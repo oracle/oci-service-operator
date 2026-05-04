@@ -477,6 +477,47 @@ func TestImportPreservesRepoAuthoredExcludedLifecycleClassification(t *testing.T
 	})
 }
 
+func TestImportPreservesRepoAuthoredExcludedDeleteConfirmation(t *testing.T) {
+	formalRoot := writeFormalRoot(t, "seeded", "oci_widget_widget")
+	providerRoot := writeProviderFixture(t)
+	importPath := filepath.Join(formalRoot, "imports", "widget", "widget.json")
+
+	doc, err := loadImport(importPath)
+	if err != nil {
+		t.Fatalf("loadImport(%q) failed: %v", importPath, err)
+	}
+	doc.DeleteConfirmation = lifecyclePhase{
+		Target: []string{"NOT_FOUND"},
+	}
+	doc.Boundary.ExcludedSemantics = append(doc.Boundary.ExcludedSemantics, "delete-confirmation")
+	if err := writeJSONFile(importPath, doc); err != nil {
+		t.Fatalf("writeJSONFile(%q) failed: %v", importPath, err)
+	}
+
+	if _, err := Import(ImportOptions{
+		Root:             formalRoot,
+		ProviderPath:     providerRoot,
+		ProviderRevision: "test-revision",
+	}); err != nil {
+		t.Fatalf("Import() returned error: %v", err)
+	}
+
+	doc, err = loadImport(importPath)
+	if err != nil {
+		t.Fatalf("loadImport(%q) after refresh failed: %v", importPath, err)
+	}
+
+	assertStrings(t, doc.DeleteConfirmation.Pending, nil)
+	assertStrings(t, doc.DeleteConfirmation.Target, []string{"NOT_FOUND"})
+	assertBindings(t, doc.Operations.Delete, []operationBinding{
+		{
+			Operation:    "DeleteWidget",
+			RequestType:  "sdkwidget.DeleteWidgetRequest",
+			ResponseType: "sdkwidget.DeleteWidgetResponse",
+		},
+	})
+}
+
 func TestNormalizeResponseItemsField(t *testing.T) {
 	if got := normalizeResponseItemsField(""); got != "Items" {
 		t.Fatalf("normalizeResponseItemsField(\"\") = %q, want %q", got, "Items")

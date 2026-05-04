@@ -1,0 +1,138 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "dashboardservice",
+  "slug": "dashboardgroup",
+  "kind": "DashboardGroup",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_dashboard_service_dashboard_group",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDashboardGroup",
+        "requestType": "dashboardservice.CreateDashboardGroupRequest",
+        "responseType": "dashboardservice.CreateDashboardGroupResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDashboardGroup",
+        "requestType": "dashboardservice.GetDashboardGroupRequest",
+        "responseType": "dashboardservice.GetDashboardGroupResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDashboardGroups",
+        "requestType": "dashboardservice.ListDashboardGroupsRequest",
+        "responseType": "dashboardservice.ListDashboardGroupsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeDashboardGroupCompartment",
+        "requestType": "dashboardservice.ChangeDashboardGroupCompartmentRequest",
+        "responseType": "dashboardservice.ChangeDashboardGroupCompartmentResponse"
+      },
+      {
+        "operation": "UpdateDashboardGroup",
+        "requestType": "dashboardservice.UpdateDashboardGroupRequest",
+        "responseType": "dashboardservice.UpdateDashboardGroupResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDashboardGroup",
+        "requestType": "dashboardservice.DeleteDashboardGroupRequest",
+        "responseType": "dashboardservice.DeleteDashboardGroupResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags"
+    ],
+    "forceNew": [
+      "compartment_id",
+      "system_tags"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED",
+      "NOT_FOUND"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_dashboard_service_dashboard_groups",
+    "collectionField": "dashboard_groups",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/dashboardservice/dashboardgroup/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/dashboardservice/dashboardgroup/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "delete-confirmation",
+      "lifecycle-classification",
+      "list-lookup",
+      "mutation-policy",
+      "regional-caveat"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: CreateDashboardGroup, GetDashboardGroup, ListDashboardGroups, UpdateDashboardGroup, DeleteDashboardGroup, and ChangeDashboardGroupCompartment are present in v65.110.0. Create, get, and update return a DashboardGroup body directly, while delete returns headers only.",
+    "Pinned OCI SDK contract: DashboardGroup lifecycle exposes CREATING, UPDATING, ACTIVE, DELETING, DELETED, and FAILED.",
+    "Pinned provider coverage is unconfirmed. formal/sources.lock still points at github.com/oracle/terraform-provider-oci@eb653febb1bab4cc6650a96d404a8baf36fdf671, but the accessible provider inventory did not expose a matching DashboardGroup resource or data source. The providerResource and datasource names therefore stay provisional OCI-style placeholders, and the checked-in mutability docs fixture is a conservative repo-authored fallback because neither the live registry page nor the pinned provider source exposes a matching argument-reference page.",
+    "The Dashboards service warns that dashboard resources created outside the tenancy home region are not viewable in the Console. The repo-authored runtime and docs must keep that regional caveat explicit even though the SDK still permits the calls.",
+    "Repo-authored runtime is narrower than the imported SDK surface: existing-before-create reuse is bounded to exact compartmentId plus displayName matches in reusable lifecycle states, mutable drift focuses on UpdateDashboardGroupDetails fields displayName, description, freeformTags, and definedTags, and ChangeDashboardGroupCompartment stays out of scope for the initial published surface.",
+    "The handwritten update builder preserves explicit empty-map clears for freeformTags and definedTags, but it intentionally treats empty-string displayName and description values as omission until the generated spec can distinguish omission from clear-to-empty for those string fields."
+  ]
+}

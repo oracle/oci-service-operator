@@ -1,0 +1,187 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "databasemigration",
+  "slug": "connection",
+  "kind": "Connection",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_migration_connection",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateConnection",
+        "requestType": "databasemigration.CreateConnectionRequest",
+        "responseType": "databasemigration.CreateConnectionResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetConnection",
+        "requestType": "databasemigration.GetConnectionRequest",
+        "responseType": "databasemigration.GetConnectionResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListConnections",
+        "requestType": "databasemigration.ListConnectionsRequest",
+        "responseType": "databasemigration.ListConnectionsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeConnectionCompartment",
+        "requestType": "databasemigration.ChangeConnectionCompartmentRequest",
+        "responseType": "databasemigration.ChangeConnectionCompartmentResponse"
+      },
+      {
+        "operation": "UpdateConnection",
+        "requestType": "databasemigration.UpdateConnectionRequest",
+        "responseType": "databasemigration.UpdateConnectionResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteConnection",
+        "requestType": "databasemigration.DeleteConnectionRequest",
+        "responseType": "databasemigration.DeleteConnectionResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "INACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "INACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "additional_attributes",
+      "compartment_id",
+      "connection_string",
+      "database_id",
+      "database_name",
+      "db_system_id",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags",
+      "host",
+      "key_id",
+      "nsg_ids",
+      "password",
+      "port",
+      "replication_password",
+      "replication_username",
+      "security_protocol",
+      "ssh_host",
+      "ssh_key",
+      "ssh_sudo_location",
+      "ssh_user",
+      "ssl_ca",
+      "ssl_cert",
+      "ssl_crl",
+      "ssl_key",
+      "ssl_mode",
+      "subnet_id",
+      "username",
+      "vault_id",
+      "wallet"
+    ],
+    "forceNew": [
+      "connection_type",
+      "technology_type"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "connection",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "connection",
+        "action": "UPDATED"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "connection",
+        "action": "DELETED"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_database_migration_connections",
+    "collectionField": "connection_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "connection_type",
+      "display_name",
+      "lifecycle_state",
+      "source_connection_id",
+      "technology_sub_type",
+      "technology_type"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/databasemigration/connection/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/databasemigration/connection/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "list-lookup",
+      "mutation-policy",
+      "status-projection",
+      "secret-output",
+      "delete-confirmation",
+      "waiter-work-request"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: Connection exposes CreateConnection, GetConnection, ListConnections, UpdateConnection, and DeleteConnection, and the wider family also exposes ChangeConnectionCompartment plus ConnectionDiagnostics. Create, update, and delete responses each expose opc-work-request-id headers and GetWorkRequest returns OperationStatus values ACCEPTED, IN_PROGRESS, WAITING, FAILED, SUCCEEDED, CANCELING, and CANCELED.",
+    "Pinned OCI SDK contract: CreateConnectionDetails and UpdateConnectionDetails are polymorphic over connectionType MYSQL and ORACLE. The MySQL create shape requires technologyType, securityProtocol, databaseName, and the shared credential fields; the Oracle create shape requires technologyType plus the shared credential fields and optional connectionString or databaseId inputs. Update bodies expose the type-specific mutable fields but omit connectionType and technologyType.",
+    "Pinned provider facts: the provider surface for oci_database_migration_connection also includes ChangeConnectionCompartment and uses work-request polling for create, update, delete, and compartment-change flows. The reviewed controller-backed runtime does not publish ChangeConnectionCompartment or ConnectionDiagnostics and instead exposes only the base CRUD mutation surface.",
+    "Repo-authored bind-versus-create stays explicit: the reviewed runtime only attempts pre-create reuse when displayName, connectionType, and technologyType are all present, then narrows list candidates in memory with connectionType, technologyType, and observable type-specific identity fields such as databaseId, connectionString, databaseName, dbSystemId, host, and port.",
+    "Repo-authored mutation policy stays explicit: only the UpdateConnectionDetails surface reconciles in place. compartmentId, connectionType, and technologyType remain replacement-only drift for the published runtime even though provider facts include ChangeConnectionCompartment.",
+    "Repo-authored status projection and secret behavior stay explicit: the runtime projects the published status read-model fields from OCI responses, but intentionally excludes password, replicationPassword, and sshKey material from status. The row has no Kubernetes secret side effects."
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "delegateaccesscontrol",
+  "kind": "DelegationControl",
+  "formalSlug": "delegationcontrol",
+  "providerResource": "oci_delegate_access_control_delegation_control",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/delegate_access_control_delegation_control",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/delegate_access_control_delegation_control",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/delegateaccesscontrol/delegationcontrol/page.html",
+  "bodySHA256": "57a453188f5992017904a5d335abbb80359d66e1ccaefc0722dee532e0d179a6",
+  "bodyBytes": 2055,
+  "fixtureBodyPath": "7.22.0/delegateaccesscontrol/delegationcontrol/page.html"
+}

@@ -13,7 +13,9 @@ import (
 	"strings"
 	"time"
 
+	apmconfigsdk "github.com/oracle/oci-go-sdk/v65/apmconfig"
 	databasesdk "github.com/oracle/oci-go-sdk/v65/database"
+	databasemigrationsdk "github.com/oracle/oci-go-sdk/v65/databasemigration"
 	databasetoolssdk "github.com/oracle/oci-go-sdk/v65/databasetools"
 	"github.com/oracle/oci-service-operator/pkg/credhelper"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
@@ -46,6 +48,10 @@ var (
 	passwordSourceType                       = reflect.TypeOf(shared.PasswordSource{})
 	usernameSourceType                       = reflect.TypeOf(shared.UsernameSource{})
 	autonomousDatabaseBaseType               = reflect.TypeOf((*databasesdk.CreateAutonomousDatabaseBase)(nil)).Elem()
+	configCreateDetailsType                  = reflect.TypeOf((*apmconfigsdk.CreateConfigDetails)(nil)).Elem()
+	configUpdateDetailsType                  = reflect.TypeOf((*apmconfigsdk.UpdateConfigDetails)(nil)).Elem()
+	connectionCreateDetailsType              = reflect.TypeOf((*databasemigrationsdk.CreateConnectionDetails)(nil)).Elem()
+	connectionUpdateDetailsType              = reflect.TypeOf((*databasemigrationsdk.UpdateConnectionDetails)(nil)).Elem()
 	databaseToolsConnectionCreateDetailsType = reflect.TypeOf((*databasetoolssdk.CreateDatabaseToolsConnectionDetails)(nil)).Elem()
 	databaseToolsConnectionUpdateDetailsType = reflect.TypeOf((*databasetoolssdk.UpdateDatabaseToolsConnectionDetails)(nil)).Elem()
 )

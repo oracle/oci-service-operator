@@ -1,0 +1,356 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: lockboxes.lockbox.oracle.com
+spec:
+  group: lockbox.oracle.com
+  names:
+    kind: Lockbox
+    listKind: LockboxList
+    plural: lockboxes
+    singular: lockbox
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the Lockbox
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the Lockbox
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: Lockbox is the Schema for the lockboxes API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: LockboxSpec defines the desired state of Lockbox.
+            properties:
+              accessContextAttributes:
+                description: LockboxAccessContextAttributes defines nested fields
+                  for Lockbox.AccessContextAttributes.
+                properties:
+                  items:
+                    description: List of context attributes.
+                    items:
+                      description: LockboxAccessContextAttributesItem defines nested
+                        fields for Lockbox.AccessContextAttributes.Item.
+                      properties:
+                        defaultValue:
+                          description: An optional default value used when access
+                            request context value is not provided
+                          type: string
+                        description:
+                          description: The description of the context attribute
+                          type: string
+                        name:
+                          description: The name of the context attribute
+                          type: string
+                        values:
+                          description: List of context attribute values.
+                          items:
+                            type: string
+                          type: array
+                      required:
+                      - name
+                      type: object
+                    type: array
+                required:
+                - items
+                type: object
+              approvalTemplateId:
+                description: Approval template ID
+                type: string
+              compartmentId:
+                description: The unique identifier (OCID) of the compartment where
+                  the resource is located.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              displayName:
+                description: Lockbox Identifier
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              lockboxPartner:
+                description: The partner using this lockbox to lock a resource.
+                type: string
+              maxAccessDuration:
+                description: The maximum amount of time operator has access to associated
+                  resources.
+                type: string
+              partnerCompartmentId:
+                description: Compartment Identifier
+                type: string
+              partnerId:
+                description: The unique identifier (OCID) of partner resource using
+                  this lockbox to lock a resource
+                type: string
+              resourceId:
+                description: The unique identifier (OCID) of the customer's resource.
+                type: string
+            required:
+            - accessContextAttributes
+            - compartmentId
+            - resourceId
+            type: object
+          status:
+            description: LockboxStatus defines the observed state of Lockbox.
+            properties:
+              accessContextAttributes:
+                description: LockboxAccessContextAttributes defines nested fields
+                  for Lockbox.AccessContextAttributes.
+                properties:
+                  items:
+                    description: List of context attributes.
+                    items:
+                      description: LockboxAccessContextAttributesItem defines nested
+                        fields for Lockbox.AccessContextAttributes.Item.
+                      properties:
+                        defaultValue:
+                          description: An optional default value used when access
+                            request context value is not provided
+                          type: string
+                        description:
+                          description: The description of the context attribute
+                          type: string
+                        name:
+                          description: The name of the context attribute
+                          type: string
+                        values:
+                          description: List of context attribute values.
+                          items:
+                            type: string
+                          type: array
+                      required:
+                      - name
+                      type: object
+                    type: array
+                required:
+                - items
+                type: object
+              approvalTemplateId:
+                description: Approval template ID
+                type: string
+              compartmentId:
+                description: Compartment Identifier
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              displayName:
+                description: Lockbox Identifier, can be renamed
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              id:
+                description: Unique identifier that is immutable on creation
+                type: string
+              lifecycleDetails:
+                description: A message describing the current state in more detail.
+                  For example, can be used to provide actionable information for a
+                  resource in Failed state.
+                type: string
+              lifecycleState:
+                description: The current state of the Lockbox.
+                type: string
+              lockboxPartner:
+                description: The partner using this lockbox to lock a resource.
+                type: string
+              maxAccessDuration:
+                description: The maximum amount of time operator has access to associated
+                  resources.
+                type: string
+              parentLockboxId:
+                description: The unique identifier (OCID) of lockbox resource using
+                  to reference parent lockbox in hybrid oma setup
+                type: string
+              partnerCompartmentId:
+                description: Compartment Identifier
+                type: string
+              partnerId:
+                description: The unique identifier (OCID) of partner resource using
+                  this lockbox to lock a resource
+                type: string
+              resourceId:
+                description: The unique identifier (OCID) of associated resource that
+                  the lockbox is created for.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of system tag keys. These predefined keys are scoped to namespaces.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              timeCreated:
+                description: The time the the Lockbox was created. An RFC3339 formatted
+                  datetime string
+                type: string
+              timeUpdated:
+                description: The time the Lockbox was updated. An RFC3339 formatted
+                  datetime string
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

@@ -1,0 +1,75 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: apiaccesscontrol
+slug: privilegedapicontrol
+kind: PrivilegedApiControl
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending:
+      - CREATING
+    updatePending:
+      - UPDATING
+    deletePending:
+      - DELETING
+  listLookup:
+    filters:
+      - compartmentId
+      - displayName
+      - resourceType
+      - id
+    matchRule: >-
+      Adopt only a unique exact ListPrivilegedApiControls match on
+      compartmentId plus displayName plus resourceType in ACTIVE, CREATING, or
+      UPDATING; duplicate matches fail, and pre-create lookup is skipped when
+      any of those identity fields are empty.
+  mutation:
+    mutable:
+      - approverGroupIdList
+      - definedTags
+      - description
+      - displayName
+      - freeformTags
+      - notificationTopicId
+      - numberOfApprovers
+      - privilegedOperationList
+      - resourceType
+      - resources
+    forceNew:
+      - compartmentId
+  hooks:
+    create:
+      - helper: CreatePrivilegedApiControl
+    update:
+      - helper: UpdatePrivilegedApiControl
+    delete:
+      - helper: DeletePrivilegedApiControl
+  followUp:
+    create: GetWorkRequest -> GetPrivilegedApiControl
+    update: GetWorkRequest -> GetPrivilegedApiControl
+    delete: GetWorkRequest -> GetPrivilegedApiControl/ListPrivilegedApiControls confirm-delete
+notes:
+  - Create, update, and delete persist the in-flight OCI work request in
+    `status.async.current`, normalize API Access Control `OperationStatus*`
+    values into shared async classes, and normalize work-request
+    `OperationType*` values into create/update/delete phases before deriving
+    conditions and requeue behavior.
+  - Create prefers the returned `PrivilegedApiControl` body when OCI exposes an
+    identifier and otherwise recovers the OCID from work-request resources
+    before polling `GetPrivilegedApiControl`. Update also gates completion on a
+    succeeded work request plus a readable `GetPrivilegedApiControl`.
+  - Only `displayName`, `description`, `notificationTopicId`,
+    `approverGroupIdList`, `resourceType`, `resources`,
+    `privilegedOperationList`, `numberOfApprovers`, `freeformTags`, and
+    `definedTags` reconcile in place. `compartmentId` remains
+    replacement-only drift, so the published runtime never exercises
+    provider-only `ChangePrivilegedApiControlCompartment`.
+  - Reviewed lifecycle mapping treats `FAILED` and `NEEDS_ATTENTION` as
+    terminal failure without requeue, and delete retains the finalizer until
+    `GetPrivilegedApiControl` or fallback `ListPrivilegedApiControls` confirms
+    the resource is deleted or not found.

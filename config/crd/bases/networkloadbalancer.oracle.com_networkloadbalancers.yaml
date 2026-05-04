@@ -1,0 +1,949 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: networkloadbalancers.networkloadbalancer.oracle.com
+spec:
+  group: networkloadbalancer.oracle.com
+  names:
+    kind: NetworkLoadBalancer
+    listKind: NetworkLoadBalancerList
+    plural: networkloadbalancers
+    singular: networkloadbalancer
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the NetworkLoadBalancer
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the NetworkLoadBalancer
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: NetworkLoadBalancer is the Schema for the networkloadbalancers
+          API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: NetworkLoadBalancerSpec defines the desired state of NetworkLoadBalancer.
+            properties:
+              assignedIpv6:
+                description: |-
+                  IPv6 address to be assigned to the network load balancer being created.
+                  This IP address has to be part of one of the prefixes supported by the subnet.
+                  Example: "2607:9b80:9a0a:9a7e:abcd:ef01:2345:6789"
+                type: string
+              assignedPrivateIpv4:
+                description: |-
+                  Private IP address to be assigned to the network load balancer being created.
+                  This IP address has to be in the CIDR range of the subnet where network load balancer is being created
+                  Example: "10.0.0.1"
+                type: string
+              backendSets:
+                additionalProperties:
+                  description: NetworkLoadBalancerBackendSets defines nested fields
+                    for NetworkLoadBalancer.BackendSets.
+                  properties:
+                    areOperationallyActiveBackendsPreferred:
+                      description: |-
+                        If enabled, NLB supports active-standby backends, with the initial standby being the configured backup backend. The standby backend becomes active and takes over serving traffic when the current active backend becomes unhealthy.
+                        The new active backend continues to serve the traffic while healthy even when the old active backend becomes healthy.
+                      type: boolean
+                    backends:
+                      description: An array of backends.
+                      items:
+                        description: NetworkLoadBalancerBackendSetsBackend defines
+                          nested fields for NetworkLoadBalancer.BackendSets.Backend.
+                        properties:
+                          ipAddress:
+                            description: |-
+                              The IP address of the backend server.
+                              Example: `10.0.0.3`
+                            type: string
+                          isBackup:
+                            description: |-
+                              Whether the network load balancer should treat this server as a backup unit. If `true`, then the network load balancer forwards no ingress
+                              traffic to this backend server unless all other backend servers not marked as "isBackup" fail the health check policy.
+                              Example: `false`
+                            type: boolean
+                          isDrain:
+                            description: |-
+                              Whether the network load balancer should drain this server.
+                              Servers marked "isDrain" stop receiving new connections but will continue to receive traffic on existing connections until the connection is terminated or times out.
+                              Example: `false`
+                            type: boolean
+                          isOffline:
+                            description: |-
+                              Whether the network load balancer should treat this server as offline. Offline servers receive no incoming
+                              traffic.
+                              Example: `false`
+                            type: boolean
+                          name:
+                            description: |-
+                              A read-only field showing the IP address/IP OCID and port that uniquely identify this backend server in the backend set.
+                              Example: `10.0.0.3:8080`, or `ocid1.privateip..oc1.<var>&lt;unique_ID&gt;</var>:443` or `10.0.0.3:0`
+                            type: string
+                          port:
+                            description: |-
+                              The communication port for the backend server.
+                              Example: `8080`
+                            type: integer
+                          targetId:
+                            description: |-
+                              The IP OCID/Instance OCID associated with the backend server.
+                              Example: `ocid1.privateip..oc1.<var>&lt;unique_ID&gt;</var>`
+                            type: string
+                          weight:
+                            description: |-
+                              The network load balancing policy weight assigned to the server. Backend servers with a higher weight receive a larger
+                              proportion of incoming traffic. For example, a server weighted '3' receives three times the number of new connections
+                              as a server weighted '1'.
+                              For more information about network load balancing policies, see
+                              Network Load Balancer Policies (https://docs.oracle.com/iaas/Content/NetworkLoadBalancer/introduction.htm#Policies).
+                              Example: `3`
+                            type: integer
+                        required:
+                        - port
+                        type: object
+                      type: array
+                    healthChecker:
+                      description: NetworkLoadBalancerBackendSetsHealthChecker defines
+                        nested fields for NetworkLoadBalancer.BackendSets.HealthChecker.
+                      properties:
+                        dns:
+                          description: NetworkLoadBalancerBackendSetsHealthCheckerDns
+                            defines nested fields for NetworkLoadBalancer.BackendSets.HealthChecker.Dns.
+                          properties:
+                            domainName:
+                              description: |-
+                                The absolute fully-qualified domain name to perform periodic DNS queries.
+                                If not provided, an extra dot will be added at the end of a domain name during the query.
+                              type: string
+                            queryClass:
+                              description: |-
+                                The class the dns health check query to use; either IN or CH.
+                                Example: `IN`
+                              type: string
+                            queryType:
+                              description: |-
+                                The type the dns health check query to use; A, AAAA, TXT.
+                                Example: `A`
+                              type: string
+                            rcodes:
+                              description: |-
+                                An array that represents accepetable RCODE values for DNS query response.
+                                Example: ["NOERROR", "NXDOMAIN"]
+                              items:
+                                type: string
+                              type: array
+                            transportProtocol:
+                              description: |-
+                                DNS transport protocol; either UDP or TCP.
+                                Example: `UDP`
+                              type: string
+                          required:
+                          - domainName
+                          type: object
+                        intervalInMillis:
+                          description: |-
+                            The interval between health checks, in milliseconds. The default value is 10000 (10 seconds).
+                            Example: `10000`
+                          type: integer
+                        port:
+                          description: |-
+                            The backend server port against which to run the health check. If the port is not specified, then the network load balancer uses the
+                            port information from the `Backend` object. The port must be specified if the backend port is 0.
+                            Example: `8080`
+                          type: integer
+                        protocol:
+                          description: |-
+                            The protocol the health check must use; either HTTP or HTTPS, or UDP or TCP.
+                            Example: `HTTP`
+                          type: string
+                        requestData:
+                          description: Base64 encoded pattern to be sent as UDP or
+                            TCP health check probe.
+                          type: string
+                        responseBodyRegex:
+                          description: |-
+                            A regular expression for parsing the response body from the backend server.
+                            Example: `^((?!false).|\s)*$`
+                          type: string
+                        responseData:
+                          description: Base64 encoded pattern to be validated as UDP
+                            or TCP health check probe response.
+                          type: string
+                        retries:
+                          description: |-
+                            The number of retries to attempt before a backend server is considered "unhealthy". This number also applies
+                            when recovering a server to the "healthy" state. The default value is 3.
+                            Example: `3`
+                          type: integer
+                        returnCode:
+                          description: |-
+                            The status code a healthy backend server should return. If you configure the health check policy to use the HTTP protocol,
+                            then you can use common HTTP status codes such as "200".
+                            Example: `200`
+                          type: integer
+                        timeoutInMillis:
+                          description: |-
+                            The maximum time, in milliseconds, to wait for a reply to a health check. A health check is successful only if a reply
+                            returns within this timeout period. The default value is 3000 (3 seconds).
+                            Example: `3000`
+                          type: integer
+                        urlPath:
+                          description: |-
+                            The path against which to run the health check.
+                            Example: `/healthcheck`
+                          type: string
+                      required:
+                      - protocol
+                      type: object
+                    ipVersion:
+                      description: IP version associated with the backend set.
+                      type: string
+                    isFailOpen:
+                      description: |-
+                        If enabled, the network load balancer will continue to distribute traffic in the configured distribution in the event all backends are unhealthy.
+                        The value is false by default.
+                      type: boolean
+                    isInstantFailoverEnabled:
+                      description: If enabled existing connections will be forwarded
+                        to an alternative healthy backend as soon as current backend
+                        becomes unhealthy.
+                      type: boolean
+                    isInstantFailoverTcpResetEnabled:
+                      description: |-
+                        This only applies when using instant failover. If enabled, the network load balancer will send TCP RST to clients when a backend becomes unhealthy and the traffic is moved to a healthy backend.
+                        If disabled, the network load balancer will not send TCP RST before moving traffic to a healthy backend.  By default, TCP RST is enabled.
+                      type: boolean
+                    isPreserveSource:
+                      description: |-
+                        If this parameter is enabled, then the network load balancer preserves the source IP of the packet when it is forwarded to backends.
+                        Backends see the original source IP. If the isPreserveSourceDestination parameter is enabled for the network load balancer resource, then this parameter cannot be disabled.
+                        The value is true by default.
+                      type: boolean
+                    policy:
+                      description: |-
+                        The network load balancer policy for the backend set.
+                        Example: `FIVE_TUPLE`
+                      type: string
+                  required:
+                  - healthChecker
+                  type: object
+                description: Backend sets associated with the network load balancer.
+                type: object
+              compartmentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment containing the network load balancer.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              displayName:
+                description: Network load balancer identifier, which can be renamed.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type, or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              isPreserveSourceDestination:
+                description: |-
+                  This parameter can be enabled only if backends are compute OCIDs. When enabled, the skipSourceDestinationCheck parameter is automatically
+                  enabled on the load balancer VNIC, and packets are sent to the backend with the entire IP header intact.
+                type: boolean
+              isPrivate:
+                description: |-
+                  Whether the network load balancer has a virtual cloud network-local (private) IP address.
+                  If "true", then the service assigns a private IP address to the network load balancer.
+                  If "false", then the service assigns a public IP address to the network load balancer.
+                  A public network load balancer is accessible from the internet, depending on the
+                  security list rules (https://docs.oracle.com/iaas/Content/network/Concepts/securitylists.htm) for your virtual cloud network. For more information about public and
+                  private network load balancers,
+                  see Network Load Balancer Types (https://docs.oracle.com/iaas/Content/NetworkLoadBalancer/introduction.htm#NetworkLoadBalancerTypes).
+                  This value is true by default.
+                  Example: `true`
+                type: boolean
+              isSymmetricHashEnabled:
+                description: |-
+                  This can only be enabled when NLB is working in transparent mode with source destination header preservation enabled.
+                  This removes the additional dependency from NLB backends(like Firewalls) to perform SNAT.
+                type: boolean
+              listeners:
+                additionalProperties:
+                  description: NetworkLoadBalancerListeners defines nested fields
+                    for NetworkLoadBalancer.Listeners.
+                  properties:
+                    defaultBackendSetName:
+                      description: |-
+                        The name of the associated backend set.
+                        Example: `example_backend_set`
+                      type: string
+                    ipVersion:
+                      description: IP version associated with the listener.
+                      type: string
+                    isPpv2Enabled:
+                      description: Property to enable/disable PPv2 feature for this
+                        listener.
+                      type: boolean
+                    l3IpIdleTimeout:
+                      description: |-
+                        The duration for L3IP idle timeout in seconds.
+                        Example: `200`
+                      type: integer
+                    name:
+                      description: |-
+                        A friendly name for the listener. It must be unique and it cannot be changed.
+                        Example: `example_listener`
+                      type: string
+                    port:
+                      description: |-
+                        The communication port for the listener.
+                        Example: `80`
+                      type: integer
+                    protocol:
+                      description: |-
+                        The protocol on which the listener accepts connection requests.
+                        For public network load balancers, ANY protocol refers to TCP/UDP with the wildcard port.
+                        For private network load balancers, ANY protocol refers to TCP/UDP/ICMP (note that ICMP requires isPreserveSourceDestination to be set to true).
+                        "ListNetworkLoadBalancersProtocols" API is deprecated and it will not return the updated values. Use the allowed values for the protocol instead.
+                        Example: `TCP`
+                      type: string
+                    tcpIdleTimeout:
+                      description: |-
+                        The duration for TCP idle timeout in seconds.
+                        Example: `300`
+                      type: integer
+                    udpIdleTimeout:
+                      description: |-
+                        The duration for UDP idle timeout in seconds.
+                        Example: `120`
+                      type: integer
+                  required:
+                  - defaultBackendSetName
+                  - name
+                  - port
+                  - protocol
+                  type: object
+                description: Listeners associated with the network load balancer.
+                type: object
+              networkSecurityGroupIds:
+                description: |-
+                  An array of network security groups OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) associated with the network load
+                  balancer.
+                  During the creation of the network load balancer, the service adds the new load balancer to the specified network security groups.
+                  The benefits of associating the network load balancer with network security groups include:
+                  *  Network security groups define network security rules to govern ingress and egress traffic for the network load balancer.
+                  *  The network security rules of other resources can reference the network security groups associated with the network load balancer
+                     to ensure access.
+                  Example: ["ocid1.nsg.oc1.phx.unique_ID"]
+                items:
+                  type: string
+                type: array
+              nlbIpVersion:
+                description: IP version associated with the NLB.
+                type: string
+              reservedIps:
+                description: |-
+                  An array of reserved Ips. NLB supports reserved public ip, reserved private IP and reserved IPv6. Customer can pass 3 reserved IP ocids, with all items unique, and a maximum of 1 allowed for each entity type: public-ip, private-ip and IPv6
+                  Note that NLB does not support changing an IP’s lifecycle state between ephemeral and reserved if the IP is already assigned to the NLB. While this type of lifecycle state change is supported by VCN IPs even when the IP is assigned to a resource, such changes will not be recognized or reflected by NLB.
+                items:
+                  description: NetworkLoadBalancerReservedIp defines nested fields
+                    for NetworkLoadBalancer.ReservedIp.
+                  properties:
+                    id:
+                      description: |-
+                        Ocid of the Reserved IP (Public IP, Private IP or IPv6) created with VCN.
+                        Reserved IPs are IPs which are already registered using VCN API.
+                        For public Network load balancers, customer can create a reserved Public IP and/or reserved private IP and/or reserved IPv6 and pass the OCID's in the
+                        reservedIps array field to attach the IP addresses to the network load balancer during create
+                        For private Network load balancers, customer can create a reserved Private IP and/or reserved IPv6 and pass the OCID's in the
+                        reservedIps array field to attach the IP addresses to the network load balancer during create
+                        Reserved IPs will not be deleted when the Network Load balancer is deleted. They will be detached from the Network Load balancer.
+                        Public IP Example: "ocid1.publicip.oc1.phx.unique_ID"
+                        Private IP Example: "ocid1.privateip.oc1.phx.unique_ID"
+                        IPV6 example: "ocid1.ipv6.oc1.phx.unique_ID"
+                      type: string
+                  type: object
+                type: array
+              reservedIpv6Id:
+                description: |-
+                  The reservedIpv6Id field is used to specify the OCID of a reserved IPv6 address to be used only when updating NLB from single-stack IPv4 to dual-stack.
+                  This field should not be used for any other scenario
+                type: string
+              securityAttributes:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  ZPR tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"oracle-zpr": {"td": {"value": "42", "mode": "audit"}}}`
+                type: object
+              subnetId:
+                description: The subnet in which the network load balancer is spawned
+                  OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm).
+                type: string
+              subnetIpv6Cidr:
+                description: IPv6 subnet prefix selection. If Ipv6 subnet prefix is
+                  passed, Nlb Ipv6 Address would be assign within the cidr block.
+                  NLB has to be dual or single stack ipv6 to support this.
+                type: string
+            required:
+            - compartmentId
+            - displayName
+            - subnetId
+            type: object
+          status:
+            description: NetworkLoadBalancerStatus defines the observed state of NetworkLoadBalancer.
+            properties:
+              backendSets:
+                additionalProperties:
+                  description: NetworkLoadBalancerBackendSets defines nested fields
+                    for NetworkLoadBalancer.BackendSets.
+                  properties:
+                    areOperationallyActiveBackendsPreferred:
+                      description: |-
+                        If enabled, NLB supports active-standby backends, with the initial standby being the configured backup backend. The standby backend becomes active and takes over serving traffic when the current active backend becomes unhealthy.
+                        The new active backend continues to serve the traffic while healthy even when the old active backend becomes healthy.
+                      type: boolean
+                    backends:
+                      description: An array of backends.
+                      items:
+                        description: NetworkLoadBalancerBackendSetsBackend defines
+                          nested fields for NetworkLoadBalancer.BackendSets.Backend.
+                        properties:
+                          ipAddress:
+                            description: |-
+                              The IP address of the backend server.
+                              Example: `10.0.0.3`
+                            type: string
+                          isBackup:
+                            description: |-
+                              Whether the network load balancer should treat this server as a backup unit. If `true`, then the network load balancer forwards no ingress
+                              traffic to this backend server unless all other backend servers not marked as "isBackup" fail the health check policy.
+                              Example: `false`
+                            type: boolean
+                          isDrain:
+                            description: |-
+                              Whether the network load balancer should drain this server.
+                              Servers marked "isDrain" stop receiving new connections but will continue to receive traffic on existing connections until the connection is terminated or times out.
+                              Example: `false`
+                            type: boolean
+                          isOffline:
+                            description: |-
+                              Whether the network load balancer should treat this server as offline. Offline servers receive no incoming
+                              traffic.
+                              Example: `false`
+                            type: boolean
+                          name:
+                            description: |-
+                              A read-only field showing the IP address/IP OCID and port that uniquely identify this backend server in the backend set.
+                              Example: `10.0.0.3:8080`, or `ocid1.privateip..oc1.<var>&lt;unique_ID&gt;</var>:443` or `10.0.0.3:0`
+                            type: string
+                          port:
+                            description: |-
+                              The communication port for the backend server.
+                              Example: `8080`
+                            type: integer
+                          targetId:
+                            description: |-
+                              The IP OCID/Instance OCID associated with the backend server.
+                              Example: `ocid1.privateip..oc1.<var>&lt;unique_ID&gt;</var>`
+                            type: string
+                          weight:
+                            description: |-
+                              The network load balancing policy weight assigned to the server. Backend servers with a higher weight receive a larger
+                              proportion of incoming traffic. For example, a server weighted '3' receives three times the number of new connections
+                              as a server weighted '1'.
+                              For more information about network load balancing policies, see
+                              Network Load Balancer Policies (https://docs.oracle.com/iaas/Content/NetworkLoadBalancer/introduction.htm#Policies).
+                              Example: `3`
+                            type: integer
+                        required:
+                        - port
+                        type: object
+                      type: array
+                    healthChecker:
+                      description: NetworkLoadBalancerBackendSetsHealthChecker defines
+                        nested fields for NetworkLoadBalancer.BackendSets.HealthChecker.
+                      properties:
+                        dns:
+                          description: NetworkLoadBalancerBackendSetsHealthCheckerDns
+                            defines nested fields for NetworkLoadBalancer.BackendSets.HealthChecker.Dns.
+                          properties:
+                            domainName:
+                              description: |-
+                                The absolute fully-qualified domain name to perform periodic DNS queries.
+                                If not provided, an extra dot will be added at the end of a domain name during the query.
+                              type: string
+                            queryClass:
+                              description: |-
+                                The class the dns health check query to use; either IN or CH.
+                                Example: `IN`
+                              type: string
+                            queryType:
+                              description: |-
+                                The type the dns health check query to use; A, AAAA, TXT.
+                                Example: `A`
+                              type: string
+                            rcodes:
+                              description: |-
+                                An array that represents accepetable RCODE values for DNS query response.
+                                Example: ["NOERROR", "NXDOMAIN"]
+                              items:
+                                type: string
+                              type: array
+                            transportProtocol:
+                              description: |-
+                                DNS transport protocol; either UDP or TCP.
+                                Example: `UDP`
+                              type: string
+                          required:
+                          - domainName
+                          type: object
+                        intervalInMillis:
+                          description: |-
+                            The interval between health checks, in milliseconds. The default value is 10000 (10 seconds).
+                            Example: `10000`
+                          type: integer
+                        port:
+                          description: |-
+                            The backend server port against which to run the health check. If the port is not specified, then the network load balancer uses the
+                            port information from the `Backend` object. The port must be specified if the backend port is 0.
+                            Example: `8080`
+                          type: integer
+                        protocol:
+                          description: |-
+                            The protocol the health check must use; either HTTP or HTTPS, or UDP or TCP.
+                            Example: `HTTP`
+                          type: string
+                        requestData:
+                          description: Base64 encoded pattern to be sent as UDP or
+                            TCP health check probe.
+                          type: string
+                        responseBodyRegex:
+                          description: |-
+                            A regular expression for parsing the response body from the backend server.
+                            Example: `^((?!false).|\s)*$`
+                          type: string
+                        responseData:
+                          description: Base64 encoded pattern to be validated as UDP
+                            or TCP health check probe response.
+                          type: string
+                        retries:
+                          description: |-
+                            The number of retries to attempt before a backend server is considered "unhealthy". This number also applies
+                            when recovering a server to the "healthy" state. The default value is 3.
+                            Example: `3`
+                          type: integer
+                        returnCode:
+                          description: |-
+                            The status code a healthy backend server should return. If you configure the health check policy to use the HTTP protocol,
+                            then you can use common HTTP status codes such as "200".
+                            Example: `200`
+                          type: integer
+                        timeoutInMillis:
+                          description: |-
+                            The maximum time, in milliseconds, to wait for a reply to a health check. A health check is successful only if a reply
+                            returns within this timeout period. The default value is 3000 (3 seconds).
+                            Example: `3000`
+                          type: integer
+                        urlPath:
+                          description: |-
+                            The path against which to run the health check.
+                            Example: `/healthcheck`
+                          type: string
+                      required:
+                      - protocol
+                      type: object
+                    ipVersion:
+                      description: IP version associated with the backend set.
+                      type: string
+                    isFailOpen:
+                      description: |-
+                        If enabled, the network load balancer will continue to distribute traffic in the configured distribution in the event all backends are unhealthy.
+                        The value is false by default.
+                      type: boolean
+                    isInstantFailoverEnabled:
+                      description: If enabled existing connections will be forwarded
+                        to an alternative healthy backend as soon as current backend
+                        becomes unhealthy.
+                      type: boolean
+                    isInstantFailoverTcpResetEnabled:
+                      description: |-
+                        This only applies when using instant failover. If enabled, the network load balancer will send TCP RST to clients when a backend becomes unhealthy and the traffic is moved to a healthy backend.
+                        If disabled, the network load balancer will not send TCP RST before moving traffic to a healthy backend.  By default, TCP RST is enabled.
+                      type: boolean
+                    isPreserveSource:
+                      description: |-
+                        If this parameter is enabled, then the network load balancer preserves the source IP of the packet when it is forwarded to backends.
+                        Backends see the original source IP. If the isPreserveSourceDestination parameter is enabled for the network load balancer resource, then this parameter cannot be disabled.
+                        The value is true by default.
+                      type: boolean
+                    policy:
+                      description: |-
+                        The network load balancer policy for the backend set.
+                        Example: `FIVE_TUPLE`
+                      type: string
+                  required:
+                  - healthChecker
+                  type: object
+                description: Backend sets associated with the network load balancer.
+                type: object
+              compartmentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment containing the network load balancer.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              displayName:
+                description: |-
+                  A user-friendly name, which does not have to be unique, and can be changed.
+                  Example: `example_load_balancer`
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              id:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the network load balancer.
+                type: string
+              ipAddresses:
+                description: An array of IP addresses.
+                items:
+                  description: NetworkLoadBalancerIpAddress defines nested fields
+                    for NetworkLoadBalancer.IpAddress.
+                  properties:
+                    ipAddress:
+                      description: |-
+                        An IP address.
+                        Example: `192.168.0.3`
+                      type: string
+                    ipVersion:
+                      description: IP version associated with this IP address.
+                      type: string
+                    isPublic:
+                      description: |-
+                        Whether the IP address is public or private.
+                        If "true", then the IP address is public and accessible from the internet.
+                        If "false", then the IP address is private and accessible only from within the associated virtual cloud network.
+                      type: boolean
+                    reservedIp:
+                      description: NetworkLoadBalancerIpAddressReservedIp defines
+                        nested fields for NetworkLoadBalancer.IpAddress.ReservedIp.
+                      properties:
+                        id:
+                          description: |-
+                            Ocid of the Reserved IP (Public IP, Private IP or IPv6) created with VCN.
+                            Reserved IPs are IPs which are already registered using VCN API.
+                            For public Network load balancers, customer can create a reserved Public IP and/or reserved private IP and/or reserved IPv6 and pass the OCID's in the
+                            reservedIps array field to attach the IP addresses to the network load balancer during create
+                            For private Network load balancers, customer can create a reserved Private IP and/or reserved IPv6 and pass the OCID's in the
+                            reservedIps array field to attach the IP addresses to the network load balancer during create
+                            Reserved IPs will not be deleted when the Network Load balancer is deleted. They will be detached from the Network Load balancer.
+                            Public IP Example: "ocid1.publicip.oc1.phx.unique_ID"
+                            Private IP Example: "ocid1.privateip.oc1.phx.unique_ID"
+                            IPV6 example: "ocid1.ipv6.oc1.phx.unique_ID"
+                          type: string
+                      type: object
+                  type: object
+                type: array
+              isPreserveSourceDestination:
+                description: |-
+                  When enabled, the skipSourceDestinationCheck parameter is automatically enabled on the load balancer VNIC.
+                  Packets are sent to the backend set without any changes to the source and destination IP.
+                type: boolean
+              isPrivate:
+                description: |-
+                  Whether the network load balancer has a virtual cloud network-local (private) IP address.
+                  If "true", then the service assigns a private IP address to the network load balancer.
+                  If "false", then the service assigns a public IP address to the network load balancer.
+                  A public network load balancer is accessible from the internet, depending the
+                  security list rules (https://docs.oracle.com/iaas/Content/network/Concepts/securitylists.htm) for your virtual cloudn network. For more information about public and
+                  private network load balancers,
+                  see Network Load Balancer Types (https://docs.oracle.com/iaas/Content/NetworkLoadBalancer/introduction.htm#NetworkLoadBalancerTypes).
+                  This value is true by default.
+                  Example: `true`
+                type: boolean
+              isSymmetricHashEnabled:
+                description: |-
+                  This can only be enabled when NLB is working in transparent mode with source destination header preservation enabled.
+                  This removes the additional dependency from NLB backends(like Firewalls) to perform SNAT.
+                type: boolean
+              lifecycleDetails:
+                description: |-
+                  A message describing the current state in more detail.
+                  For example, can be used to provide actionable information for a resource in Failed state.
+                type: string
+              lifecycleState:
+                description: The current state of the network load balancer.
+                type: string
+              listeners:
+                additionalProperties:
+                  description: NetworkLoadBalancerListeners defines nested fields
+                    for NetworkLoadBalancer.Listeners.
+                  properties:
+                    defaultBackendSetName:
+                      description: |-
+                        The name of the associated backend set.
+                        Example: `example_backend_set`
+                      type: string
+                    ipVersion:
+                      description: IP version associated with the listener.
+                      type: string
+                    isPpv2Enabled:
+                      description: Property to enable/disable PPv2 feature for this
+                        listener.
+                      type: boolean
+                    l3IpIdleTimeout:
+                      description: |-
+                        The duration for L3IP idle timeout in seconds.
+                        Example: `200`
+                      type: integer
+                    name:
+                      description: |-
+                        A friendly name for the listener. It must be unique and it cannot be changed.
+                        Example: `example_listener`
+                      type: string
+                    port:
+                      description: |-
+                        The communication port for the listener.
+                        Example: `80`
+                      type: integer
+                    protocol:
+                      description: |-
+                        The protocol on which the listener accepts connection requests.
+                        For public network load balancers, ANY protocol refers to TCP/UDP with the wildcard port.
+                        For private network load balancers, ANY protocol refers to TCP/UDP/ICMP (note that ICMP requires isPreserveSourceDestination to be set to true).
+                        "ListNetworkLoadBalancersProtocols" API is deprecated and it will not return the updated values. Use the allowed values for the protocol instead.
+                        Example: `TCP`
+                      type: string
+                    tcpIdleTimeout:
+                      description: |-
+                        The duration for TCP idle timeout in seconds.
+                        Example: `300`
+                      type: integer
+                    udpIdleTimeout:
+                      description: |-
+                        The duration for UDP idle timeout in seconds.
+                        Example: `120`
+                      type: integer
+                  required:
+                  - defaultBackendSetName
+                  - name
+                  - port
+                  - protocol
+                  type: object
+                description: Listeners associated with the network load balancer.
+                type: object
+              networkSecurityGroupIds:
+                description: |-
+                  An array of network security groups OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) associated with the network load
+                  balancer.
+                  During the creation of the network load balancer, the service adds the new load balancer to the specified network security groups.
+                  The benefits of associating the network load balancer with network security groups include:
+                  *  Network security groups define network security rules to govern ingress and egress traffic for the network load balancer.
+                  *  The network security rules of other resources can reference the network security groups associated with the network load balancer
+                     to ensure access.
+                  Example: ["ocid1.nsg.oc1.phx.unique_ID"]
+                items:
+                  type: string
+                type: array
+              nlbIpVersion:
+                description: IP version associated with the NLB.
+                type: string
+              securityAttributes:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  ZPR tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{ "oracle-zpr": { "td": { "value": "42", "mode": "audit" } } }`
+                type: object
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              subnetId:
+                description: The subnet in which the network load balancer is spawned
+                  OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm).
+                type: string
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Key-value pair representing system tags' keys and values scoped to a namespace.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              timeCreated:
+                description: |-
+                  The date and time the network load balancer was created, in the format defined by RFC3339.
+                  Example: `2020-05-01T21:10:29.600Z`
+                type: string
+              timeUpdated:
+                description: |-
+                  The time the network load balancer was updated. An RFC3339 formatted date-time string.
+                  Example: `2020-05-01T22:10:29.600Z`
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

@@ -885,4 +885,3 @@ DbSystemTelemetryConfigurationLogDestinationConfiguration defines nested fields 
 | --- | --- | --- | --- | --- | --- |
 | `key` | Name of the destination configuration variable. | `string` | Yes | - | - |
 | `value` | Value of the destination configuration variable. | `string` | Yes | - | - |
-

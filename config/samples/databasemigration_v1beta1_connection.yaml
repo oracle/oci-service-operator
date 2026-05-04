@@ -1,0 +1,37 @@
+#
+# Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+#
+
+#
+# Replace the OCI identifiers and database endpoint values below before running e2e.
+# Update metadata.name or spec.displayName if you want to force a fresh create instead of
+# binding to an existing Connection with the same compartment, display name, connectionType,
+# technologyType, and observable MySQL identity fields.
+#
+apiVersion: databasemigration.oracle.com/v1beta1
+kind: Connection
+metadata:
+  name: connection-sample
+spec:
+  compartmentId: ocid1.compartment.oc1..exampleuniqueID
+  displayName: mysql-source-connection
+  vaultId: ocid1.vault.oc1..exampleuniqueID
+  keyId: ocid1.key.oc1..exampleuniqueID
+  username: migration_user
+  password: "<replace-with-database-password>"
+  replicationUsername: replication_user
+  replicationPassword: "<replace-with-replication-password>"
+  connectionType: MYSQL
+  technologyType: OCI_MYSQL
+  securityProtocol: TLS
+  sslMode: REQUIRED
+  databaseName: appdb
+  host: mysql.example.com
+  port: 3306
+  subnetId: ocid1.subnet.oc1..exampleuniqueID
+  nsgIds:
+    - ocid1.networksecuritygroup.oc1..exampleuniqueID
+  description: Sample Database Migration MySQL source connection
+  freeformTags:
+    managed-by: oci-service-operator

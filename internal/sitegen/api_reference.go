@@ -925,7 +925,7 @@ func renderAPIReferencePage(page *apiReferencePage) string {
 		renderAPIReferenceResource(&b, page, outputPath, resource)
 	}
 
-	return b.String()
+	return strings.TrimRight(b.String(), "\n") + "\n"
 }
 
 func renderAPIReferenceResource(b *strings.Builder, page *apiReferencePage, outputPath string, resource apiReferenceResource) {

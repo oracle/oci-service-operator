@@ -1,0 +1,123 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Activity - apmsynthetics/Script
+skinparam activity {
+  backgroundColor #f8fafc
+  borderColor #0f172a
+  fontColor #0f172a
+  diamondBackgroundColor #e2e8f0
+  diamondBorderColor #1d4ed8
+  diamondFontColor #0f172a
+  startColor #1d4ed8
+  endColor #0f172a
+  barColor #1d4ed8
+}
+start
+partition "Observe and Bind" {
+:Start from shared flow\nshared/diagrams/shared-reconcile-activity.svg;
+:Read desired Script spec, tracked status, and\ndelete intent;
+if ("Tracked or explicit OCI identity present?") then (yes)
+:Get the current OCI resource via GetScript;
+else (no)
+:Resolve an existing OCI resource through\nListScripts using filters apmDomainId,\ndisplayName, contentType;
+:Create the OCI resource via CreateScript when\nno reusable match is found;
+:Persist the resolved or created OCI identity\ninto status;
+endif
+}
+if ("Delete requested?") then (yes)
+partition "Delete" {
+:Delete path uses DeleteScript with required\nvia GetScript or ListScripts to NOT_FOUND\nconfirmation;
+:Confirm deletion via GetScript or ListScripts\nuntil OCI reaches NOT_FOUND;
+if ("Delete cleanup and finalizer release succeed?") then (yes)
+:Remove the finalizer after delete completion;
+else (no)
+:Stay blocked until cleanup or finalizer\nrelease succeeds;
+endif
+}
+stop
+else (no)
+partition "Lifecycle Classification" {
+if ("OCI state is outside success targets?") then (yes)
+:Return an unsuccessful reconcile result until\nOCI reaches ACTIVE;
+stop
+endif
+}
+partition "Ready and Drift Handling" {
+:Compare live OCI state against the\nrepo-authored mutation surface;
+if ("Force-new or conflicting drift detected?") then (yes)
+:Reject drift before OCI mutation for force-new\nfields apmDomainId;
+stop
+endif
+if ("Supported mutable drift detected?") then (yes)
+:Apply UpdateScript only for mutable fields\ncontent, contentFileName, contentType,\ndefinedTags (+3 more);
+else (no)
+:Skip the no-op mutation path;
+endif
+:Run provider helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource when the\nmatching field-driven path executes;
+:Apply explicit follow-up semantics\ncreate=read-after-write;\nupdate=read-after-write; delete=confirm-delete;
+:Return success for the ACTIVE success state;
+:Project required status and finalizer policy\nretain-until-confirmed-delete;
+:Requeue on terminating;
+}
+endif
+stop
+note right
+shared diagram:
+shared/diagrams/shared-reconcile-activity.svg
+Start from the shared reconcile activity and
+specialize provider-backed CRUD, wait, and
+status-projection details here.
+Controller-local activity diagrams add
+list-lookup hints, secret policies, delete
+handling, and open formal gaps.
+archetype batch: Generated service-manager
+controllers specialize the shared reconcile path
+with formal runtime ownership.
+service: apmsynthetics
+slug: script
+kind: Script
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: terminating
+provider states: create none; update none;
+delete none
+follow-up: create=read-after-write;
+update=read-after-write; delete=confirm-delete
+supported drift: content, contentFileName,
+contentType, definedTags (+3 more)
+reject before mutate: force-new fields
+apmDomainId
+create-only fields: none
+list lookup: oci_apm_synthetics_scripts filters
+apmDomainId, displayName, contentType; exact
+apmDomainId plus displayName plus contentType
+unique match; duplicate matches fail
+conflicts: none
+open gaps: none
+Script create and update are synchronous reread
+flows. The SDK does not expose lifecycle-state
+fields on Script bodies, so the reviewed runtime
+converts a confirmed read-after-write response
+into settled Active status.
+Pre-create reuse always scopes by apmDomainId
+and uses the SDK displayName plus contentType
+filters, but adoption still requires a unique
+exact match on that reviewed identity surface.
+status.apmDomainId mirrors the bound request
+domain because OCI does not echo that query
+parameter back on Script or ScriptSummary.
+The published status surface intentionally
+excludes content and parameters to avoid
+projecting secret-capable script bodies or
+parameter values.
+end note
+@enduml

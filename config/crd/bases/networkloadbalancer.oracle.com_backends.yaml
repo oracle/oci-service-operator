@@ -1,0 +1,285 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: backends.networkloadbalancer.oracle.com
+spec:
+  group: networkloadbalancer.oracle.com
+  names:
+    kind: Backend
+    listKind: BackendList
+    plural: backends
+    singular: backend
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.name
+      name: Name
+      priority: 1
+      type: string
+    - description: status of the Backend
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the Backend
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: Backend is the Schema for the backends API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: BackendSpec defines the desired state of Backend.
+            properties:
+              backendSetName:
+                description: |-
+                  The name of the backend set associated with the backend server.
+                  Example: `example_backend_set`
+                type: string
+              ipAddress:
+                description: |-
+                  The IP address of the backend server.
+                  Example: `10.0.0.3`
+                type: string
+              isBackup:
+                description: |-
+                  Whether the network load balancer should treat this server as a backup unit. If `true`, then the network load balancer forwards no ingress
+                  traffic to this backend server unless all other backend servers not marked as "isBackup" fail the health check policy.
+                  Example: `false`
+                type: boolean
+              isDrain:
+                description: |-
+                  Whether the network load balancer should drain this server.
+                  Servers marked "isDrain" stop receiving new connections but will continue to receive traffic on existing connections until the connection is terminated.
+                  Example: `false`
+                type: boolean
+              isOffline:
+                description: |-
+                  Whether the network load balancer should treat this server as offline. Offline servers receive no incoming
+                  traffic.
+                  Example: `false`
+                type: boolean
+              name:
+                description: |-
+                  Optional unique name identifying the backend within the backend set. If not specified, then one will be generated.
+                  Example: `webServer1`
+                type: string
+              networkLoadBalancerId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the network load balancer associated with the backend set and
+                  server.
+                type: string
+              port:
+                description: |-
+                  The communication port for the backend server.
+                  Example: `8080`
+                type: integer
+              targetId:
+                description: |-
+                  The IP OCID/Instance OCID associated with the backend server.
+                  Example: `ocid1.privateip..oc1.<var>&lt;unique_ID&gt;</var>`
+                type: string
+              weight:
+                description: |-
+                  The network load balancing policy weight assigned to the server. Backend servers with a higher weight receive a larger
+                  proportion of incoming traffic. For example, a server weighted '3' receives three times the number of new connections
+                  as a server weighted '1'.
+                  For more information about network load balancer policies, see
+                  Network Load Balancer Policies (https://docs.oracle.com/iaas/Content/NetworkLoadBalancer/introduction.htm#Policies).
+                  Example: `3`
+                type: integer
+            required:
+            - backendSetName
+            - networkLoadBalancerId
+            - port
+            type: object
+          status:
+            description: BackendStatus defines the observed state of Backend.
+            properties:
+              backendSetName:
+                description: The bound backend set name used to address this backend.
+                type: string
+              ipAddress:
+                description: |-
+                  The IP address of the backend server.
+                  Example: `10.0.0.3`
+                type: string
+              isBackup:
+                description: |-
+                  Whether the network load balancer should treat this server as a backup unit. If `true`, then the network load balancer forwards no ingress
+                  traffic to this backend server unless all other backend servers not marked as "isBackup" fail the health check policy.
+                  Example: `false`
+                type: boolean
+              isDrain:
+                description: |-
+                  Whether the network load balancer should drain this server.
+                  Servers marked "isDrain" stop receiving new connections but will continue to receive traffic on existing connections until the connection is terminated or times out.
+                  Example: `false`
+                type: boolean
+              isOffline:
+                description: |-
+                  Whether the network load balancer should treat this server as offline. Offline servers receive no incoming
+                  traffic.
+                  Example: `false`
+                type: boolean
+              name:
+                description: |-
+                  A read-only field showing the IP address/IP OCID and port that uniquely identify this backend server in the backend set.
+                  Example: `10.0.0.3:8080`, or `ocid1.privateip..oc1.<var>&lt;unique_ID&gt;</var>:443` or `10.0.0.3:0`
+                type: string
+              networkLoadBalancerId:
+                description: The bound network load balancer OCID used to address
+                  this backend.
+                type: string
+              port:
+                description: |-
+                  The communication port for the backend server.
+                  Example: `8080`
+                type: integer
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              targetId:
+                description: |-
+                  The IP OCID/Instance OCID associated with the backend server.
+                  Example: `ocid1.privateip..oc1.<var>&lt;unique_ID&gt;</var>`
+                type: string
+              weight:
+                description: |-
+                  The network load balancing policy weight assigned to the server. Backend servers with a higher weight receive a larger
+                  proportion of incoming traffic. For example, a server weighted '3' receives three times the number of new connections
+                  as a server weighted '1'.
+                  For more information about network load balancing policies, see
+                  Network Load Balancer Policies (https://docs.oracle.com/iaas/Content/NetworkLoadBalancer/introduction.htm#Policies).
+                  Example: `3`
+                type: integer
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

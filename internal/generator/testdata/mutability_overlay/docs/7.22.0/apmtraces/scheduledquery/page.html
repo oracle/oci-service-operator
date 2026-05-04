@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <h2 id="argument-reference">Argument Reference</h2>
+    <p>The following arguments are supported:</p>
+    <ul>
+      <li><code>apm_domain_id</code> - (Required) (Updatable) The APM Domain ID for the intended request.</li>
+      <li><code>defined_tags</code> - (Optional) (Updatable) Defined tags for this resource. Each key is predefined and scoped to a namespace. Example: <code>{&#34;foo-namespace.bar-key&#34;: &#34;value&#34;}</code></li>
+      <li><code>freeform_tags</code> - (Optional) (Updatable) Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only. Example: <code>{&#34;bar-key&#34;: &#34;value&#34;}</code></li>
+      <li><code>opc_dry_run</code> - (Optional) (Updatable) Indicates that the request is a dry run, if set to &#34;true&#34;. A dry run request does not create or modify the resource  and is used only to perform validation on the submitted data.</li>
+      <li><code>scheduled_query_description</code> - (Optional) (Updatable) Description for the scheduled query.</li>
+      <li><code>scheduled_query_maximum_runtime_in_seconds</code> - (Optional) (Updatable) Maximum runtime for the scheduled query in seconds.</li>
+      <li><code>scheduled_query_name</code> - (Optional) (Updatable) Name of the scheduled query.</li>
+      <li><code>scheduled_query_processing_configuration</code> - (Optional) (Updatable) Definition of the scheduled query processing configuration.
+        <ul>
+          <li><code>custom_metric</code> - (Optional) (Updatable) Definition of the Custom Metric.
+            <ul>
+              <li><code>compartment</code> - (Optional) (Updatable) Compartment of the Monitoring Service. It defaults to the APM domain&#39;s compartment if not specified.  If specified, the necessary Oracle Cloud Infrastructure policies should be set to allow APM to write to that compartment.</li>
+              <li><code>description</code> - (Optional) (Updatable) Description of the Custom Metric.</li>
+              <li><code>is_anomaly_detection_enabled</code> - (Optional) (Updatable) Indicates whether anomaly Detection should be performed on the generated metric.</li>
+              <li><code>is_metric_published</code> - (Optional) (Updatable) Used in conjunction with the dry run header.  When the dry run header is set and the isPublishMetric flag is set to true, the  scheduled query is not created, but validations happen to check if the right Oracle Cloud Infrastructure policies have been set to write to the specified namespace/compartment.</li>
+              <li><code>name</code> - (Required) (Updatable) Name of the Custom Metric.</li>
+              <li><code>namespace</code> - (Optional) (Updatable) Namespace in the Custom Metric. It defaults to <code>oracle_apm_custom</code> if not specified.  If specified, the necessary Oracle Cloud Infrastructure policies should be set to allow APM to write to that namespace.</li>
+              <li><code>resource_group</code> - (Optional) (Updatable) Resource Group of the Custom Metric.</li>
+              <li><code>unit</code> - (Optional) (Updatable) Unit in which the metric value is reported. For example &#39;ms&#39;.</li>
+            </ul>
+          </li>
+          <li><code>object_storage</code> - (Optional) (Updatable) Definition of the object storage.
+            <ul>
+              <li><code>bucket</code> - (Optional) (Updatable) Bucket name in the object store.</li>
+              <li><code>name_space</code> - (Optional) (Updatable) Namespace in the object store.</li>
+              <li><code>object_name_prefix</code> - (Optional) (Updatable) Object name prefix in the object store.</li>
+            </ul>
+          </li>
+          <li><code>streaming</code> - (Optional) (Updatable) Definition of the Stream.
+            <ul>
+              <li><code>stream_id</code> - (Optional) (Updatable) Stream Id.</li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li><code>scheduled_query_processing_sub_type</code> - (Optional) (Updatable) Processing sub type of the scheduled query.</li>
+      <li><code>scheduled_query_processing_type</code> - (Optional) (Updatable) Type of the scheduled query.</li>
+      <li><code>scheduled_query_retention_criteria</code> - (Optional) (Updatable) Retention criteria for the scheduled query.</li>
+      <li><code>scheduled_query_retention_period_in_ms</code> - (Optional) (Updatable) Retention period for the scheduled query in milliseconds.</li>
+      <li><code>scheduled_query_schedule</code> - (Optional) (Updatable) Schedule for the scheduled query.</li>
+      <li><code>scheduled_query_text</code> - (Optional) (Updatable) Scheduled query to be run. ** IMPORTANT ** Any change to a property that does not support update will force the destruction and recreation of the resource with the new property values</li>
+    </ul>
+  </body>
+</html>

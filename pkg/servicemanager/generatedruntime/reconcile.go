@@ -109,6 +109,7 @@ func (c ServiceClient[T]) updateExistingResource(ctx context.Context, resource T
 	if err != nil {
 		return c.failCreateOrUpdate(resource, err)
 	}
+	requeueDuration := responseRetryAfterDuration(response)
 	c.seedOpeningRequestID(resource, response)
 	if c.generatedWorkRequestPhaseEnabled(shared.OSOKAsyncPhaseUpdate) {
 		workRequestID, err := c.startGeneratedWorkRequest(resource, response, shared.OSOKAsyncPhaseUpdate, identity)
@@ -123,7 +124,7 @@ func (c ServiceClient[T]) updateExistingResource(ctx context.Context, resource T
 	if err != nil {
 		return c.failCreateOrUpdate(resource, err)
 	}
-	return c.applySuccessWithIdentity(resource, response, shared.Updating, identity)
+	return c.applySuccessWithIdentityAndRequeue(resource, response, shared.Updating, identity, requeueDuration)
 }
 
 func (c ServiceClient[T]) observeExistingResource(ctx context.Context, resource T, currentID string, liveResponse any, identity any) (servicemanager.OSOKResponse, error) {
@@ -144,6 +145,7 @@ func (c ServiceClient[T]) createOrReadResource(ctx context.Context, resource T, 
 		if err != nil {
 			return c.failCreateOrUpdate(resource, err)
 		}
+		requeueDuration := responseRetryAfterDuration(response)
 		c.seedOpeningRequestID(resource, response)
 		if c.generatedWorkRequestPhaseEnabled(shared.OSOKAsyncPhaseCreate) {
 			workRequestID, err := c.startGeneratedWorkRequest(resource, response, shared.OSOKAsyncPhaseCreate, identity)
@@ -158,7 +160,7 @@ func (c ServiceClient[T]) createOrReadResource(ctx context.Context, resource T, 
 		if err != nil {
 			return c.failCreateOrUpdate(resource, err)
 		}
-		return c.applySuccessWithIdentity(resource, followUp, shared.Provisioning, identity)
+		return c.applySuccessWithIdentityAndRequeue(resource, followUp, shared.Provisioning, identity, requeueDuration)
 	}
 
 	response, err := c.readResource(ctx, resource, "", readPhaseObserve)

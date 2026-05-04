@@ -1,0 +1,248 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: chargebackplanreports.opsi.oracle.com
+spec:
+  group: opsi.oracle.com
+  names:
+    kind: ChargebackPlanReport
+    listKind: ChargebackPlanReportList
+    plural: chargebackplanreports
+    singular: chargebackplanreport
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: status of the ChargebackPlanReport
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the ChargebackPlanReport
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: ChargebackPlanReport is the Schema for the chargebackplanreports
+          API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ChargebackPlanReportSpec defines the desired state of ChargebackPlanReport.
+            properties:
+              reportName:
+                description: The chargeback plan report name.
+                type: string
+              reportProperties:
+                description: ChargebackPlanReportReportProperties defines nested fields
+                  for ChargebackPlanReport.ReportProperties.
+                properties:
+                  analysisTimeInterval:
+                    description: |-
+                      Specify time period in ISO 8601 format with respect to current time.
+                      If timeInterval is specified, then timeIntervalStart and timeIntervalEnd will be ignored.
+                      Examples  P90D (last 90 days), P4W (last 4 weeks), P2M (last 2 months), P1Y (last 12 months), . Maximum value allowed is 25 months prior to current time (P25M).
+                    type: string
+                  groupBy:
+                    description: Report filters used in grouping
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                  timeIntervalEnd:
+                    description: The end timestamp that was passed into the request.
+                    type: string
+                  timeIntervalStart:
+                    description: The start timestamp that was passed into the request.
+                    type: string
+                required:
+                - analysisTimeInterval
+                - groupBy
+                - timeIntervalEnd
+                - timeIntervalStart
+                type: object
+            required:
+            - reportName
+            - reportProperties
+            type: object
+          status:
+            description: ChargebackPlanReportStatus defines the observed state of
+              ChargebackPlanReport.
+            properties:
+              reportId:
+                description: OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the Chargeback plan report.
+                type: string
+              reportName:
+                description: The chargeback plan report name.
+                type: string
+              reportProperties:
+                description: ChargebackPlanReportReportProperties defines nested fields
+                  for ChargebackPlanReport.ReportProperties.
+                properties:
+                  analysisTimeInterval:
+                    description: |-
+                      Specify time period in ISO 8601 format with respect to current time.
+                      If timeInterval is specified, then timeIntervalStart and timeIntervalEnd will be ignored.
+                      Examples  P90D (last 90 days), P4W (last 4 weeks), P2M (last 2 months), P1Y (last 12 months), . Maximum value allowed is 25 months prior to current time (P25M).
+                    type: string
+                  groupBy:
+                    description: Report filters used in grouping
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                  timeIntervalEnd:
+                    description: The end timestamp that was passed into the request.
+                    type: string
+                  timeIntervalStart:
+                    description: The start timestamp that was passed into the request.
+                    type: string
+                required:
+                - analysisTimeInterval
+                - groupBy
+                - timeIntervalEnd
+                - timeIntervalStart
+                type: object
+              resourceId:
+                description: OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the Chargeback plan report.
+                type: string
+              resourceType:
+                description: 'Defines the type of resource (example: EXADATA, HOST)'
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              timeCreated:
+                description: The date and time the chargeback plan was created, in
+                  the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+                type: string
+              timeUpdated:
+                description: The time chargeback plan was updated. An RFC3339 formatted
+                  datetime string
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

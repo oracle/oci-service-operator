@@ -1,0 +1,508 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: loganalyticsobjectcollectionrules.loganalytics.oracle.com
+spec:
+  group: loganalytics.oracle.com
+  names:
+    kind: LogAnalyticsObjectCollectionRule
+    listKind: LogAnalyticsObjectCollectionRuleList
+    plural: loganalyticsobjectcollectionrules
+    singular: loganalyticsobjectcollectionrule
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.name
+      name: Name
+      priority: 1
+      type: string
+    - description: status of the LogAnalyticsObjectCollectionRule
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the LogAnalyticsObjectCollectionRule
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: LogAnalyticsObjectCollectionRule is the Schema for the loganalyticsobjectcollectionrules
+          API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: LogAnalyticsObjectCollectionRuleSpec defines the desired
+              state of LogAnalyticsObjectCollectionRule.
+            properties:
+              charEncoding:
+                description: |-
+                  An optional character encoding to aid in detecting the character encoding of the contents of the objects while processing.
+                  It is recommended to set this value as ISO_8859_1 when configuring content of the objects having more numeric characters,
+                  and very few alphabets.
+                  For e.g. this applies when configuring VCN Flow Logs.
+                type: string
+              collectionType:
+                description: The type of collection.
+                type: string
+              compartmentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment to which this rule belongs.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: |-
+                  A string that describes the details of the rule. It does not have to be unique, and can be changed.
+                  Avoid entering confidential information.
+                type: string
+              entityId:
+                description: Log Analytics entity OCID. Associates the processed logs
+                  with the given entity (optional).
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              isEnabled:
+                description: Whether or not this rule is currently enabled.
+                type: boolean
+              isForceHistoricCollection:
+                description: Flag to allow historic collection if poll period overlaps
+                  with existing ACTIVE collection rule
+                type: boolean
+              logGroupId:
+                description: Log Analytics Log group OCID to associate the processed
+                  logs with.
+                type: string
+              logSet:
+                description: |-
+                  The logSet to be associated with the processed logs. The logSet feature can be used by customers with high volume of data
+                  and this feature has to be enabled for a given tenancy prior to its usage.
+                  When logSetExtRegex value is provided, it will take precedence over this logSet value and logSet will be computed dynamically
+                  using logSetKey and logSetExtRegex.
+                type: string
+              logSetExtRegex:
+                description: The regex to be applied against given logSetKey. Regex
+                  has to be in string escaped format.
+                type: string
+              logSetKey:
+                description: An optional parameter to indicate from where the logSet
+                  to be extracted using logSetExtRegex. Default value is OBJECT_PATH
+                  (e.g. /n/<namespace>/b/<bucketname>/o/<objectname>).
+                type: string
+              logSourceName:
+                description: Name of the Log Analytics Source to use for the processing.
+                type: string
+              logType:
+                description: Type of files/objects in this object collection rule.
+                type: string
+              name:
+                description: A unique name given to the rule. The name must be unique
+                  within the tenancy, and cannot be modified.
+                type: string
+              objectNameFilters:
+                description: |-
+                  When the filters are provided, only the objects matching the filters are picked up for processing.
+                  The matchType supported is exact match and accommodates wildcard "*".
+                  For more information on filters, see Event Filters (https://docs.oracle.com/en-us/iaas/Content/Events/Concepts/filterevents.htm).
+                items:
+                  type: string
+                type: array
+              osBucketName:
+                description: Name of the Object Storage bucket.
+                type: string
+              osNamespace:
+                description: Object Storage namespace.
+                type: string
+              overrides:
+                additionalProperties:
+                  items:
+                    description: LogAnalyticsObjectCollectionRuleOverrides defines
+                      nested fields for LogAnalyticsObjectCollectionRule.Overrides.
+                    properties:
+                      matchType:
+                        description: 'Match Type. Accepted values are: contains.'
+                        type: string
+                      matchValue:
+                        description: Match Value.
+                        type: string
+                      propertyName:
+                        description: 'Property to override. Accepted values are: logSourceName,
+                          charEncoding.'
+                        type: string
+                      propertyValue:
+                        description: Value of the property.
+                        type: string
+                    type: object
+                  type: array
+                description: |-
+                  The override is used to modify some important configuration properties for objects matching a specific pattern inside the bucket.
+                  Supported propeties for override are: logSourceName, charEncoding, entityId.
+                  Supported matchType for override are "contains".
+                type: object
+              pollSince:
+                description: |-
+                  The oldest time of the file in the bucket to consider for collection.
+                  Accepted values are: BEGINNING or CURRENT_TIME or RFC3339 formatted datetime string.
+                  Use this for HISTORIC or HISTORIC_LIVE collection types. When collectionType is LIVE, specifying pollSince value other than CURRENT_TIME will result in error.
+                type: string
+              pollTill:
+                description: |-
+                  The newest time of the file in the bucket to consider for collection.
+                  Accepted values are: CURRENT_TIME or RFC3339 formatted datetime string.
+                  Use this for HISTORIC collection type. When collectionType is LIVE or HISTORIC_LIVE, specifying pollTill will result in error.
+                type: string
+              streamCursorTime:
+                description: The time from which to consume the objects, if streamCursorType
+                  is AT_TIME.
+                type: string
+              streamCursorType:
+                description: |-
+                  Cursor type used to fetch messages from stream.
+                  When the streamCursorType is set to DEFAULT, the existing cursor position will be used if already set by any previous objection collection rule(s) using the same stream.
+                  Otherwise, the behaviour is to consume from the oldest available message in the stream.
+                  When the streamCursorType is set to TRIM_HORIZON, the behaviour is to start consuming from the oldest available message in the stream.
+                  When the streamCursorType is set to LATEST, the behavior is to start consuming messages that were published after the creation of this rule.
+                  When the streamCursorType is set to AT_TIME, the behavior is to start consuming from a given time.
+                  For more information on cursor types, see Stream Consumer Groups (https://docs.oracle.com/en-us/iaas/Content/Streaming/Tasks/using_consumer_groups.htm).
+                type: string
+              streamId:
+                description: A Stream OCID is required for Object Collection rules
+                  of type LIVE or HISTORIC_LIVE, which will be used by Log Analytics
+                  while creating Event Rule and consume the event notifications created
+                  by the Object Storage.
+                type: string
+              timezone:
+                description: |-
+                  Timezone to be used when processing log entries whose timestamps do not include an explicit timezone.
+                  When this property is not specified, the timezone of the entity specified is used.
+                  If the entity is also not specified or do not have a valid timezone then UTC is used.
+                type: string
+            required:
+            - compartmentId
+            - logGroupId
+            - name
+            - osBucketName
+            - osNamespace
+            type: object
+          status:
+            description: LogAnalyticsObjectCollectionRuleStatus defines the observed
+              state of LogAnalyticsObjectCollectionRule.
+            properties:
+              charEncoding:
+                description: |-
+                  An optional character encoding to aid in detecting the character encoding of the contents of the objects while processing.
+                  It is recommended to set this value as ISO_8859_1 when configuring content of the objects having more numeric characters,
+                  and very few alphabets.
+                  For e.g. this applies when configuring VCN Flow Logs.
+                type: string
+              collectionType:
+                description: The type of log collection.
+                type: string
+              compartmentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment to which this rule belongs.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: |-
+                  A string that describes the details of the rule. It does not have to be unique, and can be changed.
+                  Avoid entering confidential information.
+                type: string
+              entityId:
+                description: Log Analytics entity OCID to associate the processed
+                  logs with.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              id:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of this rule.
+                type: string
+              isEnabled:
+                description: Whether or not this rule is currently enabled.
+                type: boolean
+              isForceHistoricCollection:
+                description: Flag to allow historic collection if poll period overlaps
+                  with existing ACTIVE collection rule
+                type: boolean
+              lastCollectedObject:
+                description: Last Collected Object for the rule
+                type: string
+              lifecycleDetails:
+                description: A detailed status of the life cycle state.
+                type: string
+              lifecycleState:
+                description: The current state of the rule.
+                type: string
+              logGroupId:
+                description: Log Analytics Log group OCID to associate the processed
+                  logs with.
+                type: string
+              logSet:
+                description: |-
+                  The logSet to be associated with the processed logs. The logSet feature can be used by customers with high volume of data
+                  and this feature has to be enabled for a given tenancy prior to its usage.
+                  When logSetExtRegex value is provided, it will take precedence over this logSet value and logSet will be computed dynamically
+                  using logSetKey and logSetExtRegex.
+                type: string
+              logSetExtRegex:
+                description: The regex to be applied against given logSetKey. Regex
+                  has to be in string escaped format.
+                type: string
+              logSetKey:
+                description: An optional parameter to indicate from where the logSet
+                  to be extracted using logSetExtRegex. Default value is OBJECT_PATH
+                  (e.g. /n/<namespace>/b/<bucketname>/o/<objectname>).
+                type: string
+              logSourceName:
+                description: Name of the Log Analytics Source to use for the processing.
+                type: string
+              logType:
+                description: Type of files/objects in this object collection rule.
+                type: string
+              name:
+                description: A unique name to the rule. The name must be unique, within
+                  the tenancy, and cannot be changed.
+                type: string
+              objectNameFilters:
+                description: |-
+                  When the filters are provided, only the objects matching the filters are picked up for processing.
+                  The matchType supported is exact match and accommodates wildcard "*".
+                  For more information on filters, see Event Filters (https://docs.oracle.com/en-us/iaas/Content/Events/Concepts/filterevents.htm).
+                items:
+                  type: string
+                type: array
+              osBucketName:
+                description: Name of the Object Storage bucket.
+                type: string
+              osNamespace:
+                description: Object Storage namespace.
+                type: string
+              overrides:
+                additionalProperties:
+                  items:
+                    description: LogAnalyticsObjectCollectionRuleOverrides defines
+                      nested fields for LogAnalyticsObjectCollectionRule.Overrides.
+                    properties:
+                      matchType:
+                        description: 'Match Type. Accepted values are: contains.'
+                        type: string
+                      matchValue:
+                        description: Match Value.
+                        type: string
+                      propertyName:
+                        description: 'Property to override. Accepted values are: logSourceName,
+                          charEncoding.'
+                        type: string
+                      propertyValue:
+                        description: Value of the property.
+                        type: string
+                    type: object
+                  type: array
+                description: |-
+                  Use this to override some property values which are defined at bucket level to the scope of object.
+                  Supported propeties for override are: logSourceName, charEncoding, entityId.
+                  Supported matchType for override are "contains".
+                type: object
+              pollSince:
+                description: |-
+                  The oldest time of the file in the bucket to consider for collection.
+                  Accepted values are: BEGINNING or CURRENT_TIME or RFC3339 formatted datetime string.
+                  Use this for HISTORIC or HISTORIC_LIVE collection types. When collectionType is LIVE, specifying pollSince value other than CURRENT_TIME will result in error.
+                type: string
+              pollTill:
+                description: |-
+                  The newest time of the file in the bucket to consider for collection.
+                  Accepted values are: CURRENT_TIME or RFC3339 formatted datetime string.
+                  Use this for HISTORIC collection type. When collectionType is LIVE or HISTORIC_LIVE, specifying pollTill will result in error.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              streamCursorTime:
+                description: The time from which to consume the objects, if streamCursorType
+                  is AT_TIME.
+                type: string
+              streamCursorType:
+                description: |-
+                  Cursor type used to fetch messages from stream.
+                  When the streamCursorType is set to DEFAULT, the existing cursor position will be used if already set by any previous objection collection rule(s) using the same stream.
+                  Otherwise, the behaviour is to consume from the oldest available message in the stream.
+                  When the streamCursorType is set to TRIM_HORIZON, the behaviour is to start consuming from the oldest available message in the stream.
+                  When the streamCursorType is set to LATEST, the behavior is to start consuming messages that were published after the creation of this rule.
+                  When the streamCursorType is set to AT_TIME, the behavior is to start consuming from a given time.
+                  For more information on cursor types, see Stream Consumer Groups (https://docs.oracle.com/en-us/iaas/Content/Streaming/Tasks/using_consumer_groups.htm).
+                type: string
+              streamId:
+                description: A Stream OCID is required for Object Collection rules
+                  of type LIVE or HISTORIC_LIVE, which will be used by Log Analytics
+                  while creating Event Rule and consume the event notifications created
+                  by the Object Storage.
+                type: string
+              timeCreated:
+                description: The time when this rule was created. An RFC3339 formatted
+                  datetime string.
+                type: string
+              timeUpdated:
+                description: The time when this rule was last updated. An RFC3339
+                  formatted datetime string.
+                type: string
+              timezone:
+                description: |-
+                  Timezone to be used when processing log entries whose timestamps do not include an explicit timezone.
+                  When this property is not specified, the timezone of the entity specified is used.
+                  If the entity is also not specified or do not have a valid timezone then UTC is used.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

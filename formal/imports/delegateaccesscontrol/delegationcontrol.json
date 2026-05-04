@@ -1,0 +1,150 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "delegateaccesscontrol",
+  "slug": "delegationcontrol",
+  "kind": "DelegationControl",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_delegate_access_control_delegation_control",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDelegationControl",
+        "requestType": "delegateaccesscontrol.CreateDelegationControlRequest",
+        "responseType": "delegateaccesscontrol.CreateDelegationControlResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDelegationControl",
+        "requestType": "delegateaccesscontrol.GetDelegationControlRequest",
+        "responseType": "delegateaccesscontrol.GetDelegationControlResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDelegationControls",
+        "requestType": "delegateaccesscontrol.ListDelegationControlsRequest",
+        "responseType": "delegateaccesscontrol.ListDelegationControlsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeDelegationControlCompartment",
+        "requestType": "delegateaccesscontrol.ChangeDelegationControlCompartmentRequest",
+        "responseType": "delegateaccesscontrol.ChangeDelegationControlCompartmentResponse"
+      },
+      {
+        "operation": "UpdateDelegationControl",
+        "requestType": "delegateaccesscontrol.UpdateDelegationControlRequest",
+        "responseType": "delegateaccesscontrol.UpdateDelegationControlResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDelegationControl",
+        "requestType": "delegateaccesscontrol.DeleteDelegationControlRequest",
+        "responseType": "delegateaccesscontrol.DeleteDelegationControlResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "defined_tags",
+      "delegation_subscription_ids",
+      "description",
+      "display_name",
+      "freeform_tags",
+      "is_auto_approve_during_maintenance",
+      "notification_message_format",
+      "notification_topic_id",
+      "num_approvals_required",
+      "pre_approved_service_provider_action_names",
+      "resource_ids"
+    ],
+    "forceNew": [
+      "compartment_id",
+      "resource_type",
+      "vault_id",
+      "vault_key_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_delegate_access_control_delegation_controls",
+    "collectionField": "delegation_control_summary_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "lifecycle_state",
+      "resource_id",
+      "resource_type"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/delegateaccesscontrol/delegationcontrol/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/delegateaccesscontrol/delegationcontrol/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "list-lookup",
+      "mutation-policy",
+      "status-projection",
+      "waiter-work-request",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: CreateDelegationControl, GetDelegationControl, ListDelegationControls, ChangeDelegationControlCompartment, UpdateDelegationControl, DeleteDelegationControl, and GetWorkRequest are present in v65.110.0. Create and update return a DelegationControl body plus opc-work-request-id; delete returns only request and work-request headers. ListDelegationControls filters compartmentId, lifecycleState, displayName, resourceType, and resourceId and returns Items []DelegationControlSummary.",
+    "Pinned provider coverage is partial. The onboarding audit confirmed the published resource type oci_delegate_access_control_delegation_control and an accessible singular DelegationControl datasource, but it did not confirm a separate plural datasource page or waiter implementation at the pinned provider boundary. The listLookup datasource and collection metadata therefore stay conservative OCI-style placeholders until provider-source confirmation is available, and the mutability overlay uses a checked-in docs fixture because the live Terraform Registry resource page is JavaScript-only.",
+    "Repo-authored runtime contract stays narrower than the imported SDK surface: only displayName, description, numApprovalsRequired, delegationSubscriptionIds, isAutoApproveDuringMaintenance, resourceIds, preApprovedServiceProviderActionNames, notificationTopicId, notificationMessageFormat, freeformTags, and definedTags reconcile in place. ChangeDelegationControlCompartment remains out of scope, while compartmentId, resourceType, vaultId, and vaultKeyId stay replacement-only drift.",
+    "Repo-authored bind-versus-create stays explicit: when no OCI identifier is tracked, the runtime only attempts reuse with exact compartmentId, displayName, resourceType, and a reusable resourceId filter, then rereads candidates through GetDelegationControl and reuses only a unique candidate whose full resourceIds set and create-only vault inputs still match.",
+    "Delegate Access Control work requests expose CREATE_DELEGATION_CONTROL, UPDATE_DELEGATION_CONTROL, and DELETE_DELEGATION_CONTROL operation types plus CREATED, UPDATED, DELETED, IN_PROGRESS, RELATED, and FAILED resource actions. The reviewed runtime uses service-sdk GetWorkRequest polling and shared async status instead of provider helper waiters and keeps delete confirmation repo-authored through GetDelegationControl/ListDelegationControls.",
+    "VaultId and VaultKeyId remain create-time inputs that are only valid when resourceType is CLOUDVMCLUSTER. The published runtime keeps that constraint explicit and never attempts in-place vault reconfiguration."
+  ]
+}

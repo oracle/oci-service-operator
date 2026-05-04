@@ -1,0 +1,282 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: triggers.devops.oracle.com
+spec:
+  group: devops.oracle.com
+  names:
+    kind: Trigger
+    listKind: TriggerList
+    plural: triggers
+    singular: trigger
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the Trigger
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the Trigger
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: Trigger is the Schema for the triggers API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: TriggerSpec defines the desired state of Trigger.
+            properties:
+              connectionId:
+                description: The OCID of the connection resource used to get details
+                  for triggered events.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: 'Defined tags for this resource. Each key is predefined
+                  and scoped to a namespace. See Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`'
+                type: object
+              description:
+                description: Optional description about the trigger.
+                type: string
+              displayName:
+                description: Trigger display name. Avoid entering confidential information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: 'Simple key-value pair that is applied without any predefined
+                  name, type or scope. Exists for cross-compatibility only.  See Resource
+                  Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"bar-key": "value"}`'
+                type: object
+              jsonData:
+                type: string
+              projectId:
+                description: The OCID of the DevOps project to which the trigger belongs
+                  to.
+                type: string
+              repositoryId:
+                description: The OCID of the DevOps code repository.
+                type: string
+              triggerSource:
+                type: string
+            required:
+            - projectId
+            type: object
+          status:
+            description: TriggerStatus defines the observed state of Trigger.
+            properties:
+              compartmentId:
+                description: The OCID of the compartment that contains the trigger.
+                type: string
+              connectionId:
+                description: The OCID of the connection resource used to get details
+                  for triggered events.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: 'Defined tags for this resource. Each key is predefined
+                  and scoped to a namespace. See Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`'
+                type: object
+              description:
+                description: Description about the trigger.
+                type: string
+              displayName:
+                description: Trigger display name. Avoid entering confidential information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: 'Simple key-value pair that is applied without any predefined
+                  name, type or scope. Exists for cross-compatibility only.  See Resource
+                  Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"bar-key": "value"}`'
+                type: object
+              id:
+                description: Unique identifier that is immutable on creation.
+                type: string
+              jsonData:
+                type: string
+              lifecycleDetails:
+                description: A message describing the current state in more detail.
+                  For example, can be used to provide actionable information for a
+                  resource in Failed state.
+                type: string
+              lifecycleState:
+                description: The current state of the trigger.
+                type: string
+              projectId:
+                description: The OCID of the DevOps project to which the trigger belongs
+                  to.
+                type: string
+              repositoryId:
+                description: The OCID of the DevOps code repository.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: 'Usage of system tag keys. These predefined keys are
+                  scoped to namespaces. See Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`'
+                type: object
+              timeCreated:
+                description: The time the trigger was created. Format defined by RFC3339
+                  (https://datatracker.ietf.org/doc/html/rfc3339).
+                type: string
+              timeUpdated:
+                description: The time the trigger was updated. Format defined by RFC3339
+                  (https://datatracker.ietf.org/doc/html/rfc3339).
+                type: string
+              triggerSource:
+                type: string
+              triggerUrl:
+                description: The endpoint that listens to trigger events.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

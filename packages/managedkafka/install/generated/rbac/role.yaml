@@ -1,0 +1,42 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
+  - managedkafka.oracle.com
+  resources:
+  - kafkaclusterconfigs
+  - kafkaclusters
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - managedkafka.oracle.com
+  resources:
+  - kafkaclusterconfigs/finalizers
+  - kafkaclusters/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - managedkafka.oracle.com
+  resources:
+  - kafkaclusterconfigs/status
+  - kafkaclusters/status
+  verbs:
+  - get
+  - patch
+  - update

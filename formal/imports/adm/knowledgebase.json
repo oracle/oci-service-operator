@@ -1,0 +1,151 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "adm",
+  "slug": "knowledgebase",
+  "kind": "KnowledgeBase",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_adm_knowledge_base",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateKnowledgeBase",
+        "requestType": "adm.CreateKnowledgeBaseRequest",
+        "responseType": "adm.CreateKnowledgeBaseResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetKnowledgeBase",
+        "requestType": "adm.GetKnowledgeBaseRequest",
+        "responseType": "adm.GetKnowledgeBaseResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListKnowledgeBases",
+        "requestType": "adm.ListKnowledgeBasesRequest",
+        "responseType": "adm.ListKnowledgeBasesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeKnowledgeBaseCompartment",
+        "requestType": "adm.ChangeKnowledgeBaseCompartmentRequest",
+        "responseType": "adm.ChangeKnowledgeBaseCompartmentResponse"
+      },
+      {
+        "operation": "UpdateKnowledgeBase",
+        "requestType": "adm.UpdateKnowledgeBaseRequest",
+        "responseType": "adm.UpdateKnowledgeBaseResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteKnowledgeBase",
+        "requestType": "adm.DeleteKnowledgeBaseRequest",
+        "responseType": "adm.DeleteKnowledgeBaseResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "display_name"
+      ,
+      "freeform_tags"
+    ],
+    "forceNew": null,
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "knowledgebase",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "knowledgebase",
+        "action": "UPDATED"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "knowledgebase",
+        "action": "DELETED"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_adm_knowledge_bases",
+    "collectionField": "knowledge_base_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "id",
+      "lifecycle_state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/adm/knowledgebase/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/adm/knowledgebase/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "list-lookup",
+      "mutation-policy",
+      "status-projection",
+      "waiter-work-request",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: CreateKnowledgeBase, GetKnowledgeBase, ListKnowledgeBases, ChangeKnowledgeBaseCompartment, UpdateKnowledgeBase, DeleteKnowledgeBase, and GetWorkRequest are present in v65.110.0. ListKnowledgeBases filters id, compartmentId, displayName, and lifecycleState, while the CRUD mutation responses expose opc-work-request-id but do not return a KnowledgeBase body.",
+    "Pinned provider implementation: oci_adm_knowledge_base waits on service-sdk GetWorkRequest and ListWorkRequestErrors for create, update, delete, and compartment-change flows. The reviewed runtime keeps using service-sdk GetWorkRequest polling and shared async status instead of provider helper waiters.",
+    "Repo-authored bind-versus-create stays explicit: when no OCI identifier is tracked, the runtime uses paginated ListKnowledgeBases matches on exact compartmentId plus displayName and optional tracked knowledgeBaseId/id, ignores DELETING, DELETED, and FAILED summaries, and fails on duplicate exact-name matches instead of adopting arbitrarily.",
+    "Repo-authored mutation policy stays explicit: only displayName, freeformTags, and definedTags reconcile in place. The provider's ChangeKnowledgeBaseCompartment support remains out-of-scope drift because the published runtime treats compartmentId as replacement-only and never calls ChangeKnowledgeBaseCompartment."
+  ]
+}

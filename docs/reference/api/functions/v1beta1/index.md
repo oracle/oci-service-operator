@@ -469,4 +469,3 @@ FunctionTraceConfig defines nested fields for Function.TraceConfig.
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `isEnabled` | Define if tracing is enabled for the resource. | `boolean` | No | - | - |
-

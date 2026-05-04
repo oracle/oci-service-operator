@@ -1,0 +1,526 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: schedules.resourcescheduler.oracle.com
+spec:
+  group: resourcescheduler.oracle.com
+  names:
+    kind: Schedule
+    listKind: ScheduleList
+    plural: schedules
+    singular: schedule
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the Schedule
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the Schedule
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: Schedule is the Schema for the schedules API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ScheduleSpec defines the desired state of Schedule.
+            properties:
+              action:
+                description: This is the action that will be executed by the schedule.
+                type: string
+              compartmentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment in which the schedule is created
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  These are defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              description:
+                description: This is the description of the schedule.
+                type: string
+              displayName:
+                description: This is a user-friendly name for the schedule. It does
+                  not have to be unique, and it's changeable.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  These are free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              recurrenceDetails:
+                description: |-
+                  This is the frequency of recurrence of a schedule. The frequency field can either conform to RFC-5545 formatting
+                  or UNIX cron formatting for recurrences, based on the value specified by the recurrenceType field.
+                type: string
+              recurrenceType:
+                description: Type of recurrence of a schedule
+                type: string
+              resourceFilters:
+                description: This is a list of resources filters.  The schedule will
+                  be applied to resources matching all of them.
+                items:
+                  description: ScheduleResourceFilter defines nested fields for Schedule.ResourceFilter.
+                  properties:
+                    attribute:
+                      type: string
+                    condition:
+                      description: This is the condition for the filter in comparison
+                        to its creation time.
+                      type: string
+                    jsonData:
+                      type: string
+                    shouldIncludeChildCompartments:
+                      description: This sets whether to include child compartments.
+                      type: boolean
+                    value:
+                      description: This is the date and time as the value of the filter.
+                      type: string
+                  type: object
+                type: array
+              resources:
+                description: This is the list of resources to which the scheduled
+                  operation is applied.
+                items:
+                  description: ScheduleResource defines nested fields for Schedule.Resource.
+                  properties:
+                    id:
+                      description: This is the resource OCID.
+                      type: string
+                    metadata:
+                      additionalProperties:
+                        type: string
+                      description: |-
+                        This is additional information that helps to identity the resource for the schedule.
+                            {
+                              "id": "<OCID_of_bucket>"
+                              "metadata":
+                              {
+                                "namespaceName": "sampleNamespace",
+                                "bucketName": "sampleBucket"
+                              }
+                            }
+                      type: object
+                    parameters:
+                      description: |-
+                        This is the user input parameters to use when acting on the resource.
+                        {
+                            "parameters": [
+                                {
+                                    "parameterType": "BODY",
+                                    "value": {
+                                        "ip": "192.168.44.44",
+                                        "memory": "1024",
+                                        "synced_folders": [
+                                            {
+                                                "host_path": "data/",
+                                                "guest_path": "/var/www",
+                                                "type": "default"
+                                            }
+                                        ],
+                                        "forwarded_ports": []
+                                    }
+                                },
+                                {
+                                    "parameterType": "PATH",
+                                    "value": {
+                                        "compartmentId": "ocid1.compartment.oc1..xxxxx",
+                                        "instanceId": "ocid1.vcn.oc1..yyyy"
+                                    }
+                                },
+                                {
+                                    "parameterType": "QUERY",
+                                    "value": {
+                                        "limit": "10",
+                                        "tenantId": "ocid1.tenant.oc1..zzzz"
+                                    }
+                                },
+                                {
+                                    "parameterType": "HEADER",
+                                    "value": {
+                                      "token": "xxxx"
+                                    }
+                                }
+                            ]
+                        }
+                      items:
+                        description: ScheduleResourceParameter defines nested fields
+                          for Schedule.Resource.Parameter.
+                        properties:
+                          jsonData:
+                            type: string
+                          parameterType:
+                            type: string
+                          value:
+                            additionalProperties:
+                              type: string
+                            description: This is the query parameter value.
+                            type: object
+                        type: object
+                      type: array
+                  required:
+                  - id
+                  type: object
+                type: array
+              timeEnds:
+                description: |-
+                  This is the date and time the schedule ends, in the format defined by RFC 3339 (https://tools.ietf.org/html/rfc3339)
+                  Example: `2016-08-25T21:10:29.600Z`
+                type: string
+              timeStarts:
+                description: |-
+                  This is the date and time the schedule starts, in the format defined by RFC 3339 (https://tools.ietf.org/html/rfc3339)
+                  Example: `2016-08-25T21:10:29.600Z`
+                type: string
+            required:
+            - action
+            - compartmentId
+            - recurrenceDetails
+            - recurrenceType
+            type: object
+          status:
+            description: ScheduleStatus defines the observed state of Schedule.
+            properties:
+              action:
+                description: This is the action that will be executed by the schedule.
+                type: string
+              compartmentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment in which the schedule is created
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  These are defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              description:
+                description: This is the description of the schedule.
+                type: string
+              displayName:
+                description: This is a user-friendly name for the schedule. It does
+                  not have to be unique, and it's changeable.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  These are free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              id:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the schedule
+                type: string
+              lastRunStatus:
+                description: This is the status of the last work request.
+                type: string
+              lifecycleState:
+                description: This is the current state of a schedule.
+                type: string
+              recurrenceDetails:
+                description: |-
+                  This is the frequency of recurrence of a schedule. The frequency field can either conform to RFC-5545 formatting
+                  or UNIX cron formatting for recurrences, based on the value specified by the recurrenceType field.
+                type: string
+              recurrenceType:
+                description: Type of recurrence of a schedule
+                type: string
+              resourceFilters:
+                description: This is a list of resources filters.  The schedule will
+                  be applied to resources matching all of them.
+                items:
+                  description: ScheduleResourceFilter defines nested fields for Schedule.ResourceFilter.
+                  properties:
+                    attribute:
+                      type: string
+                    condition:
+                      description: This is the condition for the filter in comparison
+                        to its creation time.
+                      type: string
+                    jsonData:
+                      type: string
+                    shouldIncludeChildCompartments:
+                      description: This sets whether to include child compartments.
+                      type: boolean
+                    value:
+                      description: This is the date and time as the value of the filter.
+                      type: string
+                  type: object
+                type: array
+              resources:
+                description: This is the list of resources to which the scheduled
+                  operation is applied.
+                items:
+                  description: ScheduleResource defines nested fields for Schedule.Resource.
+                  properties:
+                    id:
+                      description: This is the resource OCID.
+                      type: string
+                    metadata:
+                      additionalProperties:
+                        type: string
+                      description: |-
+                        This is additional information that helps to identity the resource for the schedule.
+                            {
+                              "id": "<OCID_of_bucket>"
+                              "metadata":
+                              {
+                                "namespaceName": "sampleNamespace",
+                                "bucketName": "sampleBucket"
+                              }
+                            }
+                      type: object
+                    parameters:
+                      description: |-
+                        This is the user input parameters to use when acting on the resource.
+                        {
+                            "parameters": [
+                                {
+                                    "parameterType": "BODY",
+                                    "value": {
+                                        "ip": "192.168.44.44",
+                                        "memory": "1024",
+                                        "synced_folders": [
+                                            {
+                                                "host_path": "data/",
+                                                "guest_path": "/var/www",
+                                                "type": "default"
+                                            }
+                                        ],
+                                        "forwarded_ports": []
+                                    }
+                                },
+                                {
+                                    "parameterType": "PATH",
+                                    "value": {
+                                        "compartmentId": "ocid1.compartment.oc1..xxxxx",
+                                        "instanceId": "ocid1.vcn.oc1..yyyy"
+                                    }
+                                },
+                                {
+                                    "parameterType": "QUERY",
+                                    "value": {
+                                        "limit": "10",
+                                        "tenantId": "ocid1.tenant.oc1..zzzz"
+                                    }
+                                },
+                                {
+                                    "parameterType": "HEADER",
+                                    "value": {
+                                      "token": "xxxx"
+                                    }
+                                }
+                            ]
+                        }
+                      items:
+                        description: ScheduleResourceParameter defines nested fields
+                          for Schedule.Resource.Parameter.
+                        properties:
+                          jsonData:
+                            type: string
+                          parameterType:
+                            type: string
+                          value:
+                            additionalProperties:
+                              type: string
+                            description: This is the query parameter value.
+                            type: object
+                        type: object
+                      type: array
+                  required:
+                  - id
+                  type: object
+                type: array
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  These are system tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              timeCreated:
+                description: |-
+                  This is the date and time the schedule was created, in the format defined by RFC 3339 (https://tools.ietf.org/html/rfc3339).
+                  Example: `2016-08-25T21:10:29.600Z`
+                type: string
+              timeEnds:
+                description: |-
+                  This is the date and time the schedule ends, in the format defined by RFC 3339 (https://tools.ietf.org/html/rfc3339)
+                  Example: `2016-08-25T21:10:29.600Z`
+                type: string
+              timeLastRun:
+                description: |-
+                  This is the date and time the schedule runs last time, in the format defined by RFC 3339 (https://tools.ietf.org/html/rfc3339).
+                  Example: `2016-08-25T21:10:29.600Z`
+                type: string
+              timeNextRun:
+                description: |-
+                  This is the date and time the schedule run the next time, in the format defined by RFC 3339 (https://tools.ietf.org/html/rfc3339).
+                  Example: `2016-08-25T21:10:29.600Z`
+                type: string
+              timeStarts:
+                description: |-
+                  This is the date and time the schedule starts, in the format defined by RFC 3339 (https://tools.ietf.org/html/rfc3339)
+                  Example: `2016-08-25T21:10:29.600Z`
+                type: string
+              timeUpdated:
+                description: |-
+                  This is the date and time the schedule was updated, in the format defined by RFC 3339 (https://tools.ietf.org/html/rfc3339).
+                  Example: `2016-08-25T21:10:29.600Z`
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

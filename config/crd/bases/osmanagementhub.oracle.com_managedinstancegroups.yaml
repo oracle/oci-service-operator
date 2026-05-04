@@ -1,0 +1,404 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: managedinstancegroups.osmanagementhub.oracle.com
+spec:
+  group: osmanagementhub.oracle.com
+  names:
+    kind: ManagedInstanceGroup
+    listKind: ManagedInstanceGroupList
+    plural: managedinstancegroups
+    singular: managedinstancegroup
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the ManagedInstanceGroup
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the ManagedInstanceGroup
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: ManagedInstanceGroup is the Schema for the managedinstancegroups
+          API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ManagedInstanceGroupSpec defines the desired state of ManagedInstanceGroup.
+            properties:
+              archType:
+                description: The CPU architecture type of the managed instances that
+                  will be attached to this group.
+                type: string
+              autonomousSettings:
+                description: ManagedInstanceGroupAutonomousSettings defines nested
+                  fields for ManagedInstanceGroup.AutonomousSettings.
+                properties:
+                  isDataCollectionAuthorized:
+                    description: Indicates whether Autonomous Linux will collect crash
+                      files.
+                    type: boolean
+                type: object
+              compartmentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment that contains the managed instance group.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              description:
+                description: User-specified description of the managed instance group.
+                  Avoid entering confidential information.
+                type: string
+              displayName:
+                description: A user-friendly name for the managed instance group.
+                  Does not have to be unique and you can change the name later. Avoid
+                  entering confidential information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              location:
+                description: The location of managed instances attached to the group.
+                  If no location is provided, the default is on premises.
+                type: string
+              managedInstanceIds:
+                description: The list of managed instance OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  to be added to the group.
+                items:
+                  type: string
+                type: array
+              notificationTopicId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  for the Oracle Notifications service (ONS) topic. ONS is the channel
+                  used to send notifications to the customer.
+                type: string
+              osFamily:
+                description: The operating system type of the managed instances that
+                  will be attached to this group.
+                type: string
+              softwareSourceIds:
+                description: The list of software source OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  available to the managed instances in the group.
+                items:
+                  type: string
+                type: array
+              vendorName:
+                description: The vendor of the operating system that will be used
+                  by the managed instances in the group.
+                type: string
+            required:
+            - archType
+            - compartmentId
+            - displayName
+            - osFamily
+            - vendorName
+            type: object
+          status:
+            description: ManagedInstanceGroupStatus defines the observed state of
+              ManagedInstanceGroup.
+            properties:
+              archType:
+                description: The CPU architecture of the instances in the managed
+                  instance group.
+                type: string
+              autonomousSettings:
+                description: ManagedInstanceGroupAutonomousSettings defines nested
+                  fields for ManagedInstanceGroup.AutonomousSettings.
+                properties:
+                  isDataCollectionAuthorized:
+                    description: Indicates whether Autonomous Linux will collect crash
+                      files.
+                    type: boolean
+                type: object
+              compartmentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment that contains the managed instance group.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              description:
+                description: User-specified information about the managed instance
+                  group.
+                type: string
+              displayName:
+                description: A user-friendly name for the managed instance group.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              id:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the managed instance group.
+                type: string
+              isManagedByAutonomousLinux:
+                description: Indicates whether the Autonomous Linux service manages
+                  the group.
+                type: boolean
+              lifecycleState:
+                description: The current state of the managed instance group.
+                type: string
+              location:
+                description: The location of managed instances attached to the group.
+                type: string
+              managedInstanceCount:
+                description: The number of managed instances in the group.
+                type: integer
+              managedInstanceIds:
+                description: The list of managed instance OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  attached to the managed instance group.
+                items:
+                  type: string
+                type: array
+              notificationTopicId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  for the Oracle Notifications service (ONS) topic. ONS is the channel
+                  used to send notifications to the customer.
+                type: string
+              osFamily:
+                description: The operating system type of the instances in the managed
+                  instance group.
+                type: string
+              pendingJobCount:
+                description: The number of scheduled jobs pending against the managed
+                  instance group.
+                type: integer
+              softwareSourceIds:
+                description: The list of software source OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  that the managed instance group will use.
+                items:
+                  description: ManagedInstanceGroupSoftwareSourceId defines nested
+                    fields for ManagedInstanceGroup.SoftwareSourceId.
+                  properties:
+                    description:
+                      description: Software source description.
+                      type: string
+                    displayName:
+                      description: Software source name.
+                      type: string
+                    id:
+                      description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                        of the software source.
+                      type: string
+                    isMandatoryForAutonomousLinux:
+                      description: Indicates whether this is a required software source
+                        for Autonomous Linux instances. If true, the user can't unselect
+                        it.
+                      type: boolean
+                    softwareSourceType:
+                      description: Type of the software source.
+                      type: string
+                  type: object
+                type: array
+              softwareSources:
+                description: The list of software sources that the managed instance
+                  group will use.
+                items:
+                  description: ManagedInstanceGroupSoftwareSource defines nested fields
+                    for ManagedInstanceGroup.SoftwareSource.
+                  properties:
+                    description:
+                      description: Software source description.
+                      type: string
+                    displayName:
+                      description: Software source name.
+                      type: string
+                    id:
+                      description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                        of the software source.
+                      type: string
+                    isMandatoryForAutonomousLinux:
+                      description: Indicates whether this is a required software source
+                        for Autonomous Linux instances. If true, the user can't unselect
+                        it.
+                      type: boolean
+                    softwareSourceType:
+                      description: Type of the software source.
+                      type: string
+                  type: object
+                type: array
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  System tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              timeCreated:
+                description: The time the managed instance group was created (in RFC
+                  3339 (https://tools.ietf.org/rfc/rfc3339) format).
+                type: string
+              timeModified:
+                description: The time the managed instance group was last modified
+                  (in RFC 3339 (https://tools.ietf.org/rfc/rfc3339) format).
+                type: string
+              vendorName:
+                description: The vendor of the operating system used by the managed
+                  instances in the group.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

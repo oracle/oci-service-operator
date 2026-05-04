@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "datalabelingservice",
+  "kind": "Dataset",
+  "formalSlug": "dataset",
+  "providerResource": "oci_data_labeling_service_dataset",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/data_labeling_service_dataset",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/data_labeling_service_dataset",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/datalabelingservice/dataset/page.html",
+  "bodySHA256": "b500d533e965555427a8eb52d2ee2aaf33f7a7d7e55c5479f516718f88435a34",
+  "bodyBytes": 1568,
+  "fixtureBodyPath": "7.22.0/datalabelingservice/dataset/page.html"
+}

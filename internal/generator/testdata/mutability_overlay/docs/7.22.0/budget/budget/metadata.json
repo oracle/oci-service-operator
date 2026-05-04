@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "budget",
+  "kind": "Budget",
+  "formalSlug": "budget",
+  "providerResource": "oci_budget_budget",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/budget_budget",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/budget_budget",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/budget/budget/page.html",
+  "bodySHA256": "026076b951f7b187e11b1c522468543a893e0e081c55f4e19f49b14411ffd683",
+  "bodyBytes": 3671,
+  "fixtureBodyPath": "7.22.0/budget/budget/page.html"
+}

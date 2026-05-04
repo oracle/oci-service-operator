@@ -316,4 +316,3 @@ PublicationSupportedOperatingSystem defines nested fields for Publication.Suppor
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `name` | The name of the operating system. | `string` | No | - | - |
-

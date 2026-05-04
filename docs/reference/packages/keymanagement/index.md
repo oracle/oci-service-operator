@@ -24,4 +24,5 @@ Manage OCI Vault resources from Kubernetes.
 
 | Resource | API Version | Summary | Guide | Sample | API Spec |
 | --- | --- | --- | --- | --- | --- |
+| `keymanagement/EkmsPrivateEndpoint` | `keymanagement.oracle.com/v1beta1` | — | — | [Sample](../../samples/keymanagement/v1beta1/ekmsprivateendpoint.md) | [Reference](../../api/keymanagement/v1beta1/index.md#kind-ekmsprivateendpoint) |
 | `keymanagement/Vault` | `keymanagement.oracle.com/v1beta1` | Manage OCI Vault resources and their scheduled deletion lifecycle. | — | [Sample](../../samples/keymanagement/v1beta1/vault.md) | [Reference](../../api/keymanagement/v1beta1/index.md#kind-vault) |

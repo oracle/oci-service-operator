@@ -1,0 +1,767 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: scheduledjobs.osmanagementhub.oracle.com
+spec:
+  group: osmanagementhub.oracle.com
+  names:
+    kind: ScheduledJob
+    listKind: ScheduledJobList
+    plural: scheduledjobs
+    singular: scheduledjob
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the ScheduledJob
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the ScheduledJob
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: ScheduledJob is the Schema for the scheduledjobs API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ScheduledJobSpec defines the desired state of ScheduledJob.
+            properties:
+              compartmentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment that contains the scheduled job.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              description:
+                description: User-specified description of the scheduled job. Avoid
+                  entering confidential information.
+                type: string
+              displayName:
+                description: User-friendly name for the scheduled job. Does not have
+                  to be unique and you can change the name later. Avoid entering confidential
+                  information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              isManagedByAutonomousLinux:
+                description: Indicates whether this scheduled job is managed by the
+                  Autonomous Linux service.
+                type: boolean
+              isSubcompartmentIncluded:
+                description: |-
+                  Indicates whether to apply the scheduled job to all compartments in the tenancy when managedCompartmentIds specifies
+                  the tenancy OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) (root compartment).
+                type: boolean
+              lifecycleStageIds:
+                description: |-
+                  The lifecycle stage OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) that this scheduled job operates on.
+                  A scheduled job can only operate on one type of target, therefore you must supply either this or managedInstanceIds,
+                  or managedInstanceGroupIds, or managedCompartmentIds.
+                items:
+                  type: string
+                type: array
+              locations:
+                description: The list of locations this scheduled job should operate
+                  on for a job targeting on compartments. (Empty list means apply
+                  to all locations). This can only be set when managedCompartmentIds
+                  is not empty.
+                items:
+                  type: string
+                type: array
+              managedCompartmentIds:
+                description: |-
+                  The compartment OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) that this scheduled job operates on.
+                  To apply the job to all compartments in the tenancy, set this to the tenancy OCID (root compartment) and set
+                  isSubcompartmentIncluded to true. A scheduled job can only operate on one type of target, therefore you must
+                  supply either this or managedInstanceIds, or managedInstanceGroupIds, or lifecycleStageIds.
+                items:
+                  type: string
+                type: array
+              managedInstanceGroupIds:
+                description: |-
+                  The managed instance group OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) that this scheduled job operates on.
+                  A scheduled job can only operate on one type of target, therefore you must supply either this or managedInstanceIds,
+                  or managedCompartmentIds, or lifecycleStageIds.
+                items:
+                  type: string
+                type: array
+              managedInstanceIds:
+                description: |-
+                  The managed instance OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) that this scheduled job operates on.
+                  A scheduled job can only operate on one type of target, therefore you must supply either this or
+                  managedInstanceGroupIds, or managedCompartmentIds, or lifecycleStageIds.
+                items:
+                  type: string
+                type: array
+              operations:
+                description: |-
+                  The list of operations this scheduled job needs to perform.
+                  A scheduled job supports only one operation type, unless it is one of the following:
+                  * UPDATE_PACKAGES
+                  * UPDATE_ALL
+                  * UPDATE_SECURITY
+                  * UPDATE_BUGFIX
+                  * UPDATE_ENHANCEMENT
+                  * UPDATE_OTHER
+                  * UPDATE_KSPLICE_USERSPACE
+                  * UPDATE_KSPLICE_KERNEL
+                items:
+                  description: ScheduledJobOperation defines nested fields for ScheduledJob.Operation.
+                  properties:
+                    manageModuleStreamsDetails:
+                      description: ScheduledJobOperationManageModuleStreamsDetails
+                        defines nested fields for ScheduledJob.Operation.ManageModuleStreamsDetails.
+                      properties:
+                        disable:
+                          description: The set of module streams to disable.
+                          items:
+                            description: ScheduledJobOperationManageModuleStreamsDetailsDisable
+                              defines nested fields for ScheduledJob.Operation.ManageModuleStreamsDetails.Disable.
+                            properties:
+                              moduleName:
+                                description: The name of a module.
+                                type: string
+                              softwareSourceId:
+                                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                                  of the software source that contains the module
+                                  stream.
+                                type: string
+                              streamName:
+                                description: The name of a stream of the specified
+                                  module.
+                                type: string
+                            required:
+                            - moduleName
+                            - streamName
+                            type: object
+                          type: array
+                        enable:
+                          description: The set of module streams to enable.
+                          items:
+                            description: ScheduledJobOperationManageModuleStreamsDetailsEnable
+                              defines nested fields for ScheduledJob.Operation.ManageModuleStreamsDetails.Enable.
+                            properties:
+                              moduleName:
+                                description: The name of a module.
+                                type: string
+                              softwareSourceId:
+                                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                                  of the software source that contains the module
+                                  stream.
+                                type: string
+                              streamName:
+                                description: The name of a stream of the specified
+                                  module.
+                                type: string
+                            required:
+                            - moduleName
+                            - streamName
+                            type: object
+                          type: array
+                        install:
+                          description: The set of module stream profiles to install.
+                          items:
+                            description: ScheduledJobOperationManageModuleStreamsDetailsInstall
+                              defines nested fields for ScheduledJob.Operation.ManageModuleStreamsDetails.Install.
+                            properties:
+                              moduleName:
+                                description: The name of a module.
+                                type: string
+                              profileName:
+                                description: The name of a profile of the specified
+                                  module stream.
+                                type: string
+                              softwareSourceId:
+                                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                                  of the software source that contains the module
+                                  stream.
+                                type: string
+                              streamName:
+                                description: The name of a stream of the specified
+                                  module.
+                                type: string
+                            required:
+                            - moduleName
+                            - profileName
+                            - streamName
+                            type: object
+                          type: array
+                        remove:
+                          description: The set of module stream profiles to remove.
+                          items:
+                            description: ScheduledJobOperationManageModuleStreamsDetailsRemove
+                              defines nested fields for ScheduledJob.Operation.ManageModuleStreamsDetails.Remove.
+                            properties:
+                              moduleName:
+                                description: The name of a module.
+                                type: string
+                              profileName:
+                                description: The name of a profile of the specified
+                                  module stream.
+                                type: string
+                              softwareSourceId:
+                                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                                  of the software source that contains the module
+                                  stream.
+                                type: string
+                              streamName:
+                                description: The name of a stream of the specified
+                                  module.
+                                type: string
+                            required:
+                            - moduleName
+                            - profileName
+                            - streamName
+                            type: object
+                          type: array
+                      type: object
+                    operationType:
+                      description: The type of operation this scheduled job performs.
+                      type: string
+                    packageNames:
+                      description: The names of the target packages. This parameter
+                        only applies when the scheduled job is for installing, updating,
+                        or removing packages.
+                      items:
+                        type: string
+                      type: array
+                    rebootTimeoutInMins:
+                      description: |-
+                        The number of minutes the service waits for the reboot to complete. If the instance doesn't reboot within the
+                        timeout, the service marks the reboot job as failed.
+                      type: integer
+                    softwareSourceIds:
+                      description: |-
+                        The software source OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm).
+                        This parameter only applies when the scheduled job is for attaching or detaching software sources.
+                      items:
+                        type: string
+                      type: array
+                    switchModuleStreamsDetails:
+                      description: ScheduledJobOperationSwitchModuleStreamsDetails
+                        defines nested fields for ScheduledJob.Operation.SwitchModuleStreamsDetails.
+                      properties:
+                        moduleName:
+                          description: The name of a module.
+                          type: string
+                        softwareSourceId:
+                          description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                            of the software source that contains the module stream.
+                          type: string
+                        streamName:
+                          description: The name of a stream of the specified module.
+                          type: string
+                      required:
+                      - moduleName
+                      - streamName
+                      type: object
+                    windowsUpdateNames:
+                      description: |-
+                        Unique identifier for the Windows update. This parameter only applies if the scheduled job is for installing Windows updates.
+                        Note that this is not an OCID, but is a unique identifier assigned by Microsoft.
+                        For example: '6981d463-cd91-4a26-b7c4-ea4ded9183ed'.
+                      items:
+                        type: string
+                      type: array
+                  required:
+                  - operationType
+                  type: object
+                type: array
+              recurringRule:
+                description: The frequency schedule for a recurring scheduled job.
+                type: string
+              retryIntervals:
+                description: |-
+                  The amount of time in minutes to wait until retrying the scheduled job. If set, the service will automatically
+                  retry a failed scheduled job after the interval. For example, you could set the interval to [2,5,10]. If the
+                  initial execution of the job fails, the service waits 2 minutes and then retries. If that fails, the service
+                  waits 5 minutes and then retries. If that fails, the service waits 10 minutes and then retries.
+                items:
+                  type: integer
+                type: array
+              scheduleType:
+                description: The type of scheduling frequency for the scheduled job.
+                type: string
+              timeNextExecution:
+                description: The desired time of the next execution of this scheduled
+                  job (in RFC 3339 (https://tools.ietf.org/rfc/rfc3339) format).
+                type: string
+              workRequestId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  for the work request that will be rerun.
+                type: string
+            required:
+            - compartmentId
+            - operations
+            - scheduleType
+            - timeNextExecution
+            type: object
+          status:
+            description: ScheduledJobStatus defines the observed state of ScheduledJob.
+            properties:
+              compartmentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment that contains the scheduled job.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              description:
+                description: User-specified description for the scheduled job.
+                type: string
+              displayName:
+                description: User-friendly name for the scheduled job.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              id:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the scheduled job.
+                type: string
+              isManagedByAutonomousLinux:
+                description: Indicates whether this scheduled job is managed by the
+                  Autonomous Linux service.
+                type: boolean
+              isRestricted:
+                description: |-
+                  Indicates if the schedule job has restricted update and deletion capabilities. For restricted scheduled jobs,
+                  you can update only the timeNextExecution, recurringRule, and tags.
+                type: boolean
+              isSubcompartmentIncluded:
+                description: Indicates whether to apply the scheduled job to all compartments
+                  in the tenancy when managedCompartmentIds specifies the tenancy
+                  OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  (root compartment).
+                type: boolean
+              lifecycleStageIds:
+                description: |-
+                  The lifecycle stage OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) that this scheduled job operates on.
+                  A scheduled job can only operate on one type of target, therefore this parameter is mutually exclusive with
+                  managedInstanceIds, managedInstanceGroupIds, and managedCompartmentIds.
+                items:
+                  type: string
+                type: array
+              lifecycleState:
+                description: The current state of the scheduled job.
+                type: string
+              locations:
+                description: The list of locations this scheduled job should operate
+                  on for a job targeting on compartments. (Empty list means apply
+                  to all locations). This can only be set when managedCompartmentIds
+                  is not empty.
+                items:
+                  type: string
+                type: array
+              managedCompartmentIds:
+                description: The compartment OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  that this scheduled job operates on. A scheduled job can only operate
+                  on one type of target, therefore this parameter is mutually exclusive
+                  with managedInstanceIds, managedInstanceGroupIds, and lifecycleStageIds.
+                items:
+                  type: string
+                type: array
+              managedInstanceGroupIds:
+                description: The managed instance group OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  that this scheduled job operates on. A scheduled job can only operate
+                  on one type of target, therefore this parameter is mutually exclusive
+                  with managedInstanceIds, managedCompartmentIds, and lifecycleStageIds.
+                items:
+                  type: string
+                type: array
+              managedInstanceIds:
+                description: |-
+                  The managed instance OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) that this scheduled job operates on.
+                  A scheduled job can only operate on one type of target, therefore this parameter is mutually exclusive with
+                  managedInstanceGroupIds, managedCompartmentIds, and lifecycleStageIds.
+                items:
+                  type: string
+                type: array
+              operations:
+                description: |-
+                  The list of operations this scheduled job needs to perform.
+                  A scheduled job supports only one operation type, unless it is one of the following:
+                  * UPDATE_PACKAGES
+                  * UPDATE_ALL
+                  * UPDATE_SECURITY
+                  * UPDATE_BUGFIX
+                  * UPDATE_ENHANCEMENT
+                  * UPDATE_OTHER
+                  * UPDATE_KSPLICE_USERSPACE
+                  * UPDATE_KSPLICE_KERNEL
+                items:
+                  description: ScheduledJobOperation defines nested fields for ScheduledJob.Operation.
+                  properties:
+                    manageModuleStreamsDetails:
+                      description: ScheduledJobOperationManageModuleStreamsDetails
+                        defines nested fields for ScheduledJob.Operation.ManageModuleStreamsDetails.
+                      properties:
+                        disable:
+                          description: The set of module streams to disable.
+                          items:
+                            description: ScheduledJobOperationManageModuleStreamsDetailsDisable
+                              defines nested fields for ScheduledJob.Operation.ManageModuleStreamsDetails.Disable.
+                            properties:
+                              moduleName:
+                                description: The name of a module.
+                                type: string
+                              softwareSourceId:
+                                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                                  of the software source that contains the module
+                                  stream.
+                                type: string
+                              streamName:
+                                description: The name of a stream of the specified
+                                  module.
+                                type: string
+                            required:
+                            - moduleName
+                            - streamName
+                            type: object
+                          type: array
+                        enable:
+                          description: The set of module streams to enable.
+                          items:
+                            description: ScheduledJobOperationManageModuleStreamsDetailsEnable
+                              defines nested fields for ScheduledJob.Operation.ManageModuleStreamsDetails.Enable.
+                            properties:
+                              moduleName:
+                                description: The name of a module.
+                                type: string
+                              softwareSourceId:
+                                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                                  of the software source that contains the module
+                                  stream.
+                                type: string
+                              streamName:
+                                description: The name of a stream of the specified
+                                  module.
+                                type: string
+                            required:
+                            - moduleName
+                            - streamName
+                            type: object
+                          type: array
+                        install:
+                          description: The set of module stream profiles to install.
+                          items:
+                            description: ScheduledJobOperationManageModuleStreamsDetailsInstall
+                              defines nested fields for ScheduledJob.Operation.ManageModuleStreamsDetails.Install.
+                            properties:
+                              moduleName:
+                                description: The name of a module.
+                                type: string
+                              profileName:
+                                description: The name of a profile of the specified
+                                  module stream.
+                                type: string
+                              softwareSourceId:
+                                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                                  of the software source that contains the module
+                                  stream.
+                                type: string
+                              streamName:
+                                description: The name of a stream of the specified
+                                  module.
+                                type: string
+                            required:
+                            - moduleName
+                            - profileName
+                            - streamName
+                            type: object
+                          type: array
+                        remove:
+                          description: The set of module stream profiles to remove.
+                          items:
+                            description: ScheduledJobOperationManageModuleStreamsDetailsRemove
+                              defines nested fields for ScheduledJob.Operation.ManageModuleStreamsDetails.Remove.
+                            properties:
+                              moduleName:
+                                description: The name of a module.
+                                type: string
+                              profileName:
+                                description: The name of a profile of the specified
+                                  module stream.
+                                type: string
+                              softwareSourceId:
+                                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                                  of the software source that contains the module
+                                  stream.
+                                type: string
+                              streamName:
+                                description: The name of a stream of the specified
+                                  module.
+                                type: string
+                            required:
+                            - moduleName
+                            - profileName
+                            - streamName
+                            type: object
+                          type: array
+                      type: object
+                    operationType:
+                      description: The type of operation this scheduled job performs.
+                      type: string
+                    packageNames:
+                      description: The names of the target packages. This parameter
+                        only applies when the scheduled job is for installing, updating,
+                        or removing packages.
+                      items:
+                        type: string
+                      type: array
+                    rebootTimeoutInMins:
+                      description: |-
+                        The number of minutes the service waits for the reboot to complete. If the instance doesn't reboot within the
+                        timeout, the service marks the reboot job as failed.
+                      type: integer
+                    softwareSourceIds:
+                      description: |-
+                        The software source OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm).
+                        This parameter only applies when the scheduled job is for attaching or detaching software sources.
+                      items:
+                        type: string
+                      type: array
+                    switchModuleStreamsDetails:
+                      description: ScheduledJobOperationSwitchModuleStreamsDetails
+                        defines nested fields for ScheduledJob.Operation.SwitchModuleStreamsDetails.
+                      properties:
+                        moduleName:
+                          description: The name of a module.
+                          type: string
+                        softwareSourceId:
+                          description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                            of the software source that contains the module stream.
+                          type: string
+                        streamName:
+                          description: The name of a stream of the specified module.
+                          type: string
+                      required:
+                      - moduleName
+                      - streamName
+                      type: object
+                    windowsUpdateNames:
+                      description: |-
+                        Unique identifier for the Windows update. This parameter only applies if the scheduled job is for installing Windows updates.
+                        Note that this is not an OCID, but is a unique identifier assigned by Microsoft.
+                        For example: '6981d463-cd91-4a26-b7c4-ea4ded9183ed'.
+                      items:
+                        type: string
+                      type: array
+                  required:
+                  - operationType
+                  type: object
+                type: array
+              recurringRule:
+                description: The frequency schedule for a recurring scheduled job.
+                type: string
+              retryIntervals:
+                description: |-
+                  The amount of time in minutes to wait until retrying the scheduled job. If set, the service will automatically retry
+                  a failed scheduled job after the interval. For example, you could set the interval to [2,5,10]. If the initial
+                  execution of the job fails, the service waits 2 minutes and then retries. If that fails, the service waits 5 minutes
+                  and then retries. If that fails, the service waits 10 minutes and then retries.
+                items:
+                  type: integer
+                type: array
+              scheduleType:
+                description: The type of scheduling frequency for the job.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  System tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              timeCreated:
+                description: The time this scheduled job was created (in RFC 3339
+                  (https://tools.ietf.org/rfc/rfc3339) format).
+                type: string
+              timeLastExecution:
+                description: The time of the last execution of this scheduled job
+                  (in RFC 3339 (https://tools.ietf.org/rfc/rfc3339) format).
+                type: string
+              timeNextExecution:
+                description: The time of the next execution of this scheduled job
+                  (in RFC 3339 (https://tools.ietf.org/rfc/rfc3339) format).
+                type: string
+              timeUpdated:
+                description: The time this scheduled job was updated (in RFC 3339
+                  (https://tools.ietf.org/rfc/rfc3339) format).
+                type: string
+              workRequestId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  for the work request that will be rerun.
+                type: string
+              workRequestIds:
+                description: The list of work request OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  associated with this scheduled job.
+                items:
+                  type: string
+                type: array
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

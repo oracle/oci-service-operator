@@ -1,0 +1,589 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: databaseinsights.opsi.oracle.com
+spec:
+  group: opsi.oracle.com
+  names:
+    kind: DatabaseInsight
+    listKind: DatabaseInsightList
+    plural: databaseinsights
+    singular: databaseinsight
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: status of the DatabaseInsight
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the DatabaseInsight
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: DatabaseInsight is the Schema for the databaseinsights API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: DatabaseInsightSpec defines the desired state of DatabaseInsight.
+            properties:
+              compartmentId:
+                description: Compartment Identifier of database
+                type: string
+              connectionCredentialDetails:
+                description: DatabaseInsightConnectionCredentialDetails defines nested
+                  fields for DatabaseInsight.ConnectionCredentialDetails.
+                properties:
+                  credentialSourceName:
+                    description: Credential source name that had been added in Management
+                      Agent wallet. This value is only required when Credential set
+                      by CREDENTIALS_BY_SOURCE and is optional properties for ther
+                      others.
+                    type: string
+                  credentialType:
+                    type: string
+                  jsonData:
+                    type: string
+                  namedCredentialId:
+                    description: The credential OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                      stored in management agent.
+                    type: string
+                  passwordSecretId:
+                    description: The secret OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                      mapping to the database credentials.
+                    type: string
+                  role:
+                    description: database user role.
+                    type: string
+                  userName:
+                    description: database user name.
+                    type: string
+                  walletSecretId:
+                    description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                      of the Secret where the database keystore contents are stored.
+                      This is used for TCPS support in BM/VM/ExaCS cases.
+                    type: string
+                type: object
+              connectionDetails:
+                description: DatabaseInsightConnectionDetails defines nested fields
+                  for DatabaseInsight.ConnectionDetails.
+                properties:
+                  hostName:
+                    description: Name of the listener host that will be used to create
+                      the connect string to the database.
+                    type: string
+                  port:
+                    description: Listener port number used for connection requests.
+                    type: integer
+                  protocol:
+                    description: Protocol used for connection requests.
+                    type: string
+                  serviceName:
+                    description: Database service name used for connection requests.
+                    type: string
+                required:
+                - hostName
+                - port
+                - protocol
+                - serviceName
+                type: object
+              credentialDetails:
+                description: DatabaseInsightCredentialDetails defines nested fields
+                  for DatabaseInsight.CredentialDetails.
+                properties:
+                  credentialSourceName:
+                    description: Credential source name that had been added in Management
+                      Agent wallet. This value is only required when Credential set
+                      by CREDENTIALS_BY_SOURCE and is optional properties for ther
+                      others.
+                    type: string
+                  credentialType:
+                    type: string
+                  jsonData:
+                    type: string
+                  namedCredentialId:
+                    description: The credential OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                      stored in management agent.
+                    type: string
+                  passwordSecretId:
+                    description: The secret OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                      mapping to the database credentials.
+                    type: string
+                  role:
+                    description: database user role.
+                    type: string
+                  userName:
+                    description: database user name.
+                    type: string
+                  walletSecretId:
+                    description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                      of the Secret where the database keystore contents are stored.
+                      This is used for TCPS support in BM/VM/ExaCS cases.
+                    type: string
+                type: object
+              databaseConnectorId:
+                description: The DBM owned database connector OCID (https://docs.oracle.com/iaas/database-management/doc/view-connector-details.html)
+                  mapping to the database credentials and connection details.
+                type: string
+              databaseId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the database.
+                type: string
+              databaseResourceType:
+                description: OCI database resource type
+                type: string
+              dbmPrivateEndpointId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the Database Management private endpoint
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              deploymentType:
+                description: Database Deployment Type (EXACS will be supported in
+                  the future)
+                type: string
+              enterpriseManagerBridgeId:
+                description: OPSI Enterprise Manager Bridge OCID
+                type: string
+              enterpriseManagerEntityIdentifier:
+                description: Enterprise Manager Entity Unique Identifier
+                type: string
+              enterpriseManagerIdentifier:
+                description: Enterprise Manager Unique Identifier
+                type: string
+              entitySource:
+                type: string
+              exadataInsightId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the Exadata insight.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              isAdvancedFeaturesEnabled:
+                description: Flag is to identify if advanced features for autonomous
+                  database is enabled or not
+                type: boolean
+              jsonData:
+                type: string
+              managementAgentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the Management Agent
+                type: string
+              opsiPrivateEndpointId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the OPSI private endpoint
+                type: string
+              serviceName:
+                description: Database service name used for connection requests.
+                type: string
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  System tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+            required:
+            - compartmentId
+            type: object
+          status:
+            description: DatabaseInsightStatus defines the observed state of DatabaseInsight.
+            properties:
+              agentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the Management Agent
+                type: string
+              compartmentId:
+                description: Compartment identifier of the database
+                type: string
+              connectionCredentialDetails:
+                description: DatabaseInsightConnectionCredentialDetails defines nested
+                  fields for DatabaseInsight.ConnectionCredentialDetails.
+                properties:
+                  credentialSourceName:
+                    description: Credential source name that had been added in Management
+                      Agent wallet. This value is only required when Credential set
+                      by CREDENTIALS_BY_SOURCE and is optional properties for ther
+                      others.
+                    type: string
+                  credentialType:
+                    type: string
+                  jsonData:
+                    type: string
+                  namedCredentialId:
+                    description: The credential OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                      stored in management agent.
+                    type: string
+                  passwordSecretId:
+                    description: The secret OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                      mapping to the database credentials.
+                    type: string
+                  role:
+                    description: database user role.
+                    type: string
+                  userName:
+                    description: database user name.
+                    type: string
+                  walletSecretId:
+                    description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                      of the Secret where the database keystore contents are stored.
+                      This is used for TCPS support in BM/VM/ExaCS cases.
+                    type: string
+                type: object
+              connectionDetails:
+                description: DatabaseInsightConnectionDetails defines nested fields
+                  for DatabaseInsight.ConnectionDetails.
+                properties:
+                  hostName:
+                    description: Name of the listener host that will be used to create
+                      the connect string to the database.
+                    type: string
+                  port:
+                    description: Listener port number used for connection requests.
+                    type: integer
+                  protocol:
+                    description: Protocol used for connection requests.
+                    type: string
+                  serviceName:
+                    description: Database service name used for connection requests.
+                    type: string
+                required:
+                - hostName
+                - port
+                - protocol
+                - serviceName
+                type: object
+              connectorId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of External Database Connector
+                type: string
+              credentialDetails:
+                description: DatabaseInsightCredentialDetails defines nested fields
+                  for DatabaseInsight.CredentialDetails.
+                properties:
+                  credentialSourceName:
+                    description: Credential source name that had been added in Management
+                      Agent wallet. This value is only required when Credential set
+                      by CREDENTIALS_BY_SOURCE and is optional properties for ther
+                      others.
+                    type: string
+                  credentialType:
+                    type: string
+                  jsonData:
+                    type: string
+                  namedCredentialId:
+                    description: The credential OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                      stored in management agent.
+                    type: string
+                  passwordSecretId:
+                    description: The secret OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                      mapping to the database credentials.
+                    type: string
+                  role:
+                    description: database user role.
+                    type: string
+                  userName:
+                    description: database user name.
+                    type: string
+                  walletSecretId:
+                    description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                      of the Secret where the database keystore contents are stored.
+                      This is used for TCPS support in BM/VM/ExaCS cases.
+                    type: string
+                type: object
+              databaseConnectionStatusDetails:
+                description: A message describing the status of the database connection
+                  of this resource. For example, it can be used to provide actionable
+                  information about the permission and content validity of the database
+                  connection.
+                type: string
+              databaseConnectorId:
+                description: The DBM owned database connector OCID (https://docs.oracle.com/iaas/database-management/doc/view-connector-details.html)
+                  mapping to the database credentials and connection details.
+                type: string
+              databaseDisplayName:
+                description: Display name of database
+                type: string
+              databaseHostNames:
+                description: The hostnames for the database.
+                items:
+                  type: string
+                type: array
+              databaseId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the database.
+                type: string
+              databaseName:
+                description: Name of database
+                type: string
+              databaseResourceType:
+                description: OCI database resource type
+                type: string
+              databaseType:
+                description: Ops Insights internal representation of the database
+                  type.
+                type: string
+              databaseVersion:
+                description: The version of the database.
+                type: string
+              dbAdditionalDetails:
+                description: Additional details of a database in JSON format. For
+                  autonomous databases, this is the AutonomousDatabase object serialized
+                  as a JSON string as defined in https://docs.oracle.com/iaas/en-us/iaas/api/#/en/database/20160918/AutonomousDatabase/.
+                  For EM, pass in null or an empty string. Note that this string needs
+                  to be escaped when specified in the curl command.
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              enterpriseManagerBridgeId:
+                description: OPSI Enterprise Manager Bridge OCID
+                type: string
+              enterpriseManagerEntityDisplayName:
+                description: Enterprise Manager Entity Display Name
+                type: string
+              enterpriseManagerEntityIdentifier:
+                description: Enterprise Manager Entity Unique Identifier
+                type: string
+              enterpriseManagerEntityName:
+                description: Enterprise Manager Entity Name
+                type: string
+              enterpriseManagerEntityType:
+                description: Enterprise Manager Entity Type
+                type: string
+              enterpriseManagerIdentifier:
+                description: Enterprise Manager Unique Identifier
+                type: string
+              entitySource:
+                type: string
+              exadataInsightId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the Exadata insight.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              id:
+                description: Database insight identifier
+                type: string
+              isAdvancedFeaturesEnabled:
+                description: Flag is to identify if advanced features for autonomous
+                  database is enabled or not
+                type: boolean
+              isHeatWaveClusterAttached:
+                description: Specifies if MYSQL DB System has heatwave cluster attached.
+                type: boolean
+              isHighlyAvailable:
+                description: Specifies if MYSQL DB System is highly available.
+                type: boolean
+              jsonData:
+                type: string
+              lifecycleDetails:
+                description: A message describing the current state in more detail.
+                  For example, can be used to provide actionable information for a
+                  resource in Failed state.
+                type: string
+              lifecycleState:
+                description: The current state of the database.
+                type: string
+              managementAgentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the Management Agent
+                type: string
+              opsiPrivateEndpointId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the OPSI private endpoint
+                type: string
+              parentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the VM Cluster or DB System ID, depending on which configuration
+                  the resource belongs to.
+                type: string
+              processorCount:
+                description: Processor count. This is the OCPU count for Autonomous
+                  Database and CPU core count for other database types.
+                type: integer
+              rootId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the Exadata Infrastructure.
+                type: string
+              sdkStatus:
+                description: |-
+                  Indicates the status of a database insight in Operations Insights
+                  This uses a distinct JSON name so it can coexist with the OSOK status envelope.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  System tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              timeCreated:
+                description: The time the the database insight was first enabled.
+                  An RFC3339 formatted datetime string
+                type: string
+              timeUpdated:
+                description: The time the database insight was updated. An RFC3339
+                  formatted datetime string
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

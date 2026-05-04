@@ -1,0 +1,390 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: rules.events.oracle.com
+spec:
+  group: events.oracle.com
+  names:
+    kind: Rule
+    listKind: RuleList
+    plural: rules
+    singular: rule
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the Rule
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the Rule
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: Rule is the Schema for the rules API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: RuleSpec defines the desired state of Rule.
+            properties:
+              actions:
+                description: RuleActions defines nested fields for Rule.Actions.
+                properties:
+                  actions:
+                    description: A list of one or more ActionDetails objects.
+                    items:
+                      description: RuleActionsAction defines nested fields for Rule.Actions.Action.
+                      properties:
+                        actionType:
+                          type: string
+                        description:
+                          description: |-
+                            A string that describes the details of the action. It does not have to be unique, and you can change it. Avoid entering
+                            confidential information.
+                          type: string
+                        functionId:
+                          description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                            of a Function hosted by Oracle Functions Service.
+                          type: string
+                        isEnabled:
+                          description: |-
+                            Whether or not this action is currently enabled.
+                            Example: `true`
+                          type: boolean
+                        jsonData:
+                          type: string
+                        streamId:
+                          description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                            of the stream to which messages are delivered.
+                          type: string
+                        topicId:
+                          description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                            of the topic to which messages are delivered.
+                          type: string
+                      required:
+                      - isEnabled
+                      type: object
+                    type: array
+                required:
+                - actions
+                type: object
+              compartmentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment to which this rule belongs.
+                type: string
+              condition:
+                description: |-
+                  A filter that specifies the event that will trigger actions associated with this rule. A few
+                  important things to remember about filters:
+                  * Fields not mentioned in the condition are ignored. You can create a valid filter that matches
+                  all events with two curly brackets: `{}`
+                    For more examples, see
+                  Matching Events with Filters (https://docs.oracle.com/iaas/Content/Events/Concepts/filterevents.htm).
+                  * For a condition with fields to match an event, the event must contain all the field names
+                  listed in the condition. Field names must appear in the condition with the same nesting
+                  structure used in the event.
+                    For a list of reference events, see
+                  Services that Produce Events (https://docs.oracle.com/iaas/Content/Events/Reference/eventsproducers.htm).
+                  * Rules apply to events in the compartment in which you create them and any child compartments.
+                  This means that a condition specified by a rule only matches events emitted from resources in
+                  the compartment or any of its child compartments.
+                  * Wildcard matching is supported with the asterisk (*) character.
+                    For examples of wildcard matching, see
+                  Matching Events with Filters (https://docs.oracle.com/iaas/Content/Events/Concepts/filterevents.htm)
+                  Example: `\"eventType\": \"com.oraclecloud.databaseservice.autonomous.database.backup.end\"`
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              description:
+                description: |-
+                  A string that describes the details of the rule. It does not have to be unique, and you can change it. Avoid entering
+                  confidential information.
+                type: string
+              displayName:
+                description: |-
+                  A string that describes the rule. It does not have to be unique, and you can change it. Avoid entering
+                  confidential information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. Exists for cross-compatibility only.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              isEnabled:
+                description: |-
+                  Whether or not this rule is currently enabled.
+                  Example: `true`
+                type: boolean
+            required:
+            - actions
+            - compartmentId
+            - condition
+            - displayName
+            - isEnabled
+            type: object
+          status:
+            description: RuleStatus defines the observed state of Rule.
+            properties:
+              actions:
+                description: RuleActions defines nested fields for Rule.Actions.
+                properties:
+                  actions:
+                    description: A list of one or more ActionDetails objects.
+                    items:
+                      description: RuleActionsAction defines nested fields for Rule.Actions.Action.
+                      properties:
+                        actionType:
+                          type: string
+                        description:
+                          description: |-
+                            A string that describes the details of the action. It does not have to be unique, and you can change it. Avoid entering
+                            confidential information.
+                          type: string
+                        functionId:
+                          description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                            of a Function hosted by Oracle Functions Service.
+                          type: string
+                        isEnabled:
+                          description: |-
+                            Whether or not this action is currently enabled.
+                            Example: `true`
+                          type: boolean
+                        jsonData:
+                          type: string
+                        streamId:
+                          description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                            of the stream to which messages are delivered.
+                          type: string
+                        topicId:
+                          description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                            of the topic to which messages are delivered.
+                          type: string
+                      required:
+                      - isEnabled
+                      type: object
+                    type: array
+                required:
+                - actions
+                type: object
+              compartmentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment to which this rule belongs.
+                type: string
+              condition:
+                description: |-
+                  A filter that specifies the event that will trigger actions associated with this rule. A few
+                  important things to remember about filters:
+                  * Fields not mentioned in the condition are ignored. You can create a valid filter that matches
+                  all events with two curly brackets: `{}`
+                    For more examples, see
+                  Matching Events with Filters (https://docs.oracle.com/iaas/Content/Events/Concepts/filterevents.htm).
+                  * For a condition with fields to match an event, the event must contain all the field names
+                  listed in the condition. Field names must appear in the condition with the same nesting
+                  structure used in the event.
+                    For a list of reference events, see
+                  Services that Produce Events (https://docs.oracle.com/iaas/Content/Events/Reference/eventsproducers.htm).
+                  * Rules apply to events in the compartment in which you create them and any child compartments.
+                  This means that a condition specified by a rule only matches events emitted from resources in
+                  the compartment or any of its child compartments.
+                  * Wildcard matching is supported with the asterisk (*) character.
+                    For examples of wildcard matching, see
+                  Matching Events with Filters (https://docs.oracle.com/iaas/Content/Events/Concepts/filterevents.htm)
+                  Example: `\"eventType\": \"com.oraclecloud.databaseservice.autonomous.database.backup.end\"`
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              description:
+                description: |-
+                  A string that describes the details of the rule. It does not have to be unique, and you can change it. Avoid entering
+                  confidential information.
+                type: string
+              displayName:
+                description: |-
+                  A string that describes the rule. It does not have to be unique, and you can change it. Avoid entering
+                  confidential information.
+                  Example: `"This rule sends a notification upon completion of DbaaS backup."`
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. Exists for cross-compatibility only.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              id:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of this rule.
+                type: string
+              isEnabled:
+                description: |-
+                  Whether or not this rule is currently enabled.
+                  Example: `true`
+                type: boolean
+              lifecycleMessage:
+                description: A message generated by the Events service about the current
+                  state of this rule.
+                type: string
+              lifecycleState:
+                description: The current state of the rule.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              timeCreated:
+                description: |-
+                  The time this rule was created, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339)
+                  timestamp format.
+                  Example: `2018-09-12T22:47:12.613Z`
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

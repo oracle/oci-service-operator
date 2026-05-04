@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "apmsynthetics",
+  "kind": "Script",
+  "formalSlug": "script",
+  "providerResource": "oci_apm_synthetics_script",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/apm_synthetics_script",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/apm_synthetics_script",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/apmsynthetics/script/page.html",
+  "bodySHA256": "f4011328b247f9efbcdd1aeb3792fb9099da4befede97d9190656663fd0ca07e",
+  "bodyBytes": 1722,
+  "fixtureBodyPath": "7.22.0/apmsynthetics/script/page.html"
+}

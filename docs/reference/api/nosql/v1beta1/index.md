@@ -222,4 +222,3 @@ TableLimits defines nested fields for Table.TableLimits.
 | `maxReadUnits` | Maximum sustained read throughput limit for the table. | `integer` | Yes | - | - |
 | `maxStorageInGBs` | Maximum size of storage used by the table. | `integer` | Yes | - | - |
 | `maxWriteUnits` | Maximum sustained write throughput limit for the table. | `integer` | Yes | - | - |
-

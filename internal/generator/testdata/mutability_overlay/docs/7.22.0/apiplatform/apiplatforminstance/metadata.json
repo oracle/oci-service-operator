@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "apiplatform",
+  "kind": "ApiPlatformInstance",
+  "formalSlug": "apiplatforminstance",
+  "providerResource": "oci_api_platform_api_platform_instance",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/api_platform_api_platform_instance",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/api_platform_api_platform_instance",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/apiplatform/apiplatforminstance/page.html",
+  "bodySHA256": "0aac137723c3e0a92f7191bb6328b9ded108edc43adcfaab11f0c2825a5a484d",
+  "bodyBytes": 674,
+  "fixtureBodyPath": "7.22.0/apiplatform/apiplatforminstance/page.html"
+}

@@ -1,0 +1,66 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
+  - stackmonitoring.oracle.com
+  resources:
+  - alarmconditions
+  - baselineablemetrics
+  - configs
+  - discoveryjobs
+  - maintenancewindows
+  - metricextensions
+  - monitoredresources
+  - monitoredresourcetypes
+  - monitoringtemplates
+  - processsets
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - stackmonitoring.oracle.com
+  resources:
+  - alarmconditions/finalizers
+  - baselineablemetrics/finalizers
+  - configs/finalizers
+  - discoveryjobs/finalizers
+  - maintenancewindows/finalizers
+  - metricextensions/finalizers
+  - monitoredresources/finalizers
+  - monitoredresourcetypes/finalizers
+  - monitoringtemplates/finalizers
+  - processsets/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - stackmonitoring.oracle.com
+  resources:
+  - alarmconditions/status
+  - baselineablemetrics/status
+  - configs/status
+  - discoveryjobs/status
+  - maintenancewindows/status
+  - metricextensions/status
+  - monitoredresources/status
+  - monitoredresourcetypes/status
+  - monitoringtemplates/status
+  - processsets/status
+  verbs:
+  - get
+  - patch
+  - update

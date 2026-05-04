@@ -1,0 +1,1354 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: webappfirewallpolicies.waf.oracle.com
+spec:
+  group: waf.oracle.com
+  names:
+    kind: WebAppFirewallPolicy
+    listKind: WebAppFirewallPolicyList
+    plural: webappfirewallpolicies
+    singular: webappfirewallpolicy
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the WebAppFirewallPolicy
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the WebAppFirewallPolicy
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: WebAppFirewallPolicy is the Schema for the webappfirewallpolicies
+          API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: WebAppFirewallPolicySpec defines the desired state of WebAppFirewallPolicy.
+            properties:
+              actions:
+                description: |-
+                  Predefined actions for use in multiple different rules. Not all actions are supported in every module.
+                  Some actions terminate further execution of modules and rules in a module and some do not.
+                  Actions names must be unique within this array.
+                items:
+                  description: WebAppFirewallPolicyAction defines nested fields for
+                    WebAppFirewallPolicy.Action.
+                  properties:
+                    body:
+                      description: WebAppFirewallPolicyActionBody defines nested fields
+                        for WebAppFirewallPolicy.Action.Body.
+                      properties:
+                        jsonData:
+                          type: string
+                        template:
+                          description: Dynamic response body
+                          type: string
+                        text:
+                          description: Static response body text.
+                          type: string
+                        type:
+                          type: string
+                      type: object
+                    code:
+                      description: |-
+                        Response code.
+                        The following response codes are valid values for this property:
+                        * 2xx
+                          200 OK
+                          201 Created
+                          202 Accepted
+                          206 Partial Content
+                        * 3xx
+                          300 Multiple Choices
+                          301 Moved Permanently
+                          302 Found
+                          303 See Other
+                          307 Temporary Redirect
+                        * 4xx
+                          400 Bad Request
+                          401 Unauthorized
+                          403 Forbidden
+                          404 Not Found
+                          405 Method Not Allowed
+                          408 Request Timeout
+                          409 Conflict
+                          411 Length Required
+                          412 Precondition Failed
+                          413 Payload Too Large
+                          414 URI Too Long
+                          415 Unsupported Media Type
+                          416 Range Not Satisfiable
+                          422 Unprocessable Entity
+                          429 Too Many Requests
+                          494 Request Header Too Large
+                          495 Cert Error
+                          496 No Cert
+                          497 HTTP to HTTPS
+                        * 5xx
+                          500 Internal Server Error
+                          501 Not Implemented
+                          502 Bad Gateway
+                          503 Service Unavailable
+                          504 Gateway Timeout
+                          507 Insufficient Storage
+                        Example: `200`
+                      type: integer
+                    headers:
+                      description: |-
+                        Adds headers defined in this array for HTTP response.
+                        Hop-by-hop headers are not allowed to be set:
+                        * Connection
+                        * Keep-Alive
+                        * Proxy-Authenticate
+                        * Proxy-Authorization
+                        * TE
+                        * Trailer
+                        * Transfer-Encoding
+                        * Upgrade
+                      items:
+                        description: WebAppFirewallPolicyActionHeader defines nested
+                          fields for WebAppFirewallPolicy.Action.Header.
+                        properties:
+                          name:
+                            description: The name of the header field.
+                            type: string
+                          value:
+                            description: The value of the header field.
+                            type: string
+                        required:
+                        - name
+                        - value
+                        type: object
+                      type: array
+                    jsonData:
+                      type: string
+                    name:
+                      description: Action name. Can be used to reference the action.
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - name
+                  type: object
+                type: array
+              compartmentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              displayName:
+                description: WebAppFirewallPolicy display name, can be renamed.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              requestAccessControl:
+                description: WebAppFirewallPolicyRequestAccessControl defines nested
+                  fields for WebAppFirewallPolicy.RequestAccessControl.
+                properties:
+                  defaultActionName:
+                    description: |-
+                      References an default Action to take if no AccessControlRule was matched. Allowed action types:
+                      * **ALLOW** continues execution of other modules and their rules.
+                      * **RETURN_HTTP_RESPONSE** terminates further execution of modules and rules and returns defined HTTP response.
+                    type: string
+                  rules:
+                    description: Ordered list of AccessControlRules. Rules are executed
+                      in order of appearance in this array.
+                    items:
+                      description: WebAppFirewallPolicyRequestAccessControlRule defines
+                        nested fields for WebAppFirewallPolicy.RequestAccessControl.Rule.
+                      properties:
+                        actionName:
+                          description: References action by name from actions defined
+                            in WebAppFirewallPolicy.
+                          type: string
+                        condition:
+                          description: An expression that determines whether or not
+                            the rule action should be executed.
+                          type: string
+                        conditionLanguage:
+                          description: |-
+                            The language used to parse condition from field `condition`. Available languages:
+                            * **JMESPATH** an extended JMESPath language syntax.
+                          type: string
+                        name:
+                          description: Rule name. Must be unique within the module.
+                          type: string
+                      required:
+                      - actionName
+                      - name
+                      type: object
+                    type: array
+                required:
+                - defaultActionName
+                type: object
+              requestProtection:
+                description: WebAppFirewallPolicyRequestProtection defines nested
+                  fields for WebAppFirewallPolicy.RequestProtection.
+                properties:
+                  bodyInspectionSizeLimitExceededActionName:
+                    description: |-
+                      References action by name from actions defined in WebAppFirewallPolicy. Executed if HTTP message
+                      body size exceeds limit set in field `bodyInspectionSizeLimitInBytes`.
+                      If this field is `null` HTTP message body will inspected up to `bodyInspectionSizeLimitInBytes` and the rest
+                      will not be inspected by Protection Capabilities.
+                      Allowed action types:
+                      * **RETURN_HTTP_RESPONSE** terminates further execution of modules and rules and returns defined HTTP response.
+                    type: string
+                  bodyInspectionSizeLimitInBytes:
+                    description: |-
+                      Maximum size of inspected HTTP message body in bytes. Actions to take if this limit is exceeded are defined in `bodyInspectionSizeLimitExceededActionName`.
+                      Body inspection maximum size allowed is defined with per-tenancy limit: 8192 bytes.
+                    type: integer
+                  rules:
+                    description: |-
+                      Ordered list of ProtectionRules. Rules are executed in order of appearance in this array.
+                      ProtectionRules in this array can only use protection Capabilities of REQUEST_PROTECTION_CAPABILITY type.
+                    items:
+                      description: WebAppFirewallPolicyRequestProtectionRule defines
+                        nested fields for WebAppFirewallPolicy.RequestProtection.Rule.
+                      properties:
+                        actionName:
+                          description: References action by name from actions defined
+                            in WebAppFirewallPolicy.
+                          type: string
+                        condition:
+                          description: An expression that determines whether or not
+                            the rule action should be executed.
+                          type: string
+                        conditionLanguage:
+                          description: |-
+                            The language used to parse condition from field `condition`. Available languages:
+                            * **JMESPATH** an extended JMESPath language syntax.
+                          type: string
+                        isBodyInspectionEnabled:
+                          description: |-
+                            Enables/disables body inspection for this protection rule.
+                            Only Protection Rules in RequestProtection can have this option enabled. Response body inspection will
+                            be available at a later date.
+                          type: boolean
+                        name:
+                          description: Rule name. Must be unique within the module.
+                          type: string
+                        protectionCapabilities:
+                          description: |-
+                            An ordered list that references OCI-managed protection capabilities.
+                            Referenced protection capabilities are not necessarily executed in order of appearance. Their execution order
+                            is decided at runtime for improved performance.
+                            The array cannot contain entries with the same pair of capability key and version more than once.
+                          items:
+                            description: WebAppFirewallPolicyRequestProtectionRuleProtectionCapability
+                              defines nested fields for WebAppFirewallPolicy.RequestProtection.Rule.ProtectionCapability.
+                            properties:
+                              actionName:
+                                description: |-
+                                  Override action to take if capability was triggered, defined in Protection Rule for this capability.
+                                  Only actions of type CHECK are allowed.
+                                type: string
+                              collaborativeActionThreshold:
+                                description: |-
+                                  The minimum sum of weights of associated collaborative protection capabilities that have triggered which
+                                  must be reached in order for _this_ capability to trigger.
+                                  This field is ignored for non-collaborative capabilities.
+                                type: integer
+                              collaborativeWeights:
+                                description: Explicit weight values to use for associated
+                                  collaborative protection capabilities.
+                                items:
+                                  description: WebAppFirewallPolicyRequestProtectionRuleProtectionCapabilityCollaborativeWeight
+                                    defines nested fields for WebAppFirewallPolicy.RequestProtection.Rule.ProtectionCapability.CollaborativeWeight.
+                                  properties:
+                                    key:
+                                      description: Unique key of collaborative capability
+                                        for which weight will be overridden.
+                                      type: string
+                                    weight:
+                                      description: The value of weight to set.
+                                      type: integer
+                                  required:
+                                  - key
+                                  - weight
+                                  type: object
+                                type: array
+                              exclusions:
+                                description: WebAppFirewallPolicyRequestProtectionRuleProtectionCapabilityExclusions
+                                  defines nested fields for WebAppFirewallPolicy.RequestProtection.Rule.ProtectionCapability.Exclusions.
+                                properties:
+                                  args:
+                                    description: |-
+                                      List of URL query parameter values from form-urlencoded XML, JSON, AMP, or POST payloads to exclude from inspecting.
+                                      Example: If we have query parameter 'argumentName=argumentValue' and args=['argumentName'], both 'argumentName' and 'argumentValue' will not be inspected.
+                                    items:
+                                      type: string
+                                    type: array
+                                  requestCookies:
+                                    description: |-
+                                      List of HTTP request cookie values (by cookie name) to exclude from inspecting.
+                                      Example: If we have cookie 'cookieName=cookieValue' and requestCookies=['cookieName'], both 'cookieName' and 'cookieValue' will not be inspected.
+                                    items:
+                                      type: string
+                                    type: array
+                                type: object
+                              key:
+                                description: Unique key of referenced protection capability.
+                                type: string
+                              version:
+                                description: Version of referenced protection capability.
+                                type: integer
+                            required:
+                            - key
+                            - version
+                            type: object
+                          type: array
+                        protectionCapabilitySettings:
+                          description: WebAppFirewallPolicyRequestProtectionRuleProtectionCapabilitySettings
+                            defines nested fields for WebAppFirewallPolicy.RequestProtection.Rule.ProtectionCapabilitySettings.
+                          properties:
+                            allowedHttpMethods:
+                              description: |-
+                                List of allowed HTTP methods. Each value as a RFC7230 formated token string.
+                                Used in protection capability 911100: Restrict HTTP Request Methods.
+                              items:
+                                type: string
+                              type: array
+                            maxHttpRequestHeaderLength:
+                              description: 'Maximum allowed length of headers in an
+                                HTTP request. Used in protection capability: 9200024:
+                                Limit length of request header size.'
+                              type: integer
+                            maxHttpRequestHeaders:
+                              description: 'Maximum number of headers allowed in an
+                                HTTP request. Used in protection capability 9200014:
+                                Limit Number of Request Headers.'
+                              type: integer
+                            maxNumberOfArguments:
+                              description: 'Maximum number of arguments allowed. Used
+                                in protection capability 920380: Number of Arguments
+                                Limits.'
+                              type: integer
+                            maxSingleArgumentLength:
+                              description: 'Maximum allowed length of a single argument.
+                                Used in protection capability 920370: Limit argument
+                                value length.'
+                              type: integer
+                            maxTotalArgumentLength:
+                              description: 'Maximum allowed total length of all arguments.
+                                Used in protection capability 920390: Limit arguments
+                                total length.'
+                              type: integer
+                          type: object
+                      required:
+                      - actionName
+                      - name
+                      - protectionCapabilities
+                      type: object
+                    type: array
+                type: object
+              requestRateLimiting:
+                description: WebAppFirewallPolicyRequestRateLimiting defines nested
+                  fields for WebAppFirewallPolicy.RequestRateLimiting.
+                properties:
+                  rules:
+                    description: Ordered list of RequestRateLimitingRules. Rules are
+                      executed in order of appearance in this array.
+                    items:
+                      description: WebAppFirewallPolicyRequestRateLimitingRule defines
+                        nested fields for WebAppFirewallPolicy.RequestRateLimiting.Rule.
+                      properties:
+                        actionName:
+                          description: References action by name from actions defined
+                            in WebAppFirewallPolicy.
+                          type: string
+                        condition:
+                          description: An expression that determines whether or not
+                            the rule action should be executed.
+                          type: string
+                        conditionLanguage:
+                          description: |-
+                            The language used to parse condition from field `condition`. Available languages:
+                            * **JMESPATH** an extended JMESPath language syntax.
+                          type: string
+                        configurations:
+                          description: |-
+                            Rate Limiting Configurations.
+                            Each configuration counts requests towards its own `requestsLimit`.
+                          items:
+                            description: WebAppFirewallPolicyRequestRateLimitingRuleConfiguration
+                              defines nested fields for WebAppFirewallPolicy.RequestRateLimiting.Rule.Configuration.
+                            properties:
+                              actionDurationInSeconds:
+                                description: Duration of block action application
+                                  in seconds when `requestsLimit` is reached. Optional
+                                  and can be 0 (no block duration).
+                                type: integer
+                              periodInSeconds:
+                                description: Evaluation period in seconds.
+                                type: integer
+                              requestsLimit:
+                                description: Requests allowed per evaluation period.
+                                type: integer
+                            required:
+                            - periodInSeconds
+                            - requestsLimit
+                            type: object
+                          type: array
+                        name:
+                          description: Rule name. Must be unique within the module.
+                          type: string
+                      required:
+                      - actionName
+                      - configurations
+                      - name
+                      type: object
+                    type: array
+                type: object
+              responseAccessControl:
+                description: WebAppFirewallPolicyResponseAccessControl defines nested
+                  fields for WebAppFirewallPolicy.ResponseAccessControl.
+                properties:
+                  rules:
+                    description: Ordered list of AccessControlRules. Rules are executed
+                      in order of appearance in this array.
+                    items:
+                      description: WebAppFirewallPolicyResponseAccessControlRule defines
+                        nested fields for WebAppFirewallPolicy.ResponseAccessControl.Rule.
+                      properties:
+                        actionName:
+                          description: References action by name from actions defined
+                            in WebAppFirewallPolicy.
+                          type: string
+                        condition:
+                          description: An expression that determines whether or not
+                            the rule action should be executed.
+                          type: string
+                        conditionLanguage:
+                          description: |-
+                            The language used to parse condition from field `condition`. Available languages:
+                            * **JMESPATH** an extended JMESPath language syntax.
+                          type: string
+                        name:
+                          description: Rule name. Must be unique within the module.
+                          type: string
+                      required:
+                      - actionName
+                      - name
+                      type: object
+                    type: array
+                type: object
+              responseProtection:
+                description: WebAppFirewallPolicyResponseProtection defines nested
+                  fields for WebAppFirewallPolicy.ResponseProtection.
+                properties:
+                  rules:
+                    description: |-
+                      Ordered list of ProtectionRules. Rules are executed in order of appearance in this array.
+                      ProtectionRules in this array can only use protection capabilities of RESPONSE_PROTECTION_CAPABILITY type.
+                    items:
+                      description: WebAppFirewallPolicyResponseProtectionRule defines
+                        nested fields for WebAppFirewallPolicy.ResponseProtection.Rule.
+                      properties:
+                        actionName:
+                          description: References action by name from actions defined
+                            in WebAppFirewallPolicy.
+                          type: string
+                        condition:
+                          description: An expression that determines whether or not
+                            the rule action should be executed.
+                          type: string
+                        conditionLanguage:
+                          description: |-
+                            The language used to parse condition from field `condition`. Available languages:
+                            * **JMESPATH** an extended JMESPath language syntax.
+                          type: string
+                        isBodyInspectionEnabled:
+                          description: |-
+                            Enables/disables body inspection for this protection rule.
+                            Only Protection Rules in RequestProtection can have this option enabled. Response body inspection will
+                            be available at a later date.
+                          type: boolean
+                        name:
+                          description: Rule name. Must be unique within the module.
+                          type: string
+                        protectionCapabilities:
+                          description: |-
+                            An ordered list that references OCI-managed protection capabilities.
+                            Referenced protection capabilities are not necessarily executed in order of appearance. Their execution order
+                            is decided at runtime for improved performance.
+                            The array cannot contain entries with the same pair of capability key and version more than once.
+                          items:
+                            description: WebAppFirewallPolicyResponseProtectionRuleProtectionCapability
+                              defines nested fields for WebAppFirewallPolicy.ResponseProtection.Rule.ProtectionCapability.
+                            properties:
+                              actionName:
+                                description: |-
+                                  Override action to take if capability was triggered, defined in Protection Rule for this capability.
+                                  Only actions of type CHECK are allowed.
+                                type: string
+                              collaborativeActionThreshold:
+                                description: |-
+                                  The minimum sum of weights of associated collaborative protection capabilities that have triggered which
+                                  must be reached in order for _this_ capability to trigger.
+                                  This field is ignored for non-collaborative capabilities.
+                                type: integer
+                              collaborativeWeights:
+                                description: Explicit weight values to use for associated
+                                  collaborative protection capabilities.
+                                items:
+                                  description: WebAppFirewallPolicyResponseProtectionRuleProtectionCapabilityCollaborativeWeight
+                                    defines nested fields for WebAppFirewallPolicy.ResponseProtection.Rule.ProtectionCapability.CollaborativeWeight.
+                                  properties:
+                                    key:
+                                      description: Unique key of collaborative capability
+                                        for which weight will be overridden.
+                                      type: string
+                                    weight:
+                                      description: The value of weight to set.
+                                      type: integer
+                                  required:
+                                  - key
+                                  - weight
+                                  type: object
+                                type: array
+                              exclusions:
+                                description: WebAppFirewallPolicyResponseProtectionRuleProtectionCapabilityExclusions
+                                  defines nested fields for WebAppFirewallPolicy.ResponseProtection.Rule.ProtectionCapability.Exclusions.
+                                properties:
+                                  args:
+                                    description: |-
+                                      List of URL query parameter values from form-urlencoded XML, JSON, AMP, or POST payloads to exclude from inspecting.
+                                      Example: If we have query parameter 'argumentName=argumentValue' and args=['argumentName'], both 'argumentName' and 'argumentValue' will not be inspected.
+                                    items:
+                                      type: string
+                                    type: array
+                                  requestCookies:
+                                    description: |-
+                                      List of HTTP request cookie values (by cookie name) to exclude from inspecting.
+                                      Example: If we have cookie 'cookieName=cookieValue' and requestCookies=['cookieName'], both 'cookieName' and 'cookieValue' will not be inspected.
+                                    items:
+                                      type: string
+                                    type: array
+                                type: object
+                              key:
+                                description: Unique key of referenced protection capability.
+                                type: string
+                              version:
+                                description: Version of referenced protection capability.
+                                type: integer
+                            required:
+                            - key
+                            - version
+                            type: object
+                          type: array
+                        protectionCapabilitySettings:
+                          description: WebAppFirewallPolicyResponseProtectionRuleProtectionCapabilitySettings
+                            defines nested fields for WebAppFirewallPolicy.ResponseProtection.Rule.ProtectionCapabilitySettings.
+                          properties:
+                            allowedHttpMethods:
+                              description: |-
+                                List of allowed HTTP methods. Each value as a RFC7230 formated token string.
+                                Used in protection capability 911100: Restrict HTTP Request Methods.
+                              items:
+                                type: string
+                              type: array
+                            maxHttpRequestHeaderLength:
+                              description: 'Maximum allowed length of headers in an
+                                HTTP request. Used in protection capability: 9200024:
+                                Limit length of request header size.'
+                              type: integer
+                            maxHttpRequestHeaders:
+                              description: 'Maximum number of headers allowed in an
+                                HTTP request. Used in protection capability 9200014:
+                                Limit Number of Request Headers.'
+                              type: integer
+                            maxNumberOfArguments:
+                              description: 'Maximum number of arguments allowed. Used
+                                in protection capability 920380: Number of Arguments
+                                Limits.'
+                              type: integer
+                            maxSingleArgumentLength:
+                              description: 'Maximum allowed length of a single argument.
+                                Used in protection capability 920370: Limit argument
+                                value length.'
+                              type: integer
+                            maxTotalArgumentLength:
+                              description: 'Maximum allowed total length of all arguments.
+                                Used in protection capability 920390: Limit arguments
+                                total length.'
+                              type: integer
+                          type: object
+                      required:
+                      - actionName
+                      - name
+                      - protectionCapabilities
+                      type: object
+                    type: array
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of system tag keys. These predefined keys are scoped to namespaces.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+            required:
+            - compartmentId
+            type: object
+          status:
+            description: WebAppFirewallPolicyStatus defines the observed state of
+              WebAppFirewallPolicy.
+            properties:
+              actions:
+                description: |-
+                  Predefined actions for use in multiple different rules. Not all actions are supported in every module.
+                  Some actions terminate further execution of modules and rules in a module and some do not.
+                  Actions names must be unique within this array.
+                items:
+                  description: WebAppFirewallPolicyAction defines nested fields for
+                    WebAppFirewallPolicy.Action.
+                  properties:
+                    body:
+                      description: WebAppFirewallPolicyActionBody defines nested fields
+                        for WebAppFirewallPolicy.Action.Body.
+                      properties:
+                        jsonData:
+                          type: string
+                        template:
+                          description: Dynamic response body
+                          type: string
+                        text:
+                          description: Static response body text.
+                          type: string
+                        type:
+                          type: string
+                      type: object
+                    code:
+                      description: |-
+                        Response code.
+                        The following response codes are valid values for this property:
+                        * 2xx
+                          200 OK
+                          201 Created
+                          202 Accepted
+                          206 Partial Content
+                        * 3xx
+                          300 Multiple Choices
+                          301 Moved Permanently
+                          302 Found
+                          303 See Other
+                          307 Temporary Redirect
+                        * 4xx
+                          400 Bad Request
+                          401 Unauthorized
+                          403 Forbidden
+                          404 Not Found
+                          405 Method Not Allowed
+                          408 Request Timeout
+                          409 Conflict
+                          411 Length Required
+                          412 Precondition Failed
+                          413 Payload Too Large
+                          414 URI Too Long
+                          415 Unsupported Media Type
+                          416 Range Not Satisfiable
+                          422 Unprocessable Entity
+                          429 Too Many Requests
+                          494 Request Header Too Large
+                          495 Cert Error
+                          496 No Cert
+                          497 HTTP to HTTPS
+                        * 5xx
+                          500 Internal Server Error
+                          501 Not Implemented
+                          502 Bad Gateway
+                          503 Service Unavailable
+                          504 Gateway Timeout
+                          507 Insufficient Storage
+                        Example: `200`
+                      type: integer
+                    headers:
+                      description: |-
+                        Adds headers defined in this array for HTTP response.
+                        Hop-by-hop headers are not allowed to be set:
+                        * Connection
+                        * Keep-Alive
+                        * Proxy-Authenticate
+                        * Proxy-Authorization
+                        * TE
+                        * Trailer
+                        * Transfer-Encoding
+                        * Upgrade
+                      items:
+                        description: WebAppFirewallPolicyActionHeader defines nested
+                          fields for WebAppFirewallPolicy.Action.Header.
+                        properties:
+                          name:
+                            description: The name of the header field.
+                            type: string
+                          value:
+                            description: The value of the header field.
+                            type: string
+                        required:
+                        - name
+                        - value
+                        type: object
+                      type: array
+                    jsonData:
+                      type: string
+                    name:
+                      description: Action name. Can be used to reference the action.
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - name
+                  type: object
+                type: array
+              compartmentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              displayName:
+                description: WebAppFirewallPolicy display name, can be renamed.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              id:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the WebAppFirewallPolicy.
+                type: string
+              lifecycleDetails:
+                description: |-
+                  A message describing the current state in more detail.
+                  For example, can be used to provide actionable information for a resource in FAILED state.
+                type: string
+              lifecycleState:
+                description: The current state of the WebAppFirewallPolicy.
+                type: string
+              requestAccessControl:
+                description: WebAppFirewallPolicyRequestAccessControl defines nested
+                  fields for WebAppFirewallPolicy.RequestAccessControl.
+                properties:
+                  defaultActionName:
+                    description: |-
+                      References an default Action to take if no AccessControlRule was matched. Allowed action types:
+                      * **ALLOW** continues execution of other modules and their rules.
+                      * **RETURN_HTTP_RESPONSE** terminates further execution of modules and rules and returns defined HTTP response.
+                    type: string
+                  rules:
+                    description: Ordered list of AccessControlRules. Rules are executed
+                      in order of appearance in this array.
+                    items:
+                      description: WebAppFirewallPolicyRequestAccessControlRule defines
+                        nested fields for WebAppFirewallPolicy.RequestAccessControl.Rule.
+                      properties:
+                        actionName:
+                          description: References action by name from actions defined
+                            in WebAppFirewallPolicy.
+                          type: string
+                        condition:
+                          description: An expression that determines whether or not
+                            the rule action should be executed.
+                          type: string
+                        conditionLanguage:
+                          description: |-
+                            The language used to parse condition from field `condition`. Available languages:
+                            * **JMESPATH** an extended JMESPath language syntax.
+                          type: string
+                        name:
+                          description: Rule name. Must be unique within the module.
+                          type: string
+                      required:
+                      - actionName
+                      - name
+                      type: object
+                    type: array
+                required:
+                - defaultActionName
+                type: object
+              requestProtection:
+                description: WebAppFirewallPolicyRequestProtection defines nested
+                  fields for WebAppFirewallPolicy.RequestProtection.
+                properties:
+                  bodyInspectionSizeLimitExceededActionName:
+                    description: |-
+                      References action by name from actions defined in WebAppFirewallPolicy. Executed if HTTP message
+                      body size exceeds limit set in field `bodyInspectionSizeLimitInBytes`.
+                      If this field is `null` HTTP message body will inspected up to `bodyInspectionSizeLimitInBytes` and the rest
+                      will not be inspected by Protection Capabilities.
+                      Allowed action types:
+                      * **RETURN_HTTP_RESPONSE** terminates further execution of modules and rules and returns defined HTTP response.
+                    type: string
+                  bodyInspectionSizeLimitInBytes:
+                    description: |-
+                      Maximum size of inspected HTTP message body in bytes. Actions to take if this limit is exceeded are defined in `bodyInspectionSizeLimitExceededActionName`.
+                      Body inspection maximum size allowed is defined with per-tenancy limit: 8192 bytes.
+                    type: integer
+                  rules:
+                    description: |-
+                      Ordered list of ProtectionRules. Rules are executed in order of appearance in this array.
+                      ProtectionRules in this array can only use protection Capabilities of REQUEST_PROTECTION_CAPABILITY type.
+                    items:
+                      description: WebAppFirewallPolicyRequestProtectionRule defines
+                        nested fields for WebAppFirewallPolicy.RequestProtection.Rule.
+                      properties:
+                        actionName:
+                          description: References action by name from actions defined
+                            in WebAppFirewallPolicy.
+                          type: string
+                        condition:
+                          description: An expression that determines whether or not
+                            the rule action should be executed.
+                          type: string
+                        conditionLanguage:
+                          description: |-
+                            The language used to parse condition from field `condition`. Available languages:
+                            * **JMESPATH** an extended JMESPath language syntax.
+                          type: string
+                        isBodyInspectionEnabled:
+                          description: |-
+                            Enables/disables body inspection for this protection rule.
+                            Only Protection Rules in RequestProtection can have this option enabled. Response body inspection will
+                            be available at a later date.
+                          type: boolean
+                        name:
+                          description: Rule name. Must be unique within the module.
+                          type: string
+                        protectionCapabilities:
+                          description: |-
+                            An ordered list that references OCI-managed protection capabilities.
+                            Referenced protection capabilities are not necessarily executed in order of appearance. Their execution order
+                            is decided at runtime for improved performance.
+                            The array cannot contain entries with the same pair of capability key and version more than once.
+                          items:
+                            description: WebAppFirewallPolicyRequestProtectionRuleProtectionCapability
+                              defines nested fields for WebAppFirewallPolicy.RequestProtection.Rule.ProtectionCapability.
+                            properties:
+                              actionName:
+                                description: |-
+                                  Override action to take if capability was triggered, defined in Protection Rule for this capability.
+                                  Only actions of type CHECK are allowed.
+                                type: string
+                              collaborativeActionThreshold:
+                                description: |-
+                                  The minimum sum of weights of associated collaborative protection capabilities that have triggered which
+                                  must be reached in order for _this_ capability to trigger.
+                                  This field is ignored for non-collaborative capabilities.
+                                type: integer
+                              collaborativeWeights:
+                                description: Explicit weight values to use for associated
+                                  collaborative protection capabilities.
+                                items:
+                                  description: WebAppFirewallPolicyRequestProtectionRuleProtectionCapabilityCollaborativeWeight
+                                    defines nested fields for WebAppFirewallPolicy.RequestProtection.Rule.ProtectionCapability.CollaborativeWeight.
+                                  properties:
+                                    key:
+                                      description: Unique key of collaborative capability
+                                        for which weight will be overridden.
+                                      type: string
+                                    weight:
+                                      description: The value of weight to set.
+                                      type: integer
+                                  required:
+                                  - key
+                                  - weight
+                                  type: object
+                                type: array
+                              exclusions:
+                                description: WebAppFirewallPolicyRequestProtectionRuleProtectionCapabilityExclusions
+                                  defines nested fields for WebAppFirewallPolicy.RequestProtection.Rule.ProtectionCapability.Exclusions.
+                                properties:
+                                  args:
+                                    description: |-
+                                      List of URL query parameter values from form-urlencoded XML, JSON, AMP, or POST payloads to exclude from inspecting.
+                                      Example: If we have query parameter 'argumentName=argumentValue' and args=['argumentName'], both 'argumentName' and 'argumentValue' will not be inspected.
+                                    items:
+                                      type: string
+                                    type: array
+                                  requestCookies:
+                                    description: |-
+                                      List of HTTP request cookie values (by cookie name) to exclude from inspecting.
+                                      Example: If we have cookie 'cookieName=cookieValue' and requestCookies=['cookieName'], both 'cookieName' and 'cookieValue' will not be inspected.
+                                    items:
+                                      type: string
+                                    type: array
+                                type: object
+                              key:
+                                description: Unique key of referenced protection capability.
+                                type: string
+                              version:
+                                description: Version of referenced protection capability.
+                                type: integer
+                            required:
+                            - key
+                            - version
+                            type: object
+                          type: array
+                        protectionCapabilitySettings:
+                          description: WebAppFirewallPolicyRequestProtectionRuleProtectionCapabilitySettings
+                            defines nested fields for WebAppFirewallPolicy.RequestProtection.Rule.ProtectionCapabilitySettings.
+                          properties:
+                            allowedHttpMethods:
+                              description: |-
+                                List of allowed HTTP methods. Each value as a RFC7230 formated token string.
+                                Used in protection capability 911100: Restrict HTTP Request Methods.
+                              items:
+                                type: string
+                              type: array
+                            maxHttpRequestHeaderLength:
+                              description: 'Maximum allowed length of headers in an
+                                HTTP request. Used in protection capability: 9200024:
+                                Limit length of request header size.'
+                              type: integer
+                            maxHttpRequestHeaders:
+                              description: 'Maximum number of headers allowed in an
+                                HTTP request. Used in protection capability 9200014:
+                                Limit Number of Request Headers.'
+                              type: integer
+                            maxNumberOfArguments:
+                              description: 'Maximum number of arguments allowed. Used
+                                in protection capability 920380: Number of Arguments
+                                Limits.'
+                              type: integer
+                            maxSingleArgumentLength:
+                              description: 'Maximum allowed length of a single argument.
+                                Used in protection capability 920370: Limit argument
+                                value length.'
+                              type: integer
+                            maxTotalArgumentLength:
+                              description: 'Maximum allowed total length of all arguments.
+                                Used in protection capability 920390: Limit arguments
+                                total length.'
+                              type: integer
+                          type: object
+                      required:
+                      - actionName
+                      - name
+                      - protectionCapabilities
+                      type: object
+                    type: array
+                type: object
+              requestRateLimiting:
+                description: WebAppFirewallPolicyRequestRateLimiting defines nested
+                  fields for WebAppFirewallPolicy.RequestRateLimiting.
+                properties:
+                  rules:
+                    description: Ordered list of RequestRateLimitingRules. Rules are
+                      executed in order of appearance in this array.
+                    items:
+                      description: WebAppFirewallPolicyRequestRateLimitingRule defines
+                        nested fields for WebAppFirewallPolicy.RequestRateLimiting.Rule.
+                      properties:
+                        actionName:
+                          description: References action by name from actions defined
+                            in WebAppFirewallPolicy.
+                          type: string
+                        condition:
+                          description: An expression that determines whether or not
+                            the rule action should be executed.
+                          type: string
+                        conditionLanguage:
+                          description: |-
+                            The language used to parse condition from field `condition`. Available languages:
+                            * **JMESPATH** an extended JMESPath language syntax.
+                          type: string
+                        configurations:
+                          description: |-
+                            Rate Limiting Configurations.
+                            Each configuration counts requests towards its own `requestsLimit`.
+                          items:
+                            description: WebAppFirewallPolicyRequestRateLimitingRuleConfiguration
+                              defines nested fields for WebAppFirewallPolicy.RequestRateLimiting.Rule.Configuration.
+                            properties:
+                              actionDurationInSeconds:
+                                description: Duration of block action application
+                                  in seconds when `requestsLimit` is reached. Optional
+                                  and can be 0 (no block duration).
+                                type: integer
+                              periodInSeconds:
+                                description: Evaluation period in seconds.
+                                type: integer
+                              requestsLimit:
+                                description: Requests allowed per evaluation period.
+                                type: integer
+                            required:
+                            - periodInSeconds
+                            - requestsLimit
+                            type: object
+                          type: array
+                        name:
+                          description: Rule name. Must be unique within the module.
+                          type: string
+                      required:
+                      - actionName
+                      - configurations
+                      - name
+                      type: object
+                    type: array
+                type: object
+              responseAccessControl:
+                description: WebAppFirewallPolicyResponseAccessControl defines nested
+                  fields for WebAppFirewallPolicy.ResponseAccessControl.
+                properties:
+                  rules:
+                    description: Ordered list of AccessControlRules. Rules are executed
+                      in order of appearance in this array.
+                    items:
+                      description: WebAppFirewallPolicyResponseAccessControlRule defines
+                        nested fields for WebAppFirewallPolicy.ResponseAccessControl.Rule.
+                      properties:
+                        actionName:
+                          description: References action by name from actions defined
+                            in WebAppFirewallPolicy.
+                          type: string
+                        condition:
+                          description: An expression that determines whether or not
+                            the rule action should be executed.
+                          type: string
+                        conditionLanguage:
+                          description: |-
+                            The language used to parse condition from field `condition`. Available languages:
+                            * **JMESPATH** an extended JMESPath language syntax.
+                          type: string
+                        name:
+                          description: Rule name. Must be unique within the module.
+                          type: string
+                      required:
+                      - actionName
+                      - name
+                      type: object
+                    type: array
+                type: object
+              responseProtection:
+                description: WebAppFirewallPolicyResponseProtection defines nested
+                  fields for WebAppFirewallPolicy.ResponseProtection.
+                properties:
+                  rules:
+                    description: |-
+                      Ordered list of ProtectionRules. Rules are executed in order of appearance in this array.
+                      ProtectionRules in this array can only use protection capabilities of RESPONSE_PROTECTION_CAPABILITY type.
+                    items:
+                      description: WebAppFirewallPolicyResponseProtectionRule defines
+                        nested fields for WebAppFirewallPolicy.ResponseProtection.Rule.
+                      properties:
+                        actionName:
+                          description: References action by name from actions defined
+                            in WebAppFirewallPolicy.
+                          type: string
+                        condition:
+                          description: An expression that determines whether or not
+                            the rule action should be executed.
+                          type: string
+                        conditionLanguage:
+                          description: |-
+                            The language used to parse condition from field `condition`. Available languages:
+                            * **JMESPATH** an extended JMESPath language syntax.
+                          type: string
+                        isBodyInspectionEnabled:
+                          description: |-
+                            Enables/disables body inspection for this protection rule.
+                            Only Protection Rules in RequestProtection can have this option enabled. Response body inspection will
+                            be available at a later date.
+                          type: boolean
+                        name:
+                          description: Rule name. Must be unique within the module.
+                          type: string
+                        protectionCapabilities:
+                          description: |-
+                            An ordered list that references OCI-managed protection capabilities.
+                            Referenced protection capabilities are not necessarily executed in order of appearance. Their execution order
+                            is decided at runtime for improved performance.
+                            The array cannot contain entries with the same pair of capability key and version more than once.
+                          items:
+                            description: WebAppFirewallPolicyResponseProtectionRuleProtectionCapability
+                              defines nested fields for WebAppFirewallPolicy.ResponseProtection.Rule.ProtectionCapability.
+                            properties:
+                              actionName:
+                                description: |-
+                                  Override action to take if capability was triggered, defined in Protection Rule for this capability.
+                                  Only actions of type CHECK are allowed.
+                                type: string
+                              collaborativeActionThreshold:
+                                description: |-
+                                  The minimum sum of weights of associated collaborative protection capabilities that have triggered which
+                                  must be reached in order for _this_ capability to trigger.
+                                  This field is ignored for non-collaborative capabilities.
+                                type: integer
+                              collaborativeWeights:
+                                description: Explicit weight values to use for associated
+                                  collaborative protection capabilities.
+                                items:
+                                  description: WebAppFirewallPolicyResponseProtectionRuleProtectionCapabilityCollaborativeWeight
+                                    defines nested fields for WebAppFirewallPolicy.ResponseProtection.Rule.ProtectionCapability.CollaborativeWeight.
+                                  properties:
+                                    key:
+                                      description: Unique key of collaborative capability
+                                        for which weight will be overridden.
+                                      type: string
+                                    weight:
+                                      description: The value of weight to set.
+                                      type: integer
+                                  required:
+                                  - key
+                                  - weight
+                                  type: object
+                                type: array
+                              exclusions:
+                                description: WebAppFirewallPolicyResponseProtectionRuleProtectionCapabilityExclusions
+                                  defines nested fields for WebAppFirewallPolicy.ResponseProtection.Rule.ProtectionCapability.Exclusions.
+                                properties:
+                                  args:
+                                    description: |-
+                                      List of URL query parameter values from form-urlencoded XML, JSON, AMP, or POST payloads to exclude from inspecting.
+                                      Example: If we have query parameter 'argumentName=argumentValue' and args=['argumentName'], both 'argumentName' and 'argumentValue' will not be inspected.
+                                    items:
+                                      type: string
+                                    type: array
+                                  requestCookies:
+                                    description: |-
+                                      List of HTTP request cookie values (by cookie name) to exclude from inspecting.
+                                      Example: If we have cookie 'cookieName=cookieValue' and requestCookies=['cookieName'], both 'cookieName' and 'cookieValue' will not be inspected.
+                                    items:
+                                      type: string
+                                    type: array
+                                type: object
+                              key:
+                                description: Unique key of referenced protection capability.
+                                type: string
+                              version:
+                                description: Version of referenced protection capability.
+                                type: integer
+                            required:
+                            - key
+                            - version
+                            type: object
+                          type: array
+                        protectionCapabilitySettings:
+                          description: WebAppFirewallPolicyResponseProtectionRuleProtectionCapabilitySettings
+                            defines nested fields for WebAppFirewallPolicy.ResponseProtection.Rule.ProtectionCapabilitySettings.
+                          properties:
+                            allowedHttpMethods:
+                              description: |-
+                                List of allowed HTTP methods. Each value as a RFC7230 formated token string.
+                                Used in protection capability 911100: Restrict HTTP Request Methods.
+                              items:
+                                type: string
+                              type: array
+                            maxHttpRequestHeaderLength:
+                              description: 'Maximum allowed length of headers in an
+                                HTTP request. Used in protection capability: 9200024:
+                                Limit length of request header size.'
+                              type: integer
+                            maxHttpRequestHeaders:
+                              description: 'Maximum number of headers allowed in an
+                                HTTP request. Used in protection capability 9200014:
+                                Limit Number of Request Headers.'
+                              type: integer
+                            maxNumberOfArguments:
+                              description: 'Maximum number of arguments allowed. Used
+                                in protection capability 920380: Number of Arguments
+                                Limits.'
+                              type: integer
+                            maxSingleArgumentLength:
+                              description: 'Maximum allowed length of a single argument.
+                                Used in protection capability 920370: Limit argument
+                                value length.'
+                              type: integer
+                            maxTotalArgumentLength:
+                              description: 'Maximum allowed total length of all arguments.
+                                Used in protection capability 920390: Limit arguments
+                                total length.'
+                              type: integer
+                          type: object
+                      required:
+                      - actionName
+                      - name
+                      - protectionCapabilities
+                      type: object
+                    type: array
+                type: object
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of system tag keys. These predefined keys are scoped to namespaces.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              timeCreated:
+                description: The time the WebAppFirewallPolicy was created. An RFC3339
+                  formatted datetime string.
+                type: string
+              timeUpdated:
+                description: The time the WebAppFirewallPolicy was updated. An RFC3339
+                  formatted datetime string.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

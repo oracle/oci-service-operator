@@ -1,0 +1,138 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "apiplatform",
+  "slug": "apiplatforminstance",
+  "kind": "ApiPlatformInstance",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_api_platform_api_platform_instance",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateApiPlatformInstance",
+        "requestType": "apiplatform.CreateApiPlatformInstanceRequest",
+        "responseType": "apiplatform.CreateApiPlatformInstanceResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetApiPlatformInstance",
+        "requestType": "apiplatform.GetApiPlatformInstanceRequest",
+        "responseType": "apiplatform.GetApiPlatformInstanceResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListApiPlatformInstances",
+        "requestType": "apiplatform.ListApiPlatformInstancesRequest",
+        "responseType": "apiplatform.ListApiPlatformInstancesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeApiPlatformInstanceCompartment",
+        "requestType": "apiplatform.ChangeApiPlatformInstanceCompartmentRequest",
+        "responseType": "apiplatform.ChangeApiPlatformInstanceCompartmentResponse"
+      },
+      {
+        "operation": "UpdateApiPlatformInstance",
+        "requestType": "apiplatform.UpdateApiPlatformInstanceRequest",
+        "responseType": "apiplatform.UpdateApiPlatformInstanceResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteApiPlatformInstance",
+        "requestType": "apiplatform.DeleteApiPlatformInstanceRequest",
+        "responseType": "apiplatform.DeleteApiPlatformInstanceResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "description",
+      "freeform_tags"
+    ],
+    "forceNew": [
+      "name"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED",
+      "NOT_FOUND"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_api_platform_api_platform_instances",
+    "collectionField": "api_platform_instances",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "id",
+      "lifecycle_state",
+      "name"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/apiplatform/apiplatforminstance/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/apiplatform/apiplatforminstance/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "delete-confirmation",
+      "lifecycle-classification",
+      "list-lookup",
+      "mutation-policy",
+      "secret-output"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: CreateApiPlatformInstance, GetApiPlatformInstance, ListApiPlatformInstances, UpdateApiPlatformInstance, DeleteApiPlatformInstance, and ChangeApiPlatformInstanceCompartment are present in v65.110.0. Create returns an ApiPlatformInstance body plus opc-work-request-id, update returns only the resource body, and delete returns the async work-request header without a body.",
+    "Pinned provider coverage from the onboarding audit maps the published resource to oci_api_platform_api_platform_instance and the list datasource to oci_api_platform_api_platform_instances.",
+    "Repo-authored runtime contract is intentionally narrower than the imported provider surface: generatedruntime publishes in-place updates only for description, freeformTags, and definedTags. ChangeApiPlatformInstanceCompartment remains out of scope, so compartmentId and name stay replacement-only in the checked-in runtime semantics.",
+    "Repo-authored bind-versus-create stays explicit: pre-create lookup uses exact compartmentId plus name matching, restricts reuse to ACTIVE, CREATING, or UPDATING candidates, and rejects duplicate exact-name matches instead of guessing.",
+    "Create and delete responses expose opc-work-request-id, but the published apiplatform surface does not expose service-local work-request readers. The reviewed generatedruntime path records request and work-request breadcrumbs when OCI returns them and relies on lifecycle projection plus confirm-delete rereads rather than work-request polling."
+  ]
+}

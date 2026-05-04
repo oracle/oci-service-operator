@@ -1,0 +1,390 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: lifecycleenvironments.osmanagementhub.oracle.com
+spec:
+  group: osmanagementhub.oracle.com
+  names:
+    kind: LifecycleEnvironment
+    listKind: LifecycleEnvironmentList
+    plural: lifecycleenvironments
+    singular: lifecycleenvironment
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the LifecycleEnvironment
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the LifecycleEnvironment
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: LifecycleEnvironment is the Schema for the lifecycleenvironments
+          API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: LifecycleEnvironmentSpec defines the desired state of LifecycleEnvironment.
+            properties:
+              archType:
+                description: The CPU architecture of the managed instances in the
+                  lifecycle environment.
+                type: string
+              compartmentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment that contains the lifecycle environment.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              description:
+                description: User-specified information about the lifecycle environment.
+                  Avoid entering confidential information.
+                type: string
+              displayName:
+                description: A user-friendly name for the lifecycle environment. Does
+                  not have to be unique and you can change the name later. Avoid entering
+                  confidential information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              location:
+                description: The location of managed instances attached to the lifecycle
+                  environment. If no location is provided, the default is 'ON_PREMISE.'
+                type: string
+              osFamily:
+                description: The operating system of the managed instances in the
+                  lifecycle environment.
+                type: string
+              stages:
+                description: User-specified list of ranked lifecycle stages used within
+                  the lifecycle environment.
+                items:
+                  description: LifecycleEnvironmentStage defines nested fields for
+                    LifecycleEnvironment.Stage.
+                  properties:
+                    definedTags:
+                      additionalProperties:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      description: |-
+                        Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                        For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                        Example: `{"Operations": {"CostCenter": "42"}}`
+                      type: object
+                    displayName:
+                      description: A user-friendly name for the lifecycle stage. Does
+                        not have to be unique and you can change the name later. Avoid
+                        entering confidential information.
+                      type: string
+                    freeformTags:
+                      additionalProperties:
+                        type: string
+                      description: |-
+                        Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                        For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                        Example: `{"Department": "Finance"}`
+                      type: object
+                    rank:
+                      description: User-specified rank for the lifecycle stage. Rank
+                        determines the hierarchy of the lifecycle stages within the
+                        lifecycle environment.
+                      type: integer
+                  required:
+                  - displayName
+                  - rank
+                  type: object
+                type: array
+              vendorName:
+                description: The vendor of the operating system used by the managed
+                  instances in the lifecycle environment.
+                type: string
+            required:
+            - archType
+            - compartmentId
+            - displayName
+            - osFamily
+            - stages
+            - vendorName
+            type: object
+          status:
+            description: LifecycleEnvironmentStatus defines the observed state of
+              LifecycleEnvironment.
+            properties:
+              archType:
+                description: The CPU architecture of the managed instances in the
+                  lifecycle environment.
+                type: string
+              compartmentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment that contains the lifecycle environment.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              description:
+                description: User-specified information about the lifecycle environment.
+                type: string
+              displayName:
+                description: The user-friendly name for the lifecycle environment.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              id:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the lifecycle environment.
+                type: string
+              lifecycleState:
+                description: The current state of the lifecycle environment.
+                type: string
+              location:
+                description: The location of managed instances attached to the lifecycle
+                  environment.
+                type: string
+              managedInstanceIds:
+                description: List of managed instance OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  assigned to the lifecycle stage.
+                items:
+                  description: LifecycleEnvironmentManagedInstanceId defines nested
+                    fields for LifecycleEnvironment.ManagedInstanceId.
+                  properties:
+                    displayName:
+                      description: Managed instance name.
+                      type: string
+                    id:
+                      description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                        of the managed instance.
+                      type: string
+                  type: object
+                type: array
+              osFamily:
+                description: The operating system of the managed instances in the
+                  lifecycle environment.
+                type: string
+              stages:
+                description: User-specified list of lifecycle stages used within the
+                  lifecycle environment.
+                items:
+                  description: LifecycleEnvironmentStage defines nested fields for
+                    LifecycleEnvironment.Stage.
+                  properties:
+                    definedTags:
+                      additionalProperties:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      description: |-
+                        Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                        For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                        Example: `{"Operations": {"CostCenter": "42"}}`
+                      type: object
+                    displayName:
+                      description: A user-friendly name for the lifecycle stage. Does
+                        not have to be unique and you can change the name later. Avoid
+                        entering confidential information.
+                      type: string
+                    freeformTags:
+                      additionalProperties:
+                        type: string
+                      description: |-
+                        Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                        For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                        Example: `{"Department": "Finance"}`
+                      type: object
+                    rank:
+                      description: User-specified rank for the lifecycle stage. Rank
+                        determines the hierarchy of the lifecycle stages within the
+                        lifecycle environment.
+                      type: integer
+                  required:
+                  - displayName
+                  - rank
+                  type: object
+                type: array
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  System tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              timeCreated:
+                description: The time the lifecycle environment was created (in RFC
+                  3339 (https://tools.ietf.org/rfc/rfc3339) format).
+                type: string
+              timeModified:
+                description: The time the lifecycle environment was last modified
+                  (in RFC 3339 (https://tools.ietf.org/rfc/rfc3339) format).
+                type: string
+              vendorName:
+                description: The vendor of the operating system used by the managed
+                  instances in the lifecycle environment.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

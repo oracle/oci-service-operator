@@ -1,0 +1,319 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: datasources.managementagent.oracle.com
+spec:
+  group: managementagent.oracle.com
+  names:
+    kind: DataSource
+    listKind: DataSourceList
+    plural: datasources
+    singular: datasource
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.name
+      name: Name
+      priority: 1
+      type: string
+    - description: status of the DataSource
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the DataSource
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: DataSource is the Schema for the datasources API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: DataSourceSpec defines the desired state of DataSource.
+            properties:
+              allowMetrics:
+                description: Comma separated metric name list. The complete set of
+                  desired scraped metrics. Use this property to limit the set of metrics
+                  uploaded if required.
+                type: string
+              compartmentId:
+                description: Compartment owning this DataSource.
+                type: string
+              connectionTimeout:
+                description: Number in milliseconds. The timeout for connecting to
+                  the Prometheus Exporter's endpoint.
+                type: integer
+              jsonData:
+                type: string
+              metricDimensions:
+                description: The names of other user-supplied properties expressed
+                  as fixed values to be used as dimensions for every uploaded datapoint.
+                items:
+                  description: DataSourceMetricDimension defines nested fields for
+                    DataSource.MetricDimension.
+                  properties:
+                    name:
+                      description: Name of the metric dimension
+                      type: string
+                    value:
+                      description: Value of the metric dimension
+                      type: string
+                  required:
+                  - name
+                  - value
+                  type: object
+                type: array
+              name:
+                description: Unique name of the DataSource.
+                type: string
+              namespace:
+                description: The OCI monitoring namespace to which scraped metrics
+                  should be uploaded.
+                type: string
+              proxyUrl:
+                description: The url of the network proxy that provides access to
+                  the Prometheus Exporter's endpoint (url required property).
+                type: string
+              readDataLimitInKilobytes:
+                description: Number in kilobytes. The limit on the data being sent,
+                  not to exceed the agent's fixed limit of 400 (KB).
+                type: integer
+              readTimeout:
+                description: Number in milliseconds. The timeout for reading the response
+                  from the Prometheus Exporter's endpoint.
+                type: integer
+              resourceGroup:
+                description: OCI monitoring resource group to assign the metric to.
+                type: string
+              scheduleMins:
+                description: Number in minutes. The scraping occurs at the specified
+                  interval.
+                type: integer
+              type:
+                type: string
+              url:
+                description: The url through which the Prometheus Exporter publishes
+                  its metrics. (http only)
+                type: string
+            required:
+            - compartmentId
+            - name
+            type: object
+          status:
+            description: DataSourceStatus defines the observed state of DataSource.
+            properties:
+              allowMetrics:
+                description: Comma separated metric name list. The complete set of
+                  desired scraped metrics. Use this property to limit the set of metrics
+                  uploaded if required.
+                type: string
+              compartmentId:
+                description: Compartment owning this DataSource.
+                type: string
+              connectionTimeout:
+                description: Number in milliseconds. The timeout for connecting to
+                  the Prometheus Exporter's endpoint.
+                type: integer
+              isDaemonSet:
+                description: If the Kubernetes cluster type is Daemon set then this
+                  will be set to true.
+                type: boolean
+              jsonData:
+                type: string
+              key:
+                description: Identifier for DataSource. This represents the type and
+                  name for the data source associated with the Management Agent.
+                type: string
+              metricDimensions:
+                description: The names of other user-supplied properties expressed
+                  as fixed values to be used as dimensions for every uploaded datapoint.
+                items:
+                  description: DataSourceMetricDimension defines nested fields for
+                    DataSource.MetricDimension.
+                  properties:
+                    name:
+                      description: Name of the metric dimension
+                      type: string
+                    value:
+                      description: Value of the metric dimension
+                      type: string
+                  required:
+                  - name
+                  - value
+                  type: object
+                type: array
+              name:
+                description: Unique name of the DataSource.
+                type: string
+              namespace:
+                description: The Kubernetes namespace
+                type: string
+              proxyUrl:
+                description: The url of the network proxy that provides access to
+                  the Prometheus Exporter's endpoint (url required property).
+                type: string
+              readDataLimit:
+                description: Number in kilobytes. The limit on the data being sent,
+                  not to exceed the agent's fixed limit of 400 (KB).
+                type: integer
+              readTimeout:
+                description: Number in milliseconds. The timeout for reading the response
+                  from the Prometheus Exporter's endpoint.
+                type: integer
+              resourceGroup:
+                description: OCI monitoring resource group to assign the metric to.
+                type: string
+              scheduleMins:
+                description: Number in minutes. The scraping occurs at the specified
+                  interval.
+                type: integer
+              state:
+                description: State of the DataSource.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              timeCreated:
+                description: The time the DataSource was created. An RFC3339 formatted
+                  datetime string
+                type: string
+              timeUpdated:
+                description: The time the DataSource data was last received. An RFC3339
+                  formatted datetime string
+                type: string
+              type:
+                type: string
+              url:
+                description: The url through which the Prometheus Exporter publishes
+                  its metrics. (http only)
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

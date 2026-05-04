@@ -1,0 +1,395 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: configs.stackmonitoring.oracle.com
+spec:
+  group: stackmonitoring.oracle.com
+  names:
+    kind: Config
+    listKind: ConfigList
+    plural: configs
+    singular: config
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the Config
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the Config
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: Config is the Schema for the configs API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ConfigSpec defines the desired state of Config.
+            properties:
+              additionalConfigurations:
+                description: ConfigAdditionalConfigurations defines nested fields
+                  for Config.AdditionalConfigurations.
+                properties:
+                  propertiesMap:
+                    additionalProperties:
+                      type: string
+                    description: Key/Value pair of Property
+                    type: object
+                type: object
+              compartmentId:
+                description: Compartment in which the configuration is created.
+                type: string
+              configType:
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              displayName:
+                description: The display name of the configuration.
+                type: string
+              dynamicGroups:
+                description: List of dynamic groups dedicated for Stack Monitoring.
+                items:
+                  description: ConfigDynamicGroup defines nested fields for Config.DynamicGroup.
+                  properties:
+                    domain:
+                      description: Identity domain name
+                      type: string
+                    name:
+                      description: Name of dynamic Group
+                      type: string
+                    stackMonitoringAssignment:
+                      description: Assignment of dynamic group in context of Stack
+                        Monitoring service. It describes the purpose of dynamic groups
+                        in Stack Monitoring.
+                      type: string
+                  required:
+                  - name
+                  - stackMonitoringAssignment
+                  type: object
+                type: array
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              isEnabled:
+                description: True if automatic promotion is enabled, false if it is
+                  not enabled.
+                type: boolean
+              isManuallyOnboarded:
+                description: True if customer decides marks configuration as manually
+                  configured.
+                type: boolean
+              jsonData:
+                type: string
+              license:
+                description: License edition.
+                type: string
+              policyNames:
+                description: List of policy names assigned for onboarding
+                items:
+                  type: string
+                type: array
+              resourceType:
+                description: The type of resource to configure for automatic promotion.
+                type: string
+              userGroups:
+                description: List of user groups dedicated for Stack Monitoring.
+                items:
+                  description: ConfigUserGroup defines nested fields for Config.UserGroup.
+                  properties:
+                    domain:
+                      description: Identity domain name
+                      type: string
+                    name:
+                      description: Name of user Group
+                      type: string
+                    stackMonitoringRole:
+                      description: 'Role assigned to user group in context of Stack
+                        Monitoring service. Access role can be for example: ADMINISTRATOR,
+                        OPERATOR, VIEWER, any other access role'
+                      type: string
+                  required:
+                  - name
+                  - stackMonitoringRole
+                  type: object
+                type: array
+              version:
+                description: Assigned version to given onboard configuration.
+                type: string
+            required:
+            - compartmentId
+            type: object
+          status:
+            description: ConfigStatus defines the observed state of Config.
+            properties:
+              additionalConfigurations:
+                description: ConfigAdditionalConfigurations defines nested fields
+                  for Config.AdditionalConfigurations.
+                properties:
+                  propertiesMap:
+                    additionalProperties:
+                      type: string
+                    description: Key/Value pair of Property
+                    type: object
+                type: object
+              compartmentId:
+                description: The OCID of the compartment containing the configuration.
+                type: string
+              configType:
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              displayName:
+                description: A user-friendly name. Does not have to be unique, and
+                  it's changeable. Avoid entering confidential information.
+                type: string
+              dynamicGroups:
+                description: List of dynamic groups dedicated for Stack Monitoring.
+                items:
+                  description: ConfigDynamicGroup defines nested fields for Config.DynamicGroup.
+                  properties:
+                    domain:
+                      description: Identity domain name
+                      type: string
+                    name:
+                      description: Name of dynamic Group
+                      type: string
+                    stackMonitoringAssignment:
+                      description: Assignment of dynamic group in context of Stack
+                        Monitoring service. It describes the purpose of dynamic groups
+                        in Stack Monitoring.
+                      type: string
+                  required:
+                  - name
+                  - stackMonitoringAssignment
+                  type: object
+                type: array
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              id:
+                description: The Unique Oracle ID (OCID) that is immutable on creation.
+                type: string
+              isEnabled:
+                description: True if enterprise extensibility is enabled, false if
+                  it is not enabled.
+                type: boolean
+              isManuallyOnboarded:
+                description: True if customer decides marks configuration as manually
+                  configured.
+                type: boolean
+              jsonData:
+                type: string
+              license:
+                description: License edition.
+                type: string
+              lifecycleState:
+                description: The current state of the configuration.
+                type: string
+              policyNames:
+                description: List of policy names assigned for onboarding
+                items:
+                  type: string
+                type: array
+              resourceType:
+                description: The type of resource to configure for automatic promotion.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of system tag keys. These predefined keys are scoped to namespaces.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              timeCreated:
+                description: The time the configuration was created. An RFC3339 formatted
+                  datetime string.
+                type: string
+              timeUpdated:
+                description: The time the Config was updated.
+                type: string
+              userGroups:
+                description: List of user groups dedicated for Stack Monitoring.
+                items:
+                  description: ConfigUserGroup defines nested fields for Config.UserGroup.
+                  properties:
+                    domain:
+                      description: Identity domain name
+                      type: string
+                    name:
+                      description: Name of user Group
+                      type: string
+                    stackMonitoringRole:
+                      description: 'Role assigned to user group in context of Stack
+                        Monitoring service. Access role can be for example: ADMINISTRATOR,
+                        OPERATOR, VIEWER, any other access role'
+                      type: string
+                  required:
+                  - name
+                  - stackMonitoringRole
+                  type: object
+                type: array
+              version:
+                description: Assigned version to given onboard configuration.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

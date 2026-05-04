@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "clusterplacementgroups",
+  "kind": "ClusterPlacementGroup",
+  "formalSlug": "clusterplacementgroup",
+  "providerResource": "oci_cluster_placement_groups_cluster_placement_group",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/cluster_placement_groups_cluster_placement_group",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/cluster_placement_groups_cluster_placement_group",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/clusterplacementgroups/clusterplacementgroup/page.html",
+  "bodySHA256": "4100ac31134c08a973d0e727e2fcf12855fa288585b9328f90d65888cfd3bfff",
+  "bodyBytes": 2673,
+  "fixtureBodyPath": "7.22.0/clusterplacementgroups/clusterplacementgroup/page.html"
+}

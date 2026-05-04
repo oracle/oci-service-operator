@@ -1,0 +1,13 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: databasemigration
+slug: connection
+kind: Connection
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+notes:
+  - Work-request-backed generatedruntime overlay with explicit MYSQL/ORACLE request builders and required delete confirmation.

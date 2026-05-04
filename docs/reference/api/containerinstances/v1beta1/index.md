@@ -439,4 +439,3 @@ ContainerInstanceVolumeConfig defines nested fields for ContainerInstance.Volume
 | `data` | The base64 encoded contents of the file. The contents are decoded to plain text before mounted as a file to a container inside container instance. | `string` | Yes | - | - |
 | `fileName` | The name of the file. The fileName should be unique across the volume. | `string` | Yes | - | - |
 | `path` | (Optional) Relative path for this file inside the volume mount directory. By default, the file is presented at the root of the volume mount path. | `string` | No | - | - |
-

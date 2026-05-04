@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
+	"time"
 
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
@@ -18,10 +19,20 @@ import (
 )
 
 func (c ServiceClient[T]) applySuccess(resource T, response any, fallback shared.OSOKConditionType) (servicemanager.OSOKResponse, error) {
-	return c.applySuccessWithIdentity(resource, response, fallback, nil)
+	return c.applySuccessWithIdentityAndRequeue(resource, response, fallback, nil, 0)
 }
 
 func (c ServiceClient[T]) applySuccessWithIdentity(resource T, response any, fallback shared.OSOKConditionType, identity any) (servicemanager.OSOKResponse, error) {
+	return c.applySuccessWithIdentityAndRequeue(resource, response, fallback, identity, 0)
+}
+
+func (c ServiceClient[T]) applySuccessWithIdentityAndRequeue(
+	resource T,
+	response any,
+	fallback shared.OSOKConditionType,
+	identity any,
+	preferredRequeueDuration time.Duration,
+) (servicemanager.OSOKResponse, error) {
 	if err := mergeResponseIntoStatus(resource, response); err != nil {
 		return servicemanager.OSOKResponse{IsSuccessful: false}, err
 	}
@@ -53,7 +64,7 @@ func (c ServiceClient[T]) applySuccessWithIdentity(resource T, response any, fal
 		return servicemanager.OSOKResponse{
 			IsSuccessful:    projection.Condition != shared.Failed,
 			ShouldRequeue:   projection.ShouldRequeue,
-			RequeueDuration: defaultRequeueDuration,
+			RequeueDuration: resolveRequeueDuration(response, projection.ShouldRequeue, preferredRequeueDuration),
 		}, nil
 	}
 
@@ -66,8 +77,21 @@ func (c ServiceClient[T]) applySuccessWithIdentity(resource T, response any, fal
 	return servicemanager.OSOKResponse{
 		IsSuccessful:    evaluation.condition != shared.Failed,
 		ShouldRequeue:   evaluation.shouldRequeue,
-		RequeueDuration: defaultRequeueDuration,
+		RequeueDuration: resolveRequeueDuration(response, evaluation.shouldRequeue, preferredRequeueDuration),
 	}, nil
+}
+
+func resolveRequeueDuration(response any, shouldRequeue bool, preferred time.Duration) time.Duration {
+	if !shouldRequeue {
+		return 0
+	}
+	if preferred > 0 {
+		return preferred
+	}
+	if retryAfter := responseRetryAfterDuration(response); retryAfter > 0 {
+		return retryAfter
+	}
+	return defaultRequeueDuration
 }
 
 func (c ServiceClient[T]) markFailure(resource T, err error) error {
@@ -167,9 +191,37 @@ func responseRequestID(response any) string {
 	return servicemanager.ResponseOpcRequestID(response)
 }
 
+func responseRetryAfterDuration(response any) time.Duration {
+	if response == nil {
+		return 0
+	}
+
+	value, ok := indirectValue(reflect.ValueOf(response))
+	if !ok || value.Kind() != reflect.Struct {
+		return 0
+	}
+
+	typ := value.Type()
+	for i := 0; i < value.NumField(); i++ {
+		fieldType := typ.Field(i)
+		if !fieldType.IsExported() || !isRetryAfterHeaderField(fieldType) {
+			continue
+		}
+		if seconds, ok := intFieldValue(value.Field(i)); ok && seconds > 0 {
+			return time.Duration(seconds) * time.Second
+		}
+	}
+	return 0
+}
+
 func isWorkRequestHeaderField(fieldType reflect.StructField) bool {
 	return fieldType.Name == "OpcWorkRequestId" ||
 		(fieldType.Tag.Get("presentIn") == "header" && fieldType.Tag.Get("name") == "opc-work-request-id")
+}
+
+func isRetryAfterHeaderField(fieldType reflect.StructField) bool {
+	return fieldType.Name == "RetryAfter" ||
+		(fieldType.Tag.Get("presentIn") == "header" && fieldType.Tag.Get("name") == "retry-after")
 }
 
 func stringFieldValue(value reflect.Value) string {
@@ -178,6 +230,20 @@ func stringFieldValue(value reflect.Value) string {
 		return ""
 	}
 	return strings.TrimSpace(value.String())
+}
+
+func intFieldValue(value reflect.Value) (int, bool) {
+	value, ok := indirectValue(value)
+	if !ok {
+		return 0, false
+	}
+
+	switch value.Kind() {
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		return int(value.Int()), true
+	default:
+		return 0, false
+	}
 }
 
 func (c ServiceClient[T]) seedOpeningWorkRequestID(resource T, response any, phase shared.OSOKAsyncPhase) {

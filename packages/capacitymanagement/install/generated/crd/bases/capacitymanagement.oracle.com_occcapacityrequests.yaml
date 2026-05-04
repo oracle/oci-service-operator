@@ -1,0 +1,471 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: occcapacityrequests.capacitymanagement.oracle.com
+spec:
+  group: capacitymanagement.oracle.com
+  names:
+    kind: OccCapacityRequest
+    listKind: OccCapacityRequestList
+    plural: occcapacityrequests
+    singular: occcapacityrequest
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the OccCapacityRequest
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the OccCapacityRequest
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: OccCapacityRequest is the Schema for the occcapacityrequests
+          API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: OccCapacityRequestSpec defines the desired state of OccCapacityRequest.
+            properties:
+              availabilityDomain:
+                description: The availability domain (AD) in which the new resource
+                  is to be placed. If this is specified then the capacity will be
+                  validated and fulfilled within the scope of this AD. Note that this
+                  field is NOT required for Capacity request Transfer requests.
+                type: string
+              compartmentId:
+                description: Since all resources are at tenancy level hence this will
+                  be the ocid of the tenancy where operation is to be performed.
+                type: string
+              dateExpectedCapacityHandover:
+                description: The date by which the capacity requested by customers
+                  before dateFinalCustomerOrder needs to be fulfilled.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: Meaningful text about the capacity request.
+                type: string
+              details:
+                description: A list of different resources requested by the user.
+                items:
+                  description: OccCapacityRequestDetail defines nested fields for
+                    OccCapacityRequest.Detail.
+                  properties:
+                    actualHandoverQuantity:
+                      description: The actual handed over quantity of resources at
+                        the time of request resolution.
+                      format: int64
+                      type: integer
+                    associatedOccHandoverResourceBlockList:
+                      description: A list containing details about occHandoverResourceBlocks
+                        which were handed over for the corresponding resource name.
+                      items:
+                        description: OccCapacityRequestDetailAssociatedOccHandoverResourceBlockList
+                          defines nested fields for OccCapacityRequest.Detail.AssociatedOccHandoverResourceBlockList.
+                        properties:
+                          handoverQuantity:
+                            description: The total quantity of the resource that was
+                              made available to the customer as part of this resource
+                              block
+                            format: int64
+                            type: integer
+                          occHandoverResourceBlockId:
+                            description: The OCID of the handed over resource block.
+                            type: string
+                        type: object
+                      type: array
+                    availabilityDomain:
+                      description: The availability domain of the resource which is
+                        to be transferred. Note that this is only required for Capacity
+                        Request Transfer requests.
+                      type: string
+                    dateActualHandover:
+                      description: The date on which the actual handover quantity
+                        of resources is delivered.
+                      type: string
+                    dateExpectedHandover:
+                      description: The date on which the latest increment to supplied
+                        quantity of resources was delivered.
+                      type: string
+                    demandQuantity:
+                      description: The number of compute server's with name <resourceName>
+                        required by the user.
+                      format: int64
+                      type: integer
+                    expectedHandoverQuantity:
+                      description: The incremental quantity of resources supplied
+                        as the provisioning is underway.
+                      format: int64
+                      type: integer
+                    resourceName:
+                      description: The name of the COMPUTE server shape for which
+                        the request is made. Do not use CAPACITY_CONSTRAINT as the
+                        resource name.
+                      type: string
+                    resourceType:
+                      description: The type of the resource against which the user
+                        wants to place a capacity request.
+                      type: string
+                    sourceWorkloadType:
+                      description: The WorkloadType from where capacity request are
+                        to be transferred.
+                      type: string
+                    workloadType:
+                      description: The type of the workload (Generic/ROW).
+                      type: string
+                  required:
+                  - demandQuantity
+                  - resourceName
+                  - resourceType
+                  - workloadType
+                  type: object
+                type: array
+              displayName:
+                description: An user-friendly name for the capacity request. Does
+                  not have to be unique, and it's changeable. Avoid entering confidential
+                  information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              lifecycleDetails:
+                description: A message describing the current state in more detail.
+                  For example, can be used to provide actionable information for a
+                  resource in a Failed State.
+                type: string
+              namespace:
+                description: The name of the OCI service in consideration. For example,
+                  Compute, Exadata, and so on.
+                type: string
+              occAvailabilityCatalogId:
+                description: The OCID of the availability catalog against which capacity
+                  request is made.
+                type: string
+              region:
+                description: The name of the region for which the capacity request
+                  is made.
+                type: string
+              requestState:
+                description: The subset of request states available for creating the
+                  capacity request.
+                type: string
+              requestType:
+                description: Type of Capacity Request(New or Transfer)
+                type: string
+            required:
+            - compartmentId
+            - dateExpectedCapacityHandover
+            - details
+            - displayName
+            - namespace
+            - region
+            type: object
+          status:
+            description: OccCapacityRequestStatus defines the observed state of OccCapacityRequest.
+            properties:
+              availabilityDomain:
+                description: The availability domain (AD) for which the capacity request
+                  was made.
+                type: string
+              compartmentId:
+                description: The OCID of the tenancy from which the request was made.
+                type: string
+              dateExpectedCapacityHandover:
+                description: The date by which the capacity requested by customers
+                  before dateFinalCustomerOrder needs to be fulfilled.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: Meaningful text about the capacity request.
+                type: string
+              details:
+                description: A list of resources requested as part of this request
+                items:
+                  description: OccCapacityRequestDetail defines nested fields for
+                    OccCapacityRequest.Detail.
+                  properties:
+                    actualHandoverQuantity:
+                      description: The actual handed over quantity of resources at
+                        the time of request resolution.
+                      format: int64
+                      type: integer
+                    associatedOccHandoverResourceBlockList:
+                      description: A list containing details about occHandoverResourceBlocks
+                        which were handed over for the corresponding resource name.
+                      items:
+                        description: OccCapacityRequestDetailAssociatedOccHandoverResourceBlockList
+                          defines nested fields for OccCapacityRequest.Detail.AssociatedOccHandoverResourceBlockList.
+                        properties:
+                          handoverQuantity:
+                            description: The total quantity of the resource that was
+                              made available to the customer as part of this resource
+                              block
+                            format: int64
+                            type: integer
+                          occHandoverResourceBlockId:
+                            description: The OCID of the handed over resource block.
+                            type: string
+                        type: object
+                      type: array
+                    availabilityDomain:
+                      description: The availability domain of the resource which is
+                        to be transferred. Note that this is only required for Capacity
+                        Request Transfer requests.
+                      type: string
+                    dateActualHandover:
+                      description: The date on which the actual handover quantity
+                        of resources is delivered.
+                      type: string
+                    dateExpectedHandover:
+                      description: The date on which the latest increment to supplied
+                        quantity of resources was delivered.
+                      type: string
+                    demandQuantity:
+                      description: The number of compute server's with name <resourceName>
+                        required by the user.
+                      format: int64
+                      type: integer
+                    expectedHandoverQuantity:
+                      description: The incremental quantity of resources supplied
+                        as the provisioning is underway.
+                      format: int64
+                      type: integer
+                    resourceName:
+                      description: The name of the COMPUTE server shape for which
+                        the request is made. Do not use CAPACITY_CONSTRAINT as the
+                        resource name.
+                      type: string
+                    resourceType:
+                      description: The type of the resource against which the user
+                        wants to place a capacity request.
+                      type: string
+                    sourceWorkloadType:
+                      description: The WorkloadType from where capacity request are
+                        to be transferred.
+                      type: string
+                    workloadType:
+                      description: The type of the workload (Generic/ROW).
+                      type: string
+                  required:
+                  - demandQuantity
+                  - resourceName
+                  - resourceType
+                  - workloadType
+                  type: object
+                type: array
+              displayName:
+                description: The display name of the capacity request.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              id:
+                description: The OCID of the capacity request.
+                type: string
+              lifecycleDetails:
+                description: A message describing the current state in more detail.
+                  For example, can be used to provide actionable information for a
+                  resource in a Failed State.
+                type: string
+              lifecycleState:
+                description: The current lifecycle state of the resource.
+                type: string
+              namespace:
+                description: The name of the OCI service in consideration. For example,
+                  Compute, Exadata, and so on.
+                type: string
+              occAvailabilityCatalogId:
+                description: The OCID of the availability catalog against which the
+                  capacity request was placed.
+                type: string
+              occCustomerGroupId:
+                description: The OCID of the customer group to which this customer
+                  belongs to.
+                type: string
+              region:
+                description: The name of the region for which the capacity request
+                  was made.
+                type: string
+              requestState:
+                description: The different states the capacity request goes through.
+                type: string
+              requestType:
+                description: Type of Capacity Request(New or Transfer)
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  System tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              timeCreated:
+                description: The time when the capacity request was created.
+                type: string
+              timeUpdated:
+                description: The time when the capacity request was updated.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

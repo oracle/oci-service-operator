@@ -1,0 +1,804 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: listingrevisions.marketplacepublisher.oracle.com
+spec:
+  group: marketplacepublisher.oracle.com
+  names:
+    kind: ListingRevision
+    listKind: ListingRevisionList
+    plural: listingrevisions
+    singular: listingrevision
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the ListingRevision
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the ListingRevision
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: ListingRevision is the Schema for the listingrevisions API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ListingRevisionSpec defines the desired state of ListingRevision.
+            properties:
+              availabilityAndPricingPolicy:
+                description: Listing availability and Pricing Policy statement.
+                type: string
+              contactUs:
+                description: Custom text by partner regarding contact information
+                type: string
+              contentLanguage:
+                description: ListingRevisionContentLanguage defines nested fields
+                  for ListingRevision.ContentLanguage.
+                properties:
+                  code:
+                    description: A code assigned to the item.
+                    type: string
+                  name:
+                    description: The name of the item.
+                    type: string
+                required:
+                - code
+                - name
+                type: object
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              demoUrl:
+                description: Url to demo of the listing
+                type: string
+              displayName:
+                description: The name for the listing revision.
+                type: string
+              downloadInfo:
+                description: ListingRevisionDownloadInfo defines nested fields for
+                  ListingRevision.DownloadInfo.
+                properties:
+                  description:
+                    description: Text shown when capturing lead
+                    type: string
+                  url:
+                    description: Redirect link provided by publisher
+                    type: string
+                type: object
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              geoLocations:
+                description: Support details based on geographic location
+                items:
+                  description: ListingRevisionGeoLocation defines nested fields for
+                    ListingRevision.GeoLocation.
+                  properties:
+                    details:
+                      description: Support details for specific region
+                      type: string
+                    geographicRegion:
+                      description: Region for geographic location
+                      type: string
+                  required:
+                  - details
+                  - geographicRegion
+                  type: object
+                type: array
+              headline:
+                description: Single line introduction for the listing revision.
+                type: string
+              industries:
+                description: List of industries subscribed by listing.
+                items:
+                  type: string
+                type: array
+              isRoverExportable:
+                description: Is this listing rover exportable
+                type: boolean
+              jsonData:
+                type: string
+              keywords:
+                description: Keywords associated with the listing revision.
+                type: string
+              listingId:
+                description: The unique identifier for the listing this revision belongs
+                  to.
+                type: string
+              listingType:
+                type: string
+              longDescription:
+                description: A long description for the listing revision.
+                type: string
+              pricingPlans:
+                description: List of Pricing Plans provider by publisher.
+                items:
+                  description: ListingRevisionPricingPlan defines nested fields for
+                    ListingRevision.PricingPlan.
+                  properties:
+                    billingFrequency:
+                      description: The plan billing frequency.
+                      type: string
+                    extendedMetadata:
+                      additionalProperties:
+                        type: string
+                      description: Additional metadata key/value pairs for the metering
+                        pricing.
+                      type: object
+                    jsonData:
+                      type: string
+                    name:
+                      description: The listing's pricing plan name.
+                      type: string
+                    planDescription:
+                      description: The plan description.
+                      type: string
+                    planType:
+                      type: string
+                    rates:
+                      description: List of pricing rates provider by publisher.
+                      items:
+                        description: ListingRevisionPricingPlanRate defines nested
+                          fields for ListingRevision.PricingPlan.Rate.
+                        properties:
+                          billingCurrency:
+                            description: The currency supported, in the format specified
+                              by ISO-4217
+                            type: string
+                          rate:
+                            description: Tha amount for the currency type.
+                            type: number
+                        required:
+                        - billingCurrency
+                        - rate
+                        type: object
+                      type: array
+                  required:
+                  - rates
+                  type: object
+                type: array
+              pricingType:
+                description: The pricing model for the listing revision.
+                type: string
+              productCodes:
+                description: List of product codes subscribed by listing.
+                items:
+                  type: string
+                type: array
+              products:
+                description: List of Products subscribed by listing.
+                items:
+                  description: ListingRevisionProduct defines nested fields for ListingRevision.Product.
+                  properties:
+                    additionalFilters:
+                      description: Custom filter for the product
+                      items:
+                        description: ListingRevisionProductAdditionalFilter defines
+                          nested fields for ListingRevision.Product.AdditionalFilter.
+                        properties:
+                          filterCode:
+                            description: filter code for the product
+                            type: string
+                          filterProperties:
+                            description: additional properties attached to a filter
+                            items:
+                              type: string
+                            type: array
+                        type: object
+                      type: array
+                    categories:
+                      description: List of category codes within a Product which are
+                        applicable to the listing revision.
+                      items:
+                        type: string
+                      type: array
+                    code:
+                      description: Product Code
+                      type: string
+                  required:
+                  - categories
+                  - code
+                  type: object
+                type: array
+              recommendedServiceProviderListingIds:
+                description: OCIDs of service listings attached to lead gen listing
+                items:
+                  type: string
+                type: array
+              selfPacedTrainingUrl:
+                description: Url to training resources of the listing
+                type: string
+              shortDescription:
+                description: A short description for the listing revision.
+                type: string
+              status:
+                description: The current status of the Listing revision.
+                type: string
+              supportContacts:
+                description: Contact information to use to get support from the publisher
+                  for the listing revision.
+                items:
+                  description: ListingRevisionSupportContact defines nested fields
+                    for ListingRevision.SupportContact.
+                  properties:
+                    email:
+                      description: The email of the contact.
+                      type: string
+                    name:
+                      description: The name of the contact.
+                      type: string
+                    phone:
+                      description: The phone number of the contact.
+                      type: string
+                    subject:
+                      description: The email subject line to use when contacting support.
+                      type: string
+                  required:
+                  - name
+                  type: object
+                type: array
+              supportLinks:
+                description: Links to support resources for the listing revision.
+                items:
+                  description: ListingRevisionSupportLink defines nested fields for
+                    ListingRevision.SupportLink.
+                  properties:
+                    name:
+                      description: Text that describes the resource.
+                      type: string
+                    url:
+                      description: The URL of the resource.
+                      type: string
+                  required:
+                  - name
+                  - url
+                  type: object
+                type: array
+              supportedlanguages:
+                description: Languages supported by the publisher for the listing
+                  revision.
+                items:
+                  description: ListingRevisionSupportedlanguage defines nested fields
+                    for ListingRevision.Supportedlanguage.
+                  properties:
+                    code:
+                      description: A code assigned to the item.
+                      type: string
+                    name:
+                      description: The name of the item.
+                      type: string
+                  required:
+                  - code
+                  - name
+                  type: object
+                type: array
+              systemRequirements:
+                description: System requirements for the listing revision.
+                type: string
+              tagline:
+                description: The tagline for the listing revision.
+                type: string
+              trainedProfessionals:
+                description: Number of trained professional per product
+                items:
+                  description: ListingRevisionTrainedProfessional defines nested fields
+                    for ListingRevision.TrainedProfessional.
+                  properties:
+                    productCode:
+                      description: Product code on which professional is trained on
+                      type: string
+                    professionalsCount:
+                      description: Count of trained professional
+                      format: int64
+                      type: integer
+                  required:
+                  - productCode
+                  - professionalsCount
+                  type: object
+                type: array
+              usageInformation:
+                description: Usage information for the listing revision.
+                type: string
+              vanityUrl:
+                description: Custom link to the listing
+                type: string
+              versionDetails:
+                description: ListingRevisionVersionDetails defines nested fields for
+                  ListingRevision.VersionDetails.
+                properties:
+                  description:
+                    description: The version description.
+                    type: string
+                  number:
+                    description: The version number.
+                    type: string
+                  releaseDate:
+                    description: The version release date.
+                    type: string
+                required:
+                - description
+                - number
+                - releaseDate
+                type: object
+            required:
+            - headline
+            - listingId
+            type: object
+          status:
+            description: ListingRevisionStatus defines the observed state of ListingRevision.
+            properties:
+              allowedTenancies:
+                description: Allowed tenancies provided when a listing revision is
+                  published as private.
+                items:
+                  type: string
+                type: array
+              areInternalTenancyLaunchAllowed:
+                description: Identifies whether publisher allows internal tenancy
+                  launches for the listing revision.
+                type: boolean
+              availabilityAndPricingPolicy:
+                description: Listing availability and Pricing Policy statement.
+                type: string
+              compartmentId:
+                description: The unique identifier for the compartment.
+                type: string
+              contactUs:
+                description: Custom text by partner regarding contact information
+                type: string
+              contentLanguage:
+                description: ListingRevisionContentLanguage defines nested fields
+                  for ListingRevision.ContentLanguage.
+                properties:
+                  code:
+                    description: A code assigned to the item.
+                    type: string
+                  name:
+                    description: The name of the item.
+                    type: string
+                required:
+                - code
+                - name
+                type: object
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              demoUrl:
+                description: Url to demo of the listing
+                type: string
+              displayName:
+                description: The name for the listing revision.
+                type: string
+              downloadInfo:
+                description: ListingRevisionDownloadInfo defines nested fields for
+                  ListingRevision.DownloadInfo.
+                properties:
+                  description:
+                    description: Text shown when capturing lead
+                    type: string
+                  url:
+                    description: Redirect link provided by publisher
+                    type: string
+                type: object
+              extendedMetadata:
+                additionalProperties:
+                  type: string
+                description: Additional metadata key/value pairs for the listing revision
+                  summary.
+                type: object
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              geoLocations:
+                description: Support details based on geographic location
+                items:
+                  description: ListingRevisionGeoLocation defines nested fields for
+                    ListingRevision.GeoLocation.
+                  properties:
+                    details:
+                      description: Support details for specific region
+                      type: string
+                    geographicRegion:
+                      description: Region for geographic location
+                      type: string
+                  required:
+                  - details
+                  - geographicRegion
+                  type: object
+                type: array
+              headline:
+                description: Single line introduction for the listing revision.
+                type: string
+              icon:
+                description: ListingRevisionIcon defines nested fields for ListingRevision.Icon.
+                properties:
+                  contentUrl:
+                    description: The content URL of the uploaded data.
+                    type: string
+                  mimeType:
+                    description: The MIME type of the uploaded data.
+                    type: string
+                type: object
+              id:
+                description: Unique OCID identifier for the listing revision in Marketplace
+                  Publisher.
+                type: string
+              industries:
+                description: List of industries subscribed by listing.
+                items:
+                  type: string
+                type: array
+              isRoverExportable:
+                description: Is this listing rover exportable
+                type: boolean
+              jsonData:
+                type: string
+              keywords:
+                description: Keywords associated with the listing revision.
+                type: string
+              lifecycleState:
+                description: The current state of the listing revision.
+                type: string
+              listingId:
+                description: The unique identifier for the listing this revision belongs
+                  to.
+                type: string
+              listingType:
+                type: string
+              longDescription:
+                description: A long description for the listing revision.
+                type: string
+              packageType:
+                description: The listing's package type. Populated from the listing.
+                type: string
+              pricingPlans:
+                description: Pricing details for lead gen listing
+                type: string
+              pricingType:
+                description: The pricing model for the listing revision.
+                type: string
+              productCodes:
+                description: List of product codes subscribed by listing.
+                items:
+                  type: string
+                type: array
+              products:
+                description: List of Products subscribed by listing.
+                items:
+                  description: ListingRevisionProduct defines nested fields for ListingRevision.Product.
+                  properties:
+                    additionalFilters:
+                      description: Custom filter for the product
+                      items:
+                        description: ListingRevisionProductAdditionalFilter defines
+                          nested fields for ListingRevision.Product.AdditionalFilter.
+                        properties:
+                          filterCode:
+                            description: filter code for the product
+                            type: string
+                          filterProperties:
+                            description: additional properties attached to a filter
+                            items:
+                              type: string
+                            type: array
+                        type: object
+                      type: array
+                    categories:
+                      description: List of category codes within a Product which are
+                        applicable to the listing revision.
+                      items:
+                        type: string
+                      type: array
+                    code:
+                      description: Product Code
+                      type: string
+                  required:
+                  - categories
+                  - code
+                  type: object
+                type: array
+              recommendedServiceProviderListingIds:
+                description: OCIDs of service listings attached to lead gen listing
+                items:
+                  type: string
+                type: array
+              revisionNumber:
+                description: The revision number for the listing revision. This is
+                  an internal attribute
+                type: string
+              sdkStatus:
+                description: |-
+                  The current status for the Listing revision.
+                  This uses a distinct JSON name so it can coexist with the OSOK status envelope.
+                type: string
+              selfPacedTrainingUrl:
+                description: Url to training resources of the listing
+                type: string
+              shortDescription:
+                description: A short description for the listing revision.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              statusNotes:
+                description: Status notes for the listing revision.
+                type: string
+              supportContacts:
+                description: Contact information to use to get support from the publisher
+                  for the listing revision.
+                items:
+                  description: ListingRevisionSupportContact defines nested fields
+                    for ListingRevision.SupportContact.
+                  properties:
+                    email:
+                      description: The email of the contact.
+                      type: string
+                    name:
+                      description: The name of the contact.
+                      type: string
+                    phone:
+                      description: The phone number of the contact.
+                      type: string
+                    subject:
+                      description: The email subject line to use when contacting support.
+                      type: string
+                  required:
+                  - name
+                  type: object
+                type: array
+              supportLinks:
+                description: Links to support resources for the listing revision.
+                items:
+                  description: ListingRevisionSupportLink defines nested fields for
+                    ListingRevision.SupportLink.
+                  properties:
+                    name:
+                      description: Text that describes the resource.
+                      type: string
+                    url:
+                      description: The URL of the resource.
+                      type: string
+                  required:
+                  - name
+                  - url
+                  type: object
+                type: array
+              supportedlanguages:
+                description: Languages supported by the publisher for the listing
+                  revision.
+                items:
+                  description: ListingRevisionSupportedlanguage defines nested fields
+                    for ListingRevision.Supportedlanguage.
+                  properties:
+                    code:
+                      description: A code assigned to the item.
+                      type: string
+                    name:
+                      description: The name of the item.
+                      type: string
+                  required:
+                  - code
+                  - name
+                  type: object
+                type: array
+              systemRequirements:
+                description: System requirements for the listing revision.
+                type: string
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  System tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              tagline:
+                description: The tagline of the listing revision.
+                type: string
+              timeCreated:
+                description: The time the listing revision was created. An RFC3339
+                  formatted datetime string.
+                type: string
+              timeUpdated:
+                description: The time the listing revision was updated. An RFC3339
+                  formatted datetime string.
+                type: string
+              trainedProfessionals:
+                description: Number of trained professional per product
+                items:
+                  description: ListingRevisionTrainedProfessional defines nested fields
+                    for ListingRevision.TrainedProfessional.
+                  properties:
+                    productCode:
+                      description: Product code on which professional is trained on
+                      type: string
+                    professionalsCount:
+                      description: Count of trained professional
+                      format: int64
+                      type: integer
+                  required:
+                  - productCode
+                  - professionalsCount
+                  type: object
+                type: array
+              usageInformation:
+                description: Usage information for the listing revision.
+                type: string
+              vanityUrl:
+                description: Custom link to the listing
+                type: string
+              versionDetails:
+                description: ListingRevisionVersionDetails defines nested fields for
+                  ListingRevision.VersionDetails.
+                properties:
+                  description:
+                    description: The version description.
+                    type: string
+                  number:
+                    description: The version number.
+                    type: string
+                  releaseDate:
+                    description: The version release date.
+                    type: string
+                required:
+                - description
+                - number
+                - releaseDate
+                type: object
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

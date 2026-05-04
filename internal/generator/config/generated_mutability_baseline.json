@@ -1,13 +1,13 @@
 {
   "aggregate": {
-    "services": 6,
-    "resources": 6,
-    "overlayArtifacts": 6,
-    "vapArtifacts": 6,
-    "fields": 84,
-    "allowInPlaceCount": 63,
+    "services": 7,
+    "resources": 7,
+    "overlayArtifacts": 7,
+    "vapArtifacts": 7,
+    "fields": 97,
+    "allowInPlaceCount": 67,
     "denyInPlaceCount": 0,
-    "replacementRequiredCount": 18,
+    "replacementRequiredCount": 27,
     "unknownPolicyCount": 3,
     "docsDeniedCount": 0,
     "unresolvedJoinCount": 0,
@@ -22,6 +22,19 @@
       "allowInPlaceCount": 6,
       "denyInPlaceCount": 0,
       "replacementRequiredCount": 4,
+      "unknownPolicyCount": 0,
+      "docsDeniedCount": 0,
+      "unresolvedJoinCount": 0,
+      "ambiguousJoinCount": 0,
+      "mergeConflictCount": 0
+    },
+    {
+      "service": "capacitymanagement",
+      "resources": 1,
+      "fields": 13,
+      "allowInPlaceCount": 4,
+      "denyInPlaceCount": 0,
+      "replacementRequiredCount": 9,
       "unknownPolicyCount": 0,
       "docsDeniedCount": 0,
       "unresolvedJoinCount": 0,
@@ -209,6 +222,175 @@
         },
         {
           "fieldPath": "networkEndpointDetails.networkEndpointType",
+          "decision": "replacementRequired",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
+        }
+      ]
+    },
+    {
+      "service": "capacitymanagement",
+      "kind": "OccCapacityRequest",
+      "formalSlug": "occcapacityrequest",
+      "providerResource": "oci_capacity_management_occ_capacity_request",
+      "terraformDocsVersion": "7.22.0",
+      "overlayPath": "internal/generator/generated/mutability_overlay/capacitymanagement/occcapacityrequest.json",
+      "vapPath": "internal/generator/generated/vap_update_policy/capacitymanagement/occcapacityrequest.json",
+      "fields": 13,
+      "allowInPlaceCount": 4,
+      "denyInPlaceCount": 0,
+      "replacementRequiredCount": 9,
+      "unknownPolicyCount": 0,
+      "allowInPlacePaths": [
+        "definedTags",
+        "displayName",
+        "freeformTags",
+        "requestState"
+      ],
+      "decisions": [
+        {
+          "fieldPath": "availabilityDomain",
+          "finalPolicy": "replacementRequired",
+          "joinStatus": "matched",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
+        },
+        {
+          "fieldPath": "compartmentId",
+          "finalPolicy": "replacementRequired",
+          "joinStatus": "matched",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
+        },
+        {
+          "fieldPath": "dateExpectedCapacityHandover",
+          "finalPolicy": "replacementRequired",
+          "joinStatus": "matched",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
+        },
+        {
+          "fieldPath": "definedTags",
+          "finalPolicy": "allowInPlaceUpdate",
+          "joinStatus": "matched",
+          "mergeCase": "docsConfirmedCandidate",
+          "docsEvidenceState": "confirmedUpdatable"
+        },
+        {
+          "fieldPath": "description",
+          "finalPolicy": "replacementRequired",
+          "joinStatus": "matched",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
+        },
+        {
+          "fieldPath": "details",
+          "finalPolicy": "replacementRequired",
+          "joinStatus": "matched",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
+        },
+        {
+          "fieldPath": "displayName",
+          "finalPolicy": "allowInPlaceUpdate",
+          "joinStatus": "matched",
+          "mergeCase": "docsConfirmedCandidate",
+          "docsEvidenceState": "confirmedUpdatable"
+        },
+        {
+          "fieldPath": "freeformTags",
+          "finalPolicy": "allowInPlaceUpdate",
+          "joinStatus": "matched",
+          "mergeCase": "docsConfirmedCandidate",
+          "docsEvidenceState": "confirmedUpdatable"
+        },
+        {
+          "fieldPath": "namespace",
+          "finalPolicy": "replacementRequired",
+          "joinStatus": "matched",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
+        },
+        {
+          "fieldPath": "occAvailabilityCatalogId",
+          "finalPolicy": "replacementRequired",
+          "joinStatus": "matched",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
+        },
+        {
+          "fieldPath": "region",
+          "finalPolicy": "replacementRequired",
+          "joinStatus": "matched",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
+        },
+        {
+          "fieldPath": "requestState",
+          "finalPolicy": "allowInPlaceUpdate",
+          "joinStatus": "matched",
+          "mergeCase": "docsConfirmedCandidate",
+          "docsEvidenceState": "confirmedUpdatable"
+        },
+        {
+          "fieldPath": "requestType",
+          "finalPolicy": "replacementRequired",
+          "joinStatus": "matched",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
+        }
+      ],
+      "denyRules": [
+        {
+          "fieldPath": "availabilityDomain",
+          "decision": "replacementRequired",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
+        },
+        {
+          "fieldPath": "compartmentId",
+          "decision": "replacementRequired",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
+        },
+        {
+          "fieldPath": "dateExpectedCapacityHandover",
+          "decision": "replacementRequired",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
+        },
+        {
+          "fieldPath": "description",
+          "decision": "replacementRequired",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
+        },
+        {
+          "fieldPath": "details",
+          "decision": "replacementRequired",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
+        },
+        {
+          "fieldPath": "namespace",
+          "decision": "replacementRequired",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
+        },
+        {
+          "fieldPath": "occAvailabilityCatalogId",
+          "decision": "replacementRequired",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
+        },
+        {
+          "fieldPath": "region",
+          "decision": "replacementRequired",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
+        },
+        {
+          "fieldPath": "requestType",
           "decision": "replacementRequired",
           "mergeCase": "replacementRequired",
           "docsEvidenceState": "notDocumented"

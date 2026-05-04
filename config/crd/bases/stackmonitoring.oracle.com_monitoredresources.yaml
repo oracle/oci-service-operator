@@ -1,0 +1,697 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: monitoredresources.stackmonitoring.oracle.com
+spec:
+  group: stackmonitoring.oracle.com
+  names:
+    kind: MonitoredResource
+    listKind: MonitoredResourceList
+    plural: monitoredresources
+    singular: monitoredresource
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the MonitoredResource
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the MonitoredResource
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: MonitoredResource is the Schema for the monitoredresources API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: MonitoredResourceSpec defines the desired state of MonitoredResource.
+            properties:
+              additionalAliases:
+                description: |-
+                  List of MonitoredResourceAliasCredentials. This property complements the existing
+                  "aliases" property by allowing user to specify more than one credential alias.
+                  If both "aliases" and "additionalAliases" are specified, union of the
+                  values is used as list of aliases applicable for this resource.
+                  If any duplicate found in the combined list of "alias" and "additionalAliases",
+                  an error will be thrown.
+                items:
+                  description: MonitoredResourceAdditionalAliase defines nested fields
+                    for MonitoredResource.AdditionalAliase.
+                  properties:
+                    credential:
+                      description: MonitoredResourceAdditionalAliaseCredential defines
+                        nested fields for MonitoredResource.AdditionalAliase.Credential.
+                      properties:
+                        name:
+                          description: |-
+                            The name of the pre-existing source credential which alias cred should point to.
+                            This should refer to the pre-existing source attribute which is bound to credential name.
+                          type: string
+                        service:
+                          description: |-
+                            The name of the service owning the credential.
+                            Example: stack-monitoring or dbmgmt
+                          type: string
+                        source:
+                          description: |-
+                            The source type and source name combination,delimited with (.) separator.
+                            This refers to the pre-existing source which alias cred should point to.
+                            Ex. {source type}.{source name} and source type max char limit is 63.
+                          type: string
+                      required:
+                      - name
+                      - service
+                      - source
+                      type: object
+                    name:
+                      description: The name of the alias, within the context of the
+                        source.
+                      type: string
+                    source:
+                      description: |-
+                        The source type and source name combination,delimited with (.) separator.
+                        Example: {source type}.{source name} and source type max char limit is 63.
+                      type: string
+                  required:
+                  - credential
+                  - name
+                  - source
+                  type: object
+                type: array
+              additionalCredentials:
+                description: |-
+                  List of MonitoredResourceCredentials. This property complements the existing
+                  "credentials" property by allowing user to specify more than one credential.
+                  If both "credential" and "additionalCredentials" are specified, union of the
+                  values is used as list of credentials applicable for this resource.
+                  If any duplicate found in the combined list of "credentials" and "additionalCredentials",
+                  an error will be thrown.
+                items:
+                  description: MonitoredResourceAdditionalCredential defines nested
+                    fields for MonitoredResource.AdditionalCredential.
+                  properties:
+                    credentialType:
+                      type: string
+                    description:
+                      description: The user-specified textual description of the credential.
+                      type: string
+                    jsonData:
+                      type: string
+                    keyId:
+                      description: |-
+                        The master key should be created in OCI Vault owned by the client of this API.
+                        The user should have permission to access the vault key.
+                      type: string
+                    name:
+                      description: The name of the credential, within the context
+                        of the source.
+                      type: string
+                    properties:
+                      description: The credential properties list. Credential property
+                        values will be encrypted format.
+                      items:
+                        description: MonitoredResourceAdditionalCredentialProperty
+                          defines nested fields for MonitoredResource.AdditionalCredential.Property.
+                        properties:
+                          name:
+                            description: |-
+                              The name of the credential property, should confirm with names of properties of this credential's type.
+                              Example: For JMXCreds type, credential property name for weblogic user is 'Username'.
+                            type: string
+                          value:
+                            description: |-
+                              The value of the credential property name.
+                              Example: For JMXCreds type, credential property value for 'Username' property is 'weblogic'.
+                            type: string
+                        required:
+                        - name
+                        - value
+                        type: object
+                      type: array
+                    source:
+                      description: |-
+                        The source type and source name combination, delimited with (.) separator.
+                        {source type}.{source name} and source type max char limit is 63.
+                      type: string
+                    type:
+                      description: The type of the credential ( ex. JMXCreds,DBCreds).
+                      type: string
+                  type: object
+                type: array
+              aliases:
+                description: MonitoredResourceAliases defines nested fields for MonitoredResource.Aliases.
+                properties:
+                  credential:
+                    description: MonitoredResourceAliasesCredential defines nested
+                      fields for MonitoredResource.Aliases.Credential.
+                    properties:
+                      name:
+                        description: |-
+                          The name of the pre-existing source credential which alias cred should point to.
+                          This should refer to the pre-existing source attribute which is bound to credential name.
+                        type: string
+                      service:
+                        description: |-
+                          The name of the service owning the credential.
+                          Example: stack-monitoring or dbmgmt
+                        type: string
+                      source:
+                        description: |-
+                          The source type and source name combination,delimited with (.) separator.
+                          This refers to the pre-existing source which alias cred should point to.
+                          Ex. {source type}.{source name} and source type max char limit is 63.
+                        type: string
+                    required:
+                    - name
+                    - service
+                    - source
+                    type: object
+                  name:
+                    description: The name of the alias, within the context of the
+                      source.
+                    type: string
+                  source:
+                    description: |-
+                      The source type and source name combination,delimited with (.) separator.
+                      Example: {source type}.{source name} and source type max char limit is 63.
+                    type: string
+                required:
+                - credential
+                - name
+                - source
+                type: object
+              compartmentId:
+                description: Compartment Identifier OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm).
+                type: string
+              credentials:
+                description: MonitoredResourceCredentials defines nested fields for
+                  MonitoredResource.Credentials.
+                properties:
+                  credentialType:
+                    type: string
+                  description:
+                    description: The user-specified textual description of the credential.
+                    type: string
+                  jsonData:
+                    type: string
+                  keyId:
+                    description: |-
+                      The master key should be created in OCI Vault owned by the client of this API.
+                      The user should have permission to access the vault key.
+                    type: string
+                  name:
+                    description: The name of the credential, within the context of
+                      the source.
+                    type: string
+                  properties:
+                    description: The credential properties list. Credential property
+                      values will be encrypted format.
+                    items:
+                      description: MonitoredResourceCredentialsProperty defines nested
+                        fields for MonitoredResource.Credentials.Property.
+                      properties:
+                        name:
+                          description: |-
+                            The name of the credential property, should confirm with names of properties of this credential's type.
+                            Example: For JMXCreds type, credential property name for weblogic user is 'Username'.
+                          type: string
+                        value:
+                          description: |-
+                            The value of the credential property name.
+                            Example: For JMXCreds type, credential property value for 'Username' property is 'weblogic'.
+                          type: string
+                      required:
+                      - name
+                      - value
+                      type: object
+                    type: array
+                  source:
+                    description: |-
+                      The source type and source name combination, delimited with (.) separator.
+                      {source type}.{source name} and source type max char limit is 63.
+                    type: string
+                  type:
+                    description: The type of the credential ( ex. JMXCreds,DBCreds).
+                    type: string
+                type: object
+              databaseConnectionDetails:
+                description: MonitoredResourceDatabaseConnectionDetails defines nested
+                  fields for MonitoredResource.DatabaseConnectionDetails.
+                properties:
+                  connectorId:
+                    description: Database connector Identifier OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm).
+                    type: string
+                  dbId:
+                    description: dbId of the database.
+                    type: string
+                  dbUniqueName:
+                    description: UniqueName used for database connection requests.
+                    type: string
+                  port:
+                    description: Listener Port number used for connection requests.
+                    type: integer
+                  protocol:
+                    description: Protocol used in DB connection string when connecting
+                      to external database service.
+                    type: string
+                  serviceName:
+                    description: Service name used for connection requests.
+                    type: string
+                  sslSecretId:
+                    description: SSL Secret Identifier for TCPS connector in OCI VaultOCID
+                      (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm).
+                    type: string
+                required:
+                - port
+                - protocol
+                - serviceName
+                type: object
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              displayName:
+                description: Monitored resource display name.
+                type: string
+              externalId:
+                description: |-
+                  External resource is any OCI resource identifier OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  which is not a Stack Monitoring service resource.
+                  Currently supports only OCI compute instance.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              hostName:
+                description: Host name of the monitored resource.
+                type: string
+              license:
+                description: |-
+                  License edition of the monitored resource. If not provided
+                  the default license type for the compartment will be used.
+                type: string
+              managementAgentId:
+                description: Management Agent Identifier OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm).
+                type: string
+              name:
+                description: Monitored Resource Name.
+                type: string
+              properties:
+                description: List of monitored resource properties.
+                items:
+                  description: MonitoredResourceProperty defines nested fields for
+                    MonitoredResource.Property.
+                  properties:
+                    name:
+                      description: Property Name.
+                      type: string
+                    value:
+                      description: Property Value.
+                      type: string
+                  type: object
+                type: array
+              resourceTimeZone:
+                description: |-
+                  Time zone in the form of tz database canonical zone ID. Specifies the preference with
+                  a value that uses the IANA Time Zone Database format (x-obmcs-time-zone).
+                  For example - America/Los_Angeles
+                type: string
+              type:
+                description: Monitored Resource Type.
+                type: string
+            required:
+            - compartmentId
+            - name
+            - type
+            type: object
+          status:
+            description: MonitoredResourceStatus defines the observed state of MonitoredResource.
+            properties:
+              aliases:
+                description: MonitoredResourceAliases defines nested fields for MonitoredResource.Aliases.
+                properties:
+                  credential:
+                    description: MonitoredResourceAliasesCredential defines nested
+                      fields for MonitoredResource.Aliases.Credential.
+                    properties:
+                      name:
+                        description: |-
+                          The name of the pre-existing source credential which alias cred should point to.
+                          This should refer to the pre-existing source attribute which is bound to credential name.
+                        type: string
+                      service:
+                        description: |-
+                          The name of the service owning the credential.
+                          Example: stack-monitoring or dbmgmt
+                        type: string
+                      source:
+                        description: |-
+                          The source type and source name combination,delimited with (.) separator.
+                          This refers to the pre-existing source which alias cred should point to.
+                          Ex. {source type}.{source name} and source type max char limit is 63.
+                        type: string
+                    required:
+                    - name
+                    - service
+                    - source
+                    type: object
+                  name:
+                    description: The name of the alias, within the context of the
+                      source.
+                    type: string
+                  source:
+                    description: |-
+                      The source type and source name combination,delimited with (.) separator.
+                      Example: {source type}.{source name} and source type max char limit is 63.
+                    type: string
+                required:
+                - credential
+                - name
+                - source
+                type: object
+              compartmentId:
+                description: Compartment Identifier OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm).
+                type: string
+              credentials:
+                description: MonitoredResourceCredentials defines nested fields for
+                  MonitoredResource.Credentials.
+                properties:
+                  credentialType:
+                    type: string
+                  description:
+                    description: The user-specified textual description of the credential.
+                    type: string
+                  jsonData:
+                    type: string
+                  keyId:
+                    description: |-
+                      The master key should be created in OCI Vault owned by the client of this API.
+                      The user should have permission to access the vault key.
+                    type: string
+                  name:
+                    description: The name of the credential, within the context of
+                      the source.
+                    type: string
+                  properties:
+                    description: The credential properties list. Credential property
+                      values will be encrypted format.
+                    items:
+                      description: MonitoredResourceCredentialsProperty defines nested
+                        fields for MonitoredResource.Credentials.Property.
+                      properties:
+                        name:
+                          description: |-
+                            The name of the credential property, should confirm with names of properties of this credential's type.
+                            Example: For JMXCreds type, credential property name for weblogic user is 'Username'.
+                          type: string
+                        value:
+                          description: |-
+                            The value of the credential property name.
+                            Example: For JMXCreds type, credential property value for 'Username' property is 'weblogic'.
+                          type: string
+                      required:
+                      - name
+                      - value
+                      type: object
+                    type: array
+                  source:
+                    description: |-
+                      The source type and source name combination, delimited with (.) separator.
+                      {source type}.{source name} and source type max char limit is 63.
+                    type: string
+                  type:
+                    description: The type of the credential ( ex. JMXCreds,DBCreds).
+                    type: string
+                type: object
+              databaseConnectionDetails:
+                description: MonitoredResourceDatabaseConnectionDetails defines nested
+                  fields for MonitoredResource.DatabaseConnectionDetails.
+                properties:
+                  connectorId:
+                    description: Database connector Identifier OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm).
+                    type: string
+                  dbId:
+                    description: dbId of the database.
+                    type: string
+                  dbUniqueName:
+                    description: UniqueName used for database connection requests.
+                    type: string
+                  port:
+                    description: Listener Port number used for connection requests.
+                    type: integer
+                  protocol:
+                    description: Protocol used in DB connection string when connecting
+                      to external database service.
+                    type: string
+                  serviceName:
+                    description: Service name used for connection requests.
+                    type: string
+                  sslSecretId:
+                    description: SSL Secret Identifier for TCPS connector in OCI VaultOCID
+                      (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm).
+                    type: string
+                required:
+                - port
+                - protocol
+                - serviceName
+                type: object
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              displayName:
+                description: Monitored resource display name.
+                type: string
+              externalId:
+                description: |-
+                  The external resource identifier OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm).
+                  External resource is any OCI resource which is not a Stack Monitoring service resource.
+                  Currently supports only following resource types - Container database, non-container database,
+                  pluggable database and OCI compute instance.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              hostName:
+                description: Monitored resource host name.
+                type: string
+              id:
+                description: Monitored resource identifier OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm).
+                type: string
+              license:
+                description: License edition of the monitored resource.
+                type: string
+              lifecycleState:
+                description: Lifecycle state of the monitored resource.
+                type: string
+              managementAgentId:
+                description: Management Agent Identifier OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm).
+                type: string
+              name:
+                description: Monitored resource name.
+                type: string
+              properties:
+                description: List of monitored resource properties.
+                items:
+                  description: MonitoredResourceProperty defines nested fields for
+                    MonitoredResource.Property.
+                  properties:
+                    name:
+                      description: Property Name.
+                      type: string
+                    value:
+                      description: Property Value.
+                      type: string
+                  type: object
+                type: array
+              resourceCategory:
+                description: Resource Category to indicate the kind of resource type.
+                type: string
+              resourceTimeZone:
+                description: Time zone in the form of tz database canonical zone ID.
+                type: string
+              sourceType:
+                description: Source type to indicate if the resource is stack monitoring
+                  discovered, OCI native resource, etc.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of system tag keys. These predefined keys are scoped to namespaces.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              tenantId:
+                description: Tenancy Identifier OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm).
+                type: string
+              timeCreated:
+                description: |-
+                  The date and time when the monitored resource was created, expressed in
+                  RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+                type: string
+              timeUpdated:
+                description: |-
+                  The date and time when the monitored resource was last updated, expressed in
+                  RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+                type: string
+              type:
+                description: Monitored Resource Type.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

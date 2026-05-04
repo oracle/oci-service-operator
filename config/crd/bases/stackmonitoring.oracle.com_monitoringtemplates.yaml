@@ -1,0 +1,362 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: monitoringtemplates.stackmonitoring.oracle.com
+spec:
+  group: stackmonitoring.oracle.com
+  names:
+    kind: MonitoringTemplate
+    listKind: MonitoringTemplateList
+    plural: monitoringtemplates
+    singular: monitoringtemplate
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the MonitoringTemplate
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the MonitoringTemplate
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: MonitoringTemplate is the Schema for the monitoringtemplates
+          API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: MonitoringTemplateSpec defines the desired state of MonitoringTemplate.
+            properties:
+              compartmentId:
+                description: The OCID of the compartment containing the monitoringTemplate.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: A user-friendly description for the monitoring template.
+                  It does not have to be unique, and it's changeable. Avoid entering
+                  confidential information.
+                type: string
+              destinations:
+                description: A list of destinations for alarm notifications. Each
+                  destination is represented by the OCID of a related resource, such
+                  as a topic.
+                items:
+                  type: string
+                type: array
+              displayName:
+                description: A user-friendly name for the monitoring template. It
+                  is unique and mutable in nature. Avoid entering confidential information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              isAlarmsEnabled:
+                description: Whether the alarm is enabled or disabled, it will be
+                  Enabled by default.
+                type: boolean
+              isSplitNotificationEnabled:
+                description: Whether the alarm notification is enabled or disabled,
+                  it will be Enabled by default.
+                type: boolean
+              members:
+                description: List of members of this monitoring template
+                items:
+                  description: MonitoringTemplateMember defines nested fields for
+                    MonitoringTemplate.Member.
+                  properties:
+                    compositeType:
+                      description: The OCID of the composite resource type like EBS
+                        or Peoplesoft.
+                      type: string
+                    id:
+                      description: The OCID of the resourceInstance/resourceType/resourceGroup
+                      type: string
+                    type:
+                      description: Type of the member reference RESOURCE_INSTANCE,
+                        RESOURCE_TYPE, RESOURCE_GROUP
+                      type: string
+                  required:
+                  - id
+                  - type
+                  type: object
+                type: array
+              messageFormat:
+                description: The format to use for alarm notifications.
+                type: string
+              repeatNotificationDuration:
+                description: The frequency for re-submitting alarm notifications,
+                  if the alarm keeps firing without interruption. Format defined by
+                  ISO 8601. For example, PT4H indicates four hours. Minimum- PT1M.
+                  Maximum - P30D.
+                type: string
+            required:
+            - compartmentId
+            - destinations
+            - displayName
+            - members
+            type: object
+          status:
+            description: MonitoringTemplateStatus defines the observed state of MonitoringTemplate.
+            properties:
+              compartmentId:
+                description: The OCID of the compartment containing the monitoringTemplate.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: A user-friendly description for the monitoring template.
+                  It does not have to be unique, and it's changeable. Avoid entering
+                  confidential information.
+                type: string
+              destinations:
+                description: A list of destinations for alarm notifications. Each
+                  destination is represented by the OCID of a related resource.
+                items:
+                  type: string
+                type: array
+              displayName:
+                description: A user-friendly name for the monitoring template. It
+                  should be unique, and it's mutable in nature. Avoid entering confidential
+                  information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              id:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the monitoringTemplate
+                type: string
+              isAlarmsEnabled:
+                description: Whether the alarm is enabled or disabled. Default value
+                  is enabled.
+                type: boolean
+              isSplitNotificationEnabled:
+                description: Whether the alarm notification is enabled or disabled,
+                  it will be Enabled by default.
+                type: boolean
+              lifecycleState:
+                description: The current lifecycle state of the monitoring template.
+                type: string
+              members:
+                description: List of members of this monitoring template.
+                items:
+                  description: MonitoringTemplateMember defines nested fields for
+                    MonitoringTemplate.Member.
+                  properties:
+                    compositeType:
+                      description: The OCID of the composite resource type like EBS
+                        or Peoplesoft.
+                      type: string
+                    id:
+                      description: The OCID of the resourceInstance/resourceType/resourceGroup
+                      type: string
+                    type:
+                      description: Type of the member reference RESOURCE_INSTANCE,
+                        RESOURCE_TYPE, RESOURCE_GROUP
+                      type: string
+                  required:
+                  - id
+                  - type
+                  type: object
+                type: array
+              messageFormat:
+                description: The format to use for alarm notifications.
+                type: string
+              repeatNotificationDuration:
+                description: The frequency for re-submitting alarm notifications,
+                  if the alarm keeps firing without interruption. Format defined by
+                  ISO 8601. For example, PT4H indicates four hours. Minimum- PT1M.
+                  Maximum - P30D.
+                type: string
+              sdkStatus:
+                description: |-
+                  The current status of the monitoring template i.e. whether it is Applied or NotApplied.
+                  This uses a distinct JSON name so it can coexist with the OSOK status envelope.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of system tag keys. These predefined keys are scoped to namespaces.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              tenantId:
+                description: Tenant Identifier OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                type: string
+              timeCreated:
+                description: The date and time the monitoringTemplate was created.
+                  Format defined by RFC3339.
+                type: string
+              timeUpdated:
+                description: The date and time the monitoringTemplate was last updated.
+                  Format defined by RFC3339.
+                type: string
+              totalAlarmConditions:
+                description: Total Alarm Conditions
+                type: number
+              totalAppliedAlarmConditions:
+                description: Total Applied Alarm Conditions
+                type: number
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

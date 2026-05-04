@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <h2 id="argument-reference">Argument Reference</h2>
+    <p>The following arguments are supported:</p>
+    <ul>
+      <li><code>apm_domain_id</code> - (Required) (Updatable) The APM Domain ID the request is intended for.</li>
+      <li><code>content</code> - (Required) (Updatable) The content of the script. It may contain custom-defined tags for setting dynamic parameters.</li>
+      <li><code>content_type</code> - (Required) (Updatable) Content type of the script. Supported values are <code>SIDE</code>, <code>JS</code>, and <code>PLAYWRIGHT_TS</code>.</li>
+      <li><code>defined_tags</code> - (Optional) (Updatable) Defined tags for this resource. Each key is predefined and scoped to a namespace.</li>
+      <li><code>display_name</code> - (Required) (Updatable) Unique name that can be edited. The name should not contain any confidential information.</li>
+      <li><code>freeform_tags</code> - (Optional) (Updatable) Simple key-value pair that is applied without any predefined name, type, or scope.</li>
+      <li><code>content_file_name</code> - (Optional) (Updatable) File name of the uploaded script content.</li>
+      <li><code>parameters</code> - (Optional) (Updatable) List of script parameters used to overwrite defaults in the script content.
+        <ul>
+          <li><code>is_secret</code> - (Optional) (Updatable) If the parameter value is secret and should be kept confidential, set this field to <code>true</code>.</li>
+          <li><code>param_name</code> - (Required) (Updatable) Name of the parameter.</li>
+          <li><code>param_value</code> - (Optional) (Updatable) Value of the parameter.</li>
+        </ul>
+      </li>
+    </ul>
+  </body>
+</html>

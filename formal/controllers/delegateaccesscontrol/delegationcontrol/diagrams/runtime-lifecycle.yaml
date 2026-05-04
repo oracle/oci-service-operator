@@ -1,0 +1,83 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: delegateaccesscontrol
+slug: delegationcontrol
+kind: DelegationControl
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending:
+      - CREATING
+    updatePending:
+      - UPDATING
+    deletePending:
+      - DELETING
+  listLookup:
+    filters:
+      - compartmentId
+      - displayName
+      - resourceType
+      - resourceId
+    matchRule: >-
+      Adopt only a unique exact ListDelegationControls match on compartmentId
+      plus displayName plus resourceType plus a reusable resourceId filter,
+      then GetDelegationControl confirms the full resourceIds set plus any
+      create-only vault inputs in ACTIVE, CREATING, or UPDATING; duplicate
+      matches fail, and pre-create lookup is skipped when any required
+      identity fields are empty.
+  mutation:
+    mutable:
+      - definedTags
+      - delegationSubscriptionIds
+      - description
+      - displayName
+      - freeformTags
+      - isAutoApproveDuringMaintenance
+      - notificationMessageFormat
+      - notificationTopicId
+      - numApprovalsRequired
+      - preApprovedServiceProviderActionNames
+      - resourceIds
+    forceNew:
+      - compartmentId
+      - resourceType
+      - vaultId
+      - vaultKeyId
+  hooks:
+    create:
+      - helper: CreateDelegationControl
+    update:
+      - helper: UpdateDelegationControl
+    delete:
+      - helper: DeleteDelegationControl
+  followUp:
+    create: GetWorkRequest -> GetDelegationControl
+    update: GetWorkRequest -> GetDelegationControl
+    delete: GetWorkRequest -> GetDelegationControl/ListDelegationControls confirm-delete
+notes:
+  - Create, update, and delete persist the in-flight OCI work request in
+    `status.async.current`, normalize Delegate Access Control
+    `OperationStatus*` values into shared async classes, and normalize
+    work-request `OperationType*` values into create/update/delete phases
+    before deriving conditions and requeue behavior.
+  - Create prefers the returned `DelegationControl` body when OCI exposes an
+    identifier and otherwise recovers the OCID from work-request resources
+    before polling `GetDelegationControl`. Update also gates completion on a
+    succeeded work request plus a readable `GetDelegationControl`.
+  - Only `displayName`, `description`, `numApprovalsRequired`,
+    `delegationSubscriptionIds`, `isAutoApproveDuringMaintenance`,
+    `resourceIds`, `preApprovedServiceProviderActionNames`,
+    `notificationTopicId`, `notificationMessageFormat`, `freeformTags`, and
+    `definedTags` reconcile in place. `compartmentId`, `resourceType`,
+    `vaultId`, and `vaultKeyId` remain replacement-only drift, so the
+    published runtime never exercises provider-only
+    `ChangeDelegationControlCompartment`.
+  - Reviewed lifecycle mapping treats `FAILED` and `NEEDS_ATTENTION` as
+    terminal failure without requeue, and delete retains the finalizer until
+    `GetDelegationControl` or fallback `ListDelegationControls` confirms the
+    resource is deleted or not found.

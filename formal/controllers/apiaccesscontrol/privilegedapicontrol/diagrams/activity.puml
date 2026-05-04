@@ -1,0 +1,149 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Activity - apiaccesscontrol/PrivilegedApiControl
+skinparam activity {
+  backgroundColor #f8fafc
+  borderColor #0f172a
+  fontColor #0f172a
+  diamondBackgroundColor #e2e8f0
+  diamondBorderColor #1d4ed8
+  diamondFontColor #0f172a
+  startColor #1d4ed8
+  endColor #0f172a
+  barColor #1d4ed8
+}
+start
+partition "Observe and Bind" {
+:Start from shared flow\nshared/diagrams/shared-reconcile-activity.svg;
+:Read desired PrivilegedApiControl spec,\ntracked status, and delete intent;
+if ("Tracked or explicit OCI identity present?") then (yes)
+:Get the current OCI resource via\nGetPrivilegedApiControl;
+else (no)
+:Resolve an existing OCI resource through\nListPrivilegedApiControls using filters\ncompartmentId, displayName, resourceType, id;
+:Create the OCI resource via\nCreatePrivilegedApiControl when no reusable\nmatch is found;
+:Persist the resolved or created OCI identity\ninto status;
+endif
+}
+if ("Delete requested?") then (yes)
+partition "Delete" {
+:Delete path uses DeletePrivilegedApiControl\nwith required via GetPrivilegedApiControl or\nListPrivilegedApiControls to DELETED\nconfirmation;
+:Confirm deletion via GetPrivilegedApiControl\nor ListPrivilegedApiControls until OCI reaches\nDELETED;
+if ("Delete cleanup and finalizer release succeed?") then (yes)
+:Remove the finalizer after delete completion;
+else (no)
+:Stay blocked until cleanup or finalizer\nrelease succeeds;
+endif
+}
+stop
+else (no)
+partition "Lifecycle Classification" {
+if ("OCI state in retryable set?") then (yes)
+:Request requeue while OCI remains in CREATING,\nUPDATING, DELETING;
+stop
+endif
+if ("OCI state is outside success targets?") then (yes)
+:Return an unsuccessful reconcile result until\nOCI reaches ACTIVE;
+stop
+endif
+}
+partition "Ready and Drift Handling" {
+:Compare live OCI state against the\nrepo-authored mutation surface;
+if ("Force-new or conflicting drift detected?") then (yes)
+:Reject drift before OCI mutation for force-new\nfields compartmentId;
+stop
+endif
+if ("Supported mutable drift detected?") then (yes)
+:Apply ChangePrivilegedApiControlCompartment,\nUpdatePrivilegedApiControl only for mutable\nfields approverGroupIdList, definedTags,\ndescription, displayName (+6 more);
+else (no)
+:Skip the no-op mutation path;
+endif
+:Run provider helper hooks\ncreate=CreatePrivilegedApiControl;\nupdate=UpdatePrivilegedApiControl;\ndelete=DeletePrivilegedApiControl when the\nmatching field-driven path executes;
+:Apply explicit follow-up semantics\ncreate=GetWorkRequest ->\nGetPrivilegedApiControl; update=GetWorkRequest\n-> GetPrivilegedApiControl;\ndelete=GetWorkRequest ->\nGetPrivilegedApiControl/ListPrivilegedApiControls\nconfirm-delete;
+:Return success for the ACTIVE success state;
+:Project required status and finalizer policy\nretain-until-confirmed-delete;
+:Requeue on provisioning, updating, terminating;
+}
+endif
+stop
+note right
+shared diagram:
+shared/diagrams/shared-reconcile-activity.svg
+Start from the shared reconcile activity and
+specialize provider-backed CRUD, wait, and
+status-projection details here.
+Controller-local activity diagrams add
+list-lookup hints, secret policies, delete
+handling, and open formal gaps.
+archetype batch: Generated service-manager
+controllers specialize the shared reconcile path
+with formal runtime ownership.
+service: apiaccesscontrol
+slug: privilegedapicontrol
+kind: PrivilegedApiControl
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: provisioning, updating, terminating
+provider states: create CREATING; update
+UPDATING; delete DELETING
+follow-up: create=GetWorkRequest ->
+GetPrivilegedApiControl; update=GetWorkRequest
+-> GetPrivilegedApiControl;
+delete=GetWorkRequest ->
+GetPrivilegedApiControl/ListPrivilegedApiControls
+confirm-delete
+supported drift: approverGroupIdList,
+definedTags, description, displayName (+6 more)
+reject before mutate: force-new fields
+compartmentId
+create-only fields: none
+list lookup:
+oci_apiaccesscontrol_privileged_api_controls
+filters compartmentId, displayName,
+resourceType, id; Adopt only a unique exact
+ListPrivilegedApiControls match on compartmentId
+plus displayName plus resourceType in ACTIVE,
+CREATING, or UPDATING; duplicate matches fail,
+and pre-create lookup is skipped when any of
+those identity fields are empty.
+conflicts: none
+open gaps: none
+Create, update, and delete persist the in-flight
+OCI work request in `status.async.current`,
+normalize API Access Control `OperationStatus*`
+values into shared async classes, and normalize
+work-request `OperationType*` values into
+create/update/delete phases before deriving
+conditions and requeue behavior.
+Create prefers the returned
+`PrivilegedApiControl` body when OCI exposes an
+identifier and otherwise recovers the OCID from
+work-request resources before polling
+`GetPrivilegedApiControl`. Update also gates
+completion on a succeeded work request plus a
+readable `GetPrivilegedApiControl`.
+Only `displayName`, `description`,
+`notificationTopicId`, `approverGroupIdList`,
+`resourceType`, `resources`,
+`privilegedOperationList`, `numberOfApprovers`,
+`freeformTags`, and `definedTags` reconcile in
+place. `compartmentId` remains replacement-only
+drift, so the published runtime never exercises
+provider-only
+`ChangePrivilegedApiControlCompartment`.
+Reviewed lifecycle mapping treats `FAILED` and
+`NEEDS_ATTENTION` as terminal failure without
+requeue, and delete retains the finalizer until
+`GetPrivilegedApiControl` or fallback
+`ListPrivilegedApiControls` confirms the
+resource is deleted or not found.
+end note
+@enduml

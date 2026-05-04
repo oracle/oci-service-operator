@@ -1,0 +1,374 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: certificates.waas.oracle.com
+spec:
+  group: waas.oracle.com
+  names:
+    kind: Certificate
+    listKind: CertificateList
+    plural: certificates
+    singular: certificate
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the Certificate
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the Certificate
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: Certificate is the Schema for the certificates API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: CertificateSpec defines the desired state of Certificate.
+            properties:
+              certificateData:
+                description: |-
+                  The data of the SSL certificate.
+
+                  **Note:** Many SSL certificate providers require an intermediate certificate chain to ensure a trusted status.
+                  If your SSL certificate requires an intermediate certificate chain, please append the intermediate certificate
+                  key in the `certificateData` field after the leaf certificate issued by the SSL certificate provider. If you
+                  are unsure if your certificate requires an intermediate certificate chain, see your certificate
+                  provider's documentation.
+
+                  The example below shows an intermediate certificate appended to a leaf certificate.
+                type: string
+              compartmentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment in which to create the SSL certificate.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              displayName:
+                description: A user-friendly name for the SSL certificate. The name
+                  can be changed and does not need to be unique.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              isTrustVerificationDisabled:
+                description: Set to `true` if the SSL certificate is self-signed.
+                type: boolean
+              privateKeyData:
+                description: The private key of the SSL certificate.
+                type: string
+            required:
+            - certificateData
+            - compartmentId
+            - privateKeyData
+            type: object
+          status:
+            description: CertificateStatus defines the observed state of Certificate.
+            properties:
+              certificateData:
+                description: The data of the SSL certificate.
+                type: string
+              compartmentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the certificate's compartment.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              displayName:
+                description: The user-friendly name of the certificate.
+                type: string
+              extensions:
+                description: Additional attributes associated with users or public
+                  keys for managing relationships between Certificate Authorities.
+                items:
+                  description: CertificateExtension defines nested fields for Certificate.Extension.
+                  properties:
+                    isCritical:
+                      description: The critical flag of the extension. Critical extensions
+                        must be processed, non-critical extensions can be ignored.
+                      type: boolean
+                    name:
+                      description: The certificate extension name.
+                      type: string
+                    value:
+                      description: The certificate extension value.
+                      type: string
+                  type: object
+                type: array
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              id:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the certificate.
+                type: string
+              isTrustVerificationDisabled:
+                description: |-
+                  This indicates whether trust verification was disabled during the creation of SSL certificate.
+                  If `true` SSL certificate trust verification was disabled and this SSL certificate is most likely self-signed.
+                type: boolean
+              issuedBy:
+                type: string
+              issuerName:
+                description: CertificateIssuerName defines nested fields for Certificate.IssuerName.
+                properties:
+                  commonName:
+                    description: The Certificate Authority (CA) name.
+                    type: string
+                  country:
+                    description: ISO 3166-1 alpha-2 code of the country where the
+                      organization is located. For a list of codes, see ISO's website
+                      (https://www.iso.org/obp/ui/#search/code/).
+                    type: string
+                  emailAddress:
+                    description: The email address of the server's administrator.
+                    type: string
+                  locality:
+                    description: The city in which the organization is located.
+                    type: string
+                  organization:
+                    description: The organization name.
+                    type: string
+                  organizationalUnit:
+                    description: The field to differentiate between divisions within
+                      an organization.
+                    type: string
+                  stateProvince:
+                    description: The province where the organization is located.
+                    type: string
+                type: object
+              lifecycleState:
+                description: The current lifecycle state of the SSL certificate.
+                type: string
+              publicKeyInfo:
+                description: CertificatePublicKeyInfo defines nested fields for Certificate.PublicKeyInfo.
+                properties:
+                  algorithm:
+                    description: The algorithm identifier and parameters for the public
+                      key.
+                    type: string
+                  exponent:
+                    description: The private key exponent.
+                    type: integer
+                  keySize:
+                    description: The number of bits in a key used by a cryptographic
+                      algorithm.
+                    type: integer
+                type: object
+              serialNumber:
+                description: A unique, positive integer assigned by the Certificate
+                  Authority (CA). The issuer name and serial number identify a unique
+                  certificate.
+                type: string
+              signatureAlgorithm:
+                description: The identifier for the cryptographic algorithm used by
+                  the Certificate Authority (CA) to sign this certificate.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              subjectName:
+                description: CertificateSubjectName defines nested fields for Certificate.SubjectName.
+                properties:
+                  commonName:
+                    description: The fully qualified domain name used for DNS lookups
+                      of the server.
+                    type: string
+                  country:
+                    description: ISO 3166-1 alpha-2 code of the country where the
+                      organization is located. For a list of codes, see ISO's website
+                      (https://www.iso.org/obp/ui/#search/code/).
+                    type: string
+                  emailAddress:
+                    description: The email address of the server's administrator.
+                    type: string
+                  locality:
+                    description: The city in which the organization is located.
+                    type: string
+                  organization:
+                    description: The organization name.
+                    type: string
+                  organizationalUnit:
+                    description: The field to differentiate between divisions within
+                      an organization.
+                    type: string
+                  stateProvince:
+                    description: The province where the organization is located.
+                    type: string
+                type: object
+              timeCreated:
+                description: The date and time the certificate was created, expressed
+                  in RFC 3339 timestamp format.
+                type: string
+              timeNotValidAfter:
+                description: The date and time the certificate will expire, expressed
+                  in RFC 3339 timestamp format.
+                type: string
+              timeNotValidBefore:
+                description: The date and time the certificate will become valid,
+                  expressed in RFC 3339 timestamp format.
+                type: string
+              version:
+                description: The version of the encoded certificate.
+                type: integer
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

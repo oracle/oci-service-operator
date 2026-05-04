@@ -1,0 +1,612 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: softwaresources.osmanagementhub.oracle.com
+spec:
+  group: osmanagementhub.oracle.com
+  names:
+    kind: SoftwareSource
+    listKind: SoftwareSourceList
+    plural: softwaresources
+    singular: softwaresource
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the SoftwareSource
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the SoftwareSource
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: SoftwareSource is the Schema for the softwaresources API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: SoftwareSourceSpec defines the desired state of SoftwareSource.
+            properties:
+              advancedRepoOptions:
+                description: Advanced repository options for the software source
+                type: string
+              archType:
+                description: The architecture type supported by the private software
+                  source.
+                type: string
+              compartmentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment that contains the software source.
+                type: string
+              customSoftwareSourceFilter:
+                description: SoftwareSourceCustomSoftwareSourceFilter defines nested
+                  fields for SoftwareSource.CustomSoftwareSourceFilter.
+                properties:
+                  moduleStreamProfileFilters:
+                    description: The list of module stream/profile filters.
+                    items:
+                      description: SoftwareSourceCustomSoftwareSourceFilterModuleStreamProfileFilter
+                        defines nested fields for SoftwareSource.CustomSoftwareSourceFilter.ModuleStreamProfileFilter.
+                      properties:
+                        filterType:
+                          description: The type of the filter.
+                          type: string
+                        moduleName:
+                          description: Module name.
+                          type: string
+                        profileName:
+                          description: Profile name.
+                          type: string
+                        streamName:
+                          description: Stream name.
+                          type: string
+                      required:
+                      - filterType
+                      - moduleName
+                      type: object
+                    type: array
+                  packageFilters:
+                    description: The list of package filters.
+                    items:
+                      description: SoftwareSourceCustomSoftwareSourceFilterPackageFilter
+                        defines nested fields for SoftwareSource.CustomSoftwareSourceFilter.PackageFilter.
+                      properties:
+                        filterType:
+                          description: The type of the filter.
+                          type: string
+                        packageName:
+                          description: The package name.
+                          type: string
+                        packageNamePattern:
+                          description: The package name pattern.
+                          type: string
+                        packageVersion:
+                          description: The package version, which is denoted by 'version-release',
+                            or 'epoch:version-release'.
+                          type: string
+                      required:
+                      - filterType
+                      type: object
+                    type: array
+                  packageGroupFilters:
+                    description: The list of group filters.
+                    items:
+                      description: SoftwareSourceCustomSoftwareSourceFilterPackageGroupFilter
+                        defines nested fields for SoftwareSource.CustomSoftwareSourceFilter.PackageGroupFilter.
+                      properties:
+                        filterType:
+                          description: The type of the filter.
+                          type: string
+                        packageGroups:
+                          description: List of package group names.
+                          items:
+                            type: string
+                          type: array
+                      required:
+                      - filterType
+                      type: object
+                    type: array
+                type: object
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              description:
+                description: User-specified description for the software source. Avoid
+                  entering confidential information.
+                type: string
+              displayName:
+                description: User-friendly name for the software source. Does not
+                  have to be unique and you can change the name later. Avoid entering
+                  confidential information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              gpgKeyUrl:
+                description: URI of the GPG key for this software source.
+                type: string
+              isAutoResolveDependencies:
+                description: Indicates whether the service should automatically resolve
+                  package dependencies when including specific packages in the software
+                  source.
+                type: boolean
+              isAutomaticallyUpdated:
+                description: Indicates whether the service should automatically update
+                  the custom software source to use the latest package versions available.
+                  The service reviews packages levels once a day.
+                type: boolean
+              isCreatedFromPackageList:
+                description: Indicates whether the service should create the software
+                  source from a list of packages provided by the user.
+                type: boolean
+              isGpgCheckEnabled:
+                description: Whether signature verification should be done for the
+                  software source
+                type: boolean
+              isLatestContentOnly:
+                description: |-
+                  Indicates whether the software source will include only the latest versions of content from vendor software sources, while accounting for other constraints set in the custom or versioned custom software source (such as a package list or filters).
+                  * For a module filter that does not specify a stream, this will include all available streams, and within each stream only the latest version of packages.
+                  * For a module filter that does specify a stream, this will include only the latest version of packages for the specified stream.
+                  * For a package filter that does not specify a version, this will include only the latest available version of the package.
+                  * For a package filter that does specify a version, this will include only the specified version of the package (the isLatestContentOnly attribute is ignored).
+                  * For a package list, this will include only the specified version of packages and modules in the list (the isLatestContentOnly attribute is ignored).
+                type: boolean
+              isMirrorSyncAllowed:
+                description: Whether this software source can be synced to a management
+                  station
+                type: boolean
+              isSslVerifyEnabled:
+                description: Whether SSL validation needs to be turned on
+                type: boolean
+              jsonData:
+                type: string
+              originSoftwareSourceId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the vendor software source in the root compartment that is being
+                  replicated.
+                type: string
+              osFamily:
+                description: The OS family for the private software source.
+                type: string
+              packages:
+                description: A property used for compatibility only. It doesn't provide
+                  a complete list of packages. See AddPackagesToSoftwareSourceDetails
+                  for providing the list of packages used to create the software source
+                  when isCreatedFromPackageList is set to true.
+                items:
+                  type: string
+                type: array
+              softwareSourceSubType:
+                description: The creation type of a software source.
+                type: string
+              softwareSourceType:
+                type: string
+              softwareSourceVersion:
+                description: The version to assign to this custom software source.
+                type: string
+              url:
+                description: URL for the private software source.
+                type: string
+              vendorSoftwareSources:
+                description: List of vendor software sources.
+                items:
+                  description: SoftwareSourceVendorSoftwareSource defines nested fields
+                    for SoftwareSource.VendorSoftwareSource.
+                  properties:
+                    displayName:
+                      description: User-friendly name.
+                      type: string
+                    id:
+                      description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                        of the resource that is immutable on creation.
+                      type: string
+                  required:
+                  - displayName
+                  - id
+                  type: object
+                type: array
+            required:
+            - compartmentId
+            type: object
+          status:
+            description: SoftwareSourceStatus defines the observed state of SoftwareSource.
+            properties:
+              advancedRepoOptions:
+                description: Advanced repository options for the software source
+                type: string
+              archType:
+                description: The architecture type supported by the software source.
+                type: string
+              availability:
+                description: Availability of the software source (for non-OCI environments).
+                type: string
+              availabilityAtOci:
+                description: Availability of the software source (for OCI environments).
+                type: string
+              checksumType:
+                description: The yum repository checksum type used by this software
+                  source.
+                type: string
+              compartmentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment that contains the software source.
+                type: string
+              customSoftwareSourceFilter:
+                description: SoftwareSourceCustomSoftwareSourceFilter defines nested
+                  fields for SoftwareSource.CustomSoftwareSourceFilter.
+                properties:
+                  moduleStreamProfileFilters:
+                    description: The list of module stream/profile filters.
+                    items:
+                      description: SoftwareSourceCustomSoftwareSourceFilterModuleStreamProfileFilter
+                        defines nested fields for SoftwareSource.CustomSoftwareSourceFilter.ModuleStreamProfileFilter.
+                      properties:
+                        filterType:
+                          description: The type of the filter.
+                          type: string
+                        moduleName:
+                          description: Module name.
+                          type: string
+                        profileName:
+                          description: Profile name.
+                          type: string
+                        streamName:
+                          description: Stream name.
+                          type: string
+                      required:
+                      - filterType
+                      - moduleName
+                      type: object
+                    type: array
+                  packageFilters:
+                    description: The list of package filters.
+                    items:
+                      description: SoftwareSourceCustomSoftwareSourceFilterPackageFilter
+                        defines nested fields for SoftwareSource.CustomSoftwareSourceFilter.PackageFilter.
+                      properties:
+                        filterType:
+                          description: The type of the filter.
+                          type: string
+                        packageName:
+                          description: The package name.
+                          type: string
+                        packageNamePattern:
+                          description: The package name pattern.
+                          type: string
+                        packageVersion:
+                          description: The package version, which is denoted by 'version-release',
+                            or 'epoch:version-release'.
+                          type: string
+                      required:
+                      - filterType
+                      type: object
+                    type: array
+                  packageGroupFilters:
+                    description: The list of group filters.
+                    items:
+                      description: SoftwareSourceCustomSoftwareSourceFilterPackageGroupFilter
+                        defines nested fields for SoftwareSource.CustomSoftwareSourceFilter.PackageGroupFilter.
+                      properties:
+                        filterType:
+                          description: The type of the filter.
+                          type: string
+                        packageGroups:
+                          description: List of package group names.
+                          items:
+                            type: string
+                          type: array
+                      required:
+                      - filterType
+                      type: object
+                    type: array
+                type: object
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              description:
+                description: User-specified description for the software source.
+                type: string
+              displayName:
+                description: User-friendly name for the software source.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              gpgKeyFingerprint:
+                description: Fingerprint of the GPG key for this software source.
+                type: string
+              gpgKeyId:
+                description: ID of the GPG key for this software source.
+                type: string
+              gpgKeyUrl:
+                description: URI of the GPG key for this software source.
+                type: string
+              id:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the software source.
+                type: string
+              isAutoResolveDependencies:
+                description: Indicates whether the service should automatically resolve
+                  package dependencies when including specific packages in the software
+                  source.
+                type: boolean
+              isAutomaticallyUpdated:
+                description: Indicates whether the service should automatically update
+                  the custom software source to use the latest package versions available.
+                  The service reviews packages levels once a day.
+                type: boolean
+              isCreatedFromPackageList:
+                description: Indicates whether the service should create the software
+                  source from a list of packages provided by the user.
+                type: boolean
+              isGpgCheckEnabled:
+                description: Whether signature verification should be done for the
+                  software source
+                type: boolean
+              isLatestContentOnly:
+                description: |-
+                  Indicates whether the software source will include only the latest versions of content from vendor software sources, while accounting for other constraints set in the custom or versioned custom software source (such as a package list or filters).
+                  * For a module filter that does not specify a stream, this will include all available streams, and within each stream only the latest version of packages.
+                  * For a module filter that does specify a stream, this will include only the latest version of packages for the specified stream.
+                  * For a package filter that does not specify a version, this will include only the latest available version of the package.
+                  * For a package filter that does specify a version, this will include only the specified version of the package (the isLatestContentOnly attribute is ignored).
+                  * For a package list, this will include only the specified version of packages and modules in the list (the isLatestContentOnly attribute is ignored).
+                type: boolean
+              isMandatoryForAutonomousLinux:
+                description: Indicates whether the software source is required for
+                  the Autonomous Linux service.
+                type: boolean
+              isMirrorSyncAllowed:
+                description: Whether this software source can be synced to a management
+                  station
+                type: boolean
+              isSslVerifyEnabled:
+                description: Whether SSL validation needs to be turned on
+                type: boolean
+              jsonData:
+                type: string
+              lifecycleState:
+                description: The current state of the software source.
+                type: string
+              originSoftwareSourceId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the vendor software source in the root compartment. This property
+                  applies only to replicated vendor software sources.
+                type: string
+              osFamily:
+                description: The OS family of the software source.
+                type: string
+              packageCount:
+                description: Number of packages the software source contains.
+                format: int64
+                type: integer
+              packages:
+                description: The packages in the software source.
+                items:
+                  type: string
+                type: array
+              repoId:
+                description: The repository ID for the software source.
+                type: string
+              size:
+                description: The size of the software source in bytes (B).
+                type: number
+              softwareSourceSubType:
+                description: Identifies how the custom software source was created.
+                type: string
+              softwareSourceType:
+                type: string
+              softwareSourceVersion:
+                description: The version to assign to this custom software source.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  System tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              timeCreated:
+                description: The date and time the software source was created (in
+                  RFC 3339 (https://tools.ietf.org/rfc/rfc3339) format).
+                type: string
+              timeMetadataUpdated:
+                description: The date and time the metadata for this software source
+                  was last updated (in RFC 3339 (https://tools.ietf.org/rfc/rfc3339)
+                  format).
+                type: string
+              timeUpdated:
+                description: The date and time the software source was updated (in
+                  RFC 3339 (https://tools.ietf.org/rfc/rfc3339) format).
+                type: string
+              url:
+                description: URL for the repository. For vendor software sources,
+                  this is the URL to the regional yum server. For custom software
+                  sources, this is 'custom/<repoId>'.
+                type: string
+              vendorName:
+                description: Name of the vendor providing the software source.
+                type: string
+              vendorSoftwareSources:
+                description: List of vendor software sources that are used for the
+                  basis of the custom software source.
+                items:
+                  description: SoftwareSourceVendorSoftwareSource defines nested fields
+                    for SoftwareSource.VendorSoftwareSource.
+                  properties:
+                    displayName:
+                      description: User-friendly name.
+                      type: string
+                    id:
+                      description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                        of the resource that is immutable on creation.
+                      type: string
+                  required:
+                  - displayName
+                  - id
+                  type: object
+                type: array
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

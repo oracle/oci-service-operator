@@ -1,0 +1,631 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: offers.marketplaceprivateoffer.oracle.com
+spec:
+  group: marketplaceprivateoffer.oracle.com
+  names:
+    kind: Offer
+    listKind: OfferList
+    plural: offers
+    singular: offer
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the Offer
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the Offer
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: Offer is the Schema for the offers API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: OfferSpec defines the desired state of Offer.
+            properties:
+              buyerCompartmentId:
+                description: Compartment Identifier of the buyer
+                type: string
+              buyerInformation:
+                description: OfferBuyerInformation defines nested fields for Offer.BuyerInformation.
+                properties:
+                  additionalContacts:
+                    description: the additional contacts associated with the buyer
+                    items:
+                      description: OfferBuyerInformationAdditionalContact defines
+                        nested fields for Offer.BuyerInformation.AdditionalContact.
+                      properties:
+                        email:
+                          description: The email of the contact
+                          type: string
+                        firstName:
+                          description: The first name of the contact
+                          type: string
+                        lastName:
+                          description: The last name of the contact
+                          type: string
+                      type: object
+                    type: array
+                  companyName:
+                    description: the name of the company for the buyer
+                    type: string
+                  noteToBuyer:
+                    description: a note the seller can specify for the buyer through
+                      a notification email
+                    type: string
+                  primaryContact:
+                    description: OfferBuyerInformationPrimaryContact defines nested
+                      fields for Offer.BuyerInformation.PrimaryContact.
+                    properties:
+                      email:
+                        description: The email of the contact
+                        type: string
+                      firstName:
+                        description: The first name of the contact
+                        type: string
+                      lastName:
+                        description: The last name of the contact
+                        type: string
+                    type: object
+                type: object
+              customFields:
+                description: A list of key value pairs specified by the seller
+                items:
+                  description: OfferCustomField defines nested fields for Offer.CustomField.
+                  properties:
+                    key:
+                      description: the key of the custom field
+                      type: string
+                    value:
+                      description: the value of the custom field
+                      type: string
+                  type: object
+                type: array
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: Description of the Offer
+                type: string
+              displayName:
+                description: Offers Identifier
+                type: string
+              duration:
+                description: Duration the Offer will be active after its start date.
+                  An ISO8601 extended formatted string.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              internalNotes:
+                description: Internal notes of the Offer
+                type: string
+              pricing:
+                description: OfferPricing defines nested fields for Offer.Pricing.
+                properties:
+                  billingCycle:
+                    description: The frequency at which the customer is billed for
+                      the Offer
+                    type: string
+                  currencyType:
+                    description: The currency supported for a given Offer, in the
+                      format specified by ISO-4217
+                    type: string
+                  totalAmount:
+                    description: The total amount an Offer costs
+                    format: int64
+                    type: integer
+                type: object
+              resourceBundles:
+                description: A list of Resource Bundles associated with an Offer.
+                items:
+                  description: OfferResourceBundle defines nested fields for Offer.ResourceBundle.
+                  properties:
+                    quantity:
+                      description: The quantity of a resources associated with the
+                        bundle
+                      format: int64
+                      type: integer
+                    resourceIds:
+                      description: the ids of the resources in the Offer
+                      items:
+                        type: string
+                      type: array
+                    type:
+                      description: The type of resources in the bundle
+                      type: string
+                    unitOfMeasurement:
+                      description: The unit of measurement for the resource bundle
+                      type: string
+                  type: object
+                type: array
+              sellerCompartmentId:
+                description: Compartment Identifier of the seller
+                type: string
+              sellerInformation:
+                description: OfferSellerInformation defines nested fields for Offer.SellerInformation.
+                properties:
+                  additionalContacts:
+                    description: the additional contacts associated with the seller
+                    items:
+                      description: OfferSellerInformationAdditionalContact defines
+                        nested fields for Offer.SellerInformation.AdditionalContact.
+                      properties:
+                        email:
+                          description: The email of the contact
+                          type: string
+                        firstName:
+                          description: The first name of the contact
+                          type: string
+                        lastName:
+                          description: The last name of the contact
+                          type: string
+                      type: object
+                    type: array
+                  primaryContact:
+                    description: OfferSellerInformationPrimaryContact defines nested
+                      fields for Offer.SellerInformation.PrimaryContact.
+                    properties:
+                      email:
+                        description: The email of the contact
+                        type: string
+                      firstName:
+                        description: The first name of the contact
+                        type: string
+                      lastName:
+                        description: The last name of the contact
+                        type: string
+                    type: object
+                type: object
+              timeAcceptBy:
+                description: The time the Offer must be accepted by the Buyer before
+                  the Offer becomes invalid. An RFC3339 formatted datetime string
+                type: string
+              timeStartDate:
+                description: The time the Offer will become active after it has been
+                  accepted by the Buyer. An RFC3339 formatted datetime string
+                type: string
+            required:
+            - displayName
+            - sellerCompartmentId
+            type: object
+          status:
+            description: OfferStatus defines the observed state of Offer.
+            properties:
+              buyerCompartmentId:
+                description: OCID of the buyer's tenancy (root compartment).
+                type: string
+              buyerInformation:
+                description: OfferBuyerInformation defines nested fields for Offer.BuyerInformation.
+                properties:
+                  additionalContacts:
+                    description: the additional contacts associated with the buyer
+                    items:
+                      description: OfferBuyerInformationAdditionalContact defines
+                        nested fields for Offer.BuyerInformation.AdditionalContact.
+                      properties:
+                        email:
+                          description: The email of the contact
+                          type: string
+                        firstName:
+                          description: The first name of the contact
+                          type: string
+                        lastName:
+                          description: The last name of the contact
+                          type: string
+                      type: object
+                    type: array
+                  companyName:
+                    description: the name of the company for the buyer
+                    type: string
+                  noteToBuyer:
+                    description: a note the seller can specify for the buyer through
+                      a notification email
+                    type: string
+                  primaryContact:
+                    description: OfferBuyerInformationPrimaryContact defines nested
+                      fields for Offer.BuyerInformation.PrimaryContact.
+                    properties:
+                      email:
+                        description: The email of the contact
+                        type: string
+                      firstName:
+                        description: The first name of the contact
+                        type: string
+                      lastName:
+                        description: The last name of the contact
+                        type: string
+                    type: object
+                type: object
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: The description of the offer
+                type: string
+              displayName:
+                description: Offer Identifier, can be renamed
+                type: string
+              duration:
+                description: Duration the Offer will be active after its start date.
+                  An ISO8601 extended formatted string.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              id:
+                description: Unique identifier that is immutable on creation
+                type: string
+              lifecycleDetails:
+                description: A message describing the current state in more detail.
+                  For example, can be used to provide actionable information for a
+                  resource in Failed state.
+                type: string
+              lifecycleState:
+                description: The current state of the Offer.
+                type: string
+              offerStatus:
+                description: A substate for lifeCycleStatus to give a more human readable
+                  version of the offer
+                type: string
+              pricing:
+                description: OfferPricing defines nested fields for Offer.Pricing.
+                properties:
+                  billingCycle:
+                    description: The frequency at which the customer is billed for
+                      the Offer
+                    type: string
+                  currencyType:
+                    description: The currency supported for a given Offer, in the
+                      format specified by ISO-4217
+                    type: string
+                  totalAmount:
+                    description: The total amount an Offer costs
+                    format: int64
+                    type: integer
+                type: object
+              publisherSummary:
+                description: OfferPublisherSummary defines nested fields for Offer.PublisherSummary.
+                properties:
+                  compartmentId:
+                    description: The root compartment of the Publisher.
+                    type: string
+                  contactEmail:
+                    description: The public email address of the publisher for customers.
+                    type: string
+                  contactPhone:
+                    description: The phone number of the publisher in E.164 format.
+                    type: string
+                  definedTags:
+                    additionalProperties:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    description: |-
+                      Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                      Example: `{"foo-namespace": {"bar-key": "value"}}`
+                    type: object
+                  description:
+                    description: A description of the publisher.
+                    type: string
+                  displayName:
+                    description: The name of the publisher.
+                    type: string
+                  facebookUrl:
+                    description: Publisher's Facebook URL
+                    type: string
+                  freeformTags:
+                    additionalProperties:
+                      type: string
+                    description: |-
+                      Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                      Example: `{"bar-key": "value"}`
+                    type: object
+                  hqAddress:
+                    description: The address of the publisher's headquarters.
+                    type: string
+                  id:
+                    description: Unique OCID identifier for the publisher.
+                    type: string
+                  legacyId:
+                    description: Unique legacy service identifier for the publisher.
+                    type: string
+                  linkedinUrl:
+                    description: Publisher's LinkedIn URL
+                    type: string
+                  logo:
+                    description: OfferPublisherSummaryLogo defines nested fields for
+                      Offer.PublisherSummary.Logo.
+                    properties:
+                      contentUrl:
+                        description: The content URL of the upload data.
+                        type: string
+                      mimeType:
+                        description: The MIME type of the upload data.
+                        type: string
+                      name:
+                        description: The name used to refer to the upload data.
+                        type: string
+                    type: object
+                  publisherType:
+                    description: publisher type.
+                    type: string
+                  registryNamespace:
+                    description: The namespace for the publisher registry to persist
+                      artifacts.
+                    type: string
+                  systemTags:
+                    additionalProperties:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    description: |-
+                      System tags for this resource. Each key is predefined and scoped to a namespace.
+                      Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                    type: object
+                  timeCreated:
+                    description: The time the publisher was created. An RFC3339 formatted
+                      datetime string.
+                    type: string
+                  timeUpdated:
+                    description: The time the publisher was updated. An RFC3339 formatted
+                      datetime string.
+                    type: string
+                  twitterUrl:
+                    description: Publisher's Twitter URL
+                    type: string
+                  websiteUrl:
+                    description: The publisher's website.
+                    type: string
+                  yearFounded:
+                    description: The year the publisher's company or organization
+                      was founded.
+                    format: int64
+                    type: integer
+                type: object
+              resourceBundles:
+                description: A list of Resource Bundles associated with an Offer.
+                items:
+                  description: OfferResourceBundle defines nested fields for Offer.ResourceBundle.
+                  properties:
+                    quantity:
+                      description: The quantity of a resources associated with the
+                        bundle
+                      format: int64
+                      type: integer
+                    resourceIds:
+                      description: the ids of the resources in the Offer
+                      items:
+                        type: string
+                      type: array
+                    type:
+                      description: The type of resources in the bundle
+                      type: string
+                    unitOfMeasurement:
+                      description: The unit of measurement for the resource bundle
+                      type: string
+                  type: object
+                type: array
+              sellerCompartmentId:
+                description: OCID of the seller's tenancy (root compartment).
+                type: string
+              sellerInformation:
+                description: OfferSellerInformation defines nested fields for Offer.SellerInformation.
+                properties:
+                  additionalContacts:
+                    description: the additional contacts associated with the seller
+                    items:
+                      description: OfferSellerInformationAdditionalContact defines
+                        nested fields for Offer.SellerInformation.AdditionalContact.
+                      properties:
+                        email:
+                          description: The email of the contact
+                          type: string
+                        firstName:
+                          description: The first name of the contact
+                          type: string
+                        lastName:
+                          description: The last name of the contact
+                          type: string
+                      type: object
+                    type: array
+                  primaryContact:
+                    description: OfferSellerInformationPrimaryContact defines nested
+                      fields for Offer.SellerInformation.PrimaryContact.
+                    properties:
+                      email:
+                        description: The email of the contact
+                        type: string
+                      firstName:
+                        description: The first name of the contact
+                        type: string
+                      lastName:
+                        description: The last name of the contact
+                        type: string
+                    type: object
+                type: object
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              timeAcceptBy:
+                description: The time the Offer must be accepted by the Buyer before
+                  the Offer becomes invalid. An RFC3339 formatted datetime string
+                type: string
+              timeAccepted:
+                description: The time the Offer was accepted by the Buyer of the Offer.
+                  An RFC3339 formatted datetime string
+                type: string
+              timeCreated:
+                description: The time the the Offer was created. An RFC3339 formatted
+                  datetime string
+                type: string
+              timeOfferEnd:
+                description: The time the accepted Offer will end. An RFC3339 formatted
+                  datetime string
+                type: string
+              timeStartDate:
+                description: The time the Offer will become active after it has been
+                  accepted by the Buyer. An RFC3339 formatted datetime string
+                type: string
+              timeUpdated:
+                description: The time the Offer was updated. An RFC3339 formatted
+                  datetime string
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

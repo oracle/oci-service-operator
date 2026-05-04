@@ -1,0 +1,467 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: managementstations.osmanagementhub.oracle.com
+spec:
+  group: osmanagementhub.oracle.com
+  names:
+    kind: ManagementStation
+    listKind: ManagementStationList
+    plural: managementstations
+    singular: managementstation
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the ManagementStation
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the ManagementStation
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: ManagementStation is the Schema for the managementstations API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ManagementStationSpec defines the desired state of ManagementStation.
+            properties:
+              compartmentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment that contains the management station.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              description:
+                description: User-specified description of the management station.
+                  Avoid entering confidential information.
+                type: string
+              displayName:
+                description: User-friendly name for the management station. Does not
+                  have to be unique and you can change the name later. Avoid entering
+                  confidential information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              hostname:
+                description: Hostname of the management station.
+                type: string
+              isAutoConfigEnabled:
+                description: When enabled, the station setup script automatically
+                  runs to configure the firewall and SELinux settings on the station.
+                type: boolean
+              mirror:
+                description: ManagementStationMirror defines nested fields for ManagementStation.Mirror.
+                properties:
+                  directory:
+                    description: Path to the data volume on the management station
+                      where software source mirrors are stored.
+                    type: string
+                  isSslverifyEnabled:
+                    description: When enabled, the SSL certificate is verified whenever
+                      an instance installs or updates a package from a software source
+                      that is mirrored on the management station.
+                    type: boolean
+                  port:
+                    description: Default mirror listening port for http.
+                    type: string
+                  sslcert:
+                    description: Path to the SSL cerfificate.
+                    type: string
+                  sslport:
+                    description: Default mirror listening port for https.
+                    type: string
+                required:
+                - directory
+                - port
+                - sslport
+                type: object
+              proxy:
+                description: ManagementStationProxy defines nested fields for ManagementStation.Proxy.
+                properties:
+                  forward:
+                    description: The URL the proxy will forward to.
+                    type: string
+                  hosts:
+                    description: List of hosts.
+                    items:
+                      type: string
+                    type: array
+                  isEnabled:
+                    description: Indicates if the proxy should be enabled or disabled.
+                      Default is enabled.
+                    type: boolean
+                  port:
+                    description: Listening port used for the proxy.
+                    type: string
+                required:
+                - isEnabled
+                type: object
+            required:
+            - compartmentId
+            - displayName
+            - hostname
+            - mirror
+            - proxy
+            type: object
+          status:
+            description: ManagementStationStatus defines the observed state of ManagementStation.
+            properties:
+              compartmentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment that contains the management station.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              description:
+                description: User-specified description for the management station.
+                type: string
+              displayName:
+                description: A user-friendly name for the management station.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              health:
+                description: ManagementStationHealth defines nested fields for ManagementStation.Health.
+                properties:
+                  description:
+                    description: Explanation of the health status.
+                    type: string
+                  state:
+                    description: Overall health status of the management station.
+                    type: string
+                type: object
+              healthState:
+                description: Overall health status of the managment station.
+                type: string
+              hostname:
+                description: Hostname of the management station.
+                type: string
+              id:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the management station.
+                type: string
+              isAutoConfigEnabled:
+                description: When enabled, the station setup script automatically
+                  runs to configure the firewall and SELinux settings on the station.
+                type: boolean
+              lifecycleState:
+                description: The current state of the management station.
+                type: string
+              location:
+                description: The location of the instance that is acting as the management
+                  station.
+                type: string
+              managedInstanceId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the instance that is acting as the management station.
+                type: string
+              mirror:
+                description: ManagementStationMirror defines nested fields for ManagementStation.Mirror.
+                properties:
+                  directory:
+                    description: Path to the data volume on the management station
+                      where software source mirrors are stored.
+                    type: string
+                  isSslverifyEnabled:
+                    description: When enabled, the SSL certificate is verified whenever
+                      an instance installs or updates a package from a software source
+                      that is mirrored on the management station.
+                    type: boolean
+                  port:
+                    description: Default mirror listening port for http.
+                    type: string
+                  sslcert:
+                    description: Path to the SSL cerfificate.
+                    type: string
+                  sslport:
+                    description: Default mirror listening port for https.
+                    type: string
+                required:
+                - directory
+                - port
+                - sslport
+                type: object
+              mirrorCapacity:
+                description: A decimal number representing the amount of mirror capacity
+                  used by the sync.
+                type: integer
+              mirrorPackageCount:
+                description: The total number of all packages within the mirrored
+                  software sources.
+                type: integer
+              mirrorSize:
+                description: The total size of all software source mirrors in bytes.
+                format: int64
+                type: integer
+              mirrorStorageAvailableSize:
+                description: Amount of available mirror storage in bytes.
+                format: int64
+                type: integer
+              mirrorStorageSize:
+                description: Total mirror storage size in bytes.
+                format: int64
+                type: integer
+              mirrorSyncStatus:
+                description: ManagementStationMirrorSyncStatus defines nested fields
+                  for ManagementStation.MirrorSyncStatus.
+                properties:
+                  failed:
+                    description: Total number of software sources that failed to sync.
+                    type: integer
+                  queued:
+                    description: Total number of software sources that are queued
+                      for sync.
+                    type: integer
+                  synced:
+                    description: Total number of software sources that successfully
+                      synced.
+                    type: integer
+                  syncing:
+                    description: Total number of software sources currently syncing.
+                    type: integer
+                  unsynced:
+                    description: Total number of software sources that have not yet
+                      been synced.
+                    type: integer
+                type: object
+              mirrorUniquePackageCount:
+                description: The total number of unique packages within the mirrored
+                  software sources on the station. Each package is counted only once,
+                  regardless of how many versions it has.
+                type: integer
+              overallPercentage:
+                description: A decimal number representing the progress of the current
+                  mirror sync.
+                type: integer
+              overallState:
+                description: Current state of the mirror sync for the management station.
+                type: string
+              peerManagementStations:
+                description: A list of other management stations that are behind the
+                  same load balancer within a high availability configuration. Stations
+                  are identified as peers if they have the same hostname and compartment.
+                items:
+                  description: ManagementStationPeerManagementStation defines nested
+                    fields for ManagementStation.PeerManagementStation.
+                  properties:
+                    displayName:
+                      description: User-friendly name for the management station.
+                      type: string
+                    id:
+                      description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                        of the management station.
+                      type: string
+                  type: object
+                type: array
+              profileId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the registration profile used for the management station.
+                type: string
+              proxy:
+                description: ManagementStationProxy defines nested fields for ManagementStation.Proxy.
+                properties:
+                  forward:
+                    description: The URL the proxy will forward to.
+                    type: string
+                  hosts:
+                    description: List of hosts.
+                    items:
+                      type: string
+                    type: array
+                  isEnabled:
+                    description: Indicates if the proxy should be enabled or disabled.
+                      Default is enabled.
+                    type: boolean
+                  port:
+                    description: Listening port used for the proxy.
+                    type: string
+                required:
+                - isEnabled
+                type: object
+              scheduledJobId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the scheduled job for the mirror sync.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  System tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              timeNextExecution:
+                description: The date and time of the next scheduled mirror sync (in
+                  RFC 3339 (https://tools.ietf.org/rfc/rfc3339) format).
+                type: string
+              totalMirrors:
+                description: The number of software sources that the station is mirroring.
+                type: integer
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

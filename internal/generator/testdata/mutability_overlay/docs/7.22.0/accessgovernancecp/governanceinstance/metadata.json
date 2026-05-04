@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "accessgovernancecp",
+  "kind": "GovernanceInstance",
+  "formalSlug": "governanceinstance",
+  "providerResource": "oci_access_governance_cp_governance_instance",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/access_governance_cp_governance_instance",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/access_governance_cp_governance_instance",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/accessgovernancecp/governanceinstance/page.html",
+  "bodySHA256": "e7b3cb8fa037e96a942f396d699f3261944baa3ba9595a7a052635feff8e4475",
+  "bodyBytes": 1114,
+  "fixtureBodyPath": "7.22.0/accessgovernancecp/governanceinstance/page.html"
+}

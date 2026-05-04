@@ -361,4 +361,3 @@ DatabaseToolsConnectionUserPassword defines nested fields for DatabaseToolsConne
 | `jsonData` | - | `string` | No | - | - |
 | `secretId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the secret containing the user password. | `string` | No | - | - |
 | `valueType` | - | `string` | No | - | - |
-

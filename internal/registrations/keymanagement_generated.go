@@ -13,6 +13,7 @@ import (
 	keymanagementv1beta1 "github.com/oracle/oci-service-operator/api/keymanagement/v1beta1"
 	keymanagementcontrollers "github.com/oracle/oci-service-operator/controllers/keymanagement"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
+	keymanagementekmsprivateendpointservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/keymanagement/ekmsprivateendpoint"
 	keymanagementvaultservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/keymanagement/vault"
 )
 
@@ -21,6 +22,17 @@ func init() {
 		Group:       "keymanagement",
 		AddToScheme: keymanagementv1beta1.AddToScheme,
 		SetupWithManager: func(ctx Context) error {
+			if err := (&keymanagementcontrollers.EkmsPrivateEndpointReconciler{
+				Reconciler: NewBaseReconciler(
+					ctx,
+					"EkmsPrivateEndpoint",
+					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
+						return keymanagementekmsprivateendpointservicemanager.NewEkmsPrivateEndpointServiceManagerWithDeps(deps)
+					},
+				),
+			}).SetupWithManager(ctx.Manager); err != nil {
+				return fmt.Errorf("setup EkmsPrivateEndpoint controller: %w", err)
+			}
 			if err := (&keymanagementcontrollers.VaultReconciler{
 				Reconciler: NewBaseReconciler(
 					ctx,
