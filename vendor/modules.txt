@@ -186,7 +186,9 @@ github.com/oracle/oci-go-sdk/v65/dns
 github.com/oracle/oci-go-sdk/v65/email
 github.com/oracle/oci-go-sdk/v65/events
 github.com/oracle/oci-go-sdk/v65/functions
+github.com/oracle/oci-go-sdk/v65/gdp
 github.com/oracle/oci-go-sdk/v65/generativeai
+github.com/oracle/oci-go-sdk/v65/generativeaiagent
 github.com/oracle/oci-go-sdk/v65/governancerulescontrolplane
 github.com/oracle/oci-go-sdk/v65/healthchecks
 github.com/oracle/oci-go-sdk/v65/identity
@@ -200,6 +202,7 @@ github.com/oracle/oci-go-sdk/v65/loadbalancer
 github.com/oracle/oci-go-sdk/v65/lockbox
 github.com/oracle/oci-go-sdk/v65/loganalytics
 github.com/oracle/oci-go-sdk/v65/logging
+github.com/oracle/oci-go-sdk/v65/lustrefilestorage
 github.com/oracle/oci-go-sdk/v65/managedkafka
 github.com/oracle/oci-go-sdk/v65/managementagent
 github.com/oracle/oci-go-sdk/v65/managementdashboard
@@ -211,14 +214,17 @@ github.com/oracle/oci-go-sdk/v65/mysql
 github.com/oracle/oci-go-sdk/v65/networkloadbalancer
 github.com/oracle/oci-go-sdk/v65/nosql
 github.com/oracle/oci-go-sdk/v65/objectstorage
+github.com/oracle/oci-go-sdk/v65/oce
 github.com/oracle/oci-go-sdk/v65/ocvp
 github.com/oracle/oci-go-sdk/v65/oda
 github.com/oracle/oci-go-sdk/v65/ons
+github.com/oracle/oci-go-sdk/v65/opa
 github.com/oracle/oci-go-sdk/v65/opensearch
 github.com/oracle/oci-go-sdk/v65/operatoraccesscontrol
 github.com/oracle/oci-go-sdk/v65/opsi
 github.com/oracle/oci-go-sdk/v65/optimizer
 github.com/oracle/oci-go-sdk/v65/osmanagementhub
+github.com/oracle/oci-go-sdk/v65/psa
 github.com/oracle/oci-go-sdk/v65/psql
 github.com/oracle/oci-go-sdk/v65/queue
 github.com/oracle/oci-go-sdk/v65/recovery
@@ -233,9 +239,13 @@ github.com/oracle/oci-go-sdk/v65/stackmonitoring
 github.com/oracle/oci-go-sdk/v65/streaming
 github.com/oracle/oci-go-sdk/v65/usageapi
 github.com/oracle/oci-go-sdk/v65/vault
+github.com/oracle/oci-go-sdk/v65/vbsinst
+github.com/oracle/oci-go-sdk/v65/visualbuilder
+github.com/oracle/oci-go-sdk/v65/vnmonitoring
 github.com/oracle/oci-go-sdk/v65/waa
 github.com/oracle/oci-go-sdk/v65/waas
 github.com/oracle/oci-go-sdk/v65/waf
+github.com/oracle/oci-go-sdk/v65/wlms
 github.com/oracle/oci-go-sdk/v65/workrequests
 # github.com/pkg/errors v0.9.1
 ## explicit
