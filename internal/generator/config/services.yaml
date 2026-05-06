@@ -3383,6 +3383,42 @@ services:
         WorkRequestLog:
           - WorkRequestLogEntry
 
+  - service: oce
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/oce
+    group: oce
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - OceInstance
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: OceInstance
+          formalSpec: oceinstance
+          async:
+            strategy: workrequest
+            runtime: generatedruntime
+            formalClassification: workrequest
+            workRequest:
+              source: service-sdk
+              phases:
+                - create
+                - update
+                - delete
+          serviceManager:
+            packagePath: oce/oceinstance
+
   - service: ocvp
     sdkPackage: github.com/oracle/oci-go-sdk/v65/ocvp
     group: ocvp

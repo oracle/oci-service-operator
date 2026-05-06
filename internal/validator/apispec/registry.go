@@ -65,6 +65,7 @@ import (
 	networkloadbalancerv1beta1 "github.com/oracle/oci-service-operator/api/networkloadbalancer/v1beta1"
 	nosqlv1beta1 "github.com/oracle/oci-service-operator/api/nosql/v1beta1"
 	objectstoragev1beta1 "github.com/oracle/oci-service-operator/api/objectstorage/v1beta1"
+	ocev1beta1 "github.com/oracle/oci-service-operator/api/oce/v1beta1"
 	ocvpv1beta1 "github.com/oracle/oci-service-operator/api/ocvp/v1beta1"
 	odav1beta1 "github.com/oracle/oci-service-operator/api/oda/v1beta1"
 	onsv1beta1 "github.com/oracle/oci-service-operator/api/ons/v1beta1"
@@ -3398,6 +3399,25 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "marketplacepublisher.TermVersionSummary",
+			},
+		},
+	},
+	{
+		Name:       "OceOceInstance",
+		SpecType:   reflect.TypeOf(ocev1beta1.OceInstanceSpec{}),
+		StatusType: reflect.TypeOf(ocev1beta1.OceInstanceStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "oce.CreateOceInstanceDetails",
+			},
+			{
+				SDKStruct: "oce.UpdateOceInstanceDetails",
+			},
+			{
+				SDKStruct: "oce.OceInstance",
+			},
+			{
+				SDKStruct: "oce.OceInstanceSummary",
 			},
 		},
 	},

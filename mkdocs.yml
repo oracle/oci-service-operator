@@ -191,6 +191,7 @@ nav:
           - networkloadbalancer.oracle.com/v1beta1: reference/api/networkloadbalancer/v1beta1/index.md
           - nosql.oracle.com/v1beta1: reference/api/nosql/v1beta1/index.md
           - objectstorage.oracle.com/v1beta1: reference/api/objectstorage/v1beta1/index.md
+          - oce.oracle.com/v1beta1: reference/api/oce/v1beta1/index.md
           - ocvp.oracle.com/v1beta1: reference/api/ocvp/v1beta1/index.md
           - oda.oracle.com/v1beta1: reference/api/oda/v1beta1/index.md
           - ons.oracle.com/v1beta1: reference/api/ons/v1beta1/index.md

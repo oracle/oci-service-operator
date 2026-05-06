@@ -641,6 +641,16 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 				retryableConflictGeneratedRuntime,
 				"Namespace resolution may perform an extra GetNamespace OCI call before CRUD when spec.namespace and status.namespace are both empty.",
 			),
+			resourceKey("oce", "OceInstance"): reviewedRegistration(
+				"oce",
+				"oce",
+				apiErrorCoverageDefaultVersion,
+				"OceInstance",
+				APIErrorCoverageFamilyGeneratedRuntimeWorkRequest,
+				deleteNotFoundReadback,
+				retryableConflictWorkRequest,
+				"Handwritten OceInstance runtime narrows mutable drift, binds by exact compartmentId plus tenancyId plus name via the displayName list filter, and persists create/update/delete work-request state with OCID recovery from GetWorkRequest resources.",
+			),
 			resourceKey("opensearch", "OpensearchCluster"): reviewedRegistration(
 				"opensearch",
 				"opensearch",

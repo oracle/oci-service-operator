@@ -1818,6 +1818,32 @@ rules:
   - patch
   - update
 - apiGroups:
+  - oce.oracle.com
+  resources:
+  - oceinstances
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - oce.oracle.com
+  resources:
+  - oceinstances/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - oce.oracle.com
+  resources:
+  - oceinstances/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - ocvp.oracle.com
   resources:
   - clusters

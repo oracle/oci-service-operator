@@ -775,6 +775,20 @@ packages:
         kind: Bucket
         summary: Manage OCI Object Storage buckets.
 
+  - package: oce
+    displayName: Oracle Content Management
+    summary: Manage OCI Oracle Content Management instances from Kubernetes with a reviewed controller-backed runtime.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to OceInstance while work-request helper families stay unpublished.
+      - The published runtime uses service-SDK work requests for create, update, and delete, with exact `compartmentId` plus `tenancyId` plus `name` pre-create reuse through the list API's `displayName` filter.
+    kindOverrides:
+      - group: oce
+        kind: OceInstance
+        summary: Manage OCI Oracle Content Management instances.
+
   - package: ocvp
     displayName: Oracle Cloud VMware Solution
     summary: Manage OCI Oracle Cloud VMware Solution resources from Kubernetes.

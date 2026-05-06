@@ -66,6 +66,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/networkloadbalancer"
 	"github.com/oracle/oci-go-sdk/v65/nosql"
 	"github.com/oracle/oci-go-sdk/v65/objectstorage"
+	"github.com/oracle/oci-go-sdk/v65/oce"
 	"github.com/oracle/oci-go-sdk/v65/ocvp"
 	"github.com/oracle/oci-go-sdk/v65/oda"
 	"github.com/oracle/oci-go-sdk/v65/ons"
@@ -921,6 +922,12 @@ var seedTargets = []Target{
 	newTarget("marketplacepublisher", "ListingRevisionSummary", reflect.TypeOf(marketplacepublisher.ListingRevisionSummary{})),
 	newTarget("marketplacepublisher", "ListingSummary", reflect.TypeOf(marketplacepublisher.ListingSummary{})),
 	newTarget("marketplacepublisher", "TermSummary", reflect.TypeOf(marketplacepublisher.TermSummary{})),
+
+	// Oce CRD support
+	newTarget("oce", "CreateOceInstanceDetails", reflect.TypeOf(oce.CreateOceInstanceDetails{})),
+	newTarget("oce", "UpdateOceInstanceDetails", reflect.TypeOf(oce.UpdateOceInstanceDetails{})),
+	newTarget("oce", "OceInstance", reflect.TypeOf(oce.OceInstance{})),
+	newTarget("oce", "OceInstanceSummary", reflect.TypeOf(oce.OceInstanceSummary{})),
 
 	// Opensearch CRD support
 	newTarget("opensearch", "CreateOpensearchClusterDetails", reflect.TypeOf(opensearch.CreateOpensearchClusterDetails{})),

@@ -1182,6 +1182,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"networkloadbalancer",
 		"nosql",
 		"objectstorage",
+		"oce",
 		"ocvp",
 		"oda",
 		"opensearch",
@@ -1275,6 +1276,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"networkloadbalancer",
 		"nosql",
 		"objectstorage",
+		"oce",
 		"ocvp",
 		"oda",
 		"opensearch",
@@ -1362,6 +1364,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	assertServiceSelection(t, services["networkloadbalancer"], true, SelectionModeExplicit, []string{"Backend", "BackendSet", "Listener", "NetworkLoadBalancer"})
 	assertServiceSelection(t, services["nosql"], true, SelectionModeExplicit, []string{"Table"})
 	assertServiceSelection(t, services["objectstorage"], true, SelectionModeExplicit, []string{"Bucket"})
+	assertServiceSelection(t, services["oce"], true, SelectionModeExplicit, []string{"OceInstance"})
 	assertServiceSelection(t, services["ocvp"], true, SelectionModeExplicit, []string{"Cluster", "EsxiHost", "Sddc"})
 	assertServiceSelection(t, services["oda"], true, SelectionModeExplicit, []string{"AuthenticationProvider", "Channel", "DigitalAssistant", "ImportedPackage", "OdaInstance", "OdaInstanceAttachment", "OdaPrivateEndpoint", "OdaPrivateEndpointAttachment", "OdaPrivateEndpointScanProxy", "Skill", "SkillParameter", "Translator"})
 	assertServiceSelection(t, services["opensearch"], true, SelectionModeExplicit, []string{"OpensearchCluster"})
@@ -1402,7 +1405,7 @@ func TestCheckedInConfigIncludesRuntimeRolloutMetadata(t *testing.T) {
 	t.Parallel()
 
 	cfg := loadCheckedInConfig(t)
-	services := serviceConfigsByName(t, cfg, "aidocument", "ailanguage", "aispeech", "aivision", "bds", "containerengine", "containerinstances", "core", "dataflow", "database", "databasemigration", "databasetools", "datalabelingservice", "datascience", "functions", "identity", "keymanagement", "mysql", "nosql", "ocvp", "psql", "redis", "streaming")
+	services := serviceConfigsByName(t, cfg, "aidocument", "ailanguage", "aispeech", "aivision", "bds", "containerengine", "containerinstances", "core", "dataflow", "database", "databasemigration", "databasetools", "datalabelingservice", "datascience", "functions", "identity", "keymanagement", "mysql", "nosql", "oce", "ocvp", "psql", "redis", "streaming")
 	assertAIDocumentRuntimeRolloutMetadata(t, services["aidocument"])
 	assertAILanguageRuntimeRolloutMetadata(t, services["ailanguage"])
 	assertAISpeechRuntimeRolloutMetadata(t, services["aispeech"])
@@ -1456,6 +1459,19 @@ func TestCheckedInConfigIncludesRuntimeRolloutMetadata(t *testing.T) {
 	assertDataflowRuntimeRolloutMetadata(t, services["dataflow"])
 	assertMySQLRuntimeRolloutMetadata(t, services["mysql"])
 	assertNoSQLRuntimeRolloutMetadata(t, services["nosql"])
+	assertServiceGenerationStrategies(t, services["oce"], generationStrategyExpectations{
+		controller:     GenerationStrategyGenerated,
+		serviceManager: GenerationStrategyGenerated,
+		registration:   GenerationStrategyGenerated,
+		webhook:        GenerationStrategyNone,
+	})
+	oceAsync := assertAsyncContract(t, services["oce"], "OceInstance", AsyncStrategyWorkRequest, AsyncRuntimeGeneratedRuntime)
+	if oceAsync.WorkRequest.Source != AsyncWorkRequestSourceServiceSDK {
+		t.Fatalf("oce OceInstance workRequest.source = %q, want %q", oceAsync.WorkRequest.Source, AsyncWorkRequestSourceServiceSDK)
+	}
+	if !slices.Equal(oceAsync.WorkRequest.Phases, []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}) {
+		t.Fatalf("oce OceInstance workRequest.phases = %v", oceAsync.WorkRequest.Phases)
+	}
 	assertPSQLRuntimeRolloutMetadata(t, services["psql"])
 	assertStreamingRuntimeRolloutMetadata(t, services["streaming"])
 	assertCoreRuntimeRolloutMetadata(t, services["core"])
@@ -1488,7 +1504,7 @@ func TestCheckedInConfigPromotesFormalSpecReferences(t *testing.T) {
 	t.Parallel()
 
 	cfg := loadCheckedInConfig(t)
-	services := serviceConfigsByName(t, cfg, "aidocument", "ailanguage", "aispeech", "aivision", "analytics", "apiaccesscontrol", "bds", "containerengine", "containerinstances", "core", "database", "databasemigration", "databasetools", "datalabelingservice", "datascience", "dataflow", "identity", "mysql", "objectstorage", "ocvp", "opensearch", "psql", "redis", "streaming")
+	services := serviceConfigsByName(t, cfg, "aidocument", "ailanguage", "aispeech", "aivision", "analytics", "apiaccesscontrol", "bds", "containerengine", "containerinstances", "core", "database", "databasemigration", "databasetools", "datalabelingservice", "datascience", "dataflow", "identity", "mysql", "objectstorage", "oce", "ocvp", "opensearch", "psql", "redis", "streaming")
 	assertFormalSpecFor(t, services["aidocument"], "Project", "project")
 	assertFormalSpecFor(t, services["ailanguage"], "Project", "project")
 	assertFormalSpecFor(t, services["aispeech"], "TranscriptionJob", "transcriptionjob")
@@ -1524,6 +1540,7 @@ func TestCheckedInConfigPromotesFormalSpecReferences(t *testing.T) {
 	assertFormalSpecFor(t, services["datascience"], "Project", "project")
 	assertFormalSpecFor(t, services["mysql"], "DbSystem", "dbsystem")
 	assertFormalSpecFor(t, services["objectstorage"], "Bucket", "objectstoragebucket")
+	assertFormalSpecFor(t, services["oce"], "OceInstance", "oceinstance")
 	assertFormalSpecFor(t, services["ocvp"], "Cluster", "cluster")
 	assertFormalSpecFor(t, services["ocvp"], "Sddc", "sddc")
 	assertFormalSpecFor(t, services["opensearch"], "OpensearchCluster", "opensearchopensearchcluster")
@@ -1536,7 +1553,7 @@ func TestCheckedInConfigCoordinatesPrimaryPortPackagePaths(t *testing.T) {
 	t.Parallel()
 
 	cfg := loadCheckedInConfig(t)
-	services := serviceConfigsByName(t, cfg, "analytics", "containerengine", "containerinstances", "core", "dataflow", "database", "identity", "keymanagement", "mysql", "objectstorage", "ocvp", "opensearch", "psql", "redis")
+	services := serviceConfigsByName(t, cfg, "analytics", "containerengine", "containerinstances", "core", "dataflow", "database", "identity", "keymanagement", "mysql", "objectstorage", "oce", "ocvp", "opensearch", "psql", "redis")
 
 	assertPrimaryPortOverride(t, services["analytics"], "AnalyticsInstance", "analyticsinstance", "analytics/analyticsinstance")
 	assertContainerengineRuntimeRolloutMetadata(t, services["containerengine"])
@@ -1548,6 +1565,7 @@ func TestCheckedInConfigCoordinatesPrimaryPortPackagePaths(t *testing.T) {
 	assertPrimaryPortOverride(t, services["keymanagement"], "Vault", "", "keymanagement/vault")
 	assertMySQLRuntimeRolloutMetadata(t, services["mysql"])
 	assertPrimaryPortOverride(t, services["objectstorage"], "Bucket", "objectstoragebucket", "objectstorage/bucket")
+	assertPrimaryPortOverride(t, services["oce"], "OceInstance", "oceinstance", "oce/oceinstance")
 	assertOCVPRuntimeRolloutMetadata(t, services["ocvp"])
 	assertOpensearchRuntimeRolloutMetadata(t, services["opensearch"])
 	assertPSQLRuntimeRolloutMetadata(t, services["psql"])
@@ -2125,6 +2143,7 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 		"networkloadbalancer":         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"nosql":                       {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"objectstorage":               {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"oce":                         {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
 		"ocvp":                        {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"oda":                         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"opensearch":                  {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},

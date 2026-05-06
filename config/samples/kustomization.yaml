@@ -220,4 +220,5 @@ resources:
 - waf_v1beta1_networkaddresslist.yaml
 - waf_v1beta1_webappfirewall.yaml
 - waf_v1beta1_webappfirewallpolicy.yaml
+- oce_v1beta1_oceinstance.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

@@ -147,6 +147,7 @@ resources:
 - bases/networkloadbalancer.oracle.com_networkloadbalancers.yaml
 - bases/nosql.oracle.com_tables.yaml
 - bases/objectstorage.oracle.com_buckets.yaml
+- bases/oce.oracle.com_oceinstances.yaml
 - bases/ocvp.oracle.com_clusters.yaml
 - bases/ocvp.oracle.com_esxihosts.yaml
 - bases/ocvp.oracle.com_sddcs.yaml

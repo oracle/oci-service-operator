@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "oce",
+  "kind": "OceInstance",
+  "formalSlug": "oceinstance",
+  "providerResource": "oci_oce_oce_instance",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/oce_oce_instance",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/oce_oce_instance",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/oce/oceinstance/page.html",
+  "bodySHA256": "a906e9ef95b4a1d2f843f92a6d5b85a62686cea46ad836b2bd287f8f938a960d",
+  "bodyBytes": 2456,
+  "fixtureBodyPath": "7.22.0/oce/oceinstance/page.html"
+}

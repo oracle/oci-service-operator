@@ -71,6 +71,7 @@ monitoring	alarmsuppression	AlarmSuppression	scaffold	repo-authored-semantics	im
 mysql	dbsystem	DbSystem	seeded	repo-authored-semantics	imports/mysql/dbsystem.json	controllers/mysql/dbsystem/spec.cfg	controllers/mysql/dbsystem/logic-gaps.md	controllers/mysql/dbsystem/diagrams
 nosql	table	Table	seeded	repo-authored-semantics	imports/nosql/table.json	controllers/nosql/table/spec.cfg	controllers/nosql/table/logic-gaps.md	controllers/nosql/table/diagrams
 objectstorage	objectstoragebucket	Bucket	seeded	repo-authored-semantics	imports/objectstorage/objectstoragebucket.json	controllers/objectstorage/objectstoragebucket/spec.cfg	controllers/objectstorage/objectstoragebucket/logic-gaps.md	controllers/objectstorage/objectstoragebucket/diagrams
+oce	oceinstance	OceInstance	seeded	repo-authored-semantics	imports/oce/oceinstance.json	controllers/oce/oceinstance/spec.cfg	controllers/oce/oceinstance/logic-gaps.md	controllers/oce/oceinstance/diagrams
 ocvp	cluster	Cluster	seeded	repo-authored-semantics	imports/ocvp/cluster.json	controllers/ocvp/cluster/spec.cfg	controllers/ocvp/cluster/logic-gaps.md	controllers/ocvp/cluster/diagrams
 ocvp	esxihost	EsxiHost	scaffold	repo-authored-semantics	imports/ocvp/esxihost.json	controllers/ocvp/esxihost/spec.cfg	controllers/ocvp/esxihost/logic-gaps.md	controllers/ocvp/esxihost/diagrams
 ocvp	sddc	Sddc	seeded	repo-authored-semantics	imports/ocvp/sddc.json	controllers/ocvp/sddc/spec.cfg	controllers/ocvp/sddc/logic-gaps.md	controllers/ocvp/sddc/diagrams

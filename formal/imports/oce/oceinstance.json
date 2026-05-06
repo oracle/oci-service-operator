@@ -1,0 +1,168 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "oce",
+  "slug": "oceinstance",
+  "kind": "OceInstance",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_oce_oce_instance",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOceInstance",
+        "requestType": "oce.CreateOceInstanceRequest",
+        "responseType": "oce.CreateOceInstanceResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOceInstance",
+        "requestType": "oce.GetOceInstanceRequest",
+        "responseType": "oce.GetOceInstanceResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOceInstances",
+        "requestType": "oce.ListOceInstancesRequest",
+        "responseType": "oce.ListOceInstancesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeOceInstanceCompartment",
+        "requestType": "oce.ChangeOceInstanceCompartmentRequest",
+        "responseType": "oce.ChangeOceInstanceCompartmentResponse"
+      },
+      {
+        "operation": "UpdateOceInstance",
+        "requestType": "oce.UpdateOceInstanceRequest",
+        "responseType": "oce.UpdateOceInstanceResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOceInstance",
+        "requestType": "oce.DeleteOceInstanceRequest",
+        "responseType": "oce.DeleteOceInstanceResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "add_on_features",
+      "compartment_id",
+      "defined_tags",
+      "description",
+      "dr_region",
+      "freeform_tags",
+      "instance_license_type",
+      "instance_usage_type",
+      "lifecycle_details",
+      "waf_primary_domain"
+    ],
+    "forceNew": [
+      "admin_email",
+      "idcs_access_token",
+      "identity_stripe.service_name",
+      "identity_stripe.tenancy",
+      "instance_access_type",
+      "name",
+      "object_storage_namespace",
+      "tenancy_id",
+      "tenancy_name",
+      "upgrade_schedule"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "oceinstance",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "oceinstance",
+        "action": "UPDATED"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "oceinstance",
+        "action": "DELETED"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_oce_oce_instances",
+    "collectionField": "oce_instances",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "state",
+      "tenancy_id"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/oce/oceinstance/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/oce/oceinstance/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "list-lookup",
+      "mutation-policy",
+      "status-projection",
+      "waiter-work-request",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: CreateOceInstance, GetOceInstance, ListOceInstances, ChangeOceInstanceCompartment, UpdateOceInstance, DeleteOceInstance, and GetWorkRequest are present in v65.110.0. The mutating responses expose opc-work-request-id but do not return an OceInstance body, and ListOceInstances filters compartmentId, tenancyId, displayName, and lifecycleState while returning Items []OceInstanceSummary that project the resource name as name.",
+    "Pinned provider surface: the Terraform resource is `oci_oce_oce_instance`, with matching singular and list data sources `oci_oce_oce_instance` and `oci_oce_oce_instances` for the same one-resource service family.",
+    "Repo-authored bind-versus-create stays explicit: when no OCI identifier is tracked, the runtime uses paginated ListOceInstances matches on exact compartmentId plus tenancyId plus displayName=spec.name, ignores FAILED, DELETING, and DELETED summaries, and fails on duplicate exact-name matches instead of adopting arbitrarily.",
+    "Repo-authored mutation policy stays explicit: only addOnFeatures, description, drRegion, freeformTags, definedTags, instanceLicenseType, instanceUsageType, and wafPrimaryDomain reconcile in place. `ChangeOceInstanceCompartment` remains out-of-scope drift for the published runtime, `IdcsAccessToken` remains create-time-only because OCI does not echo it back after create, and `LifecycleDetails` stays status-projected service state rather than a supported user-driven update input.",
+    "Repo-authored async handling stays explicit: create, update, and delete all use service-sdk GetWorkRequest polling plus work-request resource OCID recovery before the runtime rereads GetOceInstance, while delete confirmation still requires GetOceInstance or fallback ListOceInstances to observe DELETED or NotFound."
+  ]
+}

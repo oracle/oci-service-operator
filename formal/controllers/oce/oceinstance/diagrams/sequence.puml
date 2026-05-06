@@ -1,0 +1,134 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Sequence - oce/OceInstance
+hide footbox
+skinparam sequence {
+  actorBorderColor #0f172a
+  actorBackgroundColor #e2e8f0
+  participantBorderColor #0f172a
+  participantBackgroundColor #e2e8f0
+  participantFontColor #0f172a
+  lifeLineBorderColor #94a3b8
+  groupBorderColor #cbd5e1
+  groupBackgroundColor #f8fafc
+}
+actor Kubernetes
+participant Controller
+participant BaseReconciler
+participant "OSOKServiceManager" as ServiceManager
+participant OCI
+note over BaseReconciler,ServiceManager
+shared resolution:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete:
+shared/diagrams/shared-delete-sequence.svg
+end note
+Kubernetes -> Controller: enqueue OceInstance reconcile
+Controller -> BaseReconciler: Reconcile(request)
+BaseReconciler -> ServiceManager: reconcile desired OceInstance
+group Lookup and bind
+alt tracked or explicit OCI identity already exists
+ServiceManager -> OCI: GetOceInstance
+else tracked identity is missing
+ServiceManager -> OCI: ListOceInstances(filters:\ncompartment_id, display_name, state,\ntenancy_id)
+alt reusable OCI resource is not found
+ServiceManager -> OCI: CreateOceInstance
+loop create pending CREATING
+ServiceManager -> OCI: GetOceInstance
+end
+else reusable OCI resource already exists
+ServiceManager -> OCI: GetOceInstance
+end
+ServiceManager --> BaseReconciler: persist resolved OCI identity in status
+end
+alt delete requested
+group Delete
+ServiceManager -> OCI: DeleteOceInstance
+ServiceManager -> OCI: confirm delete via GetOceInstance or\nListOceInstances
+loop delete pending DELETING
+ServiceManager -> OCI: GetOceInstance or ListOceInstances
+end
+alt cleanup or finalizer release is blocked
+ServiceManager --> BaseReconciler: retain delete state and retry
+else delete completion observed
+ServiceManager --> BaseReconciler: release finalizer after delete completion
+end
+end
+else OCI state is retryable
+ServiceManager --> BaseReconciler: requeue while OCI remains in\nCREATING, UPDATING, DELETING
+else live state requires field-aware\ndrift evaluation
+group Drift handling
+note over ServiceManager,OCI
+Supported update surface:
+add_on_features, compartment_id,
+defined_tags, description (+6 more)
+Reject before mutate: force-new fields
+admin_email, idcs_access_token,
+identity_stripe.service_name,
+identity_stripe.tenancy (+6 more)
+Lookup filters: compartment_id,
+display_name, state, tenancy_id
+end note
+opt force-new or conflicting drift is detected
+ServiceManager --> BaseReconciler: reject before OCI mutation
+end
+opt supported mutable drift is detected
+ServiceManager -> OCI: Apply ChangeOceInstanceCompartment,\nUpdateOceInstance only for mutable\nfields add_on_features,\ncompartment_id, defined_tags,\ndescription (+6 more)
+loop update pending UPDATING
+ServiceManager -> OCI: GetOceInstance
+end
+end
+ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=oceinstance action=CREATED;\nupdate=tfresource.UpdateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=oceinstance action=UPDATED;\ndelete=tfresource.DeleteResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=oceinstance action=DELETED
+end
+ServiceManager --> BaseReconciler: status=required,\nfinalizer=retain-until-confirmed-delete
+end
+BaseReconciler --> Controller: requeue on provisioning, updating,\nterminating
+note right of ServiceManager
+shared diagram:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete diagram:
+shared/diagrams/shared-delete-sequence.svg
+Start from the shared resolution sequence for
+OCID binding, datasource pagination, and
+create-or-update dispatch.
+Layer the shared delete sequence when finalizer
+retention, delete confirmation, work-request
+polling, or Secret cleanup apply.
+archetype batch: Generated service-manager
+controllers follow the shared resolution and
+delete sequences with imported waits and
+controller-local policy.
+service: oce
+slug: oceinstance
+kind: OceInstance
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: provisioning, updating, terminating
+provider states: create CREATING; update
+UPDATING; delete DELETING
+supported drift: add_on_features,
+compartment_id, defined_tags, description (+6
+more)
+reject before mutate: force-new fields
+admin_email, idcs_access_token,
+identity_stripe.service_name,
+identity_stripe.tenancy (+6 more)
+create-only fields: none
+list lookup: oci_oce_oce_instances filters
+compartment_id, display_name, state, tenancy_id
+conflicts: none
+open gaps: none
+Scaffold metadata only; replace with
+controller-specific runtime states before
+promotion.
+end note
+@enduml
