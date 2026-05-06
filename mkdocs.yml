@@ -179,6 +179,7 @@ nav:
           - lockbox.oracle.com/v1beta1: reference/api/lockbox/v1beta1/index.md
           - loganalytics.oracle.com/v1beta1: reference/api/loganalytics/v1beta1/index.md
           - logging.oracle.com/v1beta1: reference/api/logging/v1beta1/index.md
+          - lustrefilestorage.oracle.com/v1beta1: reference/api/lustrefilestorage/v1beta1/index.md
           - managedkafka.oracle.com/v1beta1: reference/api/managedkafka/v1beta1/index.md
           - managementagent.oracle.com/v1beta1: reference/api/managementagent/v1beta1/index.md
           - managementdashboard.oracle.com/v1beta1: reference/api/managementdashboard/v1beta1/index.md

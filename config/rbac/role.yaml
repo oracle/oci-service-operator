@@ -1452,6 +1452,32 @@ rules:
   - patch
   - update
 - apiGroups:
+  - lustrefilestorage.oracle.com
+  resources:
+  - lustrefilesystems
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - lustrefilestorage.oracle.com
+  resources:
+  - lustrefilesystems/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - lustrefilestorage.oracle.com
+  resources:
+  - lustrefilesystems/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - managedkafka.oracle.com
   resources:
   - kafkaclusterconfigs

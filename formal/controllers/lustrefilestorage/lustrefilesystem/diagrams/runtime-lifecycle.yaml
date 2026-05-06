@@ -1,0 +1,19 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: lustrefilestorage
+slug: lustrefilesystem
+kind: LustreFileSystem
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+  - failed
+  - deleted
+notes:
+  - Ready state maps to OCI ACTIVE or INACTIVE.
+  - Requeue continues while OCI reports CREATING, UPDATING, or DELETING.
+  - Bind-before-create reuses only exact compartment, availability-domain, and display-name matches that remain in ACTIVE, CREATING, UPDATING, or INACTIVE.
+  - Create, update, and delete are work-request-backed, but steady-state readiness is still classified from Lustre file system lifecycle state.
+  - Delete completes after GetLustreFileSystem or ListLustreFileSystems returns DELETED or no longer finds the resource.

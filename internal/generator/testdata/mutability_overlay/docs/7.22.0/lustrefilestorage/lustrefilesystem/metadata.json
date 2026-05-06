@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "lustrefilestorage",
+  "kind": "LustreFileSystem",
+  "formalSlug": "lustrefilesystem",
+  "providerResource": "oci_lustre_file_storage_lustre_file_system",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/lustre_file_storage_lustre_file_system",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/lustre_file_storage_lustre_file_system",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/lustrefilestorage/lustrefilesystem/page.html",
+  "bodySHA256": "6a8963e917e8e39f45fb9db09d616856c22908622dfdf5debebd2911f3c0bf77",
+  "bodyBytes": 5653,
+  "fixtureBodyPath": "7.22.0/lustrefilestorage/lustrefilesystem/page.html"
+}

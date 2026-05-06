@@ -54,6 +54,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/lockbox"
 	"github.com/oracle/oci-go-sdk/v65/loganalytics"
 	"github.com/oracle/oci-go-sdk/v65/logging"
+	"github.com/oracle/oci-go-sdk/v65/lustrefilestorage"
 	"github.com/oracle/oci-go-sdk/v65/managedkafka"
 	"github.com/oracle/oci-go-sdk/v65/managementagent"
 	"github.com/oracle/oci-go-sdk/v65/managementdashboard"
@@ -835,6 +836,13 @@ var seedTargets = []Target{
 	newTarget("loganalytics", "LogAnalyticsLogGroupSummary", reflect.TypeOf(loganalytics.LogAnalyticsLogGroupSummary{})),
 	newTarget("loganalytics", "LogAnalyticsObjectCollectionRuleSummary", reflect.TypeOf(loganalytics.LogAnalyticsObjectCollectionRuleSummary{})),
 	newTarget("loganalytics", "ScheduledTaskSummary", reflect.TypeOf(loganalytics.ScheduledTaskSummary{})),
+
+	// Lustrefilestorage CRD support
+	newTarget("lustrefilestorage", "CreateLustreFileSystemDetails", reflect.TypeOf(lustrefilestorage.CreateLustreFileSystemDetails{})),
+	newTarget("lustrefilestorage", "UpdateLustreFileSystemDetails", reflect.TypeOf(lustrefilestorage.UpdateLustreFileSystemDetails{})),
+	newTarget("lustrefilestorage", "LustreFileSystem", reflect.TypeOf(lustrefilestorage.LustreFileSystem{})),
+	newTarget("lustrefilestorage", "LustreFileSystemCollection", reflect.TypeOf(lustrefilestorage.LustreFileSystemCollection{})),
+	newTarget("lustrefilestorage", "LustreFileSystemSummary", reflect.TypeOf(lustrefilestorage.LustreFileSystemSummary{})),
 
 	// Managedkafka CRD support
 	newTarget("managedkafka", "CreateKafkaClusterConfigDetails", reflect.TypeOf(managedkafka.CreateKafkaClusterConfigDetails{})),

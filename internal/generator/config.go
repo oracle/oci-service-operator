@@ -135,7 +135,7 @@ type SampleOverride struct {
 	Spec         string `yaml:"spec,omitempty"`
 }
 
-// AsyncConfig declares the explicit async contract for a selected runtime surface.
+// AsyncConfig declares the reviewed async contract for a service or one selected resource.
 type AsyncConfig struct {
 	Strategy             string                 `yaml:"strategy,omitempty"`
 	Runtime              string                 `yaml:"runtime,omitempty"`
@@ -715,8 +715,8 @@ func validateAsyncRuntimeField(field string, runtime string) error {
 }
 
 func validateAsyncWorkRequestConfig(field string, workRequest AsyncWorkRequestConfig) error {
-	if strings.TrimSpace(workRequest.Source) != "" {
-		switch strings.TrimSpace(workRequest.Source) {
+	if source := strings.TrimSpace(workRequest.Source); source != "" {
+		switch source {
 		case AsyncWorkRequestSourceServiceSDK, AsyncWorkRequestSourceWorkRequestsAPI, AsyncWorkRequestSourceProviderHelper:
 		default:
 			return fmt.Errorf(

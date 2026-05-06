@@ -1175,6 +1175,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"loadbalancer",
 		"logging",
 		"managedkafka",
+		"lustrefilestorage",
 		"monitoring",
 		"marketplace",
 		"mysql",
@@ -1267,6 +1268,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"loadbalancer",
 		"logging",
 		"managedkafka",
+		"lustrefilestorage",
 		"monitoring",
 		"marketplace",
 		"mysql",
@@ -1353,6 +1355,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	assertServiceSelection(t, services["loadbalancer"], true, SelectionModeExplicit, []string{"Backend", "BackendSet", "Certificate", "Hostname", "Listener", "LoadBalancer", "PathRouteSet", "RoutingPolicy", "RuleSet", "SSLCipherSuite"})
 	assertServiceSelection(t, services["logging"], true, SelectionModeExplicit, []string{"Log", "LogGroup", "LogSavedSearch", "UnifiedAgentConfiguration"})
 	assertServiceSelection(t, services["managedkafka"], true, SelectionModeExplicit, []string{"KafkaCluster", "KafkaClusterConfig"})
+	assertServiceSelection(t, services["lustrefilestorage"], true, SelectionModeExplicit, []string{"LustreFileSystem"})
 	assertServiceSelection(t, services["monitoring"], true, SelectionModeExplicit, []string{"Alarm", "AlarmSuppression"})
 	assertServiceSelection(t, services["marketplace"], true, SelectionModeExplicit, []string{"AcceptedAgreement", "Publication"})
 	assertServiceSelection(t, services["mysql"], true, SelectionModeExplicit, []string{"DbSystem"})
@@ -2114,6 +2117,7 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 		"limits":                      {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"loadbalancer":                {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"logging":                     {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"lustrefilestorage":           {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
 		"managedkafka":                {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"monitoring":                  {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"marketplace":                 {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
@@ -2223,6 +2227,17 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 			"clusterplacementgroups ClusterPlacementGroup workRequest.legacyFieldBridge = %#v, want empty legacy bridge",
 			clusterPlacementGroups.WorkRequest.LegacyFieldBridge,
 		)
+	}
+
+	lustre := assertAsyncContract(t, services["lustrefilestorage"], "LustreFileSystem", AsyncStrategyWorkRequest, AsyncRuntimeGeneratedRuntime)
+	if lustre.WorkRequest.Source != AsyncWorkRequestSourceServiceSDK {
+		t.Fatalf("lustrefilestorage LustreFileSystem workRequest.source = %q, want %q", lustre.WorkRequest.Source, AsyncWorkRequestSourceServiceSDK)
+	}
+	if !slices.Equal(lustre.WorkRequest.Phases, []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}) {
+		t.Fatalf("lustrefilestorage LustreFileSystem workRequest.phases = %v", lustre.WorkRequest.Phases)
+	}
+	if lustre.WorkRequest.LegacyFieldBridge.hasOverride() {
+		t.Fatalf("lustrefilestorage LustreFileSystem workRequest.legacyFieldBridge = %#v, want empty legacy bridge", lustre.WorkRequest.LegacyFieldBridge)
 	}
 
 	redis := assertAsyncContract(t, services["redis"], "RedisCluster", AsyncStrategyWorkRequest, AsyncRuntimeGeneratedRuntime)
