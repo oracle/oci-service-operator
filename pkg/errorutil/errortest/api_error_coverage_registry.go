@@ -1306,6 +1306,16 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 			"Schedule",
 		),
 		reviewedRegistrationSet(
+			"rover",
+			"rover",
+			apiErrorCoverageDefaultVersion,
+			APIErrorCoverageFamilyGeneratedRuntimePlain,
+			deleteNotFoundGeneratedRuntime,
+			retryableConflictGeneratedRuntime,
+			"RoverCluster narrows pre-create reuse to exact compartmentId plus displayName plus clusterType list filters and exact clusterSize summary matches, strips provider-managed lifecycle and system-tag inputs before writes, and relies on lifecycle projection instead of service-local work-request polling.",
+			"RoverCluster",
+		),
+		reviewedRegistrationSet(
 			"securityattribute",
 			"securityattribute",
 			apiErrorCoverageDefaultVersion,

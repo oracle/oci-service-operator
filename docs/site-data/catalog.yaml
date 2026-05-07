@@ -974,6 +974,20 @@ packages:
     customerVisible: false
     guidePath: docs/installation.md
 
+  - package: rover
+    displayName: Rover
+    summary: Manage OCI Rover clusters from Kubernetes.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to RoverCluster while RoverNode, RoverEntitlement, and auxiliary bundle or node workflows stay unpublished.
+      - The published runtime is lifecycle-driven and workrequest-aware, but RoverCluster CRUD does not expose service-local work-request IDs and no Kubernetes Secret side effects are emitted.
+    kindOverrides:
+      - group: rover
+        kind: RoverCluster
+        summary: Manage OCI Rover clusters.
+
   - package: sch
     displayName: Service Connector Hub
     summary: Manage OCI Service Connector Hub service connectors from Kubernetes.

@@ -1,0 +1,57 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: rover
+slug: rovercluster
+kind: RoverCluster
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending:
+      - CREATING
+    updatePending:
+      - UPDATING
+    deletePending:
+      - DELETING
+  listLookup:
+    filters:
+      - clusterType
+      - compartmentId
+      - displayName
+    matchRule: exact compartmentId plus displayName plus clusterType list filters, then exact clusterSize unique match in ACTIVE, CREATING, or UPDATING summaries; duplicate matches fail
+  mutation:
+    mutable:
+      - clusterSize
+      - clusterWorkloads
+      - customerShippingAddress
+      - dataValidationCode
+      - definedTags
+      - displayName
+      - enclosureType
+      - freeformTags
+      - importCompartmentId
+      - importFileBucket
+      - isImportRequested
+      - oracleShippingTrackingUrl
+      - pointOfContact
+      - pointOfContactPhoneNumber
+      - shippingPreference
+      - shippingVendor
+      - subscriptionId
+      - superUserPassword
+      - timePickupExpected
+      - unlockPassphrase
+    forceNew:
+      - clusterType
+      - compartmentId
+      - masterKeyId
+notes:
+  - Reviewed lifecycle mapping treats CREATING as provisioning, UPDATING as updating, ACTIVE as success, FAILED as terminal without requeue, and delete confirmation as DELETING until DELETED or NotFound.
+  - The published runtime removes ChangeRoverClusterCompartment from the generated auxiliary surface and never polls Rover work requests for CRUD because RoverCluster write responses do not expose opc-work-request-id and Rover's service-local work-request enum only documents ADD_NODES.
+  - Pre-create lookup lists by compartmentId, displayName, and clusterType, then narrows returned summaries in memory with exact clusterSize matching before any reuse. lifecycleState is intentionally omitted from the list request.
+  - LifecycleState, LifecycleStateDetails, SystemTags, and clusterWorkloads.workRequestId remain provider-managed request-shape fields. The reviewed runtime normalizes them out before parity or write calls.
+  - Required status projection keeps the OCI body surface except excluded credential-like fields and one-time URLs/codes dataValidationCode, exteriorDoorCode, imageExportPar, interiorAlarmDisarmCode, returnShippingLabelUri, superUserPassword, and unlockPassphrase. The runtime has no secret side effects.

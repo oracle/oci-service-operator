@@ -1,16 +1,16 @@
 {
   "aggregate": {
-    "specs": 224,
-    "mappings": 951,
-    "trackedMappings": 950,
+    "specs": 225,
+    "mappings": 956,
+    "trackedMappings": 955,
     "untrackedMappings": 1,
-    "presentFields": 9504,
-    "missingFields": 151,
-    "mandatoryPresentFields": 3387,
-    "mandatoryMissingFields": 130,
-    "extraSpecFields": 810,
-    "overallCoveragePercent": 98.4360435007768,
-    "mandatoryCoveragePercent": 96.30366789877736
+    "presentFields": 9597,
+    "missingFields": 159,
+    "mandatoryPresentFields": 3398,
+    "mandatoryMissingFields": 131,
+    "extraSpecFields": 813,
+    "overallCoveragePercent": 98.37023370233703,
+    "mandatoryCoveragePercent": 96.28790025502975
   },
   "services": [
     {
@@ -1146,6 +1146,20 @@
       "extraSpecFields": 1,
       "overallCoveragePercent": 98.4375,
       "mandatoryCoveragePercent": 95.45454545454545
+    },
+    {
+      "service": "rover",
+      "specs": 1,
+      "mappings": 5,
+      "trackedMappings": 5,
+      "untrackedMappings": 0,
+      "presentFields": 93,
+      "missingFields": 8,
+      "mandatoryPresentFields": 11,
+      "mandatoryMissingFields": 1,
+      "extraSpecFields": 3,
+      "overallCoveragePercent": 92.07920792079209,
+      "mandatoryCoveragePercent": 91.66666666666666
     },
     {
       "service": "sch",
