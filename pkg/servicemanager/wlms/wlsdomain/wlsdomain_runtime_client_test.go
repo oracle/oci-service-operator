@@ -273,6 +273,45 @@ func TestWlsDomainCreateOrUpdateUpdatesConfigurationAndTags(t *testing.T) {
 	}
 }
 
+func TestWlsDomainCreateOrUpdateSkipsUpdateWhenPartialConfigurationAlreadyMatches(t *testing.T) {
+	t.Parallel()
+
+	resource := trackedWlsDomainResource()
+	resource.Spec.Configuration = map[string]shared.JSONValue{
+		"isPatchEnabled": jsonValue("true"),
+	}
+
+	fake := &fakeWlsDomainOCIClient{}
+	fake.getFn = func(_ context.Context, req wlmssdk.GetWlsDomainRequest) (wlmssdk.GetWlsDomainResponse, error) {
+		requireStringPtr(t, "GetWlsDomainRequest.WlsDomainId", req.WlsDomainId, testWlsDomainID)
+		return wlmssdk.GetWlsDomainResponse{
+			WlsDomain: activeWlsDomainWithConfigSDK(
+				testWlsDomainID,
+				true,
+				30,
+				"/old/start.sh",
+				map[string]string{"env": "prod"},
+				map[string]map[string]interface{}{"Operations": {"CostCenter": "42"}},
+			),
+		}, nil
+	}
+	fake.updateFn = func(context.Context, wlmssdk.UpdateWlsDomainRequest) (wlmssdk.UpdateWlsDomainResponse, error) {
+		t.Fatal("UpdateWlsDomain should not be called when the requested partial configuration already matches OCI")
+		return wlmssdk.UpdateWlsDomainResponse{}, nil
+	}
+
+	response, err := newTestWlsDomainClient(fake).CreateOrUpdate(context.Background(), resource, requestForResource(resource))
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful || response.ShouldRequeue {
+		t.Fatalf("CreateOrUpdate() response = %#v, want successful no-op observe", response)
+	}
+	if len(fake.updateRequests) != 0 {
+		t.Fatalf("Update calls = %d, want 0", len(fake.updateRequests))
+	}
+}
+
 func TestWlsDomainCreateOrUpdateRejectsForceNewDisplayNameDrift(t *testing.T) {
 	t.Parallel()
 

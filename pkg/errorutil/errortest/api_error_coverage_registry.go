@@ -1047,6 +1047,16 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 				retryableConflictWorkRequest,
 				"VbsInstance runtime persists create, update, and delete work-request IDs, recovers the OCI identifier from work-request resources, and bounds pre-create reuse to exact compartmentId plus immutable name matches while leaving ChangeVbsInstanceCompartment out of scope.",
 			),
+			resourceKey("wlms", "WlsDomain"): reviewedRegistration(
+				"wlms",
+				"wlms",
+				apiErrorCoverageDefaultVersion,
+				"WlsDomain",
+				APIErrorCoverageFamilyGeneratedRuntimePlain,
+				deleteNotFoundGeneratedRuntime,
+				retryableConflictGeneratedRuntime,
+				"WlsDomain is manage-existing only because WLMS lacks CreateWlsDomain; a handwritten wrapper validates bind identity, paginates ListWlsDomains lookup, re-enters one Get-backed delegate pass after list-only bind, and custom update-body shaping preserves sparse configuration intent plus explicit tag clears while delete relies on generatedruntime confirm-delete rereads.",
+			),
 		},
 		reviewedRegistrationSet(
 			"governancerulescontrolplane",

@@ -312,15 +312,18 @@ func wlsDomainDesiredConfigurationUpdate(
 		return nil, false, fmt.Errorf("decode WlsDomain configuration update body: %w", err)
 	}
 
-	desiredValues, err := wlsDomainJSONMap(desired)
+	desiredValues, err := wlsDomainJSONBytesToMap(payload)
 	if err != nil {
 		return nil, false, fmt.Errorf("project desired WlsDomain configuration: %w", err)
+	}
+	if len(desiredValues) == 0 {
+		return nil, false, nil
 	}
 	currentValues, err := wlsDomainJSONMap(wlsDomainCurrentConfigurationForUpdate(current))
 	if err != nil {
 		return nil, false, fmt.Errorf("project current WlsDomain configuration: %w", err)
 	}
-	if wlsDomainJSONEqual(desiredValues, currentValues) {
+	if wlsDomainJSONEqual(desiredValues, wlsDomainSubsetJSONMap(currentValues, desiredValues)) {
 		return nil, false, nil
 	}
 	return &desired, true, nil
@@ -401,6 +404,10 @@ func wlsDomainJSONMap(value any) (map[string]any, error) {
 	if err != nil {
 		return nil, err
 	}
+	return wlsDomainJSONBytesToMap(payload)
+}
+
+func wlsDomainJSONBytesToMap(payload []byte) (map[string]any, error) {
 	if string(payload) == "null" {
 		return nil, nil
 	}
@@ -419,6 +426,20 @@ func wlsDomainJSONEqual(left any, right any) bool {
 		return false
 	}
 	return string(leftPayload) == string(rightPayload)
+}
+
+func wlsDomainSubsetJSONMap(values map[string]any, requested map[string]any) map[string]any {
+	if len(values) == 0 || len(requested) == 0 {
+		return map[string]any{}
+	}
+
+	subset := make(map[string]any, len(requested))
+	for key := range requested {
+		if value, ok := values[key]; ok {
+			subset[key] = value
+		}
+	}
+	return subset
 }
 
 func (c wlsDomainRuntimeClient) CreateOrUpdate(
