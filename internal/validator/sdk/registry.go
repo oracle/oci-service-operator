@@ -42,6 +42,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/functions"
 	"github.com/oracle/oci-go-sdk/v65/gdp"
 	"github.com/oracle/oci-go-sdk/v65/generativeai"
+	"github.com/oracle/oci-go-sdk/v65/generativeaiagent"
 	"github.com/oracle/oci-go-sdk/v65/governancerulescontrolplane"
 	"github.com/oracle/oci-go-sdk/v65/healthchecks"
 	"github.com/oracle/oci-go-sdk/v65/identity"
@@ -91,6 +92,8 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/streaming"
 	"github.com/oracle/oci-go-sdk/v65/usageapi"
 	"github.com/oracle/oci-go-sdk/v65/vbsinst"
+	"github.com/oracle/oci-go-sdk/v65/visualbuilder"
+	"github.com/oracle/oci-go-sdk/v65/vnmonitoring"
 	"github.com/oracle/oci-go-sdk/v65/waa"
 	"github.com/oracle/oci-go-sdk/v65/waas"
 	"github.com/oracle/oci-go-sdk/v65/waf"
@@ -729,6 +732,13 @@ var seedTargets = []Target{
 	newTarget("gdp", "GdpPipelineCollection", reflect.TypeOf(gdp.GdpPipelineCollection{})),
 	newTarget("gdp", "GdpPipelineSummary", reflect.TypeOf(gdp.GdpPipelineSummary{})),
 
+	// Generativeaiagent CRD support
+	newTarget("generativeaiagent", "CreateKnowledgeBaseDetails", reflect.TypeOf(generativeaiagent.CreateKnowledgeBaseDetails{})),
+	newTarget("generativeaiagent", "UpdateKnowledgeBaseDetails", reflect.TypeOf(generativeaiagent.UpdateKnowledgeBaseDetails{})),
+	newTarget("generativeaiagent", "KnowledgeBase", reflect.TypeOf(generativeaiagent.KnowledgeBase{})),
+	newTarget("generativeaiagent", "KnowledgeBaseCollection", reflect.TypeOf(generativeaiagent.KnowledgeBaseCollection{})),
+	newTarget("generativeaiagent", "KnowledgeBaseSummary", reflect.TypeOf(generativeaiagent.KnowledgeBaseSummary{})),
+
 	// Governancerulescontrolplane CRD support
 	newTarget("governancerulescontrolplane", "CreateGovernanceRuleDetails", reflect.TypeOf(governancerulescontrolplane.CreateGovernanceRuleDetails{})),
 	newTarget("governancerulescontrolplane", "CreateInclusionCriterionDetails", reflect.TypeOf(governancerulescontrolplane.CreateInclusionCriterionDetails{})),
@@ -1192,6 +1202,19 @@ var seedTargets = []Target{
 	newTarget("vbsinst", "UpdateVbsInstanceDetails", reflect.TypeOf(vbsinst.UpdateVbsInstanceDetails{})),
 	newTarget("vbsinst", "VbsInstance", reflect.TypeOf(vbsinst.VbsInstance{})),
 	newTarget("vbsinst", "VbsInstanceSummary", reflect.TypeOf(vbsinst.VbsInstanceSummary{})),
+
+	// Visualbuilder CRD support
+	newTarget("visualbuilder", "CreateVbInstanceDetails", reflect.TypeOf(visualbuilder.CreateVbInstanceDetails{})),
+	newTarget("visualbuilder", "UpdateVbInstanceDetails", reflect.TypeOf(visualbuilder.UpdateVbInstanceDetails{})),
+	newTarget("visualbuilder", "VbInstance", reflect.TypeOf(visualbuilder.VbInstance{})),
+	newTarget("visualbuilder", "VbInstanceSummary", reflect.TypeOf(visualbuilder.VbInstanceSummary{})),
+
+	// Vnmonitoring CRD support
+	newTarget("vnmonitoring", "CreatePathAnalyzerTestDetails", reflect.TypeOf(vnmonitoring.CreatePathAnalyzerTestDetails{})),
+	newTarget("vnmonitoring", "UpdatePathAnalyzerTestDetails", reflect.TypeOf(vnmonitoring.UpdatePathAnalyzerTestDetails{})),
+	newTarget("vnmonitoring", "PathAnalyzerTest", reflect.TypeOf(vnmonitoring.PathAnalyzerTest{})),
+	newTarget("vnmonitoring", "PathAnalyzerTestCollection", reflect.TypeOf(vnmonitoring.PathAnalyzerTestCollection{})),
+	newTarget("vnmonitoring", "PathAnalyzerTestSummary", reflect.TypeOf(vnmonitoring.PathAnalyzerTestSummary{})),
 
 	// Waa CRD support
 	newTarget("waa", "CreateWebAppAccelerationPolicyDetails", reflect.TypeOf(waa.CreateWebAppAccelerationPolicyDetails{})),

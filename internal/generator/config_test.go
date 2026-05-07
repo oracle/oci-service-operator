@@ -1187,9 +1187,10 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"oce",
 		"ocvp",
 		"oda",
-		"opa",
 		"opensearch",
 		"ons",
+		"opa",
+		"psa",
 		"psql",
 		"queue",
 		"redis",
@@ -1220,7 +1221,9 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"waa",
 		"waas",
 		"waf",
+		"wlms",
 		"visualbuilder",
+		"vnmonitoring",
 	}
 	if !slices.Equal(activeServices, wantActiveServices) {
 		t.Fatalf("DefaultActiveServices() = %v, want %v", activeServices, wantActiveServices)
@@ -1285,9 +1288,10 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"oce",
 		"ocvp",
 		"oda",
-		"opa",
 		"opensearch",
 		"ons",
+		"opa",
+		"psa",
 		"psql",
 		"queue",
 		"redis",
@@ -1318,7 +1322,9 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"waa",
 		"waas",
 		"waf",
+		"wlms",
 		"visualbuilder",
+		"vnmonitoring",
 		"vault",
 	)
 	assertServiceSelection(t, services["accessgovernancecp"], true, SelectionModeExplicit, []string{"GovernanceInstance"})
@@ -1380,6 +1386,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	assertServiceSelection(t, services["opa"], true, SelectionModeExplicit, []string{"OpaInstance"})
 	assertServiceSelection(t, services["opensearch"], true, SelectionModeExplicit, []string{"OpensearchCluster"})
 	assertServiceSelection(t, services["ons"], true, SelectionModeExplicit, []string{"Subscription", "Topic"})
+	assertServiceSelection(t, services["psa"], true, SelectionModeExplicit, []string{"PrivateServiceAccess"})
 	assertServiceSelection(t, services["psql"], true, SelectionModeExplicit, []string{"DbSystem"})
 	assertServiceSelection(t, services["queue"], true, SelectionModeExplicit, []string{"Queue"})
 	assertServiceSelection(t, services["redis"], true, SelectionModeExplicit, []string{"RedisCluster"})
@@ -1410,7 +1417,9 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	assertServiceSelection(t, services["waa"], true, SelectionModeExplicit, []string{"WebAppAcceleration", "WebAppAccelerationPolicy"})
 	assertServiceSelection(t, services["waas"], true, SelectionModeExplicit, []string{"AddressList", "Certificate", "CustomProtectionRule", "HttpRedirect", "WaasPolicy"})
 	assertServiceSelection(t, services["waf"], true, SelectionModeExplicit, []string{"NetworkAddressList", "WebAppFirewall", "WebAppFirewallPolicy"})
+	assertServiceSelection(t, services["wlms"], true, SelectionModeExplicit, []string{"WlsDomain"})
 	assertServiceSelection(t, services["visualbuilder"], true, SelectionModeExplicit, []string{"VbInstance"})
+	assertServiceSelection(t, services["vnmonitoring"], true, SelectionModeExplicit, []string{"PathAnalyzerTest"})
 	assertServiceSelection(t, services["vault"], false, SelectionModeAll, nil)
 }
 
@@ -2166,6 +2175,7 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 		"opa":                         {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
 		"opensearch":                  {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"ons":                         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"psa":                         {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
 		"psql":                        {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeHandwritten},
 		"queue":                       {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
 		"redis":                       {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
@@ -2193,9 +2203,12 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 		"securityattribute":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"stackmonitoring":             {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"vbsinst":                     {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"visualbuilder":               {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"vnmonitoring":                {strategy: AsyncStrategyNone, runtime: AsyncRuntimeGeneratedRuntime},
 		"waa":                         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"waas":                        {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"waf":                         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"wlms":                        {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 	}
 
 	targets := defaultActiveExplicitSelectedKindTargets(cfg)
@@ -2249,6 +2262,17 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 	}
 	if vbsinst.WorkRequest.LegacyFieldBridge.hasOverride() {
 		t.Fatalf("vbsinst VbsInstance workRequest.legacyFieldBridge = %#v, want empty legacy bridge", vbsinst.WorkRequest.LegacyFieldBridge)
+	}
+
+	psa := assertAsyncContract(t, services["psa"], "PrivateServiceAccess", AsyncStrategyWorkRequest, AsyncRuntimeGeneratedRuntime)
+	if psa.WorkRequest.Source != AsyncWorkRequestSourceServiceSDK {
+		t.Fatalf("psa PrivateServiceAccess workRequest.source = %q, want %q", psa.WorkRequest.Source, AsyncWorkRequestSourceServiceSDK)
+	}
+	if !slices.Equal(psa.WorkRequest.Phases, []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}) {
+		t.Fatalf("psa PrivateServiceAccess workRequest.phases = %v", psa.WorkRequest.Phases)
+	}
+	if psa.WorkRequest.LegacyFieldBridge.hasOverride() {
+		t.Fatalf("psa PrivateServiceAccess workRequest.legacyFieldBridge = %#v, want empty legacy bridge", psa.WorkRequest.LegacyFieldBridge)
 	}
 
 	clusterPlacementGroups := assertAsyncContract(
@@ -2325,6 +2349,23 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 			"generativeaiagent KnowledgeBase workRequest.legacyFieldBridge = %#v, want empty legacy bridge",
 			generativeAIAgent.WorkRequest.LegacyFieldBridge,
 		)
+	}
+
+	visualBuilder := assertAsyncContract(
+		t,
+		services["visualbuilder"],
+		"VbInstance",
+		AsyncStrategyWorkRequest,
+		AsyncRuntimeGeneratedRuntime,
+	)
+	if visualBuilder.WorkRequest.Source != AsyncWorkRequestSourceServiceSDK {
+		t.Fatalf("visualbuilder VbInstance workRequest.source = %q, want %q", visualBuilder.WorkRequest.Source, AsyncWorkRequestSourceServiceSDK)
+	}
+	if !slices.Equal(visualBuilder.WorkRequest.Phases, []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}) {
+		t.Fatalf("visualbuilder VbInstance workRequest.phases = %v", visualBuilder.WorkRequest.Phases)
+	}
+	if visualBuilder.WorkRequest.LegacyFieldBridge.hasOverride() {
+		t.Fatalf("visualbuilder VbInstance workRequest.legacyFieldBridge = %#v, want empty legacy bridge", visualBuilder.WorkRequest.LegacyFieldBridge)
 	}
 }
 

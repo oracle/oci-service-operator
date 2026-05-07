@@ -1047,6 +1047,34 @@ packages:
         kind: VbsInstance
         summary: Manage OCI Visual Builder Studio instances.
 
+  - package: visualbuilder
+    displayName: Visual Builder
+    summary: Manage OCI Visual Builder instances from Kubernetes with a reviewed controller-backed runtime.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to VbInstance while the Visual Builder work-request helper families stay unpublished.
+      - The published runtime uses service-SDK work requests for create, update, and delete, treats `compartmentId`, `consumptionModel`, and `networkEndpointDetails.privateEndpointIp` as replacement-only, and preserves explicit empty-collection clears for supported tag and endpoint fields.
+    kindOverrides:
+      - group: visualbuilder
+        kind: VbInstance
+        summary: Manage OCI Visual Builder instances.
+
+  - package: vnmonitoring
+    displayName: Network Monitoring
+    summary: Manage OCI Network Monitoring path analyzer tests from Kubernetes with a reviewed controller-backed runtime.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to PathAnalyzerTest while path analyses, work-request helper families, and the separate change-compartment action stay unpublished.
+      - The published runtime uses synchronous read-after-write follow-up semantics, paginated exact-match reuse on displayName plus endpoint and protocol identity within one compartment, and explicit in-place updates for endpoint, protocol, query-option, and tag fields.
+    kindOverrides:
+      - group: vnmonitoring
+        kind: PathAnalyzerTest
+        summary: Manage OCI Network Monitoring path analyzer tests.
+
   - package: waa
     displayName: Web App Acceleration
     summary: Manage OCI Web App Acceleration resources from Kubernetes.

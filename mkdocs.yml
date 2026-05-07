@@ -220,6 +220,8 @@ nav:
           - streaming.oracle.com/v1beta1: reference/api/streaming/v1beta1/index.md
           - usageapi.oracle.com/v1beta1: reference/api/usageapi/v1beta1/index.md
           - vbsinst.oracle.com/v1beta1: reference/api/vbsinst/v1beta1/index.md
+          - visualbuilder.oracle.com/v1beta1: reference/api/visualbuilder/v1beta1/index.md
+          - vnmonitoring.oracle.com/v1beta1: reference/api/vnmonitoring/v1beta1/index.md
           - waa.oracle.com/v1beta1: reference/api/waa/v1beta1/index.md
           - waas.oracle.com/v1beta1: reference/api/waas/v1beta1/index.md
           - waf.oracle.com/v1beta1: reference/api/waf/v1beta1/index.md

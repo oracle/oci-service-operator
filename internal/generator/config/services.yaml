@@ -3933,6 +3933,60 @@ services:
         WorkRequestLog:
           - WorkRequestLogEntry
 
+  - service: psa
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/psa
+    group: psa
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - PrivateServiceAccess
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: PrivateServiceAccess
+          formalSpec: privateserviceaccess
+          async:
+            strategy: workrequest
+            runtime: generatedruntime
+            formalClassification: workrequest
+            workRequest:
+              source: service-sdk
+              phases:
+                - create
+                - update
+                - delete
+          sample:
+            body: |-
+              #
+              # Replace the OCI identifiers below before running e2e.
+              # Update metadata.name or spec.displayName if you want to force a fresh create instead of
+              # binding to an existing PrivateServiceAccess with the same compartmentId, serviceId,
+              # subnetId, and displayName.
+              #
+              apiVersion: psa.oracle.com/v1beta1
+              kind: PrivateServiceAccess
+              metadata:
+                name: privateserviceaccess-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                subnetId: ocid1.subnet.oc1..exampleuniqueID
+                serviceId: ocid1.psaservice.oc1..exampleuniqueID
+                displayName: privateserviceaccess-sample
+                description: Sample PrivateServiceAccess managed by OCI Service Operator
+                freeformTags:
+                  managed-by: oci-service-operator
+
   - service: psql
     sdkPackage: github.com/oracle/oci-go-sdk/v65/psql
     group: psql
@@ -5233,6 +5287,60 @@ services:
             strategy: none
           serviceManager:
             strategy: none
+
+  - service: vnmonitoring
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/vnmonitoring
+    group: vnmonitoring
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - PathAnalyzerTest
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: PathAnalyzerTest
+          formalSpec: pathanalyzertest
+          async:
+            strategy: none
+            runtime: generatedruntime
+            formalClassification: none
+          sample:
+            body: |-
+              #
+              # Replace the OCI compartment OCID and endpoint addresses below before running e2e.
+              # Update metadata.name or spec.displayName if you want to force a fresh create instead of
+              # binding to an existing PathAnalyzerTest with the same reviewed identity surface.
+              #
+              apiVersion: vnmonitoring.oracle.com/v1beta1
+              kind: PathAnalyzerTest
+              metadata:
+                name: pathanalyzertest-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                displayName: pathanalyzertest-sample
+                protocol: 6
+                sourceEndpoint:
+                  type: IP_ADDRESS
+                  address: 10.0.0.10
+                destinationEndpoint:
+                  type: IP_ADDRESS
+                  address: 10.0.1.20
+                protocolParameters:
+                  type: TCP
+                  destinationPort: 443
+                queryOptions:
+                  isBiDirectionalAnalysis: true
 
   - service: workrequests
     sdkPackage: github.com/oracle/oci-go-sdk/v65/workrequests

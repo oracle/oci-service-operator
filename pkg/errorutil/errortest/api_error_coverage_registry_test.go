@@ -14,13 +14,13 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	}
 
 	byKey := inventoryByKey(inventory)
-	if got, want := len(inventory), 331; got != want {
+	if got, want := len(inventory), 349; got != want {
 		t.Fatalf("len(inventory) = %d, want %d", got, want)
 	}
-	if got, want := countRegistrations(inventory), 218; got != want {
+	if got, want := countRegistrations(inventory), 224; got != want {
 		t.Fatalf("registration inventory count = %d, want %d", got, want)
 	}
-	if got, want := countExceptions(inventory), 110; got != want {
+	if got, want := countExceptions(inventory), 125; got != want {
 		t.Fatalf("exception inventory count = %d, want %d", got, want)
 	}
 
@@ -58,9 +58,12 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventorySelectionSource(t, byKey, "marketplace/AcceptedAgreement", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "oda/Skill", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "opa/OpaInstance", "selection.includeKinds")
+	assertInventorySelectionSource(t, byKey, "psa/PrivateServiceAccess", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "queue/Queue", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "usageapi/Query", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "vbsinst/VbsInstance", "selection.includeKinds")
+	assertInventorySelectionSource(t, byKey, "visualbuilder/VbInstance", "selection.includeKinds")
+	assertInventorySelectionSource(t, byKey, "vnmonitoring/PathAnalyzerTest", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "wlms/WlsDomain", "selection.includeKinds")
 
 	assertInventoryRegistration(t, byKey, "accessgovernancecp/GovernanceInstance")
@@ -134,8 +137,11 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventoryException(t, byKey, "opa/WorkRequestError", `controller.strategy="none"`)
 	assertInventoryException(t, byKey, "opa/WorkRequestLog", `controller.strategy="none"`)
 	assertInventoryException(t, byKey, "opensearch/WorkRequestLog", `controller.strategy="none"`)
+	assertInventoryRegistration(t, byKey, "psa/PrivateServiceAccess")
 	assertInventoryRegistration(t, byKey, "usageapi/Query")
 	assertInventoryRegistration(t, byKey, "vbsinst/VbsInstance")
+	assertInventoryRegistration(t, byKey, "visualbuilder/VbInstance")
+	assertInventoryRegistration(t, byKey, "vnmonitoring/PathAnalyzerTest")
 	assertInventoryRegistration(t, byKey, "wlms/WlsDomain")
 }
 
@@ -194,12 +200,15 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedFamily(t, "oda/Skill", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "opa/OpaInstance", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "objectstorage/Bucket", APIErrorCoverageFamilyGeneratedRuntimePlain)
+	assertReviewedFamily(t, "psa/PrivateServiceAccess", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "psql/DbSystem", APIErrorCoverageFamilyLegacyAdapter)
 	assertReviewedFamily(t, "queue/Queue", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "redis/RedisCluster", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "streaming/Stream", APIErrorCoverageFamilyGeneratedRuntimeFollowUp)
 	assertReviewedFamily(t, "usageapi/Query", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "vbsinst/VbsInstance", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
+	assertReviewedFamily(t, "visualbuilder/VbInstance", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
+	assertReviewedFamily(t, "vnmonitoring/PathAnalyzerTest", APIErrorCoverageFamilyGeneratedRuntimeFollowUp)
 	assertReviewedFamily(t, "wlms/WlsDomain", APIErrorCoverageFamilyGeneratedRuntimePlain)
 
 	assertReviewedException(t, "accessgovernancecp/GovernanceInstanceConfiguration", "strategy=none")
