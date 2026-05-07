@@ -1,0 +1,509 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: lustrefilesystems.lustrefilestorage.oracle.com
+spec:
+  group: lustrefilestorage.oracle.com
+  names:
+    kind: LustreFileSystem
+    listKind: LustreFileSystemList
+    plural: lustrefilesystems
+    singular: lustrefilesystem
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the LustreFileSystem
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the LustreFileSystem
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: LustreFileSystem is the Schema for the lustrefilesystems API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: LustreFileSystemSpec defines the desired state of LustreFileSystem.
+            properties:
+              availabilityDomain:
+                description: |-
+                  The availability domain the file system is in. May be unset
+                  as a blank or NULL value.
+                  Example: `Uocm:PHX-AD-1`
+                type: string
+              capacityInGBs:
+                description: Capacity of the Lustre file system in GB. You can increase
+                  capacity only in multiples of 5 TB.
+                type: integer
+              clusterPlacementGroupId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the cluster placement group in which the Lustre file system exists.
+                type: string
+              compartmentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment that contains the Lustre file system.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              displayName:
+                description: |-
+                  A user-friendly name. It does not have to be unique, and it is changeable.
+                  Avoid entering confidential information.
+                  Example: `My Lustre file system`
+                type: string
+              fileSystemDescription:
+                description: |-
+                  Short description of the Lustre file system.
+                  Avoid entering confidential information.
+                type: string
+              fileSystemName:
+                description: |-
+                  The Lustre file system name. This is used in mount commands and other aspects of the client command line interface.
+                  The file system name is limited to 8 characters. Allowed characters are lower and upper case English letters, numbers, and '_'.
+                  If you have multiple Lustre file systems mounted on the same clients, this name can help distinguish them.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              kmsKeyId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the KMS key used to encrypt the encryption keys associated with
+                  this file system.
+                type: string
+              maintenanceWindow:
+                description: LustreFileSystemMaintenanceWindow defines nested fields
+                  for LustreFileSystem.MaintenanceWindow.
+                properties:
+                  dayOfWeek:
+                    description: Day of the week when the maintainence window starts.
+                    type: string
+                  timeStart:
+                    description: |-
+                      The time to start the maintenance window. The format is 'HH:MM', 'HH:MM' represents the time in UTC.
+                      Example: `22:00`
+                    type: string
+                type: object
+              nsgIds:
+                description: |-
+                  A list of Network Security Group OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) associated with this lustre file system.
+                  A maximum of 5 is allowed.
+                  Setting this to an empty array after the list is created removes the lustre file system from all NSGs.
+                  For more information about NSGs, see Security Rules (https://docs.oracle.com/iaas/Content/Network/Concepts/securityrules.htm).
+                items:
+                  type: string
+                type: array
+              performanceTier:
+                description: The Lustre file system performance tier. A value of `MBPS_PER_TB_125`
+                  represents 125 megabytes per second per terabyte.
+                type: string
+              rootSquashConfiguration:
+                description: LustreFileSystemRootSquashConfiguration defines nested
+                  fields for LustreFileSystem.RootSquashConfiguration.
+                properties:
+                  clientExceptions:
+                    description: |-
+                      A list of NIDs allowed with this lustre file system not to be squashed.
+                      A maximum of 10 is allowed.
+                    items:
+                      type: string
+                    type: array
+                  identitySquash:
+                    description: |-
+                      Used when clients accessing the Lustre file system have their UID and GID remapped to
+                      `squashUid` and `squashGid`. If `ROOT`, only the root user and group (UID/GID 0) are remapped;
+                      if `NONE`, no remapping is done. If unspecified, defaults to `NONE`.
+                    type: string
+                  squashGid:
+                    description: |-
+                      The GID value to remap to when squashing a client GID. See
+                      `identitySquash` for more details. If unspecified, defaults
+                      to `65534`.
+                    format: int64
+                    type: integer
+                  squashUid:
+                    description: |-
+                      The UID value to remap to when squashing a client UID. See
+                      `identitySquash` for more details. If unspecified, defaults
+                      to `65534`.
+                    format: int64
+                    type: integer
+                type: object
+              subnetId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the subnet the Lustre file system is in.
+                type: string
+            required:
+            - availabilityDomain
+            - capacityInGBs
+            - compartmentId
+            - fileSystemName
+            - performanceTier
+            - rootSquashConfiguration
+            - subnetId
+            type: object
+          status:
+            description: LustreFileSystemStatus defines the observed state of LustreFileSystem.
+            properties:
+              availabilityDomain:
+                description: |-
+                  The availability domain the file system is in. May be unset
+                  as a blank or NULL value.
+                  Example: `Uocm:PHX-AD-1`
+                type: string
+              capacityInGBs:
+                description: Capacity of the Lustre file system in GB.
+                type: integer
+              clusterPlacementGroupId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the cluster placement group in which the Lustre file system exists.
+                type: string
+              compartmentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment that contains the Lustre file system.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              displayName:
+                description: |-
+                  A user-friendly name. It does not have to be unique, and it is changeable.
+                  Avoid entering confidential information.
+                  Example: `My Lustre file system`
+                type: string
+              fileSystemDescription:
+                description: |-
+                  Short description of the Lustre file system.
+                  Avoid entering confidential information.
+                type: string
+              fileSystemName:
+                description: |-
+                  The Lustre file system name. This is used in mount commands and other aspects of the client command line interface.
+                  The default file system name is 'lustre'. The file system name is limited to 8 characters. Allowed characters are lower and upper case English letters, numbers, and '_'.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              id:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the Lustre file system.
+                type: string
+              kmsKeyId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the KMS key used to encrypt the encryption keys associated with
+                  this file system.
+                type: string
+              lifecycleDetails:
+                description: |-
+                  A message that describes the current state of the Lustre file system in more detail. For example,
+                  can be used to provide actionable information for a resource in the Failed state.
+                type: string
+              lifecycleState:
+                description: The current state of the Lustre file system.
+                type: string
+              lnet:
+                description: |-
+                  Type of network used by clients to mount the file system.
+                  Example: `tcp`
+                type: string
+              maintenanceWindow:
+                description: LustreFileSystemMaintenanceWindow defines nested fields
+                  for LustreFileSystem.MaintenanceWindow.
+                properties:
+                  dayOfWeek:
+                    description: Day of the week when the maintainence window starts.
+                    type: string
+                  timeStart:
+                    description: |-
+                      The time to start the maintenance window. The format is 'HH:MM', 'HH:MM' represents the time in UTC.
+                      Example: `22:00`
+                    type: string
+                type: object
+              maintenanceWindowMetadata:
+                description: LustreFileSystemMaintenanceWindowMetadata defines nested
+                  fields for LustreFileSystem.MaintenanceWindowMetadata.
+                properties:
+                  activeOrNextPlannedMaintenance:
+                    description: LustreFileSystemMaintenanceWindowMetadataActiveOrNextPlannedMaintenance
+                      defines nested fields for LustreFileSystem.MaintenanceWindowMetadata.ActiveOrNextPlannedMaintenance.
+                    properties:
+                      date:
+                        description: |-
+                          A user-friendly date.
+                          Example: `2025-04-25`
+                        type: string
+                      time:
+                        description: |-
+                          A user-friendly time. The format is 'HH:MM', 'HH:MM' represents the time in UTC.
+                          Example: `22:00`
+                        type: string
+                    type: object
+                  finishedMaintenance:
+                    description: LustreFileSystemMaintenanceWindowMetadataFinishedMaintenance
+                      defines nested fields for LustreFileSystem.MaintenanceWindowMetadata.FinishedMaintenance.
+                    properties:
+                      date:
+                        description: |-
+                          A user-friendly date.
+                          Example: `2025-04-25`
+                        type: string
+                      time:
+                        description: |-
+                          A user-friendly time. The format is 'HH:MM', 'HH:MM' represents the time in UTC.
+                          Example: `22:00`
+                        type: string
+                    type: object
+                  isMaintenanceInProgress:
+                    description: whether or not an active maintenance is going on
+                      for the LustreFileSystem
+                    type: boolean
+                type: object
+              majorVersion:
+                description: |-
+                  Major version of Lustre running in the Lustre file system.
+                  Example: `2.15`
+                type: string
+              managementServiceAddress:
+                description: The IPv4 address of MGS (Lustre Management Service) used
+                  by clients to mount the file system. For example '10.0.0.4'.
+                type: string
+              nsgIds:
+                description: |-
+                  A list of Network Security Group OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) associated with this lustre file system.
+                  A maximum of 5 is allowed.
+                  Setting this to an empty array after the list is created removes the lustre file system from all NSGs.
+                  For more information about NSGs, see Security Rules (https://docs.oracle.com/iaas/Content/Network/Concepts/securityrules.htm).
+                items:
+                  type: string
+                type: array
+              performanceTier:
+                description: The Lustre file system performance tier. A value of `MBPS_PER_TB_125`
+                  represents 125 megabytes per second per terabyte.
+                type: string
+              rootSquashConfiguration:
+                description: LustreFileSystemRootSquashConfiguration defines nested
+                  fields for LustreFileSystem.RootSquashConfiguration.
+                properties:
+                  clientExceptions:
+                    description: |-
+                      A list of NIDs allowed with this lustre file system not to be squashed.
+                      A maximum of 10 is allowed.
+                    items:
+                      type: string
+                    type: array
+                  identitySquash:
+                    description: |-
+                      Used when clients accessing the Lustre file system have their UID and GID remapped to
+                      `squashUid` and `squashGid`. If `ROOT`, only the root user and group (UID/GID 0) are remapped;
+                      if `NONE`, no remapping is done. If unspecified, defaults to `NONE`.
+                    type: string
+                  squashGid:
+                    description: |-
+                      The GID value to remap to when squashing a client GID. See
+                      `identitySquash` for more details. If unspecified, defaults
+                      to `65534`.
+                    format: int64
+                    type: integer
+                  squashUid:
+                    description: |-
+                      The UID value to remap to when squashing a client UID. See
+                      `identitySquash` for more details. If unspecified, defaults
+                      to `65534`.
+                    format: int64
+                    type: integer
+                type: object
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              subnetId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the subnet the Lustre file system is in.
+                type: string
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  System tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              timeBillingCycleEnd:
+                description: |-
+                  The date and time that the current billing cycle for the file system will end, expressed in
+                  RFC 3339 (https://tools.ietf.org/rfc/rfc3339) timestamp format. After the current cycle ends,
+                  this date is updated automatically to the next timestamp, which is 30 days later.
+                  File systems deleted earlier than this time will still incur charges until the billing cycle ends.
+                  Example: `2016-08-25T21:10:29.600Z`
+                type: string
+              timeCreated:
+                description: |-
+                  The date and time the Lustre file system was created, expressed
+                  in RFC 3339 (https://tools.ietf.org/rfc/rfc3339) timestamp format.
+                  Example: `2024-04-25T21:10:29.600Z`
+                type: string
+              timeUpdated:
+                description: |-
+                  The date and time the Lustre file system was updated, in the format defined by RFC 3339 (https://tools.ietf.org/html/rfc3339).
+                  Example: `2024-04-25T21:10:29.600Z`
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

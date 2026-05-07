@@ -1,16 +1,16 @@
 {
   "aggregate": {
-    "specs": 214,
-    "mappings": 905,
-    "trackedMappings": 904,
+    "specs": 215,
+    "mappings": 910,
+    "trackedMappings": 909,
     "untrackedMappings": 1,
-    "presentFields": 8974,
-    "missingFields": 143,
-    "mandatoryPresentFields": 3178,
-    "mandatoryMissingFields": 123,
-    "extraSpecFields": 768,
-    "overallCoveragePercent": 98.43150159043546,
-    "mandatoryCoveragePercent": 96.27385640714935
+    "presentFields": 9048,
+    "missingFields": 144,
+    "mandatoryPresentFields": 3225,
+    "mandatoryMissingFields": 124,
+    "extraSpecFields": 774,
+    "overallCoveragePercent": 98.43342036553526,
+    "mandatoryCoveragePercent": 96.29740220961482
   },
   "services": [
     {
@@ -712,6 +712,20 @@
       "extraSpecFields": 6,
       "overallCoveragePercent": 99.28057553956835,
       "mandatoryCoveragePercent": 98.14814814814815
+    },
+    {
+      "service": "lustrefilestorage",
+      "specs": 1,
+      "mappings": 5,
+      "trackedMappings": 5,
+      "untrackedMappings": 0,
+      "presentFields": 74,
+      "missingFields": 1,
+      "mandatoryPresentFields": 47,
+      "mandatoryMissingFields": 1,
+      "extraSpecFields": 6,
+      "overallCoveragePercent": 98.66666666666667,
+      "mandatoryCoveragePercent": 97.91666666666666
     },
     {
       "service": "managedkafka",

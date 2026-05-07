@@ -14,10 +14,10 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	}
 
 	byKey := inventoryByKey(inventory)
-	if got, want := len(inventory), 324; got != want {
+	if got, want := len(inventory), 325; got != want {
 		t.Fatalf("len(inventory) = %d, want %d", got, want)
 	}
-	if got, want := countRegistrations(inventory), 214; got != want {
+	if got, want := countRegistrations(inventory), 215; got != want {
 		t.Fatalf("registration inventory count = %d, want %d", got, want)
 	}
 	if got, want := countExceptions(inventory), 110; got != want {
@@ -54,6 +54,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventorySelectionSource(t, byKey, "email/Dkim", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "functions/Application", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "loadbalancer/LoadBalancer", "selection.includeKinds")
+	assertInventorySelectionSource(t, byKey, "lustrefilestorage/LustreFileSystem", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "marketplace/AcceptedAgreement", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "oda/Skill", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "queue/Queue", "selection.includeKinds")
@@ -120,6 +121,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventoryRegistration(t, byKey, "keymanagement/Vault")
 	assertInventoryException(t, byKey, "keymanagement/Key", `controller.strategy="none"`)
 	assertInventoryRegistration(t, byKey, "loadbalancer/LoadBalancer")
+	assertInventoryRegistration(t, byKey, "lustrefilestorage/LustreFileSystem")
 	assertInventoryRegistration(t, byKey, "marketplace/AcceptedAgreement")
 	assertInventoryRegistration(t, byKey, "ocvp/Cluster")
 	assertInventoryRegistration(t, byKey, "oda/Skill")
@@ -173,6 +175,7 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedFamily(t, "identity/Compartment", APIErrorCoverageFamilyLegacyAdapter)
 	assertReviewedFamily(t, "keymanagement/Vault", APIErrorCoverageFamilyLegacyAdapter)
 	assertReviewedFamily(t, "loadbalancer/LoadBalancer", APIErrorCoverageFamilyGeneratedRuntimePlain)
+	assertReviewedFamily(t, "lustrefilestorage/LustreFileSystem", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "marketplace/AcceptedAgreement", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "monitoring/Alarm", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "nosql/Table", APIErrorCoverageFamilyLegacyAdapter)

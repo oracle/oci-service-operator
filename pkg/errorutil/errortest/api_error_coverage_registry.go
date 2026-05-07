@@ -581,6 +581,16 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 				retryableConflictReadback,
 				"Functions managers share package-local delete helpers; Function also carries endpoint-secret side effects after OCI reconciliation.",
 			),
+			resourceKey("lustrefilestorage", "LustreFileSystem"): reviewedRegistration(
+				"lustrefilestorage",
+				"lustrefilestorage",
+				apiErrorCoverageDefaultVersion,
+				"LustreFileSystem",
+				APIErrorCoverageFamilyGeneratedRuntimeWorkRequest,
+				deleteNotFoundReadback,
+				retryableConflictWorkRequest,
+				"LustreFileSystem persists create, update, and delete work-request OCIDs while steady-state success still re-reads OCI lifecycle state and delete confirmation follows GetLustreFileSystem until NotFound.",
+			),
 			resourceKey("identity", "Compartment"): reviewedRegistration(
 				"identity",
 				"identity",

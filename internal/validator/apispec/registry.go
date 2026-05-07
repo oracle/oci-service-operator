@@ -53,6 +53,7 @@ import (
 	lockboxv1beta1 "github.com/oracle/oci-service-operator/api/lockbox/v1beta1"
 	loganalyticsv1beta1 "github.com/oracle/oci-service-operator/api/loganalytics/v1beta1"
 	loggingv1beta1 "github.com/oracle/oci-service-operator/api/logging/v1beta1"
+	lustrefilestoragev1beta1 "github.com/oracle/oci-service-operator/api/lustrefilestorage/v1beta1"
 	managedkafkav1beta1 "github.com/oracle/oci-service-operator/api/managedkafka/v1beta1"
 	managementagentv1beta1 "github.com/oracle/oci-service-operator/api/managementagent/v1beta1"
 	managementdashboardv1beta1 "github.com/oracle/oci-service-operator/api/managementdashboard/v1beta1"
@@ -3050,6 +3051,28 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "loganalytics.ScheduledTaskSummary",
+			},
+		},
+	},
+	{
+		Name:       "LustrefilestorageLustreFileSystem",
+		SpecType:   reflect.TypeOf(lustrefilestoragev1beta1.LustreFileSystemSpec{}),
+		StatusType: reflect.TypeOf(lustrefilestoragev1beta1.LustreFileSystemStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "lustrefilestorage.CreateLustreFileSystemDetails",
+			},
+			{
+				SDKStruct: "lustrefilestorage.UpdateLustreFileSystemDetails",
+			},
+			{
+				SDKStruct: "lustrefilestorage.LustreFileSystem",
+			},
+			{
+				SDKStruct: "lustrefilestorage.LustreFileSystemCollection",
+			},
+			{
+				SDKStruct: "lustrefilestorage.LustreFileSystemSummary",
 			},
 		},
 	},

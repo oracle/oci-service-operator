@@ -1,0 +1,154 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "lustrefilestorage",
+  "slug": "lustrefilesystem",
+  "kind": "LustreFileSystem",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_lustre_file_storage_lustre_file_system",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateLustreFileSystem",
+        "requestType": "lustrefilestorage.CreateLustreFileSystemRequest",
+        "responseType": "lustrefilestorage.CreateLustreFileSystemResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetLustreFileSystem",
+        "requestType": "lustrefilestorage.GetLustreFileSystemRequest",
+        "responseType": "lustrefilestorage.GetLustreFileSystemResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListLustreFileSystems",
+        "requestType": "lustrefilestorage.ListLustreFileSystemsRequest",
+        "responseType": "lustrefilestorage.ListLustreFileSystemsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateLustreFileSystem",
+        "requestType": "lustrefilestorage.UpdateLustreFileSystemRequest",
+        "responseType": "lustrefilestorage.UpdateLustreFileSystemResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteLustreFileSystem",
+        "requestType": "lustrefilestorage.DeleteLustreFileSystemRequest",
+        "responseType": "lustrefilestorage.DeleteLustreFileSystemResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "INACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "INACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "capacity_in_gbs",
+      "defined_tags",
+      "display_name",
+      "file_system_description",
+      "freeform_tags",
+      "kms_key_id",
+      "maintenance_window",
+      "nsg_ids",
+      "root_squash_configuration"
+    ],
+    "forceNew": [
+      "availability_domain",
+      "cluster_placement_group_id",
+      "compartment_id",
+      "file_system_name",
+      "performance_tier",
+      "subnet_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "lustrefilesystem",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "lustrefilesystem",
+        "action": "UPDATED"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "lustrefilesystem",
+        "action": "DELETED"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_lustre_file_storage_lustre_file_systems",
+    "collectionField": "lustre_file_systems",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "availability_domain",
+      "compartment_id",
+      "display_name",
+      "id",
+      "lifecycle_state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/lustrefilestorage/lustrefilesystem/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/lustrefilestorage/lustrefilesystem/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: LustreFileSystem lifecycle exposes CREATING, UPDATING, ACTIVE, INACTIVE, DELETING, DELETED, and FAILED. Repo-authored success is ACTIVE or INACTIVE, requeue covers CREATING and UPDATING, FAILED is terminal without requeue, and delete confirmation follows DELETING to DELETED.",
+    "Pinned OCI SDK contract: UpdateLustreFileSystemDetails exposes display_name, file_system_description, freeform_tags, defined_tags, nsg_ids, kms_key_id, capacity_in_gbs, root_squash_configuration, and maintenance_window as in-place update fields. Fields absent from UpdateLustreFileSystemDetails remain create-only drift.",
+    "CreateLustreFileSystem, UpdateLustreFileSystem, and DeleteLustreFileSystem each return opc-work-request-id headers, so provider wait hooks are work-request-backed even though steady-state readiness is still classified from observed LustreFileSystem lifecycle states.",
+    "ListLustreFileSystemsRequest filters by availabilityDomain, compartmentId, displayName, id, and lifecycleState and returns Items []LustreFileSystemSummary. Safe reusable matching is exact compartment_id plus availability_domain plus display_name, restricted to reusable ACTIVE, CREATING, UPDATING, or INACTIVE candidates; duplicate exact-name matches must fail instead of guessing."
+  ]
+}

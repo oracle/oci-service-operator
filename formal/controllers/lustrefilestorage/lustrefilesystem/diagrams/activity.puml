@@ -1,0 +1,123 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Activity - lustrefilestorage/LustreFileSystem
+skinparam activity {
+  backgroundColor #f8fafc
+  borderColor #0f172a
+  fontColor #0f172a
+  diamondBackgroundColor #e2e8f0
+  diamondBorderColor #1d4ed8
+  diamondFontColor #0f172a
+  startColor #1d4ed8
+  endColor #0f172a
+  barColor #1d4ed8
+}
+start
+partition "Observe and Bind" {
+:Start from shared flow\nshared/diagrams/shared-reconcile-activity.svg;
+:Read desired LustreFileSystem spec, tracked\nstatus, and delete intent;
+if ("Tracked or explicit OCI identity present?") then (yes)
+:Get the current OCI resource via\nGetLustreFileSystem;
+else (no)
+:Resolve an existing OCI resource through\nListLustreFileSystems using filters\navailability_domain, compartment_id,\ndisplay_name, id (+1 more);
+:Create the OCI resource via\nCreateLustreFileSystem when no reusable match\nis found;
+:Persist the resolved or created OCI identity\ninto status;
+endif
+}
+if ("Delete requested?") then (yes)
+partition "Delete" {
+:Delete path uses DeleteLustreFileSystem with\nrequired via GetLustreFileSystem or\nListLustreFileSystems to DELETED confirmation;
+:Confirm deletion via GetLustreFileSystem or\nListLustreFileSystems until OCI reaches\nDELETED;
+if ("Delete cleanup and finalizer release succeed?") then (yes)
+:Remove the finalizer after delete completion;
+else (no)
+:Stay blocked until cleanup or finalizer\nrelease succeeds;
+endif
+}
+stop
+else (no)
+partition "Lifecycle Classification" {
+if ("OCI state in retryable set?") then (yes)
+:Request requeue while OCI remains in CREATING,\nUPDATING, DELETING;
+stop
+endif
+if ("OCI state is outside success targets?") then (yes)
+:Return an unsuccessful reconcile result until\nOCI reaches ACTIVE, INACTIVE;
+stop
+endif
+}
+partition "Ready and Drift Handling" {
+:Compare live OCI state against the imported\nfield surface;
+if ("Force-new or conflicting drift detected?") then (yes)
+:Reject drift before OCI mutation for force-new\nfields availability_domain,\ncluster_placement_group_id, compartment_id,\nfile_system_name (+2 more);
+stop
+endif
+if ("Supported mutable drift detected?") then (yes)
+:Apply UpdateLustreFileSystem only for mutable\nfields capacity_in_gbs, defined_tags,\ndisplay_name, file_system_description (+5\nmore);
+else (no)
+:Skip the no-op mutation path;
+endif
+:Run provider helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=lustrefilesystem action=CREATED;\nupdate=tfresource.UpdateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=lustrefilesystem action=UPDATED;\ndelete=tfresource.DeleteResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=lustrefilesystem action=DELETED when\nthe matching field-driven path executes;
+:Return success for the ACTIVE, INACTIVE\nsuccess state;
+:Project required status and finalizer policy\nretain-until-confirmed-delete;
+:Requeue on provisioning, updating, terminating;
+}
+endif
+stop
+note right
+shared diagram:
+shared/diagrams/shared-reconcile-activity.svg
+Start from the shared reconcile activity and
+specialize provider-backed CRUD, wait, and
+status-projection details here.
+Controller-local activity diagrams add
+list-lookup hints, secret policies, delete
+handling, and open formal gaps.
+archetype batch: Generated service-manager
+controllers specialize the shared reconcile path
+with formal runtime ownership.
+service: lustrefilestorage
+slug: lustrefilesystem
+kind: LustreFileSystem
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: provisioning, updating, terminating
+provider states: create CREATING; update
+UPDATING; delete DELETING
+supported drift: capacity_in_gbs, defined_tags,
+display_name, file_system_description (+5 more)
+reject before mutate: force-new fields
+availability_domain, cluster_placement_group_id,
+compartment_id, file_system_name (+2 more)
+create-only fields: none
+list lookup:
+oci_lustre_file_storage_lustre_file_systems
+filters availability_domain, compartment_id,
+display_name, id (+1 more)
+conflicts: none
+open gaps: none
+Ready state maps to OCI ACTIVE or INACTIVE.
+Requeue continues while OCI reports CREATING,
+UPDATING, or DELETING.
+Bind-before-create reuses only exact
+compartment, availability-domain, and
+display-name matches that remain in ACTIVE,
+CREATING, UPDATING, or INACTIVE.
+Create, update, and delete are
+work-request-backed, but steady-state readiness
+is still classified from Lustre file system
+lifecycle state.
+Delete completes after GetLustreFileSystem or
+ListLustreFileSystems returns DELETED or no
+longer finds the resource.
+end note
+@enduml

@@ -31,6 +31,7 @@ resources:
 - database_v1beta1_autonomousdatabase.yaml
 - streaming_v1beta1_stream.yaml
 - mysql_v1beta1_dbsystem.yaml
+- lustrefilestorage_v1beta1_lustrefilesystem.yaml
 - dataflow_v1beta1_application.yaml
 - analytics_v1beta1_analyticsinstance.yaml
 - ailanguage_v1beta1_project.yaml
