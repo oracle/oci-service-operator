@@ -1,16 +1,16 @@
 {
   "aggregate": {
-    "specs": 225,
-    "mappings": 956,
-    "trackedMappings": 955,
+    "specs": 226,
+    "mappings": 961,
+    "trackedMappings": 960,
     "untrackedMappings": 1,
-    "presentFields": 9568,
-    "missingFields": 152,
-    "mandatoryPresentFields": 3397,
-    "mandatoryMissingFields": 131,
-    "extraSpecFields": 821,
-    "overallCoveragePercent": 98.43621399176955,
-    "mandatoryCoveragePercent": 96.28684807256236
+    "presentFields": 9602,
+    "missingFields": 153,
+    "mandatoryPresentFields": 3419,
+    "mandatoryMissingFields": 132,
+    "extraSpecFields": 823,
+    "overallCoveragePercent": 98.4315735520246,
+    "mandatoryCoveragePercent": 96.28273725711067
   },
   "services": [
     {
@@ -1342,6 +1342,20 @@
       "extraSpecFields": 5,
       "overallCoveragePercent": 96.875,
       "mandatoryCoveragePercent": 88.88888888888889
+    },
+    {
+      "service": "zpr",
+      "specs": 1,
+      "mappings": 5,
+      "trackedMappings": 5,
+      "untrackedMappings": 0,
+      "presentFields": 34,
+      "missingFields": 1,
+      "mandatoryPresentFields": 22,
+      "mandatoryMissingFields": 1,
+      "extraSpecFields": 2,
+      "overallCoveragePercent": 97.14285714285714,
+      "mandatoryCoveragePercent": 95.65217391304348
     }
   ]
 }

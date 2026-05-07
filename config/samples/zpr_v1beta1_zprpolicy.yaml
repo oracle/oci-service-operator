@@ -1,0 +1,18 @@
+#
+# Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+#
+
+#
+# Replace the OCI identifiers below before running e2e.
+#
+apiVersion: zpr.oracle.com/v1beta1
+kind: ZprPolicy
+metadata:
+  name: zprpolicy-sample
+spec:
+  compartmentId: ocid1.compartment.oc1..exampleuniqueID
+  name: zprpolicy-sample
+  description: Sample Zero Trust Packet Routing policy
+  statements:
+    - "ALLOW any-user to communicate in tenancy where source.resource.compartment.id = target.resource.compartment.id"

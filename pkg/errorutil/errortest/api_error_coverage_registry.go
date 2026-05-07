@@ -1067,6 +1067,16 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 				retryableConflictGeneratedRuntime,
 				"WlsDomain is manage-existing only because WLMS lacks CreateWlsDomain; a handwritten wrapper validates bind identity, paginates ListWlsDomains lookup, re-enters one Get-backed delegate pass after list-only bind, and custom update-body shaping preserves sparse configuration intent plus explicit tag clears while delete relies on generatedruntime confirm-delete rereads.",
 			),
+			resourceKey("zpr", "ZprPolicy"): reviewedRegistration(
+				"zpr",
+				"zpr",
+				apiErrorCoverageDefaultVersion,
+				"ZprPolicy",
+				APIErrorCoverageFamilyGeneratedRuntimeWorkRequest,
+				deleteNotFoundReadback,
+				retryableConflictWorkRequest,
+				"ZprPolicy runtime persists create, update, and delete work requests in shared async status, recovers the policy OCID from service-local work-request resources, binds only on exact compartmentId plus immutable name, and limits in-place updates to description, statements, and tags.",
+			),
 			resourceKey("psa", "PrivateServiceAccess"): reviewedRegistration(
 				"psa",
 				"psa",

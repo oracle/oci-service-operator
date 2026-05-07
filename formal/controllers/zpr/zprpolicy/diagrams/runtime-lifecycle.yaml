@@ -1,0 +1,18 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: zpr
+slug: zprpolicy
+kind: ZprPolicy
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+  - failed
+notes:
+  - ZprPolicy create, update, and delete are work-request-backed through the ZPR service SDK. The runtime projects the polled work request into status.async.current as the canonical async tracker and resumes in-flight OCI operations from that shared status.
+  - Create binds identity from an explicit OCI OCID first and otherwise adopts only a unique ListZprPolicies match on compartmentId plus exact name before create; ambiguous matches fail instead of guessing.
+  - Mutable drift is limited to description, statements, freeformTags, and definedTags. compartmentId and name are replacement-only once a live policy is bound.
+  - Create, update, and delete recover or confirm the tracked policy through GetZprPolicy and GetZprPolicyWorkRequest. Delete completes only after the work request reaches a terminal state and GetZprPolicy confirms the policy is gone or DELETED.
+  - FAILED and NEEDS_ATTENTION remain terminal non-success outcomes and do not collapse into ACTIVE.

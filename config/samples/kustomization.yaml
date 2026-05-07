@@ -230,4 +230,5 @@ resources:
 - psa_v1beta1_privateserviceaccess.yaml
 - visualbuilder_v1beta1_vbinstance.yaml
 - mediaservices_v1beta1_mediaasset.yaml
+- zpr_v1beta1_zprpolicy.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples
