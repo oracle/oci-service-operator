@@ -195,6 +195,7 @@ nav:
           - ocvp.oracle.com/v1beta1: reference/api/ocvp/v1beta1/index.md
           - oda.oracle.com/v1beta1: reference/api/oda/v1beta1/index.md
           - ons.oracle.com/v1beta1: reference/api/ons/v1beta1/index.md
+          - opa.oracle.com/v1beta1: reference/api/opa/v1beta1/index.md
           - opensearch.oracle.com/v1beta1: reference/api/opensearch/v1beta1/index.md
           - operatoraccesscontrol.oracle.com/v1beta1: reference/api/operatoraccesscontrol/v1beta1/index.md
           - opsi.oracle.com/v1beta1: reference/api/opsi/v1beta1/index.md

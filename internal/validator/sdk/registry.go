@@ -70,6 +70,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/ocvp"
 	"github.com/oracle/oci-go-sdk/v65/oda"
 	"github.com/oracle/oci-go-sdk/v65/ons"
+	"github.com/oracle/oci-go-sdk/v65/opa"
 	"github.com/oracle/oci-go-sdk/v65/opensearch"
 	"github.com/oracle/oci-go-sdk/v65/operatoraccesscontrol"
 	"github.com/oracle/oci-go-sdk/v65/opsi"
@@ -928,6 +929,13 @@ var seedTargets = []Target{
 	newTarget("oce", "UpdateOceInstanceDetails", reflect.TypeOf(oce.UpdateOceInstanceDetails{})),
 	newTarget("oce", "OceInstance", reflect.TypeOf(oce.OceInstance{})),
 	newTarget("oce", "OceInstanceSummary", reflect.TypeOf(oce.OceInstanceSummary{})),
+
+	// Opa CRD support
+	newTarget("opa", "CreateOpaInstanceDetails", reflect.TypeOf(opa.CreateOpaInstanceDetails{})),
+	newTarget("opa", "UpdateOpaInstanceDetails", reflect.TypeOf(opa.UpdateOpaInstanceDetails{})),
+	newTarget("opa", "OpaInstance", reflect.TypeOf(opa.OpaInstance{})),
+	newTarget("opa", "OpaInstanceCollection", reflect.TypeOf(opa.OpaInstanceCollection{})),
+	newTarget("opa", "OpaInstanceSummary", reflect.TypeOf(opa.OpaInstanceSummary{})),
 
 	// Opensearch CRD support
 	newTarget("opensearch", "CreateOpensearchClusterDetails", reflect.TypeOf(opensearch.CreateOpensearchClusterDetails{})),

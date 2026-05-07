@@ -165,6 +165,7 @@ resources:
 - bases/oda.oracle.com_translators.yaml
 - bases/ons.oracle.com_subscriptions.yaml
 - bases/ons.oracle.com_topics.yaml
+- bases/opa.oracle.com_opainstances.yaml
 - bases/opensearch.oracle.com_opensearchclusters.yaml
 - bases/operatoraccesscontrol.oracle.com_operatorcontrolassignments.yaml
 - bases/operatoraccesscontrol.oracle.com_operatorcontrols.yaml

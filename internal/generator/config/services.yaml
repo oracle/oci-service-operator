@@ -3714,6 +3714,61 @@ services:
         ConfirmSubscription:
           - ConfirmationResult
 
+  - service: opa
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/opa
+    group: opa
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - OpaInstance
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: OpaInstance
+          formalSpec: opainstance
+          async:
+            strategy: workrequest
+            runtime: generatedruntime
+            formalClassification: workrequest
+            workRequest:
+              source: service-sdk
+              phases:
+                - create
+                - update
+                - delete
+          serviceManager:
+            packagePath: opa/opainstance
+        - kind: WorkRequest
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequestError
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequestLog
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+    observedState:
+      sdkAliases:
+        WorkRequestLog:
+          - WorkRequestLogEntry
+
   - service: psql
     sdkPackage: github.com/oracle/oci-go-sdk/v65/psql
     group: psql

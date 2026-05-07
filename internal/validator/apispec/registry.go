@@ -69,6 +69,7 @@ import (
 	ocvpv1beta1 "github.com/oracle/oci-service-operator/api/ocvp/v1beta1"
 	odav1beta1 "github.com/oracle/oci-service-operator/api/oda/v1beta1"
 	onsv1beta1 "github.com/oracle/oci-service-operator/api/ons/v1beta1"
+	opav1beta1 "github.com/oracle/oci-service-operator/api/opa/v1beta1"
 	opensearchv1beta1 "github.com/oracle/oci-service-operator/api/opensearch/v1beta1"
 	operatoraccesscontrolv1beta1 "github.com/oracle/oci-service-operator/api/operatoraccesscontrol/v1beta1"
 	opsiv1beta1 "github.com/oracle/oci-service-operator/api/opsi/v1beta1"
@@ -3418,6 +3419,28 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "oce.OceInstanceSummary",
+			},
+		},
+	},
+	{
+		Name:       "OpaOpaInstance",
+		SpecType:   reflect.TypeOf(opav1beta1.OpaInstanceSpec{}),
+		StatusType: reflect.TypeOf(opav1beta1.OpaInstanceStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "opa.CreateOpaInstanceDetails",
+			},
+			{
+				SDKStruct: "opa.UpdateOpaInstanceDetails",
+			},
+			{
+				SDKStruct: "opa.OpaInstance",
+			},
+			{
+				SDKStruct: "opa.OpaInstanceCollection",
+			},
+			{
+				SDKStruct: "opa.OpaInstanceSummary",
 			},
 		},
 	},

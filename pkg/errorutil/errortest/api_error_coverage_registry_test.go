@@ -14,10 +14,10 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	}
 
 	byKey := inventoryByKey(inventory)
-	if got, want := len(inventory), 325; got != want {
+	if got, want := len(inventory), 329; got != want {
 		t.Fatalf("len(inventory) = %d, want %d", got, want)
 	}
-	if got, want := countRegistrations(inventory), 215; got != want {
+	if got, want := countRegistrations(inventory), 216; got != want {
 		t.Fatalf("registration inventory count = %d, want %d", got, want)
 	}
 	if got, want := countExceptions(inventory), 110; got != want {
@@ -57,6 +57,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventorySelectionSource(t, byKey, "lustrefilestorage/LustreFileSystem", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "marketplace/AcceptedAgreement", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "oda/Skill", "selection.includeKinds")
+	assertInventorySelectionSource(t, byKey, "opa/OpaInstance", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "queue/Queue", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "usageapi/Query", "selection.includeKinds")
 
@@ -126,6 +127,10 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventoryRegistration(t, byKey, "oce/OceInstance")
 	assertInventoryRegistration(t, byKey, "ocvp/Cluster")
 	assertInventoryRegistration(t, byKey, "oda/Skill")
+	assertInventoryRegistration(t, byKey, "opa/OpaInstance")
+	assertInventoryException(t, byKey, "opa/WorkRequest", `controller.strategy="none"`)
+	assertInventoryException(t, byKey, "opa/WorkRequestError", `controller.strategy="none"`)
+	assertInventoryException(t, byKey, "opa/WorkRequestLog", `controller.strategy="none"`)
 	assertInventoryException(t, byKey, "opensearch/WorkRequestLog", `controller.strategy="none"`)
 	assertInventoryRegistration(t, byKey, "usageapi/Query")
 }
@@ -183,6 +188,7 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedFamily(t, "nosql/Table", APIErrorCoverageFamilyLegacyAdapter)
 	assertReviewedFamily(t, "ocvp/Cluster", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "oda/Skill", APIErrorCoverageFamilyGeneratedRuntimePlain)
+	assertReviewedFamily(t, "opa/OpaInstance", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "objectstorage/Bucket", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "psql/DbSystem", APIErrorCoverageFamilyLegacyAdapter)
 	assertReviewedFamily(t, "queue/Queue", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
@@ -221,6 +227,9 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedException(t, "datalabelingservice/WorkRequestError", "strategy=none")
 	assertReviewedException(t, "datalabelingservice/WorkRequestLog", "strategy=none")
 	assertReviewedException(t, "datascience/WorkRequest", "strategy=none")
+	assertReviewedException(t, "opa/WorkRequest", "strategy=none")
+	assertReviewedException(t, "opa/WorkRequestError", "strategy=none")
+	assertReviewedException(t, "opa/WorkRequestLog", "strategy=none")
 	assertReviewedException(t, "dashboardservice/Dashboard", "strategy=none")
 	assertReviewedException(t, "keymanagement/Key", "strategy=none")
 	assertReviewedException(t, "opensearch/WorkRequest", "strategy=none")

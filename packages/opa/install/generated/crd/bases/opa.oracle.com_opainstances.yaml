@@ -1,0 +1,339 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: opainstances.opa.oracle.com
+spec:
+  group: opa.oracle.com
+  names:
+    kind: OpaInstance
+    listKind: OpaInstanceList
+    plural: opainstances
+    singular: opainstance
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the OpaInstance
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the OpaInstance
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: OpaInstance is the Schema for the opainstances API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: OpaInstanceSpec defines the desired state of OpaInstance.
+            properties:
+              compartmentId:
+                description: Compartment Identifier
+                type: string
+              consumptionModel:
+                description: Parameter specifying which entitlement to use for billing
+                  purposes
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: Description of the Oracle Process Automation instance.
+                type: string
+              displayName:
+                description: OpaInstance Identifier. User-friendly name for the instance.
+                  Avoid entering confidential information. You can change this value
+                  anytime.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              idcsAt:
+                description: IDCS Authentication token. This is required for all realms
+                  with IDCS. This property is optional, as it is not required for
+                  non-IDCS realms.
+                type: string
+              isBreakglassEnabled:
+                description: indicates if breakGlass is enabled for the opa instance.
+                type: boolean
+              meteringType:
+                description: MeteringType Identifier
+                type: string
+              shapeName:
+                description: Shape of the instance.
+                type: string
+            required:
+            - compartmentId
+            - displayName
+            - shapeName
+            type: object
+          status:
+            description: OpaInstanceStatus defines the observed state of OpaInstance.
+            properties:
+              attachments:
+                description: A list of associated attachments to other services
+                items:
+                  description: OpaInstanceAttachment defines nested fields for OpaInstance.Attachment.
+                  properties:
+                    isImplicit:
+                      description: |-
+                        * If role == `PARENT`, the attached instance was created by this service instance
+                        * If role == `CHILD`, this instance was created from attached instance on behalf of a user
+                      type: boolean
+                    targetId:
+                      description: The OCID of the target instance (which could be
+                        any other OCI PaaS/SaaS resource), to which this instance
+                        is attached.
+                      type: string
+                    targetInstanceUrl:
+                      description: The dataplane instance URL of the attached instance
+                      type: string
+                    targetRole:
+                      description: |-
+                        The role of the target attachment.
+                           * `PARENT` - The target instance is the parent of this attachment.
+                           * `CHILD` - The target instance is the child of this attachment.
+                      type: string
+                    targetServiceType:
+                      description: The type of the target instance, such as "FUSION".
+                      type: string
+                  type: object
+                type: array
+              compartmentId:
+                description: Compartment Identifier
+                type: string
+              consumptionModel:
+                description: The entitlement used for billing purposes
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: Description of the Process Automation instance.
+                type: string
+              displayName:
+                description: OpaInstance Identifier, can be renamed
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              id:
+                description: Unique identifier that is immutable on creation
+                type: string
+              identityAppDisplayName:
+                description: This property specifies the name of the Identity Application
+                  instance OPA has created inside the user-specified identity domain.
+                  This identity application instance may be used to host user roll
+                  mappings to grant access to this OPA instance for users within the
+                  identity domain.
+                type: string
+              identityAppGuid:
+                description: This property specifies the GUID of the Identity Application
+                  instance OPA has created inside the user-specified identity domain.
+                  This identity application instance may be used to host user role
+                  mappings to grant access to this OPA instance for users within the
+                  identity domain.
+                type: string
+              identityAppOpcServiceInstanceGuid:
+                description: This property specifies the OPC Service Instance GUID
+                  of the Identity Application instance OPA has created inside the
+                  user-specified identity domain. This identity application instance
+                  may be used to host user roll mappings to grant access to this OPA
+                  instance for users within the identity domain.
+                type: string
+              identityDomainUrl:
+                description: This property specifies the domain url of the Identity
+                  Application instance OPA has created inside the user-specified identity
+                  domain. This identity application instance may be used to host user
+                  roll mappings to grant access to this OPA instance for users within
+                  the identity domain.
+                type: string
+              instanceUrl:
+                description: OPA Instance URL
+                type: string
+              isBreakglassEnabled:
+                description: indicates if breakGlass is enabled for the opa instance.
+                type: boolean
+              lifecycleState:
+                description: The current state of the OpaInstance.
+                type: string
+              meteringType:
+                description: MeteringType Identifier
+                type: string
+              shapeName:
+                description: Shape of the instance.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of system tag keys. These predefined keys are scoped to namespaces.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              timeCreated:
+                description: The time when OpaInstance was created. An RFC3339 formatted
+                  datetime string
+                type: string
+              timeUpdated:
+                description: The time the OpaInstance was updated. An RFC3339 formatted
+                  datetime string
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

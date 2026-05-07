@@ -1964,6 +1964,32 @@ rules:
   - patch
   - update
 - apiGroups:
+  - opa.oracle.com
+  resources:
+  - opainstances
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - opa.oracle.com
+  resources:
+  - opainstances/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - opa.oracle.com
+  resources:
+  - opainstances/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - opensearch.oracle.com
   resources:
   - opensearchclusters

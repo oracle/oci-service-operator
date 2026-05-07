@@ -817,6 +817,20 @@ packages:
         kind: Topic
         summary: Manage OCI Notifications topics.
 
+  - package: opa
+    displayName: Process Automation
+    summary: Manage OCI Process Automation instances from Kubernetes with a reviewed controller-backed runtime.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to OpaInstance while service-local work-request helper families stay unpublished.
+      - The published runtime uses service-SDK work requests for create, update, and delete, with explicit create-only handling for `idcsAt` and no automatic compartment-change or start/stop auxiliary actions.
+    kindOverrides:
+      - group: opa
+        kind: OpaInstance
+        summary: Manage OCI Process Automation instances.
+
   - package: opensearch
     displayName: OpenSearch
     summary: Manage OCI OpenSearch clusters from Kubernetes.
