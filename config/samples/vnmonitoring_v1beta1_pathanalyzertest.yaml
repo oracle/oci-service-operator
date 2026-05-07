@@ -1,0 +1,29 @@
+#
+# Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+#
+
+#
+# Replace the OCI compartment OCID and endpoint addresses below before running e2e.
+# Update metadata.name or spec.displayName if you want to force a fresh create instead of
+# binding to an existing PathAnalyzerTest with the same reviewed identity surface.
+#
+apiVersion: vnmonitoring.oracle.com/v1beta1
+kind: PathAnalyzerTest
+metadata:
+  name: pathanalyzertest-sample
+spec:
+  compartmentId: ocid1.compartment.oc1..exampleuniqueID
+  displayName: pathanalyzertest-sample
+  protocol: 6
+  sourceEndpoint:
+    type: IP_ADDRESS
+    address: 10.0.0.10
+  destinationEndpoint:
+    type: IP_ADDRESS
+    address: 10.0.1.20
+  protocolParameters:
+    type: TCP
+    destinationPort: 443
+  queryOptions:
+    isBiDirectionalAnalysis: true

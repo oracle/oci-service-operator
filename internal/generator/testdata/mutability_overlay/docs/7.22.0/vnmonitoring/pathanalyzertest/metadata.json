@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "vnmonitoring",
+  "kind": "PathAnalyzerTest",
+  "formalSlug": "pathanalyzertest",
+  "providerResource": "oci_vn_monitoring_path_analyzer_test",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/vn_monitoring_path_analyzer_test",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/vn_monitoring_path_analyzer_test",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/vnmonitoring/pathanalyzertest/page.html",
+  "bodySHA256": "2dbbced3827efc5d12854545a65cb5d2eb781c9f13284b680071c9e71d70cb3b",
+  "bodyBytes": 8045,
+  "fixtureBodyPath": "7.22.0/vnmonitoring/pathanalyzertest/page.html"
+}

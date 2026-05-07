@@ -225,4 +225,5 @@ resources:
 - gdp_v1beta1_gdppipeline.yaml
 - vbsinst_v1beta1_vbsinstance.yaml
 - wlms_v1beta1_wlsdomain.yaml
+- vnmonitoring_v1beta1_pathanalyzertest.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

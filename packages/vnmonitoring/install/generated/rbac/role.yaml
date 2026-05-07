@@ -1,0 +1,39 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
+  - vnmonitoring.oracle.com
+  resources:
+  - pathanalyzertests
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - vnmonitoring.oracle.com
+  resources:
+  - pathanalyzertests/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - vnmonitoring.oracle.com
+  resources:
+  - pathanalyzertests/status
+  verbs:
+  - get
+  - patch
+  - update

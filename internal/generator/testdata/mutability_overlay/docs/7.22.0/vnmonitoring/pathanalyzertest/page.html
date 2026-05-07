@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <h2 id="argument-reference">Argument Reference</h2>
+    <p>The following arguments are supported:</p>
+    <ul>
+      <li><code>compartment_id</code> - (Required) (Updatable) The [OCID](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) for the <code>PathAnalyzerTest</code> resource&#39;s compartment.</li>
+      <li><code>defined_tags</code> - (Optional) (Updatable) Defined tags for this resource. Each key is predefined and scoped to a namespace. Example: <code>{&#34;foo-namespace.bar-key&#34;: &#34;value&#34;}</code></li>
+      <li><code>destination_endpoint</code> - (Required) (Updatable) Information describing a source or destination in a <code>PathAnalyzerTest</code> resource.
+        <ul>
+          <li><code>address</code> - (Required when type=COMPUTE_INSTANCE | IP_ADDRESS | ON_PREM | SUBNET | VLAN | VNIC) (Updatable) The IPv4 address of the COMPUTE_INSTANCE-type <code>Endpoint</code> object.</li>
+          <li><code>instance_id</code> - (Required when type=COMPUTE_INSTANCE) (Updatable) The [OCID](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compute instance.</li>
+          <li><code>listener_id</code> - (Required when type=LOAD_BALANCER_LISTENER | NETWORK_LOAD_BALANCER_LISTENER) (Updatable) The [OCID](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the network load balancer listener.</li>
+          <li><code>load_balancer_id</code> - (Required when type=LOAD_BALANCER | LOAD_BALANCER_LISTENER) (Updatable) The [OCID](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the listener&#39;s load balancer.</li>
+          <li><code>network_load_balancer_id</code> - (Required when type=NETWORK_LOAD_BALANCER | NETWORK_LOAD_BALANCER_LISTENER) (Updatable) The [OCID](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the listener&#39;s network load balancer.</li>
+          <li><code>psa_id</code> - (Required when type=PRIVATE_SERVICE_ACCESS) (Updatable) The [OCID](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the PSA.</li>
+          <li><code>subnet_id</code> - (Required when type=SUBNET) (Updatable) The [OCID](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the subnet containing the IP address. This can be used to disambiguate which subnet is intended, in case the IP address is used in more than one subnet (when there are subnets with overlapping IP ranges).</li>
+          <li><code>type</code> - (Required) (Updatable) The type of the <code>Endpoint</code>.</li>
+          <li><code>vlan_id</code> - (Required when type=VLAN) (Updatable) The [OCID](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN containing the IP address. This can be used to disambiguate which VLAN is queried, in case the endpoint IP address belongs to more than one VLAN (when there are VLANs with overlapping IP ranges).</li>
+          <li><code>vnic_id</code> - (Required when type=COMPUTE_INSTANCE | VNIC) (Updatable) The [OCID](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VNIC attached to the compute instance.</li>
+        </ul>
+      </li>
+      <li><code>display_name</code> - (Optional) (Updatable) A user-friendly name. Does not have to be unique, and it&#39;s changeable. Avoid entering confidential information.</li>
+      <li><code>freeform_tags</code> - (Optional) (Updatable) Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only. Example: <code>{&#34;bar-key&#34;: &#34;value&#34;}</code></li>
+      <li><code>protocol</code> - (Required) (Updatable) The IP protocol to use in the <code>PathAnalyzerTest</code> resource.</li>
+      <li><code>protocol_parameters</code> - (Optional) (Updatable) Defines the IP protocol parameters for a <code>PathAnalyzerTest</code> resource.
+        <ul>
+          <li><code>destination_port</code> - (Required when type=TCP | UDP) (Updatable) The destination port to use in a <code>PathAnalyzerTest</code> resource.</li>
+          <li><code>icmp_code</code> - (Applicable when type=ICMP) (Updatable) The [ICMP](https://www.iana.org/assignments/icmp-parameters/icmp-parameters.xhtml) code.</li>
+          <li><code>icmp_type</code> - (Required when type=ICMP) (Updatable) The [ICMP](https://www.iana.org/assignments/icmp-parameters/icmp-parameters.xhtml) type.</li>
+          <li><code>source_port</code> - (Applicable when type=TCP | UDP) (Updatable) The source port to use in a <code>PathAnalyzerTest</code> resource.</li>
+          <li><code>type</code> - (Required) (Updatable) The type of the <code>ProtocolParameters</code> object.</li>
+        </ul>
+      </li>
+      <li><code>query_options</code> - (Optional) (Updatable) Defines the query options required for a <code>PathAnalyzerTest</code> resource.
+        <ul>
+          <li><code>is_bi_directional_analysis</code> - (Optional) (Updatable) If true, a path analysis is done for both the forward and reverse routes.</li>
+        </ul>
+      </li>
+      <li><code>source_endpoint</code> - (Required) (Updatable) Information describing a source or destination in a <code>PathAnalyzerTest</code> resource.
+        <ul>
+          <li><code>address</code> - (Required when type=COMPUTE_INSTANCE | IP_ADDRESS | ON_PREM | SUBNET | VLAN | VNIC) (Updatable) The IPv4 address of the COMPUTE_INSTANCE-type <code>Endpoint</code> object.</li>
+          <li><code>instance_id</code> - (Required when type=COMPUTE_INSTANCE) (Updatable) The [OCID](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compute instance.</li>
+          <li><code>listener_id</code> - (Required when type=LOAD_BALANCER_LISTENER | NETWORK_LOAD_BALANCER_LISTENER) (Updatable) The [OCID](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the network load balancer listener.</li>
+          <li><code>load_balancer_id</code> - (Required when type=LOAD_BALANCER | LOAD_BALANCER_LISTENER) (Updatable) The [OCID](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the listener&#39;s load balancer.</li>
+          <li><code>network_load_balancer_id</code> - (Required when type=NETWORK_LOAD_BALANCER | NETWORK_LOAD_BALANCER_LISTENER) (Updatable) The [OCID](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the listener&#39;s network load balancer.</li>
+          <li><code>psa_id</code> - (Required when type=PRIVATE_SERVICE_ACCESS) (Updatable) The [OCID](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the PSA.</li>
+          <li><code>subnet_id</code> - (Required when type=SUBNET) (Updatable) The [OCID](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the subnet containing the IP address. This can be used to disambiguate which subnet is intended, in case the IP address is used in more than one subnet (when there are subnets with overlapping IP ranges).</li>
+          <li><code>type</code> - (Required) (Updatable) The type of the <code>Endpoint</code>.</li>
+          <li><code>vlan_id</code> - (Required when type=VLAN) (Updatable) The [OCID](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN containing the IP address. This can be used to disambiguate which VLAN is queried, in case the endpoint IP address belongs to more than one VLAN (when there are VLANs with overlapping IP ranges).</li>
+          <li><code>vnic_id</code> - (Required when type=COMPUTE_INSTANCE | VNIC) (Updatable) The [OCID](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VNIC attached to the compute instance. ** IMPORTANT ** Any change to a property that does not support update will force the destruction and recreation of the resource with the new property values</li>
+        </ul>
+      </li>
+    </ul>
+  </body>
+</html>
