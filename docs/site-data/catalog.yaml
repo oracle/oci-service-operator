@@ -991,6 +991,20 @@ packages:
     customerVisible: false
     guidePath: docs/installation.md
 
+  - package: vbsinst
+    displayName: Visual Builder Studio
+    summary: Manage OCI Visual Builder Studio instances from Kubernetes with a reviewed controller-backed runtime.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to VbsInstance while the service-local work-request helper families stay unpublished.
+      - The published runtime uses service-SDK work requests for create, update, and delete, and binds only on exact `compartmentId` plus immutable `name`.
+    kindOverrides:
+      - group: vbsinst
+        kind: VbsInstance
+        summary: Manage OCI Visual Builder Studio instances.
+
   - package: waa
     displayName: Web App Acceleration
     summary: Manage OCI Web App Acceleration resources from Kubernetes.

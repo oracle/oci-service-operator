@@ -2514,6 +2514,32 @@ rules:
   - patch
   - update
 - apiGroups:
+  - vbsinst.oracle.com
+  resources:
+  - vbsinstances
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - vbsinst.oracle.com
+  resources:
+  - vbsinstances/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - vbsinst.oracle.com
+  resources:
+  - vbsinstances/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - waa.oracle.com
   resources:
   - webappaccelerationpolicies

@@ -1,0 +1,154 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "vbsinst",
+  "slug": "vbsinstance",
+  "kind": "VbsInstance",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_vbs_inst_vbs_instance",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateVbsInstance",
+        "requestType": "vbsinst.CreateVbsInstanceRequest",
+        "responseType": "vbsinst.CreateVbsInstanceResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetVbsInstance",
+        "requestType": "vbsinst.GetVbsInstanceRequest",
+        "responseType": "vbsinst.GetVbsInstanceResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListVbsInstances",
+        "requestType": "vbsinst.ListVbsInstancesRequest",
+        "responseType": "vbsinst.ListVbsInstancesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeVbsInstanceCompartment",
+        "requestType": "vbsinst.ChangeVbsInstanceCompartmentRequest",
+        "responseType": "vbsinst.ChangeVbsInstanceCompartmentResponse"
+      },
+      {
+        "operation": "UpdateVbsInstance",
+        "requestType": "vbsinst.UpdateVbsInstanceRequest",
+        "responseType": "vbsinst.UpdateVbsInstanceResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteVbsInstance",
+        "requestType": "vbsinst.DeleteVbsInstanceRequest",
+        "responseType": "vbsinst.DeleteVbsInstanceResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "display_name",
+      "freeform_tags",
+      "is_resource_usage_agreement_granted",
+      "resource_compartment_id"
+    ],
+    "forceNew": [
+      "name"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "vbsinstance",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "vbsinstance",
+        "action": "UPDATED"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "vbsinstance",
+        "action": "DELETED"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_vbs_inst_vbs_instances",
+    "collectionField": "vbs_instances",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "id",
+      "name",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/vbsinst/vbsinstance/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/vbsinst/vbsinstance/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "list-lookup",
+      "mutation-policy",
+      "status-projection",
+      "waiter-work-request",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: CreateVbsInstance, GetVbsInstance, ListVbsInstances, ChangeVbsInstanceCompartment, UpdateVbsInstance, DeleteVbsInstance, and GetWorkRequest are present in v65.110.0. ListVbsInstances filters compartmentId, id, name, and lifecycleState, while the CRUD mutation responses expose opc-work-request-id but do not return a VbsInstance body.",
+    "Pinned provider surface: oci_vbs_inst_vbs_instance plus the singular and list data sources follow the same immutable name identity shape as the service SDK. The reviewed runtime keeps using the service-local GetWorkRequest helper instead of provider waiter helpers.",
+    "Repo-authored bind-versus-create stays explicit: when no OCI identifier is tracked, the runtime uses exact compartmentId plus name matches from ListVbsInstances, ignores DELETING, DELETED, and FAILED summaries, and fails on duplicate exact-name matches instead of adopting arbitrarily.",
+    "Repo-authored mutation policy stays explicit: only displayName, isResourceUsageAgreementGranted, resourceCompartmentId, freeformTags, and definedTags reconcile in place. ChangeVbsInstanceCompartment remains out-of-scope drift because the published runtime stays within the create/get/list/update/delete contract, and the provider-only idcs_access_token header input is intentionally not part of the published CRD surface."
+  ]
+}

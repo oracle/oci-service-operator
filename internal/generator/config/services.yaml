@@ -4212,6 +4212,67 @@ services:
             runtime: generatedruntime
             formalClassification: lifecycle
 
+  - service: vbsinst
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/vbsinst
+    group: vbsinst
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - VbsInstance
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: VbsInstance
+          formalSpec: vbsinstance
+          async:
+            strategy: workrequest
+            runtime: generatedruntime
+            formalClassification: workrequest
+            workRequest:
+              source: service-sdk
+              phases:
+                - create
+                - update
+                - delete
+          sample:
+            body: |-
+              #
+              # Replace the OCI identifiers below before running e2e.
+              # Update spec.name if you want to force a fresh create instead of binding to an
+              # existing VbsInstance with the same immutable name in the same compartment.
+              # spec.displayName, spec.resourceCompartmentId, spec.isResourceUsageAgreementGranted,
+              # and tags reconcile in place after the resource is bound.
+              #
+              apiVersion: vbsinst.oracle.com/v1beta1
+              kind: VbsInstance
+              metadata:
+                name: vbsinstance-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                name: vbsinstance-sample
+                displayName: "vbsinstance-sample"
+                resourceCompartmentId: ocid1.compartment.oc1..exampleworkload
+                isResourceUsageAgreementGranted: true
+                freeformTags:
+                  managed-by: osok
+          serviceManager:
+            packagePath: vbsinst/vbsinstance
+    observedState:
+      excludedFieldPaths:
+        VbsInstance:
+          - LifecyleDetails
+
   - service: governancerulescontrolplane
     sdkPackage: github.com/oracle/oci-go-sdk/v65/governancerulescontrolplane
     group: governancerulescontrolplane

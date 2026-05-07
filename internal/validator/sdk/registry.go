@@ -88,6 +88,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/stackmonitoring"
 	"github.com/oracle/oci-go-sdk/v65/streaming"
 	"github.com/oracle/oci-go-sdk/v65/usageapi"
+	"github.com/oracle/oci-go-sdk/v65/vbsinst"
 	"github.com/oracle/oci-go-sdk/v65/waa"
 	"github.com/oracle/oci-go-sdk/v65/waas"
 	"github.com/oracle/oci-go-sdk/v65/waf"
@@ -1168,6 +1169,12 @@ var seedTargets = []Target{
 	newTarget("stackmonitoring", "MonitoredResourceTypeSummary", reflect.TypeOf(stackmonitoring.MonitoredResourceTypeSummary{})),
 	newTarget("stackmonitoring", "MonitoringTemplateSummary", reflect.TypeOf(stackmonitoring.MonitoringTemplateSummary{})),
 	newTarget("stackmonitoring", "ProcessSetSummary", reflect.TypeOf(stackmonitoring.ProcessSetSummary{})),
+
+	// Vbsinst CRD support
+	newTarget("vbsinst", "CreateVbsInstanceDetails", reflect.TypeOf(vbsinst.CreateVbsInstanceDetails{})),
+	newTarget("vbsinst", "UpdateVbsInstanceDetails", reflect.TypeOf(vbsinst.UpdateVbsInstanceDetails{})),
+	newTarget("vbsinst", "VbsInstance", reflect.TypeOf(vbsinst.VbsInstance{})),
+	newTarget("vbsinst", "VbsInstanceSummary", reflect.TypeOf(vbsinst.VbsInstanceSummary{})),
 
 	// Waa CRD support
 	newTarget("waa", "CreateWebAppAccelerationPolicyDetails", reflect.TypeOf(waa.CreateWebAppAccelerationPolicyDetails{})),

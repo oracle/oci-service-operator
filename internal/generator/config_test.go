@@ -1195,6 +1195,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"servicecatalog",
 		"streaming",
 		"usageapi",
+		"vbsinst",
 		"governancerulescontrolplane",
 		"iot",
 		"licensemanager",
@@ -1290,6 +1291,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"servicecatalog",
 		"streaming",
 		"usageapi",
+		"vbsinst",
 		"governancerulescontrolplane",
 		"iot",
 		"licensemanager",
@@ -1379,6 +1381,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	assertServiceSelection(t, services["servicecatalog"], true, SelectionModeExplicit, []string{"PrivateApplication", "ServiceCatalog"})
 	assertServiceSelection(t, services["streaming"], true, SelectionModeExplicit, []string{"Stream"})
 	assertServiceSelection(t, services["usageapi"], true, SelectionModeExplicit, []string{"CustomTable", "Query", "Schedule", "UsageCarbonEmissionsQuery"})
+	assertServiceSelection(t, services["vbsinst"], true, SelectionModeExplicit, []string{"VbsInstance"})
 	assertServiceSelection(t, services["governancerulescontrolplane"], true, SelectionModeExplicit, []string{"GovernanceRule", "InclusionCriterion"})
 	assertServiceSelection(t, services["iot"], true, SelectionModeExplicit, []string{"DigitalTwinAdapter", "DigitalTwinInstance", "DigitalTwinModel", "DigitalTwinRelationship", "IotDomain", "IotDomainGroup"})
 	assertServiceSelection(t, services["licensemanager"], true, SelectionModeExplicit, []string{"LicenseRecord", "ProductLicense"})
@@ -2180,6 +2183,7 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 		"resourcescheduler":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"securityattribute":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"stackmonitoring":             {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"vbsinst":                     {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
 		"waa":                         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"waas":                        {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"waf":                         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
@@ -2225,6 +2229,17 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 	}
 	if queue.WorkRequest.LegacyFieldBridge.Delete != "DeleteWorkRequestId" {
 		t.Fatalf("queue Queue delete bridge = %q, want DeleteWorkRequestId", queue.WorkRequest.LegacyFieldBridge.Delete)
+	}
+
+	vbsinst := assertAsyncContract(t, services["vbsinst"], "VbsInstance", AsyncStrategyWorkRequest, AsyncRuntimeGeneratedRuntime)
+	if vbsinst.WorkRequest.Source != AsyncWorkRequestSourceServiceSDK {
+		t.Fatalf("vbsinst VbsInstance workRequest.source = %q, want %q", vbsinst.WorkRequest.Source, AsyncWorkRequestSourceServiceSDK)
+	}
+	if !slices.Equal(vbsinst.WorkRequest.Phases, []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}) {
+		t.Fatalf("vbsinst VbsInstance workRequest.phases = %v", vbsinst.WorkRequest.Phases)
+	}
+	if vbsinst.WorkRequest.LegacyFieldBridge.hasOverride() {
+		t.Fatalf("vbsinst VbsInstance workRequest.legacyFieldBridge = %#v, want empty legacy bridge", vbsinst.WorkRequest.LegacyFieldBridge)
 	}
 
 	clusterPlacementGroups := assertAsyncContract(

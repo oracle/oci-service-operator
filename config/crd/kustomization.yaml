@@ -219,6 +219,7 @@ resources:
 - bases/usageapi.oracle.com_queries.yaml
 - bases/usageapi.oracle.com_schedules.yaml
 - bases/usageapi.oracle.com_usagecarbonemissionsqueries.yaml
+- bases/vbsinst.oracle.com_vbsinstances.yaml
 - bases/waa.oracle.com_webappaccelerationpolicies.yaml
 - bases/waa.oracle.com_webappaccelerations.yaml
 - bases/waas.oracle.com_addresslists.yaml

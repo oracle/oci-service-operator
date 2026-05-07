@@ -87,6 +87,7 @@ import (
 	stackmonitoringv1beta1 "github.com/oracle/oci-service-operator/api/stackmonitoring/v1beta1"
 	streamingv1beta1 "github.com/oracle/oci-service-operator/api/streaming/v1beta1"
 	usageapiv1beta1 "github.com/oracle/oci-service-operator/api/usageapi/v1beta1"
+	vbsinstv1beta1 "github.com/oracle/oci-service-operator/api/vbsinst/v1beta1"
 	waav1beta1 "github.com/oracle/oci-service-operator/api/waa/v1beta1"
 	waasv1beta1 "github.com/oracle/oci-service-operator/api/waas/v1beta1"
 	wafv1beta1 "github.com/oracle/oci-service-operator/api/waf/v1beta1"
@@ -4385,6 +4386,25 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "stackmonitoring.ProcessSetSummary",
+			},
+		},
+	},
+	{
+		Name:       "VbsinstVbsInstance",
+		SpecType:   reflect.TypeOf(vbsinstv1beta1.VbsInstanceSpec{}),
+		StatusType: reflect.TypeOf(vbsinstv1beta1.VbsInstanceStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "vbsinst.CreateVbsInstanceDetails",
+			},
+			{
+				SDKStruct: "vbsinst.UpdateVbsInstanceDetails",
+			},
+			{
+				SDKStruct: "vbsinst.VbsInstance",
+			},
+			{
+				SDKStruct: "vbsinst.VbsInstanceSummary",
 			},
 		},
 	},

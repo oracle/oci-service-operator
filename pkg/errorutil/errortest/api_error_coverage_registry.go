@@ -1026,6 +1026,18 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 			"Schedule",
 			"UsageCarbonEmissionsQuery",
 		),
+		map[string]APIErrorCoverageRegistration{
+			resourceKey("vbsinst", "VbsInstance"): reviewedRegistration(
+				"vbsinst",
+				"vbsinst",
+				apiErrorCoverageDefaultVersion,
+				"VbsInstance",
+				APIErrorCoverageFamilyGeneratedRuntimeWorkRequest,
+				deleteNotFoundReadback,
+				retryableConflictWorkRequest,
+				"VbsInstance runtime persists create, update, and delete work-request IDs, recovers the OCI identifier from work-request resources, and bounds pre-create reuse to exact compartmentId plus immutable name matches while leaving ChangeVbsInstanceCompartment out of scope.",
+			),
+		},
 		reviewedRegistrationSet(
 			"governancerulescontrolplane",
 			"governancerulescontrolplane",
