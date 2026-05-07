@@ -543,6 +543,20 @@ packages:
     customerVisible: false
     guidePath: docs/installation.md
 
+  - package: generativeaiagent
+    displayName: Generative AI Agent
+    summary: Manage OCI Generative AI Agent knowledge bases from Kubernetes with an initial controller-backed KnowledgeBase rollout.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to KnowledgeBase while Agent, AgentEndpoint, DataSource, DataIngestionJob, ProvisionedCapacity, Tool, and work-request helper families stay unpublished.
+      - The published package keeps `generativeaiagent/KnowledgeBase` explicitly distinct from the existing `adm/KnowledgeBase` rollout in docs, catalog metadata, and formal/runtime surfaces.
+    kindOverrides:
+      - group: generativeaiagent
+        kind: KnowledgeBase
+        summary: Manage OCI Generative AI Agent knowledge bases.
+
   - package: governancerulescontrolplane
     displayName: Governance Rules Control Plane
     summary: Manage OCI Governance Rules Control Plane resources from Kubernetes.

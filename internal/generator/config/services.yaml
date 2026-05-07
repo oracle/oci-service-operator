@@ -2541,6 +2541,105 @@ services:
                 freeformTags:
                   managed-by: oci-service-operator
 
+  - service: generativeaiagent
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/generativeaiagent
+    group: generativeaiagent
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - KnowledgeBase
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: KnowledgeBase
+          formalSpec: knowledgebase
+          async:
+            strategy: workrequest
+            runtime: generatedruntime
+            formalClassification: workrequest
+            workRequest:
+              source: service-sdk
+              phases:
+                - create
+                - update
+                - delete
+          sample:
+            body: |-
+              #
+              # Replace the compartment OCID and tune the KnowledgeBase settings below before running e2e.
+              # Keeping spec.displayName empty disables pre-create reuse; setting it allows the controller
+              # to bind to an existing Generative AI Agent KnowledgeBase with the same compartmentId and displayName.
+              #
+              apiVersion: generativeaiagent.oracle.com/v1beta1
+              kind: KnowledgeBase
+              metadata:
+                name: knowledgebase-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                displayName: osok-generativeaiagent-knowledgebase-sample
+                description: OSOK Generative AI Agent KnowledgeBase sample
+                indexConfig:
+                  indexConfigType: DEFAULT_INDEX_CONFIG
+                  shouldEnableHybridSearch: false
+                freeformTags:
+                  managed-by: oci-service-operator
+        - kind: Agent
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: AgentEndpoint
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: DataSource
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: DataIngestionJob
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: ProvisionedCapacity
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: Tool
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequest
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequestError
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequestLog
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+
   - service: healthchecks
     sdkPackage: github.com/oracle/oci-go-sdk/v65/healthchecks
     group: healthchecks

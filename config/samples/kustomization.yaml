@@ -226,4 +226,5 @@ resources:
 - vbsinst_v1beta1_vbsinstance.yaml
 - wlms_v1beta1_wlsdomain.yaml
 - vnmonitoring_v1beta1_pathanalyzertest.yaml
+- generativeaiagent_v1beta1_knowledgebase.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

@@ -170,6 +170,7 @@ nav:
           - functions.oracle.com/v1beta1: reference/api/functions/v1beta1/index.md
           - gdp.oracle.com/v1beta1: reference/api/gdp/v1beta1/index.md
           - generativeai.oracle.com/v1beta1: reference/api/generativeai/v1beta1/index.md
+          - generativeaiagent.oracle.com/v1beta1: reference/api/generativeaiagent/v1beta1/index.md
           - governancerulescontrolplane.oracle.com/v1beta1: reference/api/governancerulescontrolplane/v1beta1/index.md
           - healthchecks.oracle.com/v1beta1: reference/api/healthchecks/v1beta1/index.md
           - identity.oracle.com/v1beta1: reference/api/identity/v1beta1/index.md

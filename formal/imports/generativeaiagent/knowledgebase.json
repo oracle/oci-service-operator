@@ -1,0 +1,153 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "generativeaiagent",
+  "slug": "knowledgebase",
+  "kind": "KnowledgeBase",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_generative_ai_agent_knowledge_base",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateKnowledgeBase",
+        "requestType": "generativeaiagent.CreateKnowledgeBaseRequest",
+        "responseType": "generativeaiagent.CreateKnowledgeBaseResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetKnowledgeBase",
+        "requestType": "generativeaiagent.GetKnowledgeBaseRequest",
+        "responseType": "generativeaiagent.GetKnowledgeBaseResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListKnowledgeBases",
+        "requestType": "generativeaiagent.ListKnowledgeBasesRequest",
+        "responseType": "generativeaiagent.ListKnowledgeBasesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeKnowledgeBaseCompartment",
+        "requestType": "generativeaiagent.ChangeKnowledgeBaseCompartmentRequest",
+        "responseType": "generativeaiagent.ChangeKnowledgeBaseCompartmentResponse"
+      },
+      {
+        "operation": "UpdateKnowledgeBase",
+        "requestType": "generativeaiagent.UpdateKnowledgeBaseRequest",
+        "responseType": "generativeaiagent.UpdateKnowledgeBaseResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteKnowledgeBase",
+        "requestType": "generativeaiagent.DeleteKnowledgeBaseRequest",
+        "responseType": "generativeaiagent.DeleteKnowledgeBaseResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "INACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags",
+      "index_config"
+    ],
+    "forceNew": null,
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "knowledgebase",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "knowledgebase",
+        "action": "UPDATED"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "knowledgebase",
+        "action": "DELETED"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_generative_ai_agent_knowledge_bases",
+    "collectionField": "knowledge_base_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "lifecycle_state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/generativeaiagent/knowledgebase/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/generativeaiagent/knowledgebase/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "list-lookup",
+      "mutation-policy",
+      "status-projection",
+      "waiter-work-request",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: CreateKnowledgeBase, GetKnowledgeBase, ListKnowledgeBases, ChangeKnowledgeBaseCompartment, UpdateKnowledgeBase, DeleteKnowledgeBase, and GetWorkRequest are present in v65.110.0. ListKnowledgeBases filters compartmentId, lifecycleState, and displayName; create returns the resource body plus opc-work-request-id, and update/delete return opc-work-request-id without a resource body.",
+    "Pinned provider implementation: oci_generative_ai_agent_knowledge_base is work-request-backed for create, update, delete, and compartment changes. The reviewed runtime keeps using service-sdk GetWorkRequest polling and shared async status instead of provider helper waiters.",
+    "Repo-authored bind-versus-create stays explicit: when no OCI identifier is tracked, the runtime uses exact compartmentId plus displayName list matches, ignores FAILED, DELETING, and DELETED summaries, treats ACTIVE, INACTIVE, CREATING, and UPDATING as reusable candidates, and fails on duplicate exact-name matches instead of adopting arbitrarily.",
+    "Repo-authored mutation policy stays explicit: only displayName, description, indexConfig, freeformTags, and definedTags reconcile in place. Provider support for moving compartment_id remains out-of-scope drift because the published runtime treats compartmentId as replacement-only and never calls ChangeKnowledgeBaseCompartment.",
+    "The reviewed runtime prefers the create response body when OCI returns a KnowledgeBase identifier and otherwise recovers the created OCID from work-request resources before rereading GetKnowledgeBase."
+  ]
+}

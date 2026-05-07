@@ -1168,6 +1168,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"functions",
 		"gdp",
 		"generativeai",
+		"generativeaiagent",
 		"healthchecks",
 		"identity",
 		"integration",
@@ -1265,6 +1266,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"events",
 		"functions",
 		"generativeai",
+		"generativeaiagent",
 		"healthchecks",
 		"identity",
 		"integration",
@@ -1356,6 +1358,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	assertServiceSelection(t, services["events"], true, SelectionModeExplicit, []string{"Rule"})
 	assertServiceSelection(t, services["functions"], true, SelectionModeExplicit, []string{"Application", "Function"})
 	assertServiceSelection(t, services["generativeai"], true, SelectionModeExplicit, []string{"DedicatedAiCluster", "Endpoint", "Model"})
+	assertServiceSelection(t, services["generativeaiagent"], true, SelectionModeExplicit, []string{"KnowledgeBase"})
 	assertServiceSelection(t, services["healthchecks"], true, SelectionModeExplicit, []string{"HttpMonitor", "PingMonitor"})
 	assertServiceSelection(t, services["identity"], true, SelectionModeExplicit, []string{"Compartment"})
 	assertServiceSelection(t, services["integration"], true, SelectionModeExplicit, []string{"IntegrationInstance"})
@@ -2141,6 +2144,7 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 		"functions":                   {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeHandwritten},
 		"gdp":                         {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
 		"generativeai":                {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"generativeaiagent":           {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
 		"healthchecks":                {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"identity":                    {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"integration":                 {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
@@ -2294,6 +2298,33 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 	}
 	if redis.WorkRequest.LegacyFieldBridge.hasOverride() {
 		t.Fatalf("redis RedisCluster workRequest.legacyFieldBridge = %#v, want empty legacy bridge", redis.WorkRequest.LegacyFieldBridge)
+	}
+
+	generativeAIAgent := assertAsyncContract(
+		t,
+		services["generativeaiagent"],
+		"KnowledgeBase",
+		AsyncStrategyWorkRequest,
+		AsyncRuntimeGeneratedRuntime,
+	)
+	if generativeAIAgent.WorkRequest.Source != AsyncWorkRequestSourceServiceSDK {
+		t.Fatalf(
+			"generativeaiagent KnowledgeBase workRequest.source = %q, want %q",
+			generativeAIAgent.WorkRequest.Source,
+			AsyncWorkRequestSourceServiceSDK,
+		)
+	}
+	if !slices.Equal(generativeAIAgent.WorkRequest.Phases, []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}) {
+		t.Fatalf(
+			"generativeaiagent KnowledgeBase workRequest.phases = %v",
+			generativeAIAgent.WorkRequest.Phases,
+		)
+	}
+	if generativeAIAgent.WorkRequest.LegacyFieldBridge.hasOverride() {
+		t.Fatalf(
+			"generativeaiagent KnowledgeBase workRequest.legacyFieldBridge = %#v, want empty legacy bridge",
+			generativeAIAgent.WorkRequest.LegacyFieldBridge,
+		)
 	}
 }
 

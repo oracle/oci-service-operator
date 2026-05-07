@@ -51,6 +51,7 @@ rules:
   - update
 - apiGroups:
   - adm.oracle.com
+  - generativeaiagent.oracle.com
   resources:
   - knowledgebases
   verbs:
@@ -63,12 +64,14 @@ rules:
   - watch
 - apiGroups:
   - adm.oracle.com
+  - generativeaiagent.oracle.com
   resources:
   - knowledgebases/finalizers
   verbs:
   - update
 - apiGroups:
   - adm.oracle.com
+  - generativeaiagent.oracle.com
   resources:
   - knowledgebases/status
   verbs:
