@@ -74,6 +74,7 @@ resources:
 - bases/events.oracle.com_rules.yaml
 - bases/functions.oracle.com_applications.yaml
 - bases/functions.oracle.com_functions.yaml
+- bases/gdp.oracle.com_gdppipelines.yaml
 - bases/generativeai.oracle.com_dedicatedaiclusters.yaml
 - bases/generativeai.oracle.com_endpoints.yaml
 - bases/generativeai.oracle.com_models.yaml

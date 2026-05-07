@@ -522,6 +522,20 @@ packages:
         kind: Function
         summary: Manage OCI Functions function definitions and images.
 
+  - package: gdp
+    displayName: Guarded Data Pipelines
+    summary: Manage OCI Guarded Data Pipeline resources from Kubernetes with a reviewed controller-backed GdpPipeline rollout.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to GdpPipeline while GDP work-request helper and auxiliary operation families stay unpublished.
+      - The published runtime uses service-SDK work requests for create, update, and delete, scopes pre-create reuse by exact `compartmentId`, `displayName`, `pipelineType`, `peeringRegion`, and `bucketDetails`, and keeps `bucketDetails`, `compartmentId`, `peeringRegion`, and `pipelineType` replacement-only.
+    kindOverrides:
+      - group: gdp
+        kind: GdpPipeline
+        summary: Manage OCI Guarded Data Pipeline resources.
+
   - package: generativeai
     displayName: Generative AI
     summary: Manage OCI Generative AI resources from Kubernetes.

@@ -39,6 +39,7 @@ import (
 	emailv1beta1 "github.com/oracle/oci-service-operator/api/email/v1beta1"
 	eventsv1beta1 "github.com/oracle/oci-service-operator/api/events/v1beta1"
 	functionsv1beta1 "github.com/oracle/oci-service-operator/api/functions/v1beta1"
+	gdpv1beta1 "github.com/oracle/oci-service-operator/api/gdp/v1beta1"
 	generativeaiv1beta1 "github.com/oracle/oci-service-operator/api/generativeai/v1beta1"
 	governancerulescontrolplanev1beta1 "github.com/oracle/oci-service-operator/api/governancerulescontrolplane/v1beta1"
 	healthchecksv1beta1 "github.com/oracle/oci-service-operator/api/healthchecks/v1beta1"
@@ -2579,6 +2580,28 @@ var targets = []Target{
 		SDKMappings: []SDKMapping{
 			{
 				SDKStruct: "devops.TriggerCollection",
+			},
+		},
+	},
+	{
+		Name:       "GdpGdpPipeline",
+		SpecType:   reflect.TypeOf(gdpv1beta1.GdpPipelineSpec{}),
+		StatusType: reflect.TypeOf(gdpv1beta1.GdpPipelineStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "gdp.CreateGdpPipelineDetails",
+			},
+			{
+				SDKStruct: "gdp.UpdateGdpPipelineDetails",
+			},
+			{
+				SDKStruct: "gdp.GdpPipeline",
+			},
+			{
+				SDKStruct: "gdp.GdpPipelineCollection",
+			},
+			{
+				SDKStruct: "gdp.GdpPipelineSummary",
 			},
 		},
 	},

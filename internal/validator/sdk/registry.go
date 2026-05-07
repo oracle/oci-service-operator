@@ -40,6 +40,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/email"
 	"github.com/oracle/oci-go-sdk/v65/events"
 	"github.com/oracle/oci-go-sdk/v65/functions"
+	"github.com/oracle/oci-go-sdk/v65/gdp"
 	"github.com/oracle/oci-go-sdk/v65/generativeai"
 	"github.com/oracle/oci-go-sdk/v65/governancerulescontrolplane"
 	"github.com/oracle/oci-go-sdk/v65/healthchecks"
@@ -719,6 +720,13 @@ var seedTargets = []Target{
 	newTarget("devops", "DeployPipelineSummary", reflect.TypeOf(devops.DeployPipelineSummary{})),
 	newTarget("devops", "ProjectSummary", reflect.TypeOf(devops.ProjectSummary{})),
 	newTarget("devops", "RepositorySummary", reflect.TypeOf(devops.RepositorySummary{})),
+
+	// Gdp CRD support
+	newTarget("gdp", "CreateGdpPipelineDetails", reflect.TypeOf(gdp.CreateGdpPipelineDetails{})),
+	newTarget("gdp", "UpdateGdpPipelineDetails", reflect.TypeOf(gdp.UpdateGdpPipelineDetails{})),
+	newTarget("gdp", "GdpPipeline", reflect.TypeOf(gdp.GdpPipeline{})),
+	newTarget("gdp", "GdpPipelineCollection", reflect.TypeOf(gdp.GdpPipelineCollection{})),
+	newTarget("gdp", "GdpPipelineSummary", reflect.TypeOf(gdp.GdpPipelineSummary{})),
 
 	// Governancerulescontrolplane CRD support
 	newTarget("governancerulescontrolplane", "CreateGovernanceRuleDetails", reflect.TypeOf(governancerulescontrolplane.CreateGovernanceRuleDetails{})),

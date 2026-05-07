@@ -2372,6 +2372,71 @@ services:
           serviceManager:
             packagePath: functions
 
+  - service: gdp
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/gdp
+    group: gdp
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - GdpPipeline
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: GdpPipeline
+          formalSpec: gdppipeline
+          async:
+            strategy: workrequest
+            runtime: generatedruntime
+            formalClassification: workrequest
+            workRequest:
+              source: service-sdk
+              phases:
+                - create
+                - update
+                - delete
+          sample:
+            body: |-
+              #
+              # Replace the OCI identifiers below before running e2e.
+              # Update metadata.name or spec.displayName if you want to force a fresh create instead of
+              # binding to an existing pipeline with the same compartmentId, displayName, pipelineType,
+              # peeringRegion, and bucketDetails.
+              #
+              apiVersion: gdp.oracle.com/v1beta1
+              kind: GdpPipeline
+              metadata:
+                name: gdppipeline-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                displayName: osok-gdp-pipeline
+                pipelineType: SENDER
+                peeringRegion: us-phoenix-1
+                bucketDetails:
+                  - bucketType: SOURCE
+                    namespace: namespace-a
+                    name: source-bucket
+                    id: ocid1.bucket.oc1..exampleuniqueID
+                  - bucketType: TRANSFER
+                    namespace: namespace-a
+                    name: transfer-bucket
+                    id: ocid1.bucket.oc1..exampleuniqueID
+                description: OSOK GDP pipeline sample
+                isScanningEnabled: true
+                isApprovalNeeded: false
+                freeformTags:
+                  managed-by: oci-service-operator
+
   - service: generativeai
     sdkPackage: github.com/oracle/oci-go-sdk/v65/generativeai
     group: generativeai

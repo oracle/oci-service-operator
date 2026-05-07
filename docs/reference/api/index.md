@@ -45,6 +45,7 @@ This landing page is generated from the checked-in package and release inventory
 | [email.oracle.com/v1beta1](email/v1beta1/index.md) | [Dkim](email/v1beta1/index.md#kind-dkim), [EmailDomain](email/v1beta1/index.md#kind-emaildomain), [Sender](email/v1beta1/index.md#kind-sender), [Suppression](email/v1beta1/index.md#kind-suppression) | - |
 | [events.oracle.com/v1beta1](events/v1beta1/index.md) | [Rule](events/v1beta1/index.md#kind-rule) | - |
 | [functions.oracle.com/v1beta1](functions/v1beta1/index.md) | [Application](functions/v1beta1/index.md#kind-application), [Function](functions/v1beta1/index.md#kind-function) | Functions (`v2.0.0-alpha`) |
+| [gdp.oracle.com/v1beta1](gdp/v1beta1/index.md) | [GdpPipeline](gdp/v1beta1/index.md#kind-gdppipeline) | - |
 | [generativeai.oracle.com/v1beta1](generativeai/v1beta1/index.md) | [DedicatedAiCluster](generativeai/v1beta1/index.md#kind-dedicatedaicluster), [Endpoint](generativeai/v1beta1/index.md#kind-endpoint), [Model](generativeai/v1beta1/index.md#kind-model) | - |
 | [governancerulescontrolplane.oracle.com/v1beta1](governancerulescontrolplane/v1beta1/index.md) | [GovernanceRule](governancerulescontrolplane/v1beta1/index.md#kind-governancerule), [InclusionCriterion](governancerulescontrolplane/v1beta1/index.md#kind-inclusioncriterion) | - |
 | [healthchecks.oracle.com/v1beta1](healthchecks/v1beta1/index.md) | [HttpMonitor](healthchecks/v1beta1/index.md#kind-httpmonitor), [PingMonitor](healthchecks/v1beta1/index.md#kind-pingmonitor) | - |

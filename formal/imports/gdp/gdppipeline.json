@@ -1,0 +1,161 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "gdp",
+  "slug": "gdppipeline",
+  "kind": "GdpPipeline",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_gdp_gdp_pipeline",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateGdpPipeline",
+        "requestType": "gdp.CreateGdpPipelineRequest",
+        "responseType": "gdp.CreateGdpPipelineResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetGdpPipeline",
+        "requestType": "gdp.GetGdpPipelineRequest",
+        "responseType": "gdp.GetGdpPipelineResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListGdpPipelines",
+        "requestType": "gdp.ListGdpPipelinesRequest",
+        "responseType": "gdp.ListGdpPipelinesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateGdpPipeline",
+        "requestType": "gdp.UpdateGdpPipelineRequest",
+        "responseType": "gdp.UpdateGdpPipelineResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteGdpPipeline",
+        "requestType": "gdp.DeleteGdpPipelineRequest",
+        "responseType": "gdp.DeleteGdpPipelineResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING",
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "INACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "INACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "approval_key_vault_id",
+      "authorization_details",
+      "defined_tags",
+      "description",
+      "display_name",
+      "file_types",
+      "freeform_tags",
+      "is_approval_needed",
+      "is_chunking_enabled",
+      "is_file_override_in_destination_enabled",
+      "is_scanning_enabled",
+      "service_log_group_id"
+    ],
+    "forceNew": [
+      "bucket_details",
+      "compartment_id",
+      "peering_region",
+      "pipeline_type"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "gdppipeline",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "gdppipeline",
+        "action": "UPDATED"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "gdppipeline",
+        "action": "DELETED"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_gdp_gdp_pipelines",
+    "collectionField": "gdp_pipeline_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "gdp_pipeline_id",
+      "lifecycle_state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/gdp/gdppipeline/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/gdp/gdppipeline/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "list-lookup",
+      "mutation-policy",
+      "status-projection",
+      "delete-confirmation",
+      "waiter-work-request"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: GdpPipeline exposes CreateGdpPipeline, GetGdpPipeline, ListGdpPipelines, UpdateGdpPipeline, and DeleteGdpPipeline. The same SDK package also exposes ChangeGdpPipelineCompartment, PeerGdpPipeline, RotateGdpPipelineKeys, StartGdpPipeline, StopGdpPipeline, and service-local work-request helpers, but the reviewed controller-backed runtime publishes only the base CRUD mutation surface.",
+    "Pinned OCI SDK contract: CreateGdpPipelineResponse, UpdateGdpPipelineResponse, and DeleteGdpPipelineResponse expose opc-work-request-id headers without returning a GdpPipeline body. The reviewed runtime therefore polls GetGdpWorkRequest, recovers the pipeline OCID from work-request resources, and rereads GetGdpPipeline before converging status or confirming delete.",
+    "Pinned OCI SDK contract: GdpPipeline lifecycle states are CREATING, UPDATING, ACTIVE, INACTIVE, DELETING, DELETED, FAILED, and NEEDS_ATTENTION. Repo-authored success is ACTIVE or INACTIVE, requeue covers CREATING and UPDATING, delete confirmation follows DELETING to DELETED or NotFound, and NEEDS_ATTENTION is terminal non-success.",
+    "Pinned provider facts: provider docs publish oci_gdp_gdp_pipeline as both a resource and singular data source plus oci_gdp_gdp_pipelines as the list data source. ListGdpPipelinesRequest filters by compartmentId, displayName, gdpPipelineId, and lifecycleState.",
+    "Repo-authored bind-versus-create and mutation policy stay explicit: pre-create reuse requires exact compartmentId, displayName, pipelineType, and peeringRegion with a follow-up GET that confirms bucketDetails, while only UpdateGdpPipelineDetails fields displayName, description, serviceLogGroupId, fileTypes, authorizationDetails, isFileOverrideInDestinationEnabled, isScanningEnabled, isChunkingEnabled, isApprovalNeeded, approvalKeyVaultId, freeformTags, and definedTags reconcile in place. The reviewed runtime publishes non-empty fileTypes replacements but does not claim zero-length fileTypes clears because the pinned SDK update request omits empty slices on the wire."
+  ]
+}

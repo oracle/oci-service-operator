@@ -998,6 +998,32 @@ rules:
   - patch
   - update
 - apiGroups:
+  - gdp.oracle.com
+  resources:
+  - gdppipelines
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - gdp.oracle.com
+  resources:
+  - gdppipelines/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - gdp.oracle.com
+  resources:
+  - gdppipelines/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - generativeai.oracle.com
   resources:
   - dedicatedaiclusters

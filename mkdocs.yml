@@ -168,6 +168,7 @@ nav:
           - email.oracle.com/v1beta1: reference/api/email/v1beta1/index.md
           - events.oracle.com/v1beta1: reference/api/events/v1beta1/index.md
           - functions.oracle.com/v1beta1: reference/api/functions/v1beta1/index.md
+          - gdp.oracle.com/v1beta1: reference/api/gdp/v1beta1/index.md
           - generativeai.oracle.com/v1beta1: reference/api/generativeai/v1beta1/index.md
           - governancerulescontrolplane.oracle.com/v1beta1: reference/api/governancerulescontrolplane/v1beta1/index.md
           - healthchecks.oracle.com/v1beta1: reference/api/healthchecks/v1beta1/index.md
