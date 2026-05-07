@@ -99,6 +99,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/waas"
 	"github.com/oracle/oci-go-sdk/v65/waf"
 	"github.com/oracle/oci-go-sdk/v65/wlms"
+	"github.com/oracle/oci-go-sdk/v65/zpr"
 )
 
 const (
@@ -1270,6 +1271,13 @@ var seedTargets = []Target{
 	newTarget("wlms", "WlsDomain", reflect.TypeOf(wlms.WlsDomain{})),
 	newTarget("wlms", "WlsDomainCollection", reflect.TypeOf(wlms.WlsDomainCollection{})),
 	newTarget("wlms", "WlsDomainSummary", reflect.TypeOf(wlms.WlsDomainSummary{})),
+
+	// Zpr CRD support
+	newTarget("zpr", "CreateZprPolicyDetails", reflect.TypeOf(zpr.CreateZprPolicyDetails{})),
+	newTarget("zpr", "UpdateZprPolicyDetails", reflect.TypeOf(zpr.UpdateZprPolicyDetails{})),
+	newTarget("zpr", "ZprPolicy", reflect.TypeOf(zpr.ZprPolicy{})),
+	newTarget("zpr", "ZprPolicyCollection", reflect.TypeOf(zpr.ZprPolicyCollection{})),
+	newTarget("zpr", "ZprPolicySummary", reflect.TypeOf(zpr.ZprPolicySummary{})),
 }
 
 var interfaceImplementations = map[string][]reflect.Type{

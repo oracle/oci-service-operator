@@ -227,6 +227,7 @@ nav:
           - waas.oracle.com/v1beta1: reference/api/waas/v1beta1/index.md
           - waf.oracle.com/v1beta1: reference/api/waf/v1beta1/index.md
           - wlms.oracle.com/v1beta1: reference/api/wlms/v1beta1/index.md
+          - zpr.oracle.com/v1beta1: reference/api/zpr/v1beta1/index.md
       # END GENERATED API VERSION NAV
   - Contributor Docs:
       - contributor/index.md

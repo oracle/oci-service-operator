@@ -98,6 +98,7 @@ import (
 	waasv1beta1 "github.com/oracle/oci-service-operator/api/waas/v1beta1"
 	wafv1beta1 "github.com/oracle/oci-service-operator/api/waf/v1beta1"
 	wlmsv1beta1 "github.com/oracle/oci-service-operator/api/wlms/v1beta1"
+	zprv1beta1 "github.com/oracle/oci-service-operator/api/zpr/v1beta1"
 )
 
 type SDKMapping struct {
@@ -4735,6 +4736,28 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "wlms.WlsDomainSummary",
+			},
+		},
+	},
+	{
+		Name:       "ZprZprPolicy",
+		SpecType:   reflect.TypeOf(zprv1beta1.ZprPolicySpec{}),
+		StatusType: reflect.TypeOf(zprv1beta1.ZprPolicyStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "zpr.CreateZprPolicyDetails",
+			},
+			{
+				SDKStruct: "zpr.UpdateZprPolicyDetails",
+			},
+			{
+				SDKStruct: "zpr.ZprPolicy",
+			},
+			{
+				SDKStruct: "zpr.ZprPolicyCollection",
+			},
+			{
+				SDKStruct: "zpr.ZprPolicySummary",
 			},
 		},
 	},

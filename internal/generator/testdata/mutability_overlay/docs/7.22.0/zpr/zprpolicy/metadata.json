@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "zpr",
+  "kind": "ZprPolicy",
+  "formalSlug": "zprpolicy",
+  "providerResource": "oci_zpr_zpr_policy",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/zpr_zpr_policy",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/zpr_zpr_policy",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/zpr/zprpolicy/page.html",
+  "bodySHA256": "997df66c865d2bd186d41099bf4b478e467280d49b82ab0c2a3a4eb315f2a3ee",
+  "bodyBytes": 815,
+  "fixtureBodyPath": "7.22.0/zpr/zprpolicy/page.html"
+}

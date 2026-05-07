@@ -1123,3 +1123,17 @@ packages:
       - group: wlms
         kind: WlsDomain
         summary: Manage OCI WebLogic domains already onboarded into OCI WebLogic Management Service.
+
+  - package: zpr
+    displayName: Zero Trust Packet Routing
+    summary: Manage OCI Zero Trust Packet Routing policies from Kubernetes with a reviewed work-request-backed runtime.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to ZprPolicy while Configuration and policy work-request helper families stay unpublished.
+      - The published runtime uses service-SDK work requests for create, update, and delete, binds only on exact `compartmentId` plus immutable `name`, and limits in-place updates to description, statements, and tags.
+    kindOverrides:
+      - group: zpr
+        kind: ZprPolicy
+        summary: Manage OCI Zero Trust Packet Routing policies.

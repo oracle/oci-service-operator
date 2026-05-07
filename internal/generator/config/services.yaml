@@ -5394,3 +5394,54 @@ services:
       sdkAliases:
         WorkRequestLog:
           - WorkRequestLogEntry
+
+  - service: zpr
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/zpr
+    group: zpr
+    version: v1beta1
+    phase: security-and-identity
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - ZprPolicy
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: ZprPolicy
+          formalSpec: zprpolicy
+          async:
+            strategy: workrequest
+            runtime: generatedruntime
+            formalClassification: workrequest
+            workRequest:
+              source: service-sdk
+              phases:
+                - create
+                - update
+                - delete
+          serviceManager:
+            packagePath: zpr/zprpolicy
+          sample:
+            body: |-
+              #
+              # Replace the OCI identifiers below before running e2e.
+              #
+              apiVersion: zpr.oracle.com/v1beta1
+              kind: ZprPolicy
+              metadata:
+                name: zprpolicy-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                name: zprpolicy-sample
+                description: Sample Zero Trust Packet Routing policy
+                statements:
+                  - "ALLOW any-user to communicate in tenancy where source.resource.compartment.id = target.resource.compartment.id"

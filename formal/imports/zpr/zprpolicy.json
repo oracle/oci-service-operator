@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "zpr",
+  "slug": "zprpolicy",
+  "kind": "ZprPolicy",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_zpr_zpr_policy",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateZprPolicy",
+        "requestType": "zpr.CreateZprPolicyRequest",
+        "responseType": "zpr.CreateZprPolicyResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetZprPolicy",
+        "requestType": "zpr.GetZprPolicyRequest",
+        "responseType": "zpr.GetZprPolicyResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListZprPolicies",
+        "requestType": "zpr.ListZprPoliciesRequest",
+        "responseType": "zpr.ListZprPoliciesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateZprPolicy",
+        "requestType": "zpr.UpdateZprPolicyRequest",
+        "responseType": "zpr.UpdateZprPolicyResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteZprPolicy",
+        "requestType": "zpr.DeleteZprPolicyRequest",
+        "responseType": "zpr.DeleteZprPolicyResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "defined_tags",
+      "description",
+      "freeform_tags",
+      "statements"
+    ],
+    "forceNew": [
+      "compartment_id",
+      "name"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_zpr_zpr_policies",
+    "collectionField": "zpr_policy_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "name",
+      "id",
+      "lifecycle_state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/zpr/zprpolicy/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/zpr/zprpolicy/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "delete-confirmation",
+      "lifecycle-classification",
+      "list-lookup",
+      "mutation-policy",
+      "status-projection",
+      "waiter-work-request"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: CreateZprPolicy, GetZprPolicy, ListZprPolicies, UpdateZprPolicy, DeleteZprPolicy, GetZprPolicyWorkRequest, and ListZprPolicyWorkRequests are present in v65.110.0. Create returns a ZprPolicy body plus opc-work-request-id, while update and delete return work-request headers only.",
+    "Pinned provider coverage is unconfirmed. formal/sources.lock still points at github.com/oracle/terraform-provider-oci@eb653febb1bab4cc6650a96d404a8baf36fdf671, but the accessible provider inventory did not expose a matching ZprPolicy resource or data source. The providerResource and datasource names therefore stay provisional OCI-style placeholders so generator-owned registry artifacts can derive stable links without claiming verified provider coverage.",
+    "Repo-authored runtime semantics stay explicit: bind-versus-create uses explicit OCID first and otherwise only a unique ListZprPolicies match on compartmentId plus exact name, mutable drift is limited to description/statements/tag updates, and the controller uses the ZPR service-local work-request APIs through generatedruntime rather than assuming a standalone workrequests API or unverified provider helper contract."
+  ]
+}

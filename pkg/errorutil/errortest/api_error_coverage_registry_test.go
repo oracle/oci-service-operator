@@ -14,10 +14,10 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	}
 
 	byKey := inventoryByKey(inventory)
-	if got, want := len(inventory), 350; got != want {
+	if got, want := len(inventory), 351; got != want {
 		t.Fatalf("len(inventory) = %d, want %d", got, want)
 	}
-	if got, want := countRegistrations(inventory), 225; got != want {
+	if got, want := countRegistrations(inventory), 226; got != want {
 		t.Fatalf("registration inventory count = %d, want %d", got, want)
 	}
 	if got, want := countExceptions(inventory), 125; got != want {
@@ -66,6 +66,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventorySelectionSource(t, byKey, "visualbuilder/VbInstance", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "vnmonitoring/PathAnalyzerTest", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "wlms/WlsDomain", "selection.includeKinds")
+	assertInventorySelectionSource(t, byKey, "zpr/ZprPolicy", "selection.includeKinds")
 
 	assertInventoryRegistration(t, byKey, "accessgovernancecp/GovernanceInstance")
 	assertInventoryException(t, byKey, "accessgovernancecp/GovernanceInstanceConfiguration", `controller.strategy="none"`)
@@ -145,6 +146,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventoryRegistration(t, byKey, "visualbuilder/VbInstance")
 	assertInventoryRegistration(t, byKey, "vnmonitoring/PathAnalyzerTest")
 	assertInventoryRegistration(t, byKey, "wlms/WlsDomain")
+	assertInventoryRegistration(t, byKey, "zpr/ZprPolicy")
 }
 
 func TestReviewedAPIErrorCoverageRegistryMatchesCheckedInInventory(t *testing.T) {
@@ -213,6 +215,7 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedFamily(t, "visualbuilder/VbInstance", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "vnmonitoring/PathAnalyzerTest", APIErrorCoverageFamilyGeneratedRuntimeFollowUp)
 	assertReviewedFamily(t, "wlms/WlsDomain", APIErrorCoverageFamilyGeneratedRuntimePlain)
+	assertReviewedFamily(t, "zpr/ZprPolicy", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 
 	assertReviewedException(t, "accessgovernancecp/GovernanceInstanceConfiguration", "strategy=none")
 	assertReviewedException(t, "accessgovernancecp/SenderConfig", "strategy=none")

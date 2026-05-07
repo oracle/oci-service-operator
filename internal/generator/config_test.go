@@ -1225,6 +1225,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"wlms",
 		"visualbuilder",
 		"vnmonitoring",
+		"zpr",
 	}
 	if !slices.Equal(activeServices, wantActiveServices) {
 		t.Fatalf("DefaultActiveServices() = %v, want %v", activeServices, wantActiveServices)
@@ -1327,6 +1328,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"wlms",
 		"visualbuilder",
 		"vnmonitoring",
+		"zpr",
 		"vault",
 	)
 	assertServiceSelection(t, services["accessgovernancecp"], true, SelectionModeExplicit, []string{"GovernanceInstance"})
@@ -1423,6 +1425,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	assertServiceSelection(t, services["wlms"], true, SelectionModeExplicit, []string{"WlsDomain"})
 	assertServiceSelection(t, services["visualbuilder"], true, SelectionModeExplicit, []string{"VbInstance"})
 	assertServiceSelection(t, services["vnmonitoring"], true, SelectionModeExplicit, []string{"PathAnalyzerTest"})
+	assertServiceSelection(t, services["zpr"], true, SelectionModeExplicit, []string{"ZprPolicy"})
 	assertServiceSelection(t, services["vault"], false, SelectionModeAll, nil)
 }
 
@@ -2213,6 +2216,7 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 		"waas":                        {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"waf":                         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"wlms":                        {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"zpr":                         {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
 	}
 
 	targets := defaultActiveExplicitSelectedKindTargets(cfg)
@@ -2263,6 +2267,17 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 	}
 	if !slices.Equal(vbsinst.WorkRequest.Phases, []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}) {
 		t.Fatalf("vbsinst VbsInstance workRequest.phases = %v", vbsinst.WorkRequest.Phases)
+	}
+
+	zpr := assertAsyncContract(t, services["zpr"], "ZprPolicy", AsyncStrategyWorkRequest, AsyncRuntimeGeneratedRuntime)
+	if zpr.WorkRequest.Source != AsyncWorkRequestSourceServiceSDK {
+		t.Fatalf("zpr ZprPolicy workRequest.source = %q, want %q", zpr.WorkRequest.Source, AsyncWorkRequestSourceServiceSDK)
+	}
+	if !slices.Equal(zpr.WorkRequest.Phases, []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}) {
+		t.Fatalf("zpr ZprPolicy workRequest.phases = %v", zpr.WorkRequest.Phases)
+	}
+	if zpr.WorkRequest.LegacyFieldBridge.hasOverride() {
+		t.Fatalf("zpr ZprPolicy workRequest.legacyFieldBridge = %#v, want empty legacy bridge", zpr.WorkRequest.LegacyFieldBridge)
 	}
 	if vbsinst.WorkRequest.LegacyFieldBridge.hasOverride() {
 		t.Fatalf("vbsinst VbsInstance workRequest.legacyFieldBridge = %#v, want empty legacy bridge", vbsinst.WorkRequest.LegacyFieldBridge)
