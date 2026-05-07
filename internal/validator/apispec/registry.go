@@ -75,6 +75,7 @@ import (
 	opsiv1beta1 "github.com/oracle/oci-service-operator/api/opsi/v1beta1"
 	optimizerv1beta1 "github.com/oracle/oci-service-operator/api/optimizer/v1beta1"
 	osmanagementhubv1beta1 "github.com/oracle/oci-service-operator/api/osmanagementhub/v1beta1"
+	psav1beta1 "github.com/oracle/oci-service-operator/api/psa/v1beta1"
 	psqlv1beta1 "github.com/oracle/oci-service-operator/api/psql/v1beta1"
 	queuev1beta1 "github.com/oracle/oci-service-operator/api/queue/v1beta1"
 	recoveryv1beta1 "github.com/oracle/oci-service-operator/api/recovery/v1beta1"
@@ -3902,6 +3903,28 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "osmanagementhub.SoftwareSourceCollection",
+			},
+		},
+	},
+	{
+		Name:       "PsaPrivateServiceAccess",
+		SpecType:   reflect.TypeOf(psav1beta1.PrivateServiceAccessSpec{}),
+		StatusType: reflect.TypeOf(psav1beta1.PrivateServiceAccessStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "psa.CreatePrivateServiceAccessDetails",
+			},
+			{
+				SDKStruct: "psa.UpdatePrivateServiceAccessDetails",
+			},
+			{
+				SDKStruct: "psa.PrivateServiceAccess",
+			},
+			{
+				SDKStruct: "psa.PrivateServiceAccessCollection",
+			},
+			{
+				SDKStruct: "psa.PrivateServiceAccessSummary",
 			},
 		},
 	},

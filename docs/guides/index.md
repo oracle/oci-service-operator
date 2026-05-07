@@ -30,6 +30,7 @@ Use these guides after the initial install and quickstart path.
 | `nosql` | `Table` | [Guide](nosql/table.md) |
 | `objectstorage` | `Bucket` | [Guide](objectstorage/bucket.md) |
 | `opensearch` | `OpensearchCluster` | [Guide](opensearch/opensearchcluster.md) |
+| `psa` | `PrivateServiceAccess` | [Guide](psa/privateserviceaccess.md) |
 | `psql` | `DbSystem` | [Guide](psql/dbsystem.md) |
 | `queue` | `Queue` | [Guide](../queue.md) |
 | `redis` | `RedisCluster` | [Guide](redis/rediscluster.md) |

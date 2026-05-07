@@ -160,6 +160,21 @@ Notes:
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | [OpenSearch](packages/opensearch/index.md) | `opensearch/OpensearchCluster` | `opensearch.oracle.com/v1beta1` | Preview | `v2.0.0-alpha` | [Guide](../guides/opensearch/opensearchcluster.md) | [Sample](samples/opensearch/v1beta1/opensearchcluster.md) | [Reference](api/opensearch/v1beta1/index.md#kind-opensearchcluster) |
 
+## Private Service Access
+
+Manage OCI Private Service Access resources from Kubernetes.
+
+Package page: [Private Service Access](packages/psa/index.md)
+
+Notes:
+- Current package scope is intentionally limited to PrivateServiceAccess.
+- PsaService and PSA work-request family resources remain unpublished with this package.
+- No checked-in release manifest currently lists this package; the resource scope below reflects the current repository package metadata.
+
+| Package | Group/Kind | API Version | Support Status | Latest Released Version | Guide | Sample | API Spec |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| [Private Service Access](packages/psa/index.md) | `psa/PrivateServiceAccess` | `psa.oracle.com/v1beta1` | Preview | `Not yet released` | [Guide](../guides/psa/privateserviceaccess.md) | [Sample](samples/psa/v1beta1/privateserviceaccess.md) | [Reference](api/psa/v1beta1/index.md#kind-privateserviceaccess) |
+
 ## PostgreSQL
 
 Manage OCI PostgreSQL DB Systems from Kubernetes.

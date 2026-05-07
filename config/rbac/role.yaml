@@ -2174,6 +2174,32 @@ rules:
   - patch
   - update
 - apiGroups:
+  - psa.oracle.com
+  resources:
+  - privateserviceaccesses
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - psa.oracle.com
+  resources:
+  - privateserviceaccesses/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - psa.oracle.com
+  resources:
+  - privateserviceaccesses/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - queue.oracle.com
   resources:
   - queues

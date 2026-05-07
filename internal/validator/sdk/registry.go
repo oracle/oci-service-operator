@@ -76,6 +76,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/opsi"
 	"github.com/oracle/oci-go-sdk/v65/optimizer"
 	"github.com/oracle/oci-go-sdk/v65/osmanagementhub"
+	"github.com/oracle/oci-go-sdk/v65/psa"
 	"github.com/oracle/oci-go-sdk/v65/psql"
 	"github.com/oracle/oci-go-sdk/v65/queue"
 	"github.com/oracle/oci-go-sdk/v65/recovery"
@@ -1046,6 +1047,13 @@ var seedTargets = []Target{
 	newTarget("osmanagementhub", "ManagementStationSummary", reflect.TypeOf(osmanagementhub.ManagementStationSummary{})),
 	newTarget("osmanagementhub", "ProfileSummary", reflect.TypeOf(osmanagementhub.ProfileSummary{})),
 	newTarget("osmanagementhub", "ScheduledJobSummary", reflect.TypeOf(osmanagementhub.ScheduledJobSummary{})),
+
+	// Psa CRD support
+	newTarget("psa", "CreatePrivateServiceAccessDetails", reflect.TypeOf(psa.CreatePrivateServiceAccessDetails{})),
+	newTarget("psa", "UpdatePrivateServiceAccessDetails", reflect.TypeOf(psa.UpdatePrivateServiceAccessDetails{})),
+	newTarget("psa", "PrivateServiceAccess", reflect.TypeOf(psa.PrivateServiceAccess{})),
+	newTarget("psa", "PrivateServiceAccessCollection", reflect.TypeOf(psa.PrivateServiceAccessCollection{})),
+	newTarget("psa", "PrivateServiceAccessSummary", reflect.TypeOf(psa.PrivateServiceAccessSummary{})),
 
 	// Recovery CRD support
 	newTarget("recovery", "CreateProtectedDatabaseDetails", reflect.TypeOf(recovery.CreateProtectedDatabaseDetails{})),

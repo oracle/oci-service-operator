@@ -872,6 +872,20 @@ packages:
     customerVisible: false
     guidePath: docs/installation.md
 
+  - package: psa
+    displayName: Private Service Access
+    summary: Manage OCI Private Service Access resources from Kubernetes.
+    supportStatus: preview
+    customerVisible: true
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to PrivateServiceAccess.
+      - PsaService and PSA work-request family resources remain unpublished with this package.
+    kindOverrides:
+      - group: psa
+        kind: PrivateServiceAccess
+        summary: Manage OCI Private Service Access resources.
+
   - package: psql
     displayName: PostgreSQL
     summary: Manage OCI PostgreSQL DB Systems from Kubernetes.

@@ -94,6 +94,8 @@ nav:
               - Bucket: guides/objectstorage/bucket.md
           - opensearch:
               - OpensearchCluster: guides/opensearch/opensearchcluster.md
+          - psa:
+              - PrivateServiceAccess: guides/psa/privateserviceaccess.md
           - psql:
               - DbSystem: guides/psql/dbsystem.md
           - queue:
@@ -119,6 +121,7 @@ nav:
           - NoSQL: reference/packages/nosql/index.md
           - Object Storage: reference/packages/objectstorage/index.md
           - OpenSearch: reference/packages/opensearch/index.md
+          - Private Service Access: reference/packages/psa/index.md
           - PostgreSQL: reference/packages/psql/index.md
           - Queue: reference/packages/queue/index.md
           - Redis: reference/packages/redis/index.md
@@ -201,6 +204,7 @@ nav:
           - opsi.oracle.com/v1beta1: reference/api/opsi/v1beta1/index.md
           - optimizer.oracle.com/v1beta1: reference/api/optimizer/v1beta1/index.md
           - osmanagementhub.oracle.com/v1beta1: reference/api/osmanagementhub/v1beta1/index.md
+          - psa.oracle.com/v1beta1: reference/api/psa/v1beta1/index.md
           - psql.oracle.com/v1beta1: reference/api/psql/v1beta1/index.md
           - queue.oracle.com/v1beta1: reference/api/queue/v1beta1/index.md
           - recovery.oracle.com/v1beta1: reference/api/recovery/v1beta1/index.md
