@@ -1322,6 +1322,16 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 			"WebAppFirewall",
 			"WebAppFirewallPolicy",
 		),
+		reviewedRegistrationSet(
+			"visualbuilder",
+			"visualbuilder",
+			apiErrorCoverageDefaultVersion,
+			APIErrorCoverageFamilyGeneratedRuntimeWorkRequest,
+			deleteNotFoundGeneratedRuntime,
+			retryableConflictGeneratedRuntime,
+			"VbInstance runtime resumes create, update, and delete through service-SDK work requests, recovers VbInstance identity from work-request resources, and keeps pre-create reuse bounded to exact compartmentId plus displayName matches.",
+			"VbInstance",
+		),
 	),
 	Exceptions: map[string]APIErrorCoverageException{
 		resourceKey("accessgovernancecp", "GovernanceInstanceConfiguration"): reviewedException(
@@ -2111,6 +2121,27 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 		resourceKey("opa", "WorkRequestLog"): reviewedException(
 			"opa",
 			"opa",
+			apiErrorCoverageDefaultVersion,
+			"WorkRequestLog",
+			"`services.yaml` keeps this subresource out of the active controller-backed surface with controller.strategy=none and serviceManager.strategy=none.",
+		),
+		resourceKey("visualbuilder", "WorkRequest"): reviewedException(
+			"visualbuilder",
+			"visualbuilder",
+			apiErrorCoverageDefaultVersion,
+			"WorkRequest",
+			"`services.yaml` keeps this subresource out of the active controller-backed surface with controller.strategy=none and serviceManager.strategy=none.",
+		),
+		resourceKey("visualbuilder", "WorkRequestError"): reviewedException(
+			"visualbuilder",
+			"visualbuilder",
+			apiErrorCoverageDefaultVersion,
+			"WorkRequestError",
+			"`services.yaml` keeps this subresource out of the active controller-backed surface with controller.strategy=none and serviceManager.strategy=none.",
+		),
+		resourceKey("visualbuilder", "WorkRequestLog"): reviewedException(
+			"visualbuilder",
+			"visualbuilder",
 			apiErrorCoverageDefaultVersion,
 			"WorkRequestLog",
 			"`services.yaml` keeps this subresource out of the active controller-backed surface with controller.strategy=none and serviceManager.strategy=none.",

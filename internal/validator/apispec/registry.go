@@ -4409,6 +4409,25 @@ var targets = []Target{
 		},
 	},
 	{
+		Name:       "VisualbuilderVbInstance",
+		SpecType:   reflect.TypeOf(visualbuilderv1beta1.VbInstanceSpec{}),
+		StatusType: reflect.TypeOf(visualbuilderv1beta1.VbInstanceStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "visualbuilder.CreateVbInstanceDetails",
+			},
+			{
+				SDKStruct: "visualbuilder.UpdateVbInstanceDetails",
+			},
+			{
+				SDKStruct: "visualbuilder.VbInstance",
+			},
+			{
+				SDKStruct: "visualbuilder.VbInstanceSummary",
+			},
+		},
+	},
+	{
 		Name:       "WaaWebAppAcceleration",
 		SpecType:   reflect.TypeOf(waav1beta1.WebAppAccelerationSpec{}),
 		StatusType: reflect.TypeOf(waav1beta1.WebAppAccelerationStatus{}),

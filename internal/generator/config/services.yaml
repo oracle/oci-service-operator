@@ -4906,6 +4906,76 @@ services:
       webhooks:
         strategy: none
 
+  - service: visualbuilder
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/visualbuilder
+    group: visualbuilder
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - VbInstance
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: VbInstance
+          formalSpec: vbinstance
+          async:
+            strategy: workrequest
+            runtime: generatedruntime
+            formalClassification: workrequest
+            workRequest:
+              source: service-sdk
+              phases:
+                - create
+                - update
+                - delete
+          serviceManager:
+            packagePath: visualbuilder/vbinstance
+          sample:
+            body: |-
+              #
+              # Replace the OCIDs below before running e2e.
+              #
+              apiVersion: visualbuilder.oracle.com/v1beta1
+              kind: VbInstance
+              metadata:
+                name: vbinstance-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                displayName: vbinstance-sample
+                nodeCount: 1
+                isVisualBuilderEnabled: true
+                networkEndpointDetails:
+                  networkEndpointType: PRIVATE
+                  subnetId: ocid1.subnet.oc1..exampleuniqueID
+                  networkSecurityGroupIds:
+                    - ocid1.nsg.oc1..exampleuniqueID
+        - kind: WorkRequest
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequestError
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequestLog
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+
   - service: workrequests
     sdkPackage: github.com/oracle/oci-go-sdk/v65/workrequests
     group: workrequests

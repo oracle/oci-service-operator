@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "visualbuilder",
+  "kind": "VbInstance",
+  "formalSlug": "vbinstance",
+  "providerResource": "oci_visual_builder_vb_instance",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/visual_builder_vb_instance",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/visual_builder_vb_instance",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/visualbuilder/vbinstance/page.html",
+  "bodySHA256": "3eb53e641f05f909fde3b99ff2fe351d1cb74f73554c73ade392a9fb1993496b",
+  "bodyBytes": 2865,
+  "fixtureBodyPath": "7.22.0/visualbuilder/vbinstance/page.html"
+}

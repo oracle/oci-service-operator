@@ -1,0 +1,86 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: visualbuilder
+slug: vbinstance
+kind: VbInstance
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending:
+      - CREATING
+    updatePending:
+      - UPDATING
+    deletePending:
+      - DELETING
+  listLookup:
+    filters:
+      - compartmentId
+      - displayName
+    matchRule: exact compartmentId plus displayName unique match in ACTIVE, CREATING, UPDATING, or INACTIVE; duplicate matches fail
+  mutation:
+    mutable:
+      - alternateCustomEndpoints.certificateSecretId
+      - alternateCustomEndpoints.hostname
+      - customEndpoint.certificateSecretId
+      - customEndpoint.hostname
+      - definedTags
+      - displayName
+      - freeformTags
+      - isVisualBuilderEnabled
+      - networkEndpointDetails.allowlistedHttpIps
+      - networkEndpointDetails.allowlistedHttpVcns.allowlistedIpCidrs
+      - networkEndpointDetails.allowlistedHttpVcns.id
+      - networkEndpointDetails.networkEndpointType
+      - networkEndpointDetails.networkSecurityGroupIds
+      - networkEndpointDetails.subnetId
+      - nodeCount
+    forceNew:
+      - compartmentId
+      - consumptionModel
+      - networkEndpointDetails.privateEndpointIp
+    createOnly:
+      - idcsOpenId
+  hooks:
+    create:
+      - helper: tfresource.CreateResource
+      - helper: tfresource.WaitForWorkRequestWithErrorHandling
+        entityType: vbinstance
+        action: CREATED
+    update:
+      - helper: tfresource.UpdateResource
+      - helper: tfresource.WaitForWorkRequestWithErrorHandling
+        entityType: vbinstance
+        action: UPDATED
+    delete:
+      - helper: tfresource.DeleteResource
+      - helper: tfresource.WaitForWorkRequestWithErrorHandling
+        entityType: vbinstance
+        action: DELETED
+  followUp:
+    create: GetWorkRequest -> GetVbInstance
+    update: GetWorkRequest -> GetVbInstance
+    delete: GetWorkRequest -> GetVbInstance/ListVbInstances confirm-delete
+notes:
+  - Reviewed lifecycle mapping treats CREATING as provisioning, UPDATING as
+    updating, ACTIVE and INACTIVE as success, and DELETING as terminating;
+    FAILED is terminal and DELETED is only a delete-confirmation target.
+  - Create, update, and delete responses expose work-request headers but do
+    not return a VbInstance body. The runtime resumes through GetWorkRequest,
+    recovers the affected VbInstance OCID from work-request resources, and then
+    rereads GetVbInstance before settling.
+  - Pre-create reuse keeps exact compartmentId plus displayName matching
+    bounded to ACTIVE, CREATING, UPDATING, or INACTIVE summaries.
+  - In-place reconcile covers displayName, nodeCount, freeformTags,
+    definedTags, one-way enablement of isVisualBuilderEnabled, customEndpoint,
+    alternateCustomEndpoints, and the mutable public/private
+    networkEndpointDetails surface. CompartmentId, consumptionModel, and
+    privateEndpointIp remain replacement-only, while idcsOpenId is create-only
+    because OCI does not project it back on live reads.
+  - ChangeVbInstanceCompartment, StartVbInstance, StopVbInstance, and
+    ReconfigurePrivateEndpointVbInstance remain out of scope for the published
+    create/get/list/update/delete runtime.

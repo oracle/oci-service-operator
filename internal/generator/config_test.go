@@ -1218,6 +1218,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"waa",
 		"waas",
 		"waf",
+		"visualbuilder",
 	}
 	if !slices.Equal(activeServices, wantActiveServices) {
 		t.Fatalf("DefaultActiveServices() = %v, want %v", activeServices, wantActiveServices)
@@ -1314,6 +1315,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"waa",
 		"waas",
 		"waf",
+		"visualbuilder",
 		"vault",
 	)
 	assertServiceSelection(t, services["accessgovernancecp"], true, SelectionModeExplicit, []string{"GovernanceInstance"})
@@ -1404,6 +1406,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	assertServiceSelection(t, services["waa"], true, SelectionModeExplicit, []string{"WebAppAcceleration", "WebAppAccelerationPolicy"})
 	assertServiceSelection(t, services["waas"], true, SelectionModeExplicit, []string{"AddressList", "Certificate", "CustomProtectionRule", "HttpRedirect", "WaasPolicy"})
 	assertServiceSelection(t, services["waf"], true, SelectionModeExplicit, []string{"NetworkAddressList", "WebAppFirewall", "WebAppFirewallPolicy"})
+	assertServiceSelection(t, services["visualbuilder"], true, SelectionModeExplicit, []string{"VbInstance"})
 	assertServiceSelection(t, services["vault"], false, SelectionModeAll, nil)
 }
 

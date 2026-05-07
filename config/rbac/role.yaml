@@ -2540,6 +2540,32 @@ rules:
   - patch
   - update
 - apiGroups:
+  - visualbuilder.oracle.com
+  resources:
+  - vbinstances
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - visualbuilder.oracle.com
+  resources:
+  - vbinstances/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - visualbuilder.oracle.com
+  resources:
+  - vbinstances/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - waa.oracle.com
   resources:
   - webappaccelerationpolicies

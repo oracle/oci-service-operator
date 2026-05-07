@@ -1,0 +1,534 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay",
+  "contractVersion": "v1alpha1",
+  "metadata": {
+    "providerSourceRef": "terraform-provider-oci",
+    "providerRevision": "eb653febb1bab4cc6650a96d404a8baf36fdf671",
+    "terraformDocsVersion": "7.22.0"
+  },
+  "sourceContract": {
+    "astPrimaryFacts": [
+      "forceNew",
+      "conflictsWith",
+      "lifecycle",
+      "hooks",
+      "crud",
+      "listLookup"
+    ],
+    "astMutableAlias": "updateCandidate",
+    "docsOverlayScope": "terraform-argument-reference-for-ast-update-candidate-fields",
+    "docsEvidenceSource": "terraform-argument-reference"
+  },
+  "resource": {
+    "service": "visualbuilder",
+    "kind": "VbInstance",
+    "formalSlug": "vbinstance",
+    "providerResource": "oci_visual_builder_vb_instance",
+    "repoAuthoredSpecPath": "controllers/visualbuilder/vbinstance/spec.cfg",
+    "formalImportPath": "imports/visualbuilder/vbinstance.json"
+  },
+  "fields": [
+    {
+      "astFieldPath": "alternateCustomEndpoints.certificateSecretId",
+      "terraformFieldPath": "alternate_custom_endpoints.certificate_secret_id",
+      "canonicalJoinKey": "alternateCustomEndpoints[].certificateSecretId",
+      "pathShape": "listItem",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/visualbuilder/vbinstance.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "visual_builder_vb_instance#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "alternateCustomEndpoints.hostname",
+      "terraformFieldPath": "alternate_custom_endpoints.hostname",
+      "canonicalJoinKey": "alternateCustomEndpoints[].hostname",
+      "pathShape": "listItem",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/visualbuilder/vbinstance.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "visual_builder_vb_instance#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "compartmentId",
+      "terraformFieldPath": "compartmentId",
+      "canonicalJoinKey": "compartmentId",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "notUpdateCandidate",
+        "forceNew": true,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "replacementRequired",
+        "finalPolicy": "replacementRequired"
+      },
+      "provenance": {
+        "formalImportPath": "imports/visualbuilder/vbinstance.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.forceNew",
+        "terraformDocsPage": "visual_builder_vb_instance#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "consumptionModel",
+      "terraformFieldPath": "consumptionModel",
+      "canonicalJoinKey": "consumptionModel",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "notUpdateCandidate",
+        "forceNew": true,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "replacementRequired",
+        "finalPolicy": "replacementRequired"
+      },
+      "provenance": {
+        "formalImportPath": "imports/visualbuilder/vbinstance.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.forceNew",
+        "terraformDocsPage": "visual_builder_vb_instance#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "customEndpoint.certificateSecretId",
+      "terraformFieldPath": "custom_endpoint.certificate_secret_id",
+      "canonicalJoinKey": "customEndpoint.certificateSecretId",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/visualbuilder/vbinstance.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "visual_builder_vb_instance#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "customEndpoint.hostname",
+      "terraformFieldPath": "custom_endpoint.hostname",
+      "canonicalJoinKey": "customEndpoint.hostname",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/visualbuilder/vbinstance.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "visual_builder_vb_instance#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "definedTags",
+      "terraformFieldPath": "defined_tags",
+      "canonicalJoinKey": "definedTags",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/visualbuilder/vbinstance.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "visual_builder_vb_instance#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "displayName",
+      "terraformFieldPath": "display_name",
+      "canonicalJoinKey": "displayName",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/visualbuilder/vbinstance.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "visual_builder_vb_instance#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "freeformTags",
+      "terraformFieldPath": "freeform_tags",
+      "canonicalJoinKey": "freeformTags",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/visualbuilder/vbinstance.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "visual_builder_vb_instance#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "isVisualBuilderEnabled",
+      "terraformFieldPath": "is_visual_builder_enabled",
+      "canonicalJoinKey": "isVisualBuilderEnabled",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/visualbuilder/vbinstance.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "visual_builder_vb_instance#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "networkEndpointDetails.allowlistedHttpIps",
+      "terraformFieldPath": "network_endpoint_details.allowlisted_http_ips",
+      "canonicalJoinKey": "networkEndpointDetails.allowlistedHttpIps",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/visualbuilder/vbinstance.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "visual_builder_vb_instance#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "networkEndpointDetails.allowlistedHttpVcns.allowlistedIpCidrs",
+      "terraformFieldPath": "network_endpoint_details.allowlisted_http_vcns.allowlisted_ip_cidrs",
+      "canonicalJoinKey": "networkEndpointDetails.allowlistedHttpVcns[].allowlistedIpCidrs",
+      "pathShape": "listItem",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/visualbuilder/vbinstance.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "visual_builder_vb_instance#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "networkEndpointDetails.allowlistedHttpVcns.id",
+      "terraformFieldPath": "network_endpoint_details.allowlisted_http_vcns.id",
+      "canonicalJoinKey": "networkEndpointDetails.allowlistedHttpVcns[].id",
+      "pathShape": "listItem",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/visualbuilder/vbinstance.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "visual_builder_vb_instance#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "networkEndpointDetails.networkEndpointType",
+      "terraformFieldPath": "network_endpoint_details.network_endpoint_type",
+      "canonicalJoinKey": "networkEndpointDetails.networkEndpointType",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/visualbuilder/vbinstance.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "visual_builder_vb_instance#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "networkEndpointDetails.networkSecurityGroupIds",
+      "terraformFieldPath": "network_endpoint_details.network_security_group_ids",
+      "canonicalJoinKey": "networkEndpointDetails.networkSecurityGroupIds",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/visualbuilder/vbinstance.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "visual_builder_vb_instance#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "networkEndpointDetails.privateEndpointIp",
+      "terraformFieldPath": "networkEndpointDetails.privateEndpointIp",
+      "canonicalJoinKey": "networkEndpointDetails.privateEndpointIp",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "notUpdateCandidate",
+        "forceNew": true,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "replacementRequired",
+        "finalPolicy": "replacementRequired"
+      },
+      "provenance": {
+        "formalImportPath": "imports/visualbuilder/vbinstance.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.forceNew",
+        "terraformDocsPage": "visual_builder_vb_instance#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "networkEndpointDetails.subnetId",
+      "terraformFieldPath": "network_endpoint_details.subnet_id",
+      "canonicalJoinKey": "networkEndpointDetails.subnetId",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/visualbuilder/vbinstance.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "visual_builder_vb_instance#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "nodeCount",
+      "terraformFieldPath": "node_count",
+      "canonicalJoinKey": "nodeCount",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/visualbuilder/vbinstance.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "visual_builder_vb_instance#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    }
+  ]
+}
