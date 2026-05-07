@@ -62,6 +62,7 @@ import (
 	marketplacev1beta1 "github.com/oracle/oci-service-operator/api/marketplace/v1beta1"
 	marketplaceprivateofferv1beta1 "github.com/oracle/oci-service-operator/api/marketplaceprivateoffer/v1beta1"
 	marketplacepublisherv1beta1 "github.com/oracle/oci-service-operator/api/marketplacepublisher/v1beta1"
+	mediaservicesv1beta1 "github.com/oracle/oci-service-operator/api/mediaservices/v1beta1"
 	monitoringv1beta1 "github.com/oracle/oci-service-operator/api/monitoring/v1beta1"
 	mysqlv1beta1 "github.com/oracle/oci-service-operator/api/mysql/v1beta1"
 	networkloadbalancerv1beta1 "github.com/oracle/oci-service-operator/api/networkloadbalancer/v1beta1"
@@ -3451,6 +3452,28 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "marketplacepublisher.TermVersionSummary",
+			},
+		},
+	},
+	{
+		Name:       "MediaservicesMediaAsset",
+		SpecType:   reflect.TypeOf(mediaservicesv1beta1.MediaAssetSpec{}),
+		StatusType: reflect.TypeOf(mediaservicesv1beta1.MediaAssetStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "mediaservices.CreateMediaAssetDetails",
+			},
+			{
+				SDKStruct: "mediaservices.UpdateMediaAssetDetails",
+			},
+			{
+				SDKStruct: "mediaservices.MediaAsset",
+			},
+			{
+				SDKStruct: "mediaservices.MediaAssetCollection",
+			},
+			{
+				SDKStruct: "mediaservices.MediaAssetSummary",
 			},
 		},
 	},

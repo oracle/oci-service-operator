@@ -1214,6 +1214,16 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 			"TermVersion",
 		),
 		reviewedRegistrationSet(
+			"mediaservices",
+			"mediaservices",
+			apiErrorCoverageDefaultVersion,
+			APIErrorCoverageFamilyGeneratedRuntimePlain,
+			deleteNotFoundGeneratedRuntime,
+			retryableConflictGeneratedRuntime,
+			"MediaAsset keeps plain generatedruntime error classification while a small handwritten seam narrows pre-create reuse, strips deleteMode/isLockOverride from the published request surface, preserves explicit mutable clears, and normalizes create-time lock readback.",
+			"MediaAsset",
+		),
+		reviewedRegistrationSet(
 			"operatoraccesscontrol",
 			"operatoraccesscontrol",
 			apiErrorCoverageDefaultVersion,

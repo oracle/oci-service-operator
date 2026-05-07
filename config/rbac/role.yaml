@@ -1702,6 +1702,32 @@ rules:
   - patch
   - update
 - apiGroups:
+  - mediaservices.oracle.com
+  resources:
+  - mediaassets
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - mediaservices.oracle.com
+  resources:
+  - mediaassets/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - mediaservices.oracle.com
+  resources:
+  - mediaassets/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - monitoring.oracle.com
   resources:
   - alarms

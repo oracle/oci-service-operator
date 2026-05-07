@@ -63,6 +63,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/marketplace"
 	"github.com/oracle/oci-go-sdk/v65/marketplaceprivateoffer"
 	"github.com/oracle/oci-go-sdk/v65/marketplacepublisher"
+	"github.com/oracle/oci-go-sdk/v65/mediaservices"
 	"github.com/oracle/oci-go-sdk/v65/monitoring"
 	"github.com/oracle/oci-go-sdk/v65/mysql"
 	"github.com/oracle/oci-go-sdk/v65/networkloadbalancer"
@@ -944,6 +945,13 @@ var seedTargets = []Target{
 	newTarget("marketplacepublisher", "ListingRevisionSummary", reflect.TypeOf(marketplacepublisher.ListingRevisionSummary{})),
 	newTarget("marketplacepublisher", "ListingSummary", reflect.TypeOf(marketplacepublisher.ListingSummary{})),
 	newTarget("marketplacepublisher", "TermSummary", reflect.TypeOf(marketplacepublisher.TermSummary{})),
+
+	// Mediaservices CRD support
+	newTarget("mediaservices", "CreateMediaAssetDetails", reflect.TypeOf(mediaservices.CreateMediaAssetDetails{})),
+	newTarget("mediaservices", "UpdateMediaAssetDetails", reflect.TypeOf(mediaservices.UpdateMediaAssetDetails{})),
+	newTarget("mediaservices", "MediaAsset", reflect.TypeOf(mediaservices.MediaAsset{})),
+	newTarget("mediaservices", "MediaAssetCollection", reflect.TypeOf(mediaservices.MediaAssetCollection{})),
+	newTarget("mediaservices", "MediaAssetSummary", reflect.TypeOf(mediaservices.MediaAssetSummary{})),
 
 	// Oce CRD support
 	newTarget("oce", "CreateOceInstanceDetails", reflect.TypeOf(oce.CreateOceInstanceDetails{})),

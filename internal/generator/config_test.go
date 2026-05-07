@@ -1180,6 +1180,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"lustrefilestorage",
 		"monitoring",
 		"marketplace",
+		"mediaservices",
 		"mysql",
 		"networkloadbalancer",
 		"nosql",
@@ -1310,6 +1311,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"managementdashboard",
 		"marketplaceprivateoffer",
 		"marketplacepublisher",
+		"mediaservices",
 		"operatoraccesscontrol",
 		"opsi",
 		"optimizer",
@@ -1405,6 +1407,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	assertServiceSelection(t, services["managementdashboard"], true, SelectionModeExplicit, []string{"ManagementDashboard", "ManagementSavedSearch"})
 	assertServiceSelection(t, services["marketplaceprivateoffer"], true, SelectionModeExplicit, []string{"Attachment", "Offer"})
 	assertServiceSelection(t, services["marketplacepublisher"], true, SelectionModeExplicit, []string{"Artifact", "Listing", "ListingRevision", "ListingRevisionAttachment", "ListingRevisionNote", "ListingRevisionPackage", "Term", "TermVersion"})
+	assertServiceSelection(t, services["mediaservices"], true, SelectionModeExplicit, []string{"MediaAsset"})
 	assertServiceSelection(t, services["operatoraccesscontrol"], true, SelectionModeExplicit, []string{"OperatorControl", "OperatorControlAssignment"})
 	assertServiceSelection(t, services["opsi"], true, SelectionModeExplicit, []string{"AwrHub", "AwrHubSource", "ChargebackPlan", "ChargebackPlanReport", "DatabaseInsight", "EnterpriseManagerBridge", "ExadataInsight", "HostInsight", "NewsReport", "OperationsInsightsPrivateEndpoint", "OperationsInsightsWarehouse", "OperationsInsightsWarehouseUser", "OpsiConfiguration"})
 	assertServiceSelection(t, services["optimizer"], true, SelectionModeExplicit, []string{"Profile"})
@@ -2193,6 +2196,7 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 		"managementdashboard":         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"marketplaceprivateoffer":     {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"marketplacepublisher":        {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"mediaservices":               {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"operatoraccesscontrol":       {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"opsi":                        {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"optimizer":                   {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},

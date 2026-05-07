@@ -1,0 +1,438 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: (devel)
+  name: mediaassets.mediaservices.oracle.com
+spec:
+  group: mediaservices.oracle.com
+  names:
+    kind: MediaAsset
+    listKind: MediaAssetList
+    plural: mediaassets
+    singular: mediaasset
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the MediaAsset
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the MediaAsset
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: MediaAsset is the Schema for the mediaassets API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: MediaAssetSpec defines the desired state of MediaAsset.
+            properties:
+              bucketName:
+                description: The name of the object storage bucket where this asset
+                  is located.
+                type: string
+              compartmentId:
+                description: Compartment Identifier.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              displayName:
+                description: Display name for the Media Asset. Does not have to be
+                  unique. Avoid entering confidential information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              locks:
+                description: Locks associated with this resource.
+                items:
+                  description: MediaAssetLock defines nested fields for MediaAsset.Lock.
+                  properties:
+                    compartmentId:
+                      description: The compartment ID of the lock.
+                      type: string
+                    message:
+                      description: |-
+                        A message added by the creator of the lock. This is typically used to give an
+                        indication of why the resource is locked.
+                      type: string
+                    relatedResourceId:
+                      description: The ID of the resource that is locking this resource.
+                        Indicates that deleting this resource will remove the lock.
+                      type: string
+                    timeCreated:
+                      description: When the lock was created.
+                      type: string
+                    type:
+                      description: Type of the lock.
+                      type: string
+                  required:
+                  - compartmentId
+                  - type
+                  type: object
+                type: array
+              masterMediaAssetId:
+                description: The ID of the senior most asset from which this asset
+                  is derived.
+                type: string
+              mediaAssetTags:
+                description: list of tags for the MediaAsset.
+                items:
+                  description: MediaAssetTag defines nested fields for MediaAsset.MediaAssetTag.
+                  properties:
+                    type:
+                      description: Type of the tag.
+                      type: string
+                    value:
+                      description: Tag of the MediaAsset.
+                      type: string
+                  required:
+                  - value
+                  type: object
+                type: array
+              mediaWorkflowJobId:
+                description: The ID of the MediaWorkflowJob used to produce this asset.
+                type: string
+              metadata:
+                description: List of Metadata.
+                items:
+                  description: MediaAssetMetadata defines nested fields for MediaAsset.Metadata.
+                  properties:
+                    metadata:
+                      description: JSON string containing the technial metadata for
+                        the media asset.
+                      type: string
+                  required:
+                  - metadata
+                  type: object
+                type: array
+              namespaceName:
+                description: The object storage namespace where this asset is located.
+                type: string
+              objectEtag:
+                description: eTag of the underlying object storage object.
+                type: string
+              objectName:
+                description: The object storage object name that identifies this asset.
+                type: string
+              parentMediaAssetId:
+                description: The ID of the parent asset from which this asset is derived.
+                type: string
+              segmentRangeEndIndex:
+                description: The end index for video segment files.
+                format: int64
+                type: integer
+              segmentRangeStartIndex:
+                description: The start index for video segment files.
+                format: int64
+                type: integer
+              sourceMediaWorkflowId:
+                description: The ID of the MediaWorkflow used to produce this asset.
+                type: string
+              sourceMediaWorkflowVersion:
+                description: The version of the MediaWorkflow used to produce this
+                  asset.
+                format: int64
+                type: integer
+              type:
+                description: The type of the media asset.
+                type: string
+            required:
+            - compartmentId
+            - type
+            type: object
+          status:
+            description: MediaAssetStatus defines the observed state of MediaAsset.
+            properties:
+              bucketName:
+                description: The name of the object storage bucket where this represented
+                  asset is located.
+                type: string
+              compartmentId:
+                description: The ID of the compartment containing the MediaAsset.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              displayName:
+                description: A user-friendly name. Does not have to be unique, and
+                  it's changeable. Avoid entering confidential information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              id:
+                description: Unique identifier that is immutable on creation.
+                type: string
+              lifecycleState:
+                description: The current state of the MediaAsset.
+                type: string
+              locks:
+                description: Locks associated with this resource.
+                items:
+                  description: MediaAssetLock defines nested fields for MediaAsset.Lock.
+                  properties:
+                    compartmentId:
+                      description: The compartment ID of the lock.
+                      type: string
+                    message:
+                      description: |-
+                        A message added by the creator of the lock. This is typically used to give an
+                        indication of why the resource is locked.
+                      type: string
+                    relatedResourceId:
+                      description: The ID of the resource that is locking this resource.
+                        Indicates that deleting this resource will remove the lock.
+                      type: string
+                    timeCreated:
+                      description: When the lock was created.
+                      type: string
+                    type:
+                      description: Type of the lock.
+                      type: string
+                  required:
+                  - compartmentId
+                  - type
+                  type: object
+                type: array
+              masterMediaAssetId:
+                description: The ID of the senior most asset from which this asset
+                  is derived.
+                type: string
+              mediaAssetTags:
+                description: List of tags for the MediaAsset.
+                items:
+                  description: MediaAssetTag defines nested fields for MediaAsset.MediaAssetTag.
+                  properties:
+                    type:
+                      description: Type of the tag.
+                      type: string
+                    value:
+                      description: Tag of the MediaAsset.
+                      type: string
+                  required:
+                  - value
+                  type: object
+                type: array
+              mediaWorkflowJobId:
+                description: The ID of the MediaWorkflowJob used to produce this asset.
+                type: string
+              metadata:
+                description: List of Metadata.
+                items:
+                  description: MediaAssetMetadata defines nested fields for MediaAsset.Metadata.
+                  properties:
+                    metadata:
+                      description: JSON string containing the technial metadata for
+                        the media asset.
+                      type: string
+                  required:
+                  - metadata
+                  type: object
+                type: array
+              namespaceName:
+                description: The object storage namespace where this asset is located.
+                type: string
+              objectEtag:
+                description: eTag of the underlying object storage object.
+                type: string
+              objectName:
+                description: The object storage object name that identifies this asset.
+                type: string
+              parentMediaAssetId:
+                description: The ID of the parent asset from which this asset is derived.
+                type: string
+              segmentRangeEndIndex:
+                description: The end index of video segment files.
+                format: int64
+                type: integer
+              segmentRangeStartIndex:
+                description: The start index for video segment files.
+                format: int64
+                type: integer
+              sourceMediaWorkflowId:
+                description: The ID of the MediaWorkflow used to produce this asset.
+                type: string
+              sourceMediaWorkflowVersion:
+                description: The version of the MediaWorkflow used to produce this
+                  asset.
+                format: int64
+                type: integer
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of system tag keys. These predefined keys are scoped to namespaces.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              timeCreated:
+                description: The time when the MediaAsset was created. An RFC3339
+                  formatted datetime string.
+                type: string
+              timeUpdated:
+                description: The time when the MediaAsset was updated. An RFC3339
+                  formatted datetime string.
+                type: string
+              type:
+                description: The type of the media asset.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

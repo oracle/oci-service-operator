@@ -1,0 +1,157 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "mediaservices",
+  "slug": "mediaasset",
+  "kind": "MediaAsset",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_media_services_media_asset",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateMediaAsset",
+        "requestType": "mediaservices.CreateMediaAssetRequest",
+        "responseType": "mediaservices.CreateMediaAssetResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetMediaAsset",
+        "requestType": "mediaservices.GetMediaAssetRequest",
+        "responseType": "mediaservices.GetMediaAssetResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListMediaAssets",
+        "requestType": "mediaservices.ListMediaAssetsRequest",
+        "responseType": "mediaservices.ListMediaAssetsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeMediaAssetCompartment",
+        "requestType": "mediaservices.ChangeMediaAssetCompartmentRequest",
+        "responseType": "mediaservices.ChangeMediaAssetCompartmentResponse"
+      },
+      {
+        "operation": "UpdateMediaAsset",
+        "requestType": "mediaservices.UpdateMediaAssetRequest",
+        "responseType": "mediaservices.UpdateMediaAssetResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteMediaAsset",
+        "requestType": "mediaservices.DeleteMediaAssetRequest",
+        "responseType": "mediaservices.DeleteMediaAssetResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "defined_tags",
+      "display_name",
+      "freeform_tags",
+      "master_media_asset_id",
+      "media_asset_tags",
+      "metadata",
+      "parent_media_asset_id",
+      "type"
+    ],
+    "forceNew": [
+      "bucket_name",
+      "compartment_id",
+      "media_workflow_job_id",
+      "namespace_name",
+      "object_etag",
+      "object_name",
+      "segment_range_end_index",
+      "segment_range_start_index",
+      "source_media_workflow_id",
+      "source_media_workflow_version"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_media_services_media_assets",
+    "collectionField": "media_assets",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "type",
+      "bucket_name",
+      "object_name",
+      "media_workflow_job_id",
+      "source_media_workflow_id",
+      "source_media_workflow_version",
+      "parent_media_asset_id",
+      "master_media_asset_id"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/mediaservices/mediaasset/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/mediaservices/mediaasset/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "delete-confirmation",
+      "lifecycle-classification",
+      "list-lookup",
+      "mutation-policy",
+      "secret-output"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: CreateMediaAsset, GetMediaAsset, ListMediaAssets, UpdateMediaAsset, DeleteMediaAsset, and ChangeMediaAssetCompartment are present in v65.110.0. Create, get, and update return a MediaAsset body directly, while delete returns headers only and no opc-work-request-id. The lifecycle enum is CREATING, UPDATING, ACTIVE, DELETING, DELETED, and FAILED.",
+    "Pinned provider coverage is unconfirmed. formal/sources.lock still points at github.com/oracle/terraform-provider-oci@eb653febb1bab4cc6650a96d404a8baf36fdf671, but the accessible provider inventory did not expose a matching MediaAsset resource or data source. The providerResource and datasource names therefore stay provisional OCI-style placeholders so generator-owned registry artifacts can derive stable links without claiming verified provider coverage.",
+    "Repo-authored runtime contract stays narrower than the imported SDK surface: only UpdateMediaAssetDetails fields displayName, type, parentMediaAssetId, masterMediaAssetId, metadata, mediaAssetTags, freeformTags, and definedTags reconcile in place. ChangeMediaAssetCompartment stays out of scope, while compartmentId, source workflow lineage, object-location fields, segment ranges, and locks remain create-only drift.",
+    "Repo-authored bind-versus-create stays explicit: pre-create lookup is skipped when the spec has no identity stronger than compartmentId plus type, or when mediaWorkflowJobId or sourceMediaWorkflowVersion is set without sourceMediaWorkflowId. When lookup runs, it requires an exact unique match on compartmentId, type, and any provided displayName, bucket/object location, workflow lineage, and parent/master IDs, restricted to reusable ACTIVE, CREATING, or UPDATING candidates.",
+    "Delete policy is explicit in repo-authored semantics: the runtime calls DeleteMediaAsset without deleteMode or isLockOverride, so hierarchical delete modes DELETE_CHILDREN and DELETE_DERIVATIONS remain out of scope for the published controller-backed surface. Delete confirmation relies on follow-up GetMediaAsset rereads until OCI reports DELETED or NotFound.",
+    "Matching create-time locks are normalized out of post-create parity checks by ignoring server-populated timeCreated metadata. Changing the requested locks after create remains explicit unsupported drift rather than an implicit add/remove lock flow."
+  ]
+}

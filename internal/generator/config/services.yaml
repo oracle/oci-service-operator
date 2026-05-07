@@ -3317,6 +3317,36 @@ services:
             runtime: generatedruntime
             formalClassification: lifecycle
 
+  - service: mediaservices
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/mediaservices
+    group: mediaservices
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - MediaAsset
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: MediaAsset
+          formalSpec: mediaasset
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+          serviceManager:
+            packagePath: mediaservices/mediaasset
+
   - service: mysql
     sdkPackage: github.com/oracle/oci-go-sdk/v65/mysql
     group: mysql
