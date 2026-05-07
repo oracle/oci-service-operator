@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "mediaservices",
+  "kind": "MediaAsset",
+  "formalSlug": "mediaasset",
+  "providerResource": "oci_media_services_media_asset",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/media_services_media_asset",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/media_services_media_asset",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/mediaservices/mediaasset/page.html",
+  "bodySHA256": "042e2b26038aad9ad8b086ffbcb4a22579914219573ed56bfd0e7d03ce43b910",
+  "bodyBytes": 2215,
+  "fixtureBodyPath": "7.22.0/mediaservices/mediaasset/page.html"
+}

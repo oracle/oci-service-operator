@@ -1,0 +1,120 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title State Machine - mediaservices/MediaAsset
+skinparam state {
+  backgroundColor #f8fafc
+  borderColor #0f172a
+  fontColor #0f172a
+  startColor #1d4ed8
+  endColor #0f172a
+}
+left to right direction
+hide empty description
+state "Observe" as observe
+state "EvaluateReady" as evaluate_ready
+state "Ready" as ready
+state "Retryable" as retryable
+state "Failed" as failed
+observe : read spec, tracked status, delete intent,\nand current OCI lifecycle
+state "ResolveByLookup" as resolve_by_lookup
+state "RejectUnsupportedDrift" as reject_unsupported_drift
+state "ApplyUpdate" as apply_update
+state "DeletePending" as delete_pending
+state "Deleted" as deleted
+state "DeleteCleanupBlocked" as delete_cleanup_blocked
+[*] --> observe : CreateMediaAsset
+observe --> resolve_by_lookup : tracked identity missing
+resolve_by_lookup --> evaluate_ready : lookup or create reaches\nACTIVE
+resolve_by_lookup --> retryable : OCI state in CREATING,\nUPDATING, DELETING
+resolve_by_lookup --> failed : unresolved OCI error or non-success state
+observe --> evaluate_ready : OCI state in ACTIVE
+observe --> retryable : OCI state in CREATING,\nUPDATING, DELETING
+observe --> failed : unresolved OCI error or non-success state
+evaluate_ready --> reject_unsupported_drift : force-new or conflicting\ndrift detected
+reject_unsupported_drift --> ready : wait for spec or live state change
+evaluate_ready --> apply_update : supported mutable drift for\ndefinedTags, displayName,\nfreeformTags (+5 more)
+apply_update --> ready : update path completes
+evaluate_ready --> ready : no supported drift remains
+ready --> ready : no supported drift remains
+retryable --> retryable : OCI remains retryable
+failed --> failed : OCI remains terminal
+ready --> delete_pending : delete requested
+retryable --> delete_pending : delete requested
+failed --> delete_pending : delete requested
+delete_pending --> delete_cleanup_blocked : cleanup or finalizer release remains blocked
+delete_cleanup_blocked --> deleted : retry delete completion until allowed
+deleted --> deleted : terminal stutter
+note right of ready
+shared diagram:
+shared/diagrams/shared-controller-state-machine.svg
+Start from the shared controller phase model and
+specialize imported provider states, delete
+targets, and failure exits here.
+archetype batch: Generated service-manager
+controllers map provider states into the shared
+controller phases with explicit finalizer and
+requeue policies.
+service: mediaservices
+slug: mediaasset
+kind: MediaAsset
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: provisioning, updating, terminating
+provider states: create CREATING; update
+UPDATING; delete DELETING
+supported drift: definedTags, displayName,
+freeformTags, masterMediaAssetId (+4 more)
+reject before mutate: force-new fields
+bucketName, compartmentId, mediaWorkflowJobId,
+namespaceName (+6 more)
+create-only fields: locks
+list lookup: oci_media_services_media_assets
+filters bucketName, compartmentId, displayName,
+masterMediaAssetId (+6 more); skip pre-create
+reuse when the spec has no identity stronger
+than compartmentId plus type, or when
+mediaWorkflowJobId/sourceMediaWorkflowVersion is
+set without sourceMediaWorkflowId; otherwise
+require an exact unique match on compartmentId,
+type, and any provided displayName,
+bucket/object location, workflow lineage, and
+parent/master IDs in ACTIVE, CREATING, or
+UPDATING
+conflicts: none
+open gaps: none
+Reviewed lifecycle mapping treats CREATING as
+provisioning, UPDATING as updating, ACTIVE as
+success, FAILED as terminal without requeue, and
+DELETING as terminating until follow-up
+observation reaches DELETED or OCI NotFound.
+Create, get, and update return the MediaAsset
+body directly, while DeleteMediaAsset returns
+only opc-request-id. The reviewed runtime
+therefore stays lifecycle-based and does not
+publish work-request polling behavior.
+The published delete contract is intentionally
+narrow: DeleteMediaAsset is called without
+deleteMode or isLockOverride, so hierarchical
+delete modes DELETE_CHILDREN and
+DELETE_DERIVATIONS remain out of scope for the
+controller-backed surface.
+Matching create-time locks are normalized by
+ignoring OCI-populated timeCreated metadata so
+steady-state reconcile does not fail after a
+successful create that requested locks.
+end note
+note right of delete_pending
+delete policy: required
+delete observe: GetMediaAsset or ListMediaAssets
+delete targets: DELETED
+end note
+@enduml

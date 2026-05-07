@@ -738,6 +738,20 @@ packages:
     customerVisible: false
     guidePath: docs/installation.md
 
+  - package: mediaservices
+    displayName: Media Services
+    summary: Manage OCI Media Services media assets from Kubernetes with a reviewed controller-backed runtime.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to MediaAsset while workflow, packaging, and attachment families stay unpublished.
+      - The published runtime keeps lifecycle-based CRUD semantics, guarded pre-create reuse on exact identity subsets, and an explicit delete contract that omits hierarchical delete modes.
+    kindOverrides:
+      - group: mediaservices
+        kind: MediaAsset
+        summary: Manage OCI Media Services media assets.
+
   - package: monitoring
     displayName: Monitoring
     summary: Manage OCI Monitoring resources from Kubernetes.
