@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "wlms",
+  "slug": "wlsdomain",
+  "kind": "WlsDomain",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_wlms_wls_domain",
+  "operations": {
+    "create": [],
+    "get": [
+      {
+        "operation": "GetWlsDomain",
+        "requestType": "wlms.GetWlsDomainRequest",
+        "responseType": "wlms.GetWlsDomainResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListWlsDomains",
+        "requestType": "wlms.ListWlsDomainsRequest",
+        "responseType": "wlms.ListWlsDomainsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeWlsDomainCompartment",
+        "requestType": "wlms.ChangeWlsDomainCompartmentRequest",
+        "responseType": "wlms.ChangeWlsDomainCompartmentResponse"
+      },
+      {
+        "operation": "UpdateWlsDomain",
+        "requestType": "wlms.UpdateWlsDomainRequest",
+        "responseType": "wlms.UpdateWlsDomainResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteWlsDomain",
+        "requestType": "wlms.DeleteWlsDomainRequest",
+        "responseType": "wlms.DeleteWlsDomainResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "configuration",
+      "defined_tags",
+      "freeform_tags"
+    ],
+    "forceNew": [
+      "compartment_id",
+      "display_name",
+      "id",
+      "middleware_type",
+      "weblogic_version"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED",
+      "NOT_FOUND"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_wlms_wls_domains",
+    "collectionField": "wls_domains",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "id",
+      "middleware_type",
+      "weblogic_version"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/wlms/wlsdomain/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/wlms/wlsdomain/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "delete-confirmation",
+      "lifecycle-classification",
+      "list-lookup",
+      "mutation-policy",
+      "status-projection",
+      "secret-output"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: GetWlsDomain, ListWlsDomains, UpdateWlsDomain, DeleteWlsDomain, and ChangeWlsDomainCompartment are present in v65.110.0. No CreateWlsDomain operation is exposed, DeleteWlsDomain returns only opc-request-id, and lifecycle states are ACTIVE, CREATING, DELETING, DELETED, FAILED, NEEDS_ATTENTION, and UPDATING.",
+    "Pinned provider coverage is data-source-only at this revision. The accessible provider inventory exposed singular and plural WlsDomain data sources but no matching managed resource, so providerResource stays a provisional OCI-style placeholder aligned with the singular data-source name while datasource records the verified plural lookup surface.",
+    "Repo-authored runtime contract is narrower than the visible SDK surface: the published kind is manage-existing only, binds by explicit id or exact compartmentId plus displayName with optional middlewareType and weblogicVersion narrowing, updates only configuration and tag fields, and keeps ChangeWlsDomainCompartment plus restart or patch helpers out of scope.",
+    "Because the visible WLMS mutation responses do not expose work-request identifiers, the reviewed generatedruntime client relies on GetWlsDomain and ListWlsDomains lifecycle rereads plus confirm-delete observation instead of service-local work-request polling."
+  ]
+}

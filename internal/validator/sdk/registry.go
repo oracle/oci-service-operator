@@ -94,6 +94,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/waa"
 	"github.com/oracle/oci-go-sdk/v65/waas"
 	"github.com/oracle/oci-go-sdk/v65/waf"
+	"github.com/oracle/oci-go-sdk/v65/wlms"
 )
 
 const (
@@ -1232,6 +1233,12 @@ var seedTargets = []Target{
 	newTarget("waf", "WebAppFirewallPolicy", reflect.TypeOf(waf.WebAppFirewallPolicy{})),
 	newTarget("waf", "WebAppFirewallPolicyCollection", reflect.TypeOf(waf.WebAppFirewallPolicyCollection{})),
 	newTarget("waf", "WebAppFirewallPolicySummary", reflect.TypeOf(waf.WebAppFirewallPolicySummary{})),
+
+	// Wlms CRD support
+	newTarget("wlms", "UpdateWlsDomainDetails", reflect.TypeOf(wlms.UpdateWlsDomainDetails{})),
+	newTarget("wlms", "WlsDomain", reflect.TypeOf(wlms.WlsDomain{})),
+	newTarget("wlms", "WlsDomainCollection", reflect.TypeOf(wlms.WlsDomainCollection{})),
+	newTarget("wlms", "WlsDomainSummary", reflect.TypeOf(wlms.WlsDomainSummary{})),
 }
 
 var interfaceImplementations = map[string][]reflect.Type{

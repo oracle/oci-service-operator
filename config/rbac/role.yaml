@@ -2716,3 +2716,29 @@ rules:
   - get
   - patch
   - update
+- apiGroups:
+  - wlms.oracle.com
+  resources:
+  - wlsdomains
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - wlms.oracle.com
+  resources:
+  - wlsdomains/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - wlms.oracle.com
+  resources:
+  - wlsdomains/status
+  verbs:
+  - get
+  - patch
+  - update

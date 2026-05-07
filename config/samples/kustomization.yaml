@@ -224,4 +224,5 @@ resources:
 - opa_v1beta1_opainstance.yaml
 - gdp_v1beta1_gdppipeline.yaml
 - vbsinst_v1beta1_vbsinstance.yaml
+- wlms_v1beta1_wlsdomain.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

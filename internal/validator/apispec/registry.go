@@ -93,6 +93,7 @@ import (
 	waav1beta1 "github.com/oracle/oci-service-operator/api/waa/v1beta1"
 	waasv1beta1 "github.com/oracle/oci-service-operator/api/waas/v1beta1"
 	wafv1beta1 "github.com/oracle/oci-service-operator/api/waf/v1beta1"
+	wlmsv1beta1 "github.com/oracle/oci-service-operator/api/wlms/v1beta1"
 )
 
 type SDKMapping struct {
@@ -4645,6 +4646,25 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "waf.WebAppFirewallPolicySummary",
+			},
+		},
+	},
+	{
+		Name:       "WlmsWlsDomain",
+		SpecType:   reflect.TypeOf(wlmsv1beta1.WlsDomainSpec{}),
+		StatusType: reflect.TypeOf(wlmsv1beta1.WlsDomainStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "wlms.UpdateWlsDomainDetails",
+			},
+			{
+				SDKStruct: "wlms.WlsDomain",
+			},
+			{
+				SDKStruct: "wlms.WlsDomainCollection",
+			},
+			{
+				SDKStruct: "wlms.WlsDomainSummary",
 			},
 		},
 	},

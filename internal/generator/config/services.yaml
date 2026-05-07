@@ -4952,6 +4952,100 @@ services:
       webhooks:
         strategy: none
 
+  - service: wlms
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/wlms
+    group: wlms
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - WlsDomain
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: WlsDomain
+          formalSpec: wlsdomain
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+          serviceManager:
+            packagePath: wlms/wlsdomain
+          specFields:
+            - name: Configuration
+              type: map[string]shared.JSONValue
+              tag: 'json:"configuration,omitempty"'
+              comments:
+                - Desired in-place WLMS configuration for an existing bound WebLogic domain.
+                - Use the WLMS update field names such as `isPatchEnabled`, `isRollbackOnFailure`, `serversShutdownTimeout`, and the `*ScriptPath` keys.
+                - Omit this field to leave the current OCI configuration unchanged.
+              markers:
+                - +kubebuilder:validation:Optional
+            - name: Id
+              type: string
+              tag: 'json:"id,omitempty"'
+              comments:
+                - The OCI identifier of the existing WebLogic domain to bind directly.
+              markers:
+                - +kubebuilder:validation:Optional
+            - name: CompartmentId
+              type: string
+              tag: 'json:"compartmentId,omitempty"'
+              comments:
+                - The compartment containing the existing WebLogic domain when binding by list lookup.
+                - Provide this together with `displayName` when `id` is not set.
+              markers:
+                - +kubebuilder:validation:Optional
+            - name: DisplayName
+              type: string
+              tag: 'json:"displayName,omitempty"'
+              comments:
+                - The display name of the existing WebLogic domain when binding by list lookup.
+                - Provide this together with `compartmentId` when `id` is not set.
+              markers:
+                - +kubebuilder:validation:Optional
+            - name: MiddlewareType
+              type: string
+              tag: 'json:"middlewareType,omitempty"'
+              comments:
+                - Optional exact-match filter used to narrow list-based binding to an existing domain.
+                - Supported values are `WLS` and `FMW`.
+              markers:
+                - +kubebuilder:validation:Optional
+            - name: WeblogicVersion
+              type: string
+              tag: 'json:"weblogicVersion,omitempty"'
+              comments:
+                - Optional exact-match filter used to narrow list-based binding to an existing domain.
+                - Supported values include `v12.2.1.4`, `v14.1.1.0`, and `v14.1.2.0`.
+              markers:
+                - +kubebuilder:validation:Optional
+          sample:
+            body: |-
+              #
+              # WLMS does not expose CreateWlsDomain in this SDK pin.
+              # This sample binds an existing WlsDomain by OCID and then manages
+              # supported in-place updates and delete.
+              #
+              apiVersion: wlms.oracle.com/v1beta1
+              kind: WlsDomain
+              metadata:
+                name: wlsdomain-sample
+              spec:
+                id: ocid1.wlsdomain.oc1..exampleuniqueID
+                configuration:
+                  isPatchEnabled: true
+
   - service: vault
     sdkPackage: github.com/oracle/oci-go-sdk/v65/vault
     group: vault

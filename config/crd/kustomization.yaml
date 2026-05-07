@@ -232,6 +232,7 @@ resources:
 - bases/waf.oracle.com_networkaddresslists.yaml
 - bases/waf.oracle.com_webappfirewallpolicies.yaml
 - bases/waf.oracle.com_webappfirewalls.yaml
+- bases/wlms.oracle.com_wlsdomains.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 
 # patches:

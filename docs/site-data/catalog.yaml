@@ -1053,3 +1053,17 @@ packages:
     supportStatus: preview
     customerVisible: false
     guidePath: docs/installation.md
+
+  - package: wlms
+    displayName: WebLogic Management Service
+    summary: Manage OCI WebLogic Management Service domains from Kubernetes with a reviewed manage-existing controller-backed runtime.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to WlsDomain while AgreementRecord, Configuration, ManagedInstance, WlsDomainCredential, and other WLMS helper families stay unpublished.
+      - The published runtime is manage-existing only at this SDK pin because WLMS does not expose CreateWlsDomain; bind by `id` or a unique `compartmentId` plus `displayName`, then reconcile configuration and tag updates with confirm-delete observation.
+    kindOverrides:
+      - group: wlms
+        kind: WlsDomain
+        summary: Manage OCI WebLogic domains already onboarded into OCI WebLogic Management Service.
