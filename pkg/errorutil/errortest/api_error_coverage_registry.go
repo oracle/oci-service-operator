@@ -923,6 +923,21 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 			"PrivateApplication",
 			"ServiceCatalog",
 		),
+		map[string]APIErrorCoverageRegistration{
+			resourceKey("servicemanagerproxy", "ServiceEnvironment"): {
+				Resource: APIErrorCoverageResource{
+					Service: "servicemanagerproxy",
+					Group:   "servicemanagerproxy",
+					Version: apiErrorCoverageDefaultVersion,
+					Kind:    "ServiceEnvironment",
+				},
+				Family:                     APIErrorCoverageFamilyGeneratedRuntimePlain,
+				SupportedOperations:        []Operation{OperationRead},
+				DeleteNotFoundSemantics:    "delete is Kubernetes-local only; the published ServiceEnvironment contract does not issue OCI delete requests",
+				RetryableConflictSemantics: "update and delete conflicts are not applicable because the published ServiceEnvironment contract is observe-only",
+				Deviation:                  "A handwritten runtime wrapper keeps ListServiceEnvironments in a confirmation-only role, rewrites entitlement-status projection after generatedruntime reads, and releases the Kubernetes finalizer locally without invoking OCI mutation APIs.",
+			},
+		},
 		reviewedRegistrationSet(
 			"email",
 			"email",

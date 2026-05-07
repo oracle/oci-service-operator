@@ -1,0 +1,116 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Activity - servicemanagerproxy/ServiceEnvironment
+skinparam activity {
+  backgroundColor #f8fafc
+  borderColor #0f172a
+  fontColor #0f172a
+  diamondBackgroundColor #e2e8f0
+  diamondBorderColor #1d4ed8
+  diamondFontColor #0f172a
+  startColor #1d4ed8
+  endColor #0f172a
+  barColor #1d4ed8
+}
+start
+partition "Observe and Bind" {
+:Start from shared flow\nshared/diagrams/shared-reconcile-activity.svg;
+:Read desired ServiceEnvironment spec, tracked\nstatus, and delete intent;
+if ("Tracked or explicit OCI identity present?") then (yes)
+:Get the current OCI resource via\nGetServiceEnvironment;
+else (no)
+:Resolve an existing OCI resource through\nListServiceEnvironments using filters\ncompartment_id, service_environment_id;
+:Persist the resolved or created OCI identity\ninto status;
+endif
+}
+if ("Delete requested?") then (yes)
+partition "Delete" {
+:Delete path is not represented by imported\nprovider facts;
+:Confirm deletion via GetServiceEnvironment or\nListServiceEnvironments until OCI reaches\nLOCAL_DELETE;
+:Allow best-effort completion without finalizer\nretention;
+}
+stop
+else (no)
+partition "Lifecycle Classification" {
+if ("OCI state in retryable set?") then (yes)
+:Request requeue while OCI remains in\nINITIALIZED, BEGIN_ACTIVATION,\nBEGIN_SOFT_TERMINATION, BEGIN_TERMINATION (+10\nmore);
+stop
+endif
+if ("OCI state is outside success targets?") then (yes)
+:Return an unsuccessful reconcile result until\nOCI reaches ACTIVE, SOFT_TERMINATED, CANCELED,\nTERMINATED (+6 more);
+stop
+endif
+}
+partition "Ready and Drift Handling" {
+:Compare live OCI state against the imported\nfield surface;
+if ("Force-new or conflicting drift detected?") then (yes)
+:Reject drift before OCI mutation for force-new\nfields compartment_id, service_environment_id;
+stop
+endif
+:Return success for the ACTIVE,\nSOFT_TERMINATED, CANCELED, TERMINATED (+6\nmore) success state;
+:Project required status and finalizer policy\nnone;
+:Requeue on provisioning, updating;
+}
+endif
+stop
+note right
+shared diagram:
+shared/diagrams/shared-reconcile-activity.svg
+Start from the shared reconcile activity and
+specialize provider-backed CRUD, wait, and
+status-projection details here.
+Controller-local activity diagrams add
+list-lookup hints, secret policies, delete
+handling, and open formal gaps.
+archetype batch: Generated service-manager
+controllers specialize the shared reconcile path
+with formal runtime ownership.
+service: servicemanagerproxy
+slug: serviceenvironment
+kind: ServiceEnvironment
+archetype: generated-service-manager
+status/finalizer: required / none
+requeue: provisioning, updating
+provider states: create INITIALIZED,
+BEGIN_ACTIVATION; update BEGIN_SOFT_TERMINATION,
+BEGIN_TERMINATION, BEGIN_DISABLING,
+BEGIN_ENABLING (+8 more); delete none
+supported drift: none
+reject before mutate: force-new fields
+compartment_id, service_environment_id
+create-only fields: none
+list lookup:
+oci_service_manager_proxy_service_environments
+filters compartment_id, service_environment_id
+conflicts: none
+open gaps: none
+Service Manager Proxy exposes
+GetServiceEnvironment and
+ListServiceEnvironments only in the pinned SDK,
+so the published runtime is bind-existing and
+observe-only.
+Bind identity is explicit: reconcile requires
+compartmentId and serviceEnvironmentId, tracks
+the returned Service Manager identifier in
+status, and uses ListServiceEnvironments only to
+confirm absence after a reread no longer finds
+the tracked environment.
+No OCI create, update, or delete operation is
+published. The controller treats
+serviceEnvironmentId and compartmentId as
+bind-only identity and performs Kubernetes-local
+finalizer cleanup on delete.
+Entitlement transitions beginning with BEGIN_
+requeue, stable entitlement states settle
+success, and FAILED_* plus TRA_UNKNOWN remain
+terminal failures.
+end note
+@enduml

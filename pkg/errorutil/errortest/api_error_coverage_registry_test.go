@@ -14,10 +14,10 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	}
 
 	byKey := inventoryByKey(inventory)
-	if got, want := len(inventory), 349; got != want {
+	if got, want := len(inventory), 350; got != want {
 		t.Fatalf("len(inventory) = %d, want %d", got, want)
 	}
-	if got, want := countRegistrations(inventory), 224; got != want {
+	if got, want := countRegistrations(inventory), 225; got != want {
 		t.Fatalf("registration inventory count = %d, want %d", got, want)
 	}
 	if got, want := countExceptions(inventory), 125; got != want {
@@ -60,6 +60,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventorySelectionSource(t, byKey, "opa/OpaInstance", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "psa/PrivateServiceAccess", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "queue/Queue", "selection.includeKinds")
+	assertInventorySelectionSource(t, byKey, "servicemanagerproxy/ServiceEnvironment", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "usageapi/Query", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "vbsinst/VbsInstance", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "visualbuilder/VbInstance", "selection.includeKinds")
@@ -204,6 +205,7 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedFamily(t, "psql/DbSystem", APIErrorCoverageFamilyLegacyAdapter)
 	assertReviewedFamily(t, "queue/Queue", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "redis/RedisCluster", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
+	assertReviewedFamily(t, "servicemanagerproxy/ServiceEnvironment", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "streaming/Stream", APIErrorCoverageFamilyGeneratedRuntimeFollowUp)
 	assertReviewedFamily(t, "usageapi/Query", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "vbsinst/VbsInstance", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)

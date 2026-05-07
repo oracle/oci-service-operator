@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay",
+  "contractVersion": "v1alpha1",
+  "metadata": {
+    "providerSourceRef": "terraform-provider-oci",
+    "providerRevision": "eb653febb1bab4cc6650a96d404a8baf36fdf671",
+    "terraformDocsVersion": "7.22.0"
+  },
+  "sourceContract": {
+    "astPrimaryFacts": [
+      "forceNew",
+      "conflictsWith",
+      "lifecycle",
+      "hooks",
+      "crud",
+      "listLookup"
+    ],
+    "astMutableAlias": "updateCandidate",
+    "docsOverlayScope": "terraform-argument-reference-for-ast-update-candidate-fields",
+    "docsEvidenceSource": "terraform-argument-reference"
+  },
+  "resource": {
+    "service": "servicemanagerproxy",
+    "kind": "ServiceEnvironment",
+    "formalSlug": "serviceenvironment",
+    "providerResource": "oci_service_manager_proxy_service_environment",
+    "repoAuthoredSpecPath": "controllers/servicemanagerproxy/serviceenvironment/spec.cfg",
+    "formalImportPath": "imports/servicemanagerproxy/serviceenvironment.json"
+  },
+  "fields": [
+    {
+      "astFieldPath": "compartmentId",
+      "terraformFieldPath": "compartmentId",
+      "canonicalJoinKey": "compartmentId",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "notUpdateCandidate",
+        "forceNew": true,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "replacementRequired",
+        "finalPolicy": "replacementRequired"
+      },
+      "provenance": {
+        "formalImportPath": "imports/servicemanagerproxy/serviceenvironment.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.forceNew",
+        "terraformDocsPage": "service_manager_proxy_service_environment",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "serviceEnvironmentId",
+      "terraformFieldPath": "serviceEnvironmentId",
+      "canonicalJoinKey": "serviceEnvironmentId",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "notUpdateCandidate",
+        "forceNew": true,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "replacementRequired",
+        "finalPolicy": "replacementRequired"
+      },
+      "provenance": {
+        "formalImportPath": "imports/servicemanagerproxy/serviceenvironment.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.forceNew",
+        "terraformDocsPage": "service_manager_proxy_service_environment",
+        "terraformDocsSection": "Argument Reference"
+      }
+    }
+  ]
+}

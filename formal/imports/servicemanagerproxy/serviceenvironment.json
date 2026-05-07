@@ -1,0 +1,124 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "servicemanagerproxy",
+  "slug": "serviceenvironment",
+  "kind": "ServiceEnvironment",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_service_manager_proxy_service_environment",
+  "operations": {
+    "create": [],
+    "get": [
+      {
+        "operation": "GetServiceEnvironment",
+        "requestType": "servicemanagerproxy.GetServiceEnvironmentRequest",
+        "responseType": "servicemanagerproxy.GetServiceEnvironmentResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListServiceEnvironments",
+        "requestType": "servicemanagerproxy.ListServiceEnvironmentsRequest",
+        "responseType": "servicemanagerproxy.ListServiceEnvironmentsResponse"
+      }
+    ],
+    "update": [],
+    "delete": []
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "INITIALIZED",
+        "BEGIN_ACTIVATION"
+      ],
+      "target": [
+        "ACTIVE",
+        "SOFT_TERMINATED",
+        "CANCELED",
+        "TERMINATED",
+        "DISABLED",
+        "SUSPENDED",
+        "LOCKED_RELOCATION",
+        "RELOCATED",
+        "UNLOCKED_RELOCATION",
+        "ACCESS_DISABLED"
+      ]
+    },
+    "update": {
+      "pending": [
+        "BEGIN_SOFT_TERMINATION",
+        "BEGIN_TERMINATION",
+        "BEGIN_DISABLING",
+        "BEGIN_ENABLING",
+        "BEGIN_MIGRATION",
+        "BEGIN_SUSPENSION",
+        "BEGIN_RESUMPTION",
+        "BEGIN_LOCK_RELOCATION",
+        "BEGIN_RELOCATION",
+        "BEGIN_UNLOCK_RELOCATION",
+        "BEGIN_DISABLING_ACCESS",
+        "BEGIN_ENABLING_ACCESS"
+      ],
+      "target": [
+        "ACTIVE",
+        "SOFT_TERMINATED",
+        "CANCELED",
+        "TERMINATED",
+        "DISABLED",
+        "SUSPENDED",
+        "LOCKED_RELOCATION",
+        "RELOCATED",
+        "UNLOCKED_RELOCATION",
+        "ACCESS_DISABLED"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [],
+    "forceNew": [
+      "compartment_id",
+      "service_environment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [],
+    "update": [],
+    "delete": []
+  },
+  "deleteConfirmation": {
+    "pending": [],
+    "target": [
+      "LOCAL_DELETE"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_service_manager_proxy_service_environments",
+    "collectionField": "service_environments",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "service_environment_id"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/servicemanagerproxy/serviceenvironment/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/servicemanagerproxy/serviceenvironment/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "lifecycle-classification",
+      "list-lookup",
+      "mutation-policy",
+      "status-projection",
+      "delete-confirmation",
+      "secret-output"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: Service Manager Proxy exposes GetServiceEnvironment and ListServiceEnvironments only for ServiceEnvironment in v65.110.0. The request identity is serviceEnvironmentId plus compartmentId, and the returned identifiers are explicitly not OCIDs.",
+    "Pinned provider coverage is unconfirmed. formal/sources.lock still points at github.com/oracle/terraform-provider-oci@eb653febb1bab4cc6650a96d404a8baf36fdf671, but the accessible provider inventory did not expose a matching ServiceEnvironment resource or data source. The providerResource and datasource names therefore stay provisional OCI-style placeholders so generator-owned registry artifacts can derive stable links without claiming verified provider coverage.",
+    "Repo-authored runtime contract is narrower than the visible SDK surface: the published kind is bind-existing and observe-only, requires explicit serviceEnvironmentId plus compartmentId, projects state from GetServiceEnvironment, and uses ListServiceEnvironments only to confirm absence when rereads fail.",
+    "Repo-authored lifecycle classification stays explicit: BEGIN_* entitlement transitions requeue, stable entitlement states settle success while the raw SDK status remains visible on the CR, and FAILED_* plus TRA_UNKNOWN are terminal failures. Delete is Kubernetes-local cleanup only because the SDK exposes no delete operation."
+  ]
+}

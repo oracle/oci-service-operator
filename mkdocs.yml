@@ -216,6 +216,7 @@ nav:
           - sch.oracle.com/v1beta1: reference/api/sch/v1beta1/index.md
           - securityattribute.oracle.com/v1beta1: reference/api/securityattribute/v1beta1/index.md
           - servicecatalog.oracle.com/v1beta1: reference/api/servicecatalog/v1beta1/index.md
+          - servicemanagerproxy.oracle.com/v1beta1: reference/api/servicemanagerproxy/v1beta1/index.md
           - stackmonitoring.oracle.com/v1beta1: reference/api/stackmonitoring/v1beta1/index.md
           - streaming.oracle.com/v1beta1: reference/api/streaming/v1beta1/index.md
           - usageapi.oracle.com/v1beta1: reference/api/usageapi/v1beta1/index.md

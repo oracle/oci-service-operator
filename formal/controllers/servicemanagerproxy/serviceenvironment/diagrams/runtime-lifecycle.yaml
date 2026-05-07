@@ -1,0 +1,25 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: servicemanagerproxy
+slug: serviceenvironment
+kind: ServiceEnvironment
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - failed
+notes:
+  - Service Manager Proxy exposes GetServiceEnvironment and
+    ListServiceEnvironments only in the pinned SDK, so the published runtime is
+    bind-existing and observe-only.
+  - "Bind identity is explicit: reconcile requires compartmentId and
+    serviceEnvironmentId, tracks the returned Service Manager identifier in
+    status, and uses ListServiceEnvironments only to confirm absence after a
+    reread no longer finds the tracked environment."
+  - No OCI create, update, or delete operation is published. The controller
+    treats serviceEnvironmentId and compartmentId as bind-only identity and
+    performs Kubernetes-local finalizer cleanup on delete.
+  - Entitlement transitions beginning with BEGIN_ requeue, stable entitlement
+    states settle success, and FAILED_* plus TRA_UNKNOWN remain terminal
+    failures.

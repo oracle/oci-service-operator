@@ -207,6 +207,7 @@ resources:
 - bases/securityattribute.oracle.com_securityattributes.yaml
 - bases/servicecatalog.oracle.com_privateapplications.yaml
 - bases/servicecatalog.oracle.com_servicecatalogs.yaml
+- bases/servicemanagerproxy.oracle.com_serviceenvironments.yaml
 - bases/stackmonitoring.oracle.com_alarmconditions.yaml
 - bases/stackmonitoring.oracle.com_baselineablemetrics.yaml
 - bases/stackmonitoring.oracle.com_configs.yaml

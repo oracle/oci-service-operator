@@ -1,16 +1,16 @@
 {
   "aggregate": {
-    "specs": 224,
-    "mappings": 951,
-    "trackedMappings": 950,
+    "specs": 225,
+    "mappings": 954,
+    "trackedMappings": 953,
     "untrackedMappings": 1,
-    "presentFields": 9504,
-    "missingFields": 151,
-    "mandatoryPresentFields": 3387,
-    "mandatoryMissingFields": 130,
+    "presentFields": 9520,
+    "missingFields": 152,
+    "mandatoryPresentFields": 3397,
+    "mandatoryMissingFields": 131,
     "extraSpecFields": 810,
-    "overallCoveragePercent": 98.4360435007768,
-    "mandatoryCoveragePercent": 96.30366789877736
+    "overallCoveragePercent": 98.42845326716294,
+    "mandatoryCoveragePercent": 96.28684807256236
   },
   "services": [
     {
@@ -1188,6 +1188,20 @@
       "extraSpecFields": 3,
       "overallCoveragePercent": 97.05882352941177,
       "mandatoryCoveragePercent": 93.75
+    },
+    {
+      "service": "servicemanagerproxy",
+      "specs": 1,
+      "mappings": 3,
+      "trackedMappings": 3,
+      "untrackedMappings": 0,
+      "presentFields": 16,
+      "missingFields": 1,
+      "mandatoryPresentFields": 10,
+      "mandatoryMissingFields": 1,
+      "extraSpecFields": 0,
+      "overallCoveragePercent": 94.11764705882352,
+      "mandatoryCoveragePercent": 90.9090909090909
     },
     {
       "service": "stackmonitoring",

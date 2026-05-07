@@ -4274,6 +4274,74 @@ services:
       webhooks:
         strategy: none
 
+  - service: servicemanagerproxy
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/servicemanagerproxy
+    group: servicemanagerproxy
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - ServiceEnvironment
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: ServiceEnvironment
+          formalSpec: serviceenvironment
+          async:
+            strategy: none
+            runtime: generatedruntime
+            formalClassification: none
+          serviceManager:
+            packagePath: servicemanagerproxy/serviceenvironment
+          specFields:
+            - name: CompartmentId
+              type: string
+              tag: 'json:"compartmentId"'
+              comments:
+                - The OCID of the compartment that contains the existing Service Manager service environment.
+                - Required for direct bind and reread operations.
+              markers:
+                - +kubebuilder:validation:Required
+            - name: ServiceEnvironmentId
+              type: string
+              tag: 'json:"serviceEnvironmentId"'
+              comments:
+                - The Service Manager service environment identifier of the existing environment to bind.
+                - This value is not an OCID.
+              markers:
+                - +kubebuilder:validation:Required
+          statusFields:
+            - name: Status
+              type: string
+              tag: 'json:"sdkStatus,omitempty"'
+              comments:
+                - The raw entitlement registration status returned by Service Manager Proxy.
+          sample:
+            body: |-
+              #
+              # ServiceEnvironment is bind-existing and observe-only in this rollout.
+              # Provide the Service Manager service environment identifier and the
+              # compartment OCID for an existing environment. The serviceEnvironmentId
+              # is not an OCID.
+              #
+              apiVersion: servicemanagerproxy.oracle.com/v1beta1
+              kind: ServiceEnvironment
+              metadata:
+                name: serviceenvironment-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                serviceEnvironmentId: example-service-environment-id
+
   - service: streaming
     sdkPackage: github.com/oracle/oci-go-sdk/v65/streaming
     group: streaming

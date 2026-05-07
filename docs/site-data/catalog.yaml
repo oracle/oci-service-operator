@@ -1006,6 +1006,20 @@ packages:
         kind: ServiceCatalog
         summary: Manage OCI Service Catalog resources.
 
+  - package: servicemanagerproxy
+    displayName: Service Manager Proxy
+    summary: Observe existing OCI Service Manager service environments from Kubernetes with a bind-existing, controller-backed read-only contract.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to ServiceEnvironment and publishes only a bind-existing observe-only contract.
+      - The reviewed runtime uses GetServiceEnvironment for read projection, keeps ListServiceEnvironments in a confirmation-only role, and does not expose OCI create, update, or delete behavior.
+    kindOverrides:
+      - group: servicemanagerproxy
+        kind: ServiceEnvironment
+        summary: Observe existing OCI Service Manager service environments.
+
   - package: stackmonitoring
     displayName: Stack Monitoring
     summary: Manage OCI Stack Monitoring resources from Kubernetes.
