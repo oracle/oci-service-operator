@@ -713,6 +713,16 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 			),
 		},
 		map[string]APIErrorCoverageRegistration{
+			resourceKey("gdp", "GdpPipeline"): reviewedRegistration(
+				"gdp",
+				"gdp",
+				apiErrorCoverageDefaultVersion,
+				"GdpPipeline",
+				APIErrorCoverageFamilyGeneratedRuntimeWorkRequest,
+				deleteNotFoundReadback,
+				retryableConflictWorkRequest,
+				"Generatedruntime owns the GDP create/update/delete work-request lifecycle, while a handwritten hook layer narrows pre-create reuse to exact compartmentId/displayName/pipelineType/peeringRegion plus bucketDetails confirmation and resumes tracked identity through the service-specific gdpPipelineId list filter.",
+			),
 			resourceKey("generativeai", "DedicatedAiCluster"): reviewedRegistration(
 				"generativeai",
 				"generativeai",
