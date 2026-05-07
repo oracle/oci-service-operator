@@ -1180,6 +1180,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"lustrefilestorage",
 		"monitoring",
 		"marketplace",
+		"mngdmac",
 		"mysql",
 		"networkloadbalancer",
 		"nosql",
@@ -1281,6 +1282,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"lustrefilestorage",
 		"monitoring",
 		"marketplace",
+		"mngdmac",
 		"mysql",
 		"networkloadbalancer",
 		"nosql",
@@ -1376,6 +1378,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	assertServiceSelection(t, services["lustrefilestorage"], true, SelectionModeExplicit, []string{"LustreFileSystem"})
 	assertServiceSelection(t, services["monitoring"], true, SelectionModeExplicit, []string{"Alarm", "AlarmSuppression"})
 	assertServiceSelection(t, services["marketplace"], true, SelectionModeExplicit, []string{"AcceptedAgreement", "Publication"})
+	assertServiceSelection(t, services["mngdmac"], true, SelectionModeExplicit, []string{"MacOrder"})
 	assertServiceSelection(t, services["mysql"], true, SelectionModeExplicit, []string{"DbSystem"})
 	assertServiceSelection(t, services["networkloadbalancer"], true, SelectionModeExplicit, []string{"Backend", "BackendSet", "Listener", "NetworkLoadBalancer"})
 	assertServiceSelection(t, services["nosql"], true, SelectionModeExplicit, []string{"Table"})
@@ -2165,6 +2168,7 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 		"managedkafka":                {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"monitoring":                  {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"marketplace":                 {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"mngdmac":                     {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
 		"mysql":                       {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"networkloadbalancer":         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"nosql":                       {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},

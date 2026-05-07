@@ -63,6 +63,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/marketplace"
 	"github.com/oracle/oci-go-sdk/v65/marketplaceprivateoffer"
 	"github.com/oracle/oci-go-sdk/v65/marketplacepublisher"
+	"github.com/oracle/oci-go-sdk/v65/mngdmac"
 	"github.com/oracle/oci-go-sdk/v65/monitoring"
 	"github.com/oracle/oci-go-sdk/v65/mysql"
 	"github.com/oracle/oci-go-sdk/v65/networkloadbalancer"
@@ -944,6 +945,13 @@ var seedTargets = []Target{
 	newTarget("marketplacepublisher", "ListingRevisionSummary", reflect.TypeOf(marketplacepublisher.ListingRevisionSummary{})),
 	newTarget("marketplacepublisher", "ListingSummary", reflect.TypeOf(marketplacepublisher.ListingSummary{})),
 	newTarget("marketplacepublisher", "TermSummary", reflect.TypeOf(marketplacepublisher.TermSummary{})),
+
+	// Mngdmac CRD support
+	newTarget("mngdmac", "CreateMacOrderDetails", reflect.TypeOf(mngdmac.CreateMacOrderDetails{})),
+	newTarget("mngdmac", "UpdateMacOrderDetails", reflect.TypeOf(mngdmac.UpdateMacOrderDetails{})),
+	newTarget("mngdmac", "MacOrder", reflect.TypeOf(mngdmac.MacOrder{})),
+	newTarget("mngdmac", "MacOrderCollection", reflect.TypeOf(mngdmac.MacOrderCollection{})),
+	newTarget("mngdmac", "MacOrderSummary", reflect.TypeOf(mngdmac.MacOrderSummary{})),
 
 	// Oce CRD support
 	newTarget("oce", "CreateOceInstanceDetails", reflect.TypeOf(oce.CreateOceInstanceDetails{})),

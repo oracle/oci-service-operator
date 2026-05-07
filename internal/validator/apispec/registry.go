@@ -62,6 +62,7 @@ import (
 	marketplacev1beta1 "github.com/oracle/oci-service-operator/api/marketplace/v1beta1"
 	marketplaceprivateofferv1beta1 "github.com/oracle/oci-service-operator/api/marketplaceprivateoffer/v1beta1"
 	marketplacepublisherv1beta1 "github.com/oracle/oci-service-operator/api/marketplacepublisher/v1beta1"
+	mngdmacv1beta1 "github.com/oracle/oci-service-operator/api/mngdmac/v1beta1"
 	monitoringv1beta1 "github.com/oracle/oci-service-operator/api/monitoring/v1beta1"
 	mysqlv1beta1 "github.com/oracle/oci-service-operator/api/mysql/v1beta1"
 	networkloadbalancerv1beta1 "github.com/oracle/oci-service-operator/api/networkloadbalancer/v1beta1"
@@ -3451,6 +3452,28 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "marketplacepublisher.TermVersionSummary",
+			},
+		},
+	},
+	{
+		Name:       "MngdmacMacOrder",
+		SpecType:   reflect.TypeOf(mngdmacv1beta1.MacOrderSpec{}),
+		StatusType: reflect.TypeOf(mngdmacv1beta1.MacOrderStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "mngdmac.CreateMacOrderDetails",
+			},
+			{
+				SDKStruct: "mngdmac.UpdateMacOrderDetails",
+			},
+			{
+				SDKStruct: "mngdmac.MacOrder",
+			},
+			{
+				SDKStruct: "mngdmac.MacOrderCollection",
+			},
+			{
+				SDKStruct: "mngdmac.MacOrderSummary",
 			},
 		},
 	},

@@ -229,4 +229,5 @@ resources:
 - generativeaiagent_v1beta1_knowledgebase.yaml
 - psa_v1beta1_privateserviceaccess.yaml
 - visualbuilder_v1beta1_vbinstance.yaml
+- mngdmac_v1beta1_macorder.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

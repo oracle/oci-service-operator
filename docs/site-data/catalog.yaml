@@ -738,6 +738,20 @@ packages:
     customerVisible: false
     guidePath: docs/installation.md
 
+  - package: mngdmac
+    displayName: Managed Services for Mac
+    summary: Manage OCI Mac orders from Kubernetes with a reviewed controller-backed runtime.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to MacOrder while MacDevice and auxiliary device-management workflows stay unpublished.
+      - The published runtime uses service-SDK work requests for create, update, and delete, maps Kubernetes delete to CancelMacOrder, and keeps ChangeMacOrderCompartment out of scope.
+    kindOverrides:
+      - group: mngdmac
+        kind: MacOrder
+        summary: Manage OCI Managed Services for Mac orders.
+
   - package: monitoring
     displayName: Monitoring
     summary: Manage OCI Monitoring resources from Kubernetes.

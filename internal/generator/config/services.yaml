@@ -3317,6 +3317,66 @@ services:
             runtime: generatedruntime
             formalClassification: lifecycle
 
+  - service: mngdmac
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/mngdmac
+    group: mngdmac
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - MacOrder
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: MacOrder
+          formalSpec: macorder
+          async:
+            strategy: workrequest
+            runtime: generatedruntime
+            formalClassification: workrequest
+            workRequest:
+              source: service-sdk
+              phases:
+                - create
+                - update
+                - delete
+          sample:
+            body: |-
+              #
+              # Replace the OCI identifiers below before running e2e.
+              # Update metadata.name and spec.displayName if you want to force a fresh create
+              # instead of binding to an existing MacOrder with the same display name in the same
+              # compartment.
+              # Kubernetes delete maps to CancelMacOrder for the published contract.
+              #
+              apiVersion: mngdmac.oracle.com/v1beta1
+              kind: MacOrder
+              metadata:
+                name: macorder-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                displayName: "macorder-sample"
+                orderDescription: "Initial Mac server order"
+                orderSize: 1
+                shape: M4_PRO_MAC_MINI_64GB_2TB
+                commitmentTerm: YEARS_3
+          serviceManager:
+            packagePath: mngdmac/macorder
+    observedState:
+      sdkAliases:
+        WorkRequestLog:
+          - WorkRequestLogEntry
+
   - service: mysql
     sdkPackage: github.com/oracle/oci-go-sdk/v65/mysql
     group: mysql
