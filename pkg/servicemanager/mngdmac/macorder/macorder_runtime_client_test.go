@@ -201,6 +201,21 @@ func requireMacOrderAsyncCurrent(
 	}
 }
 
+func requireMacOrderTrailingCondition(
+	t *testing.T,
+	resource *mngdmacv1beta1.MacOrder,
+	want shared.OSOKConditionType,
+) {
+	t.Helper()
+	conditions := resource.Status.OsokStatus.Conditions
+	if len(conditions) == 0 {
+		t.Fatal("status.conditions = empty, want trailing condition")
+	}
+	if got := conditions[len(conditions)-1].Type; got != want {
+		t.Fatalf("trailing condition = %q, want %q", got, want)
+	}
+}
+
 func assertMacOrderStringSliceEqual(t *testing.T, field string, got []string, want []string) {
 	t.Helper()
 	if !reflect.DeepEqual(got, want) {
@@ -532,6 +547,256 @@ func TestMacOrderDeleteMapsToCancelAndCompletesWhenOrderIsCanceled(t *testing.T)
 	if resource.Status.OsokStatus.Async.Current != nil {
 		t.Fatalf("status.async.current = %#v, want cleared tracker after delete", resource.Status.OsokStatus.Async.Current)
 	}
+}
+
+func TestMacOrderDeleteResumesPendingWorkRequestAcrossReconciles(t *testing.T) {
+	t.Parallel()
+
+	const (
+		existingID    = "ocid1.macorder.oc1..delete-pending"
+		workRequestID = "wr-delete-pending"
+	)
+
+	resource := newTestMacOrderResource()
+	resource.Status.Id = existingID
+	resource.Status.CompartmentId = resource.Spec.CompartmentId
+	resource.Status.DisplayName = resource.Spec.DisplayName
+	resource.Status.OsokStatus.Ocid = shared.OCID(existingID)
+	resource.Status.OsokStatus.Async.Current = &shared.OSOKAsyncOperation{
+		Source:          shared.OSOKAsyncSourceWorkRequest,
+		Phase:           shared.OSOKAsyncPhaseDelete,
+		WorkRequestID:   workRequestID,
+		NormalizedClass: shared.OSOKAsyncClassPending,
+	}
+
+	client := &fakeMacOrderOCIClient{
+		cancelFn: func(context.Context, mngdmacsdk.CancelMacOrderRequest) (mngdmacsdk.CancelMacOrderResponse, error) {
+			t.Fatal("CancelMacOrder() should not be called while a delete work request is already pending")
+			return mngdmacsdk.CancelMacOrderResponse{}, nil
+		},
+		getFn: func(context.Context, mngdmacsdk.GetMacOrderRequest) (mngdmacsdk.GetMacOrderResponse, error) {
+			t.Fatal("GetMacOrder() should not be called while a delete work request is still pending")
+			return mngdmacsdk.GetMacOrderResponse{}, nil
+		},
+		workRequestFn: func(_ context.Context, request mngdmacsdk.GetWorkRequestRequest) (mngdmacsdk.GetWorkRequestResponse, error) {
+			requireMacOrderStringPtr(t, "workRequestId", request.WorkRequestId, workRequestID)
+			return mngdmacsdk.GetWorkRequestResponse{
+				WorkRequest: makeMacOrderWorkRequest(
+					workRequestID,
+					mngdmacsdk.OperationTypeCancelMacOrder,
+					mngdmacsdk.OperationStatusInProgress,
+					mngdmacsdk.ActionTypeInProgress,
+					existingID,
+				),
+			}, nil
+		},
+	}
+
+	deleted, err := newTestMacOrderClient(client).Delete(context.Background(), resource)
+	if err != nil {
+		t.Fatalf("Delete() error = %v", err)
+	}
+	if deleted {
+		t.Fatal("Delete() = true, want false while delete work request is pending")
+	}
+	if len(client.cancelRequests) != 0 {
+		t.Fatalf("CancelMacOrder() calls = %d, want 0", len(client.cancelRequests))
+	}
+	if len(client.getRequests) != 0 {
+		t.Fatalf("GetMacOrder() calls = %d, want 0", len(client.getRequests))
+	}
+	if len(client.workRequestRequests) != 1 {
+		t.Fatalf("GetWorkRequest() calls = %d, want 1", len(client.workRequestRequests))
+	}
+	requireMacOrderAsyncCurrent(t, resource, shared.OSOKAsyncPhaseDelete, shared.OSOKAsyncClassPending, workRequestID)
+}
+
+func TestMacOrderDeleteWaitsAfterSucceededWorkRequestUntilCanceledReadback(t *testing.T) {
+	t.Parallel()
+
+	const (
+		existingID    = "ocid1.macorder.oc1..delete-readback"
+		workRequestID = "wr-delete-readback"
+	)
+
+	resource := newTestMacOrderResource()
+	resource.Status.Id = existingID
+	resource.Status.CompartmentId = resource.Spec.CompartmentId
+	resource.Status.DisplayName = resource.Spec.DisplayName
+	resource.Status.OsokStatus.Ocid = shared.OCID(existingID)
+	resource.Status.OsokStatus.Async.Current = &shared.OSOKAsyncOperation{
+		Source:          shared.OSOKAsyncSourceWorkRequest,
+		Phase:           shared.OSOKAsyncPhaseDelete,
+		WorkRequestID:   workRequestID,
+		NormalizedClass: shared.OSOKAsyncClassPending,
+	}
+
+	getCalls := 0
+	client := &fakeMacOrderOCIClient{
+		cancelFn: func(context.Context, mngdmacsdk.CancelMacOrderRequest) (mngdmacsdk.CancelMacOrderResponse, error) {
+			t.Fatal("CancelMacOrder() should not be reissued after the delete work request is already recorded")
+			return mngdmacsdk.CancelMacOrderResponse{}, nil
+		},
+		workRequestFn: func(_ context.Context, request mngdmacsdk.GetWorkRequestRequest) (mngdmacsdk.GetWorkRequestResponse, error) {
+			requireMacOrderStringPtr(t, "workRequestId", request.WorkRequestId, workRequestID)
+			return mngdmacsdk.GetWorkRequestResponse{
+				WorkRequest: makeMacOrderWorkRequest(
+					workRequestID,
+					mngdmacsdk.OperationTypeCancelMacOrder,
+					mngdmacsdk.OperationStatusSucceeded,
+					mngdmacsdk.ActionTypeDeleted,
+					existingID,
+				),
+			}, nil
+		},
+		getFn: func(_ context.Context, request mngdmacsdk.GetMacOrderRequest) (mngdmacsdk.GetMacOrderResponse, error) {
+			getCalls++
+			requireMacOrderStringPtr(t, "get macOrderId", request.MacOrderId, existingID)
+			if getCalls == 1 {
+				return mngdmacsdk.GetMacOrderResponse{
+					MacOrder: makeSDKMacOrder(existingID, resource, mngdmacsdk.MacOrderLifecycleStateActive, mngdmacsdk.MacOrderOrderStatusProvisioning),
+				}, nil
+			}
+			return mngdmacsdk.GetMacOrderResponse{
+				MacOrder: makeSDKMacOrder(existingID, resource, mngdmacsdk.MacOrderLifecycleStateActive, mngdmacsdk.MacOrderOrderStatusCanceled),
+			}, nil
+		},
+	}
+
+	serviceClient := newTestMacOrderClient(client)
+	deleted, err := serviceClient.Delete(context.Background(), resource)
+	if err != nil {
+		t.Fatalf("Delete() error = %v, want stale readback polling instead", err)
+	}
+	if deleted {
+		t.Fatal("Delete() = true, want false while the canceled readback has not been observed yet")
+	}
+	if len(client.cancelRequests) != 0 {
+		t.Fatalf("CancelMacOrder() calls = %d, want 0", len(client.cancelRequests))
+	}
+	if getCalls != 1 {
+		t.Fatalf("GetMacOrder() calls = %d, want 1 stale readback confirm", getCalls)
+	}
+	requireMacOrderAsyncCurrent(t, resource, shared.OSOKAsyncPhaseDelete, shared.OSOKAsyncClassSucceeded, workRequestID)
+
+	deleted, err = serviceClient.Delete(context.Background(), resource)
+	if err != nil {
+		t.Fatalf("Delete() after canceled readback error = %v", err)
+	}
+	if !deleted {
+		t.Fatal("Delete() = false, want true after canceled readback confirmation")
+	}
+	if getCalls != 2 {
+		t.Fatalf("GetMacOrder() calls = %d, want 2 after replaying the succeeded work request", getCalls)
+	}
+	if resource.Status.OsokStatus.DeletedAt == nil {
+		t.Fatal("status.deletedAt = nil, want delete timestamp after canceled readback")
+	}
+}
+
+func TestMacOrderCreateDoesNotReuseCanceledListMatch(t *testing.T) {
+	t.Parallel()
+
+	const workRequestID = "wr-create-canceled-filtered"
+
+	resource := newTestMacOrderResource()
+	client := &fakeMacOrderOCIClient{
+		listFn: func(_ context.Context, request mngdmacsdk.ListMacOrdersRequest) (mngdmacsdk.ListMacOrdersResponse, error) {
+			requireMacOrderStringPtr(t, "list compartmentId", request.CompartmentId, resource.Spec.CompartmentId)
+			requireMacOrderStringPtr(t, "list displayName", request.DisplayName, resource.Spec.DisplayName)
+			return mngdmacsdk.ListMacOrdersResponse{
+				MacOrderCollection: mngdmacsdk.MacOrderCollection{
+					Items: []mngdmacsdk.MacOrderSummary{
+						makeSDKMacOrderSummary(
+							"ocid1.macorder.oc1..canceled",
+							resource,
+							mngdmacsdk.MacOrderLifecycleStateActive,
+							mngdmacsdk.MacOrderOrderStatusCanceled,
+						),
+					},
+				},
+			}, nil
+		},
+		createFn: func(_ context.Context, request mngdmacsdk.CreateMacOrderRequest) (mngdmacsdk.CreateMacOrderResponse, error) {
+			return mngdmacsdk.CreateMacOrderResponse{
+				MacOrder:         makeSDKMacOrder("ocid1.macorder.oc1..created", resource, mngdmacsdk.MacOrderLifecycleStateCreating, mngdmacsdk.MacOrderOrderStatusSubmitted),
+				OpcWorkRequestId: common.String(workRequestID),
+			}, nil
+		},
+		workRequestFn: func(_ context.Context, request mngdmacsdk.GetWorkRequestRequest) (mngdmacsdk.GetWorkRequestResponse, error) {
+			requireMacOrderStringPtr(t, "workRequestId", request.WorkRequestId, workRequestID)
+			return mngdmacsdk.GetWorkRequestResponse{
+				WorkRequest: makeMacOrderWorkRequest(
+					workRequestID,
+					mngdmacsdk.OperationTypeCreateMacOrder,
+					mngdmacsdk.OperationStatusInProgress,
+					mngdmacsdk.ActionTypeInProgress,
+					"ocid1.macorder.oc1..created",
+				),
+			}, nil
+		},
+		getFn: func(context.Context, mngdmacsdk.GetMacOrderRequest) (mngdmacsdk.GetMacOrderResponse, error) {
+			t.Fatal("GetMacOrder() should not run when the only exact-name list match is a canceled order")
+			return mngdmacsdk.GetMacOrderResponse{}, nil
+		},
+	}
+
+	response, err := newTestMacOrderClient(client).CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful || !response.ShouldRequeue {
+		t.Fatalf("CreateOrUpdate() response = %#v, want create path with pending work request", response)
+	}
+	if len(client.createRequests) != 1 {
+		t.Fatalf("CreateMacOrder() calls = %d, want 1 when canceled list matches are filtered from reuse", len(client.createRequests))
+	}
+	if len(client.getRequests) != 0 {
+		t.Fatalf("GetMacOrder() calls = %d, want 0", len(client.getRequests))
+	}
+}
+
+func TestMacOrderCreateOrUpdateTreatsCanceledTrackedOrderAsTerminalFailure(t *testing.T) {
+	t.Parallel()
+
+	const existingID = "ocid1.macorder.oc1..canceled"
+
+	resource := newTestMacOrderResource()
+	resource.Status.Id = existingID
+	resource.Status.CompartmentId = resource.Spec.CompartmentId
+	resource.Status.DisplayName = resource.Spec.DisplayName
+	resource.Status.OsokStatus.Ocid = shared.OCID(existingID)
+
+	client := &fakeMacOrderOCIClient{
+		getFn: func(_ context.Context, request mngdmacsdk.GetMacOrderRequest) (mngdmacsdk.GetMacOrderResponse, error) {
+			requireMacOrderStringPtr(t, "get macOrderId", request.MacOrderId, existingID)
+			return mngdmacsdk.GetMacOrderResponse{
+				MacOrder: makeSDKMacOrder(existingID, resource, mngdmacsdk.MacOrderLifecycleStateActive, mngdmacsdk.MacOrderOrderStatusCanceled),
+			}, nil
+		},
+		updateFn: func(context.Context, mngdmacsdk.UpdateMacOrderRequest) (mngdmacsdk.UpdateMacOrderResponse, error) {
+			t.Fatal("UpdateMacOrder() should not be called once a tracked MacOrder is observed as canceled")
+			return mngdmacsdk.UpdateMacOrderResponse{}, nil
+		},
+	}
+
+	response, err := newTestMacOrderClient(client).CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v, want handled terminal failure without reconcile error", err)
+	}
+	if response.IsSuccessful {
+		t.Fatalf("CreateOrUpdate() response = %#v, want terminal failed status for canceled tracked orders", response)
+	}
+	if response.ShouldRequeue {
+		t.Fatalf("CreateOrUpdate() response = %#v, want no requeue for terminal canceled-order failure", response)
+	}
+	if got := resource.Status.OrderStatus; got != string(mngdmacsdk.MacOrderOrderStatusCanceled) {
+		t.Fatalf("status.orderStatus = %q, want CANCELED", got)
+	}
+	if got := resource.Status.LifecycleState; got != string(mngdmacsdk.MacOrderLifecycleStateFailed) {
+		t.Fatalf("status.lifecycleState = %q, want FAILED after canceled-order normalization", got)
+	}
+	requireMacOrderTrailingCondition(t, resource, shared.Failed)
 }
 
 func TestMacOrderCreateOrUpdateRejectsCompartmentMoveAsReplacementOnly(t *testing.T) {

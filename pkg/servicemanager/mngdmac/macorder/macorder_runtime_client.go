@@ -176,6 +176,10 @@ func (c *macOrderRuntimeClient) Delete(ctx context.Context, resource *mngdmacv1b
 		return false, fmt.Errorf("%s OCI client is not configured", macOrderKind)
 	}
 
+	if workRequestID := trackedMacOrderDeleteWorkRequestID(resource); workRequestID != "" {
+		return c.resumeMacOrderDelete(ctx, resource, workRequestID)
+	}
+
 	currentID := trackedMacOrderID(resource)
 	if currentID == "" {
 		response, err := confirmMacOrderDeleteRead(ctx, resource, "", c.client, nil)
@@ -240,6 +244,14 @@ func (c *macOrderRuntimeClient) Delete(ctx context.Context, resource *mngdmacv1b
 		return false, fmt.Errorf("%s delete did not return an opc-work-request-id", macOrderKind)
 	}
 
+	return c.resumeMacOrderDelete(ctx, resource, workRequestID)
+}
+
+func (c *macOrderRuntimeClient) resumeMacOrderDelete(
+	ctx context.Context,
+	resource *mngdmacv1beta1.MacOrder,
+	workRequestID string,
+) (bool, error) {
 	workRequest, err := getMacOrderWorkRequest(ctx, c.client, nil, workRequestID)
 	if err != nil {
 		servicemanager.RecordErrorOpcRequestID(&resource.Status.OsokStatus, err)
@@ -253,12 +265,14 @@ func (c *macOrderRuntimeClient) Delete(ctx context.Context, resource *mngdmacv1b
 
 	switch currentAsync.NormalizedClass {
 	case shared.OSOKAsyncClassPending:
+		currentAsync.Message = fmt.Sprintf("%s delete work request %s is still in progress", macOrderKind, workRequestID)
 		applyMacOrderAsync(resource, currentAsync)
 		return false, nil
 	case shared.OSOKAsyncClassFailed, shared.OSOKAsyncClassCanceled, shared.OSOKAsyncClassAttention, shared.OSOKAsyncClassUnknown:
 		applyMacOrderAsync(resource, currentAsync)
 		return false, fmt.Errorf("%s delete work request %s finished with status %s", macOrderKind, workRequestID, currentAsync.RawStatus)
 	case shared.OSOKAsyncClassSucceeded:
+		currentID := trackedMacOrderID(resource)
 		response, err := confirmMacOrderDeleteRead(ctx, resource, currentID, c.client, nil)
 		if err != nil {
 			if macOrderDeleteNotFound(err) {
@@ -279,7 +293,9 @@ func (c *macOrderRuntimeClient) Delete(ctx context.Context, resource *mngdmacv1b
 			markMacOrderDeletePending(resource, "OCI MacOrder cancellation is in progress")
 			return false, nil
 		}
-		return false, fmt.Errorf("%s delete confirmation returned unexpected lifecycle state %q", macOrderKind, resource.Status.LifecycleState)
+		currentAsync.Message = fmt.Sprintf("%s delete work request %s completed; waiting for MacOrder readback confirmation", macOrderKind, workRequestID)
+		applyMacOrderAsync(resource, currentAsync)
+		return false, nil
 	default:
 		return false, fmt.Errorf("%s delete work request %s projected unsupported async class %s", macOrderKind, workRequestID, currentAsync.NormalizedClass)
 	}
@@ -298,8 +314,19 @@ func applyMacOrderRuntimeHooks(
 	hooks.BuildCreateBody = buildMacOrderCreateBody
 	hooks.BuildUpdateBody = buildMacOrderUpdateBody
 	hooks.List.Fields = macOrderListFields()
-	hooks.List.Call = listMacOrdersAllPages(hooks.List.Call)
+	hooks.Get.Call = normalizeMacOrderGetCall(hooks.Get.Call)
+	hooks.List.Call = filterCanceledMacOrders(listMacOrdersAllPages(hooks.List.Call))
 	hooks.Identity.GuardExistingBeforeCreate = guardMacOrderExistingBeforeCreate
+	hooks.ParityHooks.RequiresParityHandling = func(_ *mngdmacv1beta1.MacOrder, response any) bool {
+		return macOrderReadCanceled(response)
+	}
+	hooks.ParityHooks.ApplyParityUpdate = func(
+		_ context.Context,
+		resource *mngdmacv1beta1.MacOrder,
+		response any,
+	) (servicemanager.OSOKResponse, error) {
+		return applyMacOrderCanceledObservation(resource, response)
+	}
 	hooks.Async.Adapter = macOrderWorkRequestAsyncAdapter
 	hooks.Async.GetWorkRequest = func(ctx context.Context, workRequestID string) (any, error) {
 		return getMacOrderWorkRequest(ctx, client, initErr, workRequestID)
@@ -394,6 +421,45 @@ func macOrderListFields() []generatedruntime.RequestField {
 func macOrderDeleteFields() []generatedruntime.RequestField {
 	return []generatedruntime.RequestField{
 		{FieldName: "MacOrderId", RequestName: "macOrderId", Contribution: "path", PreferResourceID: true},
+	}
+}
+
+func normalizeMacOrderGetCall(
+	call func(context.Context, mngdmacsdk.GetMacOrderRequest) (mngdmacsdk.GetMacOrderResponse, error),
+) func(context.Context, mngdmacsdk.GetMacOrderRequest) (mngdmacsdk.GetMacOrderResponse, error) {
+	if call == nil {
+		return nil
+	}
+
+	return func(ctx context.Context, request mngdmacsdk.GetMacOrderRequest) (mngdmacsdk.GetMacOrderResponse, error) {
+		response, err := call(ctx, request)
+		if err != nil {
+			return mngdmacsdk.GetMacOrderResponse{}, err
+		}
+		return normalizeMacOrderReadResponse(response), nil
+	}
+}
+
+func filterCanceledMacOrders(call macOrderListCall) macOrderListCall {
+	if call == nil {
+		return nil
+	}
+
+	return func(ctx context.Context, request mngdmacsdk.ListMacOrdersRequest) (mngdmacsdk.ListMacOrdersResponse, error) {
+		response, err := call(ctx, request)
+		if err != nil {
+			return mngdmacsdk.ListMacOrdersResponse{}, err
+		}
+
+		filtered := make([]mngdmacsdk.MacOrderSummary, 0, len(response.Items))
+		for _, item := range response.Items {
+			if macOrderSummaryCanceled(item) {
+				continue
+			}
+			filtered = append(filtered, item)
+		}
+		response.Items = filtered
+		return response, nil
 	}
 }
 
@@ -762,6 +828,13 @@ func normalizeMacOrderDeleteConfirmResponse(
 	return response
 }
 
+func normalizeMacOrderReadResponse(
+	response mngdmacsdk.GetMacOrderResponse,
+) mngdmacsdk.GetMacOrderResponse {
+	response.MacOrder = normalizeMacOrderReadBody(response.MacOrder)
+	return response
+}
+
 func normalizeMacOrderDeleteConfirmSummary(
 	summary mngdmacsdk.MacOrderSummary,
 ) mngdmacsdk.GetMacOrderResponse {
@@ -790,6 +863,16 @@ func normalizeMacOrderDeleteConfirmSummary(
 func normalizeMacOrderDeleteConfirmBody(body mngdmacsdk.MacOrder) mngdmacsdk.MacOrder {
 	if macOrderIsCanceled(body.OrderStatus, body.TimeCanceled) {
 		body.LifecycleState = mngdmacsdk.MacOrderLifecycleStateDeleted
+	}
+	return body
+}
+
+func normalizeMacOrderReadBody(body mngdmacsdk.MacOrder) mngdmacsdk.MacOrder {
+	if macOrderIsCanceled(body.OrderStatus, body.TimeCanceled) {
+		body.LifecycleState = mngdmacsdk.MacOrderLifecycleStateFailed
+		if stringValue(body.LifecycleDetails) == "" {
+			body.LifecycleDetails = common.String("MacOrder is canceled")
+		}
 	}
 	return body
 }
@@ -829,6 +912,17 @@ func trackedMacOrderID(resource *mngdmacv1beta1.MacOrder) string {
 		return strings.TrimSpace(resource.Status.Id)
 	}
 	return strings.TrimSpace(string(resource.Status.OsokStatus.Ocid))
+}
+
+func trackedMacOrderDeleteWorkRequestID(resource *mngdmacv1beta1.MacOrder) string {
+	if resource == nil || resource.Status.OsokStatus.Async.Current == nil {
+		return ""
+	}
+	current := resource.Status.OsokStatus.Async.Current
+	if current.Source != shared.OSOKAsyncSourceWorkRequest || current.Phase != shared.OSOKAsyncPhaseDelete {
+		return ""
+	}
+	return strings.TrimSpace(current.WorkRequestID)
 }
 
 func listMacOrdersAllPages(call macOrderListCall) macOrderListCall {
@@ -912,6 +1006,18 @@ func macOrderDeleteNotFound(err error) bool {
 	return classification.IsUnambiguousNotFound() || classification.IsAuthShapedNotFound()
 }
 
+func macOrderReadCanceled(response any) bool {
+	order, err := macOrderFromResponse(response)
+	if err != nil {
+		return false
+	}
+	return macOrderIsCanceled(order.OrderStatus, order.TimeCanceled)
+}
+
+func macOrderSummaryCanceled(summary mngdmacsdk.MacOrderSummary) bool {
+	return summary.OrderStatus == mngdmacsdk.MacOrderOrderStatusCanceled
+}
+
 func buildMacOrderDeleteAsyncOperation(
 	resource *mngdmacv1beta1.MacOrder,
 	workRequest any,
@@ -937,6 +1043,21 @@ func buildMacOrderDeleteAsyncOperation(
 			FallbackPhase:    shared.OSOKAsyncPhaseDelete,
 		},
 	)
+}
+
+func applyMacOrderCanceledObservation(
+	resource *mngdmacv1beta1.MacOrder,
+	response any,
+) (servicemanager.OSOKResponse, error) {
+	order, err := macOrderFromResponse(response)
+	if err != nil {
+		return servicemanager.OSOKResponse{IsSuccessful: false}, err
+	}
+	if err := applyMacOrderStatus(resource, normalizeMacOrderReadBody(order)); err != nil {
+		return servicemanager.OSOKResponse{IsSuccessful: false}, err
+	}
+	markMacOrderFailed(resource, "OCI MacOrder is canceled and cannot be reused or reconciled further")
+	return servicemanager.OSOKResponse{IsSuccessful: false}, nil
 }
 
 func applyMacOrderAsync(resource *mngdmacv1beta1.MacOrder, current *shared.OSOKAsyncOperation) {
@@ -1004,6 +1125,25 @@ func markMacOrderDeleted(resource *mngdmacv1beta1.MacOrder, message string) {
 		resource.Status.OsokStatus,
 		shared.Terminating,
 		v1.ConditionTrue,
+		"",
+		message,
+		loggerutil.OSOKLogger{},
+	)
+}
+
+func markMacOrderFailed(resource *mngdmacv1beta1.MacOrder, message string) {
+	if resource == nil {
+		return
+	}
+	now := metav1.Now()
+	resource.Status.OsokStatus.UpdatedAt = &now
+	resource.Status.OsokStatus.Message = message
+	resource.Status.OsokStatus.Reason = string(shared.Failed)
+	servicemanager.ClearAsyncOperation(&resource.Status.OsokStatus)
+	resource.Status.OsokStatus = util.UpdateOSOKStatusCondition(
+		resource.Status.OsokStatus,
+		shared.Failed,
+		v1.ConditionFalse,
 		"",
 		message,
 		loggerutil.OSOKLogger{},
