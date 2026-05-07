@@ -2621,6 +2621,32 @@ rules:
   - patch
   - update
 - apiGroups:
+  - vnmonitoring.oracle.com
+  resources:
+  - pathanalyzertests
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - vnmonitoring.oracle.com
+  resources:
+  - pathanalyzertests/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - vnmonitoring.oracle.com
+  resources:
+  - pathanalyzertests/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - waa.oracle.com
   resources:
   - webappaccelerationpolicies

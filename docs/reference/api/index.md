@@ -97,6 +97,8 @@ This landing page is generated from the checked-in package and release inventory
 | [streaming.oracle.com/v1beta1](streaming/v1beta1/index.md) | [Stream](streaming/v1beta1/index.md#kind-stream) | Streaming (`v2.0.0-alpha`) |
 | [usageapi.oracle.com/v1beta1](usageapi/v1beta1/index.md) | [CustomTable](usageapi/v1beta1/index.md#kind-customtable), [Query](usageapi/v1beta1/index.md#kind-query), [Schedule](usageapi/v1beta1/index.md#kind-schedule), [UsageCarbonEmissionsQuery](usageapi/v1beta1/index.md#kind-usagecarbonemissionsquery) | - |
 | [vbsinst.oracle.com/v1beta1](vbsinst/v1beta1/index.md) | [VbsInstance](vbsinst/v1beta1/index.md#kind-vbsinstance) | - |
+| [visualbuilder.oracle.com/v1beta1](visualbuilder/v1beta1/index.md) | [VbInstance](visualbuilder/v1beta1/index.md#kind-vbinstance) | - |
+| [vnmonitoring.oracle.com/v1beta1](vnmonitoring/v1beta1/index.md) | [PathAnalyzerTest](vnmonitoring/v1beta1/index.md#kind-pathanalyzertest) | - |
 | [waa.oracle.com/v1beta1](waa/v1beta1/index.md) | [WebAppAcceleration](waa/v1beta1/index.md#kind-webappacceleration), [WebAppAccelerationPolicy](waa/v1beta1/index.md#kind-webappaccelerationpolicy) | - |
 | [waas.oracle.com/v1beta1](waas/v1beta1/index.md) | [AddressList](waas/v1beta1/index.md#kind-addresslist), [Certificate](waas/v1beta1/index.md#kind-certificate), [CustomProtectionRule](waas/v1beta1/index.md#kind-customprotectionrule), [HttpRedirect](waas/v1beta1/index.md#kind-httpredirect), [WaasPolicy](waas/v1beta1/index.md#kind-waaspolicy) | - |
 | [waf.oracle.com/v1beta1](waf/v1beta1/index.md) | [NetworkAddressList](waf/v1beta1/index.md#kind-networkaddresslist), [WebAppFirewall](waf/v1beta1/index.md#kind-webappfirewall), [WebAppFirewallPolicy](waf/v1beta1/index.md#kind-webappfirewallpolicy) | - |

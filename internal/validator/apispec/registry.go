@@ -41,6 +41,7 @@ import (
 	functionsv1beta1 "github.com/oracle/oci-service-operator/api/functions/v1beta1"
 	gdpv1beta1 "github.com/oracle/oci-service-operator/api/gdp/v1beta1"
 	generativeaiv1beta1 "github.com/oracle/oci-service-operator/api/generativeai/v1beta1"
+	generativeaiagentv1beta1 "github.com/oracle/oci-service-operator/api/generativeaiagent/v1beta1"
 	governancerulescontrolplanev1beta1 "github.com/oracle/oci-service-operator/api/governancerulescontrolplane/v1beta1"
 	healthchecksv1beta1 "github.com/oracle/oci-service-operator/api/healthchecks/v1beta1"
 	identityv1beta1 "github.com/oracle/oci-service-operator/api/identity/v1beta1"
@@ -90,6 +91,8 @@ import (
 	streamingv1beta1 "github.com/oracle/oci-service-operator/api/streaming/v1beta1"
 	usageapiv1beta1 "github.com/oracle/oci-service-operator/api/usageapi/v1beta1"
 	vbsinstv1beta1 "github.com/oracle/oci-service-operator/api/vbsinst/v1beta1"
+	visualbuilderv1beta1 "github.com/oracle/oci-service-operator/api/visualbuilder/v1beta1"
+	vnmonitoringv1beta1 "github.com/oracle/oci-service-operator/api/vnmonitoring/v1beta1"
 	waav1beta1 "github.com/oracle/oci-service-operator/api/waa/v1beta1"
 	waasv1beta1 "github.com/oracle/oci-service-operator/api/waas/v1beta1"
 	wafv1beta1 "github.com/oracle/oci-service-operator/api/waf/v1beta1"
@@ -2607,6 +2610,28 @@ var targets = []Target{
 		},
 	},
 	{
+		Name:       "GenerativeaiagentKnowledgeBase",
+		SpecType:   reflect.TypeOf(generativeaiagentv1beta1.KnowledgeBaseSpec{}),
+		StatusType: reflect.TypeOf(generativeaiagentv1beta1.KnowledgeBaseStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "generativeaiagent.CreateKnowledgeBaseDetails",
+			},
+			{
+				SDKStruct: "generativeaiagent.UpdateKnowledgeBaseDetails",
+			},
+			{
+				SDKStruct: "generativeaiagent.KnowledgeBase",
+			},
+			{
+				SDKStruct: "generativeaiagent.KnowledgeBaseCollection",
+			},
+			{
+				SDKStruct: "generativeaiagent.KnowledgeBaseSummary",
+			},
+		},
+	},
+	{
 		Name:       "GovernancerulescontrolplaneGovernanceRule",
 		SpecType:   reflect.TypeOf(governancerulescontrolplanev1beta1.GovernanceRuleSpec{}),
 		StatusType: reflect.TypeOf(governancerulescontrolplanev1beta1.GovernanceRuleStatus{}),
@@ -4471,6 +4496,28 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "visualbuilder.VbInstanceSummary",
+			},
+		},
+	},
+	{
+		Name:       "VnmonitoringPathAnalyzerTest",
+		SpecType:   reflect.TypeOf(vnmonitoringv1beta1.PathAnalyzerTestSpec{}),
+		StatusType: reflect.TypeOf(vnmonitoringv1beta1.PathAnalyzerTestStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "vnmonitoring.CreatePathAnalyzerTestDetails",
+			},
+			{
+				SDKStruct: "vnmonitoring.UpdatePathAnalyzerTestDetails",
+			},
+			{
+				SDKStruct: "vnmonitoring.PathAnalyzerTest",
+			},
+			{
+				SDKStruct: "vnmonitoring.PathAnalyzerTestCollection",
+			},
+			{
+				SDKStruct: "vnmonitoring.PathAnalyzerTestSummary",
 			},
 		},
 	},
