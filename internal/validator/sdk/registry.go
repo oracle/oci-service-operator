@@ -86,6 +86,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/redis"
 	"github.com/oracle/oci-go-sdk/v65/resourceanalytics"
 	"github.com/oracle/oci-go-sdk/v65/resourcescheduler"
+	"github.com/oracle/oci-go-sdk/v65/rover"
 	"github.com/oracle/oci-go-sdk/v65/sch"
 	"github.com/oracle/oci-go-sdk/v65/securityattribute"
 	"github.com/oracle/oci-go-sdk/v65/self"
@@ -1131,6 +1132,13 @@ var seedTargets = []Target{
 	newTarget("resourcescheduler", "Schedule", reflect.TypeOf(resourcescheduler.Schedule{})),
 	newTarget("resourcescheduler", "ScheduleCollection", reflect.TypeOf(resourcescheduler.ScheduleCollection{})),
 	newTarget("resourcescheduler", "ScheduleSummary", reflect.TypeOf(resourcescheduler.ScheduleSummary{})),
+
+	// Rover CRD support
+	newTarget("rover", "CreateRoverClusterDetails", reflect.TypeOf(rover.CreateRoverClusterDetails{})),
+	newTarget("rover", "UpdateRoverClusterDetails", reflect.TypeOf(rover.UpdateRoverClusterDetails{})),
+	newTarget("rover", "RoverCluster", reflect.TypeOf(rover.RoverCluster{})),
+	newTarget("rover", "RoverClusterCollection", reflect.TypeOf(rover.RoverClusterCollection{})),
+	newTarget("rover", "RoverClusterSummary", reflect.TypeOf(rover.RoverClusterSummary{})),
 
 	// Sch CRD support
 	newTarget("sch", "CreateServiceConnectorDetails", reflect.TypeOf(sch.CreateServiceConnectorDetails{})),

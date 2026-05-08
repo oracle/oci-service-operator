@@ -1218,6 +1218,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"recovery",
 		"resourceanalytics",
 		"resourcescheduler",
+		"rover",
 		"securityattribute",
 		"stackmonitoring",
 		"waa",
@@ -1322,6 +1323,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"recovery",
 		"resourceanalytics",
 		"resourcescheduler",
+		"rover",
 		"securityattribute",
 		"stackmonitoring",
 		"waa",
@@ -1420,6 +1422,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	assertServiceSelection(t, services["recovery"], true, SelectionModeExplicit, []string{"ProtectedDatabase", "ProtectionPolicy", "RecoveryServiceSubnet"})
 	assertServiceSelection(t, services["resourceanalytics"], true, SelectionModeExplicit, []string{"MonitoredRegion", "ResourceAnalyticsInstance", "TenancyAttachment"})
 	assertServiceSelection(t, services["resourcescheduler"], true, SelectionModeExplicit, []string{"Schedule"})
+	assertServiceSelection(t, services["rover"], true, SelectionModeExplicit, []string{"RoverCluster"})
 	assertServiceSelection(t, services["securityattribute"], true, SelectionModeExplicit, []string{"SecurityAttribute", "SecurityAttributeNamespace"})
 	assertServiceSelection(t, services["stackmonitoring"], true, SelectionModeExplicit, []string{"AlarmCondition", "BaselineableMetric", "Config", "DiscoveryJob", "MaintenanceWindow", "MetricExtension", "MonitoredResource", "MonitoredResourceType", "MonitoringTemplate", "ProcessSet"})
 	assertServiceSelection(t, services["waa"], true, SelectionModeExplicit, []string{"WebAppAcceleration", "WebAppAccelerationPolicy"})
@@ -2210,6 +2213,7 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 		"recovery":                    {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"resourceanalytics":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"resourcescheduler":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"rover":                       {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"securityattribute":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"self":                        {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
 		"stackmonitoring":             {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},

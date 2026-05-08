@@ -1162,6 +1162,20 @@
       "mandatoryCoveragePercent": 95.45454545454545
     },
     {
+      "service": "rover",
+      "specs": 1,
+      "mappings": 5,
+      "trackedMappings": 5,
+      "untrackedMappings": 0,
+      "presentFields": 93,
+      "missingFields": 8,
+      "mandatoryPresentFields": 11,
+      "mandatoryMissingFields": 1,
+      "extraSpecFields": 3,
+      "overallCoveragePercent": 92.07920792079209,
+      "mandatoryCoveragePercent": 91.66666666666666
+    },
+    {
       "service": "sch",
       "specs": 1,
       "mappings": 5,

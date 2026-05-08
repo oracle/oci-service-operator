@@ -5065,6 +5065,46 @@ services:
       webhooks:
         strategy: none
 
+  - service: rover
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/rover
+    group: rover
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - RoverCluster
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: RoverCluster
+          formalSpec: rovercluster
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+          serviceManager:
+            packagePath: rover/rovercluster
+    observedState:
+      excludedFieldPaths:
+        RoverCluster:
+          - DataValidationCode
+          - ExteriorDoorCode
+          - ImageExportPar
+          - InteriorAlarmDisarmCode
+          - ReturnShippingLabelUri
+          - SuperUserPassword
+          - UnlockPassphrase
+
   - service: securityattribute
     sdkPackage: github.com/oracle/oci-go-sdk/v65/securityattribute
     group: securityattribute

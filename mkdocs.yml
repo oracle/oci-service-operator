@@ -214,6 +214,7 @@ nav:
           - redis.oracle.com/v1beta1: reference/api/redis/v1beta1/index.md
           - resourceanalytics.oracle.com/v1beta1: reference/api/resourceanalytics/v1beta1/index.md
           - resourcescheduler.oracle.com/v1beta1: reference/api/resourcescheduler/v1beta1/index.md
+          - rover.oracle.com/v1beta1: reference/api/rover/v1beta1/index.md
           - sch.oracle.com/v1beta1: reference/api/sch/v1beta1/index.md
           - securityattribute.oracle.com/v1beta1: reference/api/securityattribute/v1beta1/index.md
           - self.oracle.com/v1beta1: reference/api/self/v1beta1/index.md

@@ -85,6 +85,7 @@ import (
 	redisv1beta1 "github.com/oracle/oci-service-operator/api/redis/v1beta1"
 	resourceanalyticsv1beta1 "github.com/oracle/oci-service-operator/api/resourceanalytics/v1beta1"
 	resourceschedulerv1beta1 "github.com/oracle/oci-service-operator/api/resourcescheduler/v1beta1"
+	roverv1beta1 "github.com/oracle/oci-service-operator/api/rover/v1beta1"
 	schv1beta1 "github.com/oracle/oci-service-operator/api/sch/v1beta1"
 	securityattributev1beta1 "github.com/oracle/oci-service-operator/api/securityattribute/v1beta1"
 	selfv1beta1 "github.com/oracle/oci-service-operator/api/self/v1beta1"
@@ -4177,6 +4178,28 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "resourcescheduler.ScheduleSummary",
+			},
+		},
+	},
+	{
+		Name:       "RoverRoverCluster",
+		SpecType:   reflect.TypeOf(roverv1beta1.RoverClusterSpec{}),
+		StatusType: reflect.TypeOf(roverv1beta1.RoverClusterStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "rover.CreateRoverClusterDetails",
+			},
+			{
+				SDKStruct: "rover.UpdateRoverClusterDetails",
+			},
+			{
+				SDKStruct: "rover.RoverCluster",
+			},
+			{
+				SDKStruct: "rover.RoverClusterCollection",
+			},
+			{
+				SDKStruct: "rover.RoverClusterSummary",
 			},
 		},
 	},
