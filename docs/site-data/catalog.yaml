@@ -557,6 +557,20 @@ packages:
         kind: KnowledgeBase
         summary: Manage OCI Generative AI Agent knowledge bases.
 
+  - package: generativeaidata
+    displayName: Generative AI Data
+    summary: Manage OCI Generative AI Data enrichment jobs from Kubernetes with a reviewed job-shaped runtime contract.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to EnrichmentJob while the remaining Generative AI Data job families stay unpublished.
+      - Kubernetes create calls `GenerateEnrichmentJob`, and Kubernetes delete requests `CancelEnrichmentJob`; the published runtime does not claim the OCI service exposes plain update or delete operations for EnrichmentJob.
+    kindOverrides:
+      - group: generativeaidata
+        kind: EnrichmentJob
+        summary: Manage OCI Generative AI Data enrichment jobs.
+
   - package: governancerulescontrolplane
     displayName: Governance Rules Control Plane
     summary: Manage OCI Governance Rules Control Plane resources from Kubernetes.

@@ -2541,6 +2541,78 @@ services:
                 freeformTags:
                   managed-by: oci-service-operator
 
+  - service: generativeaidata
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/generativeaidata
+    group: generativeaidata
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - EnrichmentJob
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: EnrichmentJob
+          formalSpec: enrichmentjob
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+          specFields:
+            - name: SemanticStoreId
+              type: string
+              tag: 'json:"semanticStoreId"'
+              comments:
+                - The OCID of the semantic store that scopes GenerateEnrichmentJob, GetEnrichmentJob, and CancelEnrichmentJob.
+              markers:
+                - +kubebuilder:validation:Required
+            - name: CompartmentId
+              type: string
+              tag: 'json:"compartmentId"'
+              comments:
+                - The compartment OCID used only for exact ListEnrichmentJobs lookup before a new job is generated.
+              markers:
+                - +kubebuilder:validation:Required
+          statusFields:
+            - name: CompartmentId
+              type: string
+              tag: 'json:"compartmentId,omitempty"'
+              comments:
+                - The bound compartment ID carried forward for exact ListEnrichmentJobs lookup and create-only drift validation.
+          sample:
+            body: |-
+              #
+              # Replace the semanticStoreId and compartmentId before running e2e. Creating this resource calls
+              # GenerateEnrichmentJob on the OCI service. Deleting the Kubernetes resource requests
+              # CancelEnrichmentJob and waits for the job to reach a terminal lifecycle state; it
+              # does not claim the OCI service exposes a plain delete operation for EnrichmentJob.
+              #
+              apiVersion: generativeaidata.oracle.com/v1beta1
+              kind: EnrichmentJob
+              metadata:
+                name: enrichmentjob-sample
+              spec:
+                semanticStoreId: ocid1.semanticstore.oc1..exampleuniqueID
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                enrichmentJobType: FULL_BUILD
+                enrichmentJobConfiguration:
+                  enrichmentJobType: FULL_BUILD
+                  schemaName: SALES
+                displayName: osok-generativeaidata-enrichmentjob-sample
+                description: OSOK Generative AI Data EnrichmentJob sample
+                freeformTags:
+                  managed-by: oci-service-operator
+
   - service: generativeaiagent
     sdkPackage: github.com/oracle/oci-go-sdk/v65/generativeaiagent
     group: generativeaiagent

@@ -123,8 +123,8 @@ type fieldDefinition struct {
 	Contribution  FieldContribution
 }
 
-var operationMethodPattern = regexp.MustCompile(`^(Create|Get|List|Update|Delete|Launch|Terminate)(.+)$`)
-var operationRequestPattern = regexp.MustCompile(`^(Create|Get|List|Update|Delete|Launch|Terminate)(.+)Request$`)
+var operationMethodPattern = regexp.MustCompile(`^(Create|Get|List|Update|Delete|Launch|Terminate|Generate|Cancel)(.+)$`)
+var operationRequestPattern = regexp.MustCompile(`^(Create|Get|List|Update|Delete|Launch|Terminate|Generate|Cancel)(.+)Request$`)
 var constructorPattern = regexp.MustCompile(`^New(.+)WithConfigurationProvider$`)
 
 // CanonicalOperationVerb collapses SDK verb aliases onto the generator's primary CRUD phases.
@@ -135,6 +135,10 @@ func CanonicalOperationVerb(verb string) (string, bool) {
 	case "Launch":
 		return "Create", true
 	case "Terminate":
+		return "Delete", true
+	case "Generate":
+		return "Create", true
+	case "Cancel":
 		return "Delete", true
 	default:
 		return "", false
@@ -227,13 +231,34 @@ func (pkg *Package) ResourceOperations(rawName string) map[string]OperationMetho
 		if !ok {
 			continue
 		}
-		if currentStem, ok := bestMatches[verb]; ok && !preferOperationStem(rawName, stem, currentStem) {
+		if currentStem, ok := bestMatches[verb]; ok && !preferOperationMethod(rawName, verb, stem, method, currentStem, operations[verb]) {
 			continue
 		}
 		bestMatches[verb] = stem
 		operations[verb] = method
 	}
 	return operations
+}
+
+func preferOperationMethod(
+	rawName string,
+	operation string,
+	candidateStem string,
+	candidate OperationMethod,
+	currentStem string,
+	current OperationMethod,
+) bool {
+	if candidateStem != currentStem {
+		return preferOperationStem(rawName, candidateStem, currentStem)
+	}
+
+	candidateRank := operationAliasRank(operation, candidate.MethodName)
+	currentRank := operationAliasRank(operation, current.MethodName)
+	if candidateRank != currentRank {
+		return candidateRank < currentRank
+	}
+
+	return candidate.MethodName < current.MethodName
 }
 
 func preferOperationStem(rawName string, candidate string, current string) bool {
@@ -249,6 +274,13 @@ func preferOperationStem(rawName string, candidate string, current string) bool 
 	default:
 		return candidate < current
 	}
+}
+
+func operationAliasRank(operation string, methodName string) int {
+	if strings.HasPrefix(methodName, operation) {
+		return 0
+	}
+	return 1
 }
 
 func (pkg *Package) Struct(typeName string) (Struct, bool) {

@@ -560,6 +560,20 @@
       "mandatoryCoveragePercent": 94.44444444444444
     },
     {
+      "service": "generativeaidata",
+      "specs": 1,
+      "mappings": 3,
+      "trackedMappings": 3,
+      "untrackedMappings": 0,
+      "presentFields": 24,
+      "missingFields": 1,
+      "mandatoryPresentFields": 12,
+      "mandatoryMissingFields": 1,
+      "extraSpecFields": 0,
+      "overallCoveragePercent": 96,
+      "mandatoryCoveragePercent": 92.3076923076923
+    },
+    {
       "service": "governancerulescontrolplane",
       "specs": 2,
       "mappings": 9,

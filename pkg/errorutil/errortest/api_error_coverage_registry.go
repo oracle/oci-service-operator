@@ -753,6 +753,22 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 				retryableConflictWorkRequest,
 				"KnowledgeBase runtime persists create, update, and delete work-request IDs in shared async status, prefers create response-body identity when OCI returns it, recovers the OCID from work-request resources otherwise, and bounds pre-create reuse to exact compartmentId plus displayName matches.",
 			),
+			resourceKey("generativeaidata", "EnrichmentJob"): {
+				Resource: APIErrorCoverageResource{
+					Service: "generativeaidata",
+					Group:   "generativeaidata",
+					Version: apiErrorCoverageDefaultVersion,
+					Kind:    "EnrichmentJob",
+				},
+				Family: APIErrorCoverageFamilyGeneratedRuntimePlain,
+				SupportedOperations: []Operation{
+					OperationCreate,
+					OperationDelete,
+				},
+				DeleteNotFoundSemantics:    deleteNotFoundGeneratedRuntime,
+				RetryableConflictSemantics: retryableConflictGeneratedRuntime,
+				Deviation:                  "EnrichmentJob wraps generatedruntime around a Generate/Get/List/Cancel SDK surface, skips list-before-create reuse when spec.displayName is empty, rejects create-only drift because no UpdateEnrichmentJob exists, and maps Kubernetes delete onto CancelEnrichmentJob until OCI reaches CANCELED, FAILED, SUCCEEDED, or NotFound.",
+			},
 		},
 		reviewedRegistrationSet(
 			"artifacts",

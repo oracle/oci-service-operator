@@ -1,0 +1,117 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "generativeaidata",
+  "slug": "enrichmentjob",
+  "kind": "EnrichmentJob",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_generative_ai_data_enrichment_job",
+  "operations": {
+    "create": [
+      {
+        "operation": "GenerateEnrichmentJob",
+        "requestType": "generativeaidata.GenerateEnrichmentJobRequest",
+        "responseType": "generativeaidata.GenerateEnrichmentJobResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetEnrichmentJob",
+        "requestType": "generativeaidata.GetEnrichmentJobRequest",
+        "responseType": "generativeaidata.GetEnrichmentJobResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListEnrichmentJobs",
+        "requestType": "generativeaidata.ListEnrichmentJobsRequest",
+        "responseType": "generativeaidata.ListEnrichmentJobsResponse"
+      }
+    ],
+    "update": [],
+    "delete": [
+      {
+        "operation": "CancelEnrichmentJob",
+        "requestType": "generativeaidata.CancelEnrichmentJobRequest",
+        "responseType": "generativeaidata.CancelEnrichmentJobResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "ACCEPTED",
+        "IN_PROGRESS"
+      ],
+      "target": [
+        "SUCCEEDED"
+      ]
+    },
+    "update": {
+      "pending": [],
+      "target": []
+    }
+  },
+  "mutation": {
+    "mutable": [],
+    "forceNew": [
+      "compartment_id",
+      "semantic_store_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "CANCELING"
+    ],
+    "target": [
+      "CANCELED",
+      "FAILED",
+      "NOT_FOUND",
+      "SUCCEEDED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_generative_ai_data_enrichment_jobs",
+    "collectionField": "enrichment_job_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "semantic_store_id",
+      "compartment_id",
+      "display_name"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/generativeaidata/enrichmentjob/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/generativeaidata/enrichmentjob/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "delete-confirmation",
+      "lifecycle-classification",
+      "list-lookup",
+      "mutation-policy",
+      "status-projection",
+      "secret-output"
+    ]
+  },
+  "notes": [
+    "Pinned provider boundary: terraform-provider-oci at the sources.lock revision does not register a generativeaidata EnrichmentJob resource or datasource, so this row keeps a repo-curated oci_generative_ai_data_enrichment_job placeholder identifier and records the reviewed OCI SDK job surface instead of formal-import output.",
+    "Pinned OCI SDK contract: GenerateEnrichmentJob, GetEnrichmentJob, ListEnrichmentJobs, and CancelEnrichmentJob form the published controller-backed job surface; the service does not expose plain Create/Update/Delete EnrichmentJob operations.",
+    "Pinned OCI SDK identity and lifecycle shape: GetEnrichmentJob and CancelEnrichmentJob both require semanticStoreId plus enrichmentJobId, ListEnrichmentJobs requires semanticStoreId plus compartmentId, and the job lifecycle states are ACCEPTED, IN_PROGRESS, FAILED, SUCCEEDED, CANCELING, and CANCELED.",
+    "Repo-authored mutation and delete policy stays explicit: compartmentId and semanticStoreId are the create-time lookup and identity fields, every other published spec field is create-only once a job exists, delete maps to CancelEnrichmentJob and keeps the finalizer until the job reaches CANCELED, SUCCEEDED, FAILED, or NotFound, and pre-create reuse is restricted to exact semanticStoreId plus compartmentId plus displayName lookup with duplicate matches rejected."
+  ]
+}

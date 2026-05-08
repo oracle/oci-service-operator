@@ -1,0 +1,130 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title State Machine - generativeaidata/EnrichmentJob
+skinparam state {
+  backgroundColor #f8fafc
+  borderColor #0f172a
+  fontColor #0f172a
+  startColor #1d4ed8
+  endColor #0f172a
+}
+left to right direction
+hide empty description
+state "Observe" as observe
+state "EvaluateReady" as evaluate_ready
+state "Ready" as ready
+state "Retryable" as retryable
+state "Failed" as failed
+observe : read spec, tracked status, delete intent,\nand current OCI lifecycle
+state "ResolveByLookup" as resolve_by_lookup
+state "RejectUnsupportedDrift" as reject_unsupported_drift
+state "DeletePending" as delete_pending
+state "Deleted" as deleted
+state "DeleteCleanupBlocked" as delete_cleanup_blocked
+[*] --> observe : GenerateEnrichmentJob
+observe --> resolve_by_lookup : tracked identity missing
+resolve_by_lookup --> evaluate_ready : lookup or create reaches\nSUCCEEDED
+resolve_by_lookup --> retryable : OCI state in ACCEPTED,\nIN_PROGRESS, CANCELING
+resolve_by_lookup --> failed : unresolved OCI error or non-success state
+observe --> evaluate_ready : OCI state in SUCCEEDED
+observe --> retryable : OCI state in ACCEPTED,\nIN_PROGRESS, CANCELING
+observe --> failed : unresolved OCI error or non-success state
+evaluate_ready --> reject_unsupported_drift : force-new or conflicting\ndrift detected
+reject_unsupported_drift --> ready : wait for spec or live state change
+evaluate_ready --> ready : no supported drift remains
+ready --> ready : no supported drift remains
+retryable --> retryable : OCI remains retryable
+failed --> failed : OCI remains terminal
+ready --> delete_pending : delete requested
+retryable --> delete_pending : delete requested
+failed --> delete_pending : delete requested
+delete_pending --> delete_cleanup_blocked : cleanup or finalizer release remains blocked
+delete_cleanup_blocked --> deleted : retry delete completion until allowed
+deleted --> deleted : terminal stutter
+note right of ready
+shared diagram:
+shared/diagrams/shared-controller-state-machine.svg
+Start from the shared controller phase model and
+specialize imported provider states, delete
+targets, and failure exits here.
+archetype batch: Generated service-manager
+controllers map provider states into the shared
+controller phases with explicit finalizer and
+requeue policies.
+service: generativeaidata
+slug: enrichmentjob
+kind: EnrichmentJob
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: provisioning, terminating
+provider states: create ACCEPTED, IN_PROGRESS;
+update none; delete CANCELING
+follow-up: create=read-after-write;
+delete=confirm-delete
+supported drift: none
+reject before mutate: force-new fields
+compartment_id, semantic_store_id
+create-only fields: defined_tags, description,
+display_name, enrichment_job_configuration (+2
+more)
+list lookup:
+oci_generative_ai_data_enrichment_jobs filters
+semantic_store_id, compartment_id, display_name;
+Exact displayName match within the requested
+semanticStoreId and compartmentId. Duplicate
+matches fail.
+conflicts: none
+open gaps: none
+EnrichmentJob keeps the generated controller and
+service-manager shell, but the handwritten
+runtime client overrides the published contract
+so Kubernetes create calls GenerateEnrichmentJob
+and Kubernetes delete requests
+CancelEnrichmentJob instead of claiming a plain
+CRUD surface.
+ACCEPTED and IN_PROGRESS remain the provisioning
+states for create and ordinary observe.
+SUCCEEDED is the only steady success state,
+while FAILED and CANCELED are terminal
+unsuccessful outcomes that surface directly on
+the CR status.
+Delete confirmation is explicit repo-authored
+cancel behavior: the finalizer is retained until
+GetEnrichmentJob reports CANCELED, SUCCEEDED,
+FAILED, or NotFound, and a post-cancel read that
+still shows ACCEPTED or IN_PROGRESS is treated
+as pending until OCI reflects the cancellation.
+Pre-create reuse only runs when spec.displayName
+is present. ListEnrichmentJobs is narrowed by
+semanticStoreId, compartmentId, and displayName,
+then duplicate exact matches fail instead of
+binding arbitrarily.
+Because the pinned SDK has no
+UpdateEnrichmentJob, compartmentId and
+semanticStoreId remain create-time identity
+inputs and every other published spec field is
+create-only drift after create. The runtime
+rejects that drift instead of simulating an
+update surface.
+The pinned terraform-provider-oci revision has
+no matching generativeaidata resource, so the
+import catalog for this row is SDK-shaped and
+repo-curated.
+end note
+note right of delete_pending
+delete policy: required
+delete observe: GetEnrichmentJob or
+ListEnrichmentJobs
+delete targets: CANCELED, FAILED, NOT_FOUND,
+SUCCEEDED
+end note
+@enduml

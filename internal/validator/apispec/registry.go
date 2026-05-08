@@ -42,6 +42,7 @@ import (
 	gdpv1beta1 "github.com/oracle/oci-service-operator/api/gdp/v1beta1"
 	generativeaiv1beta1 "github.com/oracle/oci-service-operator/api/generativeai/v1beta1"
 	generativeaiagentv1beta1 "github.com/oracle/oci-service-operator/api/generativeaiagent/v1beta1"
+	generativeaidatav1beta1 "github.com/oracle/oci-service-operator/api/generativeaidata/v1beta1"
 	governancerulescontrolplanev1beta1 "github.com/oracle/oci-service-operator/api/governancerulescontrolplane/v1beta1"
 	healthchecksv1beta1 "github.com/oracle/oci-service-operator/api/healthchecks/v1beta1"
 	identityv1beta1 "github.com/oracle/oci-service-operator/api/identity/v1beta1"
@@ -2633,6 +2634,22 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "generativeaiagent.KnowledgeBaseSummary",
+			},
+		},
+	},
+	{
+		Name:       "GenerativeaidataEnrichmentJob",
+		SpecType:   reflect.TypeOf(generativeaidatav1beta1.EnrichmentJobSpec{}),
+		StatusType: reflect.TypeOf(generativeaidatav1beta1.EnrichmentJobStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "generativeaidata.EnrichmentJob",
+			},
+			{
+				SDKStruct: "generativeaidata.EnrichmentJobCollection",
+			},
+			{
+				SDKStruct: "generativeaidata.EnrichmentJobSummary",
 			},
 		},
 	},
