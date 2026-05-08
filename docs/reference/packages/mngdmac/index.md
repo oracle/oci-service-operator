@@ -2,7 +2,7 @@
 
 # Managed Services for Mac
 
-Manage OCI Mac orders from Kubernetes with a reviewed controller-backed runtime.
+Manage OCI Managed Services for Mac orders from Kubernetes with a reviewed controller-backed runtime.
 
 | Field | Value |
 | --- | --- |
@@ -17,7 +17,7 @@ Manage OCI Mac orders from Kubernetes with a reviewed controller-backed runtime.
 ## Notes
 
 - Current package scope is intentionally limited to MacOrder while MacDevice and auxiliary device-management workflows stay unpublished.
-- The published runtime uses service-SDK work requests for create, update, and delete, maps Kubernetes delete to CancelMacOrder, and keeps ChangeMacOrderCompartment out of scope.
+- Kubernetes delete maps to CancelMacOrder, and the published runtime uses service-SDK work requests for create, update, and delete instead of a separate DeleteMacOrder API.
 - No checked-in release manifest currently lists this package; the resource scope below reflects the current repository package metadata.
 - This package is currently hidden from the Supported Resources landing page until a checked-in release manifest promotes it to the customer-visible surface.
 

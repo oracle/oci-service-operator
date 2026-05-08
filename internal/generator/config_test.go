@@ -1183,6 +1183,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"marketplace",
 		"mngdmac",
 		"mediaservices",
+		"mngdmac",
 		"mysql",
 		"networkloadbalancer",
 		"nosql",
@@ -1324,6 +1325,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"marketplaceprivateoffer",
 		"marketplacepublisher",
 		"mediaservices",
+		"mngdmac",
 		"operatoraccesscontrol",
 		"opsi",
 		"optimizer",
@@ -1426,6 +1428,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	assertServiceSelection(t, services["marketplaceprivateoffer"], true, SelectionModeExplicit, []string{"Attachment", "Offer"})
 	assertServiceSelection(t, services["marketplacepublisher"], true, SelectionModeExplicit, []string{"Artifact", "Listing", "ListingRevision", "ListingRevisionAttachment", "ListingRevisionNote", "ListingRevisionPackage", "Term", "TermVersion"})
 	assertServiceSelection(t, services["mediaservices"], true, SelectionModeExplicit, []string{"MediaAsset"})
+	assertServiceSelection(t, services["mngdmac"], true, SelectionModeExplicit, []string{"MacOrder"})
 	assertServiceSelection(t, services["operatoraccesscontrol"], true, SelectionModeExplicit, []string{"OperatorControl", "OperatorControlAssignment"})
 	assertServiceSelection(t, services["opsi"], true, SelectionModeExplicit, []string{"AwrHub", "AwrHubSource", "ChargebackPlan", "ChargebackPlanReport", "DatabaseInsight", "EnterpriseManagerBridge", "ExadataInsight", "HostInsight", "NewsReport", "OperationsInsightsPrivateEndpoint", "OperationsInsightsWarehouse", "OperationsInsightsWarehouseUser", "OpsiConfiguration"})
 	assertServiceSelection(t, services["optimizer"], true, SelectionModeExplicit, []string{"Profile"})
@@ -2221,6 +2224,7 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 		"marketplaceprivateoffer":     {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"marketplacepublisher":        {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"mediaservices":               {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"mngdmac":                     {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
 		"operatoraccesscontrol":       {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"opsi":                        {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"optimizer":                   {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
@@ -2282,6 +2286,17 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 	}
 	if queue.WorkRequest.LegacyFieldBridge.Delete != "DeleteWorkRequestId" {
 		t.Fatalf("queue Queue delete bridge = %q, want DeleteWorkRequestId", queue.WorkRequest.LegacyFieldBridge.Delete)
+	}
+
+	mngdmac := assertAsyncContract(t, services["mngdmac"], "MacOrder", AsyncStrategyWorkRequest, AsyncRuntimeGeneratedRuntime)
+	if mngdmac.WorkRequest.Source != AsyncWorkRequestSourceServiceSDK {
+		t.Fatalf("mngdmac MacOrder workRequest.source = %q, want %q", mngdmac.WorkRequest.Source, AsyncWorkRequestSourceServiceSDK)
+	}
+	if !slices.Equal(mngdmac.WorkRequest.Phases, []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}) {
+		t.Fatalf("mngdmac MacOrder workRequest.phases = %v", mngdmac.WorkRequest.Phases)
+	}
+	if mngdmac.WorkRequest.LegacyFieldBridge.hasOverride() {
+		t.Fatalf("mngdmac MacOrder workRequest.legacyFieldBridge = %#v, want empty legacy bridge", mngdmac.WorkRequest.LegacyFieldBridge)
 	}
 
 	vbsinst := assertAsyncContract(t, services["vbsinst"], "VbsInstance", AsyncStrategyWorkRequest, AsyncRuntimeGeneratedRuntime)

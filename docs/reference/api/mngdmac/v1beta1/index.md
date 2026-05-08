@@ -38,6 +38,7 @@ MacOrderSpec defines the desired state of MacOrder.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| `cancelReason` | The reason for the MacOrder cancellation. | `string` | No | - | - |
 | `commitmentTerm` | Enum that indicates the agreed commitment term for the MacDevices. | `string` | Yes | - | - |
 | `compartmentId` | OCID of the compartment to which the resource belongs to. | `string` | Yes | - | - |
 | `displayName` | A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information. Example: `My new resource` | `string` | No | - | - |

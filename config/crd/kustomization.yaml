@@ -143,6 +143,7 @@ resources:
 - bases/marketplacepublisher.oracle.com_termversions.yaml
 - bases/mngdmac.oracle.com_macorders.yaml
 - bases/mediaservices.oracle.com_mediaassets.yaml
+- bases/mngdmac.oracle.com_macorders.yaml
 - bases/monitoring.oracle.com_alarms.yaml
 - bases/monitoring.oracle.com_alarmsuppressions.yaml
 - bases/mysql.oracle.com_dbsystems.yaml
