@@ -38,6 +38,9 @@ type MacOrderSpec struct {
 	// The IP Range specified by the customer for this order.
 	// +kubebuilder:validation:Optional
 	IpRange string `json:"ipRange,omitempty"`
+	// The reason for the MacOrder cancellation.
+	// +kubebuilder:validation:Optional
+	CancelReason string `json:"cancelReason,omitempty"`
 }
 
 // MacOrderStatus defines the observed state of MacOrder.

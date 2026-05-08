@@ -1754,6 +1754,32 @@ rules:
   - patch
   - update
 - apiGroups:
+  - mngdmac.oracle.com
+  resources:
+  - macorders
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - mngdmac.oracle.com
+  resources:
+  - macorders/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - mngdmac.oracle.com
+  resources:
+  - macorders/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - monitoring.oracle.com
   resources:
   - alarms

@@ -14,10 +14,10 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	}
 
 	byKey := inventoryByKey(inventory)
-	if got, want := len(inventory), 352; got != want {
+	if got, want := len(inventory), 357; got != want {
 		t.Fatalf("len(inventory) = %d, want %d", got, want)
 	}
-	if got, want := countRegistrations(inventory), 227; got != want {
+	if got, want := countRegistrations(inventory), 232; got != want {
 		t.Fatalf("registration inventory count = %d, want %d", got, want)
 	}
 	if got, want := countExceptions(inventory), 125; got != want {
@@ -58,6 +58,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventorySelectionSource(t, byKey, "lustrefilestorage/LustreFileSystem", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "marketplace/AcceptedAgreement", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "mediaservices/MediaAsset", "selection.includeKinds")
+	assertInventorySelectionSource(t, byKey, "mngdmac/MacOrder", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "oda/Skill", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "opa/OpaInstance", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "psa/PrivateServiceAccess", "selection.includeKinds")
@@ -135,6 +136,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventoryRegistration(t, byKey, "lustrefilestorage/LustreFileSystem")
 	assertInventoryRegistration(t, byKey, "marketplace/AcceptedAgreement")
 	assertInventoryRegistration(t, byKey, "mediaservices/MediaAsset")
+	assertInventoryRegistration(t, byKey, "mngdmac/MacOrder")
 	assertInventoryRegistration(t, byKey, "oce/OceInstance")
 	assertInventoryRegistration(t, byKey, "ocvp/Cluster")
 	assertInventoryRegistration(t, byKey, "oda/Skill")
@@ -204,6 +206,7 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedFamily(t, "lustrefilestorage/LustreFileSystem", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "marketplace/AcceptedAgreement", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "mediaservices/MediaAsset", APIErrorCoverageFamilyGeneratedRuntimePlain)
+	assertReviewedFamily(t, "mngdmac/MacOrder", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "monitoring/Alarm", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "oce/OceInstance", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "nosql/Table", APIErrorCoverageFamilyLegacyAdapter)

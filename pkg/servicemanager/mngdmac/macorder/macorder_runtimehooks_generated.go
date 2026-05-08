@@ -36,6 +36,7 @@ type MacOrderRuntimeHooks struct {
 	Get                 runtimeOperationHooks[mngdmacsdk.GetMacOrderRequest, mngdmacsdk.GetMacOrderResponse]
 	List                runtimeOperationHooks[mngdmacsdk.ListMacOrdersRequest, mngdmacsdk.ListMacOrdersResponse]
 	Update              runtimeOperationHooks[mngdmacsdk.UpdateMacOrderRequest, mngdmacsdk.UpdateMacOrderResponse]
+	Delete              runtimeOperationHooks[mngdmacsdk.CancelMacOrderRequest, mngdmacsdk.CancelMacOrderResponse]
 	WrapGeneratedClient []func(MacOrderServiceClient) MacOrderServiceClient
 }
 
@@ -101,7 +102,7 @@ func newMacOrderRuntimeSemantics() *generatedruntime.Semantics {
 			Strategy: "GetWorkRequest -> CancelMacOrder/GetMacOrder/ListMacOrders confirm-delete",
 			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
 		},
-		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{{Phase: "delete", MethodName: "CancelMacOrder", RequestTypeName: "mngdmac.CancelMacOrderRequest", ResponseTypeName: "mngdmac.CancelMacOrderResponse"}, {Phase: "update", MethodName: "ChangeMacOrderCompartment", RequestTypeName: "mngdmac.ChangeMacOrderCompartmentRequest", ResponseTypeName: "mngdmac.ChangeMacOrderCompartmentResponse"}},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{{Phase: "update", MethodName: "ChangeMacOrderCompartment", RequestTypeName: "mngdmac.ChangeMacOrderCompartmentRequest", ResponseTypeName: "mngdmac.ChangeMacOrderCompartmentResponse"}},
 		Unsupported:         []generatedruntime.UnsupportedSemantic{},
 	}
 }
@@ -137,6 +138,12 @@ func newMacOrderDefaultRuntimeHooks(sdkClient mngdmacsdk.MacOrderClient) MacOrde
 			Fields: []generatedruntime.RequestField{{FieldName: "MacOrderId", RequestName: "macOrderId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateMacOrderDetails", RequestName: "UpdateMacOrderDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request mngdmacsdk.UpdateMacOrderRequest) (mngdmacsdk.UpdateMacOrderResponse, error) {
 				return sdkClient.UpdateMacOrder(ctx, request)
+			},
+		},
+		Delete: runtimeOperationHooks[mngdmacsdk.CancelMacOrderRequest, mngdmacsdk.CancelMacOrderResponse]{
+			Fields: []generatedruntime.RequestField{{FieldName: "MacOrderId", RequestName: "macOrderId", Contribution: "path", PreferResourceID: true}, {FieldName: "CancelMacOrderDetails", RequestName: "CancelMacOrderDetails", Contribution: "body", PreferResourceID: false}},
+			Call: func(ctx context.Context, request mngdmacsdk.CancelMacOrderRequest) (mngdmacsdk.CancelMacOrderResponse, error) {
+				return sdkClient.CancelMacOrder(ctx, request)
 			},
 		},
 		WrapGeneratedClient: []func(MacOrderServiceClient) MacOrderServiceClient{},
@@ -195,6 +202,13 @@ func buildMacOrderGeneratedRuntimeConfig(
 			Fields:     append([]generatedruntime.RequestField(nil), hooks.Update.Fields...),
 			Call: func(ctx context.Context, request any) (any, error) {
 				return hooks.Update.Call(ctx, *request.(*mngdmacsdk.UpdateMacOrderRequest))
+			},
+		},
+		Delete: &generatedruntime.Operation{
+			NewRequest: func() any { return &mngdmacsdk.CancelMacOrderRequest{} },
+			Fields:     append([]generatedruntime.RequestField(nil), hooks.Delete.Fields...),
+			Call: func(ctx context.Context, request any) (any, error) {
+				return hooks.Delete.Call(ctx, *request.(*mngdmacsdk.CancelMacOrderRequest))
 			},
 		},
 	}

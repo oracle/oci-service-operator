@@ -766,6 +766,20 @@ packages:
         kind: MediaAsset
         summary: Manage OCI Media Services media assets.
 
+  - package: mngdmac
+    displayName: Managed Services for Mac
+    summary: Manage OCI Managed Services for Mac orders from Kubernetes with a reviewed controller-backed runtime.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to MacOrder while MacDevice and auxiliary device-management workflows stay unpublished.
+      - Kubernetes delete maps to CancelMacOrder, and the published runtime uses service-SDK work requests for create, update, and delete instead of a separate DeleteMacOrder API.
+    kindOverrides:
+      - group: mngdmac
+        kind: MacOrder
+        summary: Manage OCI Managed Services for Mac orders.
+
   - package: monitoring
     displayName: Monitoring
     summary: Manage OCI Monitoring resources from Kubernetes.

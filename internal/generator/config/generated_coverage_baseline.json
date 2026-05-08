@@ -1,16 +1,16 @@
 {
   "aggregate": {
-    "specs": 227,
-    "mappings": 967,
-    "trackedMappings": 966,
+    "specs": 232,
+    "mappings": 987,
+    "trackedMappings": 986,
     "untrackedMappings": 1,
-    "presentFields": 9653,
-    "missingFields": 160,
-    "mandatoryPresentFields": 3440,
-    "mandatoryMissingFields": 136,
-    "extraSpecFields": 832,
-    "overallCoveragePercent": 98.36950983389382,
-    "mandatoryCoveragePercent": 96.19686800894854
+    "presentFields": 9847,
+    "missingFields": 175,
+    "mandatoryPresentFields": 3510,
+    "mandatoryMissingFields": 141,
+    "extraSpecFields": 841,
+    "overallCoveragePercent": 98.25384154859309,
+    "mandatoryCoveragePercent": 96.1380443714051
   },
   "services": [
     {
@@ -866,6 +866,20 @@
       "extraSpecFields": 11,
       "overallCoveragePercent": 98.46153846153847,
       "mandatoryCoveragePercent": 90.9090909090909
+    },
+    {
+      "service": "mngdmac",
+      "specs": 1,
+      "mappings": 5,
+      "trackedMappings": 5,
+      "untrackedMappings": 0,
+      "presentFields": 46,
+      "missingFields": 1,
+      "mandatoryPresentFields": 26,
+      "mandatoryMissingFields": 1,
+      "extraSpecFields": 4,
+      "overallCoveragePercent": 97.87234042553192,
+      "mandatoryCoveragePercent": 96.29629629629629
     },
     {
       "service": "monitoring",
