@@ -1,0 +1,144 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Activity - generativeaidata/EnrichmentJob
+skinparam activity {
+  backgroundColor #f8fafc
+  borderColor #0f172a
+  fontColor #0f172a
+  diamondBackgroundColor #e2e8f0
+  diamondBorderColor #1d4ed8
+  diamondFontColor #0f172a
+  startColor #1d4ed8
+  endColor #0f172a
+  barColor #1d4ed8
+}
+start
+partition "Observe and Bind" {
+:Start from shared flow\nshared/diagrams/shared-reconcile-activity.svg;
+:Read desired EnrichmentJob spec, tracked\nstatus, and delete intent;
+if ("Tracked or explicit OCI identity present?") then (yes)
+:Get the current OCI resource via\nGetEnrichmentJob;
+else (no)
+:Resolve an existing OCI resource through\nListEnrichmentJobs using filters\nsemantic_store_id, compartment_id,\ndisplay_name;
+:Create the OCI resource via\nGenerateEnrichmentJob when no reusable match\nis found;
+:Persist the resolved or created OCI identity\ninto status;
+endif
+}
+if ("Delete requested?") then (yes)
+partition "Delete" {
+:Delete path uses CancelEnrichmentJob with\nrequired via GetEnrichmentJob or\nListEnrichmentJobs to CANCELED, FAILED,\nNOT_FOUND, SUCCEEDED confirmation;
+:Confirm deletion via GetEnrichmentJob or\nListEnrichmentJobs until OCI reaches CANCELED,\nFAILED, NOT_FOUND, SUCCEEDED;
+if ("Delete cleanup and finalizer release succeed?") then (yes)
+:Remove the finalizer after delete completion;
+else (no)
+:Stay blocked until cleanup or finalizer\nrelease succeeds;
+endif
+}
+stop
+else (no)
+partition "Lifecycle Classification" {
+if ("OCI state in retryable set?") then (yes)
+:Request requeue while OCI remains in ACCEPTED,\nIN_PROGRESS, CANCELING;
+stop
+endif
+if ("OCI state is outside success targets?") then (yes)
+:Return an unsuccessful reconcile result until\nOCI reaches SUCCEEDED;
+stop
+endif
+}
+partition "Ready and Drift Handling" {
+:Compare live OCI state against the\nrepo-authored mutation surface;
+if ("Force-new or conflicting drift detected?") then (yes)
+:Reject drift before OCI mutation for force-new\nfields compartment_id, semantic_store_id;
+stop
+endif
+:Run provider helper hooks\ncreate=tfresource.CreateResource;\ndelete=tfresource.DeleteResource when the\nmatching field-driven path executes;
+:Apply explicit follow-up semantics\ncreate=read-after-write; delete=confirm-delete;
+:Return success for the SUCCEEDED success state;
+:Project required status and finalizer policy\nretain-until-confirmed-delete;
+:Requeue on provisioning, terminating;
+}
+endif
+stop
+note right
+shared diagram:
+shared/diagrams/shared-reconcile-activity.svg
+Start from the shared reconcile activity and
+specialize provider-backed CRUD, wait, and
+status-projection details here.
+Controller-local activity diagrams add
+list-lookup hints, secret policies, delete
+handling, and open formal gaps.
+archetype batch: Generated service-manager
+controllers specialize the shared reconcile path
+with formal runtime ownership.
+service: generativeaidata
+slug: enrichmentjob
+kind: EnrichmentJob
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: provisioning, terminating
+provider states: create ACCEPTED, IN_PROGRESS;
+update none; delete CANCELING
+follow-up: create=read-after-write;
+delete=confirm-delete
+supported drift: none
+reject before mutate: force-new fields
+compartment_id, semantic_store_id
+create-only fields: defined_tags, description,
+display_name, enrichment_job_configuration (+2
+more)
+list lookup:
+oci_generative_ai_data_enrichment_jobs filters
+semantic_store_id, compartment_id, display_name;
+Exact displayName match within the requested
+semanticStoreId and compartmentId. Duplicate
+matches fail.
+conflicts: none
+open gaps: none
+EnrichmentJob keeps the generated controller and
+service-manager shell, but the handwritten
+runtime client overrides the published contract
+so Kubernetes create calls GenerateEnrichmentJob
+and Kubernetes delete requests
+CancelEnrichmentJob instead of claiming a plain
+CRUD surface.
+ACCEPTED and IN_PROGRESS remain the provisioning
+states for create and ordinary observe.
+SUCCEEDED is the only steady success state,
+while FAILED and CANCELED are terminal
+unsuccessful outcomes that surface directly on
+the CR status.
+Delete confirmation is explicit repo-authored
+cancel behavior: the finalizer is retained until
+GetEnrichmentJob reports CANCELED, SUCCEEDED,
+FAILED, or NotFound, and a post-cancel read that
+still shows ACCEPTED or IN_PROGRESS is treated
+as pending until OCI reflects the cancellation.
+Pre-create reuse only runs when spec.displayName
+is present. ListEnrichmentJobs is narrowed by
+semanticStoreId, compartmentId, and displayName,
+then duplicate exact matches fail instead of
+binding arbitrarily.
+Because the pinned SDK has no
+UpdateEnrichmentJob, compartmentId and
+semanticStoreId remain create-time identity
+inputs and every other published spec field is
+create-only drift after create. The runtime
+rejects that drift instead of simulating an
+update surface.
+The pinned terraform-provider-oci revision has
+no matching generativeaidata resource, so the
+import catalog for this row is SDK-shaped and
+repo-curated.
+end note
+@enduml

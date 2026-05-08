@@ -407,6 +407,10 @@ func buildServiceManagerModels(service ServiceConfig, version string, resources 
 		}
 
 		packagePath := service.ServiceManagerPackagePathFor(resource.Kind, resource.FileStem)
+		var sdkClients []SDKClientModel
+		if len(resource.Runtime.Clients) > 1 {
+			sdkClients = append([]SDKClientModel(nil), resource.Runtime.Clients...)
+		}
 		serviceManagers = append(serviceManagers, ServiceManagerModel{
 			Kind:                     resource.Kind,
 			SDKName:                  resource.SDKName,
@@ -425,6 +429,7 @@ func buildServiceManagerModels(service ServiceConfig, version string, resources 
 			ClientInterfaceName:      fmt.Sprintf("%sServiceClient", resource.Kind),
 			DefaultClientTypeName:    fmt.Sprintf("default%sServiceClient", resource.Kind),
 			UsesCredentialClient:     resourceUsesCredentialClient(resource),
+			SDKClients:               sdkClients,
 			SDKClientTypeName:        resource.Runtime.ClientType,
 			SDKClientConstructor:     resource.Runtime.ClientConstructor,
 			SDKClientConstructorKind: resource.Runtime.ClientConstructorKind,

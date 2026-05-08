@@ -1059,6 +1059,32 @@ rules:
   - patch
   - update
 - apiGroups:
+  - generativeaidata.oracle.com
+  resources:
+  - enrichmentjobs
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - generativeaidata.oracle.com
+  resources:
+  - enrichmentjobs/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - generativeaidata.oracle.com
+  resources:
+  - enrichmentjobs/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - governancerulescontrolplane.oracle.com
   resources:
   - governancerules

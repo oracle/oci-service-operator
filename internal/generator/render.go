@@ -1138,7 +1138,7 @@ func new{{ .Kind }}RuntimeSemantics() *generatedruntime.Semantics {
 }
 
 {{- end }}
-func new{{ .Kind }}DefaultRuntimeHooks(sdkClient {{ .SDKImportAlias }}.{{ .SDKClientTypeName }}) {{ .Kind }}RuntimeHooks {
+func new{{ .Kind }}DefaultRuntimeHooks(sdkClient {{- if gt (len .SDKClients) 1 }} {{ .Kind }}SDKClients{{- else }} {{ .SDKImportAlias }}.{{ .SDKClientTypeName }}{{- end }}) {{ .Kind }}RuntimeHooks {
 	return {{ .Kind }}RuntimeHooks{
 {{- if .Semantics }}
 		Semantics: new{{ .Kind }}RuntimeSemantics(),
@@ -1155,9 +1155,17 @@ func new{{ .Kind }}DefaultRuntimeHooks(sdkClient {{ .SDKImportAlias }}.{{ .SDKCl
 			Fields: {{ requestFieldsLiteral .CreateOperation.RequestFields }},
 			Call: func(ctx context.Context, request {{ .SDKImportAlias }}.{{ .CreateOperation.RequestTypeName }}) ({{ .SDKImportAlias }}.{{ .CreateOperation.ResponseTypeName }}, error) {
 {{- if .CreateOperation.UsesRequest }}
+{{- if gt (len $.SDKClients) 1 }}
+				return sdkClient.{{ .CreateOperation.ClientFieldName }}.{{ .CreateOperation.MethodName }}(ctx, request)
+{{- else }}
 				return sdkClient.{{ .CreateOperation.MethodName }}(ctx, request)
+{{- end }}
+{{- else }}
+{{- if gt (len $.SDKClients) 1 }}
+				return sdkClient.{{ .CreateOperation.ClientFieldName }}.{{ .CreateOperation.MethodName }}(ctx)
 {{- else }}
 				return sdkClient.{{ .CreateOperation.MethodName }}(ctx)
+{{- end }}
 {{- end }}
 			},
 		},
@@ -1167,9 +1175,17 @@ func new{{ .Kind }}DefaultRuntimeHooks(sdkClient {{ .SDKImportAlias }}.{{ .SDKCl
 			Fields: {{ requestFieldsLiteral .GetOperation.RequestFields }},
 			Call: func(ctx context.Context, request {{ .SDKImportAlias }}.{{ .GetOperation.RequestTypeName }}) ({{ .SDKImportAlias }}.{{ .GetOperation.ResponseTypeName }}, error) {
 {{- if .GetOperation.UsesRequest }}
+{{- if gt (len $.SDKClients) 1 }}
+				return sdkClient.{{ .GetOperation.ClientFieldName }}.{{ .GetOperation.MethodName }}(ctx, request)
+{{- else }}
 				return sdkClient.{{ .GetOperation.MethodName }}(ctx, request)
+{{- end }}
+{{- else }}
+{{- if gt (len $.SDKClients) 1 }}
+				return sdkClient.{{ .GetOperation.ClientFieldName }}.{{ .GetOperation.MethodName }}(ctx)
 {{- else }}
 				return sdkClient.{{ .GetOperation.MethodName }}(ctx)
+{{- end }}
 {{- end }}
 			},
 		},
@@ -1179,9 +1195,17 @@ func new{{ .Kind }}DefaultRuntimeHooks(sdkClient {{ .SDKImportAlias }}.{{ .SDKCl
 			Fields: {{ requestFieldsLiteral .ListOperation.RequestFields }},
 			Call: func(ctx context.Context, request {{ .SDKImportAlias }}.{{ .ListOperation.RequestTypeName }}) ({{ .SDKImportAlias }}.{{ .ListOperation.ResponseTypeName }}, error) {
 {{- if .ListOperation.UsesRequest }}
+{{- if gt (len $.SDKClients) 1 }}
+				return sdkClient.{{ .ListOperation.ClientFieldName }}.{{ .ListOperation.MethodName }}(ctx, request)
+{{- else }}
 				return sdkClient.{{ .ListOperation.MethodName }}(ctx, request)
+{{- end }}
+{{- else }}
+{{- if gt (len $.SDKClients) 1 }}
+				return sdkClient.{{ .ListOperation.ClientFieldName }}.{{ .ListOperation.MethodName }}(ctx)
 {{- else }}
 				return sdkClient.{{ .ListOperation.MethodName }}(ctx)
+{{- end }}
 {{- end }}
 			},
 		},
@@ -1191,9 +1215,17 @@ func new{{ .Kind }}DefaultRuntimeHooks(sdkClient {{ .SDKImportAlias }}.{{ .SDKCl
 			Fields: {{ requestFieldsLiteral .UpdateOperation.RequestFields }},
 			Call: func(ctx context.Context, request {{ .SDKImportAlias }}.{{ .UpdateOperation.RequestTypeName }}) ({{ .SDKImportAlias }}.{{ .UpdateOperation.ResponseTypeName }}, error) {
 {{- if .UpdateOperation.UsesRequest }}
+{{- if gt (len $.SDKClients) 1 }}
+				return sdkClient.{{ .UpdateOperation.ClientFieldName }}.{{ .UpdateOperation.MethodName }}(ctx, request)
+{{- else }}
 				return sdkClient.{{ .UpdateOperation.MethodName }}(ctx, request)
+{{- end }}
+{{- else }}
+{{- if gt (len $.SDKClients) 1 }}
+				return sdkClient.{{ .UpdateOperation.ClientFieldName }}.{{ .UpdateOperation.MethodName }}(ctx)
 {{- else }}
 				return sdkClient.{{ .UpdateOperation.MethodName }}(ctx)
+{{- end }}
 {{- end }}
 			},
 		},
@@ -1203,9 +1235,17 @@ func new{{ .Kind }}DefaultRuntimeHooks(sdkClient {{ .SDKImportAlias }}.{{ .SDKCl
 			Fields: {{ requestFieldsLiteral .DeleteOperation.RequestFields }},
 			Call: func(ctx context.Context, request {{ .SDKImportAlias }}.{{ .DeleteOperation.RequestTypeName }}) ({{ .SDKImportAlias }}.{{ .DeleteOperation.ResponseTypeName }}, error) {
 {{- if .DeleteOperation.UsesRequest }}
+{{- if gt (len $.SDKClients) 1 }}
+				return sdkClient.{{ .DeleteOperation.ClientFieldName }}.{{ .DeleteOperation.MethodName }}(ctx, request)
+{{- else }}
 				return sdkClient.{{ .DeleteOperation.MethodName }}(ctx, request)
+{{- end }}
+{{- else }}
+{{- if gt (len $.SDKClients) 1 }}
+				return sdkClient.{{ .DeleteOperation.ClientFieldName }}.{{ .DeleteOperation.MethodName }}(ctx)
 {{- else }}
 				return sdkClient.{{ .DeleteOperation.MethodName }}(ctx)
+{{- end }}
 {{- end }}
 			},
 		},
@@ -1214,7 +1254,7 @@ func new{{ .Kind }}DefaultRuntimeHooks(sdkClient {{ .SDKImportAlias }}.{{ .SDKCl
 	}
 }
 
-func new{{ .Kind }}RuntimeHooks(manager *{{ .ManagerTypeName }}, sdkClient {{ .SDKImportAlias }}.{{ .SDKClientTypeName }}) {{ .Kind }}RuntimeHooks {
+func new{{ .Kind }}RuntimeHooks(manager *{{ .ManagerTypeName }}, sdkClient {{- if gt (len .SDKClients) 1 }} {{ .Kind }}SDKClients{{- else }} {{ .SDKImportAlias }}.{{ .SDKClientTypeName }}{{- end }}) {{ .Kind }}RuntimeHooks {
 	hooks := new{{ .Kind }}DefaultRuntimeHooks(sdkClient)
 	for _, mutator := range {{ .FileStem }}RuntimeHooksMutators {
 		mutator(manager, &hooks)
@@ -1340,8 +1380,37 @@ type {{ .DefaultClientTypeName }} struct {
 
 var _ {{ .ClientInterfaceName }} = {{ .DefaultClientTypeName }}{}
 
+{{- if gt (len .SDKClients) 1 }}
+type {{ .Kind }}SDKClients struct {
+{{- range .SDKClients }}
+	{{ .FieldName }} {{ $.SDKImportAlias }}.{{ .TypeName }}
+{{- end }}
+}
+
+func new{{ .Kind }}SDKClients(manager *{{ .ManagerTypeName }}) ({{ .Kind }}SDKClients, error) {
+	var clients {{ .Kind }}SDKClients
+{{- range .SDKClients }}
+{{- if eq .ConstructorKind "provider" }}
+	{{ .VarName }}, err := {{ $.SDKImportAlias }}.{{ .Constructor }}(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize {{ $.Kind }} OCI client {{ .TypeName }}: %w", err)
+	}
+	clients.{{ .FieldName }} = {{ .VarName }}
+{{- else if eq .ConstructorKind "provider_endpoint" }}
+	return clients, fmt.Errorf("{{ $.SDKImportAlias }}.{{ .Constructor }} requires an explicit service endpoint")
+{{- else }}
+	return clients, fmt.Errorf("unsupported SDK client constructor signature for {{ $.SDKImportAlias }}.{{ .Constructor }}")
+{{- end }}
+{{- end }}
+	return clients, nil
+}
+
+{{- end }}
+
 var new{{ .Kind }}ServiceClient = func(manager *{{ .ManagerTypeName }}) {{ .ClientInterfaceName }} {
-{{- if eq .SDKClientConstructorKind "provider" }}
+{{- if gt (len .SDKClients) 1 }}
+	sdkClient, err := new{{ .Kind }}SDKClients(manager)
+{{- else if eq .SDKClientConstructorKind "provider" }}
 	sdkClient, err := {{ .SDKImportAlias }}.{{ .SDKClientConstructor }}(manager.Provider)
 {{- else }}
 	var (

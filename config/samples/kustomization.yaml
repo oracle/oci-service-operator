@@ -230,4 +230,5 @@ resources:
 - psa_v1beta1_privateserviceaccess.yaml
 - visualbuilder_v1beta1_vbinstance.yaml
 - mediaservices_v1beta1_mediaasset.yaml
+- generativeaidata_v1beta1_enrichmentjob.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

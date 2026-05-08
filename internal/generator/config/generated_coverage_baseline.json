@@ -1,16 +1,16 @@
 {
   "aggregate": {
-    "specs": 225,
-    "mappings": 956,
-    "trackedMappings": 955,
+    "specs": 226,
+    "mappings": 959,
+    "trackedMappings": 958,
     "untrackedMappings": 1,
-    "presentFields": 9568,
-    "missingFields": 152,
-    "mandatoryPresentFields": 3397,
-    "mandatoryMissingFields": 131,
+    "presentFields": 9592,
+    "missingFields": 153,
+    "mandatoryPresentFields": 3409,
+    "mandatoryMissingFields": 132,
     "extraSpecFields": 821,
-    "overallCoveragePercent": 98.43621399176955,
-    "mandatoryCoveragePercent": 96.28684807256236
+    "overallCoveragePercent": 98.42996408414571,
+    "mandatoryCoveragePercent": 96.27223948037278
   },
   "services": [
     {
@@ -558,6 +558,20 @@
       "extraSpecFields": 1,
       "overallCoveragePercent": 97.22222222222221,
       "mandatoryCoveragePercent": 94.44444444444444
+    },
+    {
+      "service": "generativeaidata",
+      "specs": 1,
+      "mappings": 3,
+      "trackedMappings": 3,
+      "untrackedMappings": 0,
+      "presentFields": 24,
+      "missingFields": 1,
+      "mandatoryPresentFields": 12,
+      "mandatoryMissingFields": 1,
+      "extraSpecFields": 0,
+      "overallCoveragePercent": 96,
+      "mandatoryCoveragePercent": 92.3076923076923
     },
     {
       "service": "governancerulescontrolplane",

@@ -43,6 +43,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/gdp"
 	"github.com/oracle/oci-go-sdk/v65/generativeai"
 	"github.com/oracle/oci-go-sdk/v65/generativeaiagent"
+	"github.com/oracle/oci-go-sdk/v65/generativeaidata"
 	"github.com/oracle/oci-go-sdk/v65/governancerulescontrolplane"
 	"github.com/oracle/oci-go-sdk/v65/healthchecks"
 	"github.com/oracle/oci-go-sdk/v65/identity"
@@ -739,6 +740,11 @@ var seedTargets = []Target{
 	newTarget("generativeaiagent", "KnowledgeBase", reflect.TypeOf(generativeaiagent.KnowledgeBase{})),
 	newTarget("generativeaiagent", "KnowledgeBaseCollection", reflect.TypeOf(generativeaiagent.KnowledgeBaseCollection{})),
 	newTarget("generativeaiagent", "KnowledgeBaseSummary", reflect.TypeOf(generativeaiagent.KnowledgeBaseSummary{})),
+
+	// Generativeaidata CRD support
+	newTarget("generativeaidata", "EnrichmentJob", reflect.TypeOf(generativeaidata.EnrichmentJob{})),
+	newTarget("generativeaidata", "EnrichmentJobCollection", reflect.TypeOf(generativeaidata.EnrichmentJobCollection{})),
+	newTarget("generativeaidata", "EnrichmentJobSummary", reflect.TypeOf(generativeaidata.EnrichmentJobSummary{})),
 
 	// Governancerulescontrolplane CRD support
 	newTarget("governancerulescontrolplane", "CreateGovernanceRuleDetails", reflect.TypeOf(governancerulescontrolplane.CreateGovernanceRuleDetails{})),
