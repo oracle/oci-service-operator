@@ -14,10 +14,10 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	}
 
 	byKey := inventoryByKey(inventory)
-	if got, want := len(inventory), 352; got != want {
+	if got, want := len(inventory), 357; got != want {
 		t.Fatalf("len(inventory) = %d, want %d", got, want)
 	}
-	if got, want := countRegistrations(inventory), 227; got != want {
+	if got, want := countRegistrations(inventory), 232; got != want {
 		t.Fatalf("registration inventory count = %d, want %d", got, want)
 	}
 	if got, want := countExceptions(inventory), 125; got != want {
@@ -57,12 +57,14 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventorySelectionSource(t, byKey, "loadbalancer/LoadBalancer", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "lustrefilestorage/LustreFileSystem", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "marketplace/AcceptedAgreement", "selection.includeKinds")
+	assertInventorySelectionSource(t, byKey, "mngdmac/MacOrder", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "mediaservices/MediaAsset", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "oda/Skill", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "opa/OpaInstance", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "psa/PrivateServiceAccess", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "queue/Queue", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "rover/RoverCluster", "selection.includeKinds")
+	assertInventorySelectionSource(t, byKey, "servicemanagerproxy/ServiceEnvironment", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "usageapi/Query", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "vbsinst/VbsInstance", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "visualbuilder/VbInstance", "selection.includeKinds")
@@ -134,6 +136,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventoryRegistration(t, byKey, "loadbalancer/LoadBalancer")
 	assertInventoryRegistration(t, byKey, "lustrefilestorage/LustreFileSystem")
 	assertInventoryRegistration(t, byKey, "marketplace/AcceptedAgreement")
+	assertInventoryRegistration(t, byKey, "mngdmac/MacOrder")
 	assertInventoryRegistration(t, byKey, "mediaservices/MediaAsset")
 	assertInventoryRegistration(t, byKey, "oce/OceInstance")
 	assertInventoryRegistration(t, byKey, "ocvp/Cluster")
@@ -145,6 +148,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventoryException(t, byKey, "opensearch/WorkRequestLog", `controller.strategy="none"`)
 	assertInventoryRegistration(t, byKey, "psa/PrivateServiceAccess")
 	assertInventoryRegistration(t, byKey, "self/Subscription")
+	assertInventoryRegistration(t, byKey, "servicemanagerproxy/ServiceEnvironment")
 	assertInventoryRegistration(t, byKey, "usageapi/Query")
 	assertInventoryRegistration(t, byKey, "vbsinst/VbsInstance")
 	assertInventoryRegistration(t, byKey, "visualbuilder/VbInstance")
@@ -203,6 +207,7 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedFamily(t, "loadbalancer/LoadBalancer", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "lustrefilestorage/LustreFileSystem", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "marketplace/AcceptedAgreement", APIErrorCoverageFamilyGeneratedRuntimePlain)
+	assertReviewedFamily(t, "mngdmac/MacOrder", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "mediaservices/MediaAsset", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "monitoring/Alarm", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "oce/OceInstance", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
@@ -217,6 +222,7 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedFamily(t, "queue/Queue", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "redis/RedisCluster", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "rover/RoverCluster", APIErrorCoverageFamilyGeneratedRuntimePlain)
+	assertReviewedFamily(t, "servicemanagerproxy/ServiceEnvironment", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "streaming/Stream", APIErrorCoverageFamilyGeneratedRuntimeFollowUp)
 	assertReviewedFamily(t, "tenantmanagercontrolplane/Organization", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "usageapi/Query", APIErrorCoverageFamilyGeneratedRuntimePlain)

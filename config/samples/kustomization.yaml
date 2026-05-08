@@ -229,7 +229,12 @@ resources:
 - generativeaiagent_v1beta1_knowledgebase.yaml
 - psa_v1beta1_privateserviceaccess.yaml
 - visualbuilder_v1beta1_vbinstance.yaml
+- mngdmac_v1beta1_macorder.yaml
+- generativeaidata_v1beta1_enrichmentjob.yaml
+- rover_v1beta1_rovercluster.yaml
+- servicemanagerproxy_v1beta1_serviceenvironment.yaml
 - mediaservices_v1beta1_mediaasset.yaml
 - zpr_v1beta1_zprpolicy.yaml
 - self_v1beta1_subscription.yaml
+- tenantmanagercontrolplane_v1beta1_organization.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples
