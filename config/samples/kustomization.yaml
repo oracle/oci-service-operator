@@ -231,4 +231,5 @@ resources:
 - visualbuilder_v1beta1_vbinstance.yaml
 - mediaservices_v1beta1_mediaasset.yaml
 - zpr_v1beta1_zprpolicy.yaml
+- tenantmanagercontrolplane_v1beta1_organization.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

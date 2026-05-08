@@ -1,16 +1,16 @@
 {
   "aggregate": {
-    "specs": 226,
-    "mappings": 961,
-    "trackedMappings": 960,
+    "specs": 227,
+    "mappings": 965,
+    "trackedMappings": 964,
     "untrackedMappings": 1,
-    "presentFields": 9602,
-    "missingFields": 153,
-    "mandatoryPresentFields": 3419,
-    "mandatoryMissingFields": 132,
-    "extraSpecFields": 823,
-    "overallCoveragePercent": 98.4315735520246,
-    "mandatoryCoveragePercent": 96.28273725711067
+    "presentFields": 9619,
+    "missingFields": 155,
+    "mandatoryPresentFields": 3430,
+    "mandatoryMissingFields": 133,
+    "extraSpecFields": 825,
+    "overallCoveragePercent": 98.41416001636996,
+    "mandatoryCoveragePercent": 96.2671905697446
   },
   "services": [
     {
@@ -1230,6 +1230,20 @@
       "extraSpecFields": 4,
       "overallCoveragePercent": 100,
       "mandatoryCoveragePercent": 100
+    },
+    {
+      "service": "tenantmanagercontrolplane",
+      "specs": 1,
+      "mappings": 4,
+      "trackedMappings": 4,
+      "untrackedMappings": 0,
+      "presentFields": 17,
+      "missingFields": 2,
+      "mandatoryPresentFields": 11,
+      "mandatoryMissingFields": 1,
+      "extraSpecFields": 2,
+      "overallCoveragePercent": 89.47368421052632,
+      "mandatoryCoveragePercent": 91.66666666666666
     },
     {
       "service": "usageapi",

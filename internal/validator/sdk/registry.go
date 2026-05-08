@@ -91,6 +91,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/servicecatalog"
 	"github.com/oracle/oci-go-sdk/v65/stackmonitoring"
 	"github.com/oracle/oci-go-sdk/v65/streaming"
+	"github.com/oracle/oci-go-sdk/v65/tenantmanagercontrolplane"
 	"github.com/oracle/oci-go-sdk/v65/usageapi"
 	"github.com/oracle/oci-go-sdk/v65/vbsinst"
 	"github.com/oracle/oci-go-sdk/v65/visualbuilder"
@@ -1205,6 +1206,12 @@ var seedTargets = []Target{
 	newTarget("stackmonitoring", "MonitoredResourceTypeSummary", reflect.TypeOf(stackmonitoring.MonitoredResourceTypeSummary{})),
 	newTarget("stackmonitoring", "MonitoringTemplateSummary", reflect.TypeOf(stackmonitoring.MonitoringTemplateSummary{})),
 	newTarget("stackmonitoring", "ProcessSetSummary", reflect.TypeOf(stackmonitoring.ProcessSetSummary{})),
+
+	// Tenantmanagercontrolplane CRD support
+	newTarget("tenantmanagercontrolplane", "UpdateOrganizationDetails", reflect.TypeOf(tenantmanagercontrolplane.UpdateOrganizationDetails{})),
+	newTarget("tenantmanagercontrolplane", "Organization", reflect.TypeOf(tenantmanagercontrolplane.Organization{})),
+	newTarget("tenantmanagercontrolplane", "OrganizationCollection", reflect.TypeOf(tenantmanagercontrolplane.OrganizationCollection{})),
+	newTarget("tenantmanagercontrolplane", "OrganizationSummary", reflect.TypeOf(tenantmanagercontrolplane.OrganizationSummary{})),
 
 	// Vbsinst CRD support
 	newTarget("vbsinst", "CreateVbsInstanceDetails", reflect.TypeOf(vbsinst.CreateVbsInstanceDetails{})),

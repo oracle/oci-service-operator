@@ -1,0 +1,208 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: organizations.tenantmanagercontrolplane.oracle.com
+spec:
+  group: tenantmanagercontrolplane.oracle.com
+  names:
+    kind: Organization
+    listKind: OrganizationList
+    plural: organizations
+    singular: organization
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: status of the Organization
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the Organization
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: Organization is the Schema for the organizations API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: OrganizationSpec defines the desired state of Organization.
+            properties:
+              compartmentId:
+                description: |-
+                  The tenancy OCID containing the existing organization when binding by list lookup.
+                  Provide this when `organizationId` is not set; reconcile requires `ListOrganizations` to return a unique match.
+                type: string
+              defaultUcmSubscriptionId:
+                description: |-
+                  Desired default Universal Credits Model subscription for the bound organization.
+                  Omit this field to leave the current OCI value unchanged.
+                type: string
+              organizationId:
+                description: The OCI identifier of the existing organization to bind
+                  directly.
+                type: string
+            type: object
+          status:
+            description: OrganizationStatus defines the observed state of Organization.
+            properties:
+              compartmentId:
+                description: OCID of the compartment containing the organization.
+                  Always a tenancy OCID.
+                type: string
+              defaultUcmSubscriptionId:
+                description: OCID of the default Universal Credits Model subscription.
+                  Any tenancy joining the organization will automatically get assigned
+                  this subscription, if a subscription is not explictly assigned.
+                type: string
+              displayName:
+                description: A display name for the organization. Avoid entering confidential
+                  information.
+                type: string
+              id:
+                description: OCID of the organization.
+                type: string
+              lifecycleState:
+                description: Lifecycle state of the organization.
+                type: string
+              parentName:
+                description: The name of the tenancy that is the organization parent.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              timeCreated:
+                description: Date and time when the organization was created.
+                type: string
+              timeUpdated:
+                description: Date and time when the organization was last updated.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

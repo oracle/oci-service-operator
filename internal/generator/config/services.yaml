@@ -4338,6 +4338,82 @@ services:
           serviceManager:
             packagePath: streaming/stream
 
+  - service: tenantmanagercontrolplane
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/tenantmanagercontrolplane
+    group: tenantmanagercontrolplane
+    version: v1beta1
+    phase: security-and-identity
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Organization
+    observedState:
+      excludedFieldPaths:
+        Organization:
+          - SystemTags
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: Organization
+          formalSpec: organization
+          async:
+            strategy: workrequest
+            runtime: generatedruntime
+            formalClassification: workrequest
+            workRequest:
+              source: service-sdk
+              phases:
+                - update
+          serviceManager:
+            packagePath: tenantmanagercontrolplane/organization
+          specFields:
+            - name: OrganizationId
+              type: string
+              tag: 'json:"organizationId,omitempty"'
+              comments:
+                - The OCI identifier of the existing organization to bind directly.
+              markers:
+                - +kubebuilder:validation:Optional
+            - name: CompartmentId
+              type: string
+              tag: 'json:"compartmentId,omitempty"'
+              comments:
+                - The tenancy OCID containing the existing organization when binding by list lookup.
+                - Provide this when `organizationId` is not set; reconcile requires `ListOrganizations` to return a unique match.
+              markers:
+                - +kubebuilder:validation:Optional
+            - name: DefaultUcmSubscriptionId
+              type: string
+              tag: 'json:"defaultUcmSubscriptionId,omitempty"'
+              comments:
+                - Desired default Universal Credits Model subscription for the bound organization.
+                - Omit this field to leave the current OCI value unchanged.
+              markers:
+                - +kubebuilder:validation:Optional
+          sample:
+            body: |-
+              #
+              # Tenant Manager Control Plane does not expose CreateOrganization or DeleteOrganization.
+              # This sample binds an existing Organization by OCID and optionally
+              # reconciles defaultUcmSubscriptionId in place.
+              #
+              apiVersion: tenantmanagercontrolplane.oracle.com/v1beta1
+              kind: Organization
+              metadata:
+                name: organization-sample
+              spec:
+                organizationId: ocid1.organization.oc1..exampleuniqueID
+                defaultUcmSubscriptionId: ocid1.subscription.oc1..exampleuniqueID
+
   - service: usageapi
     sdkPackage: github.com/oracle/oci-go-sdk/v65/usageapi
     group: usageapi
