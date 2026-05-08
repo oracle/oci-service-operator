@@ -1006,6 +1006,20 @@ packages:
     customerVisible: false
     guidePath: docs/installation.md
 
+  - package: self
+    displayName: SELF
+    summary: Manage OCI SELF marketplace subscriptions from Kubernetes with a reviewed controller-backed runtime.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to self/Subscription and must stay distinct from ons/Subscription in all shared docs and catalog surfaces.
+      - The published runtime uses service-SDK work requests for create, update, and delete, with bounded existing-before-create reuse on exact compartmentId plus displayName plus tenantId/sellerId/productId rereads.
+    kindOverrides:
+      - group: self
+        kind: Subscription
+        summary: Manage OCI SELF marketplace subscriptions.
+
   - package: servicecatalog
     displayName: Service Catalog
     summary: Manage OCI Service Catalog catalogs and private applications from Kubernetes.

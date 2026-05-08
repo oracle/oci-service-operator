@@ -206,6 +206,7 @@ resources:
 - bases/sch.oracle.com_serviceconnectors.yaml
 - bases/securityattribute.oracle.com_securityattributenamespaces.yaml
 - bases/securityattribute.oracle.com_securityattributes.yaml
+- bases/self.oracle.com_subscriptions.yaml
 - bases/servicecatalog.oracle.com_privateapplications.yaml
 - bases/servicecatalog.oracle.com_servicecatalogs.yaml
 - bases/stackmonitoring.oracle.com_alarmconditions.yaml

@@ -1337,6 +1337,16 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 			"SecurityAttributeNamespace",
 		),
 		reviewedRegistrationSet(
+			"self",
+			"self",
+			apiErrorCoverageDefaultVersion,
+			APIErrorCoverageFamilyGeneratedRuntimeWorkRequest,
+			deleteNotFoundGeneratedRuntime,
+			retryableConflictGeneratedRuntime,
+			"",
+			"Subscription",
+		),
+		reviewedRegistrationSet(
 			"stackmonitoring",
 			"stackmonitoring",
 			apiErrorCoverageDefaultVersion,

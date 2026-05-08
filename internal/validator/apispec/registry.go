@@ -87,6 +87,7 @@ import (
 	resourceschedulerv1beta1 "github.com/oracle/oci-service-operator/api/resourcescheduler/v1beta1"
 	schv1beta1 "github.com/oracle/oci-service-operator/api/sch/v1beta1"
 	securityattributev1beta1 "github.com/oracle/oci-service-operator/api/securityattribute/v1beta1"
+	selfv1beta1 "github.com/oracle/oci-service-operator/api/self/v1beta1"
 	servicecatalogv1beta1 "github.com/oracle/oci-service-operator/api/servicecatalog/v1beta1"
 	stackmonitoringv1beta1 "github.com/oracle/oci-service-operator/api/stackmonitoring/v1beta1"
 	streamingv1beta1 "github.com/oracle/oci-service-operator/api/streaming/v1beta1"
@@ -4236,6 +4237,31 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "securityattribute.SecurityAttributeNamespaceSummary",
+			},
+		},
+	},
+	{
+		Name:       "SelfSubscription",
+		SpecType:   reflect.TypeOf(selfv1beta1.SubscriptionSpec{}),
+		StatusType: reflect.TypeOf(selfv1beta1.SubscriptionStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "self.CreateSubscriptionDetails",
+			},
+			{
+				SDKStruct: "self.UpdateSubscriptionDetails",
+			},
+			{
+				SDKStruct: "self.SubscriptionDetails",
+			},
+			{
+				SDKStruct: "self.Subscription",
+			},
+			{
+				SDKStruct: "self.SubscriptionCollection",
+			},
+			{
+				SDKStruct: "self.SubscriptionSummary",
 			},
 		},
 	},
