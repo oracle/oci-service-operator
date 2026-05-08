@@ -223,6 +223,7 @@ nav:
           - servicemanagerproxy.oracle.com/v1beta1: reference/api/servicemanagerproxy/v1beta1/index.md
           - stackmonitoring.oracle.com/v1beta1: reference/api/stackmonitoring/v1beta1/index.md
           - streaming.oracle.com/v1beta1: reference/api/streaming/v1beta1/index.md
+          - tenantmanagercontrolplane.oracle.com/v1beta1: reference/api/tenantmanagercontrolplane/v1beta1/index.md
           - usageapi.oracle.com/v1beta1: reference/api/usageapi/v1beta1/index.md
           - vbsinst.oracle.com/v1beta1: reference/api/vbsinst/v1beta1/index.md
           - visualbuilder.oracle.com/v1beta1: reference/api/visualbuilder/v1beta1/index.md

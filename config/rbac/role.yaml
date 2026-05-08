@@ -2664,6 +2664,32 @@ rules:
   - patch
   - update
 - apiGroups:
+  - tenantmanagercontrolplane.oracle.com
+  resources:
+  - organizations
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - tenantmanagercontrolplane.oracle.com
+  resources:
+  - organizations/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - tenantmanagercontrolplane.oracle.com
+  resources:
+  - organizations/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - usageapi.oracle.com
   resources:
   - customtables

@@ -1288,6 +1288,20 @@
       "mandatoryCoveragePercent": 100
     },
     {
+      "service": "tenantmanagercontrolplane",
+      "specs": 1,
+      "mappings": 4,
+      "trackedMappings": 4,
+      "untrackedMappings": 0,
+      "presentFields": 17,
+      "missingFields": 2,
+      "mandatoryPresentFields": 11,
+      "mandatoryMissingFields": 1,
+      "extraSpecFields": 2,
+      "overallCoveragePercent": 89.47368421052632,
+      "mandatoryCoveragePercent": 91.66666666666666
+    },
+    {
       "service": "usageapi",
       "specs": 4,
       "mappings": 20,

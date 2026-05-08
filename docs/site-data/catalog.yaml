@@ -1096,6 +1096,20 @@ packages:
         kind: Stream
         summary: Manage OCI Streaming streams.
 
+  - package: tenantmanagercontrolplane
+    displayName: Tenant Manager Control Plane
+    summary: Bind existing OCI organizations from Kubernetes and reconcile the default UCM subscription with a reviewed update-only runtime.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to Organization while OrganizationTenancy, domain, invitation, and subscription-mapping helper families stay unpublished.
+      - "The published runtime is bind-existing plus update-only: bind by `organizationId` or a unique `compartmentId` list match, update only `defaultUcmSubscriptionId`, and treat CR delete as local unbind without OCI delete."
+    kindOverrides:
+      - group: tenantmanagercontrolplane
+        kind: Organization
+        summary: Manage existing OCI organizations with an update-only default subscription contract.
+
   - package: usageapi
     displayName: Usage API
     summary: Manage OCI Usage API resources from Kubernetes.

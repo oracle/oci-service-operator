@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "tenantmanagercontrolplane",
+  "slug": "organization",
+  "kind": "Organization",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_tenantmanagercontrolplane_organization",
+  "operations": {
+    "create": [],
+    "get": [
+      {
+        "operation": "GetOrganization",
+        "requestType": "tenantmanagercontrolplane.GetOrganizationRequest",
+        "responseType": "tenantmanagercontrolplane.GetOrganizationResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOrganizations",
+        "requestType": "tenantmanagercontrolplane.ListOrganizationsRequest",
+        "responseType": "tenantmanagercontrolplane.ListOrganizationsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOrganization",
+        "requestType": "tenantmanagercontrolplane.UpdateOrganizationRequest",
+        "responseType": "tenantmanagercontrolplane.UpdateOrganizationResponse"
+      }
+    ],
+    "delete": []
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "default_ucm_subscription_id"
+    ],
+    "forceNew": [
+      "compartment_id",
+      "organization_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": []
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED",
+      "NOT_FOUND"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_tenantmanagercontrolplane_organizations",
+    "collectionField": "organizations",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/tenantmanagercontrolplane/organization/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/tenantmanagercontrolplane/organization/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "delete-confirmation",
+      "lifecycle-classification",
+      "list-lookup",
+      "mutation-policy",
+      "status-projection",
+      "waiter-work-request"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: GetOrganization, ListOrganizations, UpdateOrganization, GetWorkRequest, ListWorkRequests, ListWorkRequestErrors, and ListWorkRequestLogs are present in v65.110.0. CreateOrganization and DeleteOrganization are not exposed, and UpdateOrganization returns only opc-request-id plus opc-work-request-id headers rather than an Organization body.",
+    "Pinned provider coverage is unconfirmed. formal/sources.lock still points at github.com/oracle/terraform-provider-oci@eb653febb1bab4cc6650a96d404a8baf36fdf671, but the accessible provider inventory did not expose a matching Organization resource or data source. The providerResource and datasource names therefore stay provisional OCI-style placeholders, and the checked-in mutability docs fixture is a conservative repo-authored fallback because the live registry page does not expose a deterministic argument-reference HTML body.",
+    "Repo-authored runtime contract is narrower than the visible SDK surface: the published kind is bind-existing plus update-only, binds by explicit organizationId or a unique ListOrganizations match on compartmentId, updates only defaultUcmSubscriptionId, resumes update through GetWorkRequest, and treats CR delete as local unbind without calling OrganizationTenancy helpers."
+  ]
+}

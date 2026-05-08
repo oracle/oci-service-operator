@@ -223,6 +223,7 @@ resources:
 - bases/stackmonitoring.oracle.com_monitoringtemplates.yaml
 - bases/stackmonitoring.oracle.com_processsets.yaml
 - bases/streaming.oracle.com_streams.yaml
+- bases/tenantmanagercontrolplane.oracle.com_organizations.yaml
 - bases/usageapi.oracle.com_customtables.yaml
 - bases/usageapi.oracle.com_queries.yaml
 - bases/usageapi.oracle.com_schedules.yaml

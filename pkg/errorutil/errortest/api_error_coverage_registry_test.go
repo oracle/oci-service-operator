@@ -150,6 +150,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventoryRegistration(t, byKey, "visualbuilder/VbInstance")
 	assertInventoryRegistration(t, byKey, "vnmonitoring/PathAnalyzerTest")
 	assertInventoryRegistration(t, byKey, "wlms/WlsDomain")
+	assertInventoryRegistration(t, byKey, "tenantmanagercontrolplane/Organization")
 	assertInventoryRegistration(t, byKey, "zpr/ZprPolicy")
 }
 
@@ -217,6 +218,7 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedFamily(t, "redis/RedisCluster", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "rover/RoverCluster", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "streaming/Stream", APIErrorCoverageFamilyGeneratedRuntimeFollowUp)
+	assertReviewedFamily(t, "tenantmanagercontrolplane/Organization", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "usageapi/Query", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "vbsinst/VbsInstance", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "visualbuilder/VbInstance", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)

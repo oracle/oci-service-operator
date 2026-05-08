@@ -94,6 +94,7 @@ import (
 	servicemanagerproxyv1beta1 "github.com/oracle/oci-service-operator/api/servicemanagerproxy/v1beta1"
 	stackmonitoringv1beta1 "github.com/oracle/oci-service-operator/api/stackmonitoring/v1beta1"
 	streamingv1beta1 "github.com/oracle/oci-service-operator/api/streaming/v1beta1"
+	tenantmanagercontrolplanev1beta1 "github.com/oracle/oci-service-operator/api/tenantmanagercontrolplane/v1beta1"
 	usageapiv1beta1 "github.com/oracle/oci-service-operator/api/usageapi/v1beta1"
 	vbsinstv1beta1 "github.com/oracle/oci-service-operator/api/vbsinst/v1beta1"
 	visualbuilderv1beta1 "github.com/oracle/oci-service-operator/api/visualbuilder/v1beta1"
@@ -4565,6 +4566,25 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "stackmonitoring.ProcessSetSummary",
+			},
+		},
+	},
+	{
+		Name:       "TenantmanagercontrolplaneOrganization",
+		SpecType:   reflect.TypeOf(tenantmanagercontrolplanev1beta1.OrganizationSpec{}),
+		StatusType: reflect.TypeOf(tenantmanagercontrolplanev1beta1.OrganizationStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "tenantmanagercontrolplane.UpdateOrganizationDetails",
+			},
+			{
+				SDKStruct: "tenantmanagercontrolplane.Organization",
+			},
+			{
+				SDKStruct: "tenantmanagercontrolplane.OrganizationCollection",
+			},
+			{
+				SDKStruct: "tenantmanagercontrolplane.OrganizationSummary",
 			},
 		},
 	},
