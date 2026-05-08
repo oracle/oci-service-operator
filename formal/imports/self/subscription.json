@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "self",
+  "slug": "subscription",
+  "kind": "Subscription",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_self_subscription",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateSubscription",
+        "requestType": "self.CreateSubscriptionRequest",
+        "responseType": "self.CreateSubscriptionResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetSubscription",
+        "requestType": "self.GetSubscriptionRequest",
+        "responseType": "self.GetSubscriptionResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListSubscriptions",
+        "requestType": "self.ListSubscriptionsRequest",
+        "responseType": "self.ListSubscriptionsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateSubscription",
+        "requestType": "self.UpdateSubscriptionRequest",
+        "responseType": "self.UpdateSubscriptionResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteSubscription",
+        "requestType": "self.DeleteSubscriptionRequest",
+        "responseType": "self.DeleteSubscriptionResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATED",
+        "PENDING_ACTIVATION",
+        "PROVISIONING_STARTED",
+        "PROVISIONING_COMPLETED"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name",
+      "freeform_tags",
+      "defined_tags"
+    ],
+    "forceNew": [
+      "compartment_id",
+      "tenant_id",
+      "seller_id",
+      "product_id",
+      "subscription_details",
+      "source_type",
+      "additional_details",
+      "realm",
+      "region"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED",
+      "NOT_FOUND"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_self_subscriptions",
+    "collectionField": "subscriptions",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "id",
+      "lifecycle_details"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/self/subscription/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/self/subscription/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "delete-confirmation",
+      "lifecycle-classification",
+      "list-lookup",
+      "mutation-policy",
+      "status-projection",
+      "workrequest-classification",
+      "shared-surface-qualification"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: CreateSubscription, GetSubscription, ListSubscriptions, UpdateSubscription, DeleteSubscription, ChangeSubscriptionCompartment, and service-local GetWorkRequest/ListWorkRequests helpers are present in v65.110.0. Create returns a Subscription body plus opc-work-request-id, while update and delete return work-request headers only.",
+    "Pinned OCI SDK lifecycle contract: coarse lifecycleState is ACTIVE, INACTIVE, DELETED, and FAILED, while actionable transition phases live in lifecycleDetails including CREATED, PENDING_ACTIVATION, PROVISIONING_STARTED, PROVISIONING_COMPLETED, PROVISIONING_FAILED, UPDATING, DELETING, ACTIVE, FAILED, EXPIRED, TERMINATED, and DELETED.",
+    "Pinned provider coverage is unconfirmed. formal/sources.lock still points at github.com/oracle/terraform-provider-oci@eb653febb1bab4cc6650a96d404a8baf36fdf671, but the accessible provider inventory did not expose a matching SELF Subscription resource or data source. The providerResource and datasource names therefore stay provisional OCI-style placeholders so generator-owned registry artifacts can derive stable links without claiming verified provider coverage.",
+    "Repo-authored runtime is narrower than the imported SDK surface: only displayName, freeformTags, and definedTags reconcile in place. ChangeSubscriptionCompartment remains out of scope, and compartmentId, tenantId, sellerId, productId, subscriptionDetails, sourceType, additionalDetails, realm, and region remain replacement-only drift.",
+    "Repo-authored bind-versus-create is bounded: existing-before-create lookup runs only when compartmentId and displayName are both present, lists by exact compartmentId plus displayName, narrows candidates by tenantId, sellerId, and productId, then rereads with GetSubscription before reusing a unique candidate in a reusable lifecycle.",
+    "Delete confirmation is workrequest-aware and required. The controller resumes delete work requests through GetWorkRequest and keeps the finalizer until GetSubscription or list fallback confirms lifecycleDetails DELETED or NotFound.",
+    "The self/Subscription rollout must remain explicitly group-qualified and distinct from ons/Subscription across formal, docs, package, and catalog surfaces."
+  ]
+}

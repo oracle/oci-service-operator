@@ -1,0 +1,15 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: self
+slug: subscription
+kind: Subscription
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+notes:
+  - Create, update, and delete are workrequest-backed and re-enter through GetWorkRequest before rereading Subscription.
+  - Provisioning, update, and delete confirmation classification uses lifecycleDetails because coarse lifecycleState is too coarse for SELF subscriptions.
+  - Keep the SELF subscription rollout distinct from ons/Subscription in shared formal surfaces.

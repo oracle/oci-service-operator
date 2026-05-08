@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "self",
+  "kind": "Subscription",
+  "formalSlug": "subscription",
+  "providerResource": "oci_self_subscription",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/self_subscription",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/self_subscription",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/self/subscription/page.html",
+  "bodySHA256": "44e0b4a9aacf9a0d2f58c28654dea35f35679edbb48a5cf939c177f98d562c04",
+  "bodyBytes": 1420,
+  "fixtureBodyPath": "7.22.0/self/subscription/page.html"
+}

@@ -88,6 +88,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/resourcescheduler"
 	"github.com/oracle/oci-go-sdk/v65/sch"
 	"github.com/oracle/oci-go-sdk/v65/securityattribute"
+	"github.com/oracle/oci-go-sdk/v65/self"
 	"github.com/oracle/oci-go-sdk/v65/servicecatalog"
 	"github.com/oracle/oci-go-sdk/v65/stackmonitoring"
 	"github.com/oracle/oci-go-sdk/v65/streaming"
@@ -1147,6 +1148,14 @@ var seedTargets = []Target{
 	newTarget("securityattribute", "SecurityAttributeNamespace", reflect.TypeOf(securityattribute.SecurityAttributeNamespace{})),
 	newTarget("securityattribute", "SecurityAttributeNamespaceSummary", reflect.TypeOf(securityattribute.SecurityAttributeNamespaceSummary{})),
 	newTarget("securityattribute", "SecurityAttributeSummary", reflect.TypeOf(securityattribute.SecurityAttributeSummary{})),
+
+	// Self CRD support
+	newTarget("self", "CreateSubscriptionDetails", reflect.TypeOf(self.CreateSubscriptionDetails{})),
+	newTarget("self", "UpdateSubscriptionDetails", reflect.TypeOf(self.UpdateSubscriptionDetails{})),
+	newTarget("self", "SubscriptionDetails", reflect.TypeOf(self.SubscriptionDetails{})),
+	newTarget("self", "Subscription", reflect.TypeOf(self.Subscription{})),
+	newTarget("self", "SubscriptionCollection", reflect.TypeOf(self.SubscriptionCollection{})),
+	newTarget("self", "SubscriptionSummary", reflect.TypeOf(self.SubscriptionSummary{})),
 
 	// Servicecatalog CRD support
 	newTarget("servicecatalog", "CreatePrivateApplicationDetails", reflect.TypeOf(servicecatalog.CreatePrivateApplicationDetails{})),

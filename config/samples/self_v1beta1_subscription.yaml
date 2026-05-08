@@ -1,0 +1,41 @@
+#
+# Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+#
+
+#
+# Replace the OCI identifiers below before running e2e.
+# Keep this self/Subscription sample distinct from ons/Subscription.
+#
+apiVersion: self.oracle.com/v1beta1
+kind: Subscription
+metadata:
+  name: subscription-sample
+spec:
+  compartmentId: ocid1.compartment.oc1..exampleuniqueID
+  tenantId: ocid1.tenancy.oc1..exampleuniqueID
+  sellerId: ocid1.seller.oc1..exampleuniqueID
+  productId: ocid1.product.oc1..exampleuniqueID
+  displayName: self-subscription-sample
+  sourceType: OCI_NATIVE
+  realm: OC1
+  region: us-chicago-1
+  additionalDetails:
+    - key: contract
+      value: gold
+  subscriptionDetails:
+    pricingPlan:
+      planType: FIXED
+      planName: gold-plan
+      billingFrequency: YEARLY
+      rates:
+        - currency: USD
+          rate: 42.5
+    partnerRegistrationUrl: https://partner.example.com/register
+    billingDetails:
+      sku: gold-sku
+      metricType: OCPU_HOURS
+      rateAllocation: 100
+      meters:
+        - name: meter-a
+          rateAllocation: 100
