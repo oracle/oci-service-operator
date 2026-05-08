@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "mngdmac",
+  "kind": "MacOrder",
+  "formalSlug": "macorder",
+  "providerResource": "oci_mngdmac_mac_order",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/mngdmac_mac_order",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/mngdmac_mac_order",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/mngdmac/macorder/page.html",
+  "bodySHA256": "e11181bd717cf1d8a56c93017b789edde53a31329ebde89a7386bc8f73179654",
+  "bodyBytes": 888,
+  "fixtureBodyPath": "7.22.0/mngdmac/macorder/page.html"
+}

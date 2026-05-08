@@ -1,0 +1,141 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "mngdmac",
+  "slug": "macorder",
+  "kind": "MacOrder",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_mngdmac_mac_order",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateMacOrder",
+        "requestType": "mngdmac.CreateMacOrderRequest",
+        "responseType": "mngdmac.CreateMacOrderResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetMacOrder",
+        "requestType": "mngdmac.GetMacOrderRequest",
+        "responseType": "mngdmac.GetMacOrderResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListMacOrders",
+        "requestType": "mngdmac.ListMacOrdersRequest",
+        "responseType": "mngdmac.ListMacOrdersResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeMacOrderCompartment",
+        "requestType": "mngdmac.ChangeMacOrderCompartmentRequest",
+        "responseType": "mngdmac.ChangeMacOrderCompartmentResponse"
+      },
+      {
+        "operation": "UpdateMacOrder",
+        "requestType": "mngdmac.UpdateMacOrderRequest",
+        "responseType": "mngdmac.UpdateMacOrderResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "CancelMacOrder",
+        "requestType": "mngdmac.CancelMacOrderRequest",
+        "responseType": "mngdmac.CancelMacOrderResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name",
+      "order_description",
+      "order_size",
+      "shape",
+      "ip_range"
+    ],
+    "forceNew": [
+      "commitment_term",
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED",
+      "NOT_FOUND"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_mngdmac_mac_orders",
+    "collectionField": "mac_orders",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "id",
+      "lifecycle_state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/mngdmac/macorder/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/mngdmac/macorder/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "delete-confirmation",
+      "lifecycle-classification",
+      "list-lookup",
+      "mutation-policy",
+      "secret-output"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract from the onboarding audit: CreateMacOrder, GetMacOrder, ListMacOrders, UpdateMacOrder, CancelMacOrder, ChangeMacOrderCompartment, and service-local GetWorkRequest helpers are present in github.com/oracle/oci-go-sdk/v65/mngdmac. The lifecycle enum is CREATING, UPDATING, ACTIVE, NEEDS_ATTENTION, DELETING, DELETED, and FAILED, while orderStatus carries customer-review, provisioning, and CANCELED phases.",
+    "Pinned OCI SDK contract from the onboarding audit: CreateMacOrderResponse returns a MacOrder body plus opc-work-request-id, while UpdateMacOrderResponse, CancelMacOrderResponse, and ChangeMacOrderCompartmentResponse return work-request headers only.",
+    "Pinned provider coverage is unconfirmed. formal/sources.lock still points at github.com/oracle/terraform-provider-oci@eb653febb1bab4cc6650a96d404a8baf36fdf671, but the accessible provider inventory did not expose a matching MacOrder resource or data source. The providerResource and datasource names therefore stay provisional OCI-style placeholders so generator-owned registry artifacts can derive stable links without claiming verified provider coverage.",
+    "Repo-authored runtime contract stays narrower than the imported SDK surface: only displayName, ipRange, orderDescription, orderSize, and shape reconcile in place. ChangeMacOrderCompartment remains out of scope, so compartmentId and commitmentTerm stay replacement-only drift; optional empty strings do not force blind clears for displayName or ipRange.",
+    "Repo-authored bind-versus-create stays explicit: pre-create lookup lists by exact compartmentId plus displayName, reuses only a unique candidate in ACTIVE, CREATING, or UPDATING, and fails duplicate exact-name matches instead of guessing.",
+    "Kubernetes delete maps to CancelMacOrder rather than a nonexistent DeleteMacOrder API. The reviewed runtime follows the cancel work request through GetWorkRequest, then rereads GetMacOrder or ListMacOrders until OCI reports DELETED, NotFound, or orderStatus CANCELED before releasing the finalizer."
+  ]
+}

@@ -989,6 +989,18 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 			"AcceptedAgreement",
 			"Publication",
 		),
+		map[string]APIErrorCoverageRegistration{
+			resourceKey("mngdmac", "MacOrder"): reviewedRegistration(
+				"mngdmac",
+				"mngdmac",
+				apiErrorCoverageDefaultVersion,
+				"MacOrder",
+				APIErrorCoverageFamilyGeneratedRuntimeWorkRequest,
+				deleteNotFoundReadback,
+				retryableConflictWorkRequest,
+				"MacOrder uses generatedruntime work requests for create and update, but delete is a reviewed cancel-as-delete contract that sends CancelMacOrder and treats DELETED, NotFound, or orderStatus CANCELED as terminal confirmation while ChangeMacOrderCompartment remains out of scope.",
+			),
+		},
 		reviewedRegistrationSet(
 			"monitoring",
 			"monitoring",
