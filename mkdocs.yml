@@ -192,7 +192,6 @@ nav:
           - marketplace.oracle.com/v1beta1: reference/api/marketplace/v1beta1/index.md
           - marketplaceprivateoffer.oracle.com/v1beta1: reference/api/marketplaceprivateoffer/v1beta1/index.md
           - marketplacepublisher.oracle.com/v1beta1: reference/api/marketplacepublisher/v1beta1/index.md
-          - mngdmac.oracle.com/v1beta1: reference/api/mngdmac/v1beta1/index.md
           - mediaservices.oracle.com/v1beta1: reference/api/mediaservices/v1beta1/index.md
           - mngdmac.oracle.com/v1beta1: reference/api/mngdmac/v1beta1/index.md
           - monitoring.oracle.com/v1beta1: reference/api/monitoring/v1beta1/index.md
