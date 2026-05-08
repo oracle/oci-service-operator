@@ -714,7 +714,9 @@ func persistEnrichmentJobLookupStatus(resource *generativeaidatav1beta1.Enrichme
 	if resource == nil {
 		return
 	}
-	resource.Status.CompartmentId = strings.TrimSpace(resource.Spec.CompartmentId)
+	if strings.TrimSpace(resource.Status.CompartmentId) == "" {
+		resource.Status.CompartmentId = strings.TrimSpace(resource.Spec.CompartmentId)
+	}
 	if strings.TrimSpace(resource.Status.SemanticStoreId) == "" {
 		resource.Status.SemanticStoreId = strings.TrimSpace(resource.Spec.SemanticStoreId)
 	}

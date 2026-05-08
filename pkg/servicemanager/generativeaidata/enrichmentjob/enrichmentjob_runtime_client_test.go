@@ -286,6 +286,59 @@ func TestEnrichmentJobCreateOrUpdateRejectsCreateOnlyDrift(t *testing.T) {
 	}
 }
 
+func TestEnrichmentJobCreateOrUpdateRejectsCompartmentMoveAcrossConsecutiveReconciles(t *testing.T) {
+	t.Parallel()
+
+	const (
+		existingID          = "ocid1.enrichmentjob.oc1..existing"
+		originalCompartment = "ocid1.compartment.oc1..original"
+		newCompartment      = "ocid1.compartment.oc1..moved"
+	)
+
+	resource := makeEnrichmentJobResource()
+	resource.Spec.CompartmentId = newCompartment
+	resource.Status.Id = existingID
+	resource.Status.SemanticStoreId = resource.Spec.SemanticStoreId
+	resource.Status.CompartmentId = originalCompartment
+	resource.Status.OsokStatus.Ocid = shared.OCID(existingID)
+
+	getCalls := 0
+	client := testEnrichmentJobClient(&fakeEnrichmentJobOCIClient{
+		getEnrichmentJobFn: func(_ context.Context, req generativeaidatasdk.GetEnrichmentJobRequest) (generativeaidatasdk.GetEnrichmentJobResponse, error) {
+			getCalls++
+			if req.EnrichmentJobId == nil || *req.EnrichmentJobId != existingID {
+				t.Fatalf("get enrichmentJobId = %v, want %q", req.EnrichmentJobId, existingID)
+			}
+			return generativeaidatasdk.GetEnrichmentJobResponse{
+				EnrichmentJob: makeSDKEnrichmentJob(
+					existingID,
+					resource.Spec.SemanticStoreId,
+					resource.Spec.DisplayName,
+					resource.Spec.Description,
+					generativeaidatasdk.LifecycleStateSucceeded,
+					"",
+				),
+			}, nil
+		},
+	})
+
+	for attempt := 1; attempt <= 2; attempt++ {
+		response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+		if err == nil || !strings.Contains(err.Error(), "compartmentId") {
+			t.Fatalf("CreateOrUpdate() attempt %d error = %v, want compartmentId drift failure", attempt, err)
+		}
+		if response.IsSuccessful {
+			t.Fatalf("CreateOrUpdate() attempt %d response = %#v, want unsuccessful drift response", attempt, response)
+		}
+		if resource.Status.CompartmentId != originalCompartment {
+			t.Fatalf("status.compartmentId after attempt %d = %q, want preserved bound compartment %q", attempt, resource.Status.CompartmentId, originalCompartment)
+		}
+	}
+	if getCalls != 2 {
+		t.Fatalf("GetEnrichmentJob() calls = %d, want 2", getCalls)
+	}
+}
+
 func TestEnrichmentJobDeleteCancelsRunningJobAndWaitsForTerminalState(t *testing.T) {
 	t.Parallel()
 
