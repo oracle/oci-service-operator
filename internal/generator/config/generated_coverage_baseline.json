@@ -4,12 +4,12 @@
     "mappings": 954,
     "trackedMappings": 953,
     "untrackedMappings": 1,
-    "presentFields": 9520,
-    "missingFields": 152,
+    "presentFields": 9518,
+    "missingFields": 154,
     "mandatoryPresentFields": 3397,
     "mandatoryMissingFields": 131,
     "extraSpecFields": 810,
-    "overallCoveragePercent": 98.42845326716294,
+    "overallCoveragePercent": 98.40777502067824,
     "mandatoryCoveragePercent": 96.28684807256236
   },
   "services": [
@@ -1195,12 +1195,12 @@
       "mappings": 3,
       "trackedMappings": 3,
       "untrackedMappings": 0,
-      "presentFields": 16,
-      "missingFields": 1,
+      "presentFields": 14,
+      "missingFields": 3,
       "mandatoryPresentFields": 10,
       "mandatoryMissingFields": 1,
       "extraSpecFields": 0,
-      "overallCoveragePercent": 94.11764705882352,
+      "overallCoveragePercent": 82.35294117647058,
       "mandatoryCoveragePercent": 90.9090909090909
     },
     {

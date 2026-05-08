@@ -47,8 +47,6 @@ type projectedServiceEnvironmentBody struct {
 	ServiceDefinition           servicemanagerproxyv1beta1.ServiceEnvironmentServiceDefinition `json:"serviceDefinition,omitempty"`
 	ConsoleUrl                  string                                                         `json:"consoleUrl,omitempty"`
 	ServiceEnvironmentEndpoints []servicemanagerproxyv1beta1.ServiceEnvironmentEndpoint        `json:"serviceEnvironmentEndpoints,omitempty"`
-	DefinedTags                 map[string]shared.MapValue                                     `json:"definedTags,omitempty"`
-	FreeformTags                map[string]string                                              `json:"freeformTags,omitempty"`
 }
 
 func init() {

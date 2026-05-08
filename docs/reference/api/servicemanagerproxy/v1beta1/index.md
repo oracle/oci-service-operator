@@ -50,8 +50,6 @@ ServiceEnvironmentStatus defines the observed state of ServiceEnvironment.
 | --- | --- | --- | --- | --- | --- |
 | `compartmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) for the compartment. | `string` | No | - | - |
 | `consoleUrl` | The URL for the console. | `string` | No | - | - |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"CostCenter": "42"}` | `map[string, string]` | No | - | - |
 | `id` | Unqiue identifier for the entitlement related to the environment. **Note:** Not an OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm). | `string` | No | - | - |
 | `sdkStatus` | The raw entitlement registration status returned by Service Manager Proxy. | `string` | No | - | - |
 | [`serviceDefinition`](#kind-serviceenvironment-status-servicedefinition) | ServiceEnvironmentServiceDefinition defines nested fields for ServiceEnvironment.ServiceDefinition. | `object` | No | - | - |

@@ -4341,6 +4341,11 @@ services:
               spec:
                 compartmentId: ocid1.compartment.oc1..exampleuniqueID
                 serviceEnvironmentId: example-service-environment-id
+    observedState:
+      excludedFieldPaths:
+        ServiceEnvironment:
+          - DefinedTags
+          - FreeformTags
 
   - service: streaming
     sdkPackage: github.com/oracle/oci-go-sdk/v65/streaming

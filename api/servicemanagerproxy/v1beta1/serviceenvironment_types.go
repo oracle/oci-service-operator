@@ -63,14 +63,6 @@ type ServiceEnvironmentStatus struct {
 	ConsoleUrl string `json:"consoleUrl,omitempty"`
 	// Array of service environment end points.
 	ServiceEnvironmentEndpoints []ServiceEnvironmentEndpoint `json:"serviceEnvironmentEndpoints,omitempty"`
-	// Defined tags for this resource. Each key is predefined and scoped to a
-	// namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
-	// Example: `{"Operations": {"CostCenter": "42"}}`
-	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
-	// Free-form tags for this resource. Each tag is a simple key-value pair with no
-	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
-	// Example: `{"CostCenter": "42"}`
-	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 }
 
 // +kubebuilder:object:root=true

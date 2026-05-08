@@ -10,7 +10,6 @@
 package v1beta1
 
 import (
-	"github.com/oracle/oci-service-operator/pkg/shared"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 )
 
@@ -127,31 +126,6 @@ func (in *ServiceEnvironmentStatus) DeepCopyInto(out *ServiceEnvironmentStatus) 
 		in, out := &in.ServiceEnvironmentEndpoints, &out.ServiceEnvironmentEndpoints
 		*out = make([]ServiceEnvironmentEndpoint, len(*in))
 		copy(*out, *in)
-	}
-	if in.DefinedTags != nil {
-		in, out := &in.DefinedTags, &out.DefinedTags
-		*out = make(map[string]shared.MapValue, len(*in))
-		for key, val := range *in {
-			var outVal map[string]string
-			if val == nil {
-				(*out)[key] = nil
-			} else {
-				inVal := (*in)[key]
-				in, out := &inVal, &outVal
-				*out = make(shared.MapValue, len(*in))
-				for key, val := range *in {
-					(*out)[key] = val
-				}
-			}
-			(*out)[key] = outVal
-		}
-	}
-	if in.FreeformTags != nil {
-		in, out := &in.FreeformTags, &out.FreeformTags
-		*out = make(map[string]string, len(*in))
-		for key, val := range *in {
-			(*out)[key] = val
-		}
 	}
 }
 
