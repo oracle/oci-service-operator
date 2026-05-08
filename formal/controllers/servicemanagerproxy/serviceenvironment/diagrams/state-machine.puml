@@ -1,0 +1,93 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title State Machine - servicemanagerproxy/ServiceEnvironment
+skinparam state {
+  backgroundColor #f8fafc
+  borderColor #0f172a
+  fontColor #0f172a
+  startColor #1d4ed8
+  endColor #0f172a
+}
+left to right direction
+hide empty description
+state "Observe" as observe
+state "EvaluateReady" as evaluate_ready
+state "Ready" as ready
+state "Retryable" as retryable
+state "Failed" as failed
+observe : read spec, tracked status, delete intent,\nand current OCI lifecycle
+state "ResolveByLookup" as resolve_by_lookup
+state "RejectUnsupportedDrift" as reject_unsupported_drift
+[*] --> observe : reconcile
+observe --> resolve_by_lookup : tracked identity missing
+resolve_by_lookup --> evaluate_ready : lookup or create reaches\nACTIVE, SOFT_TERMINATED,\nCANCELED, TERMINATED (+6\nmore)
+resolve_by_lookup --> retryable : OCI state in INITIALIZED,\nBEGIN_ACTIVATION,\nBEGIN_SOFT_TERMINATION,\nBEGIN_TERMINATION (+10 more)
+resolve_by_lookup --> failed : unresolved OCI error or non-success state
+observe --> evaluate_ready : OCI state in ACTIVE,\nSOFT_TERMINATED, CANCELED,\nTERMINATED (+6 more)
+observe --> retryable : OCI state in INITIALIZED,\nBEGIN_ACTIVATION,\nBEGIN_SOFT_TERMINATION,\nBEGIN_TERMINATION (+10 more)
+observe --> failed : unresolved OCI error or non-success state
+evaluate_ready --> reject_unsupported_drift : force-new or conflicting\ndrift detected
+reject_unsupported_drift --> ready : wait for spec or live state change
+evaluate_ready --> ready : no supported drift remains
+ready --> ready : no supported drift remains
+retryable --> retryable : OCI remains retryable
+failed --> failed : OCI remains terminal
+note right of ready
+shared diagram:
+shared/diagrams/shared-controller-state-machine.svg
+Start from the shared controller phase model and
+specialize imported provider states, delete
+targets, and failure exits here.
+archetype batch: Generated service-manager
+controllers map provider states into the shared
+controller phases with explicit finalizer and
+requeue policies.
+service: servicemanagerproxy
+slug: serviceenvironment
+kind: ServiceEnvironment
+archetype: generated-service-manager
+status/finalizer: required / none
+requeue: provisioning, updating
+provider states: create INITIALIZED,
+BEGIN_ACTIVATION; update BEGIN_SOFT_TERMINATION,
+BEGIN_TERMINATION, BEGIN_DISABLING,
+BEGIN_ENABLING (+8 more); delete none
+supported drift: none
+reject before mutate: force-new fields
+compartment_id, service_environment_id
+create-only fields: none
+list lookup:
+oci_service_manager_proxy_service_environments
+filters compartment_id, service_environment_id
+conflicts: none
+open gaps: none
+Service Manager Proxy exposes
+GetServiceEnvironment and
+ListServiceEnvironments only in the pinned SDK,
+so the published runtime is bind-existing and
+observe-only.
+Bind identity is explicit: reconcile requires
+compartmentId and serviceEnvironmentId, tracks
+the returned Service Manager identifier in
+status, and uses ListServiceEnvironments only to
+confirm absence after a reread no longer finds
+the tracked environment.
+No OCI create, update, or delete operation is
+published. The controller treats
+serviceEnvironmentId and compartmentId as
+bind-only identity and performs Kubernetes-local
+finalizer cleanup on delete.
+Entitlement transitions beginning with BEGIN_
+requeue, stable entitlement states settle
+success, and FAILED_* plus TRA_UNKNOWN remain
+terminal failures.
+end note
+@enduml

@@ -2533,6 +2533,32 @@ rules:
   - patch
   - update
 - apiGroups:
+  - servicemanagerproxy.oracle.com
+  resources:
+  - serviceenvironments
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - servicemanagerproxy.oracle.com
+  resources:
+  - serviceenvironments/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - servicemanagerproxy.oracle.com
+  resources:
+  - serviceenvironments/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - stackmonitoring.oracle.com
   resources:
   - alarmconditions

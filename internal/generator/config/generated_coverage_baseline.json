@@ -1232,6 +1232,20 @@
       "mandatoryCoveragePercent": 93.75
     },
     {
+      "service": "servicemanagerproxy",
+      "specs": 1,
+      "mappings": 3,
+      "trackedMappings": 3,
+      "untrackedMappings": 0,
+      "presentFields": 14,
+      "missingFields": 3,
+      "mandatoryPresentFields": 10,
+      "mandatoryMissingFields": 1,
+      "extraSpecFields": 0,
+      "overallCoveragePercent": 82.35294117647058,
+      "mandatoryCoveragePercent": 90.9090909090909
+    },
+    {
       "service": "stackmonitoring",
       "specs": 10,
       "mappings": 44,

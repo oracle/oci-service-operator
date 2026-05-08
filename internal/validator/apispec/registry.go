@@ -90,6 +90,7 @@ import (
 	securityattributev1beta1 "github.com/oracle/oci-service-operator/api/securityattribute/v1beta1"
 	selfv1beta1 "github.com/oracle/oci-service-operator/api/self/v1beta1"
 	servicecatalogv1beta1 "github.com/oracle/oci-service-operator/api/servicecatalog/v1beta1"
+	servicemanagerproxyv1beta1 "github.com/oracle/oci-service-operator/api/servicemanagerproxy/v1beta1"
 	stackmonitoringv1beta1 "github.com/oracle/oci-service-operator/api/stackmonitoring/v1beta1"
 	streamingv1beta1 "github.com/oracle/oci-service-operator/api/streaming/v1beta1"
 	usageapiv1beta1 "github.com/oracle/oci-service-operator/api/usageapi/v1beta1"
@@ -4329,6 +4330,22 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "servicecatalog.ServiceCatalogSummary",
+			},
+		},
+	},
+	{
+		Name:       "ServicemanagerproxyServiceEnvironment",
+		SpecType:   reflect.TypeOf(servicemanagerproxyv1beta1.ServiceEnvironmentSpec{}),
+		StatusType: reflect.TypeOf(servicemanagerproxyv1beta1.ServiceEnvironmentStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "servicemanagerproxy.ServiceEnvironment",
+			},
+			{
+				SDKStruct: "servicemanagerproxy.ServiceEnvironmentCollection",
+			},
+			{
+				SDKStruct: "servicemanagerproxy.ServiceEnvironmentSummary",
 			},
 		},
 	},

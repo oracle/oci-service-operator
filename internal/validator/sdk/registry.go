@@ -91,6 +91,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/securityattribute"
 	"github.com/oracle/oci-go-sdk/v65/self"
 	"github.com/oracle/oci-go-sdk/v65/servicecatalog"
+	"github.com/oracle/oci-go-sdk/v65/servicemanagerproxy"
 	"github.com/oracle/oci-go-sdk/v65/stackmonitoring"
 	"github.com/oracle/oci-go-sdk/v65/streaming"
 	"github.com/oracle/oci-go-sdk/v65/usageapi"
@@ -1176,6 +1177,11 @@ var seedTargets = []Target{
 	newTarget("servicecatalog", "ServiceCatalogCollection", reflect.TypeOf(servicecatalog.ServiceCatalogCollection{})),
 	newTarget("servicecatalog", "PrivateApplicationSummary", reflect.TypeOf(servicecatalog.PrivateApplicationSummary{})),
 	newTarget("servicecatalog", "ServiceCatalogSummary", reflect.TypeOf(servicecatalog.ServiceCatalogSummary{})),
+
+	// Servicemanagerproxy CRD support
+	newTarget("servicemanagerproxy", "ServiceEnvironment", reflect.TypeOf(servicemanagerproxy.ServiceEnvironment{})),
+	newTarget("servicemanagerproxy", "ServiceEnvironmentCollection", reflect.TypeOf(servicemanagerproxy.ServiceEnvironmentCollection{})),
+	newTarget("servicemanagerproxy", "ServiceEnvironmentSummary", reflect.TypeOf(servicemanagerproxy.ServiceEnvironmentSummary{})),
 
 	// Stackmonitoring CRD support
 	newTarget("stackmonitoring", "CreateAlarmConditionDetails", reflect.TypeOf(stackmonitoring.CreateAlarmConditionDetails{})),
