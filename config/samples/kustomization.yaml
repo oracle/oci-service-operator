@@ -239,5 +239,6 @@ resources:
 - mngdmac_v1beta1_macorder.yaml
 - generativeaidata_v1beta1_enrichmentjob.yaml
 - rover_v1beta1_rovercluster.yaml
+- servicemanagerproxy_v1beta1_serviceenvironment.yaml
 - tenantmanagercontrolplane_v1beta1_organization.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples
