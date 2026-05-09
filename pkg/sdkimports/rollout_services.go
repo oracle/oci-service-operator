@@ -42,6 +42,7 @@ import (
 	_ "github.com/oracle/oci-go-sdk/v65/gdp"
 	_ "github.com/oracle/oci-go-sdk/v65/generativeaiagent"
 	_ "github.com/oracle/oci-go-sdk/v65/generativeaidata"
+	_ "github.com/oracle/oci-go-sdk/v65/jms"
 	_ "github.com/oracle/oci-go-sdk/v65/keymanagement"
 	_ "github.com/oracle/oci-go-sdk/v65/limits"
 	_ "github.com/oracle/oci-go-sdk/v65/loadbalancer"
