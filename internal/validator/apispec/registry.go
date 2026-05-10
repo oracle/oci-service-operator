@@ -48,6 +48,7 @@ import (
 	identityv1beta1 "github.com/oracle/oci-service-operator/api/identity/v1beta1"
 	integrationv1beta1 "github.com/oracle/oci-service-operator/api/integration/v1beta1"
 	iotv1beta1 "github.com/oracle/oci-service-operator/api/iot/v1beta1"
+	jmsv1beta1 "github.com/oracle/oci-service-operator/api/jms/v1beta1"
 	keymanagementv1beta1 "github.com/oracle/oci-service-operator/api/keymanagement/v1beta1"
 	licensemanagerv1beta1 "github.com/oracle/oci-service-operator/api/licensemanager/v1beta1"
 	limitsv1beta1 "github.com/oracle/oci-service-operator/api/limits/v1beta1"
@@ -2882,6 +2883,28 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "iot.IotDomainGroupSummary",
+			},
+		},
+	},
+	{
+		Name:       "JmsFleet",
+		SpecType:   reflect.TypeOf(jmsv1beta1.FleetSpec{}),
+		StatusType: reflect.TypeOf(jmsv1beta1.FleetStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "jms.CreateFleetDetails",
+			},
+			{
+				SDKStruct: "jms.UpdateFleetDetails",
+			},
+			{
+				SDKStruct: "jms.Fleet",
+			},
+			{
+				SDKStruct: "jms.FleetCollection",
+			},
+			{
+				SDKStruct: "jms.FleetSummary",
 			},
 		},
 	},

@@ -49,6 +49,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/identity"
 	"github.com/oracle/oci-go-sdk/v65/integration"
 	"github.com/oracle/oci-go-sdk/v65/iot"
+	"github.com/oracle/oci-go-sdk/v65/jms"
 	"github.com/oracle/oci-go-sdk/v65/keymanagement"
 	"github.com/oracle/oci-go-sdk/v65/licensemanager"
 	"github.com/oracle/oci-go-sdk/v65/limits"
@@ -810,6 +811,13 @@ var seedTargets = []Target{
 	newTarget("iot", "DigitalTwinRelationshipSummary", reflect.TypeOf(iot.DigitalTwinRelationshipSummary{})),
 	newTarget("iot", "IotDomainGroupSummary", reflect.TypeOf(iot.IotDomainGroupSummary{})),
 	newTarget("iot", "IotDomainSummary", reflect.TypeOf(iot.IotDomainSummary{})),
+
+	// Jms CRD support
+	newTarget("jms", "CreateFleetDetails", reflect.TypeOf(jms.CreateFleetDetails{})),
+	newTarget("jms", "UpdateFleetDetails", reflect.TypeOf(jms.UpdateFleetDetails{})),
+	newTarget("jms", "Fleet", reflect.TypeOf(jms.Fleet{})),
+	newTarget("jms", "FleetCollection", reflect.TypeOf(jms.FleetCollection{})),
+	newTarget("jms", "FleetSummary", reflect.TypeOf(jms.FleetSummary{})),
 
 	// Licensemanager CRD support
 	newTarget("licensemanager", "CreateLicenseRecordDetails", reflect.TypeOf(licensemanager.CreateLicenseRecordDetails{})),

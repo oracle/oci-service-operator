@@ -691,6 +691,16 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 				retryableConflictWorkRequest,
 				"Queue runtime persists create, update, and delete work-request OCIDs and recovers Queue identity from work-request payloads.",
 			),
+			resourceKey("jms", "Fleet"): reviewedRegistration(
+				"jms",
+				"jms",
+				apiErrorCoverageDefaultVersion,
+				"Fleet",
+				APIErrorCoverageFamilyGeneratedRuntimeWorkRequest,
+				deleteNotFoundReadback,
+				retryableConflictWorkRequest,
+				"Fleet runtime persists create, update, and delete work-request IDs in shared async status, recovers the Fleet OCID from work-request resources, bounds pre-create reuse to exact compartmentId plus displayName matches in ACTIVE, CREATING, UPDATING, or NEEDS_ATTENTION, and leaves ChangeFleetCompartment out of scope while inventoryLog stays required.",
+			),
 			resourceKey("redis", "RedisCluster"): reviewedRegistration(
 				"redis",
 				"redis",

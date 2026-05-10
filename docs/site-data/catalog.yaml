@@ -623,6 +623,20 @@ packages:
     customerVisible: false
     guidePath: docs/installation.md
 
+  - package: jms
+    displayName: Java Management Service
+    summary: Manage OCI Java Management Service fleets from Kubernetes with a reviewed controller-backed runtime.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to Fleet while advanced feature configuration, agent configuration, DRS, analysis, and work-request helper families stay unpublished.
+      - The published runtime uses service-SDK work requests for create, update, and delete, keeps `inventoryLog` required from the first spec, treats `NEEDS_ATTENTION` as a steady success state, and leaves `ChangeFleetCompartment` out of scope.
+    kindOverrides:
+      - group: jms
+        kind: Fleet
+        summary: Manage OCI Java Management Service fleets.
+
   - package: keymanagement
     displayName: Key Management
     summary: Manage OCI Vault resources from Kubernetes.
