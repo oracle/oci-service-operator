@@ -1,0 +1,140 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "lustrefilestorage",
+  "slug": "objectstoragelink",
+  "kind": "ObjectStorageLink",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_lustre_file_storage_object_storage_link",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateObjectStorageLink",
+        "requestType": "lustrefilestorage.CreateObjectStorageLinkRequest",
+        "responseType": "lustrefilestorage.CreateObjectStorageLinkResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetObjectStorageLink",
+        "requestType": "lustrefilestorage.GetObjectStorageLinkRequest",
+        "responseType": "lustrefilestorage.GetObjectStorageLinkResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListObjectStorageLinks",
+        "requestType": "lustrefilestorage.ListObjectStorageLinksRequest",
+        "responseType": "lustrefilestorage.ListObjectStorageLinksResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateObjectStorageLink",
+        "requestType": "lustrefilestorage.UpdateObjectStorageLinkRequest",
+        "responseType": "lustrefilestorage.UpdateObjectStorageLinkResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteObjectStorageLink",
+        "requestType": "lustrefilestorage.DeleteObjectStorageLinkRequest",
+        "responseType": "lustrefilestorage.DeleteObjectStorageLinkResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "defined_tags",
+      "display_name",
+      "freeform_tags",
+      "is_overwrite"
+    ],
+    "forceNew": [
+      "availability_domain",
+      "compartment_id",
+      "file_system_path",
+      "lustre_file_system_id",
+      "object_storage_prefix"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "objectstoragelink",
+        "action": "DELETED"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_lustre_file_storage_object_storage_links",
+    "collectionField": "object_storage_links",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "availability_domain",
+      "compartment_id",
+      "display_name",
+      "id",
+      "lifecycle_state",
+      "lustre_file_system_id"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/lustrefilestorage/objectstoragelink/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/lustrefilestorage/objectstoragelink/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "mutation-policy",
+      "waiter-work-request",
+      "status-projection",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: ObjectStorageLink lifecycle exposes CREATING, ACTIVE, DELETING, DELETED, and FAILED. Repo-authored success is ACTIVE, requeue covers create-time CREATING plus delete-time DELETING, FAILED is terminal without requeue, and delete confirmation follows DELETED or NotFound.",
+    "Pinned OCI SDK contract: CreateObjectStorageLink and UpdateObjectStorageLink return ObjectStorageLink bodies and do not expose opc-work-request-id headers, so the published runtime uses read-after-write observation for create and update rather than work-request polling.",
+    "Pinned OCI SDK contract: DeleteObjectStorageLink returns opc-work-request-id without a response body, so delete stays work-request-aware even though steady-state readiness is still classified from observed ObjectStorageLink lifecycle state.",
+    "Pinned OCI SDK contract: UpdateObjectStorageLinkDetails exposes only display_name, is_overwrite, freeform_tags, and defined_tags as in-place update fields. Fields absent from UpdateObjectStorageLinkDetails remain create-only drift, and ChangeObjectStorageLinkCompartment stays out of scope for the published runtime.",
+    "ListObjectStorageLinksRequest filters by availabilityDomain, compartmentId, displayName, id, lifecycleState, and lustreFileSystemId and returns Items []ObjectStorageLinkSummary. Safe reusable matching is exact compartment_id plus availability_domain plus lustre_file_system_id plus display_name, restricted to reusable ACTIVE or CREATING candidates; duplicate exact-name matches must fail instead of guessing."
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-vap-update-policy-input",
+  "contractVersion": "v1alpha1",
+  "metadata": {
+    "sourceSurface": "generator-mutability-overlay",
+    "providerSourceRef": "terraform-provider-oci",
+    "providerRevision": "eb653febb1bab4cc6650a96d404a8baf36fdf671",
+    "terraformDocsVersion": "7.22.0"
+  },
+  "target": {
+    "service": "lustrefilestorage",
+    "apiVersion": "lustrefilestorage.oracle.com/v1beta1",
+    "kind": "ObjectStorageLink",
+    "formalSlug": "objectstoragelink",
+    "providerResource": "oci_lustre_file_storage_object_storage_link",
+    "specPathPrefix": "spec"
+  },
+  "update": {
+    "allowInPlacePaths": [
+      "definedTags",
+      "displayName",
+      "freeformTags",
+      "isOverwrite"
+    ],
+    "denyRules": [
+      {
+        "fieldPath": "availabilityDomain",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      {
+        "fieldPath": "compartmentId",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      {
+        "fieldPath": "fileSystemPath",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      {
+        "fieldPath": "lustreFileSystemId",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      {
+        "fieldPath": "objectStoragePrefix",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      }
+    ]
+  }
+}

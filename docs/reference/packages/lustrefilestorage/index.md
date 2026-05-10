@@ -2,7 +2,7 @@
 
 # Lustre File Storage
 
-Manage OCI Lustre File Storage file systems from Kubernetes with a reviewed controller-backed runtime.
+Manage OCI Lustre File Storage file systems and object storage links from Kubernetes with a reviewed controller-backed runtime.
 
 | Field | Value |
 | --- | --- |
@@ -16,8 +16,8 @@ Manage OCI Lustre File Storage file systems from Kubernetes with a reviewed cont
 
 ## Notes
 
-- Current package scope is intentionally limited to LustreFileSystem while object storage links, sync jobs, and work-request helper families stay unpublished.
-- The published runtime uses service-SDK work requests for create, update, and delete.
+- Current package scope is intentionally limited to LustreFileSystem and ObjectStorageLink while sync jobs and work-request helper families stay unpublished.
+- LustreFileSystem uses service-SDK work requests for create, update, and delete, while ObjectStorageLink uses service-SDK work requests only for delete confirmation.
 - No checked-in release manifest currently lists this package; the resource scope below reflects the current repository package metadata.
 - This package is currently hidden from the Supported Resources landing page until a checked-in release manifest promotes it to the customer-visible surface.
 
@@ -26,3 +26,4 @@ Manage OCI Lustre File Storage file systems from Kubernetes with a reviewed cont
 | Resource | API Version | Summary | Guide | Sample | API Spec |
 | --- | --- | --- | --- | --- | --- |
 | `lustrefilestorage/LustreFileSystem` | `lustrefilestorage.oracle.com/v1beta1` | Manage OCI Lustre File Storage file systems. | — | [Sample](../../samples/lustrefilestorage/v1beta1/lustrefilesystem.md) | [Reference](../../api/lustrefilestorage/v1beta1/index.md#kind-lustrefilesystem) |
+| `lustrefilestorage/ObjectStorageLink` | `lustrefilestorage.oracle.com/v1beta1` | Manage OCI Lustre File Storage object storage links. | — | [Sample](../../samples/lustrefilestorage/v1beta1/objectstoragelink.md) | [Reference](../../api/lustrefilestorage/v1beta1/index.md#kind-objectstoragelink) |

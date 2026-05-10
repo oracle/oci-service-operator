@@ -3238,6 +3238,7 @@ services:
       mode: explicit
       includeKinds:
         - LustreFileSystem
+        - ObjectStorageLink
     generation:
       controller:
         strategy: generated
@@ -3262,6 +3263,18 @@ services:
                 - delete
           serviceManager:
             packagePath: lustrefilestorage/lustrefilesystem
+        - kind: ObjectStorageLink
+          formalSpec: objectstoragelink
+          async:
+            strategy: workrequest
+            runtime: generatedruntime
+            formalClassification: workrequest
+            workRequest:
+              source: service-sdk
+              phases:
+                - delete
+          serviceManager:
+            packagePath: lustrefilestorage/objectstoragelink
 
   - service: monitoring
     sdkPackage: github.com/oracle/oci-go-sdk/v65/monitoring

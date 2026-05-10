@@ -1392,7 +1392,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	assertServiceSelection(t, services["loadbalancer"], true, SelectionModeExplicit, []string{"Backend", "BackendSet", "Certificate", "Hostname", "Listener", "LoadBalancer", "PathRouteSet", "RoutingPolicy", "RuleSet", "SSLCipherSuite"})
 	assertServiceSelection(t, services["logging"], true, SelectionModeExplicit, []string{"Log", "LogGroup", "LogSavedSearch", "UnifiedAgentConfiguration"})
 	assertServiceSelection(t, services["managedkafka"], true, SelectionModeExplicit, []string{"KafkaCluster", "KafkaClusterConfig"})
-	assertServiceSelection(t, services["lustrefilestorage"], true, SelectionModeExplicit, []string{"LustreFileSystem"})
+	assertServiceSelection(t, services["lustrefilestorage"], true, SelectionModeExplicit, []string{"LustreFileSystem", "ObjectStorageLink"})
 	assertServiceSelection(t, services["monitoring"], true, SelectionModeExplicit, []string{"Alarm", "AlarmSuppression"})
 	assertServiceSelection(t, services["marketplace"], true, SelectionModeExplicit, []string{"AcceptedAgreement", "Publication"})
 	assertServiceSelection(t, services["mngdmac"], true, SelectionModeExplicit, []string{"MacOrder"})
@@ -2369,6 +2369,30 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 	}
 	if lustre.WorkRequest.LegacyFieldBridge.hasOverride() {
 		t.Fatalf("lustrefilestorage LustreFileSystem workRequest.legacyFieldBridge = %#v, want empty legacy bridge", lustre.WorkRequest.LegacyFieldBridge)
+	}
+
+	objectStorageLink := assertAsyncContract(
+		t,
+		services["lustrefilestorage"],
+		"ObjectStorageLink",
+		AsyncStrategyWorkRequest,
+		AsyncRuntimeGeneratedRuntime,
+	)
+	if objectStorageLink.WorkRequest.Source != AsyncWorkRequestSourceServiceSDK {
+		t.Fatalf(
+			"lustrefilestorage ObjectStorageLink workRequest.source = %q, want %q",
+			objectStorageLink.WorkRequest.Source,
+			AsyncWorkRequestSourceServiceSDK,
+		)
+	}
+	if !slices.Equal(objectStorageLink.WorkRequest.Phases, []string{AsyncPhaseDelete}) {
+		t.Fatalf("lustrefilestorage ObjectStorageLink workRequest.phases = %v", objectStorageLink.WorkRequest.Phases)
+	}
+	if objectStorageLink.WorkRequest.LegacyFieldBridge.hasOverride() {
+		t.Fatalf(
+			"lustrefilestorage ObjectStorageLink workRequest.legacyFieldBridge = %#v, want empty legacy bridge",
+			objectStorageLink.WorkRequest.LegacyFieldBridge,
+		)
 	}
 
 	redis := assertAsyncContract(t, services["redis"], "RedisCluster", AsyncStrategyWorkRequest, AsyncRuntimeGeneratedRuntime)
