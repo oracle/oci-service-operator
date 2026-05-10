@@ -13,6 +13,7 @@ import (
 	generativeaiagentv1beta1 "github.com/oracle/oci-service-operator/api/generativeaiagent/v1beta1"
 	generativeaiagentcontrollers "github.com/oracle/oci-service-operator/controllers/generativeaiagent"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
+	generativeaiagentagentservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/generativeaiagent/agent"
 	generativeaiagentknowledgebaseservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/generativeaiagent/knowledgebase"
 )
 
@@ -21,6 +22,17 @@ func init() {
 		Group:       "generativeaiagent",
 		AddToScheme: generativeaiagentv1beta1.AddToScheme,
 		SetupWithManager: func(ctx Context) error {
+			if err := (&generativeaiagentcontrollers.AgentReconciler{
+				Reconciler: NewBaseReconciler(
+					ctx,
+					"Agent",
+					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
+						return generativeaiagentagentservicemanager.NewAgentServiceManagerWithDeps(deps)
+					},
+				),
+			}).SetupWithManager(ctx.Manager); err != nil {
+				return fmt.Errorf("setup Agent controller: %w", err)
+			}
 			if err := (&generativeaiagentcontrollers.KnowledgeBaseReconciler{
 				Reconciler: NewBaseReconciler(
 					ctx,

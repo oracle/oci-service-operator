@@ -17,10 +17,10 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	if got, want := len(inventory), 358; got != want {
 		t.Fatalf("len(inventory) = %d, want %d", got, want)
 	}
-	if got, want := countRegistrations(inventory), 233; got != want {
+	if got, want := countRegistrations(inventory), 234; got != want {
 		t.Fatalf("registration inventory count = %d, want %d", got, want)
 	}
-	if got, want := countExceptions(inventory), 125; got != want {
+	if got, want := countExceptions(inventory), 124; got != want {
 		t.Fatalf("exception inventory count = %d, want %d", got, want)
 	}
 
@@ -53,6 +53,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventorySelectionSource(t, byKey, "dataflow/Application", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "email/Dkim", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "functions/Application", "selection.includeKinds")
+	assertInventorySelectionSource(t, byKey, "generativeaiagent/Agent", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "generativeaidata/EnrichmentJob", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "loadbalancer/LoadBalancer", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "lustrefilestorage/LustreFileSystem", "selection.includeKinds")
@@ -132,6 +133,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventoryRegistration(t, byKey, "delegateaccesscontrol/DelegationControl")
 	assertInventoryException(t, byKey, "dashboardservice/Dashboard", `controller.strategy="none"`)
 	assertInventoryRegistration(t, byKey, "email/Dkim")
+	assertInventoryRegistration(t, byKey, "generativeaiagent/Agent")
 	assertInventoryRegistration(t, byKey, "generativeaidata/EnrichmentJob")
 	assertInventoryRegistration(t, byKey, "keymanagement/Vault")
 	assertInventoryException(t, byKey, "keymanagement/Key", `controller.strategy="none"`)
@@ -204,6 +206,7 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedFamily(t, "email/Dkim", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "functions/Application", APIErrorCoverageFamilyLegacyAdapter)
 	assertReviewedFamily(t, "functions/Function", APIErrorCoverageFamilyLegacyAdapter)
+	assertReviewedFamily(t, "generativeaiagent/Agent", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "generativeai/DedicatedAiCluster", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "generativeaidata/EnrichmentJob", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "identity/Compartment", APIErrorCoverageFamilyLegacyAdapter)

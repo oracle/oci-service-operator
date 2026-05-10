@@ -2619,6 +2619,28 @@ var targets = []Target{
 		},
 	},
 	{
+		Name:       "GenerativeaiagentAgent",
+		SpecType:   reflect.TypeOf(generativeaiagentv1beta1.AgentSpec{}),
+		StatusType: reflect.TypeOf(generativeaiagentv1beta1.AgentStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "generativeaiagent.CreateAgentDetails",
+			},
+			{
+				SDKStruct: "generativeaiagent.UpdateAgentDetails",
+			},
+			{
+				SDKStruct: "generativeaiagent.Agent",
+			},
+			{
+				SDKStruct: "generativeaiagent.AgentCollection",
+			},
+			{
+				SDKStruct: "generativeaiagent.AgentSummary",
+			},
+		},
+	},
+	{
 		Name:       "GenerativeaiagentKnowledgeBase",
 		SpecType:   reflect.TypeOf(generativeaiagentv1beta1.KnowledgeBaseSpec{}),
 		StatusType: reflect.TypeOf(generativeaiagentv1beta1.KnowledgeBaseStatus{}),

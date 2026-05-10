@@ -18,7 +18,195 @@ No customer-visible package currently exposes `generativeaiagent.oracle.com/v1be
 
 | Kind | Scope | Sample | Packages |
 | --- | --- | --- | --- |
+| [Agent](#kind-agent) | Namespaced | [Sample](../../../samples/generativeaiagent/v1beta1/agent.md) | - |
 | [KnowledgeBase](#kind-knowledgebase) | Namespaced | [Sample](../../../samples/generativeaiagent/v1beta1/knowledgebase.md) | - |
+
+<a id="kind-agent"></a>
+## Agent
+
+Agent is the Schema for the agents API.
+
+- `Plural`: `agents`
+- `Scope`: `Namespaced`
+- `APIVersion`: `generativeaiagent.oracle.com/v1beta1`
+- `Sample`: [Sample](../../../samples/generativeaiagent/v1beta1/agent.md) (`config/samples/generativeaiagent_v1beta1_agent.yaml`)
+- `Packages`: Not currently exposed by a customer-visible package.
+
+<a id="kind-agent-spec"></a>
+### Spec
+
+AgentSpec defines the desired state of Agent.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `compartmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment to create the agent in. | `string` | Yes | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `description` | Description about the agent. | `string` | No | - | - |
+| `displayName` | A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information. | `string` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `knowledgeBaseIds` | List of OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the knowledgeBases associated with agent. This field is deprecated and will be removed after March 26 2026. | `list[string]` | No | - | - |
+| [`llmConfig`](#kind-agent-spec-llmconfig) | AgentLlmConfig defines nested fields for Agent.LlmConfig. | `object` | No | - | - |
+| `welcomeMessage` | Details about purpose and responsibility of the agent | `string` | No | - | - |
+
+<a id="kind-agent-spec-llmconfig"></a>
+#### Spec.llmConfig
+
+[Back to Agent spec](#kind-agent-spec)
+
+AgentLlmConfig defines nested fields for Agent.LlmConfig.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`routingLlmCustomization`](#kind-agent-spec-llmconfig-routingllmcustomization) | AgentLlmConfigRoutingLlmCustomization defines nested fields for Agent.LlmConfig.RoutingLlmCustomization. | `object` | No | - | - |
+| `runtimeVersion` | The runtimeVersion of the system prompt. | `string` | No | - | - |
+
+<a id="kind-agent-spec-llmconfig-routingllmcustomization"></a>
+##### Spec.llmConfig.routingLlmCustomization
+
+[Back to Agent spec](#kind-agent-spec)
+
+AgentLlmConfigRoutingLlmCustomization defines nested fields for Agent.LlmConfig.RoutingLlmCustomization.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `instruction` | If specified, the default instruction is replaced with provided instruction. | `string` | No | - | - |
+| `llmHyperParameters` | Hyper parameters for LLM configuration. Accepts Key-value pairs to configure various hyper parameters. Refer to the guide for examples and the JSON Schema documentation for details on the format. | `map[string, object (preserves unknown fields)]` | No | - | - |
+| [`llmSelection`](#kind-agent-spec-llmconfig-routingllmcustomization-llmselection) | AgentLlmConfigRoutingLlmCustomizationLlmSelection defines nested fields for Agent.LlmConfig.RoutingLlmCustomization.LlmSelection. | `object` | No | - | - |
+
+<a id="kind-agent-spec-llmconfig-routingllmcustomization-llmselection"></a>
+###### Spec.llmConfig.routingLlmCustomization.llmSelection
+
+[Back to Agent spec](#kind-agent-spec)
+
+AgentLlmConfigRoutingLlmCustomizationLlmSelection defines nested fields for Agent.LlmConfig.RoutingLlmCustomization.LlmSelection.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `endpointId` | The OCID of the GenAI endpoint | `string` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `llmSelectionType` | - | `string` | No | - | - |
+| `modelId` | The OCID of the GenAI model | `string` | No | - | - |
+
+<a id="kind-agent-status"></a>
+### Status
+
+AgentStatus defines the observed state of Agent.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `compartmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment. | `string` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `description` | Description about the agent. | `string` | No | - | - |
+| `displayName` | A user-friendly name. Does not have to be unique, and it's changeable. | `string` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `id` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the agent. | `string` | No | - | - |
+| `knowledgeBaseIds` | List of OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the knowledgeBases associated with agent. This field is deprecated and will be removed after March 26 2026. | `list[string]` | No | - | - |
+| `lifecycleDetails` | A message that describes the current state of the agent in more detail. For example, can be used to provide actionable information for a resource in the Failed state. | `string` | No | - | - |
+| `lifecycleState` | The current state of the agent. | `string` | No | - | - |
+| [`llmConfig`](#kind-agent-status-llmconfig) | AgentLlmConfig defines nested fields for Agent.LlmConfig. | `object` | No | - | - |
+| [`status`](#kind-agent-status-status) | - | `object` | Yes | - | - |
+| `systemTags` | System tags for this resource. Each key is predefined and scoped to a namespace. Example: `{"orcl-cloud": {"free-tier-retained": "true"}}` | `map[string, map[string, string]]` | No | - | - |
+| `timeCreated` | The date and time the agent was created, in the format defined by RFC 3339 (https://tools.ietf.org/html/rfc3339). Example: `2016-08-25T21:10:29.600Z` | `string` | No | - | - |
+| `timeUpdated` | The date and time the agent was updated, in the format defined by RFC 3339 (https://tools.ietf.org/html/rfc3339). Example: `2016-08-25T21:10:29.600Z` | `string` | No | - | - |
+| `welcomeMessage` | Details about purpose and responsibility of the agent | `string` | No | - | - |
+
+<a id="kind-agent-status-llmconfig"></a>
+#### Status.llmConfig
+
+[Back to Agent status](#kind-agent-status)
+
+AgentLlmConfig defines nested fields for Agent.LlmConfig.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`routingLlmCustomization`](#kind-agent-status-llmconfig-routingllmcustomization) | AgentLlmConfigRoutingLlmCustomization defines nested fields for Agent.LlmConfig.RoutingLlmCustomization. | `object` | No | - | - |
+| `runtimeVersion` | The runtimeVersion of the system prompt. | `string` | No | - | - |
+
+<a id="kind-agent-status-llmconfig-routingllmcustomization"></a>
+##### Status.llmConfig.routingLlmCustomization
+
+[Back to Agent status](#kind-agent-status)
+
+AgentLlmConfigRoutingLlmCustomization defines nested fields for Agent.LlmConfig.RoutingLlmCustomization.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `instruction` | If specified, the default instruction is replaced with provided instruction. | `string` | No | - | - |
+| `llmHyperParameters` | Hyper parameters for LLM configuration. Accepts Key-value pairs to configure various hyper parameters. Refer to the guide for examples and the JSON Schema documentation for details on the format. | `map[string, object (preserves unknown fields)]` | No | - | - |
+| [`llmSelection`](#kind-agent-status-llmconfig-routingllmcustomization-llmselection) | AgentLlmConfigRoutingLlmCustomizationLlmSelection defines nested fields for Agent.LlmConfig.RoutingLlmCustomization.LlmSelection. | `object` | No | - | - |
+
+<a id="kind-agent-status-llmconfig-routingllmcustomization-llmselection"></a>
+###### Status.llmConfig.routingLlmCustomization.llmSelection
+
+[Back to Agent status](#kind-agent-status)
+
+AgentLlmConfigRoutingLlmCustomizationLlmSelection defines nested fields for Agent.LlmConfig.RoutingLlmCustomization.LlmSelection.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `endpointId` | The OCID of the GenAI endpoint | `string` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `llmSelectionType` | - | `string` | No | - | - |
+| `modelId` | The OCID of the GenAI model | `string` | No | - | - |
+
+<a id="kind-agent-status-status"></a>
+#### Status.status
+
+[Back to Agent status](#kind-agent-status)
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`async`](#kind-agent-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
+| [`conditions`](#kind-agent-status-status-conditions) | - | `list[object]` | No | - | - |
+| `createdAt` | - | `string (date-time)` | No | - | - |
+| `deletedAt` | - | `string (date-time)` | No | - | - |
+| `message` | - | `string` | No | - | - |
+| `ocid` | - | `string` | No | - | - |
+| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
+| `reason` | - | `string` | No | - | - |
+| `requestedAt` | - | `string (date-time)` | No | - | - |
+| `updatedAt` | - | `string (date-time)` | No | - | - |
+
+<a id="kind-agent-status-status-async"></a>
+##### Status.status.async
+
+[Back to Agent status](#kind-agent-status)
+
+Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`current`](#kind-agent-status-status-async-current) | - | `object` | No | - | - |
+
+<a id="kind-agent-status-status-async-current"></a>
+###### Status.status.async.current
+
+[Back to Agent status](#kind-agent-status)
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `message` | - | `string` | No | - | - |
+| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
+| `percentComplete` | - | `number` | No | - | - |
+| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
+| `rawOperationType` | - | `string` | No | - | - |
+| `rawStatus` | - | `string` | No | - | - |
+| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
+| `updatedAt` | - | `string (date-time)` | Yes | - | - |
+| `workRequestId` | - | `string` | No | - | - |
+
+<a id="kind-agent-status-status-conditions"></a>
+##### Status.status.conditions[]
+
+[Back to Agent status](#kind-agent-status)
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `lastTransitionTime` | - | `string (date-time)` | No | - | - |
+| `message` | - | `string` | No | - | - |
+| `reason` | - | `string` | No | - | - |
+| `status` | - | `string` | Yes | - | - |
+| `type` | - | `string` | Yes | - | - |
 
 <a id="kind-knowledgebase"></a>
 ## KnowledgeBase
