@@ -2,7 +2,7 @@
 
 # Generative AI Agent
 
-Manage OCI Generative AI Agent knowledge bases from Kubernetes with an initial controller-backed KnowledgeBase rollout.
+Manage OCI Generative AI Agent agents and knowledge bases from Kubernetes with reviewed controller-backed runtimes.
 
 | Field | Value |
 | --- | --- |
@@ -16,7 +16,8 @@ Manage OCI Generative AI Agent knowledge bases from Kubernetes with an initial c
 
 ## Notes
 
-- Current package scope is intentionally limited to KnowledgeBase while Agent, AgentEndpoint, DataSource, DataIngestionJob, ProvisionedCapacity, Tool, and work-request helper families stay unpublished.
+- Current package scope is intentionally limited to Agent and KnowledgeBase while AgentEndpoint, DataSource, DataIngestionJob, ProvisionedCapacity, Tool, and work-request helper families stay unpublished.
+- The published runtimes use service-SDK work requests for create, update, and delete. `ChangeAgentCompartment` and `ChangeKnowledgeBaseCompartment` both stay out of scope for the controller-backed surface.
 - The published package keeps `generativeaiagent/KnowledgeBase` explicitly distinct from the existing `adm/KnowledgeBase` rollout in docs, catalog metadata, and formal/runtime surfaces.
 - No checked-in release manifest currently lists this package; the resource scope below reflects the current repository package metadata.
 - This package is currently hidden from the Supported Resources landing page until a checked-in release manifest promotes it to the customer-visible surface.
@@ -25,5 +26,5 @@ Manage OCI Generative AI Agent knowledge bases from Kubernetes with an initial c
 
 | Resource | API Version | Summary | Guide | Sample | API Spec |
 | --- | --- | --- | --- | --- | --- |
-| `generativeaiagent/Agent` | `generativeaiagent.oracle.com/v1beta1` | — | — | [Sample](../../samples/generativeaiagent/v1beta1/agent.md) | [Reference](../../api/generativeaiagent/v1beta1/index.md#kind-agent) |
+| `generativeaiagent/Agent` | `generativeaiagent.oracle.com/v1beta1` | Manage OCI Generative AI Agents. | — | [Sample](../../samples/generativeaiagent/v1beta1/agent.md) | [Reference](../../api/generativeaiagent/v1beta1/index.md#kind-agent) |
 | `generativeaiagent/KnowledgeBase` | `generativeaiagent.oracle.com/v1beta1` | Manage OCI Generative AI Agent knowledge bases. | — | [Sample](../../samples/generativeaiagent/v1beta1/knowledgebase.md) | [Reference](../../api/generativeaiagent/v1beta1/index.md#kind-knowledgebase) |

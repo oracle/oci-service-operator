@@ -24,7 +24,7 @@ No customer-visible package currently exposes `generativeaiagent.oracle.com/v1be
 <a id="kind-agent"></a>
 ## Agent
 
-Agent is the Schema for the agents API.
+Manage OCI Generative AI Agents.
 
 - `Plural`: `agents`
 - `Scope`: `Namespaced`
