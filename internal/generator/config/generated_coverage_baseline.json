@@ -1,16 +1,16 @@
 {
   "aggregate": {
-    "specs": 232,
-    "mappings": 987,
-    "trackedMappings": 986,
+    "specs": 233,
+    "mappings": 992,
+    "trackedMappings": 991,
     "untrackedMappings": 1,
-    "presentFields": 9847,
-    "missingFields": 175,
-    "mandatoryPresentFields": 3510,
-    "mandatoryMissingFields": 141,
-    "extraSpecFields": 841,
-    "overallCoveragePercent": 98.25384154859309,
-    "mandatoryCoveragePercent": 96.1380443714051
+    "presentFields": 9902,
+    "missingFields": 176,
+    "mandatoryPresentFields": 3539,
+    "mandatoryMissingFields": 142,
+    "extraSpecFields": 842,
+    "overallCoveragePercent": 98.25362175034729,
+    "mandatoryCoveragePercent": 96.14235262157023
   },
   "services": [
     {
@@ -642,6 +642,20 @@
       "extraSpecFields": 14,
       "overallCoveragePercent": 97.5103734439834,
       "mandatoryCoveragePercent": 93.54838709677419
+    },
+    {
+      "service": "jms",
+      "specs": 1,
+      "mappings": 5,
+      "trackedMappings": 5,
+      "untrackedMappings": 0,
+      "presentFields": 55,
+      "missingFields": 1,
+      "mandatoryPresentFields": 29,
+      "mandatoryMissingFields": 1,
+      "extraSpecFields": 1,
+      "overallCoveragePercent": 98.21428571428571,
+      "mandatoryCoveragePercent": 96.66666666666667
     },
     {
       "service": "keymanagement",

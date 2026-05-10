@@ -54,6 +54,7 @@ This landing page is generated from the checked-in package and release inventory
 | [identity.oracle.com/v1beta1](identity/v1beta1/index.md) | [Compartment](identity/v1beta1/index.md#kind-compartment) | Identity (`v2.0.0-alpha`) |
 | [integration.oracle.com/v1beta1](integration/v1beta1/index.md) | [IntegrationInstance](integration/v1beta1/index.md#kind-integrationinstance) | - |
 | [iot.oracle.com/v1beta1](iot/v1beta1/index.md) | [DigitalTwinAdapter](iot/v1beta1/index.md#kind-digitaltwinadapter), [DigitalTwinInstance](iot/v1beta1/index.md#kind-digitaltwininstance), [DigitalTwinModel](iot/v1beta1/index.md#kind-digitaltwinmodel), [DigitalTwinRelationship](iot/v1beta1/index.md#kind-digitaltwinrelationship), [IotDomain](iot/v1beta1/index.md#kind-iotdomain), [IotDomainGroup](iot/v1beta1/index.md#kind-iotdomaingroup) | - |
+| [jms.oracle.com/v1beta1](jms/v1beta1/index.md) | [Fleet](jms/v1beta1/index.md#kind-fleet) | - |
 | [keymanagement.oracle.com/v1beta1](keymanagement/v1beta1/index.md) | [EkmsPrivateEndpoint](keymanagement/v1beta1/index.md#kind-ekmsprivateendpoint), [Vault](keymanagement/v1beta1/index.md#kind-vault) | - |
 | [licensemanager.oracle.com/v1beta1](licensemanager/v1beta1/index.md) | [LicenseRecord](licensemanager/v1beta1/index.md#kind-licenserecord), [ProductLicense](licensemanager/v1beta1/index.md#kind-productlicense) | - |
 | [limits.oracle.com/v1beta1](limits/v1beta1/index.md) | [Quota](limits/v1beta1/index.md#kind-quota) | - |

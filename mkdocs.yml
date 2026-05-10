@@ -177,6 +177,7 @@ nav:
           - identity.oracle.com/v1beta1: reference/api/identity/v1beta1/index.md
           - integration.oracle.com/v1beta1: reference/api/integration/v1beta1/index.md
           - iot.oracle.com/v1beta1: reference/api/iot/v1beta1/index.md
+          - jms.oracle.com/v1beta1: reference/api/jms/v1beta1/index.md
           - keymanagement.oracle.com/v1beta1: reference/api/keymanagement/v1beta1/index.md
           - licensemanager.oracle.com/v1beta1: reference/api/licensemanager/v1beta1/index.md
           - limits.oracle.com/v1beta1: reference/api/limits/v1beta1/index.md

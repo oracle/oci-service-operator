@@ -4930,6 +4930,61 @@ services:
       webhooks:
         strategy: none
 
+  - service: jms
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/jms
+    group: jms
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Fleet
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: Fleet
+          formalSpec: fleet
+          async:
+            strategy: workrequest
+            runtime: generatedruntime
+            formalClassification: workrequest
+            workRequest:
+              source: service-sdk
+              phases:
+                - create
+                - update
+                - delete
+          sample:
+            body: |-
+              #
+              # Replace the OCI identifiers below before running e2e.
+              # Update metadata.name and spec.displayName if you want to force a fresh create
+              # instead of binding to an existing Fleet with the same display name in the same compartment.
+              apiVersion: jms.oracle.com/v1beta1
+              kind: Fleet
+              metadata:
+                name: fleet-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                displayName: fleet-sample
+                inventoryLog:
+                  logGroupId: ocid1.loggroup.oc1..exampleuniqueID
+                  logId: ocid1.log.oc1..exampleuniqueID
+                description: "Managed Java fleet"
+                freeformTags:
+                  workload: java
+          serviceManager:
+            packagePath: jms/fleet
+
   - service: licensemanager
     sdkPackage: github.com/oracle/oci-go-sdk/v65/licensemanager
     group: licensemanager

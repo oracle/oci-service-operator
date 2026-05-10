@@ -92,6 +92,7 @@ resources:
 - bases/iot.oracle.com_digitaltwinrelationships.yaml
 - bases/iot.oracle.com_iotdomaingroups.yaml
 - bases/iot.oracle.com_iotdomains.yaml
+- bases/jms.oracle.com_fleets.yaml
 - bases/keymanagement.oracle.com_ekmsprivateendpoints.yaml
 - bases/keymanagement.oracle.com_vaults.yaml
 - bases/licensemanager.oracle.com_licenserecords.yaml

@@ -1,0 +1,160 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "jms",
+  "slug": "fleet",
+  "kind": "Fleet",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_jms_fleet",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateFleet",
+        "requestType": "jms.CreateFleetRequest",
+        "responseType": "jms.CreateFleetResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetFleet",
+        "requestType": "jms.GetFleetRequest",
+        "responseType": "jms.GetFleetResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListFleets",
+        "requestType": "jms.ListFleetsRequest",
+        "responseType": "jms.ListFleetsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeFleetCompartment",
+        "requestType": "jms.ChangeFleetCompartmentRequest",
+        "responseType": "jms.ChangeFleetCompartmentResponse"
+      },
+      {
+        "operation": "UpdateFleet",
+        "requestType": "jms.UpdateFleetRequest",
+        "responseType": "jms.UpdateFleetResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteFleet",
+        "requestType": "jms.DeleteFleetRequest",
+        "responseType": "jms.DeleteFleetResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "NEEDS_ATTENTION"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "NEEDS_ATTENTION"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags",
+      "inventory_log",
+      "is_advanced_features_enabled",
+      "operation_log"
+    ],
+    "forceNew": [],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "fleet",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "fleet",
+        "action": "UPDATED"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "fleet",
+        "action": "DELETED"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_jms_fleets",
+    "collectionField": "fleet_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "display_name_contains",
+      "id",
+      "lifecycle_state",
+      "page",
+      "sort_by",
+      "sort_order"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/jms/fleet/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/jms/fleet/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "list-lookup",
+      "mutation-policy",
+      "status-projection",
+      "waiter-work-request",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: CreateFleet, GetFleet, ListFleets, UpdateFleet, DeleteFleet, ChangeFleetCompartment, GetWorkRequest, ListWorkRequests, ListWorkRequestErrors, and ListWorkRequestLogs are present in v65.110.0. Create, update, and delete return opc-work-request-id without a Fleet body, while GetFleet and ListFleets project Fleet lifecycle and status fields directly.",
+    "Pinned provider surface: oci_jms_fleet plus the singular and list data sources oci_jms_fleet and oci_jms_fleets require inventory_log on create, expose ChangeFleetCompartment, and treat ACTIVE plus NEEDS_ATTENTION as steady target states.",
+    "Repo-authored bind-versus-create stays explicit: when no OCI identifier is tracked, the runtime uses exact compartmentId plus displayName matches from ListFleets, ignores FAILED, DELETING, and DELETED summaries, and fails on duplicate exact-name matches instead of adopting arbitrarily.",
+    "Repo-authored mutation policy stays explicit: displayName, description, inventoryLog, operationLog, isAdvancedFeaturesEnabled, freeformTags, and definedTags reconcile in place while ChangeFleetCompartment remains out of scope for the published runtime contract."
+  ]
+}
