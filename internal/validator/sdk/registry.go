@@ -883,10 +883,15 @@ var seedTargets = []Target{
 
 	// Lustrefilestorage CRD support
 	newTarget("lustrefilestorage", "CreateLustreFileSystemDetails", reflect.TypeOf(lustrefilestorage.CreateLustreFileSystemDetails{})),
+	newTarget("lustrefilestorage", "CreateObjectStorageLinkDetails", reflect.TypeOf(lustrefilestorage.CreateObjectStorageLinkDetails{})),
 	newTarget("lustrefilestorage", "UpdateLustreFileSystemDetails", reflect.TypeOf(lustrefilestorage.UpdateLustreFileSystemDetails{})),
+	newTarget("lustrefilestorage", "UpdateObjectStorageLinkDetails", reflect.TypeOf(lustrefilestorage.UpdateObjectStorageLinkDetails{})),
 	newTarget("lustrefilestorage", "LustreFileSystem", reflect.TypeOf(lustrefilestorage.LustreFileSystem{})),
 	newTarget("lustrefilestorage", "LustreFileSystemCollection", reflect.TypeOf(lustrefilestorage.LustreFileSystemCollection{})),
+	newTarget("lustrefilestorage", "ObjectStorageLink", reflect.TypeOf(lustrefilestorage.ObjectStorageLink{})),
+	newTarget("lustrefilestorage", "ObjectStorageLinkCollection", reflect.TypeOf(lustrefilestorage.ObjectStorageLinkCollection{})),
 	newTarget("lustrefilestorage", "LustreFileSystemSummary", reflect.TypeOf(lustrefilestorage.LustreFileSystemSummary{})),
+	newTarget("lustrefilestorage", "ObjectStorageLinkSummary", reflect.TypeOf(lustrefilestorage.ObjectStorageLinkSummary{})),
 
 	// Managedkafka CRD support
 	newTarget("managedkafka", "CreateKafkaClusterConfigDetails", reflect.TypeOf(managedkafka.CreateKafkaClusterConfigDetails{})),

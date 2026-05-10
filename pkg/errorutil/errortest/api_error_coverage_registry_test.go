@@ -14,10 +14,10 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	}
 
 	byKey := inventoryByKey(inventory)
-	if got, want := len(inventory), 358; got != want {
+	if got, want := len(inventory), 359; got != want {
 		t.Fatalf("len(inventory) = %d, want %d", got, want)
 	}
-	if got, want := countRegistrations(inventory), 233; got != want {
+	if got, want := countRegistrations(inventory), 234; got != want {
 		t.Fatalf("registration inventory count = %d, want %d", got, want)
 	}
 	if got, want := countExceptions(inventory), 125; got != want {
@@ -56,6 +56,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventorySelectionSource(t, byKey, "generativeaidata/EnrichmentJob", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "loadbalancer/LoadBalancer", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "lustrefilestorage/LustreFileSystem", "selection.includeKinds")
+	assertInventorySelectionSource(t, byKey, "lustrefilestorage/ObjectStorageLink", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "marketplace/AcceptedAgreement", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "mngdmac/MacOrder", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "mediaservices/MediaAsset", "selection.includeKinds")
@@ -137,6 +138,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventoryException(t, byKey, "keymanagement/Key", `controller.strategy="none"`)
 	assertInventoryRegistration(t, byKey, "loadbalancer/LoadBalancer")
 	assertInventoryRegistration(t, byKey, "lustrefilestorage/LustreFileSystem")
+	assertInventoryRegistration(t, byKey, "lustrefilestorage/ObjectStorageLink")
 	assertInventoryRegistration(t, byKey, "marketplace/AcceptedAgreement")
 	assertInventoryRegistration(t, byKey, "mngdmac/MacOrder")
 	assertInventoryRegistration(t, byKey, "mediaservices/MediaAsset")
@@ -210,6 +212,7 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedFamily(t, "keymanagement/Vault", APIErrorCoverageFamilyLegacyAdapter)
 	assertReviewedFamily(t, "loadbalancer/LoadBalancer", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "lustrefilestorage/LustreFileSystem", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
+	assertReviewedFamily(t, "lustrefilestorage/ObjectStorageLink", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "marketplace/AcceptedAgreement", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "mngdmac/MacOrder", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "mediaservices/MediaAsset", APIErrorCoverageFamilyGeneratedRuntimePlain)

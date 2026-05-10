@@ -15,6 +15,7 @@ rules:
   - lustrefilestorage.oracle.com
   resources:
   - lustrefilesystems
+  - objectstoragelinks
   verbs:
   - create
   - delete
@@ -27,12 +28,14 @@ rules:
   - lustrefilestorage.oracle.com
   resources:
   - lustrefilesystems/finalizers
+  - objectstoragelinks/finalizers
   verbs:
   - update
 - apiGroups:
   - lustrefilestorage.oracle.com
   resources:
   - lustrefilesystems/status
+  - objectstoragelinks/status
   verbs:
   - get
   - patch

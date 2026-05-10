@@ -705,17 +705,20 @@ packages:
 
   - package: lustrefilestorage
     displayName: Lustre File Storage
-    summary: Manage OCI Lustre File Storage file systems from Kubernetes with a reviewed controller-backed runtime.
+    summary: Manage OCI Lustre File Storage file systems and object storage links from Kubernetes with a reviewed controller-backed runtime.
     supportStatus: preview
     customerVisible: false
     guidePath: docs/installation.md
     packageNotes:
-      - Current package scope is intentionally limited to LustreFileSystem while object storage links, sync jobs, and work-request helper families stay unpublished.
-      - The published runtime uses service-SDK work requests for create, update, and delete.
+      - Current package scope is intentionally limited to LustreFileSystem and ObjectStorageLink while sync jobs and work-request helper families stay unpublished.
+      - LustreFileSystem uses service-SDK work requests for create, update, and delete, while ObjectStorageLink uses service-SDK work requests only for delete confirmation.
     kindOverrides:
       - group: lustrefilestorage
         kind: LustreFileSystem
         summary: Manage OCI Lustre File Storage file systems.
+      - group: lustrefilestorage
+        kind: ObjectStorageLink
+        summary: Manage OCI Lustre File Storage object storage links.
 
   - package: managedkafka
     displayName: Managed Kafka

@@ -3177,6 +3177,28 @@ var targets = []Target{
 		},
 	},
 	{
+		Name:       "LustrefilestorageObjectStorageLink",
+		SpecType:   reflect.TypeOf(lustrefilestoragev1beta1.ObjectStorageLinkSpec{}),
+		StatusType: reflect.TypeOf(lustrefilestoragev1beta1.ObjectStorageLinkStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "lustrefilestorage.CreateObjectStorageLinkDetails",
+			},
+			{
+				SDKStruct: "lustrefilestorage.UpdateObjectStorageLinkDetails",
+			},
+			{
+				SDKStruct: "lustrefilestorage.ObjectStorageLink",
+			},
+			{
+				SDKStruct: "lustrefilestorage.ObjectStorageLinkCollection",
+			},
+			{
+				SDKStruct: "lustrefilestorage.ObjectStorageLinkSummary",
+			},
+		},
+	},
+	{
 		Name:       "ManagedkafkaKafkaCluster",
 		SpecType:   reflect.TypeOf(managedkafkav1beta1.KafkaClusterSpec{}),
 		StatusType: reflect.TypeOf(managedkafkav1beta1.KafkaClusterStatus{}),

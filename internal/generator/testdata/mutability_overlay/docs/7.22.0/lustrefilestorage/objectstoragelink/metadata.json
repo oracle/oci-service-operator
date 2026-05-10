@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "lustrefilestorage",
+  "kind": "ObjectStorageLink",
+  "formalSlug": "objectstoragelink",
+  "providerResource": "oci_lustre_file_storage_object_storage_link",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/lustre_file_storage_object_storage_link",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/lustre_file_storage_object_storage_link",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/lustrefilestorage/objectstoragelink/page.html",
+  "bodySHA256": "b959e6cfe8e9c1a964693df5674e188ef2220ddea015168dbe2f0e63cc793059",
+  "bodyBytes": 1239,
+  "fixtureBodyPath": "7.22.0/lustrefilestorage/objectstoragelink/page.html"
+}

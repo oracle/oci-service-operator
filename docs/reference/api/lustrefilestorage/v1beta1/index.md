@@ -19,6 +19,7 @@ No customer-visible package currently exposes `lustrefilestorage.oracle.com/v1be
 | Kind | Scope | Sample | Packages |
 | --- | --- | --- | --- |
 | [LustreFileSystem](#kind-lustrefilesystem) | Namespaced | [Sample](../../../samples/lustrefilestorage/v1beta1/lustrefilesystem.md) | - |
+| [ObjectStorageLink](#kind-objectstoragelink) | Namespaced | [Sample](../../../samples/lustrefilestorage/v1beta1/objectstoragelink.md) | - |
 
 <a id="kind-lustrefilesystem"></a>
 ## LustreFileSystem
@@ -228,6 +229,119 @@ Async is the canonical controller-owned async contract. Resource-local legacy wo
 ##### Status.status.conditions[]
 
 [Back to LustreFileSystem status](#kind-lustrefilesystem-status)
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `lastTransitionTime` | - | `string (date-time)` | No | - | - |
+| `message` | - | `string` | No | - | - |
+| `reason` | - | `string` | No | - | - |
+| `status` | - | `string` | Yes | - | - |
+| `type` | - | `string` | Yes | - | - |
+
+<a id="kind-objectstoragelink"></a>
+## ObjectStorageLink
+
+Manage OCI Lustre File Storage object storage links.
+
+- `Plural`: `objectstoragelinks`
+- `Scope`: `Namespaced`
+- `APIVersion`: `lustrefilestorage.oracle.com/v1beta1`
+- `Sample`: [Sample](../../../samples/lustrefilestorage/v1beta1/objectstoragelink.md) (`config/samples/lustrefilestorage_v1beta1_objectstoragelink.yaml`)
+- `Packages`: Not currently exposed by a customer-visible package.
+
+<a id="kind-objectstoragelink-spec"></a>
+### Spec
+
+ObjectStorageLinkSpec defines the desired state of ObjectStorageLink.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `availabilityDomain` | The availability domain that the Lustre file system is in. May be unset as a blank or NULL value. Example: `Uocm:PHX-AD-1` | `string` | Yes | - | - |
+| `compartmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the Object Storage link. | `string` | Yes | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `displayName` | A user-friendly name. It does not have to be unique, and it is changeable. Avoid entering confidential information. Example: `My Object Storage Link` | `string` | No | - | - |
+| `fileSystemPath` | The path in the Lustre file system used for this Object Storage link. Example: `myFileSystem/mount/myDirectory` | `string` | Yes | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `isOverwrite` | The flag is an identifier to tell whether the job run has overwrite enabled. If `isOverwrite` is false, the file to be imported or exported will be skipped if it already exists. If `isOverwrite` is true, the file to be imported or exported will be overwritten if it already exists. | `boolean` | Yes | - | - |
+| `lustreFileSystemId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the associated Lustre file system. | `string` | Yes | - | - |
+| `objectStoragePrefix` | The Object Storage namespace and bucket name, including optional object prefix string, to use as the source for imports or destination for exports. Example: `objectStorageNamespace:/bucketName/optionalFolder/optionalPrefix` | `string` | Yes | - | - |
+
+<a id="kind-objectstoragelink-status"></a>
+### Status
+
+ObjectStorageLinkStatus defines the observed state of ObjectStorageLink.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `availabilityDomain` | The availability domain the file system is in. May be unset as a blank or NULL value. Example: `Uocm:PHX-AD-1` | `string` | No | - | - |
+| `compartmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the Lustre file system. | `string` | No | - | - |
+| `currentJobId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of currently running sync job. If no sync job is running, then this will be empty. | `string` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `displayName` | A user-friendly name. It does not have to be unique, and it is changeable. Avoid entering confidential information. Example: `My Object Storage Link` | `string` | No | - | - |
+| `fileSystemPath` | The path in the Lustre file system used for this Object Storage link. Example: `myFileSystem/mount/myDirectory` | `string` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `id` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the ObjectStorageLink. | `string` | No | - | - |
+| `isOverwrite` | The flag is an identifier to tell whether the job run has overwrite enabled. If `isOverwrite` is false, the file to be imported or exported will be skipped if it already exists. If `isOverwrite` is true, the file to be imported or exported will be overwritten if it already exists. | `boolean` | No | - | - |
+| `lastJobId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of last succeeded sync job. If no sync job has previously run, then this will be empty. | `string` | No | - | - |
+| `lifecycleDetails` | A message that describes the current state of the Object Storage link in more detail. For example, can be used to provide actionable information for a resource in the Failed state. | `string` | No | - | - |
+| `lifecycleState` | The current state of the Object Storage link. | `string` | No | - | - |
+| `lustreFileSystemId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the associated Lustre file system. | `string` | No | - | - |
+| `objectStoragePrefix` | The Object Storage namespace and bucket name, including optional object prefix string, to use as the source for imports or destination for exports. Example: `objectStorageNamespace:/bucketName/optionalFolder/optionalPrefix` | `string` | No | - | - |
+| [`status`](#kind-objectstoragelink-status-status) | - | `object` | Yes | - | - |
+| `systemTags` | System tags for this resource. Each key is predefined and scoped to a namespace. Example: `{"orcl-cloud": {"free-tier-retained": "true"}}` | `map[string, map[string, string]]` | No | - | - |
+| `timeCreated` | The date and time the Lustre file system was created, expressed in RFC 3339 (https://tools.ietf.org/rfc/rfc3339) timestamp format. Example: `2024-04-25T21:10:29.600Z` | `string` | No | - | - |
+| `timeUpdated` | The date and time the Object Storage link was updated, in the format defined by RFC 3339 (https://tools.ietf.org/html/rfc3339). Example: `2024-04-25T21:10:29.600Z` | `string` | No | - | - |
+
+<a id="kind-objectstoragelink-status-status"></a>
+#### Status.status
+
+[Back to ObjectStorageLink status](#kind-objectstoragelink-status)
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`async`](#kind-objectstoragelink-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
+| [`conditions`](#kind-objectstoragelink-status-status-conditions) | - | `list[object]` | No | - | - |
+| `createdAt` | - | `string (date-time)` | No | - | - |
+| `deletedAt` | - | `string (date-time)` | No | - | - |
+| `message` | - | `string` | No | - | - |
+| `ocid` | - | `string` | No | - | - |
+| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
+| `reason` | - | `string` | No | - | - |
+| `requestedAt` | - | `string (date-time)` | No | - | - |
+| `updatedAt` | - | `string (date-time)` | No | - | - |
+
+<a id="kind-objectstoragelink-status-status-async"></a>
+##### Status.status.async
+
+[Back to ObjectStorageLink status](#kind-objectstoragelink-status)
+
+Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`current`](#kind-objectstoragelink-status-status-async-current) | - | `object` | No | - | - |
+
+<a id="kind-objectstoragelink-status-status-async-current"></a>
+###### Status.status.async.current
+
+[Back to ObjectStorageLink status](#kind-objectstoragelink-status)
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `message` | - | `string` | No | - | - |
+| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
+| `percentComplete` | - | `number` | No | - | - |
+| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
+| `rawOperationType` | - | `string` | No | - | - |
+| `rawStatus` | - | `string` | No | - | - |
+| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
+| `updatedAt` | - | `string (date-time)` | Yes | - | - |
+| `workRequestId` | - | `string` | No | - | - |
+
+<a id="kind-objectstoragelink-status-status-conditions"></a>
+##### Status.status.conditions[]
+
+[Back to ObjectStorageLink status](#kind-objectstoragelink-status)
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |

@@ -123,6 +123,7 @@ resources:
 - bases/logging.oracle.com_logsavedsearches.yaml
 - bases/logging.oracle.com_unifiedagentconfigurations.yaml
 - bases/lustrefilestorage.oracle.com_lustrefilesystems.yaml
+- bases/lustrefilestorage.oracle.com_objectstoragelinks.yaml
 - bases/managedkafka.oracle.com_kafkaclusterconfigs.yaml
 - bases/managedkafka.oracle.com_kafkaclusters.yaml
 - bases/managementagent.oracle.com_datasources.yaml

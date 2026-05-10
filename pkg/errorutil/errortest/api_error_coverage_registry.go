@@ -591,6 +591,16 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 				retryableConflictWorkRequest,
 				"LustreFileSystem persists create, update, and delete work-request OCIDs while steady-state success still re-reads OCI lifecycle state and delete confirmation follows GetLustreFileSystem until NotFound.",
 			),
+			resourceKey("lustrefilestorage", "ObjectStorageLink"): reviewedRegistration(
+				"lustrefilestorage",
+				"lustrefilestorage",
+				apiErrorCoverageDefaultVersion,
+				"ObjectStorageLink",
+				APIErrorCoverageFamilyGeneratedRuntimeWorkRequest,
+				deleteNotFoundReadback,
+				retryableConflictWorkRequest,
+				"ObjectStorageLink keeps generatedruntime read-after-write semantics for create and update, but a small handwritten hook layer wires delete work-request polling through GetWorkRequest and confirms deletion through GetObjectStorageLink until DELETED or NotFound.",
+			),
 			resourceKey("identity", "Compartment"): reviewedRegistration(
 				"identity",
 				"identity",

@@ -14,6 +14,7 @@ import (
 	lustrefilestoragecontrollers "github.com/oracle/oci-service-operator/controllers/lustrefilestorage"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	lustrefilestoragelustrefilesystemservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/lustrefilestorage/lustrefilesystem"
+	lustrefilestorageobjectstoragelinkservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/lustrefilestorage/objectstoragelink"
 )
 
 func init() {
@@ -31,6 +32,17 @@ func init() {
 				),
 			}).SetupWithManager(ctx.Manager); err != nil {
 				return fmt.Errorf("setup LustreFileSystem controller: %w", err)
+			}
+			if err := (&lustrefilestoragecontrollers.ObjectStorageLinkReconciler{
+				Reconciler: NewBaseReconciler(
+					ctx,
+					"ObjectStorageLink",
+					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
+						return lustrefilestorageobjectstoragelinkservicemanager.NewObjectStorageLinkServiceManagerWithDeps(deps)
+					},
+				),
+			}).SetupWithManager(ctx.Manager); err != nil {
+				return fmt.Errorf("setup ObjectStorageLink controller: %w", err)
 			}
 			return nil
 		},
