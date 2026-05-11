@@ -527,10 +527,18 @@ func (c *configurationRuntimeClient) handleStaleTrackedIdentity(
 		return servicemanager.OSOKResponse{}, nil, false
 	}
 
-	current, err := c.get(ctx, currentConfigurationCompartmentID(resource))
+	trackedCompartmentID := trackedConfigurationCompartmentID(resource)
+	if trackedCompartmentID == "" {
+		return servicemanager.OSOKResponse{}, nil, false
+	}
+
+	current, err := c.get(ctx, trackedCompartmentID)
 	if err != nil {
 		if !servicemanager.IsNotFoundServiceError(err) {
 			return servicemanager.OSOKResponse{}, nil, false
+		}
+		if desiredCompartmentID := strings.TrimSpace(resource.Spec.CompartmentId); desiredCompartmentID != "" && desiredCompartmentID != trackedCompartmentID {
+			return servicemanager.OSOKResponse{IsSuccessful: false}, fmt.Errorf("Configuration formal semantics require replacement when compartmentId changes"), true
 		}
 		clearTrackedConfigurationIdentity(resource)
 		response, err := c.delegate.CreateOrUpdate(generatedruntime.WithSkipExistingBeforeCreate(ctx), resource, req)
@@ -586,6 +594,16 @@ func currentConfigurationCompartmentID(resource *zprv1beta1.Configuration) strin
 		return compartmentID
 	}
 	return strings.TrimSpace(resource.Status.CompartmentId)
+}
+
+func trackedConfigurationCompartmentID(resource *zprv1beta1.Configuration) string {
+	if resource == nil {
+		return ""
+	}
+	if compartmentID := strings.TrimSpace(resource.Status.CompartmentId); compartmentID != "" {
+		return compartmentID
+	}
+	return strings.TrimSpace(resource.Spec.CompartmentId)
 }
 
 func cloneConfigurationStringMap(values map[string]string) map[string]string {

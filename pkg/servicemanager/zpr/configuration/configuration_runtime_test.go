@@ -385,6 +385,48 @@ func TestConfigurationRuntimeRecreatesAfterStaleTrackedIdentityNotFound(t *testi
 	}
 }
 
+func TestConfigurationRuntimeTrackedCompartmentDriftFailsInsteadOfRecreating(t *testing.T) {
+	t.Parallel()
+
+	resource := newConfigurationTestResource()
+	resource.Status.Id = "ocid1.zprconfiguration.oc1..tracked"
+	resource.Status.CompartmentId = "ocid1.tenancy.oc1..tracked"
+	resource.Status.OsokStatus.Ocid = shared.OCID(resource.Status.Id)
+	resource.Spec.CompartmentId = "ocid1.tenancy.oc1..desired"
+
+	fake := &fakeConfigurationOCIClient{
+		createFn: func(context.Context, zprsdk.CreateConfigurationRequest) (zprsdk.CreateConfigurationResponse, error) {
+			t.Fatal("CreateConfiguration should not be called when tracked compartmentId drift requires replacement")
+			return zprsdk.CreateConfigurationResponse{}, nil
+		},
+		getFn: func(_ context.Context, req zprsdk.GetConfigurationRequest) (zprsdk.GetConfigurationResponse, error) {
+			if got := stringValue(req.CompartmentId); got != resource.Status.CompartmentId {
+				t.Fatalf("GetConfiguration compartmentId = %q, want tracked status compartment %q", got, resource.Status.CompartmentId)
+			}
+			return zprsdk.GetConfigurationResponse{}, errortest.NewServiceError(404, errorutil.NotFound, "not found")
+		},
+		getWorkRequestFn: func(context.Context, zprsdk.GetZprConfigurationWorkRequestRequest) (zprsdk.GetZprConfigurationWorkRequestResponse, error) {
+			t.Fatal("GetZprConfigurationWorkRequest should not be called when tracked compartmentId drift requires replacement")
+			return zprsdk.GetZprConfigurationWorkRequestResponse{}, nil
+		},
+	}
+
+	client := newConfigurationTestClient(fake)
+	_, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err == nil || !strings.Contains(err.Error(), "require replacement when compartmentId changes") {
+		t.Fatalf("CreateOrUpdate() error = %v, want compartmentId replacement failure", err)
+	}
+	if len(fake.createRequests) != 0 {
+		t.Fatalf("CreateConfiguration calls = %d, want 0", len(fake.createRequests))
+	}
+	if len(fake.getRequests) != 1 {
+		t.Fatalf("GetConfiguration calls = %d, want 1 tracked-compartment probe", len(fake.getRequests))
+	}
+	if len(fake.getWorkRequestRequests) != 0 {
+		t.Fatalf("GetZprConfigurationWorkRequest calls = %d, want 0", len(fake.getWorkRequestRequests))
+	}
+}
+
 func TestConfigurationRuntimeRejectsUnsupportedFreeformTagDrift(t *testing.T) {
 	t.Parallel()
 
