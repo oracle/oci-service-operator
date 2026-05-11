@@ -36,6 +36,9 @@ func TestApplyRoverNodeRuntimeHooksOverridesGeneratedDefaults(t *testing.T) {
 	if got, want := hooks.List.Fields, reviewedRoverNodeListFields(); !equalRequestFields(got, want) {
 		t.Fatalf("hooks.List.Fields = %#v, want %#v", got, want)
 	}
+	if hooks.Identity.GuardExistingBeforeCreate == nil {
+		t.Fatal("hooks.Identity.GuardExistingBeforeCreate = nil, want explicit serialNumber guard")
+	}
 	if hooks.ParityHooks.NormalizeDesiredState == nil {
 		t.Fatal("hooks.ParityHooks.NormalizeDesiredState = nil, want provider-managed field normalization")
 	}
@@ -66,6 +69,39 @@ func TestApplyRoverNodeRuntimeHooksOverridesGeneratedDefaults(t *testing.T) {
 	}
 	if got := resource.Spec.NodeWorkloads[0].WorkRequestId; got != "" {
 		t.Fatalf("resource.Spec.NodeWorkloads[0].WorkRequestId = %q, want empty string", got)
+	}
+}
+
+func TestGuardRoverNodeExistingBeforeCreateSkipsReuseWithoutSerialNumber(t *testing.T) {
+	t.Parallel()
+
+	resource := newRoverNodeTestResource()
+	resource.Spec.SerialNumber = "   "
+
+	decision, err := guardRoverNodeExistingBeforeCreate(context.Background(), resource)
+	if err != nil {
+		t.Fatalf("guardRoverNodeExistingBeforeCreate() error = %v", err)
+	}
+	if decision != generatedruntime.ExistingBeforeCreateDecisionSkip {
+		t.Fatalf("guardRoverNodeExistingBeforeCreate() = %q, want %q", decision, generatedruntime.ExistingBeforeCreateDecisionSkip)
+	}
+}
+
+func TestWrapRoverNodeListCallEnforceStandalone(t *testing.T) {
+	t.Parallel()
+
+	var seen roversdk.ListRoverNodesRequest
+	call := wrapRoverNodeListCallEnforceStandalone(func(_ context.Context, request roversdk.ListRoverNodesRequest) (roversdk.ListRoverNodesResponse, error) {
+		seen = request
+		return roversdk.ListRoverNodesResponse{}, nil
+	})
+
+	_, err := call(context.Background(), roversdk.ListRoverNodesRequest{})
+	if err != nil {
+		t.Fatalf("wrapped list call error = %v", err)
+	}
+	if seen.NodeType != roversdk.ListRoverNodesNodeTypeStandalone {
+		t.Fatalf("wrapped ListRoverNodesRequest.NodeType = %q, want %q", seen.NodeType, roversdk.ListRoverNodesNodeTypeStandalone)
 	}
 }
 
@@ -163,8 +199,8 @@ func TestRoverNodeCreateOrUpdateCreatesWhenListCandidateSerialNumberDiffers(t *t
 			Call: func(_ context.Context, request any) (any, error) {
 				listCalled = true
 				listRequest := *request.(*roversdk.ListRoverNodesRequest)
-				if listRequest.NodeType != "" {
-					t.Fatalf("ListRoverNodesRequest.NodeType = %q, want empty string after reviewed list-field override", listRequest.NodeType)
+				if listRequest.NodeType != roversdk.ListRoverNodesNodeTypeStandalone {
+					t.Fatalf("ListRoverNodesRequest.NodeType = %q, want %q for standalone-only reviewed scope", listRequest.NodeType, roversdk.ListRoverNodesNodeTypeStandalone)
 				}
 				if listRequest.LifecycleState != "" {
 					t.Fatalf("ListRoverNodesRequest.LifecycleState = %q, want empty string after reviewed list-field override", listRequest.LifecycleState)
@@ -217,6 +253,65 @@ func TestRoverNodeCreateOrUpdateCreatesWhenListCandidateSerialNumberDiffers(t *t
 	}
 }
 
+func TestRoverNodeCreateOrUpdateCreatesWithoutReuseWhenSerialNumberIsBlank(t *testing.T) {
+	t.Parallel()
+
+	resource := newRoverNodeTestResource()
+	resource.Spec.SerialNumber = ""
+
+	defaultHooks := newRoverNodeDefaultRuntimeHooks(roversdk.RoverNodeClient{})
+
+	createCalled := false
+	preCreateListCalled := false
+
+	manager := newRoverNodeRuntimeTestManager(generatedruntime.Config[*roverv1beta1.RoverNode]{
+		Identity: generatedruntime.IdentityHooks[*roverv1beta1.RoverNode]{
+			GuardExistingBeforeCreate: guardRoverNodeExistingBeforeCreate,
+		},
+		List: &generatedruntime.Operation{
+			NewRequest: func() any { return &roversdk.ListRoverNodesRequest{} },
+			Fields:     append([]generatedruntime.RequestField(nil), reviewedRoverNodeListFields()...),
+			Call: func(_ context.Context, request any) (any, error) {
+				if !createCalled {
+					preCreateListCalled = true
+				}
+				return roversdk.ListRoverNodesResponse{
+					RoverNodeCollection: roversdk.RoverNodeCollection{
+						Items: []roversdk.RoverNodeSummary{
+							observedRoverNodeSummaryFromSpec("ocid1.rovernode.oc1..existing", newRoverNodeTestResource().Spec, "ACTIVE"),
+						},
+					},
+				}, nil
+			},
+		},
+		Create: &generatedruntime.Operation{
+			NewRequest: func() any { return &roversdk.CreateRoverNodeRequest{} },
+			Fields:     append([]generatedruntime.RequestField(nil), defaultHooks.Create.Fields...),
+			Call: func(_ context.Context, _ any) (any, error) {
+				createCalled = true
+				return roversdk.CreateRoverNodeResponse{
+					RoverNode:    observedRoverNodeFromSpec("ocid1.rovernode.oc1..created", resource.Spec, "CREATING"),
+					OpcRequestId: common.String("opc-create"),
+				}, nil
+			},
+		},
+	})
+
+	response, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if preCreateListCalled {
+		t.Fatal("List() should not be used for pre-create reuse when desired serialNumber is blank")
+	}
+	if !createCalled {
+		t.Fatal("Create() should be called when desired serialNumber is blank")
+	}
+	if !response.IsSuccessful {
+		t.Fatal("CreateOrUpdate() IsSuccessful = false, want true after create path succeeds")
+	}
+}
+
 func TestRoverNodeCreateOrUpdateUpdatesUniqueExactSummaryMatch(t *testing.T) {
 	t.Parallel()
 
@@ -237,8 +332,8 @@ func TestRoverNodeCreateOrUpdateUpdatesUniqueExactSummaryMatch(t *testing.T) {
 			Fields:     append([]generatedruntime.RequestField(nil), reviewedRoverNodeListFields()...),
 			Call: func(_ context.Context, request any) (any, error) {
 				listRequest := *request.(*roversdk.ListRoverNodesRequest)
-				if listRequest.NodeType != "" {
-					t.Fatalf("ListRoverNodesRequest.NodeType = %q, want empty string after reviewed list-field override", listRequest.NodeType)
+				if listRequest.NodeType != roversdk.ListRoverNodesNodeTypeStandalone {
+					t.Fatalf("ListRoverNodesRequest.NodeType = %q, want %q for standalone-only reviewed scope", listRequest.NodeType, roversdk.ListRoverNodesNodeTypeStandalone)
 				}
 				if listRequest.LifecycleState != "" {
 					t.Fatalf("ListRoverNodesRequest.LifecycleState = %q, want empty string after reviewed list-field override", listRequest.LifecycleState)
@@ -354,6 +449,9 @@ func newRoverNodeRuntimeTestManager(
 	if cfg.Semantics == nil {
 		cfg.Semantics = reviewedRoverNodeRuntimeSemantics()
 	}
+	if cfg.Identity.GuardExistingBeforeCreate == nil {
+		cfg.Identity.GuardExistingBeforeCreate = guardRoverNodeExistingBeforeCreate
+	}
 	if cfg.ParityHooks.NormalizeDesiredState == nil {
 		cfg.ParityHooks.NormalizeDesiredState = normalizeRoverNodeDesiredState
 	}
@@ -365,6 +463,14 @@ func newRoverNodeRuntimeTestManager(
 			currentResponse any,
 		) (any, bool, error) {
 			return buildRoverNodeUpdateBody(resource, currentResponse)
+		}
+	}
+	if cfg.List != nil && cfg.List.Call != nil {
+		call := cfg.List.Call
+		cfg.List.Call = func(ctx context.Context, request any) (any, error) {
+			listRequest := request.(*roversdk.ListRoverNodesRequest)
+			listRequest.NodeType = roversdk.ListRoverNodesNodeTypeStandalone
+			return call(ctx, request)
 		}
 	}
 

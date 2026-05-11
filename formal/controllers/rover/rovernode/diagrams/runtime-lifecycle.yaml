@@ -22,7 +22,7 @@ repoAuthored:
       - compartmentId
       - displayName
       - shape
-    matchRule: exact compartmentId plus displayName plus shape list filters, then exact serialNumber unique match in ACTIVE, CREATING, or UPDATING summaries; duplicate matches fail
+    matchRule: exact compartmentId plus displayName plus shape list filters with nodeType fixed to STANDALONE, then exact serialNumber unique match in ACTIVE, CREATING, or UPDATING summaries only when the desired serialNumber is non-empty; duplicate matches fail
   mutation:
     mutable:
       - certCompartmentId
@@ -60,6 +60,6 @@ repoAuthored:
 notes:
   - Reviewed lifecycle mapping treats CREATING as provisioning, UPDATING as updating, ACTIVE as success, FAILED as terminal without requeue, and delete confirmation as DELETING until DELETED or NotFound.
   - The published runtime removes ChangeRoverNodeCompartment from the generated auxiliary surface and never polls Rover work requests for CRUD because RoverNode write responses do not expose opc-work-request-id and Rover's service-local work-request enum only documents ADD_NODES.
-  - Pre-create lookup lists by compartmentId, displayName, and shape, then narrows returned summaries in memory with exact serialNumber matching before any reuse. lifecycleState is intentionally omitted from the list request.
+  - Pre-create lookup lists by compartmentId, displayName, and shape with nodeType fixed to STANDALONE, then narrows returned summaries in memory with exact serialNumber matching only when the desired serialNumber is non-empty. lifecycleState is intentionally omitted from the list request.
   - LifecycleState, LifecycleStateDetails, SystemTags, and nodeWorkloads.workRequestId remain provider-managed request-shape fields. The reviewed runtime normalizes them out before parity or write calls.
   - Required status projection keeps the OCI body surface except excluded credential-like fields and one-time URLs/codes dataValidationCode, imageExportPar, returnShippingLabelUri, superUserPassword, and unlockPassphrase. The runtime has no secret side effects.

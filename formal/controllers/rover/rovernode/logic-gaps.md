@@ -25,7 +25,10 @@ generated-runtime contract.
   `FAILED` is terminal without requeue, and delete confirmation waits through
   `DELETING` until `DELETED` or NotFound.
 - Pre-create lookup is explicit. `ListRoverNodes` scopes by exact
-  `compartmentId`, `displayName`, and `shape`, then reuses only a unique exact
+  `compartmentId`, `displayName`, and `shape`, and the reviewed runtime forces
+  `nodeType=STANDALONE` on that list path so clustered and station nodes stay
+  out of scope. Reuse is attempted only when the desired `serialNumber` is
+  non-empty; in that case the runtime reuses only a unique exact
   `serialNumber` match in reusable `ACTIVE`, `CREATING`, or `UPDATING`
   summaries. The reviewed runtime intentionally removes provider-managed
   `lifecycleState` from the list request so desired-spec drift cannot hide a

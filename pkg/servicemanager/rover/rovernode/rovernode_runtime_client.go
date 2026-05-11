@@ -32,7 +32,11 @@ func applyRoverNodeRuntimeHooks(hooks *RoverNodeRuntimeHooks) {
 	}
 
 	hooks.Semantics = reviewedRoverNodeRuntimeSemantics()
+	hooks.Identity.GuardExistingBeforeCreate = guardRoverNodeExistingBeforeCreate
 	hooks.List.Fields = reviewedRoverNodeListFields()
+	if hooks.List.Call != nil {
+		hooks.List.Call = wrapRoverNodeListCallEnforceStandalone(hooks.List.Call)
+	}
 	hooks.ParityHooks.NormalizeDesiredState = normalizeRoverNodeDesiredState
 	hooks.BuildUpdateBody = func(
 		_ context.Context,
@@ -63,6 +67,32 @@ func reviewedRoverNodeListFields() []generatedruntime.RequestField {
 		{FieldName: "Page", RequestName: "page", Contribution: "query"},
 		{FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query"},
 		{FieldName: "SortBy", RequestName: "sortBy", Contribution: "query"},
+	}
+}
+
+func guardRoverNodeExistingBeforeCreate(
+	_ context.Context,
+	resource *roverv1beta1.RoverNode,
+) (generatedruntime.ExistingBeforeCreateDecision, error) {
+	if resource == nil {
+		return generatedruntime.ExistingBeforeCreateDecisionAllow, nil
+	}
+	if strings.TrimSpace(resource.Spec.SerialNumber) == "" {
+		return generatedruntime.ExistingBeforeCreateDecisionSkip, nil
+	}
+	return generatedruntime.ExistingBeforeCreateDecisionAllow, nil
+}
+
+func wrapRoverNodeListCallEnforceStandalone(
+	call func(context.Context, roversdk.ListRoverNodesRequest) (roversdk.ListRoverNodesResponse, error),
+) func(context.Context, roversdk.ListRoverNodesRequest) (roversdk.ListRoverNodesResponse, error) {
+	if call == nil {
+		return nil
+	}
+
+	return func(ctx context.Context, request roversdk.ListRoverNodesRequest) (roversdk.ListRoverNodesResponse, error) {
+		request.NodeType = roversdk.ListRoverNodesNodeTypeStandalone
+		return call(ctx, request)
 	}
 }
 
