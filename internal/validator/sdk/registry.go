@@ -1330,8 +1330,10 @@ var seedTargets = []Target{
 	newTarget("wlms", "WlsDomainSummary", reflect.TypeOf(wlms.WlsDomainSummary{})),
 
 	// Zpr CRD support
+	newTarget("zpr", "CreateConfigurationDetails", reflect.TypeOf(zpr.CreateConfigurationDetails{})),
 	newTarget("zpr", "CreateZprPolicyDetails", reflect.TypeOf(zpr.CreateZprPolicyDetails{})),
 	newTarget("zpr", "UpdateZprPolicyDetails", reflect.TypeOf(zpr.UpdateZprPolicyDetails{})),
+	newTarget("zpr", "Configuration", reflect.TypeOf(zpr.Configuration{})),
 	newTarget("zpr", "ZprPolicy", reflect.TypeOf(zpr.ZprPolicy{})),
 	newTarget("zpr", "ZprPolicyCollection", reflect.TypeOf(zpr.ZprPolicyCollection{})),
 	newTarget("zpr", "ZprPolicySummary", reflect.TypeOf(zpr.ZprPolicySummary{})),

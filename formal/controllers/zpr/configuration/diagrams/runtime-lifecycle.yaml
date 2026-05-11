@@ -1,0 +1,21 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: zpr
+slug: configuration
+kind: Configuration
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - failed
+repoAuthored:
+  followUp:
+    create: "GetZprConfigurationWorkRequest -> GetConfiguration"
+    update: none
+    delete: none
+notes:
+  - "The published Configuration contract is a singleton create/get surface. Reconcile binds and rereads through GetConfiguration(compartmentId) and creates only when that root-compartment read confirms absence."
+  - "CreateConfiguration is work-request-backed. The runtime stores the create work request in status.async.current, resumes through GetZprConfigurationWorkRequest, recovers the configuration identifier from work-request resources, and then confirms state with GetConfiguration."
+  - "No OCI update or delete operation is published. Drift on zprStatus or tag maps is rejected, compartmentId remains bind/create identity, and Kubernetes delete performs local finalizer cleanup only."
+  - "ACTIVE settles success, CREATING and UPDATING requeue, FAILED remains terminal non-success, and observed DELETED is treated as stale identity or absence rather than managed delete progress."

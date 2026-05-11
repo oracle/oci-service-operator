@@ -1,0 +1,120 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Activity - zpr/Configuration
+skinparam activity {
+  backgroundColor #f8fafc
+  borderColor #0f172a
+  fontColor #0f172a
+  diamondBackgroundColor #e2e8f0
+  diamondBorderColor #1d4ed8
+  diamondFontColor #0f172a
+  startColor #1d4ed8
+  endColor #0f172a
+  barColor #1d4ed8
+}
+start
+partition "Observe and Bind" {
+:Start from shared flow\nshared/diagrams/shared-reconcile-activity.svg;
+:Read desired Configuration spec, tracked\nstatus, and delete intent;
+if ("Tracked or explicit OCI identity present?") then (yes)
+:Get the current OCI resource via\nGetConfiguration;
+else (no)
+:Create the OCI resource via\nCreateConfiguration when no tracked identity\nis present;
+:Persist the resolved or created OCI identity\ninto status;
+endif
+}
+if ("Delete requested?") then (yes)
+partition "Delete" {
+:Delete path is not represented by imported\nprovider facts;
+:Confirm deletion via GetConfiguration until\nOCI reaches LOCAL_DELETE;
+:Allow best-effort completion without finalizer\nretention;
+}
+stop
+else (no)
+partition "Lifecycle Classification" {
+if ("OCI state in retryable set?") then (yes)
+:Request requeue while OCI remains in CREATING,\nUPDATING;
+stop
+endif
+if ("OCI state is outside success targets?") then (yes)
+:Return an unsuccessful reconcile result until\nOCI reaches ACTIVE;
+stop
+endif
+}
+partition "Ready and Drift Handling" {
+:Compare live OCI state against the imported\nfield surface;
+if ("Force-new or conflicting drift detected?") then (yes)
+:Reject drift before OCI mutation for force-new\nfields compartment_id, zpr_status,\nfreeform_tags, defined_tags;
+stop
+endif
+:Run provider helper hooks\ncreate=tfresource.CreateResource when the\nmatching field-driven path executes;
+:Apply explicit follow-up semantics\ncreate=GetZprConfigurationWorkRequest ->\nGetConfiguration; update=none; delete=none;
+:Return success for the ACTIVE success state;
+:Project required status and finalizer policy\nnone;
+:Requeue on provisioning, updating;
+}
+endif
+stop
+note right
+shared diagram:
+shared/diagrams/shared-reconcile-activity.svg
+Start from the shared reconcile activity and
+specialize provider-backed CRUD, wait, and
+status-projection details here.
+Controller-local activity diagrams add
+list-lookup hints, secret policies, delete
+handling, and open formal gaps.
+archetype batch: Generated service-manager
+controllers specialize the shared reconcile path
+with formal runtime ownership.
+service: zpr
+slug: configuration
+kind: Configuration
+archetype: generated-service-manager
+status/finalizer: required / none
+requeue: provisioning, updating
+provider states: create CREATING; update
+UPDATING; delete none
+follow-up: create=GetZprConfigurationWorkRequest
+-> GetConfiguration; update=none; delete=none
+supported drift: none
+reject before mutate: force-new fields
+compartment_id, zpr_status, freeform_tags,
+defined_tags
+create-only fields: none
+list lookup: none
+conflicts: none
+open gaps: none
+The published Configuration contract is a
+singleton create/get surface. Reconcile binds
+and rereads through
+GetConfiguration(compartmentId) and creates only
+when that root-compartment read confirms
+absence.
+CreateConfiguration is work-request-backed. The
+runtime stores the create work request in
+status.async.current, resumes through
+GetZprConfigurationWorkRequest, recovers the
+configuration identifier from work-request
+resources, and then confirms state with
+GetConfiguration.
+No OCI update or delete operation is published.
+Drift on zprStatus or tag maps is rejected,
+compartmentId remains bind/create identity, and
+Kubernetes delete performs local finalizer
+cleanup only.
+ACTIVE settles success, CREATING and UPDATING
+requeue, FAILED remains terminal non-success,
+and observed DELETED is treated as stale
+identity or absence rather than managed delete
+progress.
+end note
+@enduml
