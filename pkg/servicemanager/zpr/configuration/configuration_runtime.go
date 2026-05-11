@@ -547,6 +547,9 @@ func (c *configurationRuntimeClient) handleStaleTrackedIdentity(
 	if current.LifecycleState != zprsdk.ConfigurationLifecycleStateDeleted {
 		return servicemanager.OSOKResponse{}, nil, false
 	}
+	if desiredCompartmentID := strings.TrimSpace(resource.Spec.CompartmentId); desiredCompartmentID != "" && desiredCompartmentID != trackedCompartmentID {
+		return servicemanager.OSOKResponse{IsSuccessful: false}, fmt.Errorf("Configuration formal semantics require replacement when compartmentId changes"), true
+	}
 
 	clearTrackedConfigurationIdentity(resource)
 	response, err := c.delegate.CreateOrUpdate(generatedruntime.WithSkipExistingBeforeCreate(ctx), resource, req)
