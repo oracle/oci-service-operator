@@ -18,7 +18,123 @@ No customer-visible package currently exposes `wlms.oracle.com/v1beta1`.
 
 | Kind | Scope | Sample | Packages |
 | --- | --- | --- | --- |
+| [ManagedInstance](#kind-managedinstance) | Namespaced | [Sample](../../../samples/wlms/v1beta1/managedinstance.md) | - |
 | [WlsDomain](#kind-wlsdomain) | Namespaced | [Sample](../../../samples/wlms/v1beta1/wlsdomain.md) | - |
+
+<a id="kind-managedinstance"></a>
+## ManagedInstance
+
+Manage OCI managed instances already onboarded into OCI WebLogic Management Service.
+
+- `Plural`: `managedinstances`
+- `Scope`: `Namespaced`
+- `APIVersion`: `wlms.oracle.com/v1beta1`
+- `Sample`: [Sample](../../../samples/wlms/v1beta1/managedinstance.md) (`config/samples/wlms_v1beta1_managedinstance.yaml`)
+- `Packages`: Not currently exposed by a customer-visible package.
+
+<a id="kind-managedinstance-spec"></a>
+### Spec
+
+ManagedInstanceSpec defines the desired state of ManagedInstance.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `compartmentId` | The compartment containing the existing managed instance when binding by list lookup. Provide this together with `displayName` when `id` is not set. | `string` | No | - | - |
+| `configuration` | Desired in-place WLMS managed-instance configuration for an existing bound managed instance. Use the WLMS update field names such as `discoveryInterval` and `domainSearchPaths`. Omit this field to leave the current OCI configuration unchanged. | `map[string, object (preserves unknown fields)]` | No | - | - |
+| `displayName` | The display name of the existing managed instance when binding by list lookup. Provide this together with `compartmentId` when `id` is not set. | `string` | No | - | - |
+| `id` | The OCI identifier of the existing managed instance to bind directly. | `string` | No | - | - |
+| `pluginStatus` | Optional exact-match filter used to narrow list-based binding to an existing managed instance. Supported values are `ACTIVE` and `INACTIVE`. | `string` | No | - | - |
+
+<a id="kind-managedinstance-status"></a>
+### Status
+
+ManagedInstanceStatus defines the observed state of ManagedInstance.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `compartmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment. | `string` | No | - | - |
+| [`configuration`](#kind-managedinstance-status-configuration) | ManagedInstanceConfiguration defines nested fields for ManagedInstance.Configuration. | `object` | No | - | - |
+| `displayName` | A user-friendly name that does not have to be unique and is changeable. | `string` | No | - | - |
+| `hostName` | The FQDN of the managed instance. | `string` | No | - | - |
+| `id` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the managed instance. | `string` | No | - | - |
+| `osArch` | The operating system architecture on the managed instance. | `string` | No | - | - |
+| `osName` | The operating system name on the managed instance. | `string` | No | - | - |
+| `pluginStatus` | The plugin status of the managed instance. | `string` | No | - | - |
+| `serverCount` | The number of servers running in the managed instance. | `integer` | No | - | - |
+| [`status`](#kind-managedinstance-status-status) | - | `object` | Yes | - | - |
+| `timeCreated` | The date and time the managed instance was first reported (in RFC 3339 (https://tools.ietf.org/rfc/rfc3339) format). Example: `2016-08-25T21:10:29.600Z` | `string` | No | - | - |
+| `timeUpdated` | The date and time the managed instance was last report (in RFC 3339 (https://tools.ietf.org/rfc/rfc3339) format). Example: `2016-08-25T21:10:29.600Z` | `string` | No | - | - |
+
+<a id="kind-managedinstance-status-configuration"></a>
+#### Status.configuration
+
+[Back to ManagedInstance status](#kind-managedinstance-status)
+
+ManagedInstanceConfiguration defines nested fields for ManagedInstance.Configuration.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `discoveryInterval` | Frequency of domain discovery to be run on the managed instance. The unit is in hours. | `integer` | No | - | - |
+| `domainSearchPaths` | The whitelisted paths which domain discovery are run against. | `list[string]` | No | - | - |
+
+<a id="kind-managedinstance-status-status"></a>
+#### Status.status
+
+[Back to ManagedInstance status](#kind-managedinstance-status)
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`async`](#kind-managedinstance-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
+| [`conditions`](#kind-managedinstance-status-status-conditions) | - | `list[object]` | No | - | - |
+| `createdAt` | - | `string (date-time)` | No | - | - |
+| `deletedAt` | - | `string (date-time)` | No | - | - |
+| `message` | - | `string` | No | - | - |
+| `ocid` | - | `string` | No | - | - |
+| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
+| `reason` | - | `string` | No | - | - |
+| `requestedAt` | - | `string (date-time)` | No | - | - |
+| `updatedAt` | - | `string (date-time)` | No | - | - |
+
+<a id="kind-managedinstance-status-status-async"></a>
+##### Status.status.async
+
+[Back to ManagedInstance status](#kind-managedinstance-status)
+
+Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`current`](#kind-managedinstance-status-status-async-current) | - | `object` | No | - | - |
+
+<a id="kind-managedinstance-status-status-async-current"></a>
+###### Status.status.async.current
+
+[Back to ManagedInstance status](#kind-managedinstance-status)
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `message` | - | `string` | No | - | - |
+| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
+| `percentComplete` | - | `number` | No | - | - |
+| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
+| `rawOperationType` | - | `string` | No | - | - |
+| `rawStatus` | - | `string` | No | - | - |
+| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
+| `updatedAt` | - | `string (date-time)` | Yes | - | - |
+| `workRequestId` | - | `string` | No | - | - |
+
+<a id="kind-managedinstance-status-status-conditions"></a>
+##### Status.status.conditions[]
+
+[Back to ManagedInstance status](#kind-managedinstance-status)
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `lastTransitionTime` | - | `string (date-time)` | No | - | - |
+| `message` | - | `string` | No | - | - |
+| `reason` | - | `string` | No | - | - |
+| `status` | - | `string` | Yes | - | - |
+| `type` | - | `string` | Yes | - | - |
 
 <a id="kind-wlsdomain"></a>
 ## WlsDomain

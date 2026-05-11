@@ -14,10 +14,10 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	}
 
 	byKey := inventoryByKey(inventory)
-	if got, want := len(inventory), 362; got != want {
+	if got, want := len(inventory), 363; got != want {
 		t.Fatalf("len(inventory) = %d, want %d", got, want)
 	}
-	if got, want := countRegistrations(inventory), 238; got != want {
+	if got, want := countRegistrations(inventory), 239; got != want {
 		t.Fatalf("registration inventory count = %d, want %d", got, want)
 	}
 	if got, want := countExceptions(inventory), 124; got != want {
@@ -75,6 +75,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventorySelectionSource(t, byKey, "visualbuilder/VbInstance", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "jms/Fleet", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "vnmonitoring/PathAnalyzerTest", "selection.includeKinds")
+	assertInventorySelectionSource(t, byKey, "wlms/ManagedInstance", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "wlms/WlsDomain", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "zpr/Configuration", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "zpr/ZprPolicy", "selection.includeKinds")
@@ -166,6 +167,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventoryRegistration(t, byKey, "visualbuilder/VbInstance")
 	assertInventoryRegistration(t, byKey, "jms/Fleet")
 	assertInventoryRegistration(t, byKey, "vnmonitoring/PathAnalyzerTest")
+	assertInventoryRegistration(t, byKey, "wlms/ManagedInstance")
 	assertInventoryRegistration(t, byKey, "wlms/WlsDomain")
 	assertInventoryRegistration(t, byKey, "tenantmanagercontrolplane/Organization")
 	assertInventoryRegistration(t, byKey, "zpr/Configuration")
@@ -249,6 +251,7 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedFamily(t, "visualbuilder/VbInstance", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "jms/Fleet", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "vnmonitoring/PathAnalyzerTest", APIErrorCoverageFamilyGeneratedRuntimeFollowUp)
+	assertReviewedFamily(t, "wlms/ManagedInstance", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "wlms/WlsDomain", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "zpr/Configuration", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "zpr/ZprPolicy", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)

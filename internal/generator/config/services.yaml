@@ -5657,6 +5657,7 @@ services:
       mode: explicit
       includeKinds:
         - WlsDomain
+        - ManagedInstance
     generation:
       controller:
         strategy: generated
@@ -5739,6 +5740,72 @@ services:
                 id: ocid1.wlsdomain.oc1..exampleuniqueID
                 configuration:
                   isPatchEnabled: true
+        - kind: ManagedInstance
+          formalSpec: managedinstance
+          async:
+            strategy: none
+            runtime: generatedruntime
+            formalClassification: none
+          serviceManager:
+            packagePath: wlms/managedinstance
+          specFields:
+            - name: Configuration
+              type: map[string]shared.JSONValue
+              tag: 'json:"configuration,omitempty"'
+              comments:
+                - Desired in-place WLMS managed-instance configuration for an existing bound managed instance.
+                - Use the WLMS update field names such as `discoveryInterval` and `domainSearchPaths`.
+                - Omit this field to leave the current OCI configuration unchanged.
+              markers:
+                - +kubebuilder:validation:Optional
+            - name: Id
+              type: string
+              tag: 'json:"id,omitempty"'
+              comments:
+                - The OCI identifier of the existing managed instance to bind directly.
+              markers:
+                - +kubebuilder:validation:Optional
+            - name: CompartmentId
+              type: string
+              tag: 'json:"compartmentId,omitempty"'
+              comments:
+                - The compartment containing the existing managed instance when binding by list lookup.
+                - Provide this together with `displayName` when `id` is not set.
+              markers:
+                - +kubebuilder:validation:Optional
+            - name: DisplayName
+              type: string
+              tag: 'json:"displayName,omitempty"'
+              comments:
+                - The display name of the existing managed instance when binding by list lookup.
+                - Provide this together with `compartmentId` when `id` is not set.
+              markers:
+                - +kubebuilder:validation:Optional
+            - name: PluginStatus
+              type: string
+              tag: 'json:"pluginStatus,omitempty"'
+              comments:
+                - Optional exact-match filter used to narrow list-based binding to an existing managed instance.
+                - Supported values are `ACTIVE` and `INACTIVE`.
+              markers:
+                - +kubebuilder:validation:Optional
+          sample:
+            body: |-
+              #
+              # WLMS does not expose CreateManagedInstance or DeleteManagedInstance
+              # in this SDK pin. This sample binds an existing ManagedInstance by
+              # OCID and then manages supported in-place configuration updates.
+              #
+              apiVersion: wlms.oracle.com/v1beta1
+              kind: ManagedInstance
+              metadata:
+                name: managedinstance-sample
+              spec:
+                id: ocid1.managedinstance.oc1..exampleuniqueID
+                configuration:
+                  discoveryInterval: 6
+                  domainSearchPaths:
+                    - /u01/oracle/user_projects/domains
 
   - service: vault
     sdkPackage: github.com/oracle/oci-go-sdk/v65/vault

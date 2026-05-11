@@ -14,6 +14,7 @@ rules:
 - apiGroups:
   - wlms.oracle.com
   resources:
+  - managedinstances
   - wlsdomains
   verbs:
   - create
@@ -26,12 +27,14 @@ rules:
 - apiGroups:
   - wlms.oracle.com
   resources:
+  - managedinstances/finalizers
   - wlsdomains/finalizers
   verbs:
   - update
 - apiGroups:
   - wlms.oracle.com
   resources:
+  - managedinstances/status
   - wlsdomains/status
   verbs:
   - get
