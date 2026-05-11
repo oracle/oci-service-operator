@@ -1,0 +1,476 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: mediaworkflows.mediaservices.oracle.com
+spec:
+  group: mediaservices.oracle.com
+  names:
+    kind: MediaWorkflow
+    listKind: MediaWorkflowList
+    plural: mediaworkflows
+    singular: mediaworkflow
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the MediaWorkflow
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the MediaWorkflow
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: MediaWorkflow is the Schema for the mediaworkflows API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: MediaWorkflowSpec defines the desired state of MediaWorkflow.
+            properties:
+              compartmentId:
+                description: Compartment Identifier.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              displayName:
+                description: Name for the MediaWorkflow. Does not have to be unique,
+                  and it's changeable. Avoid entering confidential information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              locks:
+                description: Locks associated with this resource.
+                items:
+                  description: MediaWorkflowLock defines nested fields for MediaWorkflow.Lock.
+                  properties:
+                    compartmentId:
+                      description: The compartment ID of the lock.
+                      type: string
+                    message:
+                      description: |-
+                        A message added by the creator of the lock. This is typically used to give an
+                        indication of why the resource is locked.
+                      type: string
+                    relatedResourceId:
+                      description: The ID of the resource that is locking this resource.
+                        Indicates that deleting this resource will remove the lock.
+                      type: string
+                    timeCreated:
+                      description: When the lock was created.
+                      type: string
+                    type:
+                      description: Type of the lock.
+                      type: string
+                  required:
+                  - compartmentId
+                  - type
+                  type: object
+                type: array
+              mediaWorkflowConfigurationIds:
+                description: |-
+                  Configurations to be applied to all the jobs for this workflow. Parameters in these configurations are
+                  overridden by parameters in the MediaWorkflowConfigurations of the MediaWorkflowJob and the
+                  parameters of the MediaWorkflowJob.
+                items:
+                  type: string
+                type: array
+              parameters:
+                additionalProperties:
+                  description: JSONValue preserves arbitrary JSON values inside generated
+                    CRD fields.
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+                description: |-
+                  JSON object representing named parameters and their default values that can be referenced throughout this workflow.
+                  The values declared here can be overridden by the MediaWorkflowConfigurations or parameters supplied when creating
+                  MediaWorkflowJobs from this MediaWorkflow.
+                type: object
+              tasks:
+                description: |-
+                  The processing to be done in this workflow. Each key of the MediaWorkflowTasks in this array must be unique
+                  within the array. The order of tasks given here will be preserved.
+                items:
+                  description: MediaWorkflowTask defines nested fields for MediaWorkflow.Task.
+                  properties:
+                    enableParameterReference:
+                      description: |-
+                        Allows this task to be conditionally enabled.  If no value or a blank value is given, the task is
+                        unconditionally enbled.  Otherwise the given string specifies a parameter of the job created for this task's
+                        workflow using the JSON pointer syntax. The JSON pointer is validated when a job is created from the workflow of this task.
+                      type: string
+                    enableWhenReferencedParameterEquals:
+                      additionalProperties:
+                        description: JSONValue preserves arbitrary JSON values inside
+                          generated CRD fields.
+                        type: object
+                        x-kubernetes-preserve-unknown-fields: true
+                      description: |-
+                        Used in conjunction with enableParameterReference to conditionally enable a task.  When a job is created
+                        from the workflow of this task, the task will only be enabled if the value of the parameter specified by
+                        enableParameterReference is equal to the value of this property. This property must be prenset if and only if
+                        a enableParameterReference is given. The value is a JSON node.
+                      type: object
+                    key:
+                      description: |-
+                        A unique identifier for this task within its workflow. Keys are used to reference a task within workflows
+                        and MediaWorkflowJobs. Tasks are referenced as prerequisites and to track output and state.
+                      type: string
+                    parameters:
+                      additionalProperties:
+                        description: JSONValue preserves arbitrary JSON values inside
+                          generated CRD fields.
+                        type: object
+                        x-kubernetes-preserve-unknown-fields: true
+                      description: |-
+                        Data specifiying how this task is to be run. The data is a JSON object that must conform to the JSON Schema
+                        specified by the parameters of the MediaWorkflowTaskDeclaration this task references. The parameters may
+                        contain values or references to other parameters.
+                      type: object
+                    prerequisites:
+                      description: Keys to the other tasks in this workflow that must
+                        be completed before execution of this task can begin.
+                      items:
+                        type: string
+                      type: array
+                    type:
+                      description: The type of process to run at this task. Refers
+                        to the name of a MediaWorkflowTaskDeclaration.
+                      type: string
+                    version:
+                      description: The version of the MediaWorkflowTaskDeclaration.
+                      format: int64
+                      type: integer
+                  required:
+                  - key
+                  - parameters
+                  - type
+                  - version
+                  type: object
+                type: array
+            required:
+            - compartmentId
+            - displayName
+            type: object
+          status:
+            description: MediaWorkflowStatus defines the observed state of MediaWorkflow.
+            properties:
+              compartmentId:
+                description: Compartment Identifier.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              displayName:
+                description: Name of the Media Workflow. Does not have to be unique,
+                  and it's changeable. Avoid entering confidential information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              id:
+                description: Unique identifier that is immutable on creation.
+                type: string
+              lifecycleDetails:
+                description: A message describing the current state in more detail.
+                  For example, can be used to provide actionable information for a
+                  resource in Failed state.
+                type: string
+              lifecycleState:
+                description: The current state of the MediaWorkflow.
+                type: string
+              lifecyleDetails:
+                description: A message describing the current state in more detail.
+                  For example, can be used to provide actionable information for a
+                  resource in Failed state.
+                type: string
+              locks:
+                description: Locks associated with this resource.
+                items:
+                  description: MediaWorkflowLock defines nested fields for MediaWorkflow.Lock.
+                  properties:
+                    compartmentId:
+                      description: The compartment ID of the lock.
+                      type: string
+                    message:
+                      description: |-
+                        A message added by the creator of the lock. This is typically used to give an
+                        indication of why the resource is locked.
+                      type: string
+                    relatedResourceId:
+                      description: The ID of the resource that is locking this resource.
+                        Indicates that deleting this resource will remove the lock.
+                      type: string
+                    timeCreated:
+                      description: When the lock was created.
+                      type: string
+                    type:
+                      description: Type of the lock.
+                      type: string
+                  required:
+                  - compartmentId
+                  - type
+                  type: object
+                type: array
+              mediaWorkflowConfigurationIds:
+                description: |-
+                  Configurations to be applied to all the runs of this workflow. Parameters in these configurations are
+                  overridden by parameters in the MediaWorkflowConfigurations of the MediaWorkflowJob and the
+                  parameters of the MediaWorkflowJob. If the same parameter appears in multiple configurations, the values that
+                  appear in the configuration at the highest index will be used.
+                items:
+                  type: string
+                type: array
+              parameters:
+                additionalProperties:
+                  description: JSONValue preserves arbitrary JSON values inside generated
+                    CRD fields.
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+                description: |-
+                  JSON object representing named parameters and their default values that can be referenced throughout this workflow.
+                  The values declared here can be overridden by the MediaWorkflowConfigurations or parameters supplied when creating
+                  MediaWorkflowJobs from this MediaWorkflow.
+                type: object
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of system tag keys. These predefined keys are scoped to namespaces.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              tasks:
+                description: |-
+                  The processing to be done in this workflow. Each key of the MediaWorkflowTasks in this array is unique
+                  within the array.  The order of the items is preserved from the order of the tasks array in
+                  CreateMediaWorkflowDetails or UpdateMediaWorkflowDetails.
+                items:
+                  description: MediaWorkflowTask defines nested fields for MediaWorkflow.Task.
+                  properties:
+                    enableParameterReference:
+                      description: |-
+                        Allows this task to be conditionally enabled.  If no value or a blank value is given, the task is
+                        unconditionally enbled.  Otherwise the given string specifies a parameter of the job created for this task's
+                        workflow using the JSON pointer syntax. The JSON pointer is validated when a job is created from the workflow of this task.
+                      type: string
+                    enableWhenReferencedParameterEquals:
+                      additionalProperties:
+                        description: JSONValue preserves arbitrary JSON values inside
+                          generated CRD fields.
+                        type: object
+                        x-kubernetes-preserve-unknown-fields: true
+                      description: |-
+                        Used in conjunction with enableParameterReference to conditionally enable a task.  When a job is created
+                        from the workflow of this task, the task will only be enabled if the value of the parameter specified by
+                        enableParameterReference is equal to the value of this property. This property must be prenset if and only if
+                        a enableParameterReference is given. The value is a JSON node.
+                      type: object
+                    key:
+                      description: |-
+                        A unique identifier for this task within its workflow. Keys are used to reference a task within workflows
+                        and MediaWorkflowJobs. Tasks are referenced as prerequisites and to track output and state.
+                      type: string
+                    parameters:
+                      additionalProperties:
+                        description: JSONValue preserves arbitrary JSON values inside
+                          generated CRD fields.
+                        type: object
+                        x-kubernetes-preserve-unknown-fields: true
+                      description: |-
+                        Data specifiying how this task is to be run. The data is a JSON object that must conform to the JSON Schema
+                        specified by the parameters of the MediaWorkflowTaskDeclaration this task references. The parameters may
+                        contain values or references to other parameters.
+                      type: object
+                    prerequisites:
+                      description: Keys to the other tasks in this workflow that must
+                        be completed before execution of this task can begin.
+                      items:
+                        type: string
+                      type: array
+                    type:
+                      description: The type of process to run at this task. Refers
+                        to the name of a MediaWorkflowTaskDeclaration.
+                      type: string
+                    version:
+                      description: The version of the MediaWorkflowTaskDeclaration.
+                      format: int64
+                      type: integer
+                  required:
+                  - key
+                  - parameters
+                  - type
+                  - version
+                  type: object
+                type: array
+              timeCreated:
+                description: The time when the MediaWorkflow was created. An RFC3339
+                  formatted datetime string.
+                type: string
+              timeUpdated:
+                description: The time when the MediaWorkflow was updated. An RFC3339
+                  formatted datetime string.
+                type: string
+              version:
+                description: The version of the MediaWorkflow.
+                format: int64
+                type: integer
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

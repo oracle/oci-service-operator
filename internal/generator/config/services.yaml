@@ -3499,6 +3499,7 @@ services:
       mode: explicit
       includeKinds:
         - MediaAsset
+        - MediaWorkflow
     generation:
       controller:
         strategy: generated
@@ -3517,6 +3518,14 @@ services:
             formalClassification: lifecycle
           serviceManager:
             packagePath: mediaservices/mediaasset
+        - kind: MediaWorkflow
+          formalSpec: mediaworkflow
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+          serviceManager:
+            packagePath: mediaservices/mediaworkflow
 
   - service: mysql
     sdkPackage: github.com/oracle/oci-go-sdk/v65/mysql

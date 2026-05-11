@@ -1,0 +1,138 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "mediaservices",
+  "slug": "mediaworkflow",
+  "kind": "MediaWorkflow",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_media_services_media_workflow",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateMediaWorkflow",
+        "requestType": "mediaservices.CreateMediaWorkflowRequest",
+        "responseType": "mediaservices.CreateMediaWorkflowResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetMediaWorkflow",
+        "requestType": "mediaservices.GetMediaWorkflowRequest",
+        "responseType": "mediaservices.GetMediaWorkflowResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListMediaWorkflows",
+        "requestType": "mediaservices.ListMediaWorkflowsRequest",
+        "responseType": "mediaservices.ListMediaWorkflowsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeMediaWorkflowCompartment",
+        "requestType": "mediaservices.ChangeMediaWorkflowCompartmentRequest",
+        "responseType": "mediaservices.ChangeMediaWorkflowCompartmentResponse"
+      },
+      {
+        "operation": "UpdateMediaWorkflow",
+        "requestType": "mediaservices.UpdateMediaWorkflowRequest",
+        "responseType": "mediaservices.UpdateMediaWorkflowResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteMediaWorkflow",
+        "requestType": "mediaservices.DeleteMediaWorkflowRequest",
+        "responseType": "mediaservices.DeleteMediaWorkflowResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "defined_tags",
+      "display_name",
+      "freeform_tags",
+      "media_workflow_configuration_ids",
+      "parameters",
+      "tasks"
+    ],
+    "forceNew": [
+      "compartment_id",
+      "locks"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [],
+    "target": [
+      "DELETED",
+      "NOT_FOUND"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_media_services_media_workflows",
+    "collectionField": "media_workflows",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "id",
+      "lifecycle_state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/mediaservices/mediaworkflow/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/mediaservices/mediaworkflow/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "lifecycle-classification",
+      "list-lookup",
+      "mutation-policy",
+      "status-projection",
+      "synchronous-write-success",
+      "delete-confirmation",
+      "secret-output"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: CreateMediaWorkflow, GetMediaWorkflow, ListMediaWorkflows, ChangeMediaWorkflowCompartment, UpdateMediaWorkflow, and DeleteMediaWorkflow are present in v65.110.0.",
+    "Pinned OCI SDK contract: create, get, and update return the MediaWorkflow body directly and do not expose service-local work-request identifiers; delete returns only headers. MediaWorkflow exposes only ACTIVE, NEEDS_ATTENTION, and DELETED lifecycle states.",
+    "Pinned provider coverage is unconfirmed. formal/sources.lock still points at github.com/oracle/terraform-provider-oci@eb653febb1bab4cc6650a96d404a8baf36fdf671, but the accessible local provider/docs layout did not expose a checked-in MediaWorkflow resource or data source. The providerResource and datasource names therefore stay provisional OCI-style placeholders, and the checked-in mutability docs fixture is a conservative repo-authored fallback because the live Terraform Registry resource page is JavaScript-only.",
+    "Repo-authored runtime keeps ChangeMediaWorkflowCompartment out of scope. The published controller-backed contract treats compartmentId as replacement-only while reconciling only displayName, tasks, mediaWorkflowConfigurationIds, parameters, freeformTags, and definedTags in place.",
+    "Repo-authored runtime treats create and update as synchronous read-after-write flows. NEEDS_ATTENTION is terminal failure without requeue, and delete confirmation relies on follow-up GetMediaWorkflow or fallback ListMediaWorkflows rereads until OCI reports DELETED or NotFound.",
+    "Matching create-time locks are normalized out of post-create parity checks by ignoring OCI-populated timeCreated metadata. Changing the requested locks after create remains explicit unsupported drift rather than an implicit add/remove lock flow."
+  ]
+}

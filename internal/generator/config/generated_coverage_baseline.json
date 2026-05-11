@@ -869,17 +869,17 @@
     },
     {
       "service": "mediaservices",
-      "specs": 1,
-      "mappings": 5,
-      "trackedMappings": 5,
+      "specs": 2,
+      "mappings": 10,
+      "trackedMappings": 10,
       "untrackedMappings": 0,
-      "presentFields": 64,
-      "missingFields": 1,
-      "mandatoryPresentFields": 10,
-      "mandatoryMissingFields": 1,
-      "extraSpecFields": 11,
-      "overallCoveragePercent": 98.46153846153847,
-      "mandatoryCoveragePercent": 90.9090909090909
+      "presentFields": 105,
+      "missingFields": 2,
+      "mandatoryPresentFields": 18,
+      "mandatoryMissingFields": 2,
+      "extraSpecFields": 13,
+      "overallCoveragePercent": 98.13084112149532,
+      "mandatoryCoveragePercent": 90
     },
     {
       "service": "mngdmac",

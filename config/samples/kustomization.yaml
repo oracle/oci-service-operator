@@ -241,4 +241,5 @@ resources:
 - generativeaiagent_v1beta1_agent.yaml
 - lustrefilestorage_v1beta1_objectstoragelink.yaml
 - rover_v1beta1_rovernode.yaml
+- mediaservices_v1beta1_mediaworkflow.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

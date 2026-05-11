@@ -978,10 +978,15 @@ var seedTargets = []Target{
 
 	// Mediaservices CRD support
 	newTarget("mediaservices", "CreateMediaAssetDetails", reflect.TypeOf(mediaservices.CreateMediaAssetDetails{})),
+	newTarget("mediaservices", "CreateMediaWorkflowDetails", reflect.TypeOf(mediaservices.CreateMediaWorkflowDetails{})),
 	newTarget("mediaservices", "UpdateMediaAssetDetails", reflect.TypeOf(mediaservices.UpdateMediaAssetDetails{})),
+	newTarget("mediaservices", "UpdateMediaWorkflowDetails", reflect.TypeOf(mediaservices.UpdateMediaWorkflowDetails{})),
 	newTarget("mediaservices", "MediaAsset", reflect.TypeOf(mediaservices.MediaAsset{})),
 	newTarget("mediaservices", "MediaAssetCollection", reflect.TypeOf(mediaservices.MediaAssetCollection{})),
+	newTarget("mediaservices", "MediaWorkflow", reflect.TypeOf(mediaservices.MediaWorkflow{})),
+	newTarget("mediaservices", "MediaWorkflowCollection", reflect.TypeOf(mediaservices.MediaWorkflowCollection{})),
 	newTarget("mediaservices", "MediaAssetSummary", reflect.TypeOf(mediaservices.MediaAssetSummary{})),
+	newTarget("mediaservices", "MediaWorkflowSummary", reflect.TypeOf(mediaservices.MediaWorkflowSummary{})),
 
 	// Mngdmac CRD support
 	newTarget("mngdmac", "CreateMacOrderDetails", reflect.TypeOf(mngdmac.CreateMacOrderDetails{})),
