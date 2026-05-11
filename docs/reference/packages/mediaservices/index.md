@@ -26,3 +26,4 @@ Manage OCI Media Services media assets from Kubernetes with a reviewed controlle
 | Resource | API Version | Summary | Guide | Sample | API Spec |
 | --- | --- | --- | --- | --- | --- |
 | `mediaservices/MediaAsset` | `mediaservices.oracle.com/v1beta1` | Manage OCI Media Services media assets. | — | [Sample](../../samples/mediaservices/v1beta1/mediaasset.md) | [Reference](../../api/mediaservices/v1beta1/index.md#kind-mediaasset) |
+| `mediaservices/MediaWorkflow` | `mediaservices.oracle.com/v1beta1` | — | — | [Sample](../../samples/mediaservices/v1beta1/mediaworkflow.md) | [Reference](../../api/mediaservices/v1beta1/index.md#kind-mediaworkflow) |

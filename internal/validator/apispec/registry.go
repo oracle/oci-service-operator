@@ -3524,6 +3524,28 @@ var targets = []Target{
 		},
 	},
 	{
+		Name:       "MediaservicesMediaWorkflow",
+		SpecType:   reflect.TypeOf(mediaservicesv1beta1.MediaWorkflowSpec{}),
+		StatusType: reflect.TypeOf(mediaservicesv1beta1.MediaWorkflowStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "mediaservices.CreateMediaWorkflowDetails",
+			},
+			{
+				SDKStruct: "mediaservices.UpdateMediaWorkflowDetails",
+			},
+			{
+				SDKStruct: "mediaservices.MediaWorkflow",
+			},
+			{
+				SDKStruct: "mediaservices.MediaWorkflowCollection",
+			},
+			{
+				SDKStruct: "mediaservices.MediaWorkflowSummary",
+			},
+		},
+	},
+	{
 		Name:       "MngdmacMacOrder",
 		SpecType:   reflect.TypeOf(mngdmacv1beta1.MacOrderSpec{}),
 		StatusType: reflect.TypeOf(mngdmacv1beta1.MacOrderStatus{}),
