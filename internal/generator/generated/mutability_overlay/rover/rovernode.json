@@ -1,0 +1,899 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay",
+  "contractVersion": "v1alpha1",
+  "metadata": {
+    "providerSourceRef": "terraform-provider-oci",
+    "providerRevision": "eb653febb1bab4cc6650a96d404a8baf36fdf671",
+    "terraformDocsVersion": "7.22.0"
+  },
+  "sourceContract": {
+    "astPrimaryFacts": [
+      "forceNew",
+      "conflictsWith",
+      "lifecycle",
+      "hooks",
+      "crud",
+      "listLookup"
+    ],
+    "astMutableAlias": "updateCandidate",
+    "docsOverlayScope": "terraform-argument-reference-for-ast-update-candidate-fields",
+    "docsEvidenceSource": "terraform-argument-reference"
+  },
+  "resource": {
+    "service": "rover",
+    "kind": "RoverNode",
+    "formalSlug": "rovernode",
+    "providerResource": "oci_rover_rover_node",
+    "repoAuthoredSpecPath": "controllers/rover/rovernode/spec.cfg",
+    "formalImportPath": "imports/rover/rovernode.json"
+  },
+  "fields": [
+    {
+      "astFieldPath": "certCompartmentId",
+      "terraformFieldPath": "cert_compartment_id",
+      "canonicalJoinKey": "certCompartmentId",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/rover/rovernode.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "rover_rover_node#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "certKeyAlgorithm",
+      "terraformFieldPath": "cert_key_algorithm",
+      "canonicalJoinKey": "certKeyAlgorithm",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/rover/rovernode.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "rover_rover_node#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "certSignatureAlgorithm",
+      "terraformFieldPath": "cert_signature_algorithm",
+      "canonicalJoinKey": "certSignatureAlgorithm",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/rover/rovernode.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "rover_rover_node#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "certificateAuthorityId",
+      "terraformFieldPath": "certificate_authority_id",
+      "canonicalJoinKey": "certificateAuthorityId",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/rover/rovernode.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "rover_rover_node#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "commonName",
+      "terraformFieldPath": "common_name",
+      "canonicalJoinKey": "commonName",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/rover/rovernode.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "rover_rover_node#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "compartmentId",
+      "terraformFieldPath": "compartmentId",
+      "canonicalJoinKey": "compartmentId",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "notUpdateCandidate",
+        "forceNew": true,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "replacementRequired",
+        "finalPolicy": "replacementRequired"
+      },
+      "provenance": {
+        "formalImportPath": "imports/rover/rovernode.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.forceNew",
+        "terraformDocsPage": "rover_rover_node#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "customerShippingAddress",
+      "terraformFieldPath": "customer_shipping_address",
+      "canonicalJoinKey": "customerShippingAddress",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/rover/rovernode.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "rover_rover_node#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "dataValidationCode",
+      "terraformFieldPath": "data_validation_code",
+      "canonicalJoinKey": "dataValidationCode",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/rover/rovernode.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "rover_rover_node#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "definedTags",
+      "terraformFieldPath": "defined_tags",
+      "canonicalJoinKey": "definedTags",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/rover/rovernode.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "rover_rover_node#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "displayName",
+      "terraformFieldPath": "display_name",
+      "canonicalJoinKey": "displayName",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/rover/rovernode.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "rover_rover_node#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "enclosureType",
+      "terraformFieldPath": "enclosure_type",
+      "canonicalJoinKey": "enclosureType",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/rover/rovernode.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "rover_rover_node#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "freeformTags",
+      "terraformFieldPath": "freeform_tags",
+      "canonicalJoinKey": "freeformTags",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/rover/rovernode.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "rover_rover_node#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "importCompartmentId",
+      "terraformFieldPath": "import_compartment_id",
+      "canonicalJoinKey": "importCompartmentId",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/rover/rovernode.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "rover_rover_node#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "importFileBucket",
+      "terraformFieldPath": "import_file_bucket",
+      "canonicalJoinKey": "importFileBucket",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/rover/rovernode.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "rover_rover_node#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "isImportRequested",
+      "terraformFieldPath": "is_import_requested",
+      "canonicalJoinKey": "isImportRequested",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/rover/rovernode.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "rover_rover_node#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "masterKeyId",
+      "terraformFieldPath": "masterKeyId",
+      "canonicalJoinKey": "masterKeyId",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "notUpdateCandidate",
+        "forceNew": true,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "replacementRequired",
+        "finalPolicy": "replacementRequired"
+      },
+      "provenance": {
+        "formalImportPath": "imports/rover/rovernode.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.forceNew",
+        "terraformDocsPage": "rover_rover_node#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "nodeWorkloads",
+      "terraformFieldPath": "node_workloads",
+      "canonicalJoinKey": "nodeWorkloads",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/rover/rovernode.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "rover_rover_node#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "oracleShippingTrackingUrl",
+      "terraformFieldPath": "oracle_shipping_tracking_url",
+      "canonicalJoinKey": "oracleShippingTrackingUrl",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/rover/rovernode.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "rover_rover_node#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "pointOfContact",
+      "terraformFieldPath": "point_of_contact",
+      "canonicalJoinKey": "pointOfContact",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/rover/rovernode.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "rover_rover_node#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "pointOfContactPhoneNumber",
+      "terraformFieldPath": "point_of_contact_phone_number",
+      "canonicalJoinKey": "pointOfContactPhoneNumber",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/rover/rovernode.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "rover_rover_node#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "publicKey",
+      "terraformFieldPath": "public_key",
+      "canonicalJoinKey": "publicKey",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/rover/rovernode.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "rover_rover_node#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "serialNumber",
+      "terraformFieldPath": "serial_number",
+      "canonicalJoinKey": "serialNumber",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/rover/rovernode.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "rover_rover_node#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "shape",
+      "terraformFieldPath": "shape",
+      "canonicalJoinKey": "shape",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/rover/rovernode.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "rover_rover_node#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "shippingPreference",
+      "terraformFieldPath": "shipping_preference",
+      "canonicalJoinKey": "shippingPreference",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/rover/rovernode.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "rover_rover_node#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "shippingVendor",
+      "terraformFieldPath": "shipping_vendor",
+      "canonicalJoinKey": "shippingVendor",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/rover/rovernode.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "rover_rover_node#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "superUserPassword",
+      "terraformFieldPath": "super_user_password",
+      "canonicalJoinKey": "superUserPassword",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/rover/rovernode.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "rover_rover_node#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "timeCertValidityEnd",
+      "terraformFieldPath": "time_cert_validity_end",
+      "canonicalJoinKey": "timeCertValidityEnd",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/rover/rovernode.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "rover_rover_node#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "timePickupExpected",
+      "terraformFieldPath": "time_pickup_expected",
+      "canonicalJoinKey": "timePickupExpected",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/rover/rovernode.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "rover_rover_node#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "timeReturnWindowEnds",
+      "terraformFieldPath": "time_return_window_ends",
+      "canonicalJoinKey": "timeReturnWindowEnds",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/rover/rovernode.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "rover_rover_node#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "timeReturnWindowStarts",
+      "terraformFieldPath": "time_return_window_starts",
+      "canonicalJoinKey": "timeReturnWindowStarts",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/rover/rovernode.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "rover_rover_node#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "unlockPassphrase",
+      "terraformFieldPath": "unlock_passphrase",
+      "canonicalJoinKey": "unlockPassphrase",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/rover/rovernode.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "rover_rover_node#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    }
+  ]
+}

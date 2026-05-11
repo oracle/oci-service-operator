@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-vap-update-policy-input",
+  "contractVersion": "v1alpha1",
+  "metadata": {
+    "sourceSurface": "generator-mutability-overlay",
+    "providerSourceRef": "terraform-provider-oci",
+    "providerRevision": "eb653febb1bab4cc6650a96d404a8baf36fdf671",
+    "terraformDocsVersion": "7.22.0"
+  },
+  "target": {
+    "service": "rover",
+    "apiVersion": "rover.oracle.com/v1beta1",
+    "kind": "RoverNode",
+    "formalSlug": "rovernode",
+    "providerResource": "oci_rover_rover_node",
+    "specPathPrefix": "spec"
+  },
+  "update": {
+    "allowInPlacePaths": [
+      "certCompartmentId",
+      "certKeyAlgorithm",
+      "certSignatureAlgorithm",
+      "certificateAuthorityId",
+      "commonName",
+      "customerShippingAddress",
+      "dataValidationCode",
+      "definedTags",
+      "displayName",
+      "enclosureType",
+      "freeformTags",
+      "importCompartmentId",
+      "importFileBucket",
+      "isImportRequested",
+      "nodeWorkloads",
+      "oracleShippingTrackingUrl",
+      "pointOfContact",
+      "pointOfContactPhoneNumber",
+      "publicKey",
+      "serialNumber",
+      "shape",
+      "shippingPreference",
+      "shippingVendor",
+      "superUserPassword",
+      "timeCertValidityEnd",
+      "timePickupExpected",
+      "timeReturnWindowEnds",
+      "timeReturnWindowStarts",
+      "unlockPassphrase"
+    ],
+    "denyRules": [
+      {
+        "fieldPath": "compartmentId",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      {
+        "fieldPath": "masterKeyId",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      }
+    ]
+  }
+}

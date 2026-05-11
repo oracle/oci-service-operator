@@ -5425,6 +5425,7 @@ services:
       mode: explicit
       includeKinds:
         - RoverCluster
+        - RoverNode
     generation:
       controller:
         strategy: generated
@@ -5443,6 +5444,14 @@ services:
             formalClassification: lifecycle
           serviceManager:
             packagePath: rover/rovercluster
+        - kind: RoverNode
+          formalSpec: rovernode
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+          serviceManager:
+            packagePath: rover/rovernode
     observedState:
       excludedFieldPaths:
         RoverCluster:
@@ -5450,6 +5459,12 @@ services:
           - ExteriorDoorCode
           - ImageExportPar
           - InteriorAlarmDisarmCode
+          - ReturnShippingLabelUri
+          - SuperUserPassword
+          - UnlockPassphrase
+        RoverNode:
+          - DataValidationCode
+          - ImageExportPar
           - ReturnShippingLabelUri
           - SuperUserPassword
           - UnlockPassphrase

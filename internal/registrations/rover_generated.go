@@ -14,6 +14,7 @@ import (
 	rovercontrollers "github.com/oracle/oci-service-operator/controllers/rover"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	roverroverclusterservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/rover/rovercluster"
+	roverrovernodeservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/rover/rovernode"
 )
 
 func init() {
@@ -31,6 +32,17 @@ func init() {
 				),
 			}).SetupWithManager(ctx.Manager); err != nil {
 				return fmt.Errorf("setup RoverCluster controller: %w", err)
+			}
+			if err := (&rovercontrollers.RoverNodeReconciler{
+				Reconciler: NewBaseReconciler(
+					ctx,
+					"RoverNode",
+					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
+						return roverrovernodeservicemanager.NewRoverNodeServiceManagerWithDeps(deps)
+					},
+				),
+			}).SetupWithManager(ctx.Manager); err != nil {
+				return fmt.Errorf("setup RoverNode controller: %w", err)
 			}
 			return nil
 		},

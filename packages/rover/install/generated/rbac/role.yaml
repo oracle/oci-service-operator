@@ -15,6 +15,7 @@ rules:
   - rover.oracle.com
   resources:
   - roverclusters
+  - rovernodes
   verbs:
   - create
   - delete
@@ -27,12 +28,14 @@ rules:
   - rover.oracle.com
   resources:
   - roverclusters/finalizers
+  - rovernodes/finalizers
   verbs:
   - update
 - apiGroups:
   - rover.oracle.com
   resources:
   - roverclusters/status
+  - rovernodes/status
   verbs:
   - get
   - patch

@@ -1,0 +1,168 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "rover",
+  "slug": "rovernode",
+  "kind": "RoverNode",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_rover_rover_node",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateRoverNode",
+        "requestType": "rover.CreateRoverNodeRequest",
+        "responseType": "rover.CreateRoverNodeResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetRoverNode",
+        "requestType": "rover.GetRoverNodeRequest",
+        "responseType": "rover.GetRoverNodeResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListRoverNodes",
+        "requestType": "rover.ListRoverNodesRequest",
+        "responseType": "rover.ListRoverNodesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeRoverNodeCompartment",
+        "requestType": "rover.ChangeRoverNodeCompartmentRequest",
+        "responseType": "rover.ChangeRoverNodeCompartmentResponse"
+      },
+      {
+        "operation": "UpdateRoverNode",
+        "requestType": "rover.UpdateRoverNodeRequest",
+        "responseType": "rover.UpdateRoverNodeResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteRoverNode",
+        "requestType": "rover.DeleteRoverNodeRequest",
+        "responseType": "rover.DeleteRoverNodeResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "cert_compartment_id",
+      "cert_key_algorithm",
+      "cert_signature_algorithm",
+      "certificate_authority_id",
+      "common_name",
+      "customer_shipping_address",
+      "data_validation_code",
+      "defined_tags",
+      "display_name",
+      "enclosure_type",
+      "freeform_tags",
+      "import_compartment_id",
+      "import_file_bucket",
+      "is_import_requested",
+      "node_workloads",
+      "oracle_shipping_tracking_url",
+      "point_of_contact",
+      "point_of_contact_phone_number",
+      "public_key",
+      "serial_number",
+      "shape",
+      "shipping_preference",
+      "shipping_vendor",
+      "super_user_password",
+      "time_cert_validity_end",
+      "time_pickup_expected",
+      "time_return_window_ends",
+      "time_return_window_starts",
+      "unlock_passphrase"
+    ],
+    "forceNew": [
+      "compartment_id",
+      "master_key_id",
+      "system_tags"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED",
+      "NOT_FOUND"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_rover_rover_nodes",
+    "collectionField": "rover_nodes",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "node_type",
+      "shape",
+      "lifecycle_state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/rover/rovernode/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/rover/rovernode/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "delete-confirmation",
+      "lifecycle-classification",
+      "list-lookup",
+      "mutation-policy",
+      "secret-output"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: CreateRoverNode, GetRoverNode, ListRoverNodes, UpdateRoverNode, DeleteRoverNode, and ChangeRoverNodeCompartment are present in v65.110.0. Create, get, and update return the RoverNode body plus opc-request-id, while delete and compartment change return only headers.",
+    "Pinned provider coverage is unconfirmed. formal/sources.lock still points at github.com/oracle/terraform-provider-oci@eb653febb1bab4cc6650a96d404a8baf36fdf671, but the accessible provider inventory did not expose a matching RoverNode resource or data source. The providerResource and datasource names therefore stay provisional OCI-style placeholders so generator-owned registry artifacts can derive stable links without claiming verified provider coverage.",
+    "Repo-authored runtime contract keeps the in-place mutation surface aligned with UpdateRoverNodeDetails for displayName, shape, serialNumber, customerShippingAddress, nodeWorkloads, superUserPassword, unlockPassphrase, pointOfContact, pointOfContactPhoneNumber, oracleShippingTrackingUrl, shippingPreference, shippingVendor, timePickupExpected, timeReturnWindowStarts, timeReturnWindowEnds, isImportRequested, importCompartmentId, importFileBucket, dataValidationCode, publicKey, certificateAuthorityId, timeCertValidityEnd, commonName, certCompartmentId, certKeyAlgorithm, certSignatureAlgorithm, enclosureType, freeformTags, and definedTags. ChangeRoverNodeCompartment remains out of scope, while compartmentId, masterKeyId, and systemTags stay replacement-only or provider-managed drift.",
+    "Repo-authored bind-versus-create stays explicit: pre-create lookup lists by exact compartmentId plus displayName and shape, then narrows summary candidates in memory to exact serialNumber matches in reusable ACTIVE, CREATING, or UPDATING states. Duplicate exact matches fail instead of guessing.",
+    "LifecycleState, LifecycleStateDetails, SystemTags, and nodeWorkloads.workRequestId appear on the SDK create/update payloads but are provider-managed or auxiliary breadcrumbs. The reviewed runtime normalizes them out of desired parity instead of treating them as supported user-managed inputs.",
+    "The rover package exposes generic GetWorkRequest and ListWorkRequests helpers, but the ListWorkRequests operation type enum only models ADD_NODES and the RoverNode CRUD responses never return opc-work-request-id. The reviewed runtime is therefore workrequest-aware but not workrequest-driven: it records request breadcrumbs when available and relies on lifecycle projection plus confirm-delete rereads instead of trying to correlate RoverNode CRUD operations to service-local work requests.",
+    "OCI echoes credential-like values and one-time URLs/codes such as dataValidationCode, imageExportPar, returnShippingLabelUri, superUserPassword, and unlockPassphrase. The published runtime excludes those fields from status projection and has no Kubernetes Secret side effects."
+  ]
+}
