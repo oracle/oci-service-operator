@@ -547,17 +547,17 @@
     },
     {
       "service": "generativeaiagent",
-      "specs": 1,
-      "mappings": 5,
-      "trackedMappings": 5,
+      "specs": 2,
+      "mappings": 10,
+      "trackedMappings": 10,
       "untrackedMappings": 0,
-      "presentFields": 35,
-      "missingFields": 1,
-      "mandatoryPresentFields": 17,
-      "mandatoryMissingFields": 1,
-      "extraSpecFields": 1,
-      "overallCoveragePercent": 97.22222222222221,
-      "mandatoryCoveragePercent": 94.44444444444444
+      "presentFields": 78,
+      "missingFields": 2,
+      "mandatoryPresentFields": 26,
+      "mandatoryMissingFields": 2,
+      "extraSpecFields": 2,
+      "overallCoveragePercent": 97.5,
+      "mandatoryCoveragePercent": 92.85714285714286
     },
     {
       "service": "generativeaidata",

@@ -773,6 +773,16 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 				retryableConflictWorkRequest,
 				"KnowledgeBase runtime persists create, update, and delete work-request IDs in shared async status, prefers create response-body identity when OCI returns it, recovers the OCID from work-request resources otherwise, and bounds pre-create reuse to exact compartmentId plus displayName matches.",
 			),
+			resourceKey("generativeaiagent", "Agent"): reviewedRegistration(
+				"generativeaiagent",
+				"generativeaiagent",
+				apiErrorCoverageDefaultVersion,
+				"Agent",
+				APIErrorCoverageFamilyGeneratedRuntimeWorkRequest,
+				deleteNotFoundReadback,
+				retryableConflictWorkRequest,
+				"Agent runtime persists create, update, and delete work-request IDs in shared async status, prefers create response-body identity when OCI returns it, recovers the OCID from work-request resources otherwise, bounds pre-create reuse to exact compartmentId plus displayName matches, and rebuilds llmConfig selections into concrete SDK request bodies while keeping ChangeAgentCompartment out of the published surface.",
+			),
 			resourceKey("generativeaidata", "EnrichmentJob"): {
 				Resource: APIErrorCoverageResource{
 					Service: "generativeaidata",
@@ -1589,13 +1599,6 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 			"adm",
 			apiErrorCoverageDefaultVersion,
 			"WorkRequestLog",
-			"`services.yaml` keeps this subresource out of the active controller-backed surface with controller.strategy=none and serviceManager.strategy=none.",
-		),
-		resourceKey("generativeaiagent", "Agent"): reviewedException(
-			"generativeaiagent",
-			"generativeaiagent",
-			apiErrorCoverageDefaultVersion,
-			"Agent",
 			"`services.yaml` keeps this subresource out of the active controller-backed surface with controller.strategy=none and serviceManager.strategy=none.",
 		),
 		resourceKey("generativeaiagent", "AgentEndpoint"): reviewedException(

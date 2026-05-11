@@ -238,6 +238,7 @@ resources:
 - self_v1beta1_subscription.yaml
 - tenantmanagercontrolplane_v1beta1_organization.yaml
 - jms_v1beta1_fleet.yaml
+- generativeaiagent_v1beta1_agent.yaml
 - lustrefilestorage_v1beta1_objectstoragelink.yaml
 - rover_v1beta1_rovernode.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

@@ -742,10 +742,15 @@ var seedTargets = []Target{
 	newTarget("gdp", "GdpPipelineSummary", reflect.TypeOf(gdp.GdpPipelineSummary{})),
 
 	// Generativeaiagent CRD support
+	newTarget("generativeaiagent", "CreateAgentDetails", reflect.TypeOf(generativeaiagent.CreateAgentDetails{})),
 	newTarget("generativeaiagent", "CreateKnowledgeBaseDetails", reflect.TypeOf(generativeaiagent.CreateKnowledgeBaseDetails{})),
+	newTarget("generativeaiagent", "UpdateAgentDetails", reflect.TypeOf(generativeaiagent.UpdateAgentDetails{})),
 	newTarget("generativeaiagent", "UpdateKnowledgeBaseDetails", reflect.TypeOf(generativeaiagent.UpdateKnowledgeBaseDetails{})),
+	newTarget("generativeaiagent", "Agent", reflect.TypeOf(generativeaiagent.Agent{})),
+	newTarget("generativeaiagent", "AgentCollection", reflect.TypeOf(generativeaiagent.AgentCollection{})),
 	newTarget("generativeaiagent", "KnowledgeBase", reflect.TypeOf(generativeaiagent.KnowledgeBase{})),
 	newTarget("generativeaiagent", "KnowledgeBaseCollection", reflect.TypeOf(generativeaiagent.KnowledgeBaseCollection{})),
+	newTarget("generativeaiagent", "AgentSummary", reflect.TypeOf(generativeaiagent.AgentSummary{})),
 	newTarget("generativeaiagent", "KnowledgeBaseSummary", reflect.TypeOf(generativeaiagent.KnowledgeBaseSummary{})),
 
 	// Generativeaidata CRD support

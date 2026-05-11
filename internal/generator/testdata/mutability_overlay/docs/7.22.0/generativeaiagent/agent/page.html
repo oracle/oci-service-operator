@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <h2 id="argument-reference">Argument Reference</h2>
+    <p>The following arguments are supported:</p>
+    <ul>
+      <li><code>compartment_id</code> - (Required) (Updatable) The OCID of the compartment to create the agent in.</li>
+      <li><code>display_name</code> - (Optional) (Updatable) A user-friendly name. Does not have to be unique, and it is changeable. Avoid entering confidential information.</li>
+      <li><code>description</code> - (Optional) (Updatable) Description about the agent.</li>
+      <li><code>knowledge_base_ids</code> - (Optional) (Updatable) List of OCIDs of the knowledge bases associated with the agent. This field is deprecated and will be removed after March 26 2026.</li>
+      <li><code>welcome_message</code> - (Optional) (Updatable) Details about purpose and responsibility of the agent.</li>
+      <li><code>llm_config</code> - (Optional) (Updatable) Configuration to Agent LLM.
+        <ul>
+          <li><code>runtime_version</code> - (Optional) (Updatable) The runtimeVersion of the system prompt.</li>
+          <li><code>routing_llm_customization</code> - (Optional) (Updatable) Configuration to customize LLM.
+            <ul>
+              <li><code>instruction</code> - (Optional) (Updatable) If specified, the default instruction is replaced with the provided instruction.</li>
+              <li><code>llm_hyper_parameters</code> - (Optional) (Updatable) Hyper parameters for LLM configuration.</li>
+              <li><code>llm_selection</code> - (Optional) (Updatable) LLM selection configuration.
+                <ul>
+                  <li><code>llm_selection_type</code> - (Required) (Updatable) The LLM selection type.</li>
+                  <li><code>model_id</code> - (Applicable when llm_selection_type=CUSTOM_GEN_AI_MODEL) (Updatable) The OCID of the GenAI model.</li>
+                  <li><code>endpoint_id</code> - (Applicable when llm_selection_type=CUSTOM_GEN_AI_ENDPOINT) (Updatable) The OCID of the GenAI endpoint.</li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li><code>freeform_tags</code> - (Optional) (Updatable) Free-form tags for this resource.</li>
+      <li><code>defined_tags</code> - (Optional) (Updatable) Defined tags for this resource.</li>
+    </ul>
+  </body>
+</html>

@@ -51,7 +51,6 @@ rules:
   - update
 - apiGroups:
   - adm.oracle.com
-  - generativeaiagent.oracle.com
   resources:
   - knowledgebases
   verbs:
@@ -64,14 +63,12 @@ rules:
   - watch
 - apiGroups:
   - adm.oracle.com
-  - generativeaiagent.oracle.com
   resources:
   - knowledgebases/finalizers
   verbs:
   - update
 - apiGroups:
   - adm.oracle.com
-  - generativeaiagent.oracle.com
   resources:
   - knowledgebases/status
   verbs:
@@ -1054,6 +1051,35 @@ rules:
   - dedicatedaiclusters/status
   - endpoints/status
   - models/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - generativeaiagent.oracle.com
+  resources:
+  - agents
+  - knowledgebases
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - generativeaiagent.oracle.com
+  resources:
+  - agents/finalizers
+  - knowledgebases/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - generativeaiagent.oracle.com
+  resources:
+  - agents/status
+  - knowledgebases/status
   verbs:
   - get
   - patch
