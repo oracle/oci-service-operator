@@ -545,14 +545,18 @@ packages:
 
   - package: generativeaiagent
     displayName: Generative AI Agent
-    summary: Manage OCI Generative AI Agent knowledge bases from Kubernetes with an initial controller-backed KnowledgeBase rollout.
+    summary: Manage OCI Generative AI Agent agents and knowledge bases from Kubernetes with reviewed controller-backed runtimes.
     supportStatus: preview
     customerVisible: false
     guidePath: docs/installation.md
     packageNotes:
-      - Current package scope is intentionally limited to KnowledgeBase while Agent, AgentEndpoint, DataSource, DataIngestionJob, ProvisionedCapacity, Tool, and work-request helper families stay unpublished.
+      - Current package scope is intentionally limited to Agent and KnowledgeBase while AgentEndpoint, DataSource, DataIngestionJob, ProvisionedCapacity, Tool, and work-request helper families stay unpublished.
+      - The published runtimes use service-SDK work requests for create, update, and delete. `ChangeAgentCompartment` and `ChangeKnowledgeBaseCompartment` both stay out of scope for the controller-backed surface.
       - The published package keeps `generativeaiagent/KnowledgeBase` explicitly distinct from the existing `adm/KnowledgeBase` rollout in docs, catalog metadata, and formal/runtime surfaces.
     kindOverrides:
+      - group: generativeaiagent
+        kind: Agent
+        summary: Manage OCI Generative AI Agents.
       - group: generativeaiagent
         kind: KnowledgeBase
         summary: Manage OCI Generative AI Agent knowledge bases.

@@ -13,6 +13,7 @@ import (
 	zprv1beta1 "github.com/oracle/oci-service-operator/api/zpr/v1beta1"
 	zprcontrollers "github.com/oracle/oci-service-operator/controllers/zpr"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
+	zprconfigurationservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/zpr/configuration"
 	zprzprpolicyservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/zpr/zprpolicy"
 )
 
@@ -21,6 +22,17 @@ func init() {
 		Group:       "zpr",
 		AddToScheme: zprv1beta1.AddToScheme,
 		SetupWithManager: func(ctx Context) error {
+			if err := (&zprcontrollers.ConfigurationReconciler{
+				Reconciler: NewBaseReconciler(
+					ctx,
+					"Configuration",
+					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
+						return zprconfigurationservicemanager.NewConfigurationServiceManagerWithDeps(deps)
+					},
+				),
+			}).SetupWithManager(ctx.Manager); err != nil {
+				return fmt.Errorf("setup Configuration controller: %w", err)
+			}
 			if err := (&zprcontrollers.ZprPolicyReconciler{
 				Reconciler: NewBaseReconciler(
 					ctx,

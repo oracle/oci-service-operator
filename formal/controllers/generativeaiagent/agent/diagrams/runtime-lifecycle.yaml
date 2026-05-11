@@ -1,0 +1,61 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: generativeaiagent
+slug: agent
+kind: Agent
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending:
+      - CREATING
+    updatePending:
+      - UPDATING
+    deletePending:
+      - DELETING
+  listLookup:
+    filters:
+      - compartmentId
+      - displayName
+    matchRule: exact compartmentId plus displayName unique match in ACTIVE, CREATING, or UPDATING; duplicate matches fail
+  mutation:
+    mutable:
+      - definedTags
+      - description
+      - displayName
+      - freeformTags
+      - knowledgeBaseIds
+      - llmConfig
+      - welcomeMessage
+    forceNew:
+      - compartmentId
+  hooks:
+    create:
+      - helper: tfresource.CreateResource
+      - helper: tfresource.WaitForWorkRequestWithErrorHandling
+        entityType: agent
+        action: CREATED
+    update:
+      - helper: tfresource.UpdateResource
+      - helper: tfresource.WaitForWorkRequestWithErrorHandling
+        entityType: agent
+        action: UPDATED
+    delete:
+      - helper: tfresource.DeleteResource
+      - helper: tfresource.WaitForWorkRequestWithErrorHandling
+        entityType: agent
+        action: DELETED
+  followUp:
+    create: GetWorkRequest -> GetAgent
+    update: GetWorkRequest -> GetAgent
+    delete: GetWorkRequest -> GetAgent/ListAgents confirm-delete
+notes:
+  - Reviewed lifecycle mapping treats CREATING as provisioning, UPDATING as updating, ACTIVE as success, and DELETING as terminating; FAILED is terminal and DELETED is only a delete-confirmation target.
+  - CreateAgent returns an Agent body plus opc-work-request-id, while UpdateAgent, DeleteAgent, and ChangeAgentCompartment return work-request headers without a resource body. The runtime prefers the create response identifier and otherwise recovers the Agent OCID from work-request resources before rereading GetAgent.
+  - Pre-create reuse only runs when spec.displayName is present and keeps exact compartmentId plus displayName matching bounded to ACTIVE, CREATING, or UPDATING summaries.
+  - Only displayName, description, welcomeMessage, knowledgeBaseIds, llmConfig, freeformTags, and definedTags reconcile in place; an empty llmConfig value is treated as omission because the published spec cannot distinguish clear-from-empty from omission for that nested object. CompartmentId remains replacement-only and ChangeAgentCompartment stays out of scope for the published runtime.
+  - Delete keeps the finalizer until the work request is terminal and GetAgent or fallback ListAgents confirms the resource is gone.

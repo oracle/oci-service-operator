@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "zpr",
+  "slug": "configuration",
+  "kind": "Configuration",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_zpr_configuration",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateConfiguration",
+        "requestType": "zpr.CreateConfigurationRequest",
+        "responseType": "zpr.CreateConfigurationResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetConfiguration",
+        "requestType": "zpr.GetConfigurationRequest",
+        "responseType": "zpr.GetConfigurationResponse"
+      }
+    ],
+    "list": [],
+    "update": [],
+    "delete": []
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [],
+    "forceNew": [
+      "compartment_id",
+      "zpr_status",
+      "freeform_tags",
+      "defined_tags"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [],
+    "delete": []
+  },
+  "deleteConfirmation": {
+    "pending": [],
+    "target": [
+      "LOCAL_DELETE"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/zpr/configuration/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/zpr/configuration/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "delete-confirmation",
+      "lifecycle-classification",
+      "mutation-policy",
+      "status-projection",
+      "waiter-work-request"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: CreateConfiguration, GetConfiguration, GetZprConfigurationWorkRequest, ListZprConfigurationWorkRequests, ListZprConfigurationWorkRequestLogs, and ListZprConfigurationWorkRequestErrors are present in v65.110.0. Create returns only opc-work-request-id headers, Get returns the Configuration body, and the SDK does not expose list, update, or delete operations for the singleton configuration resource.",
+    "Pinned provider coverage is unconfirmed. formal/sources.lock still points at github.com/oracle/terraform-provider-oci@eb653febb1bab4cc6650a96d404a8baf36fdf671, but the accessible provider inventory did not expose a matching Configuration resource or data source. The providerResource name therefore stays a provisional OCI-style placeholder so generator-owned registry artifacts can derive stable links without claiming verified provider coverage.",
+    "Repo-authored runtime semantics stay explicit: bind-versus-create uses GetConfiguration(compartmentId) as the singleton lookup and observed-state source, create resumes only through the ZPR configuration work-request APIs, post-create drift on zprStatus or tag maps is rejected instead of inventing update semantics, and CR delete is local cleanup only because the SDK exposes no delete helper."
+  ]
+}

@@ -773,6 +773,16 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 				retryableConflictWorkRequest,
 				"KnowledgeBase runtime persists create, update, and delete work-request IDs in shared async status, prefers create response-body identity when OCI returns it, recovers the OCID from work-request resources otherwise, and bounds pre-create reuse to exact compartmentId plus displayName matches.",
 			),
+			resourceKey("generativeaiagent", "Agent"): reviewedRegistration(
+				"generativeaiagent",
+				"generativeaiagent",
+				apiErrorCoverageDefaultVersion,
+				"Agent",
+				APIErrorCoverageFamilyGeneratedRuntimeWorkRequest,
+				deleteNotFoundReadback,
+				retryableConflictWorkRequest,
+				"Agent runtime persists create, update, and delete work-request IDs in shared async status, prefers create response-body identity when OCI returns it, recovers the OCID from work-request resources otherwise, bounds pre-create reuse to exact compartmentId plus displayName matches, and rebuilds llmConfig selections into concrete SDK request bodies while keeping ChangeAgentCompartment out of the published surface.",
+			),
 			resourceKey("generativeaidata", "EnrichmentJob"): {
 				Resource: APIErrorCoverageResource{
 					Service: "generativeaidata",
@@ -1140,6 +1150,22 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 				retryableConflictWorkRequest,
 				"Organization is bind-existing plus update-only: a handwritten wrapper validates explicit organizationId or compartmentId binding, prevents explicit-ID fallback to list adoption, paginates ListOrganizations lookup, resumes UpdateOrganization through service-local GetWorkRequest, and treats CR delete as local unbind without OCI delete helpers.",
 			),
+			resourceKey("zpr", "Configuration"): {
+				Resource: APIErrorCoverageResource{
+					Service: "zpr",
+					Group:   "zpr",
+					Version: apiErrorCoverageDefaultVersion,
+					Kind:    "Configuration",
+				},
+				Family: APIErrorCoverageFamilyGeneratedRuntimeWorkRequest,
+				SupportedOperations: []Operation{
+					OperationRead,
+					OperationCreate,
+				},
+				DeleteNotFoundSemantics:    "delete is Kubernetes-local only; the published Configuration contract does not issue OCI delete requests",
+				RetryableConflictSemantics: "update and delete conflicts are not applicable because the published Configuration contract is create/get only",
+				Deviation:                  "Configuration is a singleton create/get contract: a handwritten wrapper preflights stale tracked identity through GetConfiguration(compartmentId), clears dead tracked state before re-entering generatedruntime create, resumes create through GetZprConfigurationWorkRequest, rejects unsupported tag or zprStatus drift, and releases the Kubernetes finalizer locally without invoking nonexistent OCI delete helpers.",
+			},
 			resourceKey("zpr", "ZprPolicy"): reviewedRegistration(
 				"zpr",
 				"zpr",
@@ -1296,16 +1322,28 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 			"Term",
 			"TermVersion",
 		),
-		reviewedRegistrationSet(
-			"mediaservices",
-			"mediaservices",
-			apiErrorCoverageDefaultVersion,
-			APIErrorCoverageFamilyGeneratedRuntimePlain,
-			deleteNotFoundGeneratedRuntime,
-			retryableConflictGeneratedRuntime,
-			"MediaAsset keeps plain generatedruntime error classification while a small handwritten seam narrows pre-create reuse, strips deleteMode/isLockOverride from the published request surface, preserves explicit mutable clears, and normalizes create-time lock readback.",
-			"MediaAsset",
-		),
+		map[string]APIErrorCoverageRegistration{
+			resourceKey("mediaservices", "MediaAsset"): reviewedRegistration(
+				"mediaservices",
+				"mediaservices",
+				apiErrorCoverageDefaultVersion,
+				"MediaAsset",
+				APIErrorCoverageFamilyGeneratedRuntimePlain,
+				deleteNotFoundGeneratedRuntime,
+				retryableConflictGeneratedRuntime,
+				"MediaAsset keeps plain generatedruntime error classification while a small handwritten seam narrows pre-create reuse, strips deleteMode/isLockOverride from the published request surface, preserves explicit mutable clears, and normalizes create-time lock readback.",
+			),
+			resourceKey("mediaservices", "MediaWorkflow"): reviewedRegistration(
+				"mediaservices",
+				"mediaservices",
+				apiErrorCoverageDefaultVersion,
+				"MediaWorkflow",
+				APIErrorCoverageFamilyGeneratedRuntimeFollowUp,
+				deleteNotFoundGeneratedRuntime,
+				retryableConflictFollowUp,
+				"MediaWorkflow runtime keeps generated read-after-write follow-up on create and update, reuses only exact compartmentId plus displayName matches, strips ChangeMediaWorkflowCompartment and isLockOverride from the published request surface, and normalizes create-time lock readback.",
+			),
+		},
 		reviewedRegistrationSet(
 			"operatoraccesscontrol",
 			"operatoraccesscontrol",
@@ -1589,13 +1627,6 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 			"adm",
 			apiErrorCoverageDefaultVersion,
 			"WorkRequestLog",
-			"`services.yaml` keeps this subresource out of the active controller-backed surface with controller.strategy=none and serviceManager.strategy=none.",
-		),
-		resourceKey("generativeaiagent", "Agent"): reviewedException(
-			"generativeaiagent",
-			"generativeaiagent",
-			apiErrorCoverageDefaultVersion,
-			"Agent",
 			"`services.yaml` keeps this subresource out of the active controller-backed surface with controller.strategy=none and serviceManager.strategy=none.",
 		),
 		resourceKey("generativeaiagent", "AgentEndpoint"): reviewedException(

@@ -14,6 +14,7 @@ rules:
 - apiGroups:
   - zpr.oracle.com
   resources:
+  - configurations
   - zprpolicies
   verbs:
   - create
@@ -26,12 +27,14 @@ rules:
 - apiGroups:
   - zpr.oracle.com
   resources:
+  - configurations/finalizers
   - zprpolicies/finalizers
   verbs:
   - update
 - apiGroups:
   - zpr.oracle.com
   resources:
+  - configurations/status
   - zprpolicies/status
   verbs:
   - get

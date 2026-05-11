@@ -742,10 +742,15 @@ var seedTargets = []Target{
 	newTarget("gdp", "GdpPipelineSummary", reflect.TypeOf(gdp.GdpPipelineSummary{})),
 
 	// Generativeaiagent CRD support
+	newTarget("generativeaiagent", "CreateAgentDetails", reflect.TypeOf(generativeaiagent.CreateAgentDetails{})),
 	newTarget("generativeaiagent", "CreateKnowledgeBaseDetails", reflect.TypeOf(generativeaiagent.CreateKnowledgeBaseDetails{})),
+	newTarget("generativeaiagent", "UpdateAgentDetails", reflect.TypeOf(generativeaiagent.UpdateAgentDetails{})),
 	newTarget("generativeaiagent", "UpdateKnowledgeBaseDetails", reflect.TypeOf(generativeaiagent.UpdateKnowledgeBaseDetails{})),
+	newTarget("generativeaiagent", "Agent", reflect.TypeOf(generativeaiagent.Agent{})),
+	newTarget("generativeaiagent", "AgentCollection", reflect.TypeOf(generativeaiagent.AgentCollection{})),
 	newTarget("generativeaiagent", "KnowledgeBase", reflect.TypeOf(generativeaiagent.KnowledgeBase{})),
 	newTarget("generativeaiagent", "KnowledgeBaseCollection", reflect.TypeOf(generativeaiagent.KnowledgeBaseCollection{})),
+	newTarget("generativeaiagent", "AgentSummary", reflect.TypeOf(generativeaiagent.AgentSummary{})),
 	newTarget("generativeaiagent", "KnowledgeBaseSummary", reflect.TypeOf(generativeaiagent.KnowledgeBaseSummary{})),
 
 	// Generativeaidata CRD support
@@ -973,10 +978,15 @@ var seedTargets = []Target{
 
 	// Mediaservices CRD support
 	newTarget("mediaservices", "CreateMediaAssetDetails", reflect.TypeOf(mediaservices.CreateMediaAssetDetails{})),
+	newTarget("mediaservices", "CreateMediaWorkflowDetails", reflect.TypeOf(mediaservices.CreateMediaWorkflowDetails{})),
 	newTarget("mediaservices", "UpdateMediaAssetDetails", reflect.TypeOf(mediaservices.UpdateMediaAssetDetails{})),
+	newTarget("mediaservices", "UpdateMediaWorkflowDetails", reflect.TypeOf(mediaservices.UpdateMediaWorkflowDetails{})),
 	newTarget("mediaservices", "MediaAsset", reflect.TypeOf(mediaservices.MediaAsset{})),
 	newTarget("mediaservices", "MediaAssetCollection", reflect.TypeOf(mediaservices.MediaAssetCollection{})),
+	newTarget("mediaservices", "MediaWorkflow", reflect.TypeOf(mediaservices.MediaWorkflow{})),
+	newTarget("mediaservices", "MediaWorkflowCollection", reflect.TypeOf(mediaservices.MediaWorkflowCollection{})),
 	newTarget("mediaservices", "MediaAssetSummary", reflect.TypeOf(mediaservices.MediaAssetSummary{})),
+	newTarget("mediaservices", "MediaWorkflowSummary", reflect.TypeOf(mediaservices.MediaWorkflowSummary{})),
 
 	// Mngdmac CRD support
 	newTarget("mngdmac", "CreateMacOrderDetails", reflect.TypeOf(mngdmac.CreateMacOrderDetails{})),
@@ -1335,8 +1345,10 @@ var seedTargets = []Target{
 	newTarget("wlms", "WlsDomainSummary", reflect.TypeOf(wlms.WlsDomainSummary{})),
 
 	// Zpr CRD support
+	newTarget("zpr", "CreateConfigurationDetails", reflect.TypeOf(zpr.CreateConfigurationDetails{})),
 	newTarget("zpr", "CreateZprPolicyDetails", reflect.TypeOf(zpr.CreateZprPolicyDetails{})),
 	newTarget("zpr", "UpdateZprPolicyDetails", reflect.TypeOf(zpr.UpdateZprPolicyDetails{})),
+	newTarget("zpr", "Configuration", reflect.TypeOf(zpr.Configuration{})),
 	newTarget("zpr", "ZprPolicy", reflect.TypeOf(zpr.ZprPolicy{})),
 	newTarget("zpr", "ZprPolicyCollection", reflect.TypeOf(zpr.ZprPolicyCollection{})),
 	newTarget("zpr", "ZprPolicySummary", reflect.TypeOf(zpr.ZprPolicySummary{})),

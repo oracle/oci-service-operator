@@ -78,6 +78,7 @@ resources:
 - bases/generativeai.oracle.com_dedicatedaiclusters.yaml
 - bases/generativeai.oracle.com_endpoints.yaml
 - bases/generativeai.oracle.com_models.yaml
+- bases/generativeaiagent.oracle.com_agents.yaml
 - bases/generativeaiagent.oracle.com_knowledgebases.yaml
 - bases/generativeaidata.oracle.com_enrichmentjobs.yaml
 - bases/governancerulescontrolplane.oracle.com_governancerules.yaml
@@ -144,6 +145,7 @@ resources:
 - bases/marketplacepublisher.oracle.com_terms.yaml
 - bases/marketplacepublisher.oracle.com_termversions.yaml
 - bases/mediaservices.oracle.com_mediaassets.yaml
+- bases/mediaservices.oracle.com_mediaworkflows.yaml
 - bases/mngdmac.oracle.com_macorders.yaml
 - bases/monitoring.oracle.com_alarms.yaml
 - bases/monitoring.oracle.com_alarmsuppressions.yaml
@@ -246,6 +248,7 @@ resources:
 - bases/waf.oracle.com_webappfirewallpolicies.yaml
 - bases/waf.oracle.com_webappfirewalls.yaml
 - bases/wlms.oracle.com_wlsdomains.yaml
+- bases/zpr.oracle.com_configurations.yaml
 - bases/zpr.oracle.com_zprpolicies.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 

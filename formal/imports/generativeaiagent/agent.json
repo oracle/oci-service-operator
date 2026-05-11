@@ -1,0 +1,153 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "generativeaiagent",
+  "slug": "agent",
+  "kind": "Agent",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_generative_ai_agent_agent",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateAgent",
+        "requestType": "generativeaiagent.CreateAgentRequest",
+        "responseType": "generativeaiagent.CreateAgentResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetAgent",
+        "requestType": "generativeaiagent.GetAgentRequest",
+        "responseType": "generativeaiagent.GetAgentResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListAgents",
+        "requestType": "generativeaiagent.ListAgentsRequest",
+        "responseType": "generativeaiagent.ListAgentsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeAgentCompartment",
+        "requestType": "generativeaiagent.ChangeAgentCompartmentRequest",
+        "responseType": "generativeaiagent.ChangeAgentCompartmentResponse"
+      },
+      {
+        "operation": "UpdateAgent",
+        "requestType": "generativeaiagent.UpdateAgentRequest",
+        "responseType": "generativeaiagent.UpdateAgentResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteAgent",
+        "requestType": "generativeaiagent.DeleteAgentRequest",
+        "responseType": "generativeaiagent.DeleteAgentResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags",
+      "knowledge_base_ids",
+      "llm_config",
+      "welcome_message"
+    ],
+    "forceNew": null,
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "agent",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "agent",
+        "action": "UPDATED"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "agent",
+        "action": "DELETED"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_generative_ai_agent_agents",
+    "collectionField": "agent_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "lifecycle_state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/generativeaiagent/agent/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/generativeaiagent/agent/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "list-lookup",
+      "mutation-policy",
+      "status-projection",
+      "waiter-work-request",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: CreateAgent, GetAgent, ListAgents, ChangeAgentCompartment, UpdateAgent, DeleteAgent, and GetWorkRequest are present in v65.110.0. ListAgents filters compartmentId, lifecycleState, and displayName; create returns the resource body plus opc-work-request-id; and update, delete, and change-compartment return opc-work-request-id without an Agent body.",
+    "Pinned provider surface: oci_generative_ai_agent_agent plus the singular and list data sources oci_generative_ai_agent_agent and oci_generative_ai_agent_agents are expected to follow the same work-request-backed CRUD shape as the service SDK for create, update, delete, and compartment changes. The checked-in mutability docs fixture is used because the live Terraform Registry resource page currently renders as a JavaScript shell instead of a deterministic argument-reference HTML page.",
+    "Repo-authored bind-versus-create stays explicit: when no OCI identifier is tracked, the runtime uses exact compartmentId plus displayName list matches, ignores FAILED, DELETING, and DELETED summaries, and fails on duplicate exact-name matches instead of adopting arbitrarily.",
+    "Repo-authored mutation policy stays explicit: displayName, description, welcomeMessage, knowledgeBaseIds, llmConfig, freeformTags, and definedTags reconcile in place while ChangeAgentCompartment remains out of scope for the published runtime contract. The handwritten runtime treats an empty llmConfig value as omission because the published spec cannot distinguish clear-from-empty from omission for that nested object."
+  ]
+}

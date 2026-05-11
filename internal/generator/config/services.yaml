@@ -2624,6 +2624,7 @@ services:
       mode: explicit
       includeKinds:
         - KnowledgeBase
+        - Agent
     generation:
       controller:
         strategy: generated
@@ -2667,10 +2668,35 @@ services:
                 freeformTags:
                   managed-by: oci-service-operator
         - kind: Agent
-          controller:
-            strategy: none
-          serviceManager:
-            strategy: none
+          formalSpec: agent
+          async:
+            strategy: workrequest
+            runtime: generatedruntime
+            formalClassification: workrequest
+            workRequest:
+              source: service-sdk
+              phases:
+                - create
+                - update
+                - delete
+          sample:
+            body: |-
+              #
+              # Replace the compartment OCID and tune the Agent metadata below before running e2e.
+              # Keeping spec.displayName empty disables pre-create reuse; setting it allows the controller
+              # to bind to an existing Generative AI Agent Agent with the same compartmentId and displayName.
+              #
+              apiVersion: generativeaiagent.oracle.com/v1beta1
+              kind: Agent
+              metadata:
+                name: agent-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                displayName: osok-generativeaiagent-agent-sample
+                description: OSOK Generative AI Agent Agent sample
+                welcomeMessage: Hello from the OSOK Generative AI Agent sample.
+                freeformTags:
+                  managed-by: oci-service-operator
         - kind: AgentEndpoint
           controller:
             strategy: none
@@ -3473,6 +3499,7 @@ services:
       mode: explicit
       includeKinds:
         - MediaAsset
+        - MediaWorkflow
     generation:
       controller:
         strategy: generated
@@ -3491,6 +3518,14 @@ services:
             formalClassification: lifecycle
           serviceManager:
             packagePath: mediaservices/mediaasset
+        - kind: MediaWorkflow
+          formalSpec: mediaworkflow
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+          serviceManager:
+            packagePath: mediaservices/mediaworkflow
 
   - service: mysql
     sdkPackage: github.com/oracle/oci-go-sdk/v65/mysql
@@ -5881,6 +5916,7 @@ services:
       enabled: true
       mode: explicit
       includeKinds:
+        - Configuration
         - ZprPolicy
     generation:
       controller:
@@ -5892,6 +5928,30 @@ services:
       webhooks:
         strategy: none
       resources:
+        - kind: Configuration
+          formalSpec: configuration
+          async:
+            strategy: workrequest
+            runtime: generatedruntime
+            formalClassification: workrequest
+            workRequest:
+              source: service-sdk
+              phases:
+                - create
+          serviceManager:
+            packagePath: zpr/configuration
+          sample:
+            body: |-
+              #
+              # Replace the OCI tenancy OCID below before running e2e.
+              #
+              apiVersion: zpr.oracle.com/v1beta1
+              kind: Configuration
+              metadata:
+                name: configuration-sample
+              spec:
+                compartmentId: ocid1.tenancy.oc1..exampleuniqueID
+                zprStatus: ENABLED
         - kind: ZprPolicy
           formalSpec: zprpolicy
           async:

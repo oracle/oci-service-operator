@@ -15,6 +15,7 @@ rules:
   - mediaservices.oracle.com
   resources:
   - mediaassets
+  - mediaworkflows
   verbs:
   - create
   - delete
@@ -27,12 +28,14 @@ rules:
   - mediaservices.oracle.com
   resources:
   - mediaassets/finalizers
+  - mediaworkflows/finalizers
   verbs:
   - update
 - apiGroups:
   - mediaservices.oracle.com
   resources:
   - mediaassets/status
+  - mediaworkflows/status
   verbs:
   - get
   - patch

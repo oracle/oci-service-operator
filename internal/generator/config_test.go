@@ -1383,7 +1383,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	assertServiceSelection(t, services["functions"], true, SelectionModeExplicit, []string{"Application", "Function"})
 	assertServiceSelection(t, services["generativeai"], true, SelectionModeExplicit, []string{"DedicatedAiCluster", "Endpoint", "Model"})
 	assertServiceSelection(t, services["generativeaidata"], true, SelectionModeExplicit, []string{"EnrichmentJob"})
-	assertServiceSelection(t, services["generativeaiagent"], true, SelectionModeExplicit, []string{"KnowledgeBase"})
+	assertServiceSelection(t, services["generativeaiagent"], true, SelectionModeExplicit, []string{"KnowledgeBase", "Agent"})
 	assertServiceSelection(t, services["healthchecks"], true, SelectionModeExplicit, []string{"HttpMonitor", "PingMonitor"})
 	assertServiceSelection(t, services["identity"], true, SelectionModeExplicit, []string{"Compartment"})
 	assertServiceSelection(t, services["integration"], true, SelectionModeExplicit, []string{"IntegrationInstance"})
@@ -1428,7 +1428,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	assertServiceSelection(t, services["managementdashboard"], true, SelectionModeExplicit, []string{"ManagementDashboard", "ManagementSavedSearch"})
 	assertServiceSelection(t, services["marketplaceprivateoffer"], true, SelectionModeExplicit, []string{"Attachment", "Offer"})
 	assertServiceSelection(t, services["marketplacepublisher"], true, SelectionModeExplicit, []string{"Artifact", "Listing", "ListingRevision", "ListingRevisionAttachment", "ListingRevisionNote", "ListingRevisionPackage", "Term", "TermVersion"})
-	assertServiceSelection(t, services["mediaservices"], true, SelectionModeExplicit, []string{"MediaAsset"})
+	assertServiceSelection(t, services["mediaservices"], true, SelectionModeExplicit, []string{"MediaAsset", "MediaWorkflow"})
 	assertServiceSelection(t, services["mngdmac"], true, SelectionModeExplicit, []string{"MacOrder"})
 	assertServiceSelection(t, services["operatoraccesscontrol"], true, SelectionModeExplicit, []string{"OperatorControl", "OperatorControlAssignment"})
 	assertServiceSelection(t, services["opsi"], true, SelectionModeExplicit, []string{"AwrHub", "AwrHubSource", "ChargebackPlan", "ChargebackPlanReport", "DatabaseInsight", "EnterpriseManagerBridge", "ExadataInsight", "HostInsight", "NewsReport", "OperationsInsightsPrivateEndpoint", "OperationsInsightsWarehouse", "OperationsInsightsWarehouseUser", "OpsiConfiguration"})
@@ -1446,7 +1446,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	assertServiceSelection(t, services["wlms"], true, SelectionModeExplicit, []string{"WlsDomain"})
 	assertServiceSelection(t, services["visualbuilder"], true, SelectionModeExplicit, []string{"VbInstance"})
 	assertServiceSelection(t, services["vnmonitoring"], true, SelectionModeExplicit, []string{"PathAnalyzerTest"})
-	assertServiceSelection(t, services["zpr"], true, SelectionModeExplicit, []string{"ZprPolicy"})
+	assertServiceSelection(t, services["zpr"], true, SelectionModeExplicit, []string{"Configuration", "ZprPolicy"})
 	assertServiceSelection(t, services["vault"], false, SelectionModeAll, nil)
 }
 
@@ -2317,6 +2317,16 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 	}
 	if zpr.WorkRequest.LegacyFieldBridge.hasOverride() {
 		t.Fatalf("zpr ZprPolicy workRequest.legacyFieldBridge = %#v, want empty legacy bridge", zpr.WorkRequest.LegacyFieldBridge)
+	}
+	configuration := assertAsyncContract(t, services["zpr"], "Configuration", AsyncStrategyWorkRequest, AsyncRuntimeGeneratedRuntime)
+	if configuration.WorkRequest.Source != AsyncWorkRequestSourceServiceSDK {
+		t.Fatalf("zpr Configuration workRequest.source = %q, want %q", configuration.WorkRequest.Source, AsyncWorkRequestSourceServiceSDK)
+	}
+	if !slices.Equal(configuration.WorkRequest.Phases, []string{AsyncPhaseCreate}) {
+		t.Fatalf("zpr Configuration workRequest.phases = %v", configuration.WorkRequest.Phases)
+	}
+	if configuration.WorkRequest.LegacyFieldBridge.hasOverride() {
+		t.Fatalf("zpr Configuration workRequest.legacyFieldBridge = %#v, want empty legacy bridge", configuration.WorkRequest.LegacyFieldBridge)
 	}
 	if vbsinst.WorkRequest.LegacyFieldBridge.hasOverride() {
 		t.Fatalf("vbsinst VbsInstance workRequest.legacyFieldBridge = %#v, want empty legacy bridge", vbsinst.WorkRequest.LegacyFieldBridge)

@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "generativeaiagent",
+  "kind": "Agent",
+  "formalSlug": "agent",
+  "providerResource": "oci_generative_ai_agent_agent",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/generative_ai_agent_agent",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/generative_ai_agent_agent",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/generativeaiagent/agent/page.html",
+  "bodySHA256": "9d108418c90a2cabdeb7bf552a4f85099b4315ba6e05e377f96325b26c6d68a5",
+  "bodyBytes": 2347,
+  "fixtureBodyPath": "7.22.0/generativeaiagent/agent/page.html"
+}

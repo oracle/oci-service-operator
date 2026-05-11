@@ -25,4 +25,5 @@ Manage OCI Zero Trust Packet Routing policies from Kubernetes with a reviewed wo
 
 | Resource | API Version | Summary | Guide | Sample | API Spec |
 | --- | --- | --- | --- | --- | --- |
+| `zpr/Configuration` | `zpr.oracle.com/v1beta1` | — | — | [Sample](../../samples/zpr/v1beta1/configuration.md) | [Reference](../../api/zpr/v1beta1/index.md#kind-configuration) |
 | `zpr/ZprPolicy` | `zpr.oracle.com/v1beta1` | Manage OCI Zero Trust Packet Routing policies. | — | [Sample](../../samples/zpr/v1beta1/zprpolicy.md) | [Reference](../../api/zpr/v1beta1/index.md#kind-zprpolicy) |

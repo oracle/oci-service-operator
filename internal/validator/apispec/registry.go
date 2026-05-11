@@ -2619,6 +2619,28 @@ var targets = []Target{
 		},
 	},
 	{
+		Name:       "GenerativeaiagentAgent",
+		SpecType:   reflect.TypeOf(generativeaiagentv1beta1.AgentSpec{}),
+		StatusType: reflect.TypeOf(generativeaiagentv1beta1.AgentStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "generativeaiagent.CreateAgentDetails",
+			},
+			{
+				SDKStruct: "generativeaiagent.UpdateAgentDetails",
+			},
+			{
+				SDKStruct: "generativeaiagent.Agent",
+			},
+			{
+				SDKStruct: "generativeaiagent.AgentCollection",
+			},
+			{
+				SDKStruct: "generativeaiagent.AgentSummary",
+			},
+		},
+	},
+	{
 		Name:       "GenerativeaiagentKnowledgeBase",
 		SpecType:   reflect.TypeOf(generativeaiagentv1beta1.KnowledgeBaseSpec{}),
 		StatusType: reflect.TypeOf(generativeaiagentv1beta1.KnowledgeBaseStatus{}),
@@ -3542,6 +3564,28 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "mediaservices.MediaAssetSummary",
+			},
+		},
+	},
+	{
+		Name:       "MediaservicesMediaWorkflow",
+		SpecType:   reflect.TypeOf(mediaservicesv1beta1.MediaWorkflowSpec{}),
+		StatusType: reflect.TypeOf(mediaservicesv1beta1.MediaWorkflowStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "mediaservices.CreateMediaWorkflowDetails",
+			},
+			{
+				SDKStruct: "mediaservices.UpdateMediaWorkflowDetails",
+			},
+			{
+				SDKStruct: "mediaservices.MediaWorkflow",
+			},
+			{
+				SDKStruct: "mediaservices.MediaWorkflowCollection",
+			},
+			{
+				SDKStruct: "mediaservices.MediaWorkflowSummary",
 			},
 		},
 	},
@@ -4929,6 +4973,19 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "wlms.WlsDomainSummary",
+			},
+		},
+	},
+	{
+		Name:       "ZprConfiguration",
+		SpecType:   reflect.TypeOf(zprv1beta1.ConfigurationSpec{}),
+		StatusType: reflect.TypeOf(zprv1beta1.ConfigurationStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "zpr.CreateConfigurationDetails",
+			},
+			{
+				SDKStruct: "zpr.Configuration",
 			},
 		},
 	},

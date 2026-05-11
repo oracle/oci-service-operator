@@ -61,6 +61,33 @@ publishes the service.
   generated package metadata disambiguated so the new group does not overwrite
   or confuse the existing ADM surface.
 
+## Follow-through For `US-135`
+
+- `Agent` is now the second published controller-backed kind in the
+  `generativeaiagent` package; the remaining `AgentEndpoint`, `DataSource`,
+  `DataIngestionJob`, `ProvisionedCapacity`, `Tool`, and work-request helper
+  families remain unpublished.
+- `Agent` uses the same recommended `formalSpec`/async posture as
+  `KnowledgeBase`: repo-authored formal row plus `async.strategy=workrequest`
+  with `workRequest.source=service-sdk` and `create`, `update`, and `delete`
+  phases.
+- `CreateAgent` returns an `Agent` body plus `OpcWorkRequestId`, while
+  `UpdateAgent`, `DeleteAgent`, and `ChangeAgentCompartment` return
+  work-request headers only. `GetAgent` and `ListAgents` project lifecycle
+  directly, so the published runtime uses service-SDK `GetWorkRequest`
+  follow-up and recovers the created OCID from either the create response body
+  or work-request resources.
+- The published runtime keeps `ChangeAgentCompartment` out of scope. The
+  controller-backed contract treats `compartmentId` as replacement-only drift
+  and confines in-place mutation to `displayName`, `description`,
+  `welcomeMessage`, `knowledgeBaseIds`, `llmConfig`, `freeformTags`, and
+  `definedTags`.
+- `Agent` needs a handwritten create/update body builder even on top of the
+  generated runtime shell because `llmConfig.routingLlmCustomization` and its
+  nested `llmSelection` polymorphism need concrete SDK bodies, and the CRD's
+  zero-value nested structs would otherwise serialize empty objects that the
+  published runtime should omit.
+
 ## Provider-Facts Coverage
 
 - `formal/sources.lock` pins provider facts to
@@ -69,6 +96,12 @@ publishes the service.
   `oci_generative_ai_agent_knowledge_base` as the resource,
   `oci_generative_ai_agent_knowledge_base` as the singular data source, and
   `oci_generative_ai_agent_knowledge_bases` as the list data source.
+- The follow-through `Agent` row uses
+  `oci_generative_ai_agent_agent` as the resource and singular data source plus
+  `oci_generative_ai_agent_agents` as the list data source. The checked-in
+  mutability docs fixture is used for that row because the live Terraform
+  Registry resource page currently renders as a JavaScript shell instead of a
+  deterministic argument-reference HTML page.
 - Provider docs publish the same knowledge-base family as both a resource and
   singular/list data sources, so the main risk is the repo-local naming
   collision with ADM rather than missing provider coverage.

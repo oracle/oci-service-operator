@@ -51,7 +51,6 @@ rules:
   - update
 - apiGroups:
   - adm.oracle.com
-  - generativeaiagent.oracle.com
   resources:
   - knowledgebases
   verbs:
@@ -64,14 +63,12 @@ rules:
   - watch
 - apiGroups:
   - adm.oracle.com
-  - generativeaiagent.oracle.com
   resources:
   - knowledgebases/finalizers
   verbs:
   - update
 - apiGroups:
   - adm.oracle.com
-  - generativeaiagent.oracle.com
   resources:
   - knowledgebases/status
   verbs:
@@ -1059,6 +1056,35 @@ rules:
   - patch
   - update
 - apiGroups:
+  - generativeaiagent.oracle.com
+  resources:
+  - agents
+  - knowledgebases
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - generativeaiagent.oracle.com
+  resources:
+  - agents/finalizers
+  - knowledgebases/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - generativeaiagent.oracle.com
+  resources:
+  - agents/status
+  - knowledgebases/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - generativeaidata.oracle.com
   resources:
   - enrichmentjobs
@@ -1760,6 +1786,7 @@ rules:
   - mediaservices.oracle.com
   resources:
   - mediaassets
+  - mediaworkflows
   verbs:
   - create
   - delete
@@ -1772,12 +1799,14 @@ rules:
   - mediaservices.oracle.com
   resources:
   - mediaassets/finalizers
+  - mediaworkflows/finalizers
   verbs:
   - update
 - apiGroups:
   - mediaservices.oracle.com
   resources:
   - mediaassets/status
+  - mediaworkflows/status
   verbs:
   - get
   - patch
@@ -2988,6 +3017,7 @@ rules:
 - apiGroups:
   - zpr.oracle.com
   resources:
+  - configurations
   - zprpolicies
   verbs:
   - create
@@ -3000,12 +3030,14 @@ rules:
 - apiGroups:
   - zpr.oracle.com
   resources:
+  - configurations/finalizers
   - zprpolicies/finalizers
   verbs:
   - update
 - apiGroups:
   - zpr.oracle.com
   resources:
+  - configurations/status
   - zprpolicies/status
   verbs:
   - get
