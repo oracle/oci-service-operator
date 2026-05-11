@@ -14,13 +14,13 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	}
 
 	byKey := inventoryByKey(inventory)
-	if got, want := len(inventory), 360; got != want {
+	if got, want := len(inventory), 362; got != want {
 		t.Fatalf("len(inventory) = %d, want %d", got, want)
 	}
-	if got, want := countRegistrations(inventory), 235; got != want {
+	if got, want := countRegistrations(inventory), 238; got != want {
 		t.Fatalf("registration inventory count = %d, want %d", got, want)
 	}
-	if got, want := countExceptions(inventory), 125; got != want {
+	if got, want := countExceptions(inventory), 124; got != want {
 		t.Fatalf("exception inventory count = %d, want %d", got, want)
 	}
 
