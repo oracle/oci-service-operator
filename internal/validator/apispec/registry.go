@@ -4704,6 +4704,28 @@ var targets = []Target{
 		},
 	},
 	{
+		Name:       "TenantmanagercontrolplaneDomain",
+		SpecType:   reflect.TypeOf(tenantmanagercontrolplanev1beta1.DomainSpec{}),
+		StatusType: reflect.TypeOf(tenantmanagercontrolplanev1beta1.DomainStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "tenantmanagercontrolplane.CreateDomainDetails",
+			},
+			{
+				SDKStruct: "tenantmanagercontrolplane.UpdateDomainDetails",
+			},
+			{
+				SDKStruct: "tenantmanagercontrolplane.Domain",
+			},
+			{
+				SDKStruct: "tenantmanagercontrolplane.DomainCollection",
+			},
+			{
+				SDKStruct: "tenantmanagercontrolplane.DomainSummary",
+			},
+		},
+	},
+	{
 		Name:       "TenantmanagercontrolplaneOrganization",
 		SpecType:   reflect.TypeOf(tenantmanagercontrolplanev1beta1.OrganizationSpec{}),
 		StatusType: reflect.TypeOf(tenantmanagercontrolplanev1beta1.OrganizationStatus{}),

@@ -1150,6 +1150,16 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 				retryableConflictWorkRequest,
 				"Organization is bind-existing plus update-only: a handwritten wrapper validates explicit organizationId or compartmentId binding, prevents explicit-ID fallback to list adoption, paginates ListOrganizations lookup, resumes UpdateOrganization through service-local GetWorkRequest, and treats CR delete as local unbind without OCI delete helpers.",
 			),
+			resourceKey("tenantmanagercontrolplane", "Domain"): reviewedRegistration(
+				"tenantmanagercontrolplane",
+				"tenantmanagercontrolplane",
+				apiErrorCoverageDefaultVersion,
+				"Domain",
+				APIErrorCoverageFamilyGeneratedRuntimeWorkRequest,
+				deleteNotFoundGeneratedRuntime,
+				retryableConflictWorkRequest,
+				"Domain is full CRUD with mixed completion paths: create resumes through service-local GetWorkRequest, direct-body update projects the returned Domain without a follow-up read, and delete holds the finalizer until generatedruntime confirm-delete reads observe DELETED or not found.",
+			),
 			resourceKey("zpr", "Configuration"): {
 				Resource: APIErrorCoverageResource{
 					Service: "zpr",

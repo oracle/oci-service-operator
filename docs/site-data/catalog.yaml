@@ -1136,14 +1136,17 @@ packages:
 
   - package: tenantmanagercontrolplane
     displayName: Tenant Manager Control Plane
-    summary: Bind existing OCI organizations from Kubernetes and reconcile the default UCM subscription with a reviewed update-only runtime.
+    summary: Manage OCI domains and existing organizations from Kubernetes with truthful service-specific runtime behavior.
     supportStatus: preview
     customerVisible: false
     guidePath: docs/installation.md
     packageNotes:
-      - Current package scope is intentionally limited to Organization while OrganizationTenancy, domain, invitation, and subscription-mapping helper families stay unpublished.
-      - "The published runtime is bind-existing plus update-only: bind by `organizationId` or a unique `compartmentId` list match, update only `defaultUcmSubscriptionId`, and treat CR delete as local unbind without OCI delete."
+      - Current package scope includes Domain and Organization while OrganizationTenancy, DomainGovernance, invitation, and subscription-mapping helper families stay unpublished.
+      - "The published runtime is intentionally mixed: Domain exposes workrequest-aware create, direct-body update, and confirmed OCI delete; Organization remains bind-existing plus update-only with local unbind on CR delete."
     kindOverrides:
+      - group: tenantmanagercontrolplane
+        kind: Domain
+        summary: Manage OCI domains with workrequest-aware create behavior and confirmed OCI delete semantics.
       - group: tenantmanagercontrolplane
         kind: Organization
         summary: Manage existing OCI organizations with an update-only default subscription contract.

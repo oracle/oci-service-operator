@@ -1414,7 +1414,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	assertServiceSelection(t, services["self"], true, SelectionModeExplicit, []string{"Subscription"})
 	assertServiceSelection(t, services["servicecatalog"], true, SelectionModeExplicit, []string{"PrivateApplication", "ServiceCatalog"})
 	assertServiceSelection(t, services["streaming"], true, SelectionModeExplicit, []string{"Stream"})
-	assertServiceSelection(t, services["tenantmanagercontrolplane"], true, SelectionModeExplicit, []string{"Organization"})
+	assertServiceSelection(t, services["tenantmanagercontrolplane"], true, SelectionModeExplicit, []string{"Domain", "Organization"})
 	assertServiceSelection(t, services["usageapi"], true, SelectionModeExplicit, []string{"CustomTable", "Query", "Schedule", "UsageCarbonEmissionsQuery"})
 	assertServiceSelection(t, services["vbsinst"], true, SelectionModeExplicit, []string{"VbsInstance"})
 	assertServiceSelection(t, services["governancerulescontrolplane"], true, SelectionModeExplicit, []string{"GovernanceRule", "InclusionCriterion"})

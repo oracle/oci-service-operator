@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "tenantmanagercontrolplane",
+  "kind": "Domain",
+  "formalSlug": "domain",
+  "providerResource": "oci_tenantmanagercontrolplane_domain",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/tenantmanagercontrolplane_domain",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/tenantmanagercontrolplane_domain",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/tenantmanagercontrolplane/domain/page.html",
+  "bodySHA256": "130084be8925c286299323a8496088fb94d833c94d817f068e7ddaa6f90a6455",
+  "bodyBytes": 812,
+  "fixtureBodyPath": "7.22.0/tenantmanagercontrolplane/domain/page.html"
+}

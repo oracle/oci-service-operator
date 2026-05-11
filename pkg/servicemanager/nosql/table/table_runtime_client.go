@@ -833,6 +833,12 @@ func tableSnapshotFromResponse(response any) (*tableSnapshot, error) {
 			return nil, nil
 		}
 		return snapshotFromTable(typed.Table), nil
+	case nosqlsdk.CreateTableResponse, *nosqlsdk.CreateTableResponse:
+		return nil, nil
+	case nosqlsdk.UpdateTableResponse, *nosqlsdk.UpdateTableResponse:
+		return nil, nil
+	case nosqlsdk.ChangeTableCompartmentResponse, *nosqlsdk.ChangeTableCompartmentResponse:
+		return nil, nil
 	default:
 		return nil, fmt.Errorf("unexpected Table response type %T", response)
 	}
