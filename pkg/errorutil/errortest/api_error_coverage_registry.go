@@ -1409,6 +1409,16 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 			"RoverCluster",
 		),
 		reviewedRegistrationSet(
+			"rover",
+			"rover",
+			apiErrorCoverageDefaultVersion,
+			APIErrorCoverageFamilyGeneratedRuntimePlain,
+			deleteNotFoundGeneratedRuntime,
+			retryableConflictGeneratedRuntime,
+			"RoverNode narrows pre-create reuse to exact compartmentId plus displayName plus shape list filters with nodeType fixed to STANDALONE, only attempts reuse when spec.serialNumber is non-empty, strips provider-managed lifecycle and system-tag inputs before writes, and relies on lifecycle projection instead of service-local work-request polling.",
+			"RoverNode",
+		),
+		reviewedRegistrationSet(
 			"securityattribute",
 			"securityattribute",
 			apiErrorCoverageDefaultVersion,

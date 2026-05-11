@@ -2,7 +2,7 @@
 
 # Rover
 
-Manage OCI Rover clusters from Kubernetes.
+Manage OCI Rover clusters and nodes from Kubernetes.
 
 | Field | Value |
 | --- | --- |
@@ -16,8 +16,8 @@ Manage OCI Rover clusters from Kubernetes.
 
 ## Notes
 
-- Current package scope is intentionally limited to RoverCluster while RoverNode, RoverEntitlement, and auxiliary bundle or node workflows stay unpublished.
-- The published runtime is lifecycle-driven and workrequest-aware, but RoverCluster CRUD does not expose service-local work-request IDs and no Kubernetes Secret side effects are emitted.
+- Current package scope includes RoverCluster and RoverNode while RoverEntitlement and auxiliary bundle or node workflows stay unpublished.
+- The published runtime is lifecycle-driven and workrequest-aware, but RoverCluster and RoverNode CRUD do not expose service-local work-request IDs and no Kubernetes Secret side effects are emitted.
 - No checked-in release manifest currently lists this package; the resource scope below reflects the current repository package metadata.
 - This package is currently hidden from the Supported Resources landing page until a checked-in release manifest promotes it to the customer-visible surface.
 
@@ -26,3 +26,4 @@ Manage OCI Rover clusters from Kubernetes.
 | Resource | API Version | Summary | Guide | Sample | API Spec |
 | --- | --- | --- | --- | --- | --- |
 | `rover/RoverCluster` | `rover.oracle.com/v1beta1` | Manage OCI Rover clusters. | — | [Sample](../../samples/rover/v1beta1/rovercluster.md) | [Reference](../../api/rover/v1beta1/index.md#kind-rovercluster) |
+| `rover/RoverNode` | `rover.oracle.com/v1beta1` | Manage OCI Rover nodes. | — | [Sample](../../samples/rover/v1beta1/rovernode.md) | [Reference](../../api/rover/v1beta1/index.md#kind-rovernode) |

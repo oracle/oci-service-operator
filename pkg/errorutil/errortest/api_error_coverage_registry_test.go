@@ -14,10 +14,10 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	}
 
 	byKey := inventoryByKey(inventory)
-	if got, want := len(inventory), 359; got != want {
+	if got, want := len(inventory), 360; got != want {
 		t.Fatalf("len(inventory) = %d, want %d", got, want)
 	}
-	if got, want := countRegistrations(inventory), 234; got != want {
+	if got, want := countRegistrations(inventory), 235; got != want {
 		t.Fatalf("registration inventory count = %d, want %d", got, want)
 	}
 	if got, want := countExceptions(inventory), 125; got != want {
@@ -66,6 +66,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventorySelectionSource(t, byKey, "psa/PrivateServiceAccess", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "queue/Queue", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "rover/RoverCluster", "selection.includeKinds")
+	assertInventorySelectionSource(t, byKey, "rover/RoverNode", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "servicemanagerproxy/ServiceEnvironment", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "usageapi/Query", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "vbsinst/VbsInstance", "selection.includeKinds")
@@ -152,6 +153,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventoryException(t, byKey, "opa/WorkRequestLog", `controller.strategy="none"`)
 	assertInventoryException(t, byKey, "opensearch/WorkRequestLog", `controller.strategy="none"`)
 	assertInventoryRegistration(t, byKey, "psa/PrivateServiceAccess")
+	assertInventoryRegistration(t, byKey, "rover/RoverNode")
 	assertInventoryRegistration(t, byKey, "self/Subscription")
 	assertInventoryRegistration(t, byKey, "servicemanagerproxy/ServiceEnvironment")
 	assertInventoryRegistration(t, byKey, "usageapi/Query")
@@ -230,6 +232,7 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedFamily(t, "queue/Queue", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "redis/RedisCluster", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "rover/RoverCluster", APIErrorCoverageFamilyGeneratedRuntimePlain)
+	assertReviewedFamily(t, "rover/RoverNode", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "servicemanagerproxy/ServiceEnvironment", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "streaming/Stream", APIErrorCoverageFamilyGeneratedRuntimeFollowUp)
 	assertReviewedFamily(t, "tenantmanagercontrolplane/Organization", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)

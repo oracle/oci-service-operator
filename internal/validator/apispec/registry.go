@@ -4291,6 +4291,28 @@ var targets = []Target{
 		},
 	},
 	{
+		Name:       "RoverRoverNode",
+		SpecType:   reflect.TypeOf(roverv1beta1.RoverNodeSpec{}),
+		StatusType: reflect.TypeOf(roverv1beta1.RoverNodeStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "rover.CreateRoverNodeDetails",
+			},
+			{
+				SDKStruct: "rover.UpdateRoverNodeDetails",
+			},
+			{
+				SDKStruct: "rover.RoverNode",
+			},
+			{
+				SDKStruct: "rover.RoverNodeCollection",
+			},
+			{
+				SDKStruct: "rover.RoverNodeSummary",
+			},
+		},
+	},
+	{
 		Name:       "SchServiceConnector",
 		SpecType:   reflect.TypeOf(schv1beta1.ServiceConnectorSpec{}),
 		StatusType: reflect.TypeOf(schv1beta1.ServiceConnectorStatus{}),

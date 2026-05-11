@@ -94,7 +94,7 @@ This landing page is generated from the checked-in package and release inventory
 | [redis.oracle.com/v1beta1](redis/v1beta1/index.md) | [RedisCluster](redis/v1beta1/index.md#kind-rediscluster) | Redis (`v2.0.0-alpha`) |
 | [resourceanalytics.oracle.com/v1beta1](resourceanalytics/v1beta1/index.md) | [MonitoredRegion](resourceanalytics/v1beta1/index.md#kind-monitoredregion), [ResourceAnalyticsInstance](resourceanalytics/v1beta1/index.md#kind-resourceanalyticsinstance), [TenancyAttachment](resourceanalytics/v1beta1/index.md#kind-tenancyattachment) | - |
 | [resourcescheduler.oracle.com/v1beta1](resourcescheduler/v1beta1/index.md) | [Schedule](resourcescheduler/v1beta1/index.md#kind-schedule) | - |
-| [rover.oracle.com/v1beta1](rover/v1beta1/index.md) | [RoverCluster](rover/v1beta1/index.md#kind-rovercluster) | - |
+| [rover.oracle.com/v1beta1](rover/v1beta1/index.md) | [RoverCluster](rover/v1beta1/index.md#kind-rovercluster), [RoverNode](rover/v1beta1/index.md#kind-rovernode) | - |
 | [sch.oracle.com/v1beta1](sch/v1beta1/index.md) | [ServiceConnector](sch/v1beta1/index.md#kind-serviceconnector) | - |
 | [securityattribute.oracle.com/v1beta1](securityattribute/v1beta1/index.md) | [SecurityAttribute](securityattribute/v1beta1/index.md#kind-securityattribute), [SecurityAttributeNamespace](securityattribute/v1beta1/index.md#kind-securityattributenamespace) | - |
 | [self.oracle.com/v1beta1](self/v1beta1/index.md) | [Subscription](self/v1beta1/index.md#kind-subscription) | - |

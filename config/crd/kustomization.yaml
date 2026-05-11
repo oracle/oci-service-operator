@@ -208,6 +208,7 @@ resources:
 - bases/resourceanalytics.oracle.com_tenancyattachments.yaml
 - bases/resourcescheduler.oracle.com_schedules.yaml
 - bases/rover.oracle.com_roverclusters.yaml
+- bases/rover.oracle.com_rovernodes.yaml
 - bases/sch.oracle.com_serviceconnectors.yaml
 - bases/securityattribute.oracle.com_securityattributenamespaces.yaml
 - bases/securityattribute.oracle.com_securityattributes.yaml

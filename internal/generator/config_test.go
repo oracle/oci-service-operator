@@ -1437,7 +1437,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	assertServiceSelection(t, services["recovery"], true, SelectionModeExplicit, []string{"ProtectedDatabase", "ProtectionPolicy", "RecoveryServiceSubnet"})
 	assertServiceSelection(t, services["resourceanalytics"], true, SelectionModeExplicit, []string{"MonitoredRegion", "ResourceAnalyticsInstance", "TenancyAttachment"})
 	assertServiceSelection(t, services["resourcescheduler"], true, SelectionModeExplicit, []string{"Schedule"})
-	assertServiceSelection(t, services["rover"], true, SelectionModeExplicit, []string{"RoverCluster"})
+	assertServiceSelection(t, services["rover"], true, SelectionModeExplicit, []string{"RoverCluster", "RoverNode"})
 	assertServiceSelection(t, services["securityattribute"], true, SelectionModeExplicit, []string{"SecurityAttribute", "SecurityAttributeNamespace"})
 	assertServiceSelection(t, services["stackmonitoring"], true, SelectionModeExplicit, []string{"AlarmCondition", "BaselineableMetric", "Config", "DiscoveryJob", "MaintenanceWindow", "MetricExtension", "MonitoredResource", "MonitoredResourceType", "MonitoringTemplate", "ProcessSet"})
 	assertServiceSelection(t, services["waa"], true, SelectionModeExplicit, []string{"WebAppAcceleration", "WebAppAccelerationPolicy"})

@@ -1164,10 +1164,15 @@ var seedTargets = []Target{
 
 	// Rover CRD support
 	newTarget("rover", "CreateRoverClusterDetails", reflect.TypeOf(rover.CreateRoverClusterDetails{})),
+	newTarget("rover", "CreateRoverNodeDetails", reflect.TypeOf(rover.CreateRoverNodeDetails{})),
 	newTarget("rover", "UpdateRoverClusterDetails", reflect.TypeOf(rover.UpdateRoverClusterDetails{})),
+	newTarget("rover", "UpdateRoverNodeDetails", reflect.TypeOf(rover.UpdateRoverNodeDetails{})),
 	newTarget("rover", "RoverCluster", reflect.TypeOf(rover.RoverCluster{})),
 	newTarget("rover", "RoverClusterCollection", reflect.TypeOf(rover.RoverClusterCollection{})),
+	newTarget("rover", "RoverNode", reflect.TypeOf(rover.RoverNode{})),
+	newTarget("rover", "RoverNodeCollection", reflect.TypeOf(rover.RoverNodeCollection{})),
 	newTarget("rover", "RoverClusterSummary", reflect.TypeOf(rover.RoverClusterSummary{})),
+	newTarget("rover", "RoverNodeSummary", reflect.TypeOf(rover.RoverNodeSummary{})),
 
 	// Sch CRD support
 	newTarget("sch", "CreateServiceConnectorDetails", reflect.TypeOf(sch.CreateServiceConnectorDetails{})),

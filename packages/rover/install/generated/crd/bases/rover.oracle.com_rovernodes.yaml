@@ -1,0 +1,631 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: rovernodes.rover.oracle.com
+spec:
+  group: rover.oracle.com
+  names:
+    kind: RoverNode
+    listKind: RoverNodeList
+    plural: rovernodes
+    singular: rovernode
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the RoverNode
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the RoverNode
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: RoverNode is the Schema for the rovernodes API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: RoverNodeSpec defines the desired state of RoverNode.
+            properties:
+              certCompartmentId:
+                description: The compartmentId of the leaf certificate.
+                type: string
+              certKeyAlgorithm:
+                description: key algorithm for issuing leaf certificate.
+                type: string
+              certSignatureAlgorithm:
+                description: signature algorithm for issuing leaf certificate.
+                type: string
+              certificateAuthorityId:
+                description: The certificateAuthorityId of subordinate/intermediate
+                  certificate authority.
+                type: string
+              commonName:
+                description: The common name for the leaf certificate.
+                type: string
+              compartmentId:
+                description: The OCID of the compartment containing the RoverNode.
+                type: string
+              customerShippingAddress:
+                description: RoverNodeCustomerShippingAddress defines nested fields
+                  for RoverNode.CustomerShippingAddress.
+                properties:
+                  address1:
+                    description: Address line 1.
+                    type: string
+                  address2:
+                    description: Address line 2.
+                    type: string
+                  address3:
+                    description: Address line 3.
+                    type: string
+                  address4:
+                    description: Address line 4.
+                    type: string
+                  addressee:
+                    description: Addressee in shipping address.
+                    type: string
+                  careOf:
+                    description: CareOf for shipping address.
+                    type: string
+                  cityOrLocality:
+                    description: city or locality for shipping address.
+                    type: string
+                  country:
+                    description: country for shipping address.
+                    type: string
+                  email:
+                    description: recipient email address.
+                    type: string
+                  phoneNumber:
+                    description: recipient phone number.
+                    type: string
+                  stateOrRegion:
+                    description: state or region for shipping address.
+                    type: string
+                  zipcode:
+                    description: zipcode for shipping address.
+                    type: string
+                required:
+                - address1
+                - addressee
+                - cityOrLocality
+                - country
+                - phoneNumber
+                - stateOrRegion
+                - zipcode
+                type: object
+              dataValidationCode:
+                description: Validation code returned by data validation tool. Required
+                  for return shipping label generation if data import was requested.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  The defined tags associated with this resource, if any. Each key is predefined and scoped to namespaces.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              displayName:
+                description: A user-friendly name. Does not have to be unique, and
+                  it's changeable. Avoid entering confidential information.
+                type: string
+              enclosureType:
+                description: The type of enclosure rover nodes in this cluster are
+                  shipped in.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  The freeform tags associated with this resource, if any. Each tag is a simple key-value pair with no
+                  predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              importCompartmentId:
+                description: An OCID of a compartment where data will be imported
+                  to upon Rover node return.
+                type: string
+              importFileBucket:
+                description: Name of a bucket where files from NFS share will be imported
+                  to upon Rover node return.
+                type: string
+              isImportRequested:
+                description: The flag indicating that customer requests data to be
+                  imported to OCI upon Rover node return.
+                type: boolean
+              lifecycleState:
+                description: The current state of the RoverNode.
+                type: string
+              lifecycleStateDetails:
+                description: A property that can contain details on the lifecycle.
+                type: string
+              masterKeyId:
+                description: Customer provided master key ID to encrypt secret information.
+                  If not provided, Rover's master key will be used for encryption.
+                type: string
+              nodeWorkloads:
+                description: List of existing workloads that should be provisioned
+                  on the node.
+                items:
+                  description: RoverNodeNodeWorkload defines nested fields for RoverNode.NodeWorkload.
+                  properties:
+                    compartmentId:
+                      description: The OCID of the compartment containing the workload.
+                      type: string
+                    id:
+                      description: The Unique Oracle ID (OCID) that is immutable on
+                        creation.
+                      type: string
+                    name:
+                      description: Name of the Rover Workload
+                      type: string
+                    objectCount:
+                      description: Number of objects in a workload.
+                      type: string
+                    prefix:
+                      description: Prefix to filter objects in case it is a bucket.
+                      type: string
+                    rangeEnd:
+                      description: End of the range in a bucket.
+                      type: string
+                    rangeStart:
+                      description: Start of the range in a bucket.
+                      type: string
+                    size:
+                      description: Size of the workload.
+                      type: string
+                    workRequestId:
+                      description: The compute work request id to track progress of
+                        custom image exports.
+                      type: string
+                    workloadType:
+                      description: The type of workload
+                      type: string
+                  required:
+                  - compartmentId
+                  - id
+                  - workloadType
+                  type: object
+                type: array
+              oracleShippingTrackingUrl:
+                description: Tracking Url for the shipped FmsRoverNode.
+                type: string
+              pointOfContact:
+                description: Name of point of contact for this order if customer is
+                  picking up.
+                type: string
+              pointOfContactPhoneNumber:
+                description: Phone number of point of contact for this order if customer
+                  is picking up.
+                type: string
+              publicKey:
+                description: The public key of the resource principal
+                type: string
+              serialNumber:
+                description: Serial number of the node.
+                type: string
+              shape:
+                description: The shape of the node.
+                type: string
+              shippingPreference:
+                description: Preference for device delivery.
+                type: string
+              shippingVendor:
+                description: Shipping vendor of choice for orace to customer shipping.
+                type: string
+              superUserPassword:
+                description: Root password for the rover node.
+                type: string
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  The system tags associated with this resource, if any. The system tags are set by Oracle cloud infrastructure services. Each key is predefined and scoped to namespaces.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{orcl-cloud: {free-tier-retain: true}}`
+                type: object
+              timeCertValidityEnd:
+                description: The time after which leaf certificate will invalid.
+                type: string
+              timePickupExpected:
+                description: Expected date when customer wants to pickup the device
+                  if they chose customer pickup.
+                type: string
+              timeReturnWindowEnds:
+                description: End time for the window to pickup the device from customer.
+                type: string
+              timeReturnWindowStarts:
+                description: Start time for the window to pickup the device from customer.
+                type: string
+              unlockPassphrase:
+                description: Passphrase to unlock the rover node.
+                type: string
+            required:
+            - compartmentId
+            - displayName
+            type: object
+          status:
+            description: RoverNodeStatus defines the observed state of RoverNode.
+            properties:
+              certCompartmentId:
+                description: The compartmentId of the leaf certificate.
+                type: string
+              certKeyAlgorithm:
+                description: key algorithm for issuing leaf certificate.
+                type: string
+              certSignatureAlgorithm:
+                description: signature algorithm for issuing leaf certificate.
+                type: string
+              certificateAuthorityId:
+                description: The certificateAuthorityId of subordinate/intermediate
+                  certificate authority.
+                type: string
+              certificateId:
+                description: The id of the leaf certificate.
+                type: string
+              certificateVersionNumber:
+                description: The version number of the leaf certificate.
+                type: string
+              clusterId:
+                description: The cluster ID if the node is part of a cluster.
+                type: string
+              commonName:
+                description: The common name for the leaf certificate.
+                type: string
+              compartmentId:
+                description: The OCID of the compartment containing the RoverNode.
+                type: string
+              customerShippingAddress:
+                description: RoverNodeCustomerShippingAddress defines nested fields
+                  for RoverNode.CustomerShippingAddress.
+                properties:
+                  address1:
+                    description: Address line 1.
+                    type: string
+                  address2:
+                    description: Address line 2.
+                    type: string
+                  address3:
+                    description: Address line 3.
+                    type: string
+                  address4:
+                    description: Address line 4.
+                    type: string
+                  addressee:
+                    description: Addressee in shipping address.
+                    type: string
+                  careOf:
+                    description: CareOf for shipping address.
+                    type: string
+                  cityOrLocality:
+                    description: city or locality for shipping address.
+                    type: string
+                  country:
+                    description: country for shipping address.
+                    type: string
+                  email:
+                    description: recipient email address.
+                    type: string
+                  phoneNumber:
+                    description: recipient phone number.
+                    type: string
+                  stateOrRegion:
+                    description: state or region for shipping address.
+                    type: string
+                  zipcode:
+                    description: zipcode for shipping address.
+                    type: string
+                required:
+                - address1
+                - addressee
+                - cityOrLocality
+                - country
+                - phoneNumber
+                - stateOrRegion
+                - zipcode
+                type: object
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  The defined tags associated with this resource, if any. Each key is predefined and scoped to namespaces.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              deliveryTrackingInfo:
+                description: Tracking information for device shipping.
+                type: string
+              displayName:
+                description: A user-friendly name. Does not have to be unique, and
+                  it's changeable. Avoid entering confidential information.
+                type: string
+              enclosureType:
+                description: The type of enclosure rover node is shipped in.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  The freeform tags associated with this resource, if any. Each tag is a simple key-value pair with no
+                  predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              id:
+                description: The OCID of RoverNode.
+                type: string
+              importCompartmentId:
+                description: An OCID of a compartment where data will be imported
+                  to upon Rover node return.
+                type: string
+              importFileBucket:
+                description: Name of a bucket where files from NFS share will be imported
+                  to upon Rover node return.
+                type: string
+              isImportRequested:
+                description: The flag indicating that customer requests data to be
+                  imported to OCI upon Rover node return.
+                type: boolean
+              lifecycleState:
+                description: The current state of the RoverNode.
+                type: string
+              lifecycleStateDetails:
+                description: A property that can contain details on the lifecycle.
+                type: string
+              masterKeyId:
+                description: Customer provided master key ID to encrypt secret information.
+                  If not provided, Rover's master key will be used for encryption.
+                type: string
+              nodeType:
+                description: The type of node indicating if it belongs to a cluster
+                type: string
+              nodeWorkloads:
+                description: List of existing workloads that should be provisioned
+                  on the node.
+                items:
+                  description: RoverNodeNodeWorkload defines nested fields for RoverNode.NodeWorkload.
+                  properties:
+                    compartmentId:
+                      description: The OCID of the compartment containing the workload.
+                      type: string
+                    id:
+                      description: The Unique Oracle ID (OCID) that is immutable on
+                        creation.
+                      type: string
+                    name:
+                      description: Name of the Rover Workload
+                      type: string
+                    objectCount:
+                      description: Number of objects in a workload.
+                      type: string
+                    prefix:
+                      description: Prefix to filter objects in case it is a bucket.
+                      type: string
+                    rangeEnd:
+                      description: End of the range in a bucket.
+                      type: string
+                    rangeStart:
+                      description: Start of the range in a bucket.
+                      type: string
+                    size:
+                      description: Size of the workload.
+                      type: string
+                    workRequestId:
+                      description: The compute work request id to track progress of
+                        custom image exports.
+                      type: string
+                    workloadType:
+                      description: The type of workload
+                      type: string
+                  required:
+                  - compartmentId
+                  - id
+                  - workloadType
+                  type: object
+                type: array
+              oracleShippingTrackingUrl:
+                description: Tracking Url for the shipped RoverNode.
+                type: string
+              pointOfContact:
+                description: Name of point of contact for this order if customer is
+                  picking up.
+                type: string
+              pointOfContactPhoneNumber:
+                description: Phone number of point of contact for this order if customer
+                  is picking up.
+                type: string
+              publicKey:
+                description: The public key of the resource principal
+                type: string
+              serialNumber:
+                description: Serial number of the node.
+                type: string
+              shape:
+                description: The shape of the node.
+                type: string
+              shippingPreference:
+                description: Preference for device delivery.
+                type: string
+              shippingVendor:
+                description: Shipping vendor of choice for orace to customer shipping.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  The system tags associated with this resource, if any. The system tags are set by Oracle cloud infrastructure services. Each key is predefined and scoped to namespaces.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{orcl-cloud: {free-tier-retain: true}}`
+                type: object
+              tags:
+                description: The tags associated with tagSlug.
+                type: string
+              timeCertValidityEnd:
+                description: The time after which leaf certificate will invalid.
+                type: string
+              timeCreated:
+                description: The time the the RoverNode was created. An RFC3339 formatted
+                  datetime string
+                type: string
+              timeCustomerReceieved:
+                description: Date and time when customer received tne node.
+                type: string
+              timeCustomerReturned:
+                description: Date and time when customer returned the node.
+                type: string
+              timePickupExpected:
+                description: Expected date when customer wants to pickup the device
+                  if they chose customer pickup.
+                type: string
+              timeReturnWindowEnds:
+                description: End time for the window to pickup the device from customer.
+                type: string
+              timeReturnWindowStarts:
+                description: Start time for the window to pickup the device from customer.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

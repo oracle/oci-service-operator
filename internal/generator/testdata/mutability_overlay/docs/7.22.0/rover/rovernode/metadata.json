@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "rover",
+  "kind": "RoverNode",
+  "formalSlug": "rovernode",
+  "providerResource": "oci_rover_rover_node",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/rover_rover_node",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/rover_rover_node",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/rover/rovernode/page.html",
+  "bodySHA256": "7d9d455d761e8839a4a2497465bd8d6a9f7f8d21ad1397d981e64430de35d7dd",
+  "bodyBytes": 4085,
+  "fixtureBodyPath": "7.22.0/rover/rovernode/page.html"
+}
