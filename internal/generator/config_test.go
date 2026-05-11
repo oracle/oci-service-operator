@@ -1446,7 +1446,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	assertServiceSelection(t, services["wlms"], true, SelectionModeExplicit, []string{"WlsDomain"})
 	assertServiceSelection(t, services["visualbuilder"], true, SelectionModeExplicit, []string{"VbInstance"})
 	assertServiceSelection(t, services["vnmonitoring"], true, SelectionModeExplicit, []string{"PathAnalyzerTest"})
-	assertServiceSelection(t, services["zpr"], true, SelectionModeExplicit, []string{"ZprPolicy"})
+	assertServiceSelection(t, services["zpr"], true, SelectionModeExplicit, []string{"Configuration", "ZprPolicy"})
 	assertServiceSelection(t, services["vault"], false, SelectionModeAll, nil)
 }
 
@@ -2317,6 +2317,16 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 	}
 	if zpr.WorkRequest.LegacyFieldBridge.hasOverride() {
 		t.Fatalf("zpr ZprPolicy workRequest.legacyFieldBridge = %#v, want empty legacy bridge", zpr.WorkRequest.LegacyFieldBridge)
+	}
+	configuration := assertAsyncContract(t, services["zpr"], "Configuration", AsyncStrategyWorkRequest, AsyncRuntimeGeneratedRuntime)
+	if configuration.WorkRequest.Source != AsyncWorkRequestSourceServiceSDK {
+		t.Fatalf("zpr Configuration workRequest.source = %q, want %q", configuration.WorkRequest.Source, AsyncWorkRequestSourceServiceSDK)
+	}
+	if !slices.Equal(configuration.WorkRequest.Phases, []string{AsyncPhaseCreate}) {
+		t.Fatalf("zpr Configuration workRequest.phases = %v", configuration.WorkRequest.Phases)
+	}
+	if configuration.WorkRequest.LegacyFieldBridge.hasOverride() {
+		t.Fatalf("zpr Configuration workRequest.legacyFieldBridge = %#v, want empty legacy bridge", configuration.WorkRequest.LegacyFieldBridge)
 	}
 	if vbsinst.WorkRequest.LegacyFieldBridge.hasOverride() {
 		t.Fatalf("vbsinst VbsInstance workRequest.legacyFieldBridge = %#v, want empty legacy bridge", vbsinst.WorkRequest.LegacyFieldBridge)

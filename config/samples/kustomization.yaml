@@ -242,4 +242,5 @@ resources:
 - lustrefilestorage_v1beta1_objectstoragelink.yaml
 - rover_v1beta1_rovernode.yaml
 - mediaservices_v1beta1_mediaworkflow.yaml
+- zpr_v1beta1_configuration.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

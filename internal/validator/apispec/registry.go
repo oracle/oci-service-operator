@@ -4977,6 +4977,19 @@ var targets = []Target{
 		},
 	},
 	{
+		Name:       "ZprConfiguration",
+		SpecType:   reflect.TypeOf(zprv1beta1.ConfigurationSpec{}),
+		StatusType: reflect.TypeOf(zprv1beta1.ConfigurationStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "zpr.CreateConfigurationDetails",
+			},
+			{
+				SDKStruct: "zpr.Configuration",
+			},
+		},
+	},
+	{
 		Name:       "ZprZprPolicy",
 		SpecType:   reflect.TypeOf(zprv1beta1.ZprPolicySpec{}),
 		StatusType: reflect.TypeOf(zprv1beta1.ZprPolicyStatus{}),

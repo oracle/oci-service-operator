@@ -5916,6 +5916,7 @@ services:
       enabled: true
       mode: explicit
       includeKinds:
+        - Configuration
         - ZprPolicy
     generation:
       controller:
@@ -5927,6 +5928,30 @@ services:
       webhooks:
         strategy: none
       resources:
+        - kind: Configuration
+          formalSpec: configuration
+          async:
+            strategy: workrequest
+            runtime: generatedruntime
+            formalClassification: workrequest
+            workRequest:
+              source: service-sdk
+              phases:
+                - create
+          serviceManager:
+            packagePath: zpr/configuration
+          sample:
+            body: |-
+              #
+              # Replace the OCI tenancy OCID below before running e2e.
+              #
+              apiVersion: zpr.oracle.com/v1beta1
+              kind: Configuration
+              metadata:
+                name: configuration-sample
+              spec:
+                compartmentId: ocid1.tenancy.oc1..exampleuniqueID
+                zprStatus: ENABLED
         - kind: ZprPolicy
           formalSpec: zprpolicy
           async:

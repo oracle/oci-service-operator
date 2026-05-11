@@ -1443,17 +1443,17 @@
     },
     {
       "service": "zpr",
-      "specs": 1,
-      "mappings": 5,
-      "trackedMappings": 5,
+      "specs": 2,
+      "mappings": 7,
+      "trackedMappings": 7,
       "untrackedMappings": 0,
-      "presentFields": 34,
+      "presentFields": 48,
       "missingFields": 1,
-      "mandatoryPresentFields": 22,
+      "mandatoryPresentFields": 29,
       "mandatoryMissingFields": 1,
       "extraSpecFields": 2,
-      "overallCoveragePercent": 97.14285714285714,
-      "mandatoryCoveragePercent": 95.65217391304348
+      "overallCoveragePercent": 97.95918367346938,
+      "mandatoryCoveragePercent": 96.66666666666667
     }
   ]
 }

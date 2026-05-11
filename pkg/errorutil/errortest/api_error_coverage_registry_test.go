@@ -76,6 +76,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventorySelectionSource(t, byKey, "jms/Fleet", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "vnmonitoring/PathAnalyzerTest", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "wlms/WlsDomain", "selection.includeKinds")
+	assertInventorySelectionSource(t, byKey, "zpr/Configuration", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "zpr/ZprPolicy", "selection.includeKinds")
 
 	assertInventoryRegistration(t, byKey, "accessgovernancecp/GovernanceInstance")
@@ -167,6 +168,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventoryRegistration(t, byKey, "vnmonitoring/PathAnalyzerTest")
 	assertInventoryRegistration(t, byKey, "wlms/WlsDomain")
 	assertInventoryRegistration(t, byKey, "tenantmanagercontrolplane/Organization")
+	assertInventoryRegistration(t, byKey, "zpr/Configuration")
 	assertInventoryRegistration(t, byKey, "zpr/ZprPolicy")
 }
 
@@ -248,6 +250,7 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedFamily(t, "jms/Fleet", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "vnmonitoring/PathAnalyzerTest", APIErrorCoverageFamilyGeneratedRuntimeFollowUp)
 	assertReviewedFamily(t, "wlms/WlsDomain", APIErrorCoverageFamilyGeneratedRuntimePlain)
+	assertReviewedFamily(t, "zpr/Configuration", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "zpr/ZprPolicy", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 
 	assertReviewedException(t, "accessgovernancecp/GovernanceInstanceConfiguration", "strategy=none")

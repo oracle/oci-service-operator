@@ -1,0 +1,90 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title State Machine - zpr/Configuration
+skinparam state {
+  backgroundColor #f8fafc
+  borderColor #0f172a
+  fontColor #0f172a
+  startColor #1d4ed8
+  endColor #0f172a
+}
+left to right direction
+hide empty description
+state "Observe" as observe
+state "EvaluateReady" as evaluate_ready
+state "Ready" as ready
+state "Retryable" as retryable
+state "Failed" as failed
+observe : read spec, tracked status, delete intent,\nand current OCI lifecycle
+state "RejectUnsupportedDrift" as reject_unsupported_drift
+[*] --> observe : CreateConfiguration
+observe --> evaluate_ready : OCI state in ACTIVE
+observe --> retryable : OCI state in CREATING,\nUPDATING
+observe --> failed : unresolved OCI error or non-success state
+evaluate_ready --> reject_unsupported_drift : force-new or conflicting\ndrift detected
+reject_unsupported_drift --> ready : wait for spec or live state change
+evaluate_ready --> ready : no supported drift remains
+ready --> ready : no supported drift remains
+retryable --> retryable : OCI remains retryable
+failed --> failed : OCI remains terminal
+note right of ready
+shared diagram:
+shared/diagrams/shared-controller-state-machine.svg
+Start from the shared controller phase model and
+specialize imported provider states, delete
+targets, and failure exits here.
+archetype batch: Generated service-manager
+controllers map provider states into the shared
+controller phases with explicit finalizer and
+requeue policies.
+service: zpr
+slug: configuration
+kind: Configuration
+archetype: generated-service-manager
+status/finalizer: required / none
+requeue: provisioning, updating
+provider states: create CREATING; update
+UPDATING; delete none
+follow-up: create=GetZprConfigurationWorkRequest
+-> GetConfiguration; update=none; delete=none
+supported drift: none
+reject before mutate: force-new fields
+compartment_id, zpr_status, freeform_tags,
+defined_tags
+create-only fields: none
+list lookup: none
+conflicts: none
+open gaps: none
+The published Configuration contract is a
+singleton create/get surface. Reconcile binds
+and rereads through
+GetConfiguration(compartmentId) and creates only
+when that root-compartment read confirms
+absence.
+CreateConfiguration is work-request-backed. The
+runtime stores the create work request in
+status.async.current, resumes through
+GetZprConfigurationWorkRequest, recovers the
+configuration identifier from work-request
+resources, and then confirms state with
+GetConfiguration.
+No OCI update or delete operation is published.
+Drift on zprStatus or tag maps is rejected,
+compartmentId remains bind/create identity, and
+Kubernetes delete performs local finalizer
+cleanup only.
+ACTIVE settles success, CREATING and UPDATING
+requeue, FAILED remains terminal non-success,
+and observed DELETED is treated as stale
+identity or absence rather than managed delete
+progress.
+end note
+@enduml

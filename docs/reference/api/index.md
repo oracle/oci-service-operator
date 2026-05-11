@@ -111,4 +111,4 @@ This landing page is generated from the checked-in package and release inventory
 | [waas.oracle.com/v1beta1](waas/v1beta1/index.md) | [AddressList](waas/v1beta1/index.md#kind-addresslist), [Certificate](waas/v1beta1/index.md#kind-certificate), [CustomProtectionRule](waas/v1beta1/index.md#kind-customprotectionrule), [HttpRedirect](waas/v1beta1/index.md#kind-httpredirect), [WaasPolicy](waas/v1beta1/index.md#kind-waaspolicy) | - |
 | [waf.oracle.com/v1beta1](waf/v1beta1/index.md) | [NetworkAddressList](waf/v1beta1/index.md#kind-networkaddresslist), [WebAppFirewall](waf/v1beta1/index.md#kind-webappfirewall), [WebAppFirewallPolicy](waf/v1beta1/index.md#kind-webappfirewallpolicy) | - |
 | [wlms.oracle.com/v1beta1](wlms/v1beta1/index.md) | [WlsDomain](wlms/v1beta1/index.md#kind-wlsdomain) | - |
-| [zpr.oracle.com/v1beta1](zpr/v1beta1/index.md) | [ZprPolicy](zpr/v1beta1/index.md#kind-zprpolicy) | - |
+| [zpr.oracle.com/v1beta1](zpr/v1beta1/index.md) | [Configuration](zpr/v1beta1/index.md#kind-configuration), [ZprPolicy](zpr/v1beta1/index.md#kind-zprpolicy) | - |

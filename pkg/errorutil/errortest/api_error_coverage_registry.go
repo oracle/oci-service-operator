@@ -1150,6 +1150,22 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 				retryableConflictWorkRequest,
 				"Organization is bind-existing plus update-only: a handwritten wrapper validates explicit organizationId or compartmentId binding, prevents explicit-ID fallback to list adoption, paginates ListOrganizations lookup, resumes UpdateOrganization through service-local GetWorkRequest, and treats CR delete as local unbind without OCI delete helpers.",
 			),
+			resourceKey("zpr", "Configuration"): {
+				Resource: APIErrorCoverageResource{
+					Service: "zpr",
+					Group:   "zpr",
+					Version: apiErrorCoverageDefaultVersion,
+					Kind:    "Configuration",
+				},
+				Family: APIErrorCoverageFamilyGeneratedRuntimeWorkRequest,
+				SupportedOperations: []Operation{
+					OperationRead,
+					OperationCreate,
+				},
+				DeleteNotFoundSemantics:    "delete is Kubernetes-local only; the published Configuration contract does not issue OCI delete requests",
+				RetryableConflictSemantics: "update and delete conflicts are not applicable because the published Configuration contract is create/get only",
+				Deviation:                  "Configuration is a singleton create/get contract: a handwritten wrapper preflights stale tracked identity through GetConfiguration(compartmentId), clears dead tracked state before re-entering generatedruntime create, resumes create through GetZprConfigurationWorkRequest, rejects unsupported tag or zprStatus drift, and releases the Kubernetes finalizer locally without invoking nonexistent OCI delete helpers.",
+			},
 			resourceKey("zpr", "ZprPolicy"): reviewedRegistration(
 				"zpr",
 				"zpr",
