@@ -216,6 +216,8 @@ FORMAL_IMPORT_PROVIDER_REVISION ?=
 FORMAL_IMPORT_SOURCE_NAME ?= terraform-provider-oci
 FORMAL_PROVIDER_PATH ?= $(FORMAL_IMPORT_PROVIDER_PATH)
 FORMAL_PROVIDER_PATH_ARG = $(if $(strip $(FORMAL_PROVIDER_PATH)),--provider-path $(FORMAL_PROVIDER_PATH),)
+FORMAL_SCAFFOLD_BACKFILL ?=
+FORMAL_SCAFFOLD_BACKFILL_ARG = $(if $(filter 1 true TRUE yes YES,$(FORMAL_SCAFFOLD_BACKFILL)),--backfill-missing,)
 FORMAL_IMPORT_PROVIDER_REVISION_ARG = $(if $(strip $(FORMAL_IMPORT_PROVIDER_REVISION)),--provider-revision $(FORMAL_IMPORT_PROVIDER_REVISION),)
 
 schema-validator: ## Run OSOK schema validator (coverage by default, SDK upgrade diff when SCHEMA_VALIDATOR_UPGRADE_FROM/TO are set).
@@ -258,8 +260,11 @@ formal-import: ## Refresh provider-fact JSON and pin sources.lock from FORMAL_IM
 formal-verify: ## Validate the repo-local formal schema scaffold, bindings, and gap categories.
 	go run ./cmd/formal-verify --root $(FORMAL_ROOT)
 
-formal-scaffold: ## Expand scaffold-only formal entries from the published default-active API surface and optional matching terraform-provider-oci facts.
-	go run ./cmd/formal-scaffold --root $(FORMAL_ROOT) --config $(EFFECTIVE_GENERATOR_CONFIG) $(FORMAL_PROVIDER_PATH_ARG)
+formal-scaffold: ## Refresh tracked formal scaffold entries and optional explicit backfill rows from the published default-active API surface.
+	go run ./cmd/formal-scaffold --root $(FORMAL_ROOT) --config $(EFFECTIVE_GENERATOR_CONFIG) $(FORMAL_PROVIDER_PATH_ARG) $(FORMAL_SCAFFOLD_BACKFILL_ARG)
+
+formal-scaffold-backfill: ## Intentionally add new scaffold rows for published kinds missing from the checked-in formal catalog.
+	@$(MAKE) formal-scaffold FORMAL_SCAFFOLD_BACKFILL=true
 
 formal-scaffold-verify: ## Verify formal scaffold coverage for the published default-active API surface against matching terraform-provider-oci facts.
 	@test -n "$(FORMAL_PROVIDER_PATH)" || (echo "Set FORMAL_PROVIDER_PATH=/path/to/terraform-provider-oci" && exit 1)

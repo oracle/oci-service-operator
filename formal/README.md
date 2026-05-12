@@ -22,10 +22,13 @@ current seeded default-active corpus lives in `core/Drg`, `mysql/DbSystem`,
 row, and `identity/User` remains a preserved explicit-backlog promotable
 reference row.
 
-Use `make formal-scaffold` to expand scaffold-only entries from the published
-default-active API surface in `internal/generator/config/services.yaml`. That
-surface follows the generator's blank-run selection rules and honors any
-per-service selected kind subset. When
+Use `make formal-scaffold` to refresh the tracked scaffold rows and any
+explicit `formalSpec` rows from the published default-active API surface in
+`internal/generator/config/services.yaml`. That surface follows the
+generator's blank-run selection rules and honors any per-service selected kind
+subset. Set `FORMAL_SCAFFOLD_BACKFILL=true` when you intentionally want to add
+new scaffold rows for published kinds that are not already represented in the
+checked-in catalog. When
 `FORMAL_PROVIDER_PATH=/path/to/terraform-provider-oci` is set, the scaffold
 uses the pinned provider checkout only to enrich and verify those same selected
 published rows.
@@ -50,7 +53,7 @@ controller-backed promotion:
    `internal/generator/config/services.yaml`. New services start
    `packageProfile: crd-only`; add `formalSpec` at the service level or under
    `generation.resources[]` once the published kind has a matching manifest row.
-2. Run `make formal-scaffold` to create or refresh scaffold-only rows for the
+2. Run `make formal-scaffold` to refresh the tracked scaffold rows for the
    published default-active API surface, and pass
    `FORMAL_PROVIDER_PATH=/path/to/terraform-provider-oci` when matching
    provider facts for that selected surface should be refreshed. The command
@@ -67,7 +70,9 @@ controller-backed promotion:
    `formal/controllers/<service>/<slug>/diagrams/`, and
    `formal/imports/<service>/<slug>.json`. When the published active surface
    shrinks, this scaffold refresh also prunes generator-owned stale controller
-   and import artifacts that are no longer referenced by the manifest.
+   and import artifacts that are no longer referenced by the manifest. Use
+   `FORMAL_SCAFFOLD_BACKFILL=true` only when you intentionally want the command
+   to add brand-new scaffold rows for missing published kinds.
 3. Run `make formal-import FORMAL_IMPORT_PROVIDER_PATH=/path/to/terraform-provider-oci`.
    The provider path is a pinned external input; the repo does not assume a
    sibling checkout.
@@ -124,10 +129,13 @@ resources are out of scope for the checked-in scaffold.
 
 When expanding `formal/` across existing API groups:
 
-- use `make formal-scaffold` to generate scaffold rows from the resolved
-  default-active OSOK API surface and, when `FORMAL_PROVIDER_PATH` is set,
-  merge matching `terraform-provider-oci` registrations for that same selected
-  surface without copying upstream diagram artifacts;
+- use `make formal-scaffold` to refresh the tracked scaffold rows from the
+  resolved default-active OSOK API surface and, when `FORMAL_PROVIDER_PATH` is
+  set, merge matching `terraform-provider-oci` registrations for that same
+  selected surface without copying upstream diagram artifacts;
+- use `make formal-scaffold FORMAL_SCAFFOLD_BACKFILL=true` only when the change
+  intentionally expands the checked-in formal catalog with new scaffold rows
+  for previously untracked published kinds;
 - keep new rows at `stage=scaffold` with placeholder imports until repo-authored
   semantics and logic gaps are written; scaffold rows must pass
   `make formal-verify`, selected-surface coverage should pass

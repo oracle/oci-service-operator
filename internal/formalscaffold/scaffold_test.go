@@ -512,8 +512,9 @@ func TestGenerateAddsScaffoldsForPublishedKindsAndPreservesSeededRows(t *testing
 	repoRoot := writeTestRepo(t)
 
 	report, err := Generate(Options{
-		Root:       filepath.Join(repoRoot, "formal"),
-		ConfigPath: filepath.Join(repoRoot, "internal", "generator", "config", "services.yaml"),
+		Root:            filepath.Join(repoRoot, "formal"),
+		ConfigPath:      filepath.Join(repoRoot, "internal", "generator", "config", "services.yaml"),
+		BackfillMissing: true,
 	})
 	if err != nil {
 		t.Fatalf("Generate() error = %v", err)
@@ -531,6 +532,33 @@ func TestGenerateAddsScaffoldsForPublishedKindsAndPreservesSeededRows(t *testing
 	assertRenderedDiagramFamily(t, filepath.Join(repoRoot, "formal", "controllers", "identity", "networksource", "diagrams"))
 }
 
+func TestGenerateSkipsMissingPublishedKindsWithoutBackfill(t *testing.T) {
+	requirePlantUML(t)
+	repoRoot := writeTestRepo(t)
+
+	report, err := Generate(Options{
+		Root:       filepath.Join(repoRoot, "formal"),
+		ConfigPath: filepath.Join(repoRoot, "internal", "generator", "config", "services.yaml"),
+	})
+	if err != nil {
+		t.Fatalf("Generate() error = %v", err)
+	}
+	assertScaffoldReport(t, report, 1, 2, 0, 2)
+
+	catalog, err := formal.LoadCatalog(filepath.Join(repoRoot, "formal"))
+	if err != nil {
+		t.Fatalf("formal.LoadCatalog() error = %v", err)
+	}
+	assertSeededCatalogRowPreserved(t, catalog)
+	assertSharedDiagramStrategyArtifacts(t, filepath.Join(repoRoot, "formal", "shared", "diagrams"))
+	assertRenderedDiagramFamily(t, filepath.Join(repoRoot, "formal", "controllers", "identity", "user", "diagrams"))
+	if _, ok := catalog.Lookup("identity", "networksource"); ok {
+		t.Fatal("catalog.Lookup(identity, networksource) unexpectedly found untracked published kind without backfill")
+	}
+	assertPathNotExists(t, filepath.Join(repoRoot, "formal", "controllers", "identity", "networksource"))
+	assertPathNotExists(t, filepath.Join(repoRoot, "formal", "imports", "identity", "networksource.json"))
+}
+
 func TestGenerateUsesFileStemAsFormalSlug(t *testing.T) {
 	requirePlantUML(t)
 	repoRoot := t.TempDir()
@@ -539,8 +567,9 @@ func TestGenerateUsesFileStemAsFormalSlug(t *testing.T) {
 	writeTestFile(t, filepath.Join(repoRoot, "api", "psql", "v1beta1", "dbsystemdbinstance_types.go"), testDBSystemDBInstanceAPI)
 
 	report, err := Generate(Options{
-		Root:       filepath.Join(repoRoot, "formal"),
-		ConfigPath: filepath.Join(repoRoot, "internal", "generator", "config", "services.yaml"),
+		Root:            filepath.Join(repoRoot, "formal"),
+		ConfigPath:      filepath.Join(repoRoot, "internal", "generator", "config", "services.yaml"),
+		BackfillMissing: true,
 	})
 	if err != nil {
 		t.Fatalf("Generate() error = %v", err)
@@ -731,9 +760,10 @@ func TestGenerateIgnoresProviderInventoryOutsidePublishedActiveSurface(t *testin
 	providerRoot := writeScaffoldProviderFixture(t)
 
 	report, err := Generate(Options{
-		Root:         filepath.Join(repoRoot, "formal"),
-		ConfigPath:   filepath.Join(repoRoot, "internal", "generator", "config", "services.yaml"),
-		ProviderPath: providerRoot,
+		Root:            filepath.Join(repoRoot, "formal"),
+		ConfigPath:      filepath.Join(repoRoot, "internal", "generator", "config", "services.yaml"),
+		ProviderPath:    providerRoot,
+		BackfillMissing: true,
 	})
 	if err != nil {
 		t.Fatalf("Generate() error = %v", err)
@@ -942,8 +972,9 @@ func TestVerifyCoverageIgnoresProviderInventoryOutsidePublishedActiveSurface(t *
 	repoRoot := writeTestRepo(t)
 	providerRoot := writeScaffoldProviderFixture(t)
 	if _, err := Generate(Options{
-		Root:       filepath.Join(repoRoot, "formal"),
-		ConfigPath: filepath.Join(repoRoot, "internal", "generator", "config", "services.yaml"),
+		Root:            filepath.Join(repoRoot, "formal"),
+		ConfigPath:      filepath.Join(repoRoot, "internal", "generator", "config", "services.yaml"),
+		BackfillMissing: true,
 	}); err != nil {
 		t.Fatalf("Generate() preflight error = %v", err)
 	}
