@@ -8,6 +8,7 @@ package managedinstance
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -20,6 +21,8 @@ import (
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
+
+var errManagedInstanceRequiresGetBackedResponse = errors.New("ManagedInstance update assessment requires a GetManagedInstance-backed response")
 
 type managedInstanceOCIClient interface {
 	GetManagedInstance(context.Context, wlmssdk.GetManagedInstanceRequest) (wlmssdk.GetManagedInstanceResponse, error)
@@ -263,7 +266,7 @@ func managedInstanceFromResponse(currentResponse any) (wlmssdk.ManagedInstance, 
 		}
 		return *response, nil
 	}
-	return wlmssdk.ManagedInstance{}, fmt.Errorf("current ManagedInstance response does not expose a ManagedInstance body")
+	return wlmssdk.ManagedInstance{}, fmt.Errorf("%w: current ManagedInstance response does not expose a ManagedInstance body", errManagedInstanceRequiresGetBackedResponse)
 }
 
 func managedInstanceDesiredConfigurationUpdate(
@@ -371,22 +374,36 @@ func (c managedInstanceRuntimeClient) CreateOrUpdate(
 		return servicemanager.OSOKResponse{IsSuccessful: false}, err
 	}
 
-	hadTrackedIdentity := trackedManagedInstanceID(resource) != ""
+	currentTrackedManagedInstanceID := trackedManagedInstanceID(resource)
+	hadTrackedIdentity := currentTrackedManagedInstanceID != ""
 	explicitManagedInstanceID := strings.TrimSpace(resource.Spec.Id)
-	if !hadTrackedIdentity && explicitManagedInstanceID != "" {
-		if c.get == nil {
-			return servicemanager.OSOKResponse{IsSuccessful: false}, fmt.Errorf("ManagedInstance get hook is not configured")
-		}
-		if _, err := c.get(ctx, wlmssdk.GetManagedInstanceRequest{
-			ManagedInstanceId: common.String(explicitManagedInstanceID),
-		}); err != nil {
+	if explicitManagedInstanceID != "" {
+		if err := c.preflightManagedInstanceDirectBind(ctx, resource, explicitManagedInstanceID); err != nil {
 			return servicemanager.OSOKResponse{IsSuccessful: false}, err
 		}
-		resource.Status.OsokStatus.Ocid = shared.OCID(explicitManagedInstanceID)
-		resource.Status.Id = explicitManagedInstanceID
+
+		return c.delegate.CreateOrUpdate(ctx, resource, req)
 	}
 
 	response, err := c.delegate.CreateOrUpdate(ctx, resource, req)
+	if err != nil && hadTrackedIdentity && managedInstanceNeedsGetBackedRebind(resource) && errors.Is(err, errManagedInstanceRequiresGetBackedResponse) {
+		reboundManagedInstanceID := strings.TrimSpace(resource.Status.Id)
+		if reboundManagedInstanceID != "" && reboundManagedInstanceID != currentTrackedManagedInstanceID {
+			seedManagedInstanceTrackedIdentity(resource, reboundManagedInstanceID)
+			return c.delegate.CreateOrUpdate(ctx, resource, req)
+		}
+
+		clearManagedInstanceTrackedIdentity(resource)
+		response, err = c.delegate.CreateOrUpdate(ctx, resource, req)
+		if err != nil || trackedManagedInstanceID(resource) == "" {
+			return response, err
+		}
+
+		// The rebound pass can only relink through ListManagedInstances because
+		// Create=nil. Rerun immediately so mutable-drift evaluation uses a
+		// GetManagedInstance payload for the replacement binding.
+		return c.delegate.CreateOrUpdate(ctx, resource, req)
+	}
 	if err != nil || hadTrackedIdentity || explicitManagedInstanceID != "" || trackedManagedInstanceID(resource) == "" {
 		return response, err
 	}
@@ -406,6 +423,23 @@ func (c managedInstanceRuntimeClient) Delete(
 		return false, fmt.Errorf("ManagedInstance generated runtime delegate is not configured")
 	}
 	return true, nil
+}
+
+func (c managedInstanceRuntimeClient) preflightManagedInstanceDirectBind(
+	ctx context.Context,
+	resource *wlmsv1beta1.ManagedInstance,
+	managedInstanceID string,
+) error {
+	if c.get == nil {
+		return fmt.Errorf("ManagedInstance get hook is not configured")
+	}
+	if _, err := c.get(ctx, wlmssdk.GetManagedInstanceRequest{
+		ManagedInstanceId: common.String(managedInstanceID),
+	}); err != nil {
+		return err
+	}
+	seedManagedInstanceTrackedIdentity(resource, managedInstanceID)
+	return nil
 }
 
 func validateManagedInstanceBinding(resource *wlmsv1beta1.ManagedInstance) error {
@@ -432,4 +466,24 @@ func trackedManagedInstanceID(resource *wlmsv1beta1.ManagedInstance) string {
 		return id
 	}
 	return strings.TrimSpace(resource.Status.Id)
+}
+
+func managedInstanceNeedsGetBackedRebind(resource *wlmsv1beta1.ManagedInstance) bool {
+	return resource != nil && len(resource.Spec.Configuration) > 0
+}
+
+func seedManagedInstanceTrackedIdentity(resource *wlmsv1beta1.ManagedInstance, managedInstanceID string) {
+	if resource == nil {
+		return
+	}
+	resource.Status.OsokStatus.Ocid = shared.OCID(strings.TrimSpace(managedInstanceID))
+	resource.Status.Id = strings.TrimSpace(managedInstanceID)
+}
+
+func clearManagedInstanceTrackedIdentity(resource *wlmsv1beta1.ManagedInstance) {
+	if resource == nil {
+		return
+	}
+	resource.Status.OsokStatus.Ocid = ""
+	resource.Status.Id = ""
 }

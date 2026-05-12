@@ -217,6 +217,110 @@ func TestManagedInstanceCreateOrUpdateBindsExistingManagedInstanceByPagedList(t 
 	}
 }
 
+func TestManagedInstanceCreateOrUpdateClearsStaleTrackedIDBeforeListRebindUpdate(t *testing.T) {
+	t.Parallel()
+
+	resource := trackedManagedInstanceResource()
+	resource.Spec.Id = ""
+	resource.Spec.Configuration = map[string]shared.JSONValue{
+		"discoveryInterval": jsonValue("0"),
+		"domainSearchPaths": jsonValue("[]"),
+	}
+	resource.Status.Id = testOtherManagedInstanceID
+	resource.Status.OsokStatus.Ocid = shared.OCID(testOtherManagedInstanceID)
+
+	updateApplied := false
+	fake := &fakeManagedInstanceOCIClient{
+		getFn: func(_ context.Context, req wlmssdk.GetManagedInstanceRequest) (wlmssdk.GetManagedInstanceResponse, error) {
+			switch managedInstanceID := stringPtrValue(req.ManagedInstanceId); managedInstanceID {
+			case testOtherManagedInstanceID:
+				return wlmssdk.GetManagedInstanceResponse{}, stubServiceError{statusCode: 404, code: "NotFound"}
+			case testManagedInstanceID:
+				if updateApplied {
+					return wlmssdk.GetManagedInstanceResponse{
+						ManagedInstance: activeManagedInstanceWithConfigSDK(testManagedInstanceID, 0, []string{}),
+					}, nil
+				}
+				return wlmssdk.GetManagedInstanceResponse{
+					ManagedInstance: activeManagedInstanceWithConfigSDK(
+						testManagedInstanceID,
+						6,
+						[]string{"/u01/oracle/old"},
+					),
+				}, nil
+			default:
+				t.Fatalf("unexpected GetManagedInstanceRequest.ManagedInstanceId %q", managedInstanceID)
+				return wlmssdk.GetManagedInstanceResponse{}, nil
+			}
+		},
+		listFn: func(_ context.Context, req wlmssdk.ListManagedInstancesRequest) (wlmssdk.ListManagedInstancesResponse, error) {
+			requireStringPtr(t, "ListManagedInstancesRequest.CompartmentId", req.CompartmentId, testManagedInstanceCompartment)
+			requireStringPtr(t, "ListManagedInstancesRequest.DisplayName", req.DisplayName, testManagedInstanceName)
+			if req.Id != nil {
+				t.Fatalf("ListManagedInstancesRequest.Id = %#v, want nil after stale tracked identity clear", req.Id)
+			}
+			if got := string(req.PluginStatus); got != resource.Spec.PluginStatus {
+				t.Fatalf("ListManagedInstancesRequest.PluginStatus = %q, want %q", got, resource.Spec.PluginStatus)
+			}
+			return wlmssdk.ListManagedInstancesResponse{
+				ManagedInstanceCollection: wlmssdk.ManagedInstanceCollection{
+					Items: []wlmssdk.ManagedInstanceSummary{
+						managedInstanceSummary(testManagedInstanceID, testManagedInstanceName, resource.Spec.PluginStatus),
+					},
+				},
+			}, nil
+		},
+		updateFn: func(_ context.Context, req wlmssdk.UpdateManagedInstanceRequest) (wlmssdk.UpdateManagedInstanceResponse, error) {
+			requireStringPtr(t, "UpdateManagedInstanceRequest.ManagedInstanceId", req.ManagedInstanceId, testManagedInstanceID)
+			if req.Configuration == nil {
+				t.Fatal("UpdateManagedInstanceRequest.Configuration = nil, want explicit configuration update after stale tracked-ID rebind")
+			}
+			if req.Configuration.DiscoveryInterval == nil || *req.Configuration.DiscoveryInterval != 0 {
+				t.Fatalf("Configuration.DiscoveryInterval = %#v, want 0", req.Configuration.DiscoveryInterval)
+			}
+			if req.Configuration.DomainSearchPaths == nil || len(req.Configuration.DomainSearchPaths) != 0 {
+				t.Fatalf("Configuration.DomainSearchPaths = %#v, want explicit empty slice", req.Configuration.DomainSearchPaths)
+			}
+			updateApplied = true
+			return wlmssdk.UpdateManagedInstanceResponse{
+				ManagedInstance: activeManagedInstanceWithConfigSDK(testManagedInstanceID, 0, []string{}),
+				OpcRequestId:    common.String("opc-update"),
+			}, nil
+		},
+	}
+
+	response, err := newTestManagedInstanceClient(fake).CreateOrUpdate(context.Background(), resource, requestForManagedInstance(resource))
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful || !response.ShouldRequeue {
+		t.Fatalf("CreateOrUpdate() response = %#v, want bounded confirmation requeue after stale tracked-ID rebind update", response)
+	}
+	if len(fake.getRequests) != 2 {
+		t.Fatalf("Get calls = %d, want stale tracked-ID preflight plus live Get on rebound resource", len(fake.getRequests))
+	}
+	requireStringPtr(t, "first GetManagedInstanceRequest.ManagedInstanceId", fake.getRequests[0].ManagedInstanceId, testOtherManagedInstanceID)
+	requireStringPtr(t, "second GetManagedInstanceRequest.ManagedInstanceId", fake.getRequests[1].ManagedInstanceId, testManagedInstanceID)
+	if len(fake.listRequests) != 1 {
+		t.Fatalf("List calls = %d, want 1 rebind lookup after stale tracked-ID clear", len(fake.listRequests))
+	}
+	if len(fake.updateRequests) != 1 {
+		t.Fatalf("Update calls = %d, want 1 update after rebound GetManagedInstance", len(fake.updateRequests))
+	}
+	if got := string(resource.Status.OsokStatus.Ocid); got != testManagedInstanceID {
+		t.Fatalf("status.ocid = %q, want rebound id %q", got, testManagedInstanceID)
+	}
+	if got := resource.Status.Id; got != testManagedInstanceID {
+		t.Fatalf("status.id = %q, want rebound id %q", got, testManagedInstanceID)
+	}
+	if resource.Status.Configuration.DiscoveryInterval != 0 {
+		t.Fatalf("status.configuration.discoveryInterval = %d, want 0 after rebound update", resource.Status.Configuration.DiscoveryInterval)
+	}
+	if len(resource.Status.Configuration.DomainSearchPaths) != 0 {
+		t.Fatalf("status.configuration.domainSearchPaths = %#v, want empty after rebound update", resource.Status.Configuration.DomainSearchPaths)
+	}
+}
+
 func TestManagedInstanceCreateOrUpdateUsesBoundedConfirmationPassForUpdate(t *testing.T) {
 	t.Parallel()
 
