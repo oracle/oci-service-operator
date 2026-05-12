@@ -1,0 +1,17 @@
+#
+# Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+#
+
+#
+# MacDevice is bind-existing and terminate-only in this rollout.
+# Provide the owning MacOrder OCID plus the existing MacDevice UUID.
+# Kubernetes delete maps to TerminateMacDevice.
+#
+apiVersion: mngdmac.oracle.com/v1beta1
+kind: MacDevice
+metadata:
+  name: macdevice-sample
+spec:
+  macOrderId: ocid1.macorder.oc1..exampleuniqueID
+  macDeviceId: example-mac-device-uuid

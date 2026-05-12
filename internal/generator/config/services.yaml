@@ -1779,6 +1779,7 @@ services:
       mode: explicit
       includeKinds:
         - Connection
+        - Assessment
     observedState:
       excludedFieldPaths:
         Connection:
@@ -1839,6 +1840,46 @@ services:
                 nsgIds:
                   - ocid1.networksecuritygroup.oc1..exampleuniqueID
                 description: Sample Database Migration MySQL source connection
+                freeformTags:
+                  managed-by: oci-service-operator
+        - kind: Assessment
+          formalSpec: assessment
+          async:
+            strategy: workrequest
+            runtime: generatedruntime
+            formalClassification: workrequest
+            workRequest:
+              source: service-sdk
+              phases:
+                - create
+                - update
+                - delete
+          sample:
+            body: |-
+              #
+              # Replace the Assessment input OCIDs below before running e2e.
+              # Update metadata.name or spec.displayName if you want to force a fresh create instead of
+              # binding to an existing Assessment with the same compartment, displayName, and
+              # databaseCombination.
+              #
+              apiVersion: databasemigration.oracle.com/v1beta1
+              kind: Assessment
+              metadata:
+                name: assessment-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                displayName: mysql-assessment
+                databaseCombination: MYSQL
+                sourceDatabaseConnection:
+                  id: ocid1.connection.oc1..exampleuniqueID
+                targetDatabaseConnection:
+                  id: ocid1.connection.oc1..exampletargetID
+                networkSpeedMegabitPerSecond: MBPS_100
+                acceptableDowntime: LESS_THAN_1_HOUR
+                databaseDataSize: GB_10_50
+                ddlExpectation: DDL_NOT_EXPECTED
+                creationType: CREATE_ONLY
+                description: Sample Database Migration assessment
                 freeformTags:
                   managed-by: oci-service-operator
 
@@ -2080,6 +2121,7 @@ services:
       mode: explicit
       includeKinds:
         - DashboardGroup
+        - Dashboard
     generation:
       controller:
         strategy: generated
@@ -2097,10 +2139,19 @@ services:
             runtime: generatedruntime
             formalClassification: lifecycle
         - kind: Dashboard
-          controller:
-            strategy: none
-          serviceManager:
-            strategy: none
+          formalSpec: dashboard
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+          specFields:
+            - name: JsonData
+              type: string
+              tag: 'json:"-"'
+          statusFields:
+            - name: JsonData
+              type: string
+              tag: 'json:"-"'
 
   - service: delegateaccesscontrol
     sdkPackage: github.com/oracle/oci-go-sdk/v65/delegateaccesscontrol
@@ -3439,6 +3490,7 @@ services:
       mode: explicit
       includeKinds:
         - MacOrder
+        - MacDevice
     generation:
       controller:
         strategy: generated
@@ -3483,6 +3535,49 @@ services:
                 commitmentTerm: YEARS_3
           serviceManager:
             packagePath: mngdmac/macorder
+        - kind: MacDevice
+          formalSpec: macdevice
+          async:
+            strategy: workrequest
+            runtime: generatedruntime
+            formalClassification: workrequest
+            workRequest:
+              source: service-sdk
+              phases:
+                - delete
+          serviceManager:
+            packagePath: mngdmac/macdevice
+          specFields:
+            - name: MacOrderId
+              type: string
+              tag: 'json:"macOrderId"'
+              comments:
+                - The OCID of the MacOrder that owns the existing MacDevice.
+                - Required for GetMacDevice, ListMacDevices, and TerminateMacDevice requests.
+              markers:
+                - +kubebuilder:validation:Required
+            - name: MacDeviceId
+              type: string
+              tag: 'json:"macDeviceId"'
+              comments:
+                - The UUID of the existing MacDevice to bind and manage.
+                - Required for direct get and terminate requests; delete confirmation also reuses it for exact list checks.
+              markers:
+                - +kubebuilder:validation:Required
+          sample:
+            body: |-
+              #
+              # MacDevice is bind-existing and terminate-only in this rollout.
+              # Provide the owning MacOrder OCID plus the existing MacDevice UUID.
+              # Kubernetes delete maps to TerminateMacDevice.
+              #
+              apiVersion: mngdmac.oracle.com/v1beta1
+              kind: MacDevice
+              metadata:
+                name: macdevice-sample
+              spec:
+                macOrderId: ocid1.macorder.oc1..exampleuniqueID
+                macDeviceId: example-mac-device-uuid
     observedState:
       sdkAliases:
         WorkRequestLog:
@@ -4673,9 +4768,12 @@ services:
       enabled: true
       mode: explicit
       includeKinds:
+        - Domain
         - Organization
     observedState:
       excludedFieldPaths:
+        Domain:
+          - SystemTags
         Organization:
           - SystemTags
     generation:
@@ -4688,6 +4786,71 @@ services:
       webhooks:
         strategy: none
       resources:
+        - kind: Domain
+          formalSpec: domain
+          async:
+            strategy: workrequest
+            runtime: generatedruntime
+            formalClassification: workrequest
+            workRequest:
+              source: service-sdk
+              phases:
+                - create
+          serviceManager:
+            packagePath: tenantmanagercontrolplane/domain
+          specFields:
+            - name: Status
+              type: string
+              tag: 'json:"status,omitempty"'
+              comments:
+                - Optional exact-match filter used to narrow list-based binding and delete confirmation reads.
+                - Supported values include `PENDING`, `RELEASING`, `RELEASED`, `EXPIRING`, `REVOKING`, `REVOKED`, `ACTIVE`, and `FAILED`.
+              markers:
+                - +kubebuilder:validation:Optional
+            - name: LifecycleState
+              type: string
+              tag: 'json:"lifecycleState,omitempty"'
+              comments:
+                - Optional exact-match filter used to narrow list-based binding and delete confirmation reads.
+                - Supported values include `CREATING`, `ACTIVE`, `INACTIVE`, `UPDATING`, `FAILED`, and `TERMINATED`.
+              markers:
+                - +kubebuilder:validation:Optional
+          statusFields:
+            - name: CompartmentId
+              type: string
+              tag: 'json:"compartmentId,omitempty"'
+              comments:
+                - The tenancy OCID recorded for list identity matching and replacement-only drift checks.
+            - name: Status
+              type: string
+              tag: 'json:"sdkStatus,omitempty"'
+              comments:
+                - The raw domain status returned by Tenant Manager Control Plane.
+            - name: SubscriptionEmail
+              type: string
+              tag: 'json:"subscriptionEmail,omitempty"'
+              comments:
+                - The accepted subscription email tracked from the spec because the SDK does not echo it on reads.
+            - name: IsGovernanceEnabled
+              type: bool
+              tag: 'json:"isGovernanceEnabled,omitempty"'
+              comments:
+                - Whether governance was requested for the bound domain; tracked from the spec because the SDK does not echo it on reads.
+          sample:
+            body: |-
+              #
+              # Replace the compartment OCID and domain name below before running e2e.
+              # `spec.domainName` is the OCI identity surface; metadata.name is only the Kubernetes object name.
+              #
+              apiVersion: tenantmanagercontrolplane.oracle.com/v1beta1
+              kind: Domain
+              metadata:
+                name: domain-sample
+              spec:
+                compartmentId: ocid1.tenancy.oc1..exampleuniqueID
+                domainName: example.com
+                subscriptionEmail: admin@example.com
+                isGovernanceEnabled: false
         - kind: Organization
           formalSpec: organization
           async:

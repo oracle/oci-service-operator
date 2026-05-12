@@ -33,7 +33,7 @@ func (c ServiceClient[T]) applySuccessWithIdentityAndRequeue(
 	identity any,
 	preferredRequeueDuration time.Duration,
 ) (servicemanager.OSOKResponse, error) {
-	if err := mergeResponseIntoStatus(resource, response); err != nil {
+	if err := c.projectStatusWithHooks(resource, response); err != nil {
 		return servicemanager.OSOKResponse{IsSuccessful: false}, err
 	}
 	stampSecretSourceStatus(resource)

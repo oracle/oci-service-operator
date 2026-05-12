@@ -1,0 +1,53 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: dashboardservice
+slug: dashboard
+kind: Dashboard
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending:
+      - CREATING
+    updatePending:
+      - UPDATING
+    deletePending:
+      - DELETING
+  listLookup:
+    filters:
+      - dashboardGroupId
+      - displayName
+    matchRule: exact dashboardGroupId plus displayName unique match in ACTIVE, CREATING, or UPDATING; empty displayName skips lookup and duplicate matches fail
+  mutation:
+    mutable:
+      - config
+      - definedTags
+      - description
+      - displayName
+      - freeformTags
+      - widgets
+    forceNew:
+      - dashboardGroupId
+      - schemaVersion
+      - systemTags
+  hooks:
+    create:
+      - helper: tfresource.CreateResource
+    update:
+      - helper: tfresource.UpdateResource
+    delete:
+      - helper: tfresource.DeleteResource
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - Reviewed lifecycle mapping treats CREATING as provisioning, UPDATING as updating, ACTIVE as success, and DELETING as terminating; FAILED is terminal and DELETED or NotFound are delete-confirmation targets.
+  - Existing-before-create lookup runs only when both dashboardGroupId and displayName are present, then scopes ListDashboards by exact dashboardGroupId plus displayName and reuses only a unique candidate in ACTIVE, CREATING, or UPDATING.
+  - The published runtime dispatches polymorphic create and update bodies by schemaVersion, currently supports only V1, defaults an omitted schemaVersion to V1, and rejects unsupported schema versions before OCI mutation.
+  - Only displayName, description, freeformTags, definedTags, config, and widgets reconcile in place. dashboardGroupId moves via ChangeDashboardGroup remain out of scope, and schemaVersion plus systemTags remain replacement-only drift. Empty-string displayName or description values and null config values are treated as omission until the spec can distinguish clear from omit.
+  - Create, get, and update return the Dashboard body polymorphically, list returns DashboardSummary items only, delete returns headers only, and the Dashboards home-region caveat remains explicit in the published runtime contract.

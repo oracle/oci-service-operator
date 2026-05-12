@@ -501,6 +501,16 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 				retryableConflictGeneratedRuntime,
 				"Initial DatabaseToolsConnection rollout keeps plain generatedruntime CRUD and lifecycle rereads even though the service also exposes endpoint services, private endpoints, work-request identifiers, and connection validation helpers.",
 			),
+			resourceKey("databasemigration", "Assessment"): reviewedRegistration(
+				"databasemigration",
+				"databasemigration",
+				apiErrorCoverageDefaultVersion,
+				"Assessment",
+				APIErrorCoverageFamilyGeneratedRuntimeWorkRequest,
+				deleteNotFoundReadback,
+				retryableConflictWorkRequest,
+				"Assessment runtime persists create, update, and delete work-request OCIDs in shared async status, recovers Assessment identity from work-request resources, requires explicit databaseCombination to build concrete MYSQL versus ORACLE request bodies, and rereads GetAssessment after work-request completion before projecting status.",
+			),
 			resourceKey("databasemigration", "Connection"): reviewedRegistration(
 				"databasemigration",
 				"databasemigration",
@@ -530,6 +540,16 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 				deleteNotFoundGeneratedRuntime,
 				retryableConflictGeneratedRuntime,
 				"DashboardGroup keeps generatedruntime CRUD and lifecycle rereads, while a small handwritten seam skips unsafe pre-create reuse when displayName is empty, preserves explicit empty-map clears for tag maps, and treats empty-string displayName/description values as omission until the spec can distinguish clear from omit.",
+			),
+			resourceKey("dashboardservice", "Dashboard"): reviewedRegistration(
+				"dashboardservice",
+				"dashboardservice",
+				apiErrorCoverageDefaultVersion,
+				"Dashboard",
+				APIErrorCoverageFamilyGeneratedRuntimePlain,
+				deleteNotFoundGeneratedRuntime,
+				retryableConflictGeneratedRuntime,
+				"Dashboard keeps generatedruntime CRUD and lifecycle rereads, while a handwritten seam dispatches polymorphic V1 create/update bodies by schemaVersion, scopes existing-before-create reuse to exact dashboardGroupId plus displayName, preserves explicit empty-list widget clears plus empty-map tag clears, and treats empty-string or null clears as omission until the spec can distinguish clear from omit.",
 			),
 			resourceKey("delegateaccesscontrol", "DelegationControl"): reviewedRegistration(
 				"delegateaccesscontrol",
@@ -1051,6 +1071,16 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 			"Publication",
 		),
 		map[string]APIErrorCoverageRegistration{
+			resourceKey("mngdmac", "MacDevice"): reviewedRegistration(
+				"mngdmac",
+				"mngdmac",
+				apiErrorCoverageDefaultVersion,
+				"MacDevice",
+				APIErrorCoverageFamilyGeneratedRuntimeWorkRequest,
+				deleteNotFoundReadback,
+				retryableConflictWorkRequest,
+				"MacDevice is bind-existing and terminate-only: CreateOrUpdate rereads GetMacDevice and ListMacDevices against explicit macOrderId plus macDeviceId, and delete sends TerminateMacDevice then confirms DELETED or NotFound through the returned work request before releasing the finalizer.",
+			),
 			resourceKey("mngdmac", "MacOrder"): reviewedRegistration(
 				"mngdmac",
 				"mngdmac",
@@ -1159,6 +1189,16 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 				deleteNotFoundManualRuntime,
 				retryableConflictWorkRequest,
 				"Organization is bind-existing plus update-only: a handwritten wrapper validates explicit organizationId or compartmentId binding, prevents explicit-ID fallback to list adoption, paginates ListOrganizations lookup, resumes UpdateOrganization through service-local GetWorkRequest, and treats CR delete as local unbind without OCI delete helpers.",
+			),
+			resourceKey("tenantmanagercontrolplane", "Domain"): reviewedRegistration(
+				"tenantmanagercontrolplane",
+				"tenantmanagercontrolplane",
+				apiErrorCoverageDefaultVersion,
+				"Domain",
+				APIErrorCoverageFamilyGeneratedRuntimeWorkRequest,
+				deleteNotFoundGeneratedRuntime,
+				retryableConflictWorkRequest,
+				"Domain is full CRUD with mixed completion paths: create resumes through service-local GetWorkRequest, direct-body update projects the returned Domain without a follow-up read, and delete holds the finalizer until generatedruntime confirm-delete reads observe DELETED or not found.",
 			),
 			resourceKey("zpr", "Configuration"): {
 				Resource: APIErrorCoverageResource{
@@ -2302,13 +2342,6 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 			"datascience",
 			apiErrorCoverageDefaultVersion,
 			"WorkRequestLog",
-			"`services.yaml` keeps this subresource out of the active controller-backed surface with controller.strategy=none and serviceManager.strategy=none.",
-		),
-		resourceKey("dashboardservice", "Dashboard"): reviewedException(
-			"dashboardservice",
-			"dashboardservice",
-			apiErrorCoverageDefaultVersion,
-			"Dashboard",
 			"`services.yaml` keeps this subresource out of the active controller-backed surface with controller.strategy=none and serviceManager.strategy=none.",
 		),
 		resourceKey("keymanagement", "Key"): reviewedException(

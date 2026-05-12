@@ -27,9 +27,10 @@ const manifestHeader = "service\tslug\tkind\tstage\tsurface\timport\tspec\tlogic
 
 // Options controls formal scaffold expansion.
 type Options struct {
-	Root         string
-	ConfigPath   string
-	ProviderPath string
+	Root            string
+	ConfigPath      string
+	ProviderPath    string
+	BackfillMissing bool
 }
 
 // Report summarizes scaffold generation.
@@ -64,12 +65,13 @@ func (r Report) String() string {
 }
 
 type inventoryEntry struct {
-	Service          string
-	Group            string
-	Version          string
-	Slug             string
-	Kind             string
-	ProviderResource string
+	Service            string
+	Group              string
+	Version            string
+	Slug               string
+	Kind               string
+	ProviderResource   string
+	ExplicitFormalSpec bool
 }
 
 type scaffoldArtifacts struct {
@@ -87,7 +89,10 @@ type generateInputs struct {
 	Template   formal.ControllerBinding
 }
 
-// Generate expands the repo-local formal scaffold to cover every published API kind.
+// Generate refreshes the repo-local formal scaffold for the published API kinds
+// already tracked in the checked-in catalog plus any explicit formalSpec rows.
+// Set BackfillMissing to intentionally add new scaffold rows for other
+// published kinds that are not yet represented in the catalog.
 func Generate(opts Options) (Report, error) {
 	report, err := initializeGenerateReport(opts)
 	if err != nil {
@@ -106,7 +111,7 @@ func Generate(opts Options) (Report, error) {
 		return report, err
 	}
 
-	rows, err := buildManifestRows(inputs.Root, inputs.Config, inputs.Catalog, entries, &report)
+	rows, err := buildManifestRows(inputs.Root, inputs.Config, inputs.Catalog, entries, opts.BackfillMissing, &report)
 	if err != nil {
 		return report, err
 	}
@@ -205,7 +210,7 @@ func indexInventoryEntries(entries []inventoryEntry) map[string]inventoryEntry {
 	return index
 }
 
-func buildManifestRows(formalRoot string, cfg *generator.Config, catalog *formal.Catalog, entries []inventoryEntry, report *Report) ([]formal.ManifestRow, error) {
+func buildManifestRows(formalRoot string, cfg *generator.Config, catalog *formal.Catalog, entries []inventoryEntry, backfillMissing bool, report *Report) ([]formal.ManifestRow, error) {
 	existingBindings, rowByKey := seedManifestRows(cfg, catalog)
 	recreatedRows, err := addConfiguredFormalSpecRows(formalRoot, cfg, rowByKey)
 	if err != nil {
@@ -214,7 +219,7 @@ func buildManifestRows(formalRoot string, cfg *generator.Config, catalog *formal
 	report.NewRows += recreatedRows
 
 	for _, entry := range entries {
-		if err := mergeDiscoveredManifestRow(entry, existingBindings, rowByKey, report); err != nil {
+		if err := mergeDiscoveredManifestRow(entry, existingBindings, rowByKey, backfillMissing, report); err != nil {
 			return nil, err
 		}
 	}
@@ -240,7 +245,7 @@ func seedManifestRows(cfg *generator.Config, catalog *formal.Catalog) (map[strin
 	return existingBindings, rowByKey
 }
 
-func mergeDiscoveredManifestRow(entry inventoryEntry, existingBindings map[string]formal.ControllerBinding, rowByKey map[string]formal.ManifestRow, report *Report) error {
+func mergeDiscoveredManifestRow(entry inventoryEntry, existingBindings map[string]formal.ControllerBinding, rowByKey map[string]formal.ManifestRow, backfillMissing bool, report *Report) error {
 	key := rowKey(entry.Service, entry.Slug)
 	if binding, ok := existingBindings[key]; ok {
 		if err := ensureManifestKindMatch(entry, binding.Manifest.Kind); err != nil {
@@ -252,6 +257,9 @@ func mergeDiscoveredManifestRow(entry inventoryEntry, existingBindings map[strin
 	}
 	if row, ok := rowByKey[key]; ok {
 		return ensureManifestKindMatch(entry, row.Kind)
+	}
+	if !backfillMissing && !entry.ExplicitFormalSpec {
+		return nil
 	}
 
 	rowByKey[key] = scaffoldManifestRow(entry)
@@ -397,6 +405,7 @@ func publishedInventoryEntry(apiDir string, service generator.ServiceConfig, ver
 	}
 
 	slug := strings.TrimSpace(service.FormalSpecFor(kind))
+	explicitFormalSpec := slug != ""
 	if slug == "" {
 		slug = strings.TrimSuffix(dirEntry.Name(), "_types.go")
 	}
@@ -407,11 +416,12 @@ func publishedInventoryEntry(apiDir string, service generator.ServiceConfig, ver
 	seen[key] = path
 
 	return inventoryEntry{
-		Service: service.Service,
-		Group:   service.Group,
-		Version: version,
-		Slug:    slug,
-		Kind:    kind,
+		Service:            service.Service,
+		Group:              service.Group,
+		Version:            version,
+		Slug:               slug,
+		Kind:               kind,
+		ExplicitFormalSpec: explicitFormalSpec,
 	}, true, nil
 }
 

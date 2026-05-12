@@ -655,11 +655,14 @@ var seedTargets = []Target{
 	// Dashboardservice CRD support
 	newTarget("dashboardservice", "CreateDashboardGroupDetails", reflect.TypeOf(dashboardservice.CreateDashboardGroupDetails{})),
 	newTarget("dashboardservice", "UpdateDashboardGroupDetails", reflect.TypeOf(dashboardservice.UpdateDashboardGroupDetails{})),
+	newTarget("dashboardservice", "DashboardCollection", reflect.TypeOf(dashboardservice.DashboardCollection{})),
 	newTarget("dashboardservice", "DashboardGroup", reflect.TypeOf(dashboardservice.DashboardGroup{})),
 	newTarget("dashboardservice", "DashboardGroupCollection", reflect.TypeOf(dashboardservice.DashboardGroupCollection{})),
 	newTarget("dashboardservice", "DashboardGroupSummary", reflect.TypeOf(dashboardservice.DashboardGroupSummary{})),
+	newTarget("dashboardservice", "DashboardSummary", reflect.TypeOf(dashboardservice.DashboardSummary{})),
 
 	// Databasemigration CRD support
+	newTarget("databasemigration", "AssessmentCollection", reflect.TypeOf(databasemigration.AssessmentCollection{})),
 	newTarget("databasemigration", "ConnectionCollection", reflect.TypeOf(databasemigration.ConnectionCollection{})),
 
 	// Databasetools CRD support
@@ -991,8 +994,11 @@ var seedTargets = []Target{
 	// Mngdmac CRD support
 	newTarget("mngdmac", "CreateMacOrderDetails", reflect.TypeOf(mngdmac.CreateMacOrderDetails{})),
 	newTarget("mngdmac", "UpdateMacOrderDetails", reflect.TypeOf(mngdmac.UpdateMacOrderDetails{})),
+	newTarget("mngdmac", "MacDevice", reflect.TypeOf(mngdmac.MacDevice{})),
+	newTarget("mngdmac", "MacDeviceCollection", reflect.TypeOf(mngdmac.MacDeviceCollection{})),
 	newTarget("mngdmac", "MacOrder", reflect.TypeOf(mngdmac.MacOrder{})),
 	newTarget("mngdmac", "MacOrderCollection", reflect.TypeOf(mngdmac.MacOrderCollection{})),
+	newTarget("mngdmac", "MacDeviceSummary", reflect.TypeOf(mngdmac.MacDeviceSummary{})),
 	newTarget("mngdmac", "MacOrderSummary", reflect.TypeOf(mngdmac.MacOrderSummary{})),
 
 	// Oce CRD support
@@ -1273,9 +1279,14 @@ var seedTargets = []Target{
 	newTarget("stackmonitoring", "ProcessSetSummary", reflect.TypeOf(stackmonitoring.ProcessSetSummary{})),
 
 	// Tenantmanagercontrolplane CRD support
+	newTarget("tenantmanagercontrolplane", "CreateDomainDetails", reflect.TypeOf(tenantmanagercontrolplane.CreateDomainDetails{})),
+	newTarget("tenantmanagercontrolplane", "UpdateDomainDetails", reflect.TypeOf(tenantmanagercontrolplane.UpdateDomainDetails{})),
 	newTarget("tenantmanagercontrolplane", "UpdateOrganizationDetails", reflect.TypeOf(tenantmanagercontrolplane.UpdateOrganizationDetails{})),
+	newTarget("tenantmanagercontrolplane", "Domain", reflect.TypeOf(tenantmanagercontrolplane.Domain{})),
+	newTarget("tenantmanagercontrolplane", "DomainCollection", reflect.TypeOf(tenantmanagercontrolplane.DomainCollection{})),
 	newTarget("tenantmanagercontrolplane", "Organization", reflect.TypeOf(tenantmanagercontrolplane.Organization{})),
 	newTarget("tenantmanagercontrolplane", "OrganizationCollection", reflect.TypeOf(tenantmanagercontrolplane.OrganizationCollection{})),
+	newTarget("tenantmanagercontrolplane", "DomainSummary", reflect.TypeOf(tenantmanagercontrolplane.DomainSummary{})),
 	newTarget("tenantmanagercontrolplane", "OrganizationSummary", reflect.TypeOf(tenantmanagercontrolplane.OrganizationSummary{})),
 
 	// Vbsinst CRD support

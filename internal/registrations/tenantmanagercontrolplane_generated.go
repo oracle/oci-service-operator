@@ -13,6 +13,7 @@ import (
 	tenantmanagercontrolplanev1beta1 "github.com/oracle/oci-service-operator/api/tenantmanagercontrolplane/v1beta1"
 	tenantmanagercontrolplanecontrollers "github.com/oracle/oci-service-operator/controllers/tenantmanagercontrolplane"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
+	tenantmanagercontrolplanedomainservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/tenantmanagercontrolplane/domain"
 	tenantmanagercontrolplaneorganizationservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/tenantmanagercontrolplane/organization"
 )
 
@@ -21,6 +22,17 @@ func init() {
 		Group:       "tenantmanagercontrolplane",
 		AddToScheme: tenantmanagercontrolplanev1beta1.AddToScheme,
 		SetupWithManager: func(ctx Context) error {
+			if err := (&tenantmanagercontrolplanecontrollers.DomainReconciler{
+				Reconciler: NewBaseReconciler(
+					ctx,
+					"Domain",
+					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
+						return tenantmanagercontrolplanedomainservicemanager.NewDomainServiceManagerWithDeps(deps)
+					},
+				),
+			}).SetupWithManager(ctx.Manager); err != nil {
+				return fmt.Errorf("setup Domain controller: %w", err)
+			}
 			if err := (&tenantmanagercontrolplanecontrollers.OrganizationReconciler{
 				Reconciler: NewBaseReconciler(
 					ctx,

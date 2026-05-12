@@ -335,16 +335,20 @@ packages:
 
   - package: dashboardservice
     displayName: Dashboard Service
-    summary: Manage OCI dashboard groups from Kubernetes with a reviewed controller-backed runtime.
+    summary: Manage OCI dashboards and dashboard groups from Kubernetes with a reviewed controller-backed runtime.
     supportStatus: preview
     customerVisible: false
     guidePath: docs/installation.md
     packageNotes:
-      - Current package scope is intentionally limited to DashboardGroup while the dashboard content model itself stays unpublished.
-      - The published runtime keeps lifecycle-based generatedruntime semantics, scopes existing-before-create reuse to exact `compartmentId` plus `displayName`, updates non-empty `displayName` and `description` values in place, and preserves explicit empty-map clears for `freeformTags` and `definedTags`.
-      - Empty-string `displayName` and `description` values currently behave as omission rather than explicit clear because the generated spec cannot distinguish those intents.
-      - Dashboard resources created outside the tenancy home region are not viewable in the Console, so that Dashboards service caveat remains explicit in the published docs and formal metadata.
+      - 'Current package scope publishes both `dashboardservice/Dashboard` and `dashboardservice/DashboardGroup`.'
+      - '`Dashboard` keeps lifecycle-based generatedruntime semantics, scopes existing-before-create reuse to exact `dashboardGroupId` plus `displayName`, dispatches create and update bodies by `schemaVersion`, and preserves explicit empty-list widget clears plus explicit empty-map tag clears.'
+      - '`DashboardGroup` keeps lifecycle-based generatedruntime semantics, scopes existing-before-create reuse to exact `compartmentId` plus `displayName`, and preserves explicit empty-map tag clears.'
+      - 'Empty-string `displayName` and `description` values currently behave as omission rather than explicit clear because the generated specs cannot distinguish those intents. `Dashboard` also treats null `config` clears as omission for the same reason.'
+      - 'Dashboard resources created outside the tenancy home region are not viewable in the Console, so that Dashboards service caveat remains explicit in the published docs and formal metadata.'
     kindOverrides:
+      - group: dashboardservice
+        kind: Dashboard
+        summary: Manage OCI dashboards with schemaVersion-aware V1 model handling.
       - group: dashboardservice
         kind: DashboardGroup
         summary: Manage OCI dashboard groups.
@@ -789,14 +793,17 @@ packages:
 
   - package: mngdmac
     displayName: Managed Services for Mac
-    summary: Manage OCI Mac orders from Kubernetes with a reviewed controller-backed runtime.
+    summary: Manage OCI Mac orders and devices from Kubernetes with a reviewed controller-backed runtime.
     supportStatus: preview
     customerVisible: false
     guidePath: docs/installation.md
     packageNotes:
-      - Current package scope is intentionally limited to MacOrder while MacDevice and auxiliary device-management workflows stay unpublished.
-      - The published runtime uses service-SDK work requests for create, update, and delete, maps Kubernetes delete to CancelMacOrder, and keeps ChangeMacOrderCompartment out of scope.
+      - Current package scope publishes MacOrder plus bind-existing terminate-only MacDevice, while auxiliary order-management and device-management workflows stay unpublished.
+      - The published runtime uses service-SDK work requests for MacOrder create/update/delete and MacDevice delete, maps Kubernetes delete to CancelMacOrder or TerminateMacDevice as appropriate, and keeps ChangeMacOrderCompartment out of scope.
     kindOverrides:
+      - group: mngdmac
+        kind: MacDevice
+        summary: Bind an existing OCI Managed Services for Mac device and terminate it from Kubernetes.
       - group: mngdmac
         kind: MacOrder
         summary: Manage OCI Managed Services for Mac orders.
@@ -1136,14 +1143,17 @@ packages:
 
   - package: tenantmanagercontrolplane
     displayName: Tenant Manager Control Plane
-    summary: Bind existing OCI organizations from Kubernetes and reconcile the default UCM subscription with a reviewed update-only runtime.
+    summary: Manage OCI domains and existing organizations from Kubernetes with truthful service-specific runtime behavior.
     supportStatus: preview
     customerVisible: false
     guidePath: docs/installation.md
     packageNotes:
-      - Current package scope is intentionally limited to Organization while OrganizationTenancy, domain, invitation, and subscription-mapping helper families stay unpublished.
-      - "The published runtime is bind-existing plus update-only: bind by `organizationId` or a unique `compartmentId` list match, update only `defaultUcmSubscriptionId`, and treat CR delete as local unbind without OCI delete."
+      - Current package scope includes Domain and Organization while OrganizationTenancy, DomainGovernance, invitation, and subscription-mapping helper families stay unpublished.
+      - "The published runtime is intentionally mixed: Domain exposes workrequest-aware create, direct-body update, and confirmed OCI delete; Organization remains bind-existing plus update-only with local unbind on CR delete."
     kindOverrides:
+      - group: tenantmanagercontrolplane
+        kind: Domain
+        summary: Manage OCI domains with workrequest-aware create behavior and confirmed OCI delete semantics.
       - group: tenantmanagercontrolplane
         kind: Organization
         summary: Manage existing OCI organizations with an update-only default subscription contract.

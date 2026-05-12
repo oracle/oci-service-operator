@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "tenantmanagercontrolplane",
+  "slug": "domain",
+  "kind": "Domain",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_tenantmanagercontrolplane_domain",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDomain",
+        "requestType": "tenantmanagercontrolplane.CreateDomainRequest",
+        "responseType": "tenantmanagercontrolplane.CreateDomainResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDomain",
+        "requestType": "tenantmanagercontrolplane.GetDomainRequest",
+        "responseType": "tenantmanagercontrolplane.GetDomainResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDomains",
+        "requestType": "tenantmanagercontrolplane.ListDomainsRequest",
+        "responseType": "tenantmanagercontrolplane.ListDomainsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDomain",
+        "requestType": "tenantmanagercontrolplane.UpdateDomainRequest",
+        "responseType": "tenantmanagercontrolplane.UpdateDomainResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDomain",
+        "requestType": "tenantmanagercontrolplane.DeleteDomainRequest",
+        "responseType": "tenantmanagercontrolplane.DeleteDomainResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "defined_tags",
+      "freeform_tags"
+    ],
+    "forceNew": [
+      "compartment_id",
+      "domain_name",
+      "is_governance_enabled",
+      "subscription_email"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "domain",
+        "action": "REGISTER_DOMAIN"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [],
+    "target": [
+      "DELETED",
+      "NOT_FOUND"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_tenantmanagercontrolplane_domains",
+    "collectionField": "domains",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "domain_name",
+      "lifecycle_state",
+      "status"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/tenantmanagercontrolplane/domain/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/tenantmanagercontrolplane/domain/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "delete-confirmation",
+      "list-lookup",
+      "lifecycle-classification",
+      "mutation-policy",
+      "status-projection",
+      "waiter-work-request"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: CreateDomain, GetDomain, ListDomains, UpdateDomain, DeleteDomain, and GetWorkRequest are present in v65.110.0. CreateDomainResponse returns a concrete Domain body plus opc-work-request-id, UpdateDomainResponse returns a concrete Domain body directly, and DeleteDomainResponse returns only opc-request-id headers.",
+    "ListDomainsRequest requires compartmentId and supports domainId, name, lifecycleState, and status filters. The published runtime paginates ListDomains, maps the request name filter from spec.domainName, and adopts only a unique exact match on compartmentId plus domainName with optional lifecycleState and status narrowing.",
+    "Repo-authored runtime semantics are narrower than the visible SDK surface: only freeformTags and definedTags reconcile in place; compartmentId, domainName, subscriptionEmail, and isGovernanceEnabled remain replacement-only drift. Create is the only service-local work-request phase, while delete confirms through GetDomain/ListDomains rereads because DeleteDomain does not return an opc-work-request-id."
+  ]
+}

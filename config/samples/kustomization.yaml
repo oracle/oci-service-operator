@@ -244,4 +244,8 @@ resources:
 - mediaservices_v1beta1_mediaworkflow.yaml
 - zpr_v1beta1_configuration.yaml
 - wlms_v1beta1_managedinstance.yaml
+- tenantmanagercontrolplane_v1beta1_domain.yaml
+- mngdmac_v1beta1_macdevice.yaml
+- dashboardservice_v1beta1_dashboard.yaml
+- databasemigration_v1beta1_assessment.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

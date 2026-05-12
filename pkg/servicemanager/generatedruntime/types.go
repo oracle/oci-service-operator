@@ -14,6 +14,7 @@ import (
 	"time"
 
 	apmconfigsdk "github.com/oracle/oci-go-sdk/v65/apmconfig"
+	dashboardservicesdk "github.com/oracle/oci-go-sdk/v65/dashboardservice"
 	databasesdk "github.com/oracle/oci-go-sdk/v65/database"
 	databasemigrationsdk "github.com/oracle/oci-go-sdk/v65/databasemigration"
 	databasetoolssdk "github.com/oracle/oci-go-sdk/v65/databasetools"
@@ -54,6 +55,8 @@ var (
 	connectionUpdateDetailsType              = reflect.TypeOf((*databasemigrationsdk.UpdateConnectionDetails)(nil)).Elem()
 	databaseToolsConnectionCreateDetailsType = reflect.TypeOf((*databasetoolssdk.CreateDatabaseToolsConnectionDetails)(nil)).Elem()
 	databaseToolsConnectionUpdateDetailsType = reflect.TypeOf((*databasetoolssdk.UpdateDatabaseToolsConnectionDetails)(nil)).Elem()
+	dashboardCreateDetailsType               = reflect.TypeOf((*dashboardservicesdk.CreateDashboardDetails)(nil)).Elem()
+	dashboardUpdateDetailsType               = reflect.TypeOf((*dashboardservicesdk.UpdateDashboardDetails)(nil)).Elem()
 )
 
 type createContextKey string

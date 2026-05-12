@@ -2298,6 +2298,19 @@ var targets = []Target{
 		},
 	},
 	{
+		Name:       "DashboardserviceDashboard",
+		SpecType:   reflect.TypeOf(dashboardservicev1beta1.DashboardSpec{}),
+		StatusType: reflect.TypeOf(dashboardservicev1beta1.DashboardStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "dashboardservice.DashboardCollection",
+			},
+			{
+				SDKStruct: "dashboardservice.DashboardSummary",
+			},
+		},
+	},
+	{
 		Name:       "DashboardserviceDashboardGroup",
 		SpecType:   reflect.TypeOf(dashboardservicev1beta1.DashboardGroupSpec{}),
 		StatusType: reflect.TypeOf(dashboardservicev1beta1.DashboardGroupStatus{}),
@@ -2316,6 +2329,16 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "dashboardservice.DashboardGroupSummary",
+			},
+		},
+	},
+	{
+		Name:       "DatabasemigrationAssessment",
+		SpecType:   reflect.TypeOf(databasemigrationv1beta1.AssessmentSpec{}),
+		StatusType: reflect.TypeOf(databasemigrationv1beta1.AssessmentStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "databasemigration.AssessmentCollection",
 			},
 		},
 	},
@@ -3590,6 +3613,22 @@ var targets = []Target{
 		},
 	},
 	{
+		Name:       "MngdmacMacDevice",
+		SpecType:   reflect.TypeOf(mngdmacv1beta1.MacDeviceSpec{}),
+		StatusType: reflect.TypeOf(mngdmacv1beta1.MacDeviceStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "mngdmac.MacDevice",
+			},
+			{
+				SDKStruct: "mngdmac.MacDeviceCollection",
+			},
+			{
+				SDKStruct: "mngdmac.MacDeviceSummary",
+			},
+		},
+	},
+	{
 		Name:       "MngdmacMacOrder",
 		SpecType:   reflect.TypeOf(mngdmacv1beta1.MacOrderSpec{}),
 		StatusType: reflect.TypeOf(mngdmacv1beta1.MacOrderStatus{}),
@@ -4700,6 +4739,28 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "stackmonitoring.ProcessSetSummary",
+			},
+		},
+	},
+	{
+		Name:       "TenantmanagercontrolplaneDomain",
+		SpecType:   reflect.TypeOf(tenantmanagercontrolplanev1beta1.DomainSpec{}),
+		StatusType: reflect.TypeOf(tenantmanagercontrolplanev1beta1.DomainStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "tenantmanagercontrolplane.CreateDomainDetails",
+			},
+			{
+				SDKStruct: "tenantmanagercontrolplane.UpdateDomainDetails",
+			},
+			{
+				SDKStruct: "tenantmanagercontrolplane.Domain",
+			},
+			{
+				SDKStruct: "tenantmanagercontrolplane.DomainCollection",
+			},
+			{
+				SDKStruct: "tenantmanagercontrolplane.DomainSummary",
 			},
 		},
 	},

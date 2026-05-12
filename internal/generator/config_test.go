@@ -1371,10 +1371,10 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	assertServiceSelection(t, services["dataflow"], true, SelectionModeExplicit, []string{"Application"})
 	assertServiceSelection(t, services["database"], true, SelectionModeExplicit, []string{"AutonomousDatabase"})
 	assertServiceSelection(t, services["databasetools"], true, SelectionModeExplicit, []string{"DatabaseToolsConnection"})
-	assertServiceSelection(t, services["databasemigration"], true, SelectionModeExplicit, []string{"Connection"})
+	assertServiceSelection(t, services["databasemigration"], true, SelectionModeExplicit, []string{"Connection", "Assessment"})
 	assertServiceSelection(t, services["datalabelingservice"], true, SelectionModeExplicit, []string{"Dataset"})
 	assertServiceSelection(t, services["datascience"], true, SelectionModeExplicit, []string{"Project"})
-	assertServiceSelection(t, services["dashboardservice"], true, SelectionModeExplicit, []string{"DashboardGroup"})
+	assertServiceSelection(t, services["dashboardservice"], true, SelectionModeExplicit, []string{"DashboardGroup", "Dashboard"})
 	assertServiceSelection(t, services["delegateaccesscontrol"], true, SelectionModeExplicit, []string{"DelegationControl"})
 	assertServiceSelection(t, services["devops"], true, SelectionModeExplicit, []string{"Project", "Repository", "BuildPipeline", "DeployPipeline", "DeployArtifact", "Trigger"})
 	assertServiceSelection(t, services["dns"], true, SelectionModeExplicit, []string{"Zone", "View", "TsigKey", "SteeringPolicy", "SteeringPolicyAttachment"})
@@ -1395,7 +1395,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	assertServiceSelection(t, services["lustrefilestorage"], true, SelectionModeExplicit, []string{"LustreFileSystem", "ObjectStorageLink"})
 	assertServiceSelection(t, services["monitoring"], true, SelectionModeExplicit, []string{"Alarm", "AlarmSuppression"})
 	assertServiceSelection(t, services["marketplace"], true, SelectionModeExplicit, []string{"AcceptedAgreement", "Publication"})
-	assertServiceSelection(t, services["mngdmac"], true, SelectionModeExplicit, []string{"MacOrder"})
+	assertServiceSelection(t, services["mngdmac"], true, SelectionModeExplicit, []string{"MacOrder", "MacDevice"})
 	assertServiceSelection(t, services["mysql"], true, SelectionModeExplicit, []string{"DbSystem"})
 	assertServiceSelection(t, services["networkloadbalancer"], true, SelectionModeExplicit, []string{"Backend", "BackendSet", "Listener", "NetworkLoadBalancer"})
 	assertServiceSelection(t, services["nosql"], true, SelectionModeExplicit, []string{"Table"})
@@ -1414,7 +1414,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	assertServiceSelection(t, services["self"], true, SelectionModeExplicit, []string{"Subscription"})
 	assertServiceSelection(t, services["servicecatalog"], true, SelectionModeExplicit, []string{"PrivateApplication", "ServiceCatalog"})
 	assertServiceSelection(t, services["streaming"], true, SelectionModeExplicit, []string{"Stream"})
-	assertServiceSelection(t, services["tenantmanagercontrolplane"], true, SelectionModeExplicit, []string{"Organization"})
+	assertServiceSelection(t, services["tenantmanagercontrolplane"], true, SelectionModeExplicit, []string{"Domain", "Organization"})
 	assertServiceSelection(t, services["usageapi"], true, SelectionModeExplicit, []string{"CustomTable", "Query", "Schedule", "UsageCarbonEmissionsQuery"})
 	assertServiceSelection(t, services["vbsinst"], true, SelectionModeExplicit, []string{"VbsInstance"})
 	assertServiceSelection(t, services["governancerulescontrolplane"], true, SelectionModeExplicit, []string{"GovernanceRule", "InclusionCriterion"})
@@ -1429,7 +1429,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	assertServiceSelection(t, services["marketplaceprivateoffer"], true, SelectionModeExplicit, []string{"Attachment", "Offer"})
 	assertServiceSelection(t, services["marketplacepublisher"], true, SelectionModeExplicit, []string{"Artifact", "Listing", "ListingRevision", "ListingRevisionAttachment", "ListingRevisionNote", "ListingRevisionPackage", "Term", "TermVersion"})
 	assertServiceSelection(t, services["mediaservices"], true, SelectionModeExplicit, []string{"MediaAsset", "MediaWorkflow"})
-	assertServiceSelection(t, services["mngdmac"], true, SelectionModeExplicit, []string{"MacOrder"})
+	assertServiceSelection(t, services["mngdmac"], true, SelectionModeExplicit, []string{"MacOrder", "MacDevice"})
 	assertServiceSelection(t, services["operatoraccesscontrol"], true, SelectionModeExplicit, []string{"OperatorControl", "OperatorControlAssignment"})
 	assertServiceSelection(t, services["opsi"], true, SelectionModeExplicit, []string{"AwrHub", "AwrHubSource", "ChargebackPlan", "ChargebackPlanReport", "DatabaseInsight", "EnterpriseManagerBridge", "ExadataInsight", "HostInsight", "NewsReport", "OperationsInsightsPrivateEndpoint", "OperationsInsightsWarehouse", "OperationsInsightsWarehouseUser", "OpsiConfiguration"})
 	assertServiceSelection(t, services["optimizer"], true, SelectionModeExplicit, []string{"Profile"})
@@ -1564,6 +1564,7 @@ func TestCheckedInConfigPromotesFormalSpecReferences(t *testing.T) {
 	assertFormalSpecFor(t, services["containerengine"], "Cluster", "cluster")
 	assertFormalSpecFor(t, services["containerengine"], "NodePool", "nodepool")
 	assertFormalSpecFor(t, services["containerinstances"], "ContainerInstance", "")
+	assertFormalSpecFor(t, services["databasemigration"], "Assessment", "assessment")
 	assertFormalSpecFor(t, services["databasemigration"], "Connection", "connection")
 	assertFormalSpecFor(t, services["databasetools"], "DatabaseToolsConnection", "databasetoolsconnection")
 	assertFormalSpecFor(t, services["datalabelingservice"], "Dataset", "dataset")
@@ -3008,7 +3009,7 @@ func assertDatabaseMigrationRuntimeRolloutMetadata(t *testing.T, service *Servic
 		registration:   GenerationStrategyGenerated,
 		webhook:        GenerationStrategyNone,
 	})
-	assertResourceOverrideCount(t, service, 1)
+	assertResourceOverrideCount(t, service, 2)
 
 	async := assertAsyncContract(t, service, "Connection", AsyncStrategyWorkRequest, AsyncRuntimeGeneratedRuntime)
 	if async.FormalClassification != AsyncStrategyWorkRequest {
@@ -3019,6 +3020,17 @@ func assertDatabaseMigrationRuntimeRolloutMetadata(t *testing.T, service *Servic
 	}
 	if !slices.Equal(async.WorkRequest.Phases, []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}) {
 		t.Fatalf("databasemigration Connection workRequest.phases = %v, want %v", async.WorkRequest.Phases, []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete})
+	}
+
+	async = assertAsyncContract(t, service, "Assessment", AsyncStrategyWorkRequest, AsyncRuntimeGeneratedRuntime)
+	if async.FormalClassification != AsyncStrategyWorkRequest {
+		t.Fatalf("databasemigration Assessment formalClassification = %q, want %q", async.FormalClassification, AsyncStrategyWorkRequest)
+	}
+	if async.WorkRequest.Source != AsyncWorkRequestSourceServiceSDK {
+		t.Fatalf("databasemigration Assessment workRequest.source = %q, want %q", async.WorkRequest.Source, AsyncWorkRequestSourceServiceSDK)
+	}
+	if !slices.Equal(async.WorkRequest.Phases, []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}) {
+		t.Fatalf("databasemigration Assessment workRequest.phases = %v, want %v", async.WorkRequest.Phases, []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete})
 	}
 }
 

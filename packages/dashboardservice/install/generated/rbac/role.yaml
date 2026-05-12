@@ -15,6 +15,7 @@ rules:
   - dashboardservice.oracle.com
   resources:
   - dashboardgroups
+  - dashboards
   verbs:
   - create
   - delete
@@ -27,12 +28,14 @@ rules:
   - dashboardservice.oracle.com
   resources:
   - dashboardgroups/finalizers
+  - dashboards/finalizers
   verbs:
   - update
 - apiGroups:
   - dashboardservice.oracle.com
   resources:
   - dashboardgroups/status
+  - dashboards/status
   verbs:
   - get
   - patch

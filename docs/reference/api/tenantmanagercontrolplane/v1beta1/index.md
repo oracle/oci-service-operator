@@ -18,7 +18,116 @@ No customer-visible package currently exposes `tenantmanagercontrolplane.oracle.
 
 | Kind | Scope | Sample | Packages |
 | --- | --- | --- | --- |
+| [Domain](#kind-domain) | Namespaced | [Sample](../../../samples/tenantmanagercontrolplane/v1beta1/domain.md) | - |
 | [Organization](#kind-organization) | Namespaced | [Sample](../../../samples/tenantmanagercontrolplane/v1beta1/organization.md) | - |
+
+<a id="kind-domain"></a>
+## Domain
+
+Manage OCI domains with workrequest-aware create behavior and confirmed OCI delete semantics.
+
+- `Plural`: `domains`
+- `Scope`: `Namespaced`
+- `APIVersion`: `tenantmanagercontrolplane.oracle.com/v1beta1`
+- `Sample`: [Sample](../../../samples/tenantmanagercontrolplane/v1beta1/domain.md) (`config/samples/tenantmanagercontrolplane_v1beta1_domain.yaml`)
+- `Packages`: Not currently exposed by a customer-visible package.
+
+<a id="kind-domain-spec"></a>
+### Spec
+
+DomainSpec defines the desired state of Domain.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `compartmentId` | OCID of the tenancy. | `string` | Yes | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. Example: `{"foo-namespace": {"bar-key": "value"}}` | `map[string, map[string, string]]` | No | - | - |
+| `domainName` | The domain name. | `string` | Yes | - | - |
+| `freeformTags` | Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only. Example: `{"bar-key": "value"}` | `map[string, string]` | No | - | - |
+| `isGovernanceEnabled` | Indicates whether governance should be enabled for this domain. Defaults to false. | `boolean` | No | - | - |
+| `lifecycleState` | Optional exact-match filter used to narrow list-based binding and delete confirmation reads. Supported values include `CREATING`, `ACTIVE`, `INACTIVE`, `UPDATING`, `FAILED`, and `TERMINATED`. | `string` | No | - | - |
+| `status` | Optional exact-match filter used to narrow list-based binding and delete confirmation reads. Supported values include `PENDING`, `RELEASING`, `RELEASED`, `EXPIRING`, `REVOKING`, `REVOKED`, `ACTIVE`, and `FAILED`. | `string` | No | - | - |
+| `subscriptionEmail` | Email address to be used to notify the user, and that the ONS subscription will be created with. | `string` | No | - | - |
+
+<a id="kind-domain-status"></a>
+### Status
+
+DomainStatus defines the observed state of Domain.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `compartmentId` | The tenancy OCID recorded for list identity matching and replacement-only drift checks. | `string` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. Example: `{"foo-namespace": {"bar-key": "value"}}` | `map[string, map[string, string]]` | No | - | - |
+| `domainName` | The domain name. | `string` | No | - | - |
+| `freeformTags` | Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only. Example: `{"bar-key": "value"}` | `map[string, string]` | No | - | - |
+| `id` | The OCID of the domain. | `string` | No | - | - |
+| `isGovernanceEnabled` | Whether governance was requested for the bound domain; tracked from the spec because the SDK does not echo it on reads. | `boolean` | No | - | - |
+| `lifecycleState` | Lifecycle state of the domain. | `string` | No | - | - |
+| `ownerId` | The OCID of the tenancy that has started the registration process for this domain. | `string` | No | - | - |
+| `sdkStatus` | The raw domain status returned by Tenant Manager Control Plane. | `string` | No | - | - |
+| [`status`](#kind-domain-status-status) | - | `object` | Yes | - | - |
+| `subscriptionEmail` | The accepted subscription email tracked from the spec because the SDK does not echo it on reads. | `string` | No | - | - |
+| `timeCreated` | Date-time when this domain was created. An RFC 3339-formatted date and time string. | `string` | No | - | - |
+| `timeUpdated` | Date-time when this domain was last updated. An RFC 3339-formatted date and time string. | `string` | No | - | - |
+| `txtRecord` | The code that the owner of the domain will need to add as a TXT record to their domain. | `string` | No | - | - |
+
+<a id="kind-domain-status-status"></a>
+#### Status.status
+
+[Back to Domain status](#kind-domain-status)
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`async`](#kind-domain-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
+| [`conditions`](#kind-domain-status-status-conditions) | - | `list[object]` | No | - | - |
+| `createdAt` | - | `string (date-time)` | No | - | - |
+| `deletedAt` | - | `string (date-time)` | No | - | - |
+| `message` | - | `string` | No | - | - |
+| `ocid` | - | `string` | No | - | - |
+| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
+| `reason` | - | `string` | No | - | - |
+| `requestedAt` | - | `string (date-time)` | No | - | - |
+| `updatedAt` | - | `string (date-time)` | No | - | - |
+
+<a id="kind-domain-status-status-async"></a>
+##### Status.status.async
+
+[Back to Domain status](#kind-domain-status)
+
+Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`current`](#kind-domain-status-status-async-current) | - | `object` | No | - | - |
+
+<a id="kind-domain-status-status-async-current"></a>
+###### Status.status.async.current
+
+[Back to Domain status](#kind-domain-status)
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `message` | - | `string` | No | - | - |
+| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
+| `percentComplete` | - | `number` | No | - | - |
+| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
+| `rawOperationType` | - | `string` | No | - | - |
+| `rawStatus` | - | `string` | No | - | - |
+| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
+| `updatedAt` | - | `string (date-time)` | Yes | - | - |
+| `workRequestId` | - | `string` | No | - | - |
+
+<a id="kind-domain-status-status-conditions"></a>
+##### Status.status.conditions[]
+
+[Back to Domain status](#kind-domain-status)
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `lastTransitionTime` | - | `string (date-time)` | No | - | - |
+| `message` | - | `string` | No | - | - |
+| `reason` | - | `string` | No | - | - |
+| `status` | - | `string` | Yes | - | - |
+| `type` | - | `string` | Yes | - | - |
 
 <a id="kind-organization"></a>
 ## Organization

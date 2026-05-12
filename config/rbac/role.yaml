@@ -650,6 +650,7 @@ rules:
   - dashboardservice.oracle.com
   resources:
   - dashboardgroups
+  - dashboards
   verbs:
   - create
   - delete
@@ -662,12 +663,14 @@ rules:
   - dashboardservice.oracle.com
   resources:
   - dashboardgroups/finalizers
+  - dashboards/finalizers
   verbs:
   - update
 - apiGroups:
   - dashboardservice.oracle.com
   resources:
   - dashboardgroups/status
+  - dashboards/status
   verbs:
   - get
   - patch
@@ -701,6 +704,7 @@ rules:
 - apiGroups:
   - databasemigration.oracle.com
   resources:
+  - assessments
   - connections
   verbs:
   - create
@@ -713,12 +717,14 @@ rules:
 - apiGroups:
   - databasemigration.oracle.com
   resources:
+  - assessments/finalizers
   - connections/finalizers
   verbs:
   - update
 - apiGroups:
   - databasemigration.oracle.com
   resources:
+  - assessments/status
   - connections/status
   verbs:
   - get
@@ -1814,6 +1820,7 @@ rules:
 - apiGroups:
   - mngdmac.oracle.com
   resources:
+  - macdevices
   - macorders
   verbs:
   - create
@@ -1826,12 +1833,14 @@ rules:
 - apiGroups:
   - mngdmac.oracle.com
   resources:
+  - macdevices/finalizers
   - macorders/finalizers
   verbs:
   - update
 - apiGroups:
   - mngdmac.oracle.com
   resources:
+  - macdevices/status
   - macorders/status
   verbs:
   - get
@@ -2753,6 +2762,7 @@ rules:
 - apiGroups:
   - tenantmanagercontrolplane.oracle.com
   resources:
+  - domains
   - organizations
   verbs:
   - create
@@ -2765,12 +2775,14 @@ rules:
 - apiGroups:
   - tenantmanagercontrolplane.oracle.com
   resources:
+  - domains/finalizers
   - organizations/finalizers
   verbs:
   - update
 - apiGroups:
   - tenantmanagercontrolplane.oracle.com
   resources:
+  - domains/status
   - organizations/status
   verbs:
   - get

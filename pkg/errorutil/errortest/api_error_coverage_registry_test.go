@@ -14,13 +14,13 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	}
 
 	byKey := inventoryByKey(inventory)
-	if got, want := len(inventory), 363; got != want {
+	if got, want := len(inventory), 366; got != want {
 		t.Fatalf("len(inventory) = %d, want %d", got, want)
 	}
-	if got, want := countRegistrations(inventory), 239; got != want {
+	if got, want := countRegistrations(inventory), 243; got != want {
 		t.Fatalf("registration inventory count = %d, want %d", got, want)
 	}
-	if got, want := countExceptions(inventory), 124; got != want {
+	if got, want := countExceptions(inventory), 123; got != want {
 		t.Fatalf("exception inventory count = %d, want %d", got, want)
 	}
 
@@ -44,10 +44,12 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventorySelectionSource(t, byKey, "containerengine/Cluster", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "containerengine/NodePool", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "core/Drg", "packageSplits[core-network].includeKinds")
+	assertInventorySelectionSource(t, byKey, "databasemigration/Assessment", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "databasemigration/Connection", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "databasetools/DatabaseToolsConnection", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "datalabelingservice/Dataset", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "datascience/Project", "selection.includeKinds")
+	assertInventorySelectionSource(t, byKey, "dashboardservice/Dashboard", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "dashboardservice/DashboardGroup", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "delegateaccesscontrol/DelegationControl", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "dataflow/Application", "selection.includeKinds")
@@ -59,6 +61,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventorySelectionSource(t, byKey, "lustrefilestorage/LustreFileSystem", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "lustrefilestorage/ObjectStorageLink", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "marketplace/AcceptedAgreement", "selection.includeKinds")
+	assertInventorySelectionSource(t, byKey, "mngdmac/MacDevice", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "mngdmac/MacOrder", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "mediaservices/MediaAsset", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "mediaservices/MediaWorkflow", "selection.includeKinds")
@@ -70,6 +73,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventorySelectionSource(t, byKey, "rover/RoverCluster", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "rover/RoverNode", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "servicemanagerproxy/ServiceEnvironment", "selection.includeKinds")
+	assertInventorySelectionSource(t, byKey, "tenantmanagercontrolplane/Domain", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "usageapi/Query", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "vbsinst/VbsInstance", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "visualbuilder/VbInstance", "selection.includeKinds")
@@ -124,6 +128,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventoryException(t, byKey, "clusterplacementgroups/WorkRequest", `controller.strategy="none"`)
 	assertInventoryException(t, byKey, "clusterplacementgroups/WorkRequestError", `controller.strategy="none"`)
 	assertInventoryException(t, byKey, "clusterplacementgroups/WorkRequestLog", `controller.strategy="none"`)
+	assertInventoryRegistration(t, byKey, "databasemigration/Assessment")
 	assertInventoryRegistration(t, byKey, "databasemigration/Connection")
 	assertInventoryRegistration(t, byKey, "databasetools/DatabaseToolsConnection")
 	assertInventoryRegistration(t, byKey, "datalabelingservice/Dataset")
@@ -134,9 +139,9 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventoryException(t, byKey, "databasetools/WorkRequest", `controller.strategy="none"`)
 	assertInventoryRegistration(t, byKey, "datascience/Project")
 	assertInventoryException(t, byKey, "datascience/WorkRequest", `controller.strategy="none"`)
+	assertInventoryRegistration(t, byKey, "dashboardservice/Dashboard")
 	assertInventoryRegistration(t, byKey, "dashboardservice/DashboardGroup")
 	assertInventoryRegistration(t, byKey, "delegateaccesscontrol/DelegationControl")
-	assertInventoryException(t, byKey, "dashboardservice/Dashboard", `controller.strategy="none"`)
 	assertInventoryRegistration(t, byKey, "email/Dkim")
 	assertInventoryRegistration(t, byKey, "generativeaiagent/Agent")
 	assertInventoryRegistration(t, byKey, "generativeaidata/EnrichmentJob")
@@ -146,6 +151,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventoryRegistration(t, byKey, "lustrefilestorage/LustreFileSystem")
 	assertInventoryRegistration(t, byKey, "lustrefilestorage/ObjectStorageLink")
 	assertInventoryRegistration(t, byKey, "marketplace/AcceptedAgreement")
+	assertInventoryRegistration(t, byKey, "mngdmac/MacDevice")
 	assertInventoryRegistration(t, byKey, "mngdmac/MacOrder")
 	assertInventoryRegistration(t, byKey, "mediaservices/MediaAsset")
 	assertInventoryRegistration(t, byKey, "mediaservices/MediaWorkflow")
@@ -169,6 +175,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventoryRegistration(t, byKey, "vnmonitoring/PathAnalyzerTest")
 	assertInventoryRegistration(t, byKey, "wlms/ManagedInstance")
 	assertInventoryRegistration(t, byKey, "wlms/WlsDomain")
+	assertInventoryRegistration(t, byKey, "tenantmanagercontrolplane/Domain")
 	assertInventoryRegistration(t, byKey, "tenantmanagercontrolplane/Organization")
 	assertInventoryRegistration(t, byKey, "zpr/Configuration")
 	assertInventoryRegistration(t, byKey, "zpr/ZprPolicy")
@@ -206,10 +213,12 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedFamily(t, "containerengine/NodePool", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "containerinstances/ContainerInstance", APIErrorCoverageFamilyLegacyAdapter)
 	assertReviewedFamily(t, "core/Vcn", APIErrorCoverageFamilyManualRuntime)
+	assertReviewedFamily(t, "databasemigration/Assessment", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "databasemigration/Connection", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "databasetools/DatabaseToolsConnection", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "datalabelingservice/Dataset", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "datascience/Project", APIErrorCoverageFamilyGeneratedRuntimePlain)
+	assertReviewedFamily(t, "dashboardservice/Dashboard", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "dashboardservice/DashboardGroup", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "delegateaccesscontrol/DelegationControl", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "dataflow/Application", APIErrorCoverageFamilyGeneratedRuntimePlain)
@@ -225,6 +234,7 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedFamily(t, "lustrefilestorage/LustreFileSystem", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "lustrefilestorage/ObjectStorageLink", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "marketplace/AcceptedAgreement", APIErrorCoverageFamilyGeneratedRuntimePlain)
+	assertReviewedFamily(t, "mngdmac/MacDevice", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "mngdmac/MacOrder", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "mediaservices/MediaAsset", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "mediaservices/MediaWorkflow", APIErrorCoverageFamilyGeneratedRuntimeFollowUp)
@@ -245,6 +255,7 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedFamily(t, "rover/RoverNode", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "servicemanagerproxy/ServiceEnvironment", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "streaming/Stream", APIErrorCoverageFamilyGeneratedRuntimeFollowUp)
+	assertReviewedFamily(t, "tenantmanagercontrolplane/Domain", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "tenantmanagercontrolplane/Organization", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "usageapi/Query", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "vbsinst/VbsInstance", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
@@ -290,7 +301,6 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedException(t, "opa/WorkRequest", "strategy=none")
 	assertReviewedException(t, "opa/WorkRequestError", "strategy=none")
 	assertReviewedException(t, "opa/WorkRequestLog", "strategy=none")
-	assertReviewedException(t, "dashboardservice/Dashboard", "strategy=none")
 	assertReviewedException(t, "keymanagement/Key", "strategy=none")
 	assertReviewedException(t, "opensearch/WorkRequest", "strategy=none")
 }

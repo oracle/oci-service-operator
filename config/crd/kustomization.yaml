@@ -49,7 +49,9 @@ resources:
 - bases/core.oracle.com_subnets.yaml
 - bases/core.oracle.com_vcns.yaml
 - bases/dashboardservice.oracle.com_dashboardgroups.yaml
+- bases/dashboardservice.oracle.com_dashboards.yaml
 - bases/database.oracle.com_autonomousdatabases.yaml
+- bases/databasemigration.oracle.com_assessments.yaml
 - bases/databasemigration.oracle.com_connections.yaml
 - bases/databasetools.oracle.com_databasetoolsconnections.yaml
 - bases/dataflow.oracle.com_applications.yaml
@@ -146,6 +148,7 @@ resources:
 - bases/marketplacepublisher.oracle.com_termversions.yaml
 - bases/mediaservices.oracle.com_mediaassets.yaml
 - bases/mediaservices.oracle.com_mediaworkflows.yaml
+- bases/mngdmac.oracle.com_macdevices.yaml
 - bases/mngdmac.oracle.com_macorders.yaml
 - bases/monitoring.oracle.com_alarms.yaml
 - bases/monitoring.oracle.com_alarmsuppressions.yaml
@@ -229,6 +232,7 @@ resources:
 - bases/stackmonitoring.oracle.com_monitoringtemplates.yaml
 - bases/stackmonitoring.oracle.com_processsets.yaml
 - bases/streaming.oracle.com_streams.yaml
+- bases/tenantmanagercontrolplane.oracle.com_domains.yaml
 - bases/tenantmanagercontrolplane.oracle.com_organizations.yaml
 - bases/usageapi.oracle.com_customtables.yaml
 - bases/usageapi.oracle.com_queries.yaml

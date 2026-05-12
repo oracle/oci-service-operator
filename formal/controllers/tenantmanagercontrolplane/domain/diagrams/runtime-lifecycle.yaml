@@ -1,0 +1,44 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: tenantmanagercontrolplane
+slug: domain
+kind: Domain
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - terminating
+  - failed
+repoAuthored:
+  followUp:
+    create: "GetWorkRequest -> GetDomain"
+    update: none
+    delete: "GetDomain/ListDomains confirm-delete"
+  listLookup:
+    filters:
+      - compartmentId
+      - domainName
+      - lifecycleState
+      - status
+    matchRule: exact compartmentId plus domainName with optional lifecycleState and status unique match; duplicate matches fail
+  mutation:
+    mutable:
+      - definedTags
+      - freeformTags
+    forceNew:
+      - compartmentId
+      - domainName
+      - isGovernanceEnabled
+      - subscriptionEmail
+notes:
+  - CreateDomain is the only work-request-backed mutation in the visible SDK
+    contract. The runtime stores the create work request, waits through
+    GetWorkRequest, and rereads GetDomain once that work request succeeds.
+  - UpdateDomain returns the concrete Domain body directly, so update projects
+    status from the response body without a separate follow-up read.
+  - DeleteDomain returns no work-request identifier. The runtime issues delete
+    once, then confirms DELETED or NOT_FOUND through GetDomain or ListDomains
+    rereads before releasing the finalizer.
+  - Pre-create reuse and delete-time list fallback both key off exact
+    compartmentId plus domainName and optionally reuse lifecycleState and
+    status as narrowing filters when the CR sets them.
