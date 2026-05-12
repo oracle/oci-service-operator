@@ -159,6 +159,7 @@ github.com/oracle/oci-go-sdk/v65/apmconfig
 github.com/oracle/oci-go-sdk/v65/apmcontrolplane
 github.com/oracle/oci-go-sdk/v65/apmsynthetics
 github.com/oracle/oci-go-sdk/v65/apmtraces
+github.com/oracle/oci-go-sdk/v65/appmgmtcontrol
 github.com/oracle/oci-go-sdk/v65/artifacts
 github.com/oracle/oci-go-sdk/v65/bastion
 github.com/oracle/oci-go-sdk/v65/bds
@@ -170,6 +171,7 @@ github.com/oracle/oci-go-sdk/v65/clusterplacementgroups
 github.com/oracle/oci-go-sdk/v65/common
 github.com/oracle/oci-go-sdk/v65/common/auth
 github.com/oracle/oci-go-sdk/v65/common/utils
+github.com/oracle/oci-go-sdk/v65/computeinstanceagent
 github.com/oracle/oci-go-sdk/v65/containerengine
 github.com/oracle/oci-go-sdk/v65/containerinstances
 github.com/oracle/oci-go-sdk/v65/core
@@ -182,6 +184,8 @@ github.com/oracle/oci-go-sdk/v65/datalabelingservice
 github.com/oracle/oci-go-sdk/v65/datascience
 github.com/oracle/oci-go-sdk/v65/delegateaccesscontrol
 github.com/oracle/oci-go-sdk/v65/devops
+github.com/oracle/oci-go-sdk/v65/disasterrecovery
+github.com/oracle/oci-go-sdk/v65/distributeddatabase
 github.com/oracle/oci-go-sdk/v65/dns
 github.com/oracle/oci-go-sdk/v65/email
 github.com/oracle/oci-go-sdk/v65/events
