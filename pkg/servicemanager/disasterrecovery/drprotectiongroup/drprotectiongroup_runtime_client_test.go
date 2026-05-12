@@ -49,7 +49,7 @@ func TestNormalizeDrProtectionGroupDesiredStateClearsListFilters(t *testing.T) {
 	}
 }
 
-func TestBuildDrProtectionGroupCreateBodyIncludesAssociationAndPolymorphicMemberJSONData(t *testing.T) {
+func TestBuildDrProtectionGroupCreateBodyPreservesTypedFalseBooleanMemberFields(t *testing.T) {
 	t.Parallel()
 
 	resource := newDrProtectionGroupTestResource()
@@ -62,7 +62,18 @@ func TestBuildDrProtectionGroupCreateBodyIncludesAssociationAndPolymorphicMember
 		{
 			MemberId:   "ocid1.instance.oc1..member",
 			MemberType: "COMPUTE_INSTANCE",
-			JsonData:   `{"isMovable":false}`,
+			IsMovable:  false,
+		},
+		{
+			MemberId:   "ocid1.networkloadbalancer.oc1..member",
+			MemberType: "NETWORK_LOAD_BALANCER",
+			BackendSetMappings: []disasterrecoveryv1beta1.DrProtectionGroupMemberBackendSetMapping{
+				{
+					IsBackendSetForNonMovable: false,
+					SourceBackendSetName:      "Source-BackendSet-1",
+					DestinationBackendSetName: "Destination-BackendSet-1",
+				},
+			},
 		},
 	}
 	resource.Spec.FreeformTags = map[string]string{"managed-by": "osok"}
@@ -77,8 +88,8 @@ func TestBuildDrProtectionGroupCreateBodyIncludesAssociationAndPolymorphicMember
 	if got := string(details.Association.Role); got != "STANDBY" {
 		t.Fatalf("details.Association.Role = %q, want STANDBY", got)
 	}
-	if got := len(details.Members); got != 1 {
-		t.Fatalf("len(details.Members) = %d, want 1", got)
+	if got := len(details.Members); got != 2 {
+		t.Fatalf("len(details.Members) = %d, want 2", got)
 	}
 
 	member, ok := details.Members[0].(disasterrecoverysdk.CreateDrProtectionGroupMemberComputeInstanceDetails)
@@ -87,6 +98,16 @@ func TestBuildDrProtectionGroupCreateBodyIncludesAssociationAndPolymorphicMember
 	}
 	if member.IsMovable == nil || *member.IsMovable {
 		t.Fatalf("member.IsMovable = %#v, want explicit false", member.IsMovable)
+	}
+	nlbMember, ok := details.Members[1].(disasterrecoverysdk.CreateDrProtectionGroupMemberNetworkLoadBalancerDetails)
+	if !ok {
+		t.Fatalf("details.Members[1] type = %T, want CreateDrProtectionGroupMemberNetworkLoadBalancerDetails", details.Members[1])
+	}
+	if len(nlbMember.BackendSetMappings) != 1 {
+		t.Fatalf("len(nlbMember.BackendSetMappings) = %d, want 1", len(nlbMember.BackendSetMappings))
+	}
+	if nlbMember.BackendSetMappings[0].IsBackendSetForNonMovable == nil || *nlbMember.BackendSetMappings[0].IsBackendSetForNonMovable {
+		t.Fatalf("nlbMember.BackendSetMappings[0].IsBackendSetForNonMovable = %#v, want explicit false", nlbMember.BackendSetMappings[0].IsBackendSetForNonMovable)
 	}
 
 	body := drProtectionGroupSerializedRequestBody(t, disasterrecoverysdk.CreateDrProtectionGroupRequest{
@@ -99,6 +120,8 @@ func TestBuildDrProtectionGroupCreateBodyIncludesAssociationAndPolymorphicMember
 		`"memberType":"COMPUTE_INSTANCE"`,
 		`"memberId":"ocid1.instance.oc1..member"`,
 		`"isMovable":false`,
+		`"memberType":"NETWORK_LOAD_BALANCER"`,
+		`"isBackendSetForNonMovable":false`,
 		`"managed-by":"osok"`,
 	} {
 		if !strings.Contains(body, want) {
@@ -164,6 +187,69 @@ func TestBuildDrProtectionGroupUpdateBodyClearsTagsAndMembers(t *testing.T) {
 	}
 }
 
+func TestBuildDrProtectionGroupUpdateBodyPreservesTypedFalseBooleanMemberFields(t *testing.T) {
+	t.Parallel()
+
+	resource := newDrProtectionGroupTestResource()
+	resource.Spec.Members = []disasterrecoveryv1beta1.DrProtectionGroupMember{
+		{
+			MemberId:   "ocid1.instance.oc1..member",
+			MemberType: "COMPUTE_INSTANCE",
+			IsMovable:  false,
+		},
+		{
+			MemberId:   "ocid1.networkloadbalancer.oc1..member",
+			MemberType: "NETWORK_LOAD_BALANCER",
+			BackendSetMappings: []disasterrecoveryv1beta1.DrProtectionGroupMemberBackendSetMapping{
+				{
+					IsBackendSetForNonMovable: false,
+					SourceBackendSetName:      "Source-BackendSet-1",
+					DestinationBackendSetName: "Destination-BackendSet-1",
+				},
+			},
+		},
+	}
+
+	current := disasterrecoverysdk.GetDrProtectionGroupResponse{
+		DrProtectionGroup: disasterrecoverysdk.DrProtectionGroup{
+			Id:             common.String("ocid1.drprotectiongroup.oc1..current"),
+			CompartmentId:  common.String(resource.Spec.CompartmentId),
+			DisplayName:    common.String(resource.Spec.DisplayName),
+			Role:           disasterrecoverysdk.DrProtectionGroupRolePrimary,
+			TimeCreated:    sdkTimePtr(time.Date(2026, time.May, 12, 10, 0, 0, 0, time.UTC)),
+			TimeUpdated:    sdkTimePtr(time.Date(2026, time.May, 12, 10, 5, 0, 0, time.UTC)),
+			LifecycleState: disasterrecoverysdk.DrProtectionGroupLifecycleStateActive,
+			LogLocation: &disasterrecoverysdk.ObjectStorageLogLocation{
+				Namespace: common.String(resource.Spec.LogLocation.Namespace),
+				Bucket:    common.String(resource.Spec.LogLocation.Bucket),
+			},
+		},
+	}
+
+	details, updateNeeded, err := buildDrProtectionGroupUpdateBody(resource, current)
+	if err != nil {
+		t.Fatalf("buildDrProtectionGroupUpdateBody() error = %v", err)
+	}
+	if !updateNeeded {
+		t.Fatal("buildDrProtectionGroupUpdateBody() updateNeeded = false, want member diff")
+	}
+
+	body := drProtectionGroupSerializedRequestBody(t, disasterrecoverysdk.UpdateDrProtectionGroupRequest{
+		DrProtectionGroupId:            common.String("ocid1.drprotectiongroup.oc1..current"),
+		UpdateDrProtectionGroupDetails: details,
+	}, http.MethodPut, "/drProtectionGroups/ocid1.drprotectiongroup.oc1..current")
+	for _, want := range []string{
+		`"memberType":"COMPUTE_INSTANCE"`,
+		`"isMovable":false`,
+		`"memberType":"NETWORK_LOAD_BALANCER"`,
+		`"isBackendSetForNonMovable":false`,
+	} {
+		if !strings.Contains(body, want) {
+			t.Fatalf("request body %s does not contain %s", body, want)
+		}
+	}
+}
+
 func TestBuildDrProtectionGroupUpdateBodyNoDiffWhenObservedMatchesDesired(t *testing.T) {
 	t.Parallel()
 
@@ -172,7 +258,7 @@ func TestBuildDrProtectionGroupUpdateBodyNoDiffWhenObservedMatchesDesired(t *tes
 		{
 			MemberId:   "ocid1.instance.oc1..member",
 			MemberType: "COMPUTE_INSTANCE",
-			JsonData:   `{"isMovable":false}`,
+			IsMovable:  false,
 		},
 	}
 

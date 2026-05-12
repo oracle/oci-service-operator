@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"maps"
+	"reflect"
 	"strings"
 	"unicode"
 
@@ -444,6 +445,7 @@ func drProtectionGroupMemberPayload(
 	}
 	payload["memberId"] = memberID
 	payload["memberType"] = memberType
+	drProtectionGroupOverlayBooleanFields(payload, member)
 	return payload, nil
 }
 
@@ -693,7 +695,7 @@ func drProtectionGroupPruneMeaningfulJSONValue(value any) (any, bool) {
 	case string:
 		return strings.TrimSpace(current), strings.TrimSpace(current) != ""
 	case bool:
-		return current, current
+		return current, true
 	case float64:
 		return current, current != 0
 	case map[string]any:
@@ -879,4 +881,150 @@ func drProtectionGroupStringValue(value *string) string {
 		return ""
 	}
 	return strings.TrimSpace(*value)
+}
+
+func drProtectionGroupOverlayBooleanFields(target map[string]any, source any) {
+	drProtectionGroupOverlayBooleanValue(target, reflect.ValueOf(source))
+}
+
+func drProtectionGroupOverlayBooleanValue(target map[string]any, value reflect.Value) bool {
+	value, ok := drProtectionGroupIndirectValue(value)
+	if !ok {
+		return false
+	}
+
+	switch value.Kind() {
+	case reflect.Struct:
+		return drProtectionGroupOverlayBooleanStruct(target, value)
+	case reflect.Bool:
+		return false
+	default:
+		return false
+	}
+}
+
+func drProtectionGroupOverlayBooleanStruct(target map[string]any, value reflect.Value) bool {
+	if target == nil {
+		return false
+	}
+
+	typ := value.Type()
+	merged := false
+	for i := 0; i < value.NumField(); i++ {
+		fieldType := typ.Field(i)
+		if !fieldType.IsExported() {
+			continue
+		}
+		jsonName := drProtectionGroupJSONFieldName(fieldType)
+		if jsonName == "" {
+			continue
+		}
+
+		fieldValue := value.Field(i)
+		switch fieldValue.Kind() {
+		case reflect.Bool:
+			target[jsonName] = fieldValue.Bool()
+			merged = true
+		case reflect.Pointer:
+			indirect, ok := drProtectionGroupIndirectValue(fieldValue)
+			if !ok {
+				continue
+			}
+			switch indirect.Kind() {
+			case reflect.Bool:
+				target[jsonName] = indirect.Bool()
+				merged = true
+			case reflect.Struct:
+				child, mergedChild := drProtectionGroupChildBooleanMap(target, jsonName)
+				if drProtectionGroupOverlayBooleanStruct(child, indirect) {
+					if !mergedChild {
+						target[jsonName] = child
+					}
+					merged = true
+				}
+			}
+		case reflect.Struct:
+			child, mergedChild := drProtectionGroupChildBooleanMap(target, jsonName)
+			if drProtectionGroupOverlayBooleanStruct(child, fieldValue) {
+				if !mergedChild {
+					target[jsonName] = child
+				}
+				merged = true
+			}
+		case reflect.Slice:
+			if drProtectionGroupOverlayBooleanSlice(target, jsonName, fieldValue) {
+				merged = true
+			}
+		}
+	}
+	return merged
+}
+
+func drProtectionGroupOverlayBooleanSlice(target map[string]any, jsonName string, value reflect.Value) bool {
+	if value.Len() == 0 {
+		return false
+	}
+
+	merged := false
+	items, ok := target[jsonName].([]any)
+	if !ok || len(items) < value.Len() {
+		items = make([]any, value.Len())
+	}
+
+	for i := 0; i < value.Len(); i++ {
+		element, ok := drProtectionGroupIndirectValue(value.Index(i))
+		if !ok || element.Kind() != reflect.Struct {
+			continue
+		}
+
+		child, _ := drProtectionGroupExistingBooleanMap(items[i])
+		if drProtectionGroupOverlayBooleanStruct(child, element) {
+			items[i] = child
+			merged = true
+		}
+	}
+
+	if merged {
+		target[jsonName] = items
+	}
+	return merged
+}
+
+func drProtectionGroupChildBooleanMap(target map[string]any, jsonName string) (map[string]any, bool) {
+	if existing, ok := target[jsonName].(map[string]any); ok && existing != nil {
+		return existing, true
+	}
+	return map[string]any{}, false
+}
+
+func drProtectionGroupExistingBooleanMap(value any) (map[string]any, bool) {
+	if existing, ok := value.(map[string]any); ok && existing != nil {
+		return existing, true
+	}
+	return map[string]any{}, false
+}
+
+func drProtectionGroupIndirectValue(value reflect.Value) (reflect.Value, bool) {
+	if !value.IsValid() {
+		return reflect.Value{}, false
+	}
+	for value.Kind() == reflect.Pointer {
+		if value.IsNil() {
+			return reflect.Value{}, false
+		}
+		value = value.Elem()
+	}
+	return value, value.IsValid()
+}
+
+func drProtectionGroupJSONFieldName(field reflect.StructField) string {
+	tag := strings.TrimSpace(field.Tag.Get("json"))
+	if tag == "" {
+		return ""
+	}
+	name := strings.TrimSpace(strings.Split(tag, ",")[0])
+	if name == "" || name == "-" {
+		return ""
+	}
+	return name
 }
