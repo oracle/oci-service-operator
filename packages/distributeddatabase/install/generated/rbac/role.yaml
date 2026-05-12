@@ -1,0 +1,39 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
+  - distributeddatabase.oracle.com
+  resources:
+  - distributeddatabaseprivateendpoints
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - distributeddatabase.oracle.com
+  resources:
+  - distributeddatabaseprivateendpoints/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - distributeddatabase.oracle.com
+  resources:
+  - distributeddatabaseprivateendpoints/status
+  verbs:
+  - get
+  - patch
+  - update

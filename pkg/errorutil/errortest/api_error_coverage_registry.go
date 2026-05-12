@@ -580,6 +580,15 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 				deleteNotFoundReadback,
 				retryableConflictWorkRequest,
 				"DrProtectionGroup uses generatedruntime work-request follow-up semantics with a handwritten hook layer for polymorphic member request-body shaping, filter-only lifecycle narrowing, create-only association drift checks, and GetWorkRequest plus GetDrProtectionGroup delete confirmation rereads.",
+			resourceKey("distributeddatabase", "DistributedDatabasePrivateEndpoint"): reviewedRegistration(
+				"distributeddatabase",
+				"distributeddatabase",
+				apiErrorCoverageDefaultVersion,
+				"DistributedDatabasePrivateEndpoint",
+				APIErrorCoverageFamilyGeneratedRuntimePlain,
+				deleteNotFoundGeneratedRuntime,
+				retryableConflictGeneratedRuntime,
+				"DistributedDatabasePrivateEndpoint keeps lifecycle-driven generatedruntime CRUD and confirm-delete rereads, while a small handwritten seam drops lifecycleState from the pre-create list request, preserves explicit empty clears for description, nsgIds, and tag maps, and clears tracked identity when a reread reports the recorded OCID as stale.",
 			),
 			resourceKey("dataflow", "Application"): reviewedRegistration(
 				"dataflow",

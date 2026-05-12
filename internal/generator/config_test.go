@@ -1164,6 +1164,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"delegateaccesscontrol",
 		"disasterrecovery",
 		"devops",
+		"distributeddatabase",
 		"dns",
 		"email",
 		"events",
@@ -1277,6 +1278,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"delegateaccesscontrol",
 		"disasterrecovery",
 		"devops",
+		"distributeddatabase",
 		"dns",
 		"email",
 		"events",
@@ -1382,6 +1384,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	assertServiceSelection(t, services["dashboardservice"], true, SelectionModeExplicit, []string{"DashboardGroup", "Dashboard"})
 	assertServiceSelection(t, services["delegateaccesscontrol"], true, SelectionModeExplicit, []string{"DelegationControl"})
 	assertServiceSelection(t, services["devops"], true, SelectionModeExplicit, []string{"Project", "Repository", "BuildPipeline", "DeployPipeline", "DeployArtifact", "Trigger"})
+	assertServiceSelection(t, services["distributeddatabase"], true, SelectionModeExplicit, []string{"DistributedDatabasePrivateEndpoint"})
 	assertServiceSelection(t, services["dns"], true, SelectionModeExplicit, []string{"Zone", "View", "TsigKey", "SteeringPolicy", "SteeringPolicyAttachment"})
 	assertServiceSelection(t, services["email"], true, SelectionModeExplicit, []string{"Dkim", "EmailDomain", "Sender", "Suppression"})
 	assertServiceSelection(t, services["events"], true, SelectionModeExplicit, []string{"Rule"})
@@ -2182,6 +2185,7 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 		"delegateaccesscontrol":       {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
 		"disasterrecovery":            {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
 		"devops":                      {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"distributeddatabase":         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"dns":                         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"email":                       {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"events":                      {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},

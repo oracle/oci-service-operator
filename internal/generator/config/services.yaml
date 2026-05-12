@@ -2394,6 +2394,34 @@ services:
       webhooks:
         strategy: none
 
+  - service: distributeddatabase
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/distributeddatabase
+    group: distributeddatabase
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - DistributedDatabasePrivateEndpoint
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: DistributedDatabasePrivateEndpoint
+          formalSpec: distributeddatabaseprivateendpoint
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+
   - service: dns
     sdkPackage: github.com/oracle/oci-go-sdk/v65/dns
     group: dns
