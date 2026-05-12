@@ -25,6 +25,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/capacitymanagement"
 	"github.com/oracle/oci-go-sdk/v65/certificatesmanagement"
 	"github.com/oracle/oci-go-sdk/v65/clusterplacementgroups"
+	"github.com/oracle/oci-go-sdk/v65/computeinstanceagent"
 	"github.com/oracle/oci-go-sdk/v65/containerengine"
 	"github.com/oracle/oci-go-sdk/v65/containerinstances"
 	"github.com/oracle/oci-go-sdk/v65/core"
@@ -651,6 +652,10 @@ var seedTargets = []Target{
 	newTarget("clusterplacementgroups", "ClusterPlacementGroup", reflect.TypeOf(clusterplacementgroups.ClusterPlacementGroup{})),
 	newTarget("clusterplacementgroups", "ClusterPlacementGroupCollection", reflect.TypeOf(clusterplacementgroups.ClusterPlacementGroupCollection{})),
 	newTarget("clusterplacementgroups", "ClusterPlacementGroupSummary", reflect.TypeOf(clusterplacementgroups.ClusterPlacementGroupSummary{})),
+
+	// Computeinstanceagent CRD support
+	newTarget("computeinstanceagent", "InstanceAgentPlugin", reflect.TypeOf(computeinstanceagent.InstanceAgentPlugin{})),
+	newTarget("computeinstanceagent", "InstanceAgentPluginSummary", reflect.TypeOf(computeinstanceagent.InstanceAgentPluginSummary{})),
 
 	// Containerinstances CRD support
 	newTarget("containerinstances", "CreateContainerInstanceDetails", reflect.TypeOf(containerinstances.CreateContainerInstanceDetails{})),

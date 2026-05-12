@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "computeinstanceagent",
+  "slug": "instanceagentplugin",
+  "kind": "InstanceAgentPlugin",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_compute_instance_agent_instance_agent_plugin",
+  "operations": {
+    "create": [],
+    "get": [
+      {
+        "operation": "GetInstanceAgentPlugin",
+        "requestType": "computeinstanceagent.GetInstanceAgentPluginRequest",
+        "responseType": "computeinstanceagent.GetInstanceAgentPluginResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListInstanceAgentPlugins",
+        "requestType": "computeinstanceagent.ListInstanceAgentPluginsRequest",
+        "responseType": "computeinstanceagent.ListInstanceAgentPluginsResponse"
+      }
+    ],
+    "update": [],
+    "delete": []
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [],
+      "target": [
+        "RUNNING",
+        "STOPPED",
+        "NOT_SUPPORTED",
+        "INVALID"
+      ]
+    },
+    "update": {
+      "pending": [],
+      "target": [
+        "RUNNING",
+        "STOPPED",
+        "NOT_SUPPORTED",
+        "INVALID"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [],
+    "forceNew": [
+      "compartment_id",
+      "instanceagent_id",
+      "plugin_name"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [],
+    "update": [],
+    "delete": []
+  },
+  "deleteConfirmation": {
+    "pending": [],
+    "target": [
+      "LOCAL_DELETE"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_compute_instance_agent_instance_agent_plugins",
+    "collectionField": "instance_agent_plugins",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "instanceagent_id",
+      "plugin_name"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/computeinstanceagent/instanceagentplugin/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/computeinstanceagent/instanceagentplugin/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "delete-confirmation",
+      "lifecycle-classification",
+      "list-lookup",
+      "mutation-policy",
+      "secret-output",
+      "status-projection"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: GetInstanceAgentPlugin and ListInstanceAgentPlugins are present in v65.110.0. GetInstanceAgentPlugin requires instanceagentId, compartmentId, and pluginName; ListInstanceAgentPlugins requires instanceagentId and compartmentId and supports name and status filters. There is no create, update, or delete surface in this package, and plugin enable-disable remains part of Core UpdateInstance.",
+    "Pinned provider coverage is unconfirmed. formal/sources.lock still points at github.com/oracle/terraform-provider-oci@eb653febb1bab4cc6650a96d404a8baf36fdf671, but the accessible provider inventory did not expose a checked-in InstanceAgentPlugin resource or data source. The providerResource and datasource names therefore stay provisional OCI-style placeholders so generator-owned registry artifacts can derive stable links without claiming verified provider coverage.",
+    "Repo-authored runtime contract is narrower than the visible SDK surface: the published kind is bind-existing and observe-only, requires explicit instanceagentId plus compartmentId plus pluginName, projects state from GetInstanceAgentPlugin, uses ListInstanceAgentPlugins only to confirm absence when rereads fail, and treats CR delete as local unbind without calling OCI mutation helpers.",
+    "Visible plugin statuses are steady-state observations rather than create, update, or delete progress markers. The runtime therefore does not invent waiter or work-request semantics for this read-only rollout."
+  ]
+}

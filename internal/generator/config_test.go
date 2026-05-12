@@ -1151,6 +1151,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"capacitymanagement",
 		"certificatesmanagement",
 		"clusterplacementgroups",
+		"computeinstanceagent",
 		"containerengine",
 		"containerinstances",
 		"core",
@@ -1265,6 +1266,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"capacitymanagement",
 		"certificatesmanagement",
 		"clusterplacementgroups",
+		"computeinstanceagent",
 		"containerengine",
 		"containerinstances",
 		"core",
@@ -1372,6 +1374,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	assertServiceSelection(t, services["capacitymanagement"], true, SelectionModeExplicit, []string{"OccCapacityRequest"})
 	assertServiceSelection(t, services["certificatesmanagement"], true, SelectionModeExplicit, []string{"CaBundle"})
 	assertServiceSelection(t, services["clusterplacementgroups"], true, SelectionModeExplicit, []string{"ClusterPlacementGroup"})
+	assertServiceSelection(t, services["computeinstanceagent"], true, SelectionModeExplicit, []string{"InstanceAgentPlugin"})
 	assertServiceSelection(t, services["containerengine"], true, SelectionModeExplicit, []string{"Cluster", "NodePool"})
 	assertServiceSelection(t, services["containerinstances"], true, SelectionModeExplicit, []string{"ContainerInstance"})
 	assertServiceSelection(t, services["core"], true, SelectionModeExplicit, []string{"Instance"})
@@ -2172,6 +2175,7 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 		"capacitymanagement":          {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"certificatesmanagement":      {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"clusterplacementgroups":      {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"computeinstanceagent":        {strategy: AsyncStrategyNone, runtime: AsyncRuntimeGeneratedRuntime},
 		"containerengine":             {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"containerinstances":          {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeHandwritten},
 		"core":                        {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},

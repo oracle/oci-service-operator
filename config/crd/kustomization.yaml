@@ -36,6 +36,7 @@ resources:
 - bases/capacitymanagement.oracle.com_occcapacityrequests.yaml
 - bases/certificatesmanagement.oracle.com_cabundles.yaml
 - bases/clusterplacementgroups.oracle.com_clusterplacementgroups.yaml
+- bases/computeinstanceagent.oracle.com_instanceagentplugins.yaml
 - bases/containerengine.oracle.com_clusters.yaml
 - bases/containerengine.oracle.com_nodepools.yaml
 - bases/containerinstances.oracle.com_containerinstances.yaml

@@ -1,0 +1,98 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title State Machine - computeinstanceagent/InstanceAgentPlugin
+skinparam state {
+  backgroundColor #f8fafc
+  borderColor #0f172a
+  fontColor #0f172a
+  startColor #1d4ed8
+  endColor #0f172a
+}
+left to right direction
+hide empty description
+state "Observe" as observe
+state "EvaluateReady" as evaluate_ready
+state "Ready" as ready
+state "Retryable" as retryable
+state "Failed" as failed
+observe : read spec, tracked status, delete intent,\nand current OCI lifecycle
+state "ResolveByLookup" as resolve_by_lookup
+state "RejectUnsupportedDrift" as reject_unsupported_drift
+[*] --> observe : reconcile
+observe --> resolve_by_lookup : tracked identity missing
+resolve_by_lookup --> evaluate_ready : lookup or create reaches\nRUNNING, STOPPED,\nNOT_SUPPORTED, INVALID
+resolve_by_lookup --> failed : unresolved OCI error or non-success state
+observe --> evaluate_ready : OCI state in RUNNING,\nSTOPPED, NOT_SUPPORTED,\nINVALID
+observe --> failed : unresolved OCI error or non-success state
+evaluate_ready --> reject_unsupported_drift : force-new or conflicting\ndrift detected
+reject_unsupported_drift --> ready : wait for spec or live state change
+evaluate_ready --> ready : no supported drift remains
+ready --> ready : no supported drift remains
+retryable --> retryable : OCI remains retryable
+failed --> failed : OCI remains terminal
+note right of ready
+shared diagram:
+shared/diagrams/shared-controller-state-machine.svg
+Start from the shared controller phase model and
+specialize imported provider states, delete
+targets, and failure exits here.
+archetype batch: Generated service-manager
+controllers map provider states into the shared
+controller phases with explicit finalizer and
+requeue policies.
+service: computeinstanceagent
+slug: instanceagentplugin
+kind: InstanceAgentPlugin
+archetype: generated-service-manager
+status/finalizer: required / none
+requeue: terminating
+provider states: create none; update none;
+delete none
+follow-up: create=none; update=none; delete=none
+supported drift: none
+reject before mutate: force-new fields
+compartmentId, instanceagentId, pluginName
+create-only fields: none
+list lookup:
+oci_compute_instance_agent_instance_agent_plugins
+filters compartmentId, instanceagentId,
+pluginName; Direct reads require the exact
+composite identity
+instanceagentId+compartmentId+pluginName.
+Confirmation-only list reads reuse the same
+scope and treat an exact plugin-name match as
+the bound plugin; unexpected surviving matches
+fail instead of guessing.
+conflicts: none
+open gaps: none
+Compute Instance Agent exposes
+GetInstanceAgentPlugin and
+ListInstanceAgentPlugins only in the pinned SDK,
+so the published runtime is bind-existing and
+observe-only.
+Bind identity is explicit: reconcile requires
+compartmentId, instanceagentId, and pluginName,
+tracks the composite identity in status, and
+uses ListInstanceAgentPlugins only to confirm
+absence after a reread no longer finds the
+tracked plugin.
+No OCI create, update, or delete operation is
+published. Plugin enable or disable remains part
+of Core UpdateInstance and is out of scope for
+this package.
+Visible plugin states RUNNING, STOPPED,
+NOT_SUPPORTED, and INVALID are all stable
+observed states. Delete is Kubernetes-local
+unbind only and settles through best-effort
+local cleanup rather than cloud-side terminal
+waiting.
+end note
+@enduml
