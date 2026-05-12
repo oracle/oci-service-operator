@@ -7,6 +7,7 @@ package managedinstance
 
 import (
 	"context"
+	"strings"
 	"testing"
 
 	"github.com/oracle/oci-go-sdk/v65/common"
@@ -318,6 +319,108 @@ func TestManagedInstanceCreateOrUpdateClearsStaleTrackedIDBeforeListRebindUpdate
 	}
 	if len(resource.Status.Configuration.DomainSearchPaths) != 0 {
 		t.Fatalf("status.configuration.domainSearchPaths = %#v, want empty after rebound update", resource.Status.Configuration.DomainSearchPaths)
+	}
+}
+
+func TestManagedInstanceCreateOrUpdateRejectsForceNewIDDraftOnTrackedResource(t *testing.T) {
+	t.Parallel()
+
+	resource := trackedManagedInstanceResource()
+	resource.Spec.Id = testOtherManagedInstanceID
+
+	fake := &fakeManagedInstanceOCIClient{
+		getFn: func(_ context.Context, req wlmssdk.GetManagedInstanceRequest) (wlmssdk.GetManagedInstanceResponse, error) {
+			requireStringPtr(t, "GetManagedInstanceRequest.ManagedInstanceId", req.ManagedInstanceId, testManagedInstanceID)
+			return wlmssdk.GetManagedInstanceResponse{
+				ManagedInstance: activeManagedInstanceWithConfigSDK(
+					testManagedInstanceID,
+					6,
+					[]string{"/u01/oracle/user_projects/domains"},
+				),
+			}, nil
+		},
+		updateFn: func(context.Context, wlmssdk.UpdateManagedInstanceRequest) (wlmssdk.UpdateManagedInstanceResponse, error) {
+			t.Fatal("UpdateManagedInstance should not be called after force-new id drift")
+			return wlmssdk.UpdateManagedInstanceResponse{}, nil
+		},
+	}
+
+	response, err := newTestManagedInstanceClient(fake).CreateOrUpdate(context.Background(), resource, requestForManagedInstance(resource))
+	if err == nil || !strings.Contains(err.Error(), "require replacement when id changes") {
+		t.Fatalf("CreateOrUpdate() error = %v, want force-new id drift failure", err)
+	}
+	if response.IsSuccessful {
+		t.Fatalf("CreateOrUpdate() response = %#v, want unsuccessful drift rejection", response)
+	}
+	if len(fake.getRequests) != 1 {
+		t.Fatalf("Get calls = %d, want 1 on the currently tracked resource", len(fake.getRequests))
+	}
+	if len(fake.updateRequests) != 0 {
+		t.Fatalf("Update calls = %d, want 0 after force-new id drift", len(fake.updateRequests))
+	}
+}
+
+func TestManagedInstanceCreateOrUpdateRebindsStaleTrackedIDWithoutConfigurationUpdate(t *testing.T) {
+	t.Parallel()
+
+	resource := trackedManagedInstanceResource()
+	resource.Spec.Id = ""
+	resource.Spec.Configuration = nil
+	resource.Status.Id = testOtherManagedInstanceID
+	resource.Status.OsokStatus.Ocid = shared.OCID(testOtherManagedInstanceID)
+
+	fake := &fakeManagedInstanceOCIClient{
+		getFn: func(_ context.Context, req wlmssdk.GetManagedInstanceRequest) (wlmssdk.GetManagedInstanceResponse, error) {
+			requireStringPtr(t, "GetManagedInstanceRequest.ManagedInstanceId", req.ManagedInstanceId, testOtherManagedInstanceID)
+			return wlmssdk.GetManagedInstanceResponse{}, stubServiceError{statusCode: 404, code: "NotFound"}
+		},
+		listFn: func(_ context.Context, req wlmssdk.ListManagedInstancesRequest) (wlmssdk.ListManagedInstancesResponse, error) {
+			requireStringPtr(t, "ListManagedInstancesRequest.CompartmentId", req.CompartmentId, testManagedInstanceCompartment)
+			requireStringPtr(t, "ListManagedInstancesRequest.DisplayName", req.DisplayName, testManagedInstanceName)
+			if req.Id != nil {
+				t.Fatalf("ListManagedInstancesRequest.Id = %#v, want nil after stale tracked identity clear", req.Id)
+			}
+			if got := string(req.PluginStatus); got != resource.Spec.PluginStatus {
+				t.Fatalf("ListManagedInstancesRequest.PluginStatus = %q, want %q", got, resource.Spec.PluginStatus)
+			}
+			return wlmssdk.ListManagedInstancesResponse{
+				ManagedInstanceCollection: wlmssdk.ManagedInstanceCollection{
+					Items: []wlmssdk.ManagedInstanceSummary{
+						managedInstanceSummary(testManagedInstanceID, testManagedInstanceName, resource.Spec.PluginStatus),
+					},
+				},
+			}, nil
+		},
+		updateFn: func(context.Context, wlmssdk.UpdateManagedInstanceRequest) (wlmssdk.UpdateManagedInstanceResponse, error) {
+			t.Fatal("UpdateManagedInstance should not be called when no configuration update is requested")
+			return wlmssdk.UpdateManagedInstanceResponse{}, nil
+		},
+	}
+
+	response, err := newTestManagedInstanceClient(fake).CreateOrUpdate(context.Background(), resource, requestForManagedInstance(resource))
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v, want successful stale tracked-ID rebind without configuration drift", err)
+	}
+	if !response.IsSuccessful || response.ShouldRequeue {
+		t.Fatalf("CreateOrUpdate() response = %#v, want successful observe after stale tracked-ID rebind", response)
+	}
+	if len(fake.getRequests) != 1 {
+		t.Fatalf("Get calls = %d, want 1 stale tracked-ID probe", len(fake.getRequests))
+	}
+	if len(fake.listRequests) != 1 {
+		t.Fatalf("List calls = %d, want 1 rebind lookup after stale tracked-ID clear", len(fake.listRequests))
+	}
+	if len(fake.updateRequests) != 0 {
+		t.Fatalf("Update calls = %d, want 0 when no configuration update is requested", len(fake.updateRequests))
+	}
+	if got := string(resource.Status.OsokStatus.Ocid); got != testManagedInstanceID {
+		t.Fatalf("status.ocid = %q, want rebound id %q", got, testManagedInstanceID)
+	}
+	if got := resource.Status.Id; got != testManagedInstanceID {
+		t.Fatalf("status.id = %q, want rebound id %q", got, testManagedInstanceID)
+	}
+	if got := resource.Status.HostName; got != testManagedInstanceHostName {
+		t.Fatalf("status.hostName = %q, want %q", got, testManagedInstanceHostName)
 	}
 }
 

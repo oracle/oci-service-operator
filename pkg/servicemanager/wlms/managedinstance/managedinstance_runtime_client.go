@@ -223,6 +223,9 @@ func buildManagedInstanceUpdateBody(
 	if resource == nil {
 		return wlmssdk.UpdateManagedInstanceDetails{}, false, fmt.Errorf("ManagedInstance resource is nil")
 	}
+	if len(resource.Spec.Configuration) == 0 {
+		return wlmssdk.UpdateManagedInstanceDetails{}, false, nil
+	}
 
 	current, err := managedInstanceFromResponse(currentResponse)
 	if err != nil {
@@ -377,7 +380,7 @@ func (c managedInstanceRuntimeClient) CreateOrUpdate(
 	currentTrackedManagedInstanceID := trackedManagedInstanceID(resource)
 	hadTrackedIdentity := currentTrackedManagedInstanceID != ""
 	explicitManagedInstanceID := strings.TrimSpace(resource.Spec.Id)
-	if explicitManagedInstanceID != "" {
+	if !hadTrackedIdentity && explicitManagedInstanceID != "" {
 		if err := c.preflightManagedInstanceDirectBind(ctx, resource, explicitManagedInstanceID); err != nil {
 			return servicemanager.OSOKResponse{IsSuccessful: false}, err
 		}
