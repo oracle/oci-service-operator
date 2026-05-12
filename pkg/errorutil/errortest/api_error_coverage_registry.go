@@ -1140,6 +1140,16 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 				retryableConflictGeneratedRuntime,
 				"WlsDomain is manage-existing only because WLMS lacks CreateWlsDomain; a handwritten wrapper validates bind identity, paginates ListWlsDomains lookup, re-enters one Get-backed delegate pass after list-only bind, and custom update-body shaping preserves sparse configuration intent plus explicit tag clears while delete relies on generatedruntime confirm-delete rereads.",
 			),
+			resourceKey("wlms", "ManagedInstance"): reviewedRegistration(
+				"wlms",
+				"wlms",
+				apiErrorCoverageDefaultVersion,
+				"ManagedInstance",
+				APIErrorCoverageFamilyGeneratedRuntimePlain,
+				deleteNotFoundManualRuntime,
+				retryableConflictGeneratedRuntime,
+				"ManagedInstance is bind-existing plus update-only because WLMS lacks CreateManagedInstance and DeleteManagedInstance; a handwritten wrapper validates bind identity, preflights explicit IDs through GetManagedInstance so direct binds do not fall back to list adoption, paginates ListManagedInstances lookup, preserves sparse configuration intent for UpdateManagedInstance, and treats CR delete as local unbind without OCI delete helpers.",
+			),
 			resourceKey("tenantmanagercontrolplane", "Organization"): reviewedRegistration(
 				"tenantmanagercontrolplane",
 				"tenantmanagercontrolplane",

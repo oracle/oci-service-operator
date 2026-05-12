@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "wlms",
+  "slug": "managedinstance",
+  "kind": "ManagedInstance",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_wlms_managed_instance",
+  "operations": {
+    "create": [],
+    "get": [
+      {
+        "operation": "GetManagedInstance",
+        "requestType": "wlms.GetManagedInstanceRequest",
+        "responseType": "wlms.GetManagedInstanceResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListManagedInstances",
+        "requestType": "wlms.ListManagedInstancesRequest",
+        "responseType": "wlms.ListManagedInstancesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateManagedInstance",
+        "requestType": "wlms.UpdateManagedInstanceRequest",
+        "responseType": "wlms.UpdateManagedInstanceResponse"
+      }
+    ],
+    "delete": []
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [],
+      "target": [
+        "ACTIVE",
+        "INACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [],
+      "target": [
+        "ACTIVE",
+        "INACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "configuration"
+    ],
+    "forceNew": [
+      "compartment_id",
+      "display_name",
+      "id",
+      "plugin_status"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": []
+  },
+  "deleteConfirmation": {
+    "pending": [],
+    "target": [
+      "LOCAL_DELETE"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_wlms_managed_instances",
+    "collectionField": "managed_instances",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "id",
+      "plugin_status"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/wlms/managedinstance/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/wlms/managedinstance/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "delete-confirmation",
+      "lifecycle-classification",
+      "list-lookup",
+      "mutation-policy",
+      "status-projection",
+      "waiter-work-request"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: GetManagedInstance, ListManagedInstances, and UpdateManagedInstance are present in v65.110.0. CreateManagedInstance and DeleteManagedInstance are not exposed, and both GetManagedInstanceResponse and UpdateManagedInstanceResponse return a ManagedInstance body without a work-request identifier.",
+    "Pinned provider coverage is unconfirmed. formal/sources.lock still points at github.com/oracle/terraform-provider-oci@eb653febb1bab4cc6650a96d404a8baf36fdf671, but the accessible local provider inventory did not expose a checked-in ManagedInstance resource or data source. The providerResource and datasource names therefore stay provisional OCI-style placeholders so generator-owned registry artifacts can derive stable links without claiming verified provider coverage.",
+    "Repo-authored runtime contract is narrower than the visible SDK surface: the published kind is bind-existing plus update-only, binds by explicit id or a unique ListManagedInstances match on compartmentId plus displayName with optional pluginStatus narrowing, updates only configuration, and treats CR delete as local unbind without calling OCI delete helpers.",
+    "Visible WLMS mutation responses expose neither lifecycle state nor work-request tracking for ManagedInstance. The reviewed runtime therefore uses a bounded read-after-write confirmation pass on the next reconcile instead of inventing waiter semantics."
+  ]
+}

@@ -1339,9 +1339,13 @@ var seedTargets = []Target{
 	newTarget("waf", "WebAppFirewallPolicySummary", reflect.TypeOf(waf.WebAppFirewallPolicySummary{})),
 
 	// Wlms CRD support
+	newTarget("wlms", "UpdateManagedInstanceDetails", reflect.TypeOf(wlms.UpdateManagedInstanceDetails{})),
 	newTarget("wlms", "UpdateWlsDomainDetails", reflect.TypeOf(wlms.UpdateWlsDomainDetails{})),
+	newTarget("wlms", "ManagedInstance", reflect.TypeOf(wlms.ManagedInstance{})),
+	newTarget("wlms", "ManagedInstanceCollection", reflect.TypeOf(wlms.ManagedInstanceCollection{})),
 	newTarget("wlms", "WlsDomain", reflect.TypeOf(wlms.WlsDomain{})),
 	newTarget("wlms", "WlsDomainCollection", reflect.TypeOf(wlms.WlsDomainCollection{})),
+	newTarget("wlms", "ManagedInstanceSummary", reflect.TypeOf(wlms.ManagedInstanceSummary{})),
 	newTarget("wlms", "WlsDomainSummary", reflect.TypeOf(wlms.WlsDomainSummary{})),
 
 	// Zpr CRD support

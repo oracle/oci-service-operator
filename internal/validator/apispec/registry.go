@@ -4958,6 +4958,25 @@ var targets = []Target{
 		},
 	},
 	{
+		Name:       "WlmsManagedInstance",
+		SpecType:   reflect.TypeOf(wlmsv1beta1.ManagedInstanceSpec{}),
+		StatusType: reflect.TypeOf(wlmsv1beta1.ManagedInstanceStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "wlms.UpdateManagedInstanceDetails",
+			},
+			{
+				SDKStruct: "wlms.ManagedInstance",
+			},
+			{
+				SDKStruct: "wlms.ManagedInstanceCollection",
+			},
+			{
+				SDKStruct: "wlms.ManagedInstanceSummary",
+			},
+		},
+	},
+	{
 		Name:       "WlmsWlsDomain",
 		SpecType:   reflect.TypeOf(wlmsv1beta1.WlsDomainSpec{}),
 		StatusType: reflect.TypeOf(wlmsv1beta1.WlsDomainStatus{}),

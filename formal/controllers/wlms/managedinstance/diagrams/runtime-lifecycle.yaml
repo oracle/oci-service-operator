@@ -1,0 +1,41 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: wlms
+slug: managedinstance
+kind: ManagedInstance
+archetype: generated-service-manager
+states:
+  - active
+  - updating
+  - failed
+repoAuthored:
+  followUp:
+    create: none
+    update: "next reconcile GetManagedInstance confirmation"
+    delete: none
+  listLookup:
+    filters:
+      - compartmentId
+      - displayName
+      - id
+      - pluginStatus
+    matchRule: exact id or exact compartmentId plus displayName plus optional pluginStatus unique match; duplicate matches fail
+  mutation:
+    mutable:
+      - configuration
+    forceNew:
+      - compartmentId
+      - displayName
+      - id
+      - pluginStatus
+notes:
+  - WLMS does not expose CreateManagedInstance or DeleteManagedInstance in
+    v65.110.0, so the published runtime is bind/manage-existing only.
+  - Successful UpdateManagedInstance responses already return a
+    ManagedInstance body. The runtime uses that body plus one bounded
+    GetManagedInstance confirmation pass on the next reconcile instead of
+    inventing lifecycle or work-request polling.
+  - Delete is Kubernetes-local unbind only because the SDK exposes no delete
+    helper and no cloud-side delete lifecycle for this family.
+  - Plugin status remains a projected observed-state field and optional bind
+    filter, not a controller-owned async lifecycle.

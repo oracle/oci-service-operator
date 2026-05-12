@@ -2,7 +2,7 @@
 
 # WebLogic Management Service
 
-Manage OCI WebLogic Management Service domains from Kubernetes with a reviewed manage-existing controller-backed runtime.
+Manage OCI WebLogic Management Service resources from Kubernetes with reviewed controller-backed manage-existing runtimes.
 
 | Field | Value |
 | --- | --- |
@@ -16,8 +16,9 @@ Manage OCI WebLogic Management Service domains from Kubernetes with a reviewed m
 
 ## Notes
 
-- Current package scope is intentionally limited to WlsDomain while AgreementRecord, Configuration, ManagedInstance, WlsDomainCredential, and other WLMS helper families stay unpublished.
-- The published runtime is manage-existing only at this SDK pin because WLMS does not expose CreateWlsDomain; bind by `id` or a unique `compartmentId` plus `displayName`, then reconcile configuration and tag updates with confirm-delete observation.
+- Current package scope is intentionally limited to WlsDomain and ManagedInstance while AgreementRecord, Configuration, WlsDomainCredential, and other WLMS helper families stay unpublished.
+- WlsDomain is manage-existing because WLMS does not expose CreateWlsDomain; bind by `id` or a unique `compartmentId` plus `displayName`, then reconcile configuration and tag updates with confirm-delete observation.
+- ManagedInstance is bind-existing plus update-only because WLMS does not expose CreateManagedInstance or DeleteManagedInstance; bind by `id` or a unique `compartmentId` plus `displayName` with optional `pluginStatus`, then reconcile configuration updates with one bounded confirmation reread.
 - No checked-in release manifest currently lists this package; the resource scope below reflects the current repository package metadata.
 - This package is currently hidden from the Supported Resources landing page until a checked-in release manifest promotes it to the customer-visible surface.
 
@@ -25,4 +26,5 @@ Manage OCI WebLogic Management Service domains from Kubernetes with a reviewed m
 
 | Resource | API Version | Summary | Guide | Sample | API Spec |
 | --- | --- | --- | --- | --- | --- |
+| `wlms/ManagedInstance` | `wlms.oracle.com/v1beta1` | Manage OCI managed instances already onboarded into OCI WebLogic Management Service. | — | [Sample](../../samples/wlms/v1beta1/managedinstance.md) | [Reference](../../api/wlms/v1beta1/index.md#kind-managedinstance) |
 | `wlms/WlsDomain` | `wlms.oracle.com/v1beta1` | Manage OCI WebLogic domains already onboarded into OCI WebLogic Management Service. | — | [Sample](../../samples/wlms/v1beta1/wlsdomain.md) | [Reference](../../api/wlms/v1beta1/index.md#kind-wlsdomain) |

@@ -13,6 +13,7 @@ import (
 	wlmsv1beta1 "github.com/oracle/oci-service-operator/api/wlms/v1beta1"
 	wlmscontrollers "github.com/oracle/oci-service-operator/controllers/wlms"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
+	wlmsmanagedinstanceservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/wlms/managedinstance"
 	wlmswlsdomainservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/wlms/wlsdomain"
 )
 
@@ -21,6 +22,17 @@ func init() {
 		Group:       "wlms",
 		AddToScheme: wlmsv1beta1.AddToScheme,
 		SetupWithManager: func(ctx Context) error {
+			if err := (&wlmscontrollers.ManagedInstanceReconciler{
+				Reconciler: NewBaseReconciler(
+					ctx,
+					"ManagedInstance",
+					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
+						return wlmsmanagedinstanceservicemanager.NewManagedInstanceServiceManagerWithDeps(deps)
+					},
+				),
+			}).SetupWithManager(ctx.Manager); err != nil {
+				return fmt.Errorf("setup ManagedInstance controller: %w", err)
+			}
 			if err := (&wlmscontrollers.WlsDomainReconciler{
 				Reconciler: NewBaseReconciler(
 					ctx,

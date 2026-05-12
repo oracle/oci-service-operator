@@ -1443,7 +1443,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	assertServiceSelection(t, services["waa"], true, SelectionModeExplicit, []string{"WebAppAcceleration", "WebAppAccelerationPolicy"})
 	assertServiceSelection(t, services["waas"], true, SelectionModeExplicit, []string{"AddressList", "Certificate", "CustomProtectionRule", "HttpRedirect", "WaasPolicy"})
 	assertServiceSelection(t, services["waf"], true, SelectionModeExplicit, []string{"NetworkAddressList", "WebAppFirewall", "WebAppFirewallPolicy"})
-	assertServiceSelection(t, services["wlms"], true, SelectionModeExplicit, []string{"WlsDomain"})
+	assertServiceSelection(t, services["wlms"], true, SelectionModeExplicit, []string{"WlsDomain", "ManagedInstance"})
 	assertServiceSelection(t, services["visualbuilder"], true, SelectionModeExplicit, []string{"VbInstance"})
 	assertServiceSelection(t, services["vnmonitoring"], true, SelectionModeExplicit, []string{"PathAnalyzerTest"})
 	assertServiceSelection(t, services["zpr"], true, SelectionModeExplicit, []string{"Configuration", "ZprPolicy"})
@@ -2246,6 +2246,12 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 		"wlms":                        {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"zpr":                         {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
 	}
+	expectedByTarget := map[string]struct {
+		strategy string
+		runtime  string
+	}{
+		"wlms/ManagedInstance": {strategy: AsyncStrategyNone, runtime: AsyncRuntimeGeneratedRuntime},
+	}
 
 	targets := defaultActiveExplicitSelectedKindTargets(cfg)
 	if len(targets) == 0 {
@@ -2254,7 +2260,10 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 
 	for _, target := range targets {
 		service := services[target.Service]
-		expected, ok := expectedByService[target.Service]
+		expected, ok := expectedByTarget[target.Service+"/"+target.Kind]
+		if !ok {
+			expected, ok = expectedByService[target.Service]
+		}
 		if !ok {
 			t.Fatalf("missing async expectation for default-active service %q", target.Service)
 		}
