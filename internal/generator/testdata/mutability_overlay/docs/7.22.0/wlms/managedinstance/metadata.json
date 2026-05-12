@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "wlms",
+  "kind": "ManagedInstance",
+  "formalSlug": "managedinstance",
+  "providerResource": "oci_wlms_managed_instance",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/wlms_managed_instance",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/wlms_managed_instance",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/wlms/managedinstance/page.html",
+  "bodySHA256": "b974547ce8dabf796fb982d560696130110517e11954efc97b396e1ddf953eb4",
+  "bodyBytes": 699,
+  "fixtureBodyPath": "7.22.0/wlms/managedinstance/page.html"
+}
