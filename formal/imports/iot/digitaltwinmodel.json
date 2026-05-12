@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "iot",
+  "slug": "digitaltwinmodel",
+  "kind": "DigitalTwinModel",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_iot_digitaltwinmodel",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDigitalTwinModel",
+        "requestType": "iot.CreateDigitalTwinModelRequest",
+        "responseType": "iot.CreateDigitalTwinModelResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDigitalTwinModel",
+        "requestType": "iot.GetDigitalTwinModelRequest",
+        "responseType": "iot.GetDigitalTwinModelResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDigitalTwinModel",
+        "requestType": "iot.ListDigitalTwinModelRequest",
+        "responseType": "iot.ListDigitalTwinModelResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDigitalTwinModel",
+        "requestType": "iot.UpdateDigitalTwinModelRequest",
+        "responseType": "iot.UpdateDigitalTwinModelResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDigitalTwinModel",
+        "requestType": "iot.DeleteDigitalTwinModelRequest",
+        "responseType": "iot.DeleteDigitalTwinModelResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_iot_digitaltwinmodel",
+    "collectionField": "digitaltwinmodel",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/iot/digitaltwinmodel/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/iot/digitaltwinmodel/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for iot/digitaltwinmodel; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "opsi",
+  "slug": "awrhub",
+  "kind": "AwrHub",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_opsi_awrhub",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateAwrHub",
+        "requestType": "opsi.CreateAwrHubRequest",
+        "responseType": "opsi.CreateAwrHubResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetAwrHub",
+        "requestType": "opsi.GetAwrHubRequest",
+        "responseType": "opsi.GetAwrHubResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListAwrHub",
+        "requestType": "opsi.ListAwrHubRequest",
+        "responseType": "opsi.ListAwrHubResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateAwrHub",
+        "requestType": "opsi.UpdateAwrHubRequest",
+        "responseType": "opsi.UpdateAwrHubResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteAwrHub",
+        "requestType": "opsi.DeleteAwrHubRequest",
+        "responseType": "opsi.DeleteAwrHubResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_opsi_awrhub",
+    "collectionField": "awrhub",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/opsi/awrhub/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/opsi/awrhub/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for opsi/awrhub; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

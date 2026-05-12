@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "dns",
+  "slug": "tsigkey",
+  "kind": "TsigKey",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_dns_tsigkey",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateTsigKey",
+        "requestType": "dns.CreateTsigKeyRequest",
+        "responseType": "dns.CreateTsigKeyResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetTsigKey",
+        "requestType": "dns.GetTsigKeyRequest",
+        "responseType": "dns.GetTsigKeyResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListTsigKey",
+        "requestType": "dns.ListTsigKeyRequest",
+        "responseType": "dns.ListTsigKeyResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateTsigKey",
+        "requestType": "dns.UpdateTsigKeyRequest",
+        "responseType": "dns.UpdateTsigKeyResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteTsigKey",
+        "requestType": "dns.DeleteTsigKeyRequest",
+        "responseType": "dns.DeleteTsigKeyResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_dns_tsigkey",
+    "collectionField": "tsigkey",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/dns/tsigkey/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/dns/tsigkey/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for dns/tsigkey; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

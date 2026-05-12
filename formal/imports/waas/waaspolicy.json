@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "waas",
+  "slug": "waaspolicy",
+  "kind": "WaasPolicy",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_waas_waaspolicy",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateWaasPolicy",
+        "requestType": "waas.CreateWaasPolicyRequest",
+        "responseType": "waas.CreateWaasPolicyResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetWaasPolicy",
+        "requestType": "waas.GetWaasPolicyRequest",
+        "responseType": "waas.GetWaasPolicyResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListWaasPolicy",
+        "requestType": "waas.ListWaasPolicyRequest",
+        "responseType": "waas.ListWaasPolicyResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateWaasPolicy",
+        "requestType": "waas.UpdateWaasPolicyRequest",
+        "responseType": "waas.UpdateWaasPolicyResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteWaasPolicy",
+        "requestType": "waas.DeleteWaasPolicyRequest",
+        "responseType": "waas.DeleteWaasPolicyResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_waas_waaspolicy",
+    "collectionField": "waaspolicy",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/waas/waaspolicy/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/waas/waaspolicy/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for waas/waaspolicy; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

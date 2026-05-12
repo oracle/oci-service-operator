@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "waa",
+  "slug": "webappaccelerationpolicy",
+  "kind": "WebAppAccelerationPolicy",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_waa_webappaccelerationpolicy",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateWebAppAccelerationPolicy",
+        "requestType": "waa.CreateWebAppAccelerationPolicyRequest",
+        "responseType": "waa.CreateWebAppAccelerationPolicyResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetWebAppAccelerationPolicy",
+        "requestType": "waa.GetWebAppAccelerationPolicyRequest",
+        "responseType": "waa.GetWebAppAccelerationPolicyResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListWebAppAccelerationPolicy",
+        "requestType": "waa.ListWebAppAccelerationPolicyRequest",
+        "responseType": "waa.ListWebAppAccelerationPolicyResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateWebAppAccelerationPolicy",
+        "requestType": "waa.UpdateWebAppAccelerationPolicyRequest",
+        "responseType": "waa.UpdateWebAppAccelerationPolicyResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteWebAppAccelerationPolicy",
+        "requestType": "waa.DeleteWebAppAccelerationPolicyRequest",
+        "responseType": "waa.DeleteWebAppAccelerationPolicyResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_waa_webappaccelerationpolicy",
+    "collectionField": "webappaccelerationpolicy",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/waa/webappaccelerationpolicy/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/waa/webappaccelerationpolicy/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for waa/webappaccelerationpolicy; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

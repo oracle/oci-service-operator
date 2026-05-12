@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "managementdashboard",
+  "slug": "managementdashboard",
+  "kind": "ManagementDashboard",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_managementdashboard_managementdashboard",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateManagementDashboard",
+        "requestType": "managementdashboard.CreateManagementDashboardRequest",
+        "responseType": "managementdashboard.CreateManagementDashboardResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetManagementDashboard",
+        "requestType": "managementdashboard.GetManagementDashboardRequest",
+        "responseType": "managementdashboard.GetManagementDashboardResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListManagementDashboard",
+        "requestType": "managementdashboard.ListManagementDashboardRequest",
+        "responseType": "managementdashboard.ListManagementDashboardResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateManagementDashboard",
+        "requestType": "managementdashboard.UpdateManagementDashboardRequest",
+        "responseType": "managementdashboard.UpdateManagementDashboardResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteManagementDashboard",
+        "requestType": "managementdashboard.DeleteManagementDashboardRequest",
+        "responseType": "managementdashboard.DeleteManagementDashboardResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_managementdashboard_managementdashboard",
+    "collectionField": "managementdashboard",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/managementdashboard/managementdashboard/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/managementdashboard/managementdashboard/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for managementdashboard/managementdashboard; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

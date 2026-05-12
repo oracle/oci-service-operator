@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "waas",
+  "slug": "customprotectionrule",
+  "kind": "CustomProtectionRule",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_waas_customprotectionrule",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateCustomProtectionRule",
+        "requestType": "waas.CreateCustomProtectionRuleRequest",
+        "responseType": "waas.CreateCustomProtectionRuleResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetCustomProtectionRule",
+        "requestType": "waas.GetCustomProtectionRuleRequest",
+        "responseType": "waas.GetCustomProtectionRuleResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListCustomProtectionRule",
+        "requestType": "waas.ListCustomProtectionRuleRequest",
+        "responseType": "waas.ListCustomProtectionRuleResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateCustomProtectionRule",
+        "requestType": "waas.UpdateCustomProtectionRuleRequest",
+        "responseType": "waas.UpdateCustomProtectionRuleResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteCustomProtectionRule",
+        "requestType": "waas.DeleteCustomProtectionRuleRequest",
+        "responseType": "waas.DeleteCustomProtectionRuleResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_waas_customprotectionrule",
+    "collectionField": "customprotectionrule",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/waas/customprotectionrule/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/waas/customprotectionrule/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for waas/customprotectionrule; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "iot",
+  "slug": "iotdomain",
+  "kind": "IotDomain",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_iot_iotdomain",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateIotDomain",
+        "requestType": "iot.CreateIotDomainRequest",
+        "responseType": "iot.CreateIotDomainResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetIotDomain",
+        "requestType": "iot.GetIotDomainRequest",
+        "responseType": "iot.GetIotDomainResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListIotDomain",
+        "requestType": "iot.ListIotDomainRequest",
+        "responseType": "iot.ListIotDomainResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateIotDomain",
+        "requestType": "iot.UpdateIotDomainRequest",
+        "responseType": "iot.UpdateIotDomainResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteIotDomain",
+        "requestType": "iot.DeleteIotDomainRequest",
+        "responseType": "iot.DeleteIotDomainResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_iot_iotdomain",
+    "collectionField": "iotdomain",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/iot/iotdomain/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/iot/iotdomain/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for iot/iotdomain; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

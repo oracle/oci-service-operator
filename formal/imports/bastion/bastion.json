@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "bastion",
+  "slug": "bastion",
+  "kind": "Bastion",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_bastion_bastion",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateBastion",
+        "requestType": "bastion.CreateBastionRequest",
+        "responseType": "bastion.CreateBastionResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetBastion",
+        "requestType": "bastion.GetBastionRequest",
+        "responseType": "bastion.GetBastionResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListBastion",
+        "requestType": "bastion.ListBastionRequest",
+        "responseType": "bastion.ListBastionResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateBastion",
+        "requestType": "bastion.UpdateBastionRequest",
+        "responseType": "bastion.UpdateBastionResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteBastion",
+        "requestType": "bastion.DeleteBastionRequest",
+        "responseType": "bastion.DeleteBastionResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_bastion_bastion",
+    "collectionField": "bastion",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/bastion/bastion/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/bastion/bastion/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for bastion/bastion; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

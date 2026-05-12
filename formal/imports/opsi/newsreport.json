@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "opsi",
+  "slug": "newsreport",
+  "kind": "NewsReport",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_opsi_newsreport",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateNewsReport",
+        "requestType": "opsi.CreateNewsReportRequest",
+        "responseType": "opsi.CreateNewsReportResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetNewsReport",
+        "requestType": "opsi.GetNewsReportRequest",
+        "responseType": "opsi.GetNewsReportResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListNewsReport",
+        "requestType": "opsi.ListNewsReportRequest",
+        "responseType": "opsi.ListNewsReportResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateNewsReport",
+        "requestType": "opsi.UpdateNewsReportRequest",
+        "responseType": "opsi.UpdateNewsReportResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteNewsReport",
+        "requestType": "opsi.DeleteNewsReportRequest",
+        "responseType": "opsi.DeleteNewsReportResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_opsi_newsreport",
+    "collectionField": "newsreport",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/opsi/newsreport/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/opsi/newsreport/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for opsi/newsreport; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "osmanagementhub",
+  "slug": "lifecycleenvironment",
+  "kind": "LifecycleEnvironment",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_osmanagementhub_lifecycleenvironment",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateLifecycleEnvironment",
+        "requestType": "osmanagementhub.CreateLifecycleEnvironmentRequest",
+        "responseType": "osmanagementhub.CreateLifecycleEnvironmentResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetLifecycleEnvironment",
+        "requestType": "osmanagementhub.GetLifecycleEnvironmentRequest",
+        "responseType": "osmanagementhub.GetLifecycleEnvironmentResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListLifecycleEnvironment",
+        "requestType": "osmanagementhub.ListLifecycleEnvironmentRequest",
+        "responseType": "osmanagementhub.ListLifecycleEnvironmentResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateLifecycleEnvironment",
+        "requestType": "osmanagementhub.UpdateLifecycleEnvironmentRequest",
+        "responseType": "osmanagementhub.UpdateLifecycleEnvironmentResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteLifecycleEnvironment",
+        "requestType": "osmanagementhub.DeleteLifecycleEnvironmentRequest",
+        "responseType": "osmanagementhub.DeleteLifecycleEnvironmentResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_osmanagementhub_lifecycleenvironment",
+    "collectionField": "lifecycleenvironment",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/osmanagementhub/lifecycleenvironment/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/osmanagementhub/lifecycleenvironment/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for osmanagementhub/lifecycleenvironment; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

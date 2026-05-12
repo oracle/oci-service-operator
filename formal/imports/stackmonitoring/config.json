@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "stackmonitoring",
+  "slug": "config",
+  "kind": "Config",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_stackmonitoring_config",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateConfig",
+        "requestType": "stackmonitoring.CreateConfigRequest",
+        "responseType": "stackmonitoring.CreateConfigResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetConfig",
+        "requestType": "stackmonitoring.GetConfigRequest",
+        "responseType": "stackmonitoring.GetConfigResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListConfig",
+        "requestType": "stackmonitoring.ListConfigRequest",
+        "responseType": "stackmonitoring.ListConfigResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateConfig",
+        "requestType": "stackmonitoring.UpdateConfigRequest",
+        "responseType": "stackmonitoring.UpdateConfigResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteConfig",
+        "requestType": "stackmonitoring.DeleteConfigRequest",
+        "responseType": "stackmonitoring.DeleteConfigResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_stackmonitoring_config",
+    "collectionField": "config",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/stackmonitoring/config/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/stackmonitoring/config/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for stackmonitoring/config; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

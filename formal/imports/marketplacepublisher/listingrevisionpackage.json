@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "marketplacepublisher",
+  "slug": "listingrevisionpackage",
+  "kind": "ListingRevisionPackage",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_marketplacepublisher_listingrevisionpackage",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateListingRevisionPackage",
+        "requestType": "marketplacepublisher.CreateListingRevisionPackageRequest",
+        "responseType": "marketplacepublisher.CreateListingRevisionPackageResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetListingRevisionPackage",
+        "requestType": "marketplacepublisher.GetListingRevisionPackageRequest",
+        "responseType": "marketplacepublisher.GetListingRevisionPackageResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListListingRevisionPackage",
+        "requestType": "marketplacepublisher.ListListingRevisionPackageRequest",
+        "responseType": "marketplacepublisher.ListListingRevisionPackageResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateListingRevisionPackage",
+        "requestType": "marketplacepublisher.UpdateListingRevisionPackageRequest",
+        "responseType": "marketplacepublisher.UpdateListingRevisionPackageResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteListingRevisionPackage",
+        "requestType": "marketplacepublisher.DeleteListingRevisionPackageRequest",
+        "responseType": "marketplacepublisher.DeleteListingRevisionPackageResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_marketplacepublisher_listingrevisionpackage",
+    "collectionField": "listingrevisionpackage",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/marketplacepublisher/listingrevisionpackage/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/marketplacepublisher/listingrevisionpackage/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for marketplacepublisher/listingrevisionpackage; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

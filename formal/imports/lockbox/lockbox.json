@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "lockbox",
+  "slug": "lockbox",
+  "kind": "Lockbox",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_lockbox_lockbox",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateLockbox",
+        "requestType": "lockbox.CreateLockboxRequest",
+        "responseType": "lockbox.CreateLockboxResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetLockbox",
+        "requestType": "lockbox.GetLockboxRequest",
+        "responseType": "lockbox.GetLockboxResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListLockbox",
+        "requestType": "lockbox.ListLockboxRequest",
+        "responseType": "lockbox.ListLockboxResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateLockbox",
+        "requestType": "lockbox.UpdateLockboxRequest",
+        "responseType": "lockbox.UpdateLockboxResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteLockbox",
+        "requestType": "lockbox.DeleteLockboxRequest",
+        "responseType": "lockbox.DeleteLockboxResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_lockbox_lockbox",
+    "collectionField": "lockbox",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/lockbox/lockbox/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/lockbox/lockbox/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for lockbox/lockbox; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "licensemanager",
+  "slug": "productlicense",
+  "kind": "ProductLicense",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_licensemanager_productlicense",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateProductLicense",
+        "requestType": "licensemanager.CreateProductLicenseRequest",
+        "responseType": "licensemanager.CreateProductLicenseResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetProductLicense",
+        "requestType": "licensemanager.GetProductLicenseRequest",
+        "responseType": "licensemanager.GetProductLicenseResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListProductLicense",
+        "requestType": "licensemanager.ListProductLicenseRequest",
+        "responseType": "licensemanager.ListProductLicenseResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateProductLicense",
+        "requestType": "licensemanager.UpdateProductLicenseRequest",
+        "responseType": "licensemanager.UpdateProductLicenseResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteProductLicense",
+        "requestType": "licensemanager.DeleteProductLicenseRequest",
+        "responseType": "licensemanager.DeleteProductLicenseResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_licensemanager_productlicense",
+    "collectionField": "productlicense",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/licensemanager/productlicense/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/licensemanager/productlicense/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for licensemanager/productlicense; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

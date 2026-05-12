@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "opsi",
+  "slug": "operationsinsightswarehouseuser",
+  "kind": "OperationsInsightsWarehouseUser",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_opsi_operationsinsightswarehouseuser",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOperationsInsightsWarehouseUser",
+        "requestType": "opsi.CreateOperationsInsightsWarehouseUserRequest",
+        "responseType": "opsi.CreateOperationsInsightsWarehouseUserResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOperationsInsightsWarehouseUser",
+        "requestType": "opsi.GetOperationsInsightsWarehouseUserRequest",
+        "responseType": "opsi.GetOperationsInsightsWarehouseUserResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOperationsInsightsWarehouseUser",
+        "requestType": "opsi.ListOperationsInsightsWarehouseUserRequest",
+        "responseType": "opsi.ListOperationsInsightsWarehouseUserResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOperationsInsightsWarehouseUser",
+        "requestType": "opsi.UpdateOperationsInsightsWarehouseUserRequest",
+        "responseType": "opsi.UpdateOperationsInsightsWarehouseUserResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOperationsInsightsWarehouseUser",
+        "requestType": "opsi.DeleteOperationsInsightsWarehouseUserRequest",
+        "responseType": "opsi.DeleteOperationsInsightsWarehouseUserResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_opsi_operationsinsightswarehouseuser",
+    "collectionField": "operationsinsightswarehouseuser",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/opsi/operationsinsightswarehouseuser/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/opsi/operationsinsightswarehouseuser/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for opsi/operationsinsightswarehouseuser; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

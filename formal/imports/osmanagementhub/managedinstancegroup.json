@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "osmanagementhub",
+  "slug": "managedinstancegroup",
+  "kind": "ManagedInstanceGroup",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_osmanagementhub_managedinstancegroup",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateManagedInstanceGroup",
+        "requestType": "osmanagementhub.CreateManagedInstanceGroupRequest",
+        "responseType": "osmanagementhub.CreateManagedInstanceGroupResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetManagedInstanceGroup",
+        "requestType": "osmanagementhub.GetManagedInstanceGroupRequest",
+        "responseType": "osmanagementhub.GetManagedInstanceGroupResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListManagedInstanceGroup",
+        "requestType": "osmanagementhub.ListManagedInstanceGroupRequest",
+        "responseType": "osmanagementhub.ListManagedInstanceGroupResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateManagedInstanceGroup",
+        "requestType": "osmanagementhub.UpdateManagedInstanceGroupRequest",
+        "responseType": "osmanagementhub.UpdateManagedInstanceGroupResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteManagedInstanceGroup",
+        "requestType": "osmanagementhub.DeleteManagedInstanceGroupRequest",
+        "responseType": "osmanagementhub.DeleteManagedInstanceGroupResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_osmanagementhub_managedinstancegroup",
+    "collectionField": "managedinstancegroup",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/osmanagementhub/managedinstancegroup/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/osmanagementhub/managedinstancegroup/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for osmanagementhub/managedinstancegroup; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

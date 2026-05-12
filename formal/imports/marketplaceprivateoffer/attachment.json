@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "marketplaceprivateoffer",
+  "slug": "attachment",
+  "kind": "Attachment",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_marketplaceprivateoffer_attachment",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateAttachment",
+        "requestType": "marketplaceprivateoffer.CreateAttachmentRequest",
+        "responseType": "marketplaceprivateoffer.CreateAttachmentResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetAttachment",
+        "requestType": "marketplaceprivateoffer.GetAttachmentRequest",
+        "responseType": "marketplaceprivateoffer.GetAttachmentResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListAttachment",
+        "requestType": "marketplaceprivateoffer.ListAttachmentRequest",
+        "responseType": "marketplaceprivateoffer.ListAttachmentResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateAttachment",
+        "requestType": "marketplaceprivateoffer.UpdateAttachmentRequest",
+        "responseType": "marketplaceprivateoffer.UpdateAttachmentResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteAttachment",
+        "requestType": "marketplaceprivateoffer.DeleteAttachmentRequest",
+        "responseType": "marketplaceprivateoffer.DeleteAttachmentResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_marketplaceprivateoffer_attachment",
+    "collectionField": "attachment",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/marketplaceprivateoffer/attachment/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/marketplaceprivateoffer/attachment/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for marketplaceprivateoffer/attachment; replace imported facts before promoting this row beyond scaffold."
+  ]
+}
