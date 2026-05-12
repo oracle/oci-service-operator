@@ -14,10 +14,10 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	}
 
 	byKey := inventoryByKey(inventory)
-	if got, want := len(inventory), 366; got != want {
+	if got, want := len(inventory), 367; got != want {
 		t.Fatalf("len(inventory) = %d, want %d", got, want)
 	}
-	if got, want := countRegistrations(inventory), 243; got != want {
+	if got, want := countRegistrations(inventory), 244; got != want {
 		t.Fatalf("registration inventory count = %d, want %d", got, want)
 	}
 	if got, want := countExceptions(inventory), 123; got != want {
@@ -52,6 +52,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventorySelectionSource(t, byKey, "dashboardservice/Dashboard", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "dashboardservice/DashboardGroup", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "delegateaccesscontrol/DelegationControl", "selection.includeKinds")
+	assertInventorySelectionSource(t, byKey, "distributeddatabase/DistributedDatabasePrivateEndpoint", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "dataflow/Application", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "email/Dkim", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "functions/Application", "selection.includeKinds")
@@ -142,6 +143,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventoryRegistration(t, byKey, "dashboardservice/Dashboard")
 	assertInventoryRegistration(t, byKey, "dashboardservice/DashboardGroup")
 	assertInventoryRegistration(t, byKey, "delegateaccesscontrol/DelegationControl")
+	assertInventoryRegistration(t, byKey, "distributeddatabase/DistributedDatabasePrivateEndpoint")
 	assertInventoryRegistration(t, byKey, "email/Dkim")
 	assertInventoryRegistration(t, byKey, "generativeaiagent/Agent")
 	assertInventoryRegistration(t, byKey, "generativeaidata/EnrichmentJob")
@@ -221,6 +223,7 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedFamily(t, "dashboardservice/Dashboard", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "dashboardservice/DashboardGroup", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "delegateaccesscontrol/DelegationControl", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
+	assertReviewedFamily(t, "distributeddatabase/DistributedDatabasePrivateEndpoint", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "dataflow/Application", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "email/Dkim", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "functions/Application", APIErrorCoverageFamilyLegacyAdapter)

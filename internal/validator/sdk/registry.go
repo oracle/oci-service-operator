@@ -36,6 +36,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/datascience"
 	"github.com/oracle/oci-go-sdk/v65/delegateaccesscontrol"
 	"github.com/oracle/oci-go-sdk/v65/devops"
+	"github.com/oracle/oci-go-sdk/v65/distributeddatabase"
 	"github.com/oracle/oci-go-sdk/v65/dns"
 	"github.com/oracle/oci-go-sdk/v65/email"
 	"github.com/oracle/oci-go-sdk/v65/events"
@@ -736,6 +737,13 @@ var seedTargets = []Target{
 	newTarget("devops", "DeployPipelineSummary", reflect.TypeOf(devops.DeployPipelineSummary{})),
 	newTarget("devops", "ProjectSummary", reflect.TypeOf(devops.ProjectSummary{})),
 	newTarget("devops", "RepositorySummary", reflect.TypeOf(devops.RepositorySummary{})),
+
+	// Distributeddatabase CRD support
+	newTarget("distributeddatabase", "CreateDistributedDatabasePrivateEndpointDetails", reflect.TypeOf(distributeddatabase.CreateDistributedDatabasePrivateEndpointDetails{})),
+	newTarget("distributeddatabase", "UpdateDistributedDatabasePrivateEndpointDetails", reflect.TypeOf(distributeddatabase.UpdateDistributedDatabasePrivateEndpointDetails{})),
+	newTarget("distributeddatabase", "DistributedDatabasePrivateEndpoint", reflect.TypeOf(distributeddatabase.DistributedDatabasePrivateEndpoint{})),
+	newTarget("distributeddatabase", "DistributedDatabasePrivateEndpointCollection", reflect.TypeOf(distributeddatabase.DistributedDatabasePrivateEndpointCollection{})),
+	newTarget("distributeddatabase", "DistributedDatabasePrivateEndpointSummary", reflect.TypeOf(distributeddatabase.DistributedDatabasePrivateEndpointSummary{})),
 
 	// Gdp CRD support
 	newTarget("gdp", "CreateGdpPipelineDetails", reflect.TypeOf(gdp.CreateGdpPipelineDetails{})),

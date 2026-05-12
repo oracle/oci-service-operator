@@ -1,0 +1,118 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title State Machine - distributeddatabase/DistributedDatabasePrivateEndpoint
+skinparam state {
+  backgroundColor #f8fafc
+  borderColor #0f172a
+  fontColor #0f172a
+  startColor #1d4ed8
+  endColor #0f172a
+}
+left to right direction
+hide empty description
+state "Observe" as observe
+state "EvaluateReady" as evaluate_ready
+state "Ready" as ready
+state "Retryable" as retryable
+state "Failed" as failed
+observe : read spec, tracked status, delete intent,\nand current OCI lifecycle
+state "ResolveByLookup" as resolve_by_lookup
+state "RejectUnsupportedDrift" as reject_unsupported_drift
+state "ApplyUpdate" as apply_update
+state "DeletePending" as delete_pending
+state "Deleted" as deleted
+state "DeleteCleanupBlocked" as delete_cleanup_blocked
+[*] --> observe : CreateDistributedDatabasePrivateEndpoint
+observe --> resolve_by_lookup : tracked identity missing
+resolve_by_lookup --> evaluate_ready : lookup or create reaches\nACTIVE, INACTIVE
+resolve_by_lookup --> retryable : OCI state in CREATING,\nUPDATING, DELETING
+resolve_by_lookup --> failed : unresolved OCI error or non-success state
+observe --> evaluate_ready : OCI state in ACTIVE,\nINACTIVE
+observe --> retryable : OCI state in CREATING,\nUPDATING, DELETING
+observe --> failed : unresolved OCI error or non-success state
+evaluate_ready --> reject_unsupported_drift : force-new or conflicting\ndrift detected
+reject_unsupported_drift --> ready : wait for spec or live state change
+evaluate_ready --> apply_update : supported mutable drift for\ndefinedTags, description,\ndisplayName (+2 more)
+apply_update --> ready : update path completes
+evaluate_ready --> ready : no supported drift remains
+ready --> ready : no supported drift remains
+retryable --> retryable : OCI remains retryable
+failed --> failed : OCI remains terminal
+ready --> delete_pending : delete requested
+retryable --> delete_pending : delete requested
+failed --> delete_pending : delete requested
+delete_pending --> delete_cleanup_blocked : cleanup or finalizer release remains blocked
+delete_cleanup_blocked --> deleted : retry delete completion until allowed
+deleted --> deleted : terminal stutter
+note right of ready
+shared diagram:
+shared/diagrams/shared-controller-state-machine.svg
+Start from the shared controller phase model and
+specialize imported provider states, delete
+targets, and failure exits here.
+archetype batch: Generated service-manager
+controllers map provider states into the shared
+controller phases with explicit finalizer and
+requeue policies.
+service: distributeddatabase
+slug: distributeddatabaseprivateendpoint
+kind: DistributedDatabasePrivateEndpoint
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: provisioning, updating, terminating
+provider states: create CREATING; update
+UPDATING; delete DELETING
+follow-up: create=read-after-write;
+update=read-after-write; delete=confirm-delete
+supported drift: definedTags, description,
+displayName, freeformTags (+1 more)
+reject before mutate: force-new fields
+compartmentId, subnetId
+create-only fields: none
+list lookup:
+oci_distributeddatabase_distributed_database_private_endpoints
+filters compartmentId, displayName; exact
+compartmentId plus displayName list filters,
+then reuse only a unique summary candidate;
+lifecycleState is intentionally omitted from the
+list request and the runtime rereads
+GetDistributedDatabasePrivateEndpoint before
+binding or status projection
+conflicts: none
+open gaps: none
+Create and delete responses can carry
+`opc-work-request-id` headers, but the published
+runtime stays lifecycle-classified and uses
+those IDs only as shared request breadcrumbs
+instead of polling `GetWorkRequest`.
+`ListDistributedDatabasePrivateEndpoints`
+returns summary items that omit `privateIp`, so
+every successful bind or write path rereads
+`GetDistributedDatabasePrivateEndpoint` before
+projecting steady-state status.
+The package-local update builder preserves
+explicit clear intent for `description`,
+`nsgIds`, `freeformTags`, and `definedTags`
+instead of letting generatedruntime drop
+zero-value clears.
+Delete keeps the finalizer until
+`GetDistributedDatabasePrivateEndpoint` or list
+fallback confirms `DELETED` or NotFound.
+end note
+note right of delete_pending
+delete policy: required
+delete observe:
+GetDistributedDatabasePrivateEndpoint or
+ListDistributedDatabasePrivateEndpoints
+delete targets: DELETED, NOT_FOUND
+end note
+@enduml

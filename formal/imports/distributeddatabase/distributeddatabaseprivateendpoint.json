@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "distributeddatabase",
+  "slug": "distributeddatabaseprivateendpoint",
+  "kind": "DistributedDatabasePrivateEndpoint",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_distributeddatabase_distributed_database_private_endpoint",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDistributedDatabasePrivateEndpoint",
+        "requestType": "distributeddatabase.CreateDistributedDatabasePrivateEndpointRequest",
+        "responseType": "distributeddatabase.CreateDistributedDatabasePrivateEndpointResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDistributedDatabasePrivateEndpoint",
+        "requestType": "distributeddatabase.GetDistributedDatabasePrivateEndpointRequest",
+        "responseType": "distributeddatabase.GetDistributedDatabasePrivateEndpointResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDistributedDatabasePrivateEndpoints",
+        "requestType": "distributeddatabase.ListDistributedDatabasePrivateEndpointsRequest",
+        "responseType": "distributeddatabase.ListDistributedDatabasePrivateEndpointsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDistributedDatabasePrivateEndpoint",
+        "requestType": "distributeddatabase.UpdateDistributedDatabasePrivateEndpointRequest",
+        "responseType": "distributeddatabase.UpdateDistributedDatabasePrivateEndpointResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDistributedDatabasePrivateEndpoint",
+        "requestType": "distributeddatabase.DeleteDistributedDatabasePrivateEndpointRequest",
+        "responseType": "distributeddatabase.DeleteDistributedDatabasePrivateEndpointResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "INACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "INACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags",
+      "nsg_ids"
+    ],
+    "forceNew": [
+      "compartment_id",
+      "subnet_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED",
+      "NOT_FOUND"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_distributeddatabase_distributed_database_private_endpoints",
+    "collectionField": "distributed_database_private_endpoint_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "lifecycle_state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/distributeddatabase/distributeddatabaseprivateendpoint/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/distributeddatabase/distributeddatabaseprivateendpoint/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "delete-confirmation",
+      "list-lookup",
+      "mutation-policy",
+      "status-projection"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: CreateDistributedDatabasePrivateEndpoint and GetDistributedDatabasePrivateEndpoint return the resource body, update returns the updated body without an opc-work-request-id, and delete returns headers only with opc-work-request-id.",
+    "Pinned OCI SDK contract: ListDistributedDatabasePrivateEndpoints requires compartmentId and supports lifecycleState plus displayName filters, but returns DistributedDatabasePrivateEndpointSummary items rather than full bodies.",
+    "Pinned provider coverage is unconfirmed in this checkout. formal/sources.lock still points at terraform-provider-oci, but the repo-local onboarding audit did not prove a matching checked-in provider resource or datasource for DistributedDatabasePrivateEndpoint, so the providerResource and datasource names stay provisional placeholders.",
+    "Repo-authored runtime contract keeps in-place mutation aligned with UpdateDistributedDatabasePrivateEndpointDetails for displayName, description, nsgIds, freeformTags, and definedTags. compartmentId and subnetId remain replacement-only drift on the published surface.",
+    "Repo-authored bind-versus-create stays explicit: pre-create lookup lists by exact compartmentId plus displayName, then narrows summary candidates in memory to a unique exact match before reuse. lifecycleState is intentionally not sent on that list request.",
+    "List summaries omit privateIp, so the reviewed runtime always rereads GetDistributedDatabasePrivateEndpoint before status projection after bind, create, or update. The runtime has no Kubernetes Secret side effects."
+  ]
+}

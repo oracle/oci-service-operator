@@ -471,6 +471,20 @@ packages:
         kind: Trigger
         summary: Manage OCI DevOps triggers.
 
+  - package: distributeddatabase
+    displayName: Distributed Database
+    summary: Manage OCI Distributed Database private endpoints from Kubernetes with a reviewed controller-backed lifecycle runtime.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to DistributedDatabasePrivateEndpoint while distributed databases, validation helpers, wallet flows, and other service families stay unpublished.
+      - The published runtime is lifecycle-classified, rereads GetDistributedDatabasePrivateEndpoint after bind and write paths because list returns summaries, and keeps delete confirmation explicit until DELETED or NotFound.
+    kindOverrides:
+      - group: distributeddatabase
+        kind: DistributedDatabasePrivateEndpoint
+        summary: Manage OCI Distributed Database private endpoints.
+
   - package: dns
     displayName: DNS
     summary: Manage OCI DNS zones, views, TSIG keys, steering policies, and attachments from Kubernetes.

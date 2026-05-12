@@ -1,16 +1,16 @@
 {
   "aggregate": {
-    "specs": 243,
-    "mappings": 1029,
-    "trackedMappings": 1028,
+    "specs": 244,
+    "mappings": 1034,
+    "trackedMappings": 1033,
     "untrackedMappings": 1,
-    "presentFields": 10248,
-    "missingFields": 192,
-    "mandatoryPresentFields": 3667,
-    "mandatoryMissingFields": 151,
-    "extraSpecFields": 864,
-    "overallCoveragePercent": 98.16091954022988,
-    "mandatoryCoveragePercent": 96.0450497642745
+    "presentFields": 10292,
+    "missingFields": 193,
+    "mandatoryPresentFields": 3686,
+    "mandatoryMissingFields": 152,
+    "extraSpecFields": 866,
+    "overallCoveragePercent": 98.1592751549833,
+    "mandatoryCoveragePercent": 96.03960396039604
   },
   "services": [
     {
@@ -460,6 +460,20 @@
       "extraSpecFields": 7,
       "overallCoveragePercent": 97.30941704035875,
       "mandatoryCoveragePercent": 89.28571428571429
+    },
+    {
+      "service": "distributeddatabase",
+      "specs": 1,
+      "mappings": 5,
+      "trackedMappings": 5,
+      "untrackedMappings": 0,
+      "presentFields": 44,
+      "missingFields": 1,
+      "mandatoryPresentFields": 19,
+      "mandatoryMissingFields": 1,
+      "extraSpecFields": 2,
+      "overallCoveragePercent": 97.77777777777777,
+      "mandatoryCoveragePercent": 95
     },
     {
       "service": "dns",

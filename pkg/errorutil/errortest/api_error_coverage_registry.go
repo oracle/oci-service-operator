@@ -561,6 +561,16 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 				retryableConflictWorkRequest,
 				"DelegationControl stores create, update, and delete work-request IDs in shared async status, recovers identity from work-request resources when OCI omits it from the create response, bounds pre-create reuse to exact compartmentId plus displayName plus resourceType plus resourceIds matches, and confirms delete completion through work-request polling plus Get/List rereads.",
 			),
+			resourceKey("distributeddatabase", "DistributedDatabasePrivateEndpoint"): reviewedRegistration(
+				"distributeddatabase",
+				"distributeddatabase",
+				apiErrorCoverageDefaultVersion,
+				"DistributedDatabasePrivateEndpoint",
+				APIErrorCoverageFamilyGeneratedRuntimePlain,
+				deleteNotFoundGeneratedRuntime,
+				retryableConflictGeneratedRuntime,
+				"DistributedDatabasePrivateEndpoint keeps lifecycle-driven generatedruntime CRUD and confirm-delete rereads, while a small handwritten seam drops lifecycleState from the pre-create list request, preserves explicit empty clears for description, nsgIds, and tag maps, and clears tracked identity when a reread reports the recorded OCID as stale.",
+			),
 			resourceKey("dataflow", "Application"): reviewedRegistration(
 				"dataflow",
 				"dataflow",
