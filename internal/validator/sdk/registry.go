@@ -37,6 +37,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/datascience"
 	"github.com/oracle/oci-go-sdk/v65/delegateaccesscontrol"
 	"github.com/oracle/oci-go-sdk/v65/devops"
+	"github.com/oracle/oci-go-sdk/v65/disasterrecovery"
 	"github.com/oracle/oci-go-sdk/v65/dns"
 	"github.com/oracle/oci-go-sdk/v65/email"
 	"github.com/oracle/oci-go-sdk/v65/events"
@@ -742,6 +743,13 @@ var seedTargets = []Target{
 	newTarget("devops", "DeployPipelineSummary", reflect.TypeOf(devops.DeployPipelineSummary{})),
 	newTarget("devops", "ProjectSummary", reflect.TypeOf(devops.ProjectSummary{})),
 	newTarget("devops", "RepositorySummary", reflect.TypeOf(devops.RepositorySummary{})),
+
+	// Disasterrecovery CRD support
+	newTarget("disasterrecovery", "CreateDrProtectionGroupDetails", reflect.TypeOf(disasterrecovery.CreateDrProtectionGroupDetails{})),
+	newTarget("disasterrecovery", "UpdateDrProtectionGroupDetails", reflect.TypeOf(disasterrecovery.UpdateDrProtectionGroupDetails{})),
+	newTarget("disasterrecovery", "DrProtectionGroup", reflect.TypeOf(disasterrecovery.DrProtectionGroup{})),
+	newTarget("disasterrecovery", "DrProtectionGroupCollection", reflect.TypeOf(disasterrecovery.DrProtectionGroupCollection{})),
+	newTarget("disasterrecovery", "DrProtectionGroupSummary", reflect.TypeOf(disasterrecovery.DrProtectionGroupSummary{})),
 
 	// Gdp CRD support
 	newTarget("gdp", "CreateGdpPipelineDetails", reflect.TypeOf(gdp.CreateGdpPipelineDetails{})),

@@ -2281,6 +2281,89 @@ services:
                 freeformTags:
                   managed-by: oci-service-operator
 
+  - service: disasterrecovery
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/disasterrecovery
+    group: disasterrecovery
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - DrProtectionGroup
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: DrProtectionGroup
+          formalSpec: drprotectiongroup
+          async:
+            strategy: workrequest
+            runtime: generatedruntime
+            formalClassification: workrequest
+            workRequest:
+              source: service-sdk
+              phases:
+                - create
+                - update
+                - delete
+          serviceManager:
+            packagePath: disasterrecovery/drprotectiongroup
+          specFields:
+            - name: LifecycleState
+              type: string
+              tag: 'json:"lifecycleState,omitempty"'
+              comments:
+                - Optional exact-match filter used to narrow list-based binding and delete confirmation reads.
+                - Supported values include `CREATING`, `ACTIVE`, `UPDATING`, `INACTIVE`, `NEEDS_ATTENTION`, `DELETING`, `DELETED`, and `FAILED`.
+              markers:
+                - +kubebuilder:validation:Optional
+            - name: Role
+              type: string
+              tag: 'json:"role,omitempty"'
+              comments:
+                - Optional exact-match filter used to narrow list-based binding and delete confirmation reads.
+                - Supported values include `PRIMARY`, `STANDBY`, and `UNCONFIGURED`.
+              markers:
+                - +kubebuilder:validation:Optional
+            - name: LifecycleSubState
+              type: string
+              tag: 'json:"lifecycleSubState,omitempty"'
+              comments:
+                - Optional exact-match filter used to narrow list-based binding and delete confirmation reads.
+                - Supported values include `DR_DRILL_IN_PROGRESS`, `DR_PLAN_EXECUTION_IN_PROGRESS`, and `AUTOMATIC_DR_PLAN_EXECUTION_IN_PROGRESS`.
+              markers:
+                - +kubebuilder:validation:Optional
+          sample:
+            body: |-
+              #
+              # Replace the OCI identifiers and object storage location below before running e2e.
+              # The members list uses polymorphic entries; when updating members, keep every retained
+              # member in the list and remove only entries you intend to delete from the DR protection group.
+              #
+              apiVersion: disasterrecovery.oracle.com/v1beta1
+              kind: DrProtectionGroup
+              metadata:
+                name: drprotectiongroup-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                displayName: app-drprotectiongroup-sample
+                logLocation:
+                  namespace: myocitenancy
+                  bucket: dr-protection-group-logs
+                members:
+                  - memberType: COMPUTE_INSTANCE
+                    memberId: ocid1.instance.oc1..exampleuniqueID
+                freeformTags:
+                  managed-by: oci-service-operator
+
   - service: devops
     sdkPackage: github.com/oracle/oci-go-sdk/v65/devops
     group: devops

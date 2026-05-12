@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "disasterrecovery",
+  "kind": "DrProtectionGroup",
+  "formalSlug": "drprotectiongroup",
+  "providerResource": "oci_disaster_recovery_dr_protection_group",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/disaster_recovery_dr_protection_group",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/disaster_recovery_dr_protection_group",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/disasterrecovery/drprotectiongroup/page.html",
+  "bodySHA256": "a5234cb8d98e8cb0f2ce323d800aa4e5ef4f6fec98cde027b85c3680fdb1b00f",
+  "bodyBytes": 1375,
+  "fixtureBodyPath": "7.22.0/disasterrecovery/drprotectiongroup/page.html"
+}
