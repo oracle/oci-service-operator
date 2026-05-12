@@ -539,6 +539,32 @@ rules:
   - patch
   - update
 - apiGroups:
+  - computeinstanceagent.oracle.com
+  resources:
+  - instanceagentplugins
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - computeinstanceagent.oracle.com
+  resources:
+  - instanceagentplugins/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - computeinstanceagent.oracle.com
+  resources:
+  - instanceagentplugins/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - containerengine.oracle.com
   resources:
   - clusters

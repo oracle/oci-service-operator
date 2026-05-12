@@ -351,6 +351,19 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 				retryableConflictWorkRequest,
 				"ClusterPlacementGroup runtime persists CRUD work-request IDs in shared async status, bounds pre-create reuse to exact compartmentId plus name, availabilityDomain, and clusterPlacementGroupType matches, and keeps activate/deactivate/compartment-change helpers out of the published surface.",
 			),
+			resourceKey("computeinstanceagent", "InstanceAgentPlugin"): {
+				Resource: APIErrorCoverageResource{
+					Service: "computeinstanceagent",
+					Group:   "computeinstanceagent",
+					Version: apiErrorCoverageDefaultVersion,
+					Kind:    "InstanceAgentPlugin",
+				},
+				Family:                     APIErrorCoverageFamilyGeneratedRuntimePlain,
+				SupportedOperations:        []Operation{OperationRead},
+				DeleteNotFoundSemantics:    "delete is Kubernetes-local only; the published InstanceAgentPlugin contract does not issue OCI delete requests",
+				RetryableConflictSemantics: "update and delete conflicts are not applicable because the published InstanceAgentPlugin contract is observe-only",
+				Deviation:                  "A handwritten runtime wrapper keeps ListInstanceAgentPlugins in a confirmation-only role, projects the composite instanceagentId+compartmentId+pluginName identity into status after generatedruntime reads, and releases the Kubernetes finalizer locally without invoking OCI mutation APIs.",
+			},
 			resourceKey("containerengine", "Cluster"): reviewedRegistration(
 				"containerengine",
 				"containerengine",

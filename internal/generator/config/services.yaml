@@ -1153,6 +1153,93 @@ services:
         WorkRequestLog:
           - WorkRequestLogEntry
 
+  - service: computeinstanceagent
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/computeinstanceagent
+    group: computeinstanceagent
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - InstanceAgentPlugin
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: InstanceAgentPlugin
+          formalSpec: instanceagentplugin
+          async:
+            strategy: none
+            runtime: generatedruntime
+            formalClassification: none
+          serviceManager:
+            packagePath: computeinstanceagent/instanceagentplugin
+          specFields:
+            - name: InstanceagentId
+              type: string
+              tag: 'json:"instanceagentId"'
+              comments:
+                - The OCID of the compute instance whose Oracle Cloud Agent plugin should be observed.
+                - Required for GetInstanceAgentPlugin and ListInstanceAgentPlugins requests.
+              markers:
+                - +kubebuilder:validation:Required
+            - name: CompartmentId
+              type: string
+              tag: 'json:"compartmentId"'
+              comments:
+                - The OCID of the compartment that contains the compute instance.
+                - Required for direct bind and reread operations.
+              markers:
+                - +kubebuilder:validation:Required
+            - name: PluginName
+              type: string
+              tag: 'json:"pluginName"'
+              comments:
+                - The Oracle Cloud Agent plugin name to bind and observe on the target compute instance.
+                - Required for direct get and exact list confirmation reads.
+              markers:
+                - +kubebuilder:validation:Required
+          statusFields:
+            - name: InstanceagentId
+              type: string
+              tag: 'json:"instanceagentId,omitempty"'
+              comments:
+                - The compute instance OCID recorded for exact rereads and replacement-only drift checks.
+            - name: CompartmentId
+              type: string
+              tag: 'json:"compartmentId,omitempty"'
+              comments:
+                - The compartment OCID recorded for exact rereads and replacement-only drift checks.
+            - name: Status
+              type: string
+              tag: 'json:"sdkStatus,omitempty"'
+              comments:
+                - The raw plugin status returned by Compute Instance Agent.
+          sample:
+            body: |-
+              #
+              # InstanceAgentPlugin is bind-existing and observe-only in this rollout.
+              # Provide the compute instance OCID, containing compartment OCID, and
+              # plugin name for an existing Oracle Cloud Agent plugin.
+              # Plugin enable or disable remains out of scope for this package.
+              #
+              apiVersion: computeinstanceagent.oracle.com/v1beta1
+              kind: InstanceAgentPlugin
+              metadata:
+                name: instanceagentplugin-sample
+              spec:
+                instanceagentId: ocid1.instance.oc1..exampleuniqueID
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                pluginName: Compute Instance Monitoring
+
   - service: containerengine
     sdkPackage: github.com/oracle/oci-go-sdk/v65/containerengine
     group: containerengine

@@ -1,0 +1,48 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: computeinstanceagent
+slug: instanceagentplugin
+kind: InstanceAgentPlugin
+archetype: generated-service-manager
+states:
+  - active
+  - terminating
+repoAuthored:
+  listLookup:
+    filters:
+      - compartmentId
+      - instanceagentId
+      - pluginName
+    matchRule: >-
+      Direct reads require the exact composite identity
+      instanceagentId+compartmentId+pluginName. Confirmation-only list reads
+      reuse the same scope and treat an exact plugin-name match as the bound
+      plugin; unexpected surviving matches fail instead of guessing.
+  mutation:
+    mutable: []
+    forceNew:
+      - compartmentId
+      - instanceagentId
+      - pluginName
+  followUp:
+    create: none
+    update: none
+    delete: none
+notes:
+  - >-
+    Compute Instance Agent exposes GetInstanceAgentPlugin and
+    ListInstanceAgentPlugins only in the pinned SDK, so the published runtime
+    is bind-existing and observe-only.
+  - >-
+    Bind identity is explicit: reconcile requires compartmentId,
+    instanceagentId, and pluginName, tracks the composite identity in status,
+    and uses ListInstanceAgentPlugins only to confirm absence after a reread no
+    longer finds the tracked plugin.
+  - >-
+    No OCI create, update, or delete operation is published. Plugin enable or
+    disable remains part of Core UpdateInstance and is out of scope for this
+    package.
+  - >-
+    Visible plugin states RUNNING, STOPPED, NOT_SUPPORTED, and INVALID are all
+    stable observed states. Delete is Kubernetes-local unbind only and settles
+    through best-effort local cleanup rather than cloud-side terminal waiting.

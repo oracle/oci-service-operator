@@ -1,0 +1,19 @@
+#
+# Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+#
+
+#
+# InstanceAgentPlugin is bind-existing and observe-only in this rollout.
+# Provide the compute instance OCID, containing compartment OCID, and
+# plugin name for an existing Oracle Cloud Agent plugin.
+# Plugin enable or disable remains out of scope for this package.
+#
+apiVersion: computeinstanceagent.oracle.com/v1beta1
+kind: InstanceAgentPlugin
+metadata:
+  name: instanceagentplugin-sample
+spec:
+  instanceagentId: ocid1.instance.oc1..exampleuniqueID
+  compartmentId: ocid1.compartment.oc1..exampleuniqueID
+  pluginName: Compute Instance Monitoring

@@ -288,6 +288,20 @@ packages:
         kind: ClusterPlacementGroup
         summary: Manage OCI Cluster Placement Groups.
 
+  - package: computeinstanceagent
+    displayName: Compute Instance Agent
+    summary: Observe existing OCI Compute Instance Agent plugins from Kubernetes with a bind-existing, controller-backed read-only contract.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to InstanceAgentPlugin and publishes only a bind-existing observe-only contract.
+      - The reviewed runtime uses GetInstanceAgentPlugin for read projection, keeps ListInstanceAgentPlugins in a confirmation-only role, and does not expose OCI create, update, or delete behavior or plugin enable-disable mutation.
+    kindOverrides:
+      - group: computeinstanceagent
+        kind: InstanceAgentPlugin
+        summary: Observe existing OCI Compute Instance Agent plugins on compute instances.
+
   - package: containerengine
     displayName: Container Engine for Kubernetes
     summary: Manage OCI Container Engine for Kubernetes clusters and node pools from Kubernetes.
