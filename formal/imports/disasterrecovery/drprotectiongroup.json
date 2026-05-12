@@ -1,0 +1,155 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "disasterrecovery",
+  "slug": "drprotectiongroup",
+  "kind": "DrProtectionGroup",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_disaster_recovery_dr_protection_group",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDrProtectionGroup",
+        "requestType": "disasterrecovery.CreateDrProtectionGroupRequest",
+        "responseType": "disasterrecovery.CreateDrProtectionGroupResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDrProtectionGroup",
+        "requestType": "disasterrecovery.GetDrProtectionGroupRequest",
+        "responseType": "disasterrecovery.GetDrProtectionGroupResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDrProtectionGroups",
+        "requestType": "disasterrecovery.ListDrProtectionGroupsRequest",
+        "responseType": "disasterrecovery.ListDrProtectionGroupsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDrProtectionGroup",
+        "requestType": "disasterrecovery.UpdateDrProtectionGroupRequest",
+        "responseType": "disasterrecovery.UpdateDrProtectionGroupResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDrProtectionGroup",
+        "requestType": "disasterrecovery.DeleteDrProtectionGroupRequest",
+        "responseType": "disasterrecovery.DeleteDrProtectionGroupResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "INACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "INACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "defined_tags",
+      "display_name",
+      "freeform_tags",
+      "log_location.bucket",
+      "log_location.namespace",
+      "members"
+    ],
+    "forceNew": [
+      "association",
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "drprotectiongroup",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "drprotectiongroup",
+        "action": "UPDATED"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "drprotectiongroup",
+        "action": "DELETED"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_disaster_recovery_dr_protection_groups",
+    "collectionField": "dr_protection_group_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "dr_protection_group_id",
+      "lifecycle_state",
+      "role",
+      "lifecycle_sub_state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/disasterrecovery/drprotectiongroup/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/disasterrecovery/drprotectiongroup/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "list-lookup",
+      "mutation-policy",
+      "status-projection",
+      "delete-confirmation",
+      "waiter-work-request",
+      "secret-output"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: CreateDrProtectionGroup returns a DrProtectionGroup body plus opc-work-request-id, GetDrProtectionGroup returns the full DrProtectionGroup body, ListDrProtectionGroups returns DrProtectionGroupSummary items, and UpdateDrProtectionGroup plus DeleteDrProtectionGroup return work-request headers only.",
+    "Pinned OCI SDK contract: DrProtectionGroup projects role, lifecycleState, lifecycleSubState, peerId, peerRegion, logLocation, and a polymorphic members array. The published runtime keeps that member discriminator truthfully surfaced instead of flattening members into opaque maps.",
+    "Pinned OCI SDK contract: UpdateDrProtectionGroupDetails only exposes displayName, logLocation, members, freeformTags, and definedTags for in-place mutation. compartmentId and create-time association therefore remain replacement-only drift, and associate/disassociate, role-change, compartment-move, DR plan, and broader member-action families stay out of scope for this first published rollout.",
+    "Pinned provider coverage is unconfirmed. formal/sources.lock still points at github.com/oracle/terraform-provider-oci@eb653febb1bab4cc6650a96d404a8baf36fdf671, but the checked-in onboarding audit did not confirm a matching DrProtectionGroup resource or datasource at that boundary. The providerResource and datasource names therefore stay provisional OCI-style placeholders so generator-owned registry artifacts can derive stable links without claiming verified provider coverage.",
+    "Repo-authored runtime semantics stay explicit: create, update, and delete resume through GetWorkRequest plus GetDrProtectionGroup rereads, list summaries are not treated as authoritative observed state because they omit members and logLocation, and required delete confirmation waits for either a terminal work request followed by a missing or DELETED resource."
+  ]
+}

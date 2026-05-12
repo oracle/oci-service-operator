@@ -1,0 +1,51 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: distributeddatabase
+slug: distributeddatabaseprivateendpoint
+kind: DistributedDatabasePrivateEndpoint
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending:
+      - CREATING
+    updatePending:
+      - UPDATING
+    deletePending:
+      - DELETING
+  listLookup:
+    filters:
+      - compartmentId
+      - displayName
+      - lifecycleState
+    matchRule: "exact compartmentId plus displayName list filters preserve the service-supported lifecycleState filter, then reuse only a unique summary candidate; the runtime rereads GetDistributedDatabasePrivateEndpoint before binding or status projection"
+  mutation:
+    mutable:
+      - definedTags
+      - description
+      - displayName
+      - freeformTags
+      - nsgIds
+    forceNew:
+      - compartmentId
+      - subnetId
+  hooks:
+    create:
+      - helper: tfresource.CreateResource
+    update:
+      - helper: tfresource.UpdateResource
+    delete:
+      - helper: tfresource.DeleteResource
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - "Create and delete responses can carry `opc-work-request-id` headers, but the published runtime stays lifecycle-classified and uses those IDs only as shared request breadcrumbs instead of polling `GetWorkRequest`."
+  - "`ListDistributedDatabasePrivateEndpoints` returns summary items that omit `privateIp`, so every successful bind or write path rereads `GetDistributedDatabasePrivateEndpoint` before projecting steady-state status."
+  - "The package-local update builder preserves explicit clear intent for `description`, `nsgIds`, `freeformTags`, and `definedTags` instead of letting generatedruntime drop zero-value clears."
+  - "Delete keeps the finalizer until `GetDistributedDatabasePrivateEndpoint` or list fallback confirms `DELETED` or NotFound."

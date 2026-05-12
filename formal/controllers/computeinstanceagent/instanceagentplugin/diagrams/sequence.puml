@@ -1,0 +1,138 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Sequence - computeinstanceagent/InstanceAgentPlugin
+hide footbox
+skinparam sequence {
+  actorBorderColor #0f172a
+  actorBackgroundColor #e2e8f0
+  participantBorderColor #0f172a
+  participantBackgroundColor #e2e8f0
+  participantFontColor #0f172a
+  lifeLineBorderColor #94a3b8
+  groupBorderColor #cbd5e1
+  groupBackgroundColor #f8fafc
+}
+actor Kubernetes
+participant Controller
+participant BaseReconciler
+participant "OSOKServiceManager" as ServiceManager
+participant OCI
+note over BaseReconciler,ServiceManager
+shared resolution:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete:
+shared/diagrams/shared-delete-sequence.svg
+end note
+Kubernetes -> Controller: enqueue InstanceAgentPlugin\nreconcile
+Controller -> BaseReconciler: Reconcile(request)
+BaseReconciler -> ServiceManager: reconcile desired\nInstanceAgentPlugin
+group Lookup and bind
+alt tracked or explicit OCI identity already exists
+ServiceManager -> OCI: GetInstanceAgentPlugin
+else tracked identity is missing
+ServiceManager -> OCI: ListInstanceAgentPlugins(filters:\ncompartmentId, instanceagentId,\npluginName)
+ServiceManager --> BaseReconciler: persist resolved OCI identity in status
+end
+alt delete requested
+group Delete
+ServiceManager -> OCI: none
+ServiceManager -> OCI: confirm delete via\nGetInstanceAgentPlugin or\nListInstanceAgentPlugins
+ServiceManager --> BaseReconciler: best-effort delete completion observed
+end
+else live state requires field-aware\ndrift evaluation
+group Drift handling
+note over ServiceManager,OCI
+Supported update surface: none
+Reject before mutate: force-new fields
+compartmentId, instanceagentId,
+pluginName
+Lookup filters: compartmentId,
+instanceagentId, pluginName
+Lookup matching: Direct reads require
+the exact composite identity
+instanceagentId+compartmentId+pluginName.
+Confirmation-only list reads reuse the
+same scope and treat an exact
+plugin-name match as the bound plugin;
+unexpected surviving matches fail
+instead of guessing.
+end note
+opt force-new or conflicting drift is detected
+ServiceManager --> BaseReconciler: reject before OCI mutation
+end
+ServiceManager -> OCI: apply follow-up strategy\ncreate=none; update=none;\ndelete=none
+end
+ServiceManager --> BaseReconciler: status=required, finalizer=none
+end
+BaseReconciler --> Controller: requeue on terminating
+note right of ServiceManager
+shared diagram:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete diagram:
+shared/diagrams/shared-delete-sequence.svg
+Start from the shared resolution sequence for
+OCID binding, datasource pagination, and
+create-or-update dispatch.
+Layer the shared delete sequence when finalizer
+retention, delete confirmation, work-request
+polling, or Secret cleanup apply.
+archetype batch: Generated service-manager
+controllers follow the shared resolution and
+delete sequences with imported waits and
+controller-local policy.
+service: computeinstanceagent
+slug: instanceagentplugin
+kind: InstanceAgentPlugin
+archetype: generated-service-manager
+status/finalizer: required / none
+requeue: terminating
+provider states: create none; update none;
+delete none
+follow-up: create=none; update=none; delete=none
+supported drift: none
+reject before mutate: force-new fields
+compartmentId, instanceagentId, pluginName
+create-only fields: none
+list lookup:
+oci_compute_instance_agent_instance_agent_plugins
+filters compartmentId, instanceagentId,
+pluginName; Direct reads require the exact
+composite identity
+instanceagentId+compartmentId+pluginName.
+Confirmation-only list reads reuse the same
+scope and treat an exact plugin-name match as
+the bound plugin; unexpected surviving matches
+fail instead of guessing.
+conflicts: none
+open gaps: none
+Compute Instance Agent exposes
+GetInstanceAgentPlugin and
+ListInstanceAgentPlugins only in the pinned SDK,
+so the published runtime is bind-existing and
+observe-only.
+Bind identity is explicit: reconcile requires
+compartmentId, instanceagentId, and pluginName,
+tracks the composite identity in status, and
+uses ListInstanceAgentPlugins only to confirm
+absence after a reread no longer finds the
+tracked plugin.
+No OCI create, update, or delete operation is
+published. Plugin enable or disable remains part
+of Core UpdateInstance and is out of scope for
+this package.
+Visible plugin states RUNNING, STOPPED,
+NOT_SUPPORTED, and INVALID are all stable
+observed states. Delete is Kubernetes-local
+unbind only and settles through best-effort
+local cleanup rather than cloud-side terminal
+waiting.
+end note
+@enduml

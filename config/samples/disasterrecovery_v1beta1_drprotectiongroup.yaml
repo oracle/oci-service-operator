@@ -1,0 +1,25 @@
+#
+# Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+#
+
+#
+# Replace the OCI identifiers and object storage location below before running e2e.
+# The members list uses polymorphic entries; when updating members, keep every retained
+# member in the list and remove only entries you intend to delete from the DR protection group.
+#
+apiVersion: disasterrecovery.oracle.com/v1beta1
+kind: DrProtectionGroup
+metadata:
+  name: drprotectiongroup-sample
+spec:
+  compartmentId: ocid1.compartment.oc1..exampleuniqueID
+  displayName: app-drprotectiongroup-sample
+  logLocation:
+    namespace: myocitenancy
+    bucket: dr-protection-group-logs
+  members:
+    - memberType: COMPUTE_INSTANCE
+      memberId: ocid1.instance.oc1..exampleuniqueID
+  freeformTags:
+    managed-by: oci-service-operator

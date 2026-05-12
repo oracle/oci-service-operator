@@ -1151,6 +1151,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"capacitymanagement",
 		"certificatesmanagement",
 		"clusterplacementgroups",
+		"computeinstanceagent",
 		"containerengine",
 		"containerinstances",
 		"core",
@@ -1162,7 +1163,9 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"datascience",
 		"dashboardservice",
 		"delegateaccesscontrol",
+		"disasterrecovery",
 		"devops",
+		"distributeddatabase",
 		"dns",
 		"email",
 		"events",
@@ -1263,6 +1266,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"capacitymanagement",
 		"certificatesmanagement",
 		"clusterplacementgroups",
+		"computeinstanceagent",
 		"containerengine",
 		"containerinstances",
 		"core",
@@ -1274,7 +1278,9 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"datascience",
 		"dashboardservice",
 		"delegateaccesscontrol",
+		"disasterrecovery",
 		"devops",
+		"distributeddatabase",
 		"dns",
 		"email",
 		"events",
@@ -1368,6 +1374,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	assertServiceSelection(t, services["capacitymanagement"], true, SelectionModeExplicit, []string{"OccCapacityRequest"})
 	assertServiceSelection(t, services["certificatesmanagement"], true, SelectionModeExplicit, []string{"CaBundle"})
 	assertServiceSelection(t, services["clusterplacementgroups"], true, SelectionModeExplicit, []string{"ClusterPlacementGroup"})
+	assertServiceSelection(t, services["computeinstanceagent"], true, SelectionModeExplicit, []string{"InstanceAgentPlugin"})
 	assertServiceSelection(t, services["containerengine"], true, SelectionModeExplicit, []string{"Cluster", "NodePool"})
 	assertServiceSelection(t, services["containerinstances"], true, SelectionModeExplicit, []string{"ContainerInstance"})
 	assertServiceSelection(t, services["core"], true, SelectionModeExplicit, []string{"Instance"})
@@ -1380,6 +1387,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	assertServiceSelection(t, services["dashboardservice"], true, SelectionModeExplicit, []string{"DashboardGroup", "Dashboard"})
 	assertServiceSelection(t, services["delegateaccesscontrol"], true, SelectionModeExplicit, []string{"DelegationControl"})
 	assertServiceSelection(t, services["devops"], true, SelectionModeExplicit, []string{"Project", "Repository", "BuildPipeline", "DeployPipeline", "DeployArtifact", "Trigger"})
+	assertServiceSelection(t, services["distributeddatabase"], true, SelectionModeExplicit, []string{"DistributedDatabasePrivateEndpoint"})
 	assertServiceSelection(t, services["dns"], true, SelectionModeExplicit, []string{"Zone", "View", "TsigKey", "SteeringPolicy", "SteeringPolicyAttachment"})
 	assertServiceSelection(t, services["email"], true, SelectionModeExplicit, []string{"Dkim", "EmailDomain", "Sender", "Suppression"})
 	assertServiceSelection(t, services["events"], true, SelectionModeExplicit, []string{"Rule"})
@@ -2167,6 +2175,7 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 		"capacitymanagement":          {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"certificatesmanagement":      {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"clusterplacementgroups":      {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"computeinstanceagent":        {strategy: AsyncStrategyNone, runtime: AsyncRuntimeGeneratedRuntime},
 		"containerengine":             {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"containerinstances":          {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeHandwritten},
 		"core":                        {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
@@ -2178,7 +2187,9 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 		"datascience":                 {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"dashboardservice":            {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"delegateaccesscontrol":       {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"disasterrecovery":            {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
 		"devops":                      {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"distributeddatabase":         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"dns":                         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"email":                       {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"events":                      {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},

@@ -14,10 +14,10 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	}
 
 	byKey := inventoryByKey(inventory)
-	if got, want := len(inventory), 367; got != want {
+	if got, want := len(inventory), 370; got != want {
 		t.Fatalf("len(inventory) = %d, want %d", got, want)
 	}
-	if got, want := countRegistrations(inventory), 244; got != want {
+	if got, want := countRegistrations(inventory), 247; got != want {
 		t.Fatalf("registration inventory count = %d, want %d", got, want)
 	}
 	if got, want := countExceptions(inventory), 123; got != want {
@@ -42,6 +42,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventorySelectionSource(t, byKey, "budget/Budget", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "capacitymanagement/OccCapacityRequest", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "clusterplacementgroups/ClusterPlacementGroup", "selection.includeKinds")
+	assertInventorySelectionSource(t, byKey, "computeinstanceagent/InstanceAgentPlugin", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "containerengine/Cluster", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "containerengine/NodePool", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "core/Drg", "packageSplits[core-network].includeKinds")
@@ -53,6 +54,8 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventorySelectionSource(t, byKey, "dashboardservice/Dashboard", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "dashboardservice/DashboardGroup", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "delegateaccesscontrol/DelegationControl", "selection.includeKinds")
+	assertInventorySelectionSource(t, byKey, "disasterrecovery/DrProtectionGroup", "selection.includeKinds")
+	assertInventorySelectionSource(t, byKey, "distributeddatabase/DistributedDatabasePrivateEndpoint", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "dataflow/Application", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "email/Dkim", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "functions/Application", "selection.includeKinds")
@@ -127,6 +130,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventoryException(t, byKey, "budget/AlertRule", `controller.strategy="none"`)
 	assertInventoryRegistration(t, byKey, "capacitymanagement/OccCapacityRequest")
 	assertInventoryRegistration(t, byKey, "clusterplacementgroups/ClusterPlacementGroup")
+	assertInventoryRegistration(t, byKey, "computeinstanceagent/InstanceAgentPlugin")
 	assertInventoryException(t, byKey, "clusterplacementgroups/WorkRequest", `controller.strategy="none"`)
 	assertInventoryException(t, byKey, "clusterplacementgroups/WorkRequestError", `controller.strategy="none"`)
 	assertInventoryException(t, byKey, "clusterplacementgroups/WorkRequestLog", `controller.strategy="none"`)
@@ -144,6 +148,8 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventoryRegistration(t, byKey, "dashboardservice/Dashboard")
 	assertInventoryRegistration(t, byKey, "dashboardservice/DashboardGroup")
 	assertInventoryRegistration(t, byKey, "delegateaccesscontrol/DelegationControl")
+	assertInventoryRegistration(t, byKey, "disasterrecovery/DrProtectionGroup")
+	assertInventoryRegistration(t, byKey, "distributeddatabase/DistributedDatabasePrivateEndpoint")
 	assertInventoryRegistration(t, byKey, "email/Dkim")
 	assertInventoryRegistration(t, byKey, "generativeaiagent/Agent")
 	assertInventoryRegistration(t, byKey, "generativeaidata/EnrichmentJob")
@@ -212,6 +218,7 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedFamily(t, "budget/Budget", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "capacitymanagement/OccCapacityRequest", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "clusterplacementgroups/ClusterPlacementGroup", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
+	assertReviewedFamily(t, "computeinstanceagent/InstanceAgentPlugin", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "containerengine/Cluster", APIErrorCoverageFamilyGeneratedRuntimeFollowUp)
 	assertReviewedFamily(t, "containerengine/NodePool", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "containerinstances/ContainerInstance", APIErrorCoverageFamilyLegacyAdapter)
@@ -224,6 +231,7 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedFamily(t, "dashboardservice/Dashboard", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "dashboardservice/DashboardGroup", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "delegateaccesscontrol/DelegationControl", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
+	assertReviewedFamily(t, "distributeddatabase/DistributedDatabasePrivateEndpoint", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "dataflow/Application", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "email/Dkim", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "functions/Application", APIErrorCoverageFamilyLegacyAdapter)

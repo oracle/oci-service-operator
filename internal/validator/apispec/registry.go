@@ -24,6 +24,7 @@ import (
 	capacitymanagementv1beta1 "github.com/oracle/oci-service-operator/api/capacitymanagement/v1beta1"
 	certificatesmanagementv1beta1 "github.com/oracle/oci-service-operator/api/certificatesmanagement/v1beta1"
 	clusterplacementgroupsv1beta1 "github.com/oracle/oci-service-operator/api/clusterplacementgroups/v1beta1"
+	computeinstanceagentv1beta1 "github.com/oracle/oci-service-operator/api/computeinstanceagent/v1beta1"
 	containerenginev1beta1 "github.com/oracle/oci-service-operator/api/containerengine/v1beta1"
 	containerinstancesv1beta1 "github.com/oracle/oci-service-operator/api/containerinstances/v1beta1"
 	corev1beta1 "github.com/oracle/oci-service-operator/api/core/v1beta1"
@@ -36,6 +37,8 @@ import (
 	datasciencev1beta1 "github.com/oracle/oci-service-operator/api/datascience/v1beta1"
 	delegateaccesscontrolv1beta1 "github.com/oracle/oci-service-operator/api/delegateaccesscontrol/v1beta1"
 	devopsv1beta1 "github.com/oracle/oci-service-operator/api/devops/v1beta1"
+	disasterrecoveryv1beta1 "github.com/oracle/oci-service-operator/api/disasterrecovery/v1beta1"
+	distributeddatabasev1beta1 "github.com/oracle/oci-service-operator/api/distributeddatabase/v1beta1"
 	dnsv1beta1 "github.com/oracle/oci-service-operator/api/dns/v1beta1"
 	emailv1beta1 "github.com/oracle/oci-service-operator/api/email/v1beta1"
 	eventsv1beta1 "github.com/oracle/oci-service-operator/api/events/v1beta1"
@@ -2291,6 +2294,19 @@ var targets = []Target{
 		},
 	},
 	{
+		Name:       "ComputeinstanceagentInstanceAgentPlugin",
+		SpecType:   reflect.TypeOf(computeinstanceagentv1beta1.InstanceAgentPluginSpec{}),
+		StatusType: reflect.TypeOf(computeinstanceagentv1beta1.InstanceAgentPluginStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "computeinstanceagent.InstanceAgentPlugin",
+			},
+			{
+				SDKStruct: "computeinstanceagent.InstanceAgentPluginSummary",
+			},
+		},
+	},
+	{
 		Name:       "ContainerinstancesContainerInstance",
 		SpecType:   reflect.TypeOf(containerinstancesv1beta1.ContainerInstanceSpec{}),
 		StatusType: reflect.TypeOf(containerinstancesv1beta1.ContainerInstanceStatus{}),
@@ -2633,6 +2649,50 @@ var targets = []Target{
 		SDKMappings: []SDKMapping{
 			{
 				SDKStruct: "devops.TriggerCollection",
+			},
+		},
+	},
+	{
+		Name:       "DisasterrecoveryDrProtectionGroup",
+		SpecType:   reflect.TypeOf(disasterrecoveryv1beta1.DrProtectionGroupSpec{}),
+		StatusType: reflect.TypeOf(disasterrecoveryv1beta1.DrProtectionGroupStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "disasterrecovery.CreateDrProtectionGroupDetails",
+			},
+			{
+				SDKStruct: "disasterrecovery.UpdateDrProtectionGroupDetails",
+			},
+			{
+				SDKStruct: "disasterrecovery.DrProtectionGroup",
+			},
+			{
+				SDKStruct: "disasterrecovery.DrProtectionGroupCollection",
+			},
+			{
+				SDKStruct: "disasterrecovery.DrProtectionGroupSummary",
+			},
+		},
+	},
+	{
+		Name:       "DistributeddatabaseDistributedDatabasePrivateEndpoint",
+		SpecType:   reflect.TypeOf(distributeddatabasev1beta1.DistributedDatabasePrivateEndpointSpec{}),
+		StatusType: reflect.TypeOf(distributeddatabasev1beta1.DistributedDatabasePrivateEndpointStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "distributeddatabase.CreateDistributedDatabasePrivateEndpointDetails",
+			},
+			{
+				SDKStruct: "distributeddatabase.UpdateDistributedDatabasePrivateEndpointDetails",
+			},
+			{
+				SDKStruct: "distributeddatabase.DistributedDatabasePrivateEndpoint",
+			},
+			{
+				SDKStruct: "distributeddatabase.DistributedDatabasePrivateEndpointCollection",
+			},
+			{
+				SDKStruct: "distributeddatabase.DistributedDatabasePrivateEndpointSummary",
 			},
 		},
 	},

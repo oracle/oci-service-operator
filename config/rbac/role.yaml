@@ -565,6 +565,32 @@ rules:
   - patch
   - update
 - apiGroups:
+  - computeinstanceagent.oracle.com
+  resources:
+  - instanceagentplugins
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - computeinstanceagent.oracle.com
+  resources:
+  - instanceagentplugins/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - computeinstanceagent.oracle.com
+  resources:
+  - instanceagentplugins/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - containerengine.oracle.com
   resources:
   - clusters
@@ -897,6 +923,58 @@ rules:
   - projects/status
   - repositories/status
   - triggers/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - disasterrecovery.oracle.com
+  resources:
+  - drprotectiongroups
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - disasterrecovery.oracle.com
+  resources:
+  - drprotectiongroups/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - disasterrecovery.oracle.com
+  resources:
+  - drprotectiongroups/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - distributeddatabase.oracle.com
+  resources:
+  - distributeddatabaseprivateendpoints
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - distributeddatabase.oracle.com
+  resources:
+  - distributeddatabaseprivateendpoints/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - distributeddatabase.oracle.com
+  resources:
+  - distributeddatabaseprivateendpoints/status
   verbs:
   - get
   - patch

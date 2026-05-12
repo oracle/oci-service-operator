@@ -36,6 +36,7 @@ resources:
 - bases/capacitymanagement.oracle.com_occcapacityrequests.yaml
 - bases/certificatesmanagement.oracle.com_cabundles.yaml
 - bases/clusterplacementgroups.oracle.com_clusterplacementgroups.yaml
+- bases/computeinstanceagent.oracle.com_instanceagentplugins.yaml
 - bases/containerengine.oracle.com_clusters.yaml
 - bases/containerengine.oracle.com_nodepools.yaml
 - bases/containerinstances.oracle.com_containerinstances.yaml
@@ -65,6 +66,8 @@ resources:
 - bases/devops.oracle.com_projects.yaml
 - bases/devops.oracle.com_repositories.yaml
 - bases/devops.oracle.com_triggers.yaml
+- bases/disasterrecovery.oracle.com_drprotectiongroups.yaml
+- bases/distributeddatabase.oracle.com_distributeddatabaseprivateendpoints.yaml
 - bases/dns.oracle.com_steeringpolicies.yaml
 - bases/dns.oracle.com_steeringpolicyattachments.yaml
 - bases/dns.oracle.com_tsigkeys.yaml
