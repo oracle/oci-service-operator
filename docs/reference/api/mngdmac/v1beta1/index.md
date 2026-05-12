@@ -18,7 +18,108 @@ No customer-visible package currently exposes `mngdmac.oracle.com/v1beta1`.
 
 | Kind | Scope | Sample | Packages |
 | --- | --- | --- | --- |
+| [MacDevice](#kind-macdevice) | Namespaced | [Sample](../../../samples/mngdmac/v1beta1/macdevice.md) | - |
 | [MacOrder](#kind-macorder) | Namespaced | [Sample](../../../samples/mngdmac/v1beta1/macorder.md) | - |
+
+<a id="kind-macdevice"></a>
+## MacDevice
+
+Bind an existing OCI Managed Services for Mac device and terminate it from Kubernetes.
+
+- `Plural`: `macdevices`
+- `Scope`: `Namespaced`
+- `APIVersion`: `mngdmac.oracle.com/v1beta1`
+- `Sample`: [Sample](../../../samples/mngdmac/v1beta1/macdevice.md) (`config/samples/mngdmac_v1beta1_macdevice.yaml`)
+- `Packages`: Not currently exposed by a customer-visible package.
+
+<a id="kind-macdevice-spec"></a>
+### Spec
+
+MacDeviceSpec defines the desired state of MacDevice.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `macDeviceId` | The UUID of the existing MacDevice to bind and manage. Required for direct get and terminate requests; delete confirmation also reuses it for exact list checks. | `string` | Yes | - | - |
+| `macOrderId` | The OCID of the MacOrder that owns the existing MacDevice. Required for GetMacDevice, ListMacDevices, and TerminateMacDevice requests. | `string` | Yes | - | - |
+
+<a id="kind-macdevice-status"></a>
+### Status
+
+MacDeviceStatus defines the observed state of MacDevice.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `compartmentId` | OCID of the compartment to which the resource belongs to. | `string` | No | - | - |
+| `id` | The unique ID of the MacDevice. | `string` | No | - | - |
+| `ipAddress` | The IP address assigned to the MacDevice. | `string` | No | - | - |
+| `isMarkedDecom` | A flag that indicates if this MacDevice is decommissioned. | `boolean` | No | - | - |
+| `lifecycleState` | The current status of the MacDevice. | `string` | No | - | - |
+| `macOrderId` | The OCID of the resource. | `string` | No | - | - |
+| `serialNumber` | The serial number of the MacDevice. | `string` | No | - | - |
+| `shape` | The shape of the Mac. | `string` | No | - | - |
+| [`status`](#kind-macdevice-status-status) | - | `object` | Yes | - | - |
+| `timeCreated` | The time this resource was created. An RFC3339 formatted datetime string. | `string` | No | - | - |
+| `timeDecom` | An RFC3339-formatted datetime string containing the time this MacDevice was decommissioned. | `string` | No | - | - |
+| `timeUpdated` | The time this resource was last updated. An RFC3339 formatted datetime string. | `string` | No | - | - |
+
+<a id="kind-macdevice-status-status"></a>
+#### Status.status
+
+[Back to MacDevice status](#kind-macdevice-status)
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`async`](#kind-macdevice-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
+| [`conditions`](#kind-macdevice-status-status-conditions) | - | `list[object]` | No | - | - |
+| `createdAt` | - | `string (date-time)` | No | - | - |
+| `deletedAt` | - | `string (date-time)` | No | - | - |
+| `message` | - | `string` | No | - | - |
+| `ocid` | - | `string` | No | - | - |
+| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
+| `reason` | - | `string` | No | - | - |
+| `requestedAt` | - | `string (date-time)` | No | - | - |
+| `updatedAt` | - | `string (date-time)` | No | - | - |
+
+<a id="kind-macdevice-status-status-async"></a>
+##### Status.status.async
+
+[Back to MacDevice status](#kind-macdevice-status)
+
+Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`current`](#kind-macdevice-status-status-async-current) | - | `object` | No | - | - |
+
+<a id="kind-macdevice-status-status-async-current"></a>
+###### Status.status.async.current
+
+[Back to MacDevice status](#kind-macdevice-status)
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `message` | - | `string` | No | - | - |
+| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
+| `percentComplete` | - | `number` | No | - | - |
+| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
+| `rawOperationType` | - | `string` | No | - | - |
+| `rawStatus` | - | `string` | No | - | - |
+| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
+| `updatedAt` | - | `string (date-time)` | Yes | - | - |
+| `workRequestId` | - | `string` | No | - | - |
+
+<a id="kind-macdevice-status-status-conditions"></a>
+##### Status.status.conditions[]
+
+[Back to MacDevice status](#kind-macdevice-status)
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `lastTransitionTime` | - | `string (date-time)` | No | - | - |
+| `message` | - | `string` | No | - | - |
+| `reason` | - | `string` | No | - | - |
+| `status` | - | `string` | Yes | - | - |
+| `type` | - | `string` | Yes | - | - |
 
 <a id="kind-macorder"></a>
 ## MacOrder

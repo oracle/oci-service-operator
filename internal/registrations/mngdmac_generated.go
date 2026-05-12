@@ -13,6 +13,7 @@ import (
 	mngdmacv1beta1 "github.com/oracle/oci-service-operator/api/mngdmac/v1beta1"
 	mngdmaccontrollers "github.com/oracle/oci-service-operator/controllers/mngdmac"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
+	mngdmacmacdeviceservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/mngdmac/macdevice"
 	mngdmacmacorderservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/mngdmac/macorder"
 )
 
@@ -21,6 +22,17 @@ func init() {
 		Group:       "mngdmac",
 		AddToScheme: mngdmacv1beta1.AddToScheme,
 		SetupWithManager: func(ctx Context) error {
+			if err := (&mngdmaccontrollers.MacDeviceReconciler{
+				Reconciler: NewBaseReconciler(
+					ctx,
+					"MacDevice",
+					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
+						return mngdmacmacdeviceservicemanager.NewMacDeviceServiceManagerWithDeps(deps)
+					},
+				),
+			}).SetupWithManager(ctx.Manager); err != nil {
+				return fmt.Errorf("setup MacDevice controller: %w", err)
+			}
 			if err := (&mngdmaccontrollers.MacOrderReconciler{
 				Reconciler: NewBaseReconciler(
 					ctx,

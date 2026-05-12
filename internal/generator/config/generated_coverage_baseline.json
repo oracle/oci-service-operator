@@ -883,7 +883,7 @@
     },
     {
       "service": "mngdmac",
-      "specs": 1,
+      "specs": 2,
       "mappings": 5,
       "trackedMappings": 5,
       "untrackedMappings": 0,

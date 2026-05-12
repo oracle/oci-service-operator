@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "mngdmac",
+  "slug": "macdevice",
+  "kind": "MacDevice",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_mngdmac_mac_device",
+  "operations": {
+    "create": [],
+    "get": [
+      {
+        "operation": "GetMacDevice",
+        "requestType": "mngdmac.GetMacDeviceRequest",
+        "responseType": "mngdmac.GetMacDeviceResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListMacDevices",
+        "requestType": "mngdmac.ListMacDevicesRequest",
+        "responseType": "mngdmac.ListMacDevicesResponse"
+      }
+    ],
+    "update": [],
+    "delete": [
+      {
+        "operation": "TerminateMacDevice",
+        "requestType": "mngdmac.TerminateMacDeviceRequest",
+        "responseType": "mngdmac.TerminateMacDeviceResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [],
+      "target": []
+    }
+  },
+  "mutation": {
+    "mutable": [],
+    "forceNew": [
+      "mac_device_id",
+      "mac_order_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [],
+    "update": [],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED",
+      "NOT_FOUND"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_mngdmac_mac_devices",
+    "collectionField": "mac_devices",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "mac_order_id",
+      "id"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/mngdmac/macdevice/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/mngdmac/macdevice/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "delete-confirmation",
+      "lifecycle-classification",
+      "list-lookup",
+      "mutation-policy",
+      "status-projection",
+      "secret-output",
+      "waiter-work-request"
+    ]
+  },
+  "notes": [
+    "Pinned provider boundary: terraform-provider-oci at the sources.lock revision does not register a Managed Services for Mac MacDevice resource or datasource, so this row keeps repo-curated OCI-style placeholder names while recording the reviewed SDK surface for generator-owned registry links.",
+    "Pinned OCI SDK contract: GetMacDevice, ListMacDevices, and TerminateMacDevice form the published controller-backed surface in github.com/oracle/oci-go-sdk/v65/mngdmac. The SDK does not expose CreateMacDevice, UpdateMacDevice, or DeleteMacDevice, and TerminateMacDeviceResponse returns only opc-request-id plus opc-work-request-id headers.",
+    "Pinned OCI SDK identity and lifecycle shape: GetMacDevice and TerminateMacDevice both require macOrderId plus macDeviceId, ListMacDevices requires macOrderId and can narrow by id, and the lifecycle enum is CREATING, ACTIVE, NEEDS_ATTENTION, DELETING, and DELETED.",
+    "Repo-authored runtime contract is narrower than the visible SDK surface: the published kind is bind-existing plus terminate-only, requires explicit macOrderId plus macDeviceId, projects state from GetMacDevice, uses ListMacDevices only for exact-id absence confirmation, and treats every spec field as identity-only once bound.",
+    "Delete follows the TerminateMacDevice work request through service-local GetWorkRequest on MacOrderClient, then rereads GetMacDevice or ListMacDevices until OCI reports DELETED or NotFound before releasing the finalizer."
+  ]
+}

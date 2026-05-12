@@ -1814,6 +1814,7 @@ rules:
 - apiGroups:
   - mngdmac.oracle.com
   resources:
+  - macdevices
   - macorders
   verbs:
   - create
@@ -1826,12 +1827,14 @@ rules:
 - apiGroups:
   - mngdmac.oracle.com
   resources:
+  - macdevices/finalizers
   - macorders/finalizers
   verbs:
   - update
 - apiGroups:
   - mngdmac.oracle.com
   resources:
+  - macdevices/status
   - macorders/status
   verbs:
   - get
