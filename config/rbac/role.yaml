@@ -2753,6 +2753,7 @@ rules:
 - apiGroups:
   - tenantmanagercontrolplane.oracle.com
   resources:
+  - domains
   - organizations
   verbs:
   - create
@@ -2765,12 +2766,14 @@ rules:
 - apiGroups:
   - tenantmanagercontrolplane.oracle.com
   resources:
+  - domains/finalizers
   - organizations/finalizers
   verbs:
   - update
 - apiGroups:
   - tenantmanagercontrolplane.oracle.com
   resources:
+  - domains/status
   - organizations/status
   verbs:
   - get

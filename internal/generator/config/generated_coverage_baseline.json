@@ -1317,17 +1317,17 @@
     },
     {
       "service": "tenantmanagercontrolplane",
-      "specs": 1,
-      "mappings": 4,
-      "trackedMappings": 4,
+      "specs": 2,
+      "mappings": 9,
+      "trackedMappings": 9,
       "untrackedMappings": 0,
-      "presentFields": 17,
-      "missingFields": 2,
-      "mandatoryPresentFields": 11,
-      "mandatoryMissingFields": 1,
-      "extraSpecFields": 2,
-      "overallCoveragePercent": 89.47368421052632,
-      "mandatoryCoveragePercent": 91.66666666666666
+      "presentFields": 45,
+      "missingFields": 5,
+      "mandatoryPresentFields": 25,
+      "mandatoryMissingFields": 2,
+      "extraSpecFields": 10,
+      "overallCoveragePercent": 90,
+      "mandatoryCoveragePercent": 92.5925925925926
     },
     {
       "service": "usageapi",

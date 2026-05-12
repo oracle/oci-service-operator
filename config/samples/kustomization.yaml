@@ -244,4 +244,5 @@ resources:
 - mediaservices_v1beta1_mediaworkflow.yaml
 - zpr_v1beta1_configuration.yaml
 - wlms_v1beta1_managedinstance.yaml
+- tenantmanagercontrolplane_v1beta1_domain.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

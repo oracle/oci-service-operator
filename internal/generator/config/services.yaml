@@ -4673,9 +4673,12 @@ services:
       enabled: true
       mode: explicit
       includeKinds:
+        - Domain
         - Organization
     observedState:
       excludedFieldPaths:
+        Domain:
+          - SystemTags
         Organization:
           - SystemTags
     generation:
@@ -4688,6 +4691,71 @@ services:
       webhooks:
         strategy: none
       resources:
+        - kind: Domain
+          formalSpec: domain
+          async:
+            strategy: workrequest
+            runtime: generatedruntime
+            formalClassification: workrequest
+            workRequest:
+              source: service-sdk
+              phases:
+                - create
+          serviceManager:
+            packagePath: tenantmanagercontrolplane/domain
+          specFields:
+            - name: Status
+              type: string
+              tag: 'json:"status,omitempty"'
+              comments:
+                - Optional exact-match filter used to narrow list-based binding and delete confirmation reads.
+                - Supported values include `PENDING`, `RELEASING`, `RELEASED`, `EXPIRING`, `REVOKING`, `REVOKED`, `ACTIVE`, and `FAILED`.
+              markers:
+                - +kubebuilder:validation:Optional
+            - name: LifecycleState
+              type: string
+              tag: 'json:"lifecycleState,omitempty"'
+              comments:
+                - Optional exact-match filter used to narrow list-based binding and delete confirmation reads.
+                - Supported values include `CREATING`, `ACTIVE`, `INACTIVE`, `UPDATING`, `FAILED`, and `TERMINATED`.
+              markers:
+                - +kubebuilder:validation:Optional
+          statusFields:
+            - name: CompartmentId
+              type: string
+              tag: 'json:"compartmentId,omitempty"'
+              comments:
+                - The tenancy OCID recorded for list identity matching and replacement-only drift checks.
+            - name: Status
+              type: string
+              tag: 'json:"sdkStatus,omitempty"'
+              comments:
+                - The raw domain status returned by Tenant Manager Control Plane.
+            - name: SubscriptionEmail
+              type: string
+              tag: 'json:"subscriptionEmail,omitempty"'
+              comments:
+                - The accepted subscription email tracked from the spec because the SDK does not echo it on reads.
+            - name: IsGovernanceEnabled
+              type: bool
+              tag: 'json:"isGovernanceEnabled,omitempty"'
+              comments:
+                - Whether governance was requested for the bound domain; tracked from the spec because the SDK does not echo it on reads.
+          sample:
+            body: |-
+              #
+              # Replace the compartment OCID and domain name below before running e2e.
+              # `spec.domainName` is the OCI identity surface; metadata.name is only the Kubernetes object name.
+              #
+              apiVersion: tenantmanagercontrolplane.oracle.com/v1beta1
+              kind: Domain
+              metadata:
+                name: domain-sample
+              spec:
+                compartmentId: ocid1.tenancy.oc1..exampleuniqueID
+                domainName: example.com
+                subscriptionEmail: admin@example.com
+                isGovernanceEnabled: false
         - kind: Organization
           formalSpec: organization
           async:
