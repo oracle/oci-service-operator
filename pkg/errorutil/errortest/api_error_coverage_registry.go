@@ -311,6 +311,16 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 				retryableConflictGeneratedRuntime,
 				"Script keeps generatedruntime CRUD and confirm-delete handling, while a handwritten hook layer scopes requests by apmDomainId, mirrors that bound domain into status, settles synchronous create and update rereads as Active, and bounds pre-create reuse to exact apmDomainId plus displayName plus contentType matches.",
 			),
+			resourceKey("appmgmtcontrol", "MonitoredInstance"): reviewedRegistration(
+				"appmgmtcontrol",
+				"appmgmtcontrol",
+				apiErrorCoverageDefaultVersion,
+				"MonitoredInstance",
+				APIErrorCoverageFamilyGeneratedRuntimePlain,
+				deleteNotFoundManualRuntime,
+				retryableConflictGeneratedRuntime,
+				"MonitoredInstance is bind-existing and observe-only because AppMgmt Control lacks create, update, and delete operations; a handwritten wrapper validates bind identity, preflights explicit instanceId lookups through GetMonitoredInstance so direct binds do not fall back to list adoption, paginates ListMonitoredInstances lookup, reruns one Get-backed delegate pass after list-only bind, and treats CR delete as local unbind without OCI delete helpers.",
+			),
 			resourceKey("bds", "BdsInstance"): reviewedRegistration(
 				"bds",
 				"bds",

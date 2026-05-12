@@ -17,6 +17,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/apmcontrolplane"
 	"github.com/oracle/oci-go-sdk/v65/apmsynthetics"
 	"github.com/oracle/oci-go-sdk/v65/apmtraces"
+	"github.com/oracle/oci-go-sdk/v65/appmgmtcontrol"
 	"github.com/oracle/oci-go-sdk/v65/artifacts"
 	"github.com/oracle/oci-go-sdk/v65/bastion"
 	"github.com/oracle/oci-go-sdk/v65/bds"
@@ -608,6 +609,11 @@ var seedTargets = []Target{
 	newTarget("apmtraces", "ScheduledQuery", reflect.TypeOf(apmtraces.ScheduledQuery{})),
 	newTarget("apmtraces", "ScheduledQueryCollection", reflect.TypeOf(apmtraces.ScheduledQueryCollection{})),
 	newTarget("apmtraces", "ScheduledQuerySummary", reflect.TypeOf(apmtraces.ScheduledQuerySummary{})),
+
+	// Appmgmtcontrol CRD support
+	newTarget("appmgmtcontrol", "MonitoredInstance", reflect.TypeOf(appmgmtcontrol.MonitoredInstance{})),
+	newTarget("appmgmtcontrol", "MonitoredInstanceCollection", reflect.TypeOf(appmgmtcontrol.MonitoredInstanceCollection{})),
+	newTarget("appmgmtcontrol", "MonitoredInstanceSummary", reflect.TypeOf(appmgmtcontrol.MonitoredInstanceSummary{})),
 
 	// Bastion CRD support
 	newTarget("bastion", "CreateBastionDetails", reflect.TypeOf(bastion.CreateBastionDetails{})),

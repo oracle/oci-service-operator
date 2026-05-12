@@ -25,6 +25,7 @@ resources:
 - bases/apmcontrolplane.oracle.com_apmdomains.yaml
 - bases/apmsynthetics.oracle.com_scripts.yaml
 - bases/apmtraces.oracle.com_scheduledqueries.yaml
+- bases/appmgmtcontrol.oracle.com_monitoredinstances.yaml
 - bases/artifacts.oracle.com_containerimagesignatures.yaml
 - bases/artifacts.oracle.com_containerrepositories.yaml
 - bases/artifacts.oracle.com_repositories.yaml

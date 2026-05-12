@@ -14,10 +14,10 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	}
 
 	byKey := inventoryByKey(inventory)
-	if got, want := len(inventory), 366; got != want {
+	if got, want := len(inventory), 367; got != want {
 		t.Fatalf("len(inventory) = %d, want %d", got, want)
 	}
-	if got, want := countRegistrations(inventory), 243; got != want {
+	if got, want := countRegistrations(inventory), 244; got != want {
 		t.Fatalf("registration inventory count = %d, want %d", got, want)
 	}
 	if got, want := countExceptions(inventory), 123; got != want {
@@ -37,6 +37,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventorySelectionSource(t, byKey, "apmcontrolplane/ApmDomain", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "apmtraces/ScheduledQuery", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "apmsynthetics/Script", "selection.includeKinds")
+	assertInventorySelectionSource(t, byKey, "appmgmtcontrol/MonitoredInstance", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "bds/BdsInstance", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "budget/Budget", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "capacitymanagement/OccCapacityRequest", "selection.includeKinds")
@@ -119,6 +120,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventoryException(t, byKey, "apmcontrolplane/WorkRequestLog", `controller.strategy="none"`)
 	assertInventoryRegistration(t, byKey, "apmtraces/ScheduledQuery")
 	assertInventoryRegistration(t, byKey, "apmsynthetics/Script")
+	assertInventoryRegistration(t, byKey, "appmgmtcontrol/MonitoredInstance")
 	assertInventoryRegistration(t, byKey, "bds/BdsInstance")
 	assertInventoryException(t, byKey, "bds/WorkRequest", `controller.strategy="none"`)
 	assertInventoryRegistration(t, byKey, "budget/Budget")
@@ -205,6 +207,7 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedFamily(t, "apmcontrolplane/ApmDomain", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "apmtraces/ScheduledQuery", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "apmsynthetics/Script", APIErrorCoverageFamilyGeneratedRuntimePlain)
+	assertReviewedFamily(t, "appmgmtcontrol/MonitoredInstance", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "bds/BdsInstance", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "budget/Budget", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "capacitymanagement/OccCapacityRequest", APIErrorCoverageFamilyGeneratedRuntimePlain)

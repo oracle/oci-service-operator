@@ -1141,6 +1141,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"apiplatform",
 		"apmcontrolplane",
 		"apmconfig",
+		"appmgmtcontrol",
 		"apmtraces",
 		"apmsynthetics",
 		"artifacts",
@@ -1252,6 +1253,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"apiplatform",
 		"apmcontrolplane",
 		"apmconfig",
+		"appmgmtcontrol",
 		"apmtraces",
 		"apmsynthetics",
 		"artifacts",
@@ -1356,6 +1358,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	assertServiceSelection(t, services["apiplatform"], true, SelectionModeExplicit, []string{"ApiPlatformInstance"})
 	assertServiceSelection(t, services["apmcontrolplane"], true, SelectionModeExplicit, []string{"ApmDomain"})
 	assertServiceSelection(t, services["apmconfig"], true, SelectionModeExplicit, []string{"Config"})
+	assertServiceSelection(t, services["appmgmtcontrol"], true, SelectionModeExplicit, []string{"MonitoredInstance"})
 	assertServiceSelection(t, services["apmtraces"], true, SelectionModeExplicit, []string{"ScheduledQuery"})
 	assertServiceSelection(t, services["apmsynthetics"], true, SelectionModeExplicit, []string{"Script"})
 	assertServiceSelection(t, services["artifacts"], true, SelectionModeExplicit, []string{"ContainerImageSignature", "ContainerRepository", "Repository"})
@@ -2154,6 +2157,7 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 		"apiplatform":                 {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"apmcontrolplane":             {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
 		"apmconfig":                   {strategy: AsyncStrategyNone, runtime: AsyncRuntimeGeneratedRuntime},
+		"appmgmtcontrol":              {strategy: AsyncStrategyNone, runtime: AsyncRuntimeGeneratedRuntime},
 		"apmtraces":                   {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"apmsynthetics":               {strategy: AsyncStrategyNone, runtime: AsyncRuntimeGeneratedRuntime},
 		"artifacts":                   {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
