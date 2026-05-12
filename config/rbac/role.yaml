@@ -876,6 +876,32 @@ rules:
   - patch
   - update
 - apiGroups:
+  - disasterrecovery.oracle.com
+  resources:
+  - drprotectiongroups
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - disasterrecovery.oracle.com
+  resources:
+  - drprotectiongroups/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - disasterrecovery.oracle.com
+  resources:
+  - drprotectiongroups/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - dns.oracle.com
   resources:
   - steeringpolicies

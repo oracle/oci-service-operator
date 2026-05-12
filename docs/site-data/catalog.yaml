@@ -471,6 +471,20 @@ packages:
         kind: Trigger
         summary: Manage OCI DevOps triggers.
 
+  - package: disasterrecovery
+    displayName: Disaster Recovery
+    summary: Manage OCI Disaster Recovery protection groups from Kubernetes with an initial controller-backed DrProtectionGroup rollout.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to DrProtectionGroup while associate, disassociate, role-change, DR plan, and work-request helper families stay unpublished.
+      - The published runtime uses service-SDK work requests for create, update, and delete, keeps peer and lifecycle state truthfully projected in status, and preserves polymorphic member content instead of flattening the DR protection group membership surface.
+    kindOverrides:
+      - group: disasterrecovery
+        kind: DrProtectionGroup
+        summary: Manage OCI Disaster Recovery protection groups.
+
   - package: dns
     displayName: DNS
     summary: Manage OCI DNS zones, views, TSIG keys, steering policies, and attachments from Kubernetes.

@@ -561,6 +561,16 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 				retryableConflictWorkRequest,
 				"DelegationControl stores create, update, and delete work-request IDs in shared async status, recovers identity from work-request resources when OCI omits it from the create response, bounds pre-create reuse to exact compartmentId plus displayName plus resourceType plus resourceIds matches, and confirms delete completion through work-request polling plus Get/List rereads.",
 			),
+			resourceKey("disasterrecovery", "DrProtectionGroup"): reviewedRegistration(
+				"disasterrecovery",
+				"disasterrecovery",
+				apiErrorCoverageDefaultVersion,
+				"DrProtectionGroup",
+				APIErrorCoverageFamilyGeneratedRuntimeWorkRequest,
+				deleteNotFoundReadback,
+				retryableConflictWorkRequest,
+				"DrProtectionGroup uses generatedruntime work-request follow-up semantics with a handwritten hook layer for polymorphic member request-body shaping, filter-only lifecycle narrowing, create-only association drift checks, and GetWorkRequest plus GetDrProtectionGroup delete confirmation rereads.",
+			),
 			resourceKey("dataflow", "Application"): reviewedRegistration(
 				"dataflow",
 				"dataflow",
