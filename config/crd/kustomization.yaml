@@ -51,6 +51,7 @@ resources:
 - bases/dashboardservice.oracle.com_dashboardgroups.yaml
 - bases/dashboardservice.oracle.com_dashboards.yaml
 - bases/database.oracle.com_autonomousdatabases.yaml
+- bases/databasemigration.oracle.com_assessments.yaml
 - bases/databasemigration.oracle.com_connections.yaml
 - bases/databasetools.oracle.com_databasetoolsconnections.yaml
 - bases/dataflow.oracle.com_applications.yaml

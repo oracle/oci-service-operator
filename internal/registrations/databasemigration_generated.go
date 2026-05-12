@@ -13,6 +13,7 @@ import (
 	databasemigrationv1beta1 "github.com/oracle/oci-service-operator/api/databasemigration/v1beta1"
 	databasemigrationcontrollers "github.com/oracle/oci-service-operator/controllers/databasemigration"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
+	databasemigrationassessmentservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/databasemigration/assessment"
 	databasemigrationconnectionservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/databasemigration/connection"
 )
 
@@ -21,6 +22,17 @@ func init() {
 		Group:       "databasemigration",
 		AddToScheme: databasemigrationv1beta1.AddToScheme,
 		SetupWithManager: func(ctx Context) error {
+			if err := (&databasemigrationcontrollers.AssessmentReconciler{
+				Reconciler: NewBaseReconciler(
+					ctx,
+					"Assessment",
+					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
+						return databasemigrationassessmentservicemanager.NewAssessmentServiceManagerWithDeps(deps)
+					},
+				),
+			}).SetupWithManager(ctx.Manager); err != nil {
+				return fmt.Errorf("setup Assessment controller: %w", err)
+			}
 			if err := (&databasemigrationcontrollers.ConnectionReconciler{
 				Reconciler: NewBaseReconciler(
 					ctx,

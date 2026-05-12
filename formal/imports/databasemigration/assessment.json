@@ -1,0 +1,164 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "databasemigration",
+  "slug": "assessment",
+  "kind": "Assessment",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_database_migration_assessment",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateAssessment",
+        "requestType": "databasemigration.CreateAssessmentRequest",
+        "responseType": "databasemigration.CreateAssessmentResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetAssessment",
+        "requestType": "databasemigration.GetAssessmentRequest",
+        "responseType": "databasemigration.GetAssessmentResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListAssessments",
+        "requestType": "databasemigration.ListAssessmentsRequest",
+        "responseType": "databasemigration.ListAssessmentsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateAssessment",
+        "requestType": "databasemigration.UpdateAssessmentRequest",
+        "responseType": "databasemigration.UpdateAssessmentResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteAssessment",
+        "requestType": "databasemigration.DeleteAssessmentRequest",
+        "responseType": "databasemigration.DeleteAssessmentResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING",
+        "IN_PROGRESS"
+      ],
+      "target": [
+        "ACTIVE",
+        "SUCCEEDED"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING",
+        "IN_PROGRESS"
+      ],
+      "target": [
+        "ACTIVE",
+        "SUCCEEDED"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "acceptable_downtime",
+      "creation_type",
+      "database_data_size",
+      "ddl_expectation",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags",
+      "network_speed_megabit_per_second",
+      "source_database_connection",
+      "target_database_connection"
+    ],
+    "forceNew": [
+      "bulk_include_exclude_data",
+      "compartment_id",
+      "database_combination",
+      "exclude_objects",
+      "include_objects"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "assessment",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "assessment",
+        "action": "UPDATED"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "assessment",
+        "action": "DELETED"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_database_migration_assessments",
+    "collectionField": "assessment_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "lifecycle_details",
+      "lifecycle_state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/databasemigration/assessment/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/databasemigration/assessment/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "list-lookup",
+      "mutation-policy",
+      "status-projection",
+      "secret-output",
+      "delete-confirmation",
+      "waiter-work-request"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: Assessment, AssessmentSummary, CreateAssessmentDetails, and UpdateAssessmentDetails are all polymorphic over databaseCombination MYSQL and ORACLE. The published runtime requires spec.databaseCombination explicitly and builds the matching concrete create/update body type before OCI calls.",
+    "Pinned OCI SDK contract: CreateAssessment returns an Assessment body plus opc-work-request-id, while UpdateAssessment and DeleteAssessment surface only opc-work-request-id headers. The reviewed runtime therefore follows create, update, and delete with GetWorkRequest plus a concrete GetAssessment reread before projecting status or confirming delete completion.",
+    "Pinned provider-facing shape: the CRUD family is CreateAssessment, GetAssessment, ListAssessments, UpdateAssessment, and DeleteAssessment, with list filters compartmentId, displayName, lifecycleState, and lifecycleDetails plus the service-local work-request status surface from GetWorkRequest.",
+    "Repo-authored bind-versus-create stays explicit: the reviewed runtime only attempts pre-create reuse when compartmentId, displayName, and databaseCombination are all present, then narrows candidates in memory by databaseCombination and exact source/target connection identity plus network speed, downtime, database size, DDL expectation, and creation type through GetAssessment rereads.",
+    "Repo-authored mutation policy stays explicit: only the UpdateAssessmentDetails surface reconciles in place. compartmentId and databaseCombination remain replacement-only drift, and the broader object-helper fields includeObjects, excludeObjects, and bulkIncludeExcludeData are rejected because this rollout intentionally excludes the assessor/object helper families.",
+    "Repo-authored status projection and secret behavior stay explicit: the runtime projects the published Assessment status read model from concrete GetAssessment responses, preserves the shared async contract in status.async.current for work-request-backed flows, and has no Kubernetes secret side effects."
+  ]
+}

@@ -18,7 +18,214 @@ No customer-visible package currently exposes `databasemigration.oracle.com/v1be
 
 | Kind | Scope | Sample | Packages |
 | --- | --- | --- | --- |
+| [Assessment](#kind-assessment) | Namespaced | [Sample](../../../samples/databasemigration/v1beta1/assessment.md) | - |
 | [Connection](#kind-connection) | Namespaced | [Sample](../../../samples/databasemigration/v1beta1/connection.md) | - |
+
+<a id="kind-assessment"></a>
+## Assessment
+
+Assessment is the Schema for the assessments API.
+
+- `Plural`: `assessments`
+- `Scope`: `Namespaced`
+- `APIVersion`: `databasemigration.oracle.com/v1beta1`
+- `Sample`: [Sample](../../../samples/databasemigration/v1beta1/assessment.md) (`config/samples/databasemigration_v1beta1_assessment.yaml`)
+- `Packages`: Not currently exposed by a customer-visible package.
+
+<a id="kind-assessment-spec"></a>
+### Spec
+
+AssessmentSpec defines the desired state of Assessment.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `acceptableDowntime` | Time allowed for the application downtime. | `string` | Yes | - | - |
+| `bulkIncludeExcludeData` | Specifies the database objects to be excluded from the migration in bulk. The definition accepts input in a CSV format, newline separated for each entry. More details can be found in the documentation. | `string` | No | - | - |
+| `compartmentId` | The OCID of the resource being referenced. | `string` | Yes | - | - |
+| `creationType` | The type of assessment creation. | `string` | No | - | - |
+| `databaseCombination` | - | `string` | No | - | - |
+| `databaseDataSize` | The size of a source database. | `string` | Yes | - | - |
+| `ddlExpectation` | DDL expectation values. | `string` | Yes | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. Example: `{"foo-namespace": {"bar-key": "value"}}` | `map[string, map[string, string]]` | No | - | - |
+| `description` | A user-friendly description. Does not have to be unique, and it's changeable. Avoid entering confidential information. | `string` | No | - | - |
+| `displayName` | A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information. | `string` | No | - | - |
+| [`excludeObjects`](#kind-assessment-spec-excludeobjects) | Database objects to exclude from migration, cannot be specified alongside 'includeObjects' | `list[object]` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags. Example: {"Department": "Finance"} | `map[string, string]` | No | - | - |
+| [`includeObjects`](#kind-assessment-spec-includeobjects) | Database objects to include from migration, cannot be specified alongside 'excludeObjects' | `list[object]` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `networkSpeedMegabitPerSecond` | A network speed in Megabits per second. | `string` | Yes | - | - |
+| [`sourceDatabaseConnection`](#kind-assessment-spec-sourcedatabaseconnection) | AssessmentSourceDatabaseConnection defines nested fields for Assessment.SourceDatabaseConnection. | `object` | Yes | - | - |
+| [`targetDatabaseConnection`](#kind-assessment-spec-targetdatabaseconnection) | AssessmentTargetDatabaseConnection defines nested fields for Assessment.TargetDatabaseConnection. | `object` | Yes | - | - |
+
+<a id="kind-assessment-spec-excludeobjects"></a>
+#### Spec.excludeObjects[]
+
+[Back to Assessment spec](#kind-assessment-spec)
+
+AssessmentExcludeObject defines nested fields for Assessment.ExcludeObject.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `isOmitExcludedTableFromReplication` | Whether an excluded table should be omitted from replication. Only valid for database objects that have are of type TABLE and object status EXCLUDE. | `boolean` | No | - | - |
+| `objectName` | Name of the object (regular expression is allowed) | `string` | Yes | - | - |
+| `owner` | Owner of the object (regular expression is allowed) | `string` | Yes | - | - |
+| `type` | Type of object to exclude. If not specified, matching owners and object names of type TABLE would be excluded. | `string` | No | - | - |
+
+<a id="kind-assessment-spec-includeobjects"></a>
+#### Spec.includeObjects[]
+
+[Back to Assessment spec](#kind-assessment-spec)
+
+AssessmentIncludeObject defines nested fields for Assessment.IncludeObject.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `isOmitExcludedTableFromReplication` | Whether an excluded table should be omitted from replication. Only valid for database objects that have are of type TABLE and object status EXCLUDE. | `boolean` | No | - | - |
+| `objectName` | Name of the object (regular expression is allowed) | `string` | Yes | - | - |
+| `owner` | Owner of the object (regular expression is allowed) | `string` | Yes | - | - |
+| `type` | Type of object to exclude. If not specified, matching owners and object names of type TABLE would be excluded. | `string` | No | - | - |
+
+<a id="kind-assessment-spec-sourcedatabaseconnection"></a>
+#### Spec.sourceDatabaseConnection
+
+[Back to Assessment spec](#kind-assessment-spec)
+
+AssessmentSourceDatabaseConnection defines nested fields for Assessment.SourceDatabaseConnection.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `id` | The OCID of the resource being referenced. | `string` | Yes | - | - |
+
+<a id="kind-assessment-spec-targetdatabaseconnection"></a>
+#### Spec.targetDatabaseConnection
+
+[Back to Assessment spec](#kind-assessment-spec)
+
+AssessmentTargetDatabaseConnection defines nested fields for Assessment.TargetDatabaseConnection.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `connectionType` | Defines the type of connection. For example, ORACLE. | `string` | No | - | - |
+| `databaseVersion` | The database version | `string` | No | - | - |
+| `id` | The OCID of the resource being referenced. | `string` | No | - | - |
+| `technologySubType` | Technology sub-type e.g. ADW_SHARED, ADW_DEDICATED, ATP_SHARED, ATP_DEDICATED | `string` | No | - | - |
+| `technologyType` | The technology type. | `string` | No | - | - |
+
+<a id="kind-assessment-status"></a>
+### Status
+
+AssessmentStatus defines the observed state of Assessment.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `acceptableDowntime` | Time allowed for the application downtime. | `string` | No | - | - |
+| `assessmentMigrationType` | The migration type of the migration to be performed. | `string` | No | - | - |
+| `compartmentId` | The OCID of the resource being referenced. | `string` | No | - | - |
+| `creationType` | The type of assessment creation. | `string` | No | - | - |
+| `databaseCombination` | - | `string` | No | - | - |
+| `databaseDataSize` | The size of a source database. | `string` | No | - | - |
+| `ddlExpectation` | DDL expectation values. | `string` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. Example: `{"foo-namespace": {"bar-key": "value"}}` | `map[string, map[string, string]]` | No | - | - |
+| `description` | A user-friendly description. Does not have to be unique, and it's changeable. Avoid entering confidential information. | `string` | No | - | - |
+| `displayName` | A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information. | `string` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags. Example: {"Department": "Finance"} | `map[string, string]` | No | - | - |
+| `id` | The OCID of the resource being referenced. | `string` | No | - | - |
+| `isCdbSupported` | True if CDB should be defined, false otherwise. | `boolean` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `lifecycleState` | The current state of the Assessment resource. | `string` | No | - | - |
+| `migrationId` | The OCID of the resource being referenced. | `string` | No | - | - |
+| `networkSpeedMegabitPerSecond` | A network speed in Megabits per second. | `string` | No | - | - |
+| [`sourceDatabaseConnection`](#kind-assessment-status-sourcedatabaseconnection) | AssessmentSourceDatabaseConnection defines nested fields for Assessment.SourceDatabaseConnection. | `object` | No | - | - |
+| [`status`](#kind-assessment-status-status) | - | `object` | Yes | - | - |
+| `systemTags` | Usage of system tag keys. These predefined keys are scoped to namespaces. Example: `{"orcl-cloud": {"free-tier-retained": "true"}}` | `map[string, map[string, string]]` | No | - | - |
+| [`targetDatabaseConnection`](#kind-assessment-status-targetdatabaseconnection) | AssessmentTargetDatabaseConnection defines nested fields for Assessment.TargetDatabaseConnection. | `object` | No | - | - |
+| `timeCreated` | An RFC3339 formatted datetime string such as `2016-08-25T21:10:29.600Z`. | `string` | No | - | - |
+| `timeUpdated` | An RFC3339 formatted datetime string such as `2016-08-25T21:10:29.600Z`. | `string` | No | - | - |
+
+<a id="kind-assessment-status-sourcedatabaseconnection"></a>
+#### Status.sourceDatabaseConnection
+
+[Back to Assessment status](#kind-assessment-status)
+
+AssessmentSourceDatabaseConnection defines nested fields for Assessment.SourceDatabaseConnection.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `id` | The OCID of the resource being referenced. | `string` | Yes | - | - |
+
+<a id="kind-assessment-status-status"></a>
+#### Status.status
+
+[Back to Assessment status](#kind-assessment-status)
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`async`](#kind-assessment-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
+| [`conditions`](#kind-assessment-status-status-conditions) | - | `list[object]` | No | - | - |
+| `createdAt` | - | `string (date-time)` | No | - | - |
+| `deletedAt` | - | `string (date-time)` | No | - | - |
+| `message` | - | `string` | No | - | - |
+| `ocid` | - | `string` | No | - | - |
+| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
+| `reason` | - | `string` | No | - | - |
+| `requestedAt` | - | `string (date-time)` | No | - | - |
+| `updatedAt` | - | `string (date-time)` | No | - | - |
+
+<a id="kind-assessment-status-status-async"></a>
+##### Status.status.async
+
+[Back to Assessment status](#kind-assessment-status)
+
+Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`current`](#kind-assessment-status-status-async-current) | - | `object` | No | - | - |
+
+<a id="kind-assessment-status-status-async-current"></a>
+###### Status.status.async.current
+
+[Back to Assessment status](#kind-assessment-status)
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `message` | - | `string` | No | - | - |
+| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
+| `percentComplete` | - | `number` | No | - | - |
+| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
+| `rawOperationType` | - | `string` | No | - | - |
+| `rawStatus` | - | `string` | No | - | - |
+| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
+| `updatedAt` | - | `string (date-time)` | Yes | - | - |
+| `workRequestId` | - | `string` | No | - | - |
+
+<a id="kind-assessment-status-status-conditions"></a>
+##### Status.status.conditions[]
+
+[Back to Assessment status](#kind-assessment-status)
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `lastTransitionTime` | - | `string (date-time)` | No | - | - |
+| `message` | - | `string` | No | - | - |
+| `reason` | - | `string` | No | - | - |
+| `status` | - | `string` | Yes | - | - |
+| `type` | - | `string` | Yes | - | - |
+
+<a id="kind-assessment-status-targetdatabaseconnection"></a>
+#### Status.targetDatabaseConnection
+
+[Back to Assessment status](#kind-assessment-status)
+
+AssessmentTargetDatabaseConnection defines nested fields for Assessment.TargetDatabaseConnection.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `connectionType` | Defines the type of connection. For example, ORACLE. | `string` | No | - | - |
+| `databaseVersion` | The database version | `string` | No | - | - |
+| `id` | The OCID of the resource being referenced. | `string` | No | - | - |
+| `technologySubType` | Technology sub-type e.g. ADW_SHARED, ADW_DEDICATED, ATP_SHARED, ATP_DEDICATED | `string` | No | - | - |
+| `technologyType` | The technology type. | `string` | No | - | - |
 
 <a id="kind-connection"></a>
 ## Connection

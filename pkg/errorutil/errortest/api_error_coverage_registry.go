@@ -501,6 +501,16 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 				retryableConflictGeneratedRuntime,
 				"Initial DatabaseToolsConnection rollout keeps plain generatedruntime CRUD and lifecycle rereads even though the service also exposes endpoint services, private endpoints, work-request identifiers, and connection validation helpers.",
 			),
+			resourceKey("databasemigration", "Assessment"): reviewedRegistration(
+				"databasemigration",
+				"databasemigration",
+				apiErrorCoverageDefaultVersion,
+				"Assessment",
+				APIErrorCoverageFamilyGeneratedRuntimeWorkRequest,
+				deleteNotFoundReadback,
+				retryableConflictWorkRequest,
+				"Assessment runtime persists create, update, and delete work-request OCIDs in shared async status, recovers Assessment identity from work-request resources, requires explicit databaseCombination to build concrete MYSQL versus ORACLE request bodies, and rereads GetAssessment after work-request completion before projecting status.",
+			),
 			resourceKey("databasemigration", "Connection"): reviewedRegistration(
 				"databasemigration",
 				"databasemigration",

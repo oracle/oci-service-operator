@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "databasemigration",
+  "kind": "Assessment",
+  "formalSlug": "assessment",
+  "providerResource": "oci_database_migration_assessment",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/database_migration_assessment",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/database_migration_assessment",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/databasemigration/assessment/page.html",
+  "bodySHA256": "d5117f9d2d0ad1c1fdf712e6a07abdee9272ebd1ac2075313239b5c99020609d",
+  "bodyBytes": 2254,
+  "fixtureBodyPath": "7.22.0/databasemigration/assessment/page.html"
+}

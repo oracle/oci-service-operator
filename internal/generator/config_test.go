@@ -1371,7 +1371,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	assertServiceSelection(t, services["dataflow"], true, SelectionModeExplicit, []string{"Application"})
 	assertServiceSelection(t, services["database"], true, SelectionModeExplicit, []string{"AutonomousDatabase"})
 	assertServiceSelection(t, services["databasetools"], true, SelectionModeExplicit, []string{"DatabaseToolsConnection"})
-	assertServiceSelection(t, services["databasemigration"], true, SelectionModeExplicit, []string{"Connection"})
+	assertServiceSelection(t, services["databasemigration"], true, SelectionModeExplicit, []string{"Connection", "Assessment"})
 	assertServiceSelection(t, services["datalabelingservice"], true, SelectionModeExplicit, []string{"Dataset"})
 	assertServiceSelection(t, services["datascience"], true, SelectionModeExplicit, []string{"Project"})
 	assertServiceSelection(t, services["dashboardservice"], true, SelectionModeExplicit, []string{"DashboardGroup", "Dashboard"})
@@ -1564,6 +1564,7 @@ func TestCheckedInConfigPromotesFormalSpecReferences(t *testing.T) {
 	assertFormalSpecFor(t, services["containerengine"], "Cluster", "cluster")
 	assertFormalSpecFor(t, services["containerengine"], "NodePool", "nodepool")
 	assertFormalSpecFor(t, services["containerinstances"], "ContainerInstance", "")
+	assertFormalSpecFor(t, services["databasemigration"], "Assessment", "assessment")
 	assertFormalSpecFor(t, services["databasemigration"], "Connection", "connection")
 	assertFormalSpecFor(t, services["databasetools"], "DatabaseToolsConnection", "databasetoolsconnection")
 	assertFormalSpecFor(t, services["datalabelingservice"], "Dataset", "dataset")
@@ -3008,7 +3009,7 @@ func assertDatabaseMigrationRuntimeRolloutMetadata(t *testing.T, service *Servic
 		registration:   GenerationStrategyGenerated,
 		webhook:        GenerationStrategyNone,
 	})
-	assertResourceOverrideCount(t, service, 1)
+	assertResourceOverrideCount(t, service, 2)
 
 	async := assertAsyncContract(t, service, "Connection", AsyncStrategyWorkRequest, AsyncRuntimeGeneratedRuntime)
 	if async.FormalClassification != AsyncStrategyWorkRequest {
@@ -3019,6 +3020,17 @@ func assertDatabaseMigrationRuntimeRolloutMetadata(t *testing.T, service *Servic
 	}
 	if !slices.Equal(async.WorkRequest.Phases, []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}) {
 		t.Fatalf("databasemigration Connection workRequest.phases = %v, want %v", async.WorkRequest.Phases, []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete})
+	}
+
+	async = assertAsyncContract(t, service, "Assessment", AsyncStrategyWorkRequest, AsyncRuntimeGeneratedRuntime)
+	if async.FormalClassification != AsyncStrategyWorkRequest {
+		t.Fatalf("databasemigration Assessment formalClassification = %q, want %q", async.FormalClassification, AsyncStrategyWorkRequest)
+	}
+	if async.WorkRequest.Source != AsyncWorkRequestSourceServiceSDK {
+		t.Fatalf("databasemigration Assessment workRequest.source = %q, want %q", async.WorkRequest.Source, AsyncWorkRequestSourceServiceSDK)
+	}
+	if !slices.Equal(async.WorkRequest.Phases, []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}) {
+		t.Fatalf("databasemigration Assessment workRequest.phases = %v, want %v", async.WorkRequest.Phases, []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete})
 	}
 }
 
