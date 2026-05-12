@@ -3590,6 +3590,22 @@ var targets = []Target{
 		},
 	},
 	{
+		Name:       "MngdmacMacDevice",
+		SpecType:   reflect.TypeOf(mngdmacv1beta1.MacDeviceSpec{}),
+		StatusType: reflect.TypeOf(mngdmacv1beta1.MacDeviceStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "mngdmac.MacDevice",
+			},
+			{
+				SDKStruct: "mngdmac.MacDeviceCollection",
+			},
+			{
+				SDKStruct: "mngdmac.MacDeviceSummary",
+			},
+		},
+	},
+	{
 		Name:       "MngdmacMacOrder",
 		SpecType:   reflect.TypeOf(mngdmacv1beta1.MacOrderSpec{}),
 		StatusType: reflect.TypeOf(mngdmacv1beta1.MacOrderStatus{}),

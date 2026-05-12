@@ -2,7 +2,7 @@
 
 # Managed Services for Mac
 
-Manage OCI Mac orders from Kubernetes with a reviewed controller-backed runtime.
+Manage OCI Mac orders and devices from Kubernetes with a reviewed controller-backed runtime.
 
 | Field | Value |
 | --- | --- |
@@ -16,8 +16,8 @@ Manage OCI Mac orders from Kubernetes with a reviewed controller-backed runtime.
 
 ## Notes
 
-- Current package scope is intentionally limited to MacOrder while MacDevice and auxiliary device-management workflows stay unpublished.
-- The published runtime uses service-SDK work requests for create, update, and delete, maps Kubernetes delete to CancelMacOrder, and keeps ChangeMacOrderCompartment out of scope.
+- Current package scope publishes MacOrder plus bind-existing terminate-only MacDevice, while auxiliary order-management and device-management workflows stay unpublished.
+- The published runtime uses service-SDK work requests for MacOrder create/update/delete and MacDevice delete, maps Kubernetes delete to CancelMacOrder or TerminateMacDevice as appropriate, and keeps ChangeMacOrderCompartment out of scope.
 - No checked-in release manifest currently lists this package; the resource scope below reflects the current repository package metadata.
 - This package is currently hidden from the Supported Resources landing page until a checked-in release manifest promotes it to the customer-visible surface.
 
@@ -25,4 +25,5 @@ Manage OCI Mac orders from Kubernetes with a reviewed controller-backed runtime.
 
 | Resource | API Version | Summary | Guide | Sample | API Spec |
 | --- | --- | --- | --- | --- | --- |
+| `mngdmac/MacDevice` | `mngdmac.oracle.com/v1beta1` | Bind an existing OCI Managed Services for Mac device and terminate it from Kubernetes. | — | [Sample](../../samples/mngdmac/v1beta1/macdevice.md) | [Reference](../../api/mngdmac/v1beta1/index.md#kind-macdevice) |
 | `mngdmac/MacOrder` | `mngdmac.oracle.com/v1beta1` | Manage OCI Managed Services for Mac orders. | — | [Sample](../../samples/mngdmac/v1beta1/macorder.md) | [Reference](../../api/mngdmac/v1beta1/index.md#kind-macorder) |

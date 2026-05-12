@@ -1,6 +1,6 @@
 {
   "aggregate": {
-    "specs": 238,
+    "specs": 239,
     "mappings": 1014,
     "trackedMappings": 1013,
     "untrackedMappings": 1,
@@ -883,7 +883,7 @@
     },
     {
       "service": "mngdmac",
-      "specs": 1,
+      "specs": 2,
       "mappings": 5,
       "trackedMappings": 5,
       "untrackedMappings": 0,

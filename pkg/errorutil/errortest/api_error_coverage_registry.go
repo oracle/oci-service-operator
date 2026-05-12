@@ -1051,6 +1051,16 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 			"Publication",
 		),
 		map[string]APIErrorCoverageRegistration{
+			resourceKey("mngdmac", "MacDevice"): reviewedRegistration(
+				"mngdmac",
+				"mngdmac",
+				apiErrorCoverageDefaultVersion,
+				"MacDevice",
+				APIErrorCoverageFamilyGeneratedRuntimeWorkRequest,
+				deleteNotFoundReadback,
+				retryableConflictWorkRequest,
+				"MacDevice is bind-existing and terminate-only: CreateOrUpdate rereads GetMacDevice and ListMacDevices against explicit macOrderId plus macDeviceId, and delete sends TerminateMacDevice then confirms DELETED or NotFound through the returned work request before releasing the finalizer.",
+			),
 			resourceKey("mngdmac", "MacOrder"): reviewedRegistration(
 				"mngdmac",
 				"mngdmac",

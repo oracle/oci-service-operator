@@ -991,8 +991,11 @@ var seedTargets = []Target{
 	// Mngdmac CRD support
 	newTarget("mngdmac", "CreateMacOrderDetails", reflect.TypeOf(mngdmac.CreateMacOrderDetails{})),
 	newTarget("mngdmac", "UpdateMacOrderDetails", reflect.TypeOf(mngdmac.UpdateMacOrderDetails{})),
+	newTarget("mngdmac", "MacDevice", reflect.TypeOf(mngdmac.MacDevice{})),
+	newTarget("mngdmac", "MacDeviceCollection", reflect.TypeOf(mngdmac.MacDeviceCollection{})),
 	newTarget("mngdmac", "MacOrder", reflect.TypeOf(mngdmac.MacOrder{})),
 	newTarget("mngdmac", "MacOrderCollection", reflect.TypeOf(mngdmac.MacOrderCollection{})),
+	newTarget("mngdmac", "MacDeviceSummary", reflect.TypeOf(mngdmac.MacDeviceSummary{})),
 	newTarget("mngdmac", "MacOrderSummary", reflect.TypeOf(mngdmac.MacOrderSummary{})),
 
 	// Oce CRD support

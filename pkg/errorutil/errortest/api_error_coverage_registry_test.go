@@ -14,10 +14,10 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	}
 
 	byKey := inventoryByKey(inventory)
-	if got, want := len(inventory), 362; got != want {
+	if got, want := len(inventory), 363; got != want {
 		t.Fatalf("len(inventory) = %d, want %d", got, want)
 	}
-	if got, want := countRegistrations(inventory), 238; got != want {
+	if got, want := countRegistrations(inventory), 239; got != want {
 		t.Fatalf("registration inventory count = %d, want %d", got, want)
 	}
 	if got, want := countExceptions(inventory), 124; got != want {
@@ -59,6 +59,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventorySelectionSource(t, byKey, "lustrefilestorage/LustreFileSystem", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "lustrefilestorage/ObjectStorageLink", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "marketplace/AcceptedAgreement", "selection.includeKinds")
+	assertInventorySelectionSource(t, byKey, "mngdmac/MacDevice", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "mngdmac/MacOrder", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "mediaservices/MediaAsset", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "mediaservices/MediaWorkflow", "selection.includeKinds")
@@ -145,6 +146,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventoryRegistration(t, byKey, "lustrefilestorage/LustreFileSystem")
 	assertInventoryRegistration(t, byKey, "lustrefilestorage/ObjectStorageLink")
 	assertInventoryRegistration(t, byKey, "marketplace/AcceptedAgreement")
+	assertInventoryRegistration(t, byKey, "mngdmac/MacDevice")
 	assertInventoryRegistration(t, byKey, "mngdmac/MacOrder")
 	assertInventoryRegistration(t, byKey, "mediaservices/MediaAsset")
 	assertInventoryRegistration(t, byKey, "mediaservices/MediaWorkflow")
@@ -223,6 +225,7 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedFamily(t, "lustrefilestorage/LustreFileSystem", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "lustrefilestorage/ObjectStorageLink", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "marketplace/AcceptedAgreement", APIErrorCoverageFamilyGeneratedRuntimePlain)
+	assertReviewedFamily(t, "mngdmac/MacDevice", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "mngdmac/MacOrder", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "mediaservices/MediaAsset", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "mediaservices/MediaWorkflow", APIErrorCoverageFamilyGeneratedRuntimeFollowUp)
