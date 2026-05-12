@@ -24,7 +24,7 @@ No customer-visible package currently exposes `dashboardservice.oracle.com/v1bet
 <a id="kind-dashboard"></a>
 ## Dashboard
 
-Dashboard is the Schema for the dashboards API.
+Manage OCI dashboards with schemaVersion-aware V1 model handling.
 
 - `Plural`: `dashboards`
 - `Scope`: `Namespaced`

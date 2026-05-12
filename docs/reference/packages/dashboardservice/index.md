@@ -2,7 +2,7 @@
 
 # Dashboard Service
 
-Manage OCI dashboard groups from Kubernetes with a reviewed controller-backed runtime.
+Manage OCI dashboards and dashboard groups from Kubernetes with a reviewed controller-backed runtime.
 
 | Field | Value |
 | --- | --- |
@@ -16,9 +16,10 @@ Manage OCI dashboard groups from Kubernetes with a reviewed controller-backed ru
 
 ## Notes
 
-- Current package scope is intentionally limited to DashboardGroup while the dashboard content model itself stays unpublished.
-- The published runtime keeps lifecycle-based generatedruntime semantics, scopes existing-before-create reuse to exact `compartmentId` plus `displayName`, updates non-empty `displayName` and `description` values in place, and preserves explicit empty-map clears for `freeformTags` and `definedTags`.
-- Empty-string `displayName` and `description` values currently behave as omission rather than explicit clear because the generated spec cannot distinguish those intents.
+- Current package scope publishes both `dashboardservice/Dashboard` and `dashboardservice/DashboardGroup`.
+- `Dashboard` keeps lifecycle-based generatedruntime semantics, scopes existing-before-create reuse to exact `dashboardGroupId` plus `displayName`, dispatches create and update bodies by `schemaVersion`, and preserves explicit empty-list widget clears plus explicit empty-map tag clears.
+- `DashboardGroup` keeps lifecycle-based generatedruntime semantics, scopes existing-before-create reuse to exact `compartmentId` plus `displayName`, and preserves explicit empty-map tag clears.
+- Empty-string `displayName` and `description` values currently behave as omission rather than explicit clear because the generated specs cannot distinguish those intents. `Dashboard` also treats null `config` clears as omission for the same reason.
 - Dashboard resources created outside the tenancy home region are not viewable in the Console, so that Dashboards service caveat remains explicit in the published docs and formal metadata.
 - No checked-in release manifest currently lists this package; the resource scope below reflects the current repository package metadata.
 - This package is currently hidden from the Supported Resources landing page until a checked-in release manifest promotes it to the customer-visible surface.
@@ -27,5 +28,5 @@ Manage OCI dashboard groups from Kubernetes with a reviewed controller-backed ru
 
 | Resource | API Version | Summary | Guide | Sample | API Spec |
 | --- | --- | --- | --- | --- | --- |
-| `dashboardservice/Dashboard` | `dashboardservice.oracle.com/v1beta1` | — | — | [Sample](../../samples/dashboardservice/v1beta1/dashboard.md) | [Reference](../../api/dashboardservice/v1beta1/index.md#kind-dashboard) |
+| `dashboardservice/Dashboard` | `dashboardservice.oracle.com/v1beta1` | Manage OCI dashboards with schemaVersion-aware V1 model handling. | — | [Sample](../../samples/dashboardservice/v1beta1/dashboard.md) | [Reference](../../api/dashboardservice/v1beta1/index.md#kind-dashboard) |
 | `dashboardservice/DashboardGroup` | `dashboardservice.oracle.com/v1beta1` | Manage OCI dashboard groups. | — | [Sample](../../samples/dashboardservice/v1beta1/dashboardgroup.md) | [Reference](../../api/dashboardservice/v1beta1/index.md#kind-dashboardgroup) |
