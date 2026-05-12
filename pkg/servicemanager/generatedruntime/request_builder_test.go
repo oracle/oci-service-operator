@@ -8,11 +8,14 @@ package generatedruntime
 import (
 	"context"
 	coresdk "github.com/oracle/oci-go-sdk/v65/core"
+	dashboardservicesdk "github.com/oracle/oci-go-sdk/v65/dashboardservice"
 	databasesdk "github.com/oracle/oci-go-sdk/v65/database"
 	mysqlsdk "github.com/oracle/oci-go-sdk/v65/mysql"
 	corev1beta1 "github.com/oracle/oci-service-operator/api/core/v1beta1"
+	dashboardservicev1beta1 "github.com/oracle/oci-service-operator/api/dashboardservice/v1beta1"
 	databasev1beta1 "github.com/oracle/oci-service-operator/api/database/v1beta1"
 	mysqlv1beta1 "github.com/oracle/oci-service-operator/api/mysql/v1beta1"
+	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	"io"
 	"strings"
 	"testing"
@@ -69,6 +72,108 @@ func TestBuildRequestPopulatesAutonomousDatabasePolymorphicCreateBody(t *testing
 			}
 			tc.assert(t, request.CreateAutonomousDatabaseDetails)
 		})
+	}
+}
+
+func TestBuildRequestPopulatesDashboardPolymorphicCreateBody(t *testing.T) {
+	t.Parallel()
+
+	request := &dashboardservicesdk.CreateDashboardRequest{}
+	resource := &dashboardservicev1beta1.Dashboard{
+		Spec: dashboardservicev1beta1.DashboardSpec{
+			DashboardGroupId: "ocid1.dashboardgroup.oc1..group",
+			SchemaVersion:    "V1",
+			DisplayName:      "dash-create",
+			Widgets: []shared.JSONValue{
+				{Raw: []byte(`{"name":"cpu"}`)},
+			},
+			Config: shared.JSONValue{Raw: []byte(`{"layout":"grid"}`)},
+		},
+	}
+
+	values, err := lookupValues(resource)
+	if err != nil {
+		t.Fatalf("lookupValues() error = %v", err)
+	}
+	err = buildRequest(
+		request,
+		resource,
+		values,
+		"",
+		[]RequestField{{FieldName: "CreateDashboardDetails", RequestName: "CreateDashboardDetails", Contribution: "body"}},
+		nil,
+		requestBuildOptions{Context: context.Background()},
+		nil,
+		false,
+	)
+	if err != nil {
+		t.Fatalf("buildRequest() error = %v", err)
+	}
+	if request.CreateDashboardDetails == nil {
+		t.Fatal("buildRequest() should populate CreateDashboardDetails")
+	}
+
+	details, ok := request.CreateDashboardDetails.(dashboardservicesdk.CreateV1DashboardDetails)
+	if !ok {
+		t.Fatalf("create body type = %T, want %T", request.CreateDashboardDetails, dashboardservicesdk.CreateV1DashboardDetails{})
+	}
+	if details.DashboardGroupId == nil || *details.DashboardGroupId != "ocid1.dashboardgroup.oc1..group" {
+		t.Fatalf("details.dashboardGroupId = %v, want ocid1.dashboardgroup.oc1..group", details.DashboardGroupId)
+	}
+	if details.DisplayName == nil || *details.DisplayName != "dash-create" {
+		t.Fatalf("details.displayName = %v, want dash-create", details.DisplayName)
+	}
+	if len(details.Widgets) != 1 {
+		t.Fatalf("details.widgets len = %d, want 1", len(details.Widgets))
+	}
+}
+
+func TestBuildRequestPopulatesDashboardPolymorphicUpdateBody(t *testing.T) {
+	t.Parallel()
+
+	request := &dashboardservicesdk.UpdateDashboardRequest{}
+	resource := &dashboardservicev1beta1.Dashboard{
+		Spec: dashboardservicev1beta1.DashboardSpec{
+			SchemaVersion: "V1",
+			DisplayName:   "dash-update",
+			Widgets: []shared.JSONValue{
+				{Raw: []byte(`{"name":"memory"}`)},
+			},
+			Config: shared.JSONValue{Raw: []byte(`{"layout":"single"}`)},
+		},
+	}
+
+	values, err := lookupValues(resource)
+	if err != nil {
+		t.Fatalf("lookupValues() error = %v", err)
+	}
+	err = buildRequest(
+		request,
+		resource,
+		values,
+		"",
+		[]RequestField{{FieldName: "UpdateDashboardDetails", RequestName: "UpdateDashboardDetails", Contribution: "body"}},
+		nil,
+		requestBuildOptions{Context: context.Background()},
+		nil,
+		false,
+	)
+	if err != nil {
+		t.Fatalf("buildRequest() error = %v", err)
+	}
+	if request.UpdateDashboardDetails == nil {
+		t.Fatal("buildRequest() should populate UpdateDashboardDetails")
+	}
+
+	details, ok := request.UpdateDashboardDetails.(dashboardservicesdk.UpdateV1DashboardDetails)
+	if !ok {
+		t.Fatalf("update body type = %T, want %T", request.UpdateDashboardDetails, dashboardservicesdk.UpdateV1DashboardDetails{})
+	}
+	if details.DisplayName == nil || *details.DisplayName != "dash-update" {
+		t.Fatalf("details.displayName = %v, want dash-update", details.DisplayName)
+	}
+	if len(details.Widgets) != 1 {
+		t.Fatalf("details.widgets len = %d, want 1", len(details.Widgets))
 	}
 }
 

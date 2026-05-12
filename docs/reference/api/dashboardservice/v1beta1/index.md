@@ -18,7 +18,117 @@ No customer-visible package currently exposes `dashboardservice.oracle.com/v1bet
 
 | Kind | Scope | Sample | Packages |
 | --- | --- | --- | --- |
+| [Dashboard](#kind-dashboard) | Namespaced | [Sample](../../../samples/dashboardservice/v1beta1/dashboard.md) | - |
 | [DashboardGroup](#kind-dashboardgroup) | Namespaced | [Sample](../../../samples/dashboardservice/v1beta1/dashboardgroup.md) | - |
+
+<a id="kind-dashboard"></a>
+## Dashboard
+
+Dashboard is the Schema for the dashboards API.
+
+- `Plural`: `dashboards`
+- `Scope`: `Namespaced`
+- `APIVersion`: `dashboardservice.oracle.com/v1beta1`
+- `Sample`: [Sample](../../../samples/dashboardservice/v1beta1/dashboard.md) (`config/samples/dashboardservice_v1beta1_dashboard.yaml`)
+- `Packages`: Not currently exposed by a customer-visible package.
+
+<a id="kind-dashboard-spec"></a>
+### Spec
+
+DashboardSpec defines the desired state of Dashboard.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `config` | The layout and widget placement for the dashboard. Unknown nested fields are preserved. | `object (preserves unknown fields)` | No | - | - |
+| `dashboardGroupId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the dashboard group that the dashbaord is associated with. | `string` | Yes | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. Example: `{"foo-namespace": {"bar-key": "value"}}` | `map[string, map[string, string]]` | No | - | - |
+| `description` | A short description of the dashboard. It can be changed. Avoid entering confidential information. The following special characters are not allowed: <>()=/'"&\ | `string` | No | - | - |
+| `displayName` | A user-friendly name for the dashboard. Does not have to be unique, and it can be changed. Avoid entering confidential information. Leading and trailing spaces and the following special characters are not allowed: <>()=/'"&\ | `string` | No | - | - |
+| `freeformTags` | Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only. Example: `{"bar-key": "value"}` | `map[string, string]` | No | - | - |
+| `schemaVersion` | - | `string` | No | - | - |
+| `widgets` | The basic visualization building blocks of a dashboard. | `list[object (preserves unknown fields)]` | No | - | - |
+
+<a id="kind-dashboard-status"></a>
+### Status
+
+DashboardStatus defines the observed state of Dashboard.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `compartmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the dashboard. A dashboard is always in the same compartment as its dashboard group. | `string` | No | - | - |
+| `config` | The dashboard configuration. For example, the layout and widget placement. Unknown nested fields are preserved. | `object (preserves unknown fields)` | No | - | - |
+| `dashboardGroupId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the dashboard group that the dashboard belongs to. | `string` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. Example: `{"foo-namespace": {"bar-key": "value"}}` | `map[string, map[string, string]]` | No | - | - |
+| `description` | A short description of the dashboard. It can be changed. Avoid entering confidential information. The following special characters are not allowed: <>()=/'"&\ | `string` | No | - | - |
+| `displayName` | A user-friendly name for the dashboard. Does not have to be unique, and it can be changed. Avoid entering confidential information. Leading and trailing spaces and the following special characters are not allowed: <>()=/'"&\ | `string` | No | - | - |
+| `freeformTags` | Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only. Example: `{"bar-key": "value"}` | `map[string, string]` | No | - | - |
+| `id` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the dashboard resource. | `string` | No | - | - |
+| `lifecycleState` | The current state of the dashboard. | `string` | No | - | - |
+| `schemaVersion` | - | `string` | No | - | - |
+| [`status`](#kind-dashboard-status-status) | - | `object` | Yes | - | - |
+| `systemTags` | Usage of system tag keys. These predefined keys are scoped to namespaces. Example: `{"orcl-cloud": {"free-tier-retained": "true"}}` | `map[string, map[string, string]]` | No | - | - |
+| `timeCreated` | The date and time the dashboard was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339). Example: `2016-08-25T21:10:29.600Z` | `string` | No | - | - |
+| `timeUpdated` | The date and time the dashboard was updated, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339). Example: `2016-08-25T21:10:29.600Z` | `string` | No | - | - |
+| `widgets` | The visualization building blocks of the dashboard. | `list[object (preserves unknown fields)]` | No | - | - |
+
+<a id="kind-dashboard-status-status"></a>
+#### Status.status
+
+[Back to Dashboard status](#kind-dashboard-status)
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`async`](#kind-dashboard-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
+| [`conditions`](#kind-dashboard-status-status-conditions) | - | `list[object]` | No | - | - |
+| `createdAt` | - | `string (date-time)` | No | - | - |
+| `deletedAt` | - | `string (date-time)` | No | - | - |
+| `message` | - | `string` | No | - | - |
+| `ocid` | - | `string` | No | - | - |
+| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
+| `reason` | - | `string` | No | - | - |
+| `requestedAt` | - | `string (date-time)` | No | - | - |
+| `updatedAt` | - | `string (date-time)` | No | - | - |
+
+<a id="kind-dashboard-status-status-async"></a>
+##### Status.status.async
+
+[Back to Dashboard status](#kind-dashboard-status)
+
+Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`current`](#kind-dashboard-status-status-async-current) | - | `object` | No | - | - |
+
+<a id="kind-dashboard-status-status-async-current"></a>
+###### Status.status.async.current
+
+[Back to Dashboard status](#kind-dashboard-status)
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `message` | - | `string` | No | - | - |
+| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
+| `percentComplete` | - | `number` | No | - | - |
+| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
+| `rawOperationType` | - | `string` | No | - | - |
+| `rawStatus` | - | `string` | No | - | - |
+| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
+| `updatedAt` | - | `string (date-time)` | Yes | - | - |
+| `workRequestId` | - | `string` | No | - | - |
+
+<a id="kind-dashboard-status-status-conditions"></a>
+##### Status.status.conditions[]
+
+[Back to Dashboard status](#kind-dashboard-status)
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `lastTransitionTime` | - | `string (date-time)` | No | - | - |
+| `message` | - | `string` | No | - | - |
+| `reason` | - | `string` | No | - | - |
+| `status` | - | `string` | Yes | - | - |
+| `type` | - | `string` | Yes | - | - |
 
 <a id="kind-dashboardgroup"></a>
 ## DashboardGroup

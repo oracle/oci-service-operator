@@ -1374,7 +1374,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	assertServiceSelection(t, services["databasemigration"], true, SelectionModeExplicit, []string{"Connection"})
 	assertServiceSelection(t, services["datalabelingservice"], true, SelectionModeExplicit, []string{"Dataset"})
 	assertServiceSelection(t, services["datascience"], true, SelectionModeExplicit, []string{"Project"})
-	assertServiceSelection(t, services["dashboardservice"], true, SelectionModeExplicit, []string{"DashboardGroup"})
+	assertServiceSelection(t, services["dashboardservice"], true, SelectionModeExplicit, []string{"DashboardGroup", "Dashboard"})
 	assertServiceSelection(t, services["delegateaccesscontrol"], true, SelectionModeExplicit, []string{"DelegationControl"})
 	assertServiceSelection(t, services["devops"], true, SelectionModeExplicit, []string{"Project", "Repository", "BuildPipeline", "DeployPipeline", "DeployArtifact", "Trigger"})
 	assertServiceSelection(t, services["dns"], true, SelectionModeExplicit, []string{"Zone", "View", "TsigKey", "SteeringPolicy", "SteeringPolicyAttachment"})

@@ -243,4 +243,5 @@ resources:
 - rover_v1beta1_rovernode.yaml
 - mediaservices_v1beta1_mediaworkflow.yaml
 - zpr_v1beta1_configuration.yaml
+- dashboardservice_v1beta1_dashboard.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

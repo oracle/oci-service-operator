@@ -27,4 +27,5 @@ Manage OCI dashboard groups from Kubernetes with a reviewed controller-backed ru
 
 | Resource | API Version | Summary | Guide | Sample | API Spec |
 | --- | --- | --- | --- | --- | --- |
+| `dashboardservice/Dashboard` | `dashboardservice.oracle.com/v1beta1` | — | — | [Sample](../../samples/dashboardservice/v1beta1/dashboard.md) | [Reference](../../api/dashboardservice/v1beta1/index.md#kind-dashboard) |
 | `dashboardservice/DashboardGroup` | `dashboardservice.oracle.com/v1beta1` | Manage OCI dashboard groups. | — | [Sample](../../samples/dashboardservice/v1beta1/dashboardgroup.md) | [Reference](../../api/dashboardservice/v1beta1/index.md#kind-dashboardgroup) |

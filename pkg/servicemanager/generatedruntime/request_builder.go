@@ -15,6 +15,7 @@ import (
 	"unicode"
 
 	apmconfigsdk "github.com/oracle/oci-go-sdk/v65/apmconfig"
+	dashboardservicesdk "github.com/oracle/oci-go-sdk/v65/dashboardservice"
 	databasesdk "github.com/oracle/oci-go-sdk/v65/database"
 	databasemigrationsdk "github.com/oracle/oci-go-sdk/v65/databasemigration"
 	databasetoolssdk "github.com/oracle/oci-go-sdk/v65/databasetools"
@@ -592,6 +593,22 @@ func convertPolymorphicInterfaceValue(payload []byte, targetType reflect.Type) (
 		converted := reflect.New(targetType).Elem()
 		converted.Set(reflect.ValueOf(body))
 		return converted, true, nil
+	case dashboardCreateDetailsType:
+		body, err := convertDashboardCreateDetails(payload)
+		if err != nil {
+			return reflect.Value{}, true, err
+		}
+		converted := reflect.New(targetType).Elem()
+		converted.Set(reflect.ValueOf(body))
+		return converted, true, nil
+	case dashboardUpdateDetailsType:
+		body, err := convertDashboardUpdateDetails(payload)
+		if err != nil {
+			return reflect.Value{}, true, err
+		}
+		converted := reflect.New(targetType).Elem()
+		converted.Set(reflect.ValueOf(body))
+		return converted, true, nil
 	default:
 		return reflect.Value{}, false, nil
 	}
@@ -746,6 +763,40 @@ func convertConfigUpdateDetails(payload []byte) (apmconfigsdk.UpdateConfigDetail
 	return body, nil
 }
 
+func convertDashboardCreateDetails(payload []byte) (dashboardservicesdk.CreateDashboardDetails, error) {
+	concreteType, err := dashboardCreateConcreteType(payload)
+	if err != nil {
+		return nil, err
+	}
+
+	converted := reflect.New(concreteType)
+	if err := json.Unmarshal(payload, converted.Interface()); err != nil {
+		return nil, fmt.Errorf("unmarshal into %s: %w", concreteType, err)
+	}
+	body, ok := converted.Elem().Interface().(dashboardservicesdk.CreateDashboardDetails)
+	if !ok {
+		return nil, fmt.Errorf("resolved CreateDashboardDetails type %s does not implement the polymorphic interface", concreteType)
+	}
+	return body, nil
+}
+
+func convertDashboardUpdateDetails(payload []byte) (dashboardservicesdk.UpdateDashboardDetails, error) {
+	concreteType, err := dashboardUpdateConcreteType(payload)
+	if err != nil {
+		return nil, err
+	}
+
+	converted := reflect.New(concreteType)
+	if err := json.Unmarshal(payload, converted.Interface()); err != nil {
+		return nil, fmt.Errorf("unmarshal into %s: %w", concreteType, err)
+	}
+	body, ok := converted.Elem().Interface().(dashboardservicesdk.UpdateDashboardDetails)
+	if !ok {
+		return nil, fmt.Errorf("resolved UpdateDashboardDetails type %s does not implement the polymorphic interface", concreteType)
+	}
+	return body, nil
+}
+
 func databaseToolsConnectionCreateConcreteType(payload []byte) (reflect.Type, error) {
 	connectionType, err := jsonFieldString(payload, "type")
 	if err != nil {
@@ -806,6 +857,20 @@ func configCreateConcreteType(payload []byte) (reflect.Type, error) {
 	}
 }
 
+func dashboardCreateConcreteType(payload []byte) (reflect.Type, error) {
+	schemaVersion, err := jsonFieldString(payload, "schemaVersion")
+	if err != nil {
+		return nil, fmt.Errorf("decode Dashboard create schemaVersion: %w", err)
+	}
+
+	switch strings.ToUpper(strings.TrimSpace(schemaVersion)) {
+	case "", "V1":
+		return reflect.TypeOf(dashboardservicesdk.CreateV1DashboardDetails{}), nil
+	default:
+		return nil, fmt.Errorf("unsupported CreateDashboardDetails schemaVersion %q", schemaVersion)
+	}
+}
+
 func connectionUpdateConcreteType(payload []byte) (reflect.Type, error) {
 	connectionType, err := jsonFieldString(payload, "connectionType")
 	if err != nil {
@@ -843,6 +908,20 @@ func configUpdateConcreteType(payload []byte) (reflect.Type, error) {
 		return reflect.TypeOf(apmconfigsdk.UpdateSpanFilterDetails{}), nil
 	default:
 		return nil, fmt.Errorf("unsupported UpdateConfigDetails type %q", configType)
+	}
+}
+
+func dashboardUpdateConcreteType(payload []byte) (reflect.Type, error) {
+	schemaVersion, err := jsonFieldString(payload, "schemaVersion")
+	if err != nil {
+		return nil, fmt.Errorf("decode Dashboard update schemaVersion: %w", err)
+	}
+
+	switch strings.ToUpper(strings.TrimSpace(schemaVersion)) {
+	case "", "V1":
+		return reflect.TypeOf(dashboardservicesdk.UpdateV1DashboardDetails{}), nil
+	default:
+		return nil, fmt.Errorf("unsupported UpdateDashboardDetails schemaVersion %q", schemaVersion)
 	}
 }
 
