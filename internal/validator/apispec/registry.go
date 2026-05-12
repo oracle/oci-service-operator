@@ -16,6 +16,7 @@ import (
 	apmcontrolplanev1beta1 "github.com/oracle/oci-service-operator/api/apmcontrolplane/v1beta1"
 	apmsyntheticsv1beta1 "github.com/oracle/oci-service-operator/api/apmsynthetics/v1beta1"
 	apmtracesv1beta1 "github.com/oracle/oci-service-operator/api/apmtraces/v1beta1"
+	appmgmtcontrolv1beta1 "github.com/oracle/oci-service-operator/api/appmgmtcontrol/v1beta1"
 	artifactsv1beta1 "github.com/oracle/oci-service-operator/api/artifacts/v1beta1"
 	bastionv1beta1 "github.com/oracle/oci-service-operator/api/bastion/v1beta1"
 	bdsv1beta1 "github.com/oracle/oci-service-operator/api/bds/v1beta1"
@@ -2150,6 +2151,22 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "apmtraces.ScheduledQuerySummary",
+			},
+		},
+	},
+	{
+		Name:       "AppmgmtcontrolMonitoredInstance",
+		SpecType:   reflect.TypeOf(appmgmtcontrolv1beta1.MonitoredInstanceSpec{}),
+		StatusType: reflect.TypeOf(appmgmtcontrolv1beta1.MonitoredInstanceStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "appmgmtcontrol.MonitoredInstance",
+			},
+			{
+				SDKStruct: "appmgmtcontrol.MonitoredInstanceCollection",
+			},
+			{
+				SDKStruct: "appmgmtcontrol.MonitoredInstanceSummary",
 			},
 		},
 	},

@@ -248,4 +248,5 @@ resources:
 - mngdmac_v1beta1_macdevice.yaml
 - dashboardservice_v1beta1_dashboard.yaml
 - databasemigration_v1beta1_assessment.yaml
+- appmgmtcontrol_v1beta1_monitoredinstance.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

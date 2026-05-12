@@ -22,6 +22,7 @@ This landing page is generated from the checked-in package and release inventory
 | [apmcontrolplane.oracle.com/v1beta1](apmcontrolplane/v1beta1/index.md) | [ApmDomain](apmcontrolplane/v1beta1/index.md#kind-apmdomain) | - |
 | [apmsynthetics.oracle.com/v1beta1](apmsynthetics/v1beta1/index.md) | [Script](apmsynthetics/v1beta1/index.md#kind-script) | - |
 | [apmtraces.oracle.com/v1beta1](apmtraces/v1beta1/index.md) | [ScheduledQuery](apmtraces/v1beta1/index.md#kind-scheduledquery) | - |
+| [appmgmtcontrol.oracle.com/v1beta1](appmgmtcontrol/v1beta1/index.md) | [MonitoredInstance](appmgmtcontrol/v1beta1/index.md#kind-monitoredinstance) | - |
 | [artifacts.oracle.com/v1beta1](artifacts/v1beta1/index.md) | [ContainerImageSignature](artifacts/v1beta1/index.md#kind-containerimagesignature), [ContainerRepository](artifacts/v1beta1/index.md#kind-containerrepository), [Repository](artifacts/v1beta1/index.md#kind-repository) | - |
 | [bastion.oracle.com/v1beta1](bastion/v1beta1/index.md) | [Bastion](bastion/v1beta1/index.md#kind-bastion), [Session](bastion/v1beta1/index.md#kind-session) | - |
 | [bds.oracle.com/v1beta1](bds/v1beta1/index.md) | [BdsInstance](bds/v1beta1/index.md#kind-bdsinstance) | - |

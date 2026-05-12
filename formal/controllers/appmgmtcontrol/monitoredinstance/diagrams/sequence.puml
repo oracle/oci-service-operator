@@ -1,0 +1,127 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Sequence - appmgmtcontrol/MonitoredInstance
+hide footbox
+skinparam sequence {
+  actorBorderColor #0f172a
+  actorBackgroundColor #e2e8f0
+  participantBorderColor #0f172a
+  participantBackgroundColor #e2e8f0
+  participantFontColor #0f172a
+  lifeLineBorderColor #94a3b8
+  groupBorderColor #cbd5e1
+  groupBackgroundColor #f8fafc
+}
+actor Kubernetes
+participant Controller
+participant BaseReconciler
+participant "OSOKServiceManager" as ServiceManager
+participant OCI
+note over BaseReconciler,ServiceManager
+shared resolution:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete:
+shared/diagrams/shared-delete-sequence.svg
+end note
+Kubernetes -> Controller: enqueue MonitoredInstance reconcile
+Controller -> BaseReconciler: Reconcile(request)
+BaseReconciler -> ServiceManager: reconcile desired MonitoredInstance
+group Lookup and bind
+alt tracked or explicit OCI identity already exists
+ServiceManager -> OCI: GetMonitoredInstance
+else tracked identity is missing
+ServiceManager -> OCI: ListMonitoredInstances(filters:\ncompartment_id, display_name)
+ServiceManager --> BaseReconciler: persist resolved OCI identity in status
+end
+alt delete requested
+group Delete
+ServiceManager -> OCI: none
+ServiceManager -> OCI: confirm delete via\nGetMonitoredInstance or\nListMonitoredInstances
+loop delete pending DELETING
+ServiceManager -> OCI: GetMonitoredInstance or\nListMonitoredInstances
+end
+ServiceManager --> BaseReconciler: best-effort delete completion observed
+end
+else OCI state is retryable
+ServiceManager --> BaseReconciler: requeue while OCI remains in\nCREATING, UPDATING, DELETING
+else live state requires field-aware\ndrift evaluation
+group Drift handling
+note over ServiceManager,OCI
+Supported update surface: none
+Reject before mutate: force-new fields
+compartment_id, display_name,
+instance_id
+Lookup filters: compartment_id,
+display_name
+end note
+opt force-new or conflicting drift is detected
+ServiceManager --> BaseReconciler: reject before OCI mutation
+end
+end
+ServiceManager --> BaseReconciler: status=required, finalizer=none
+end
+BaseReconciler --> Controller: requeue on provisioning, updating,\nterminating
+note right of ServiceManager
+shared diagram:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete diagram:
+shared/diagrams/shared-delete-sequence.svg
+Start from the shared resolution sequence for
+OCID binding, datasource pagination, and
+create-or-update dispatch.
+Layer the shared delete sequence when finalizer
+retention, delete confirmation, work-request
+polling, or Secret cleanup apply.
+archetype batch: Generated service-manager
+controllers follow the shared resolution and
+delete sequences with imported waits and
+controller-local policy.
+service: appmgmtcontrol
+slug: monitoredinstance
+kind: MonitoredInstance
+archetype: generated-service-manager
+status/finalizer: required / none
+requeue: provisioning, updating, terminating
+provider states: create CREATING; update
+UPDATING; delete DELETING
+supported drift: none
+reject before mutate: force-new fields
+compartment_id, display_name, instance_id
+create-only fields: none
+list lookup:
+oci_appmgmtcontrol_monitored_instances filters
+compartment_id, display_name
+conflicts: none
+open gaps: none
+The published MonitoredInstance contract is
+bind-existing and observe-only. Reconcile binds
+by explicit instanceId or a unique
+ListMonitoredInstances match on compartmentId
+plus displayName, and it never invents create,
+update, or delete operations.
+Direct binds are explicit. The runtime
+preflights GetMonitoredInstance when instanceId
+is set so a missing direct bind does not fall
+back to list adoption.
+ListMonitoredInstances returns
+MonitoredInstanceSummary rather than the full
+body, so the runtime reruns GetMonitoredInstance
+after a list bind to project timeCreated,
+timeUpdated, and lifecycleDetails from the full
+object.
+Delete is CR-local unbind only. The controller
+clears the finalizer immediately, never calls
+auxiliary monitoring or workrequest helpers, and
+treats observed DELETING or DELETED lifecycle as
+terminating read state rather than managed
+delete progress.
+end note
+@enduml

@@ -348,6 +348,32 @@ rules:
   - patch
   - update
 - apiGroups:
+  - appmgmtcontrol.oracle.com
+  resources:
+  - monitoredinstances
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - appmgmtcontrol.oracle.com
+  resources:
+  - monitoredinstances/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - appmgmtcontrol.oracle.com
+  resources:
+  - monitoredinstances/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - artifacts.oracle.com
   resources:
   - containerimagesignatures

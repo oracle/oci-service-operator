@@ -193,6 +193,20 @@ packages:
         kind: ScheduledQuery
         summary: Manage OCI Application Performance Monitoring scheduled trace queries.
 
+  - package: appmgmtcontrol
+    displayName: Application Management Control
+    summary: Observe existing OCI AppMgmt Control monitored instances from Kubernetes with a bind-existing, controller-backed read-only contract.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to MonitoredInstance while monitoring-plugin activation, top-process metrics publishing, and workrequest helper families stay unpublished.
+      - "The published runtime is bind-existing and observe-only: direct binds preflight `instanceId`, list-based binds require exact `compartmentId` plus `displayName`, and the runtime reruns `GetMonitoredInstance` after list adoption so status projects the full body."
+    kindOverrides:
+      - group: appmgmtcontrol
+        kind: MonitoredInstance
+        summary: Observe existing OCI AppMgmt Control monitored instances.
+
   - package: artifacts
     displayName: Artifacts
     summary: Manage OCI Artifact Registry repositories, container repositories, and image signatures from Kubernetes.
