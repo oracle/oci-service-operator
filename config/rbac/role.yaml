@@ -701,6 +701,7 @@ rules:
 - apiGroups:
   - databasemigration.oracle.com
   resources:
+  - assessments
   - connections
   verbs:
   - create
@@ -713,12 +714,14 @@ rules:
 - apiGroups:
   - databasemigration.oracle.com
   resources:
+  - assessments/finalizers
   - connections/finalizers
   verbs:
   - update
 - apiGroups:
   - databasemigration.oracle.com
   resources:
+  - assessments/status
   - connections/status
   verbs:
   - get

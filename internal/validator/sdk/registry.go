@@ -660,6 +660,7 @@ var seedTargets = []Target{
 	newTarget("dashboardservice", "DashboardGroupSummary", reflect.TypeOf(dashboardservice.DashboardGroupSummary{})),
 
 	// Databasemigration CRD support
+	newTarget("databasemigration", "AssessmentCollection", reflect.TypeOf(databasemigration.AssessmentCollection{})),
 	newTarget("databasemigration", "ConnectionCollection", reflect.TypeOf(databasemigration.ConnectionCollection{})),
 
 	// Databasetools CRD support

@@ -2320,6 +2320,16 @@ var targets = []Target{
 		},
 	},
 	{
+		Name:       "DatabasemigrationAssessment",
+		SpecType:   reflect.TypeOf(databasemigrationv1beta1.AssessmentSpec{}),
+		StatusType: reflect.TypeOf(databasemigrationv1beta1.AssessmentStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "databasemigration.AssessmentCollection",
+			},
+		},
+	},
+	{
 		Name:       "DatabasemigrationConnection",
 		SpecType:   reflect.TypeOf(databasemigrationv1beta1.ConnectionSpec{}),
 		StatusType: reflect.TypeOf(databasemigrationv1beta1.ConnectionStatus{}),

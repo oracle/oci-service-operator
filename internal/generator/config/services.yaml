@@ -1779,6 +1779,7 @@ services:
       mode: explicit
       includeKinds:
         - Connection
+        - Assessment
     observedState:
       excludedFieldPaths:
         Connection:
@@ -1839,6 +1840,46 @@ services:
                 nsgIds:
                   - ocid1.networksecuritygroup.oc1..exampleuniqueID
                 description: Sample Database Migration MySQL source connection
+                freeformTags:
+                  managed-by: oci-service-operator
+        - kind: Assessment
+          formalSpec: assessment
+          async:
+            strategy: workrequest
+            runtime: generatedruntime
+            formalClassification: workrequest
+            workRequest:
+              source: service-sdk
+              phases:
+                - create
+                - update
+                - delete
+          sample:
+            body: |-
+              #
+              # Replace the Assessment input OCIDs below before running e2e.
+              # Update metadata.name or spec.displayName if you want to force a fresh create instead of
+              # binding to an existing Assessment with the same compartment, displayName, and
+              # databaseCombination.
+              #
+              apiVersion: databasemigration.oracle.com/v1beta1
+              kind: Assessment
+              metadata:
+                name: assessment-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                displayName: mysql-assessment
+                databaseCombination: MYSQL
+                sourceDatabaseConnection:
+                  id: ocid1.connection.oc1..exampleuniqueID
+                targetDatabaseConnection:
+                  id: ocid1.connection.oc1..exampletargetID
+                networkSpeedMegabitPerSecond: MBPS_100
+                acceptableDowntime: LESS_THAN_1_HOUR
+                databaseDataSize: GB_10_50
+                ddlExpectation: DDL_NOT_EXPECTED
+                creationType: CREATE_ONLY
+                description: Sample Database Migration assessment
                 freeformTags:
                   managed-by: oci-service-operator
 
