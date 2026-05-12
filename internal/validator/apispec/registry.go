@@ -38,6 +38,7 @@ import (
 	delegateaccesscontrolv1beta1 "github.com/oracle/oci-service-operator/api/delegateaccesscontrol/v1beta1"
 	devopsv1beta1 "github.com/oracle/oci-service-operator/api/devops/v1beta1"
 	disasterrecoveryv1beta1 "github.com/oracle/oci-service-operator/api/disasterrecovery/v1beta1"
+	distributeddatabasev1beta1 "github.com/oracle/oci-service-operator/api/distributeddatabase/v1beta1"
 	dnsv1beta1 "github.com/oracle/oci-service-operator/api/dns/v1beta1"
 	emailv1beta1 "github.com/oracle/oci-service-operator/api/email/v1beta1"
 	eventsv1beta1 "github.com/oracle/oci-service-operator/api/events/v1beta1"
@@ -2670,6 +2671,28 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "disasterrecovery.DrProtectionGroupSummary",
+			},
+		},
+	},
+	{
+		Name:       "DistributeddatabaseDistributedDatabasePrivateEndpoint",
+		SpecType:   reflect.TypeOf(distributeddatabasev1beta1.DistributedDatabasePrivateEndpointSpec{}),
+		StatusType: reflect.TypeOf(distributeddatabasev1beta1.DistributedDatabasePrivateEndpointStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "distributeddatabase.CreateDistributedDatabasePrivateEndpointDetails",
+			},
+			{
+				SDKStruct: "distributeddatabase.UpdateDistributedDatabasePrivateEndpointDetails",
+			},
+			{
+				SDKStruct: "distributeddatabase.DistributedDatabasePrivateEndpoint",
+			},
+			{
+				SDKStruct: "distributeddatabase.DistributedDatabasePrivateEndpointCollection",
+			},
+			{
+				SDKStruct: "distributeddatabase.DistributedDatabasePrivateEndpointSummary",
 			},
 		},
 	},

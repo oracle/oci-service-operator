@@ -593,6 +593,7 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 				deleteNotFoundReadback,
 				retryableConflictWorkRequest,
 				"DrProtectionGroup uses generatedruntime work-request follow-up semantics with a handwritten hook layer for polymorphic member request-body shaping, filter-only lifecycle narrowing, create-only association drift checks, and GetWorkRequest plus GetDrProtectionGroup delete confirmation rereads.",
+			),
 			resourceKey("distributeddatabase", "DistributedDatabasePrivateEndpoint"): reviewedRegistration(
 				"distributeddatabase",
 				"distributeddatabase",

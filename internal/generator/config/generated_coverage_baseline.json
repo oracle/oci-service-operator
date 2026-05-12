@@ -1,16 +1,16 @@
 {
   "aggregate": {
-    "specs": 244,
-    "mappings": 1032,
-    "trackedMappings": 1031,
+    "specs": 247,
+    "mappings": 1044,
+    "trackedMappings": 1043,
     "untrackedMappings": 1,
-    "presentFields": 10263,
-    "missingFields": 193,
-    "mandatoryPresentFields": 3671,
-    "mandatoryMissingFields": 152,
-    "extraSpecFields": 864,
-    "overallCoveragePercent": 98.15416985462892,
-    "mandatoryCoveragePercent": 96.02406487052053
+    "presentFields": 10356,
+    "missingFields": 195,
+    "mandatoryPresentFields": 3713,
+    "mandatoryMissingFields": 154,
+    "extraSpecFields": 874,
+    "overallCoveragePercent": 98.15183394938867,
+    "mandatoryCoveragePercent": 96.01758469097491
   },
   "services": [
     {
@@ -308,6 +308,20 @@
       "mandatoryCoveragePercent": 96
     },
     {
+      "service": "computeinstanceagent",
+      "specs": 1,
+      "mappings": 2,
+      "trackedMappings": 2,
+      "untrackedMappings": 0,
+      "presentFields": 7,
+      "missingFields": 0,
+      "mandatoryPresentFields": 6,
+      "mandatoryMissingFields": 0,
+      "extraSpecFields": 0,
+      "overallCoveragePercent": 100,
+      "mandatoryCoveragePercent": 100
+    },
+    {
       "service": "containerengine",
       "specs": 2,
       "mappings": 8,
@@ -474,6 +488,34 @@
       "extraSpecFields": 7,
       "overallCoveragePercent": 97.30941704035875,
       "mandatoryCoveragePercent": 89.28571428571429
+    },
+    {
+      "service": "disasterrecovery",
+      "specs": 1,
+      "mappings": 5,
+      "trackedMappings": 5,
+      "untrackedMappings": 0,
+      "presentFields": 42,
+      "missingFields": 1,
+      "mandatoryPresentFields": 17,
+      "mandatoryMissingFields": 1,
+      "extraSpecFields": 8,
+      "overallCoveragePercent": 97.67441860465115,
+      "mandatoryCoveragePercent": 94.44444444444444
+    },
+    {
+      "service": "distributeddatabase",
+      "specs": 1,
+      "mappings": 5,
+      "trackedMappings": 5,
+      "untrackedMappings": 0,
+      "presentFields": 44,
+      "missingFields": 1,
+      "mandatoryPresentFields": 19,
+      "mandatoryMissingFields": 1,
+      "extraSpecFields": 2,
+      "overallCoveragePercent": 97.77777777777777,
+      "mandatoryCoveragePercent": 95
     },
     {
       "service": "dns",

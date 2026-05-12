@@ -167,6 +167,7 @@ nav:
           - delegateaccesscontrol.oracle.com/v1beta1: reference/api/delegateaccesscontrol/v1beta1/index.md
           - devops.oracle.com/v1beta1: reference/api/devops/v1beta1/index.md
           - disasterrecovery.oracle.com/v1beta1: reference/api/disasterrecovery/v1beta1/index.md
+          - distributeddatabase.oracle.com/v1beta1: reference/api/distributeddatabase/v1beta1/index.md
           - dns.oracle.com/v1beta1: reference/api/dns/v1beta1/index.md
           - email.oracle.com/v1beta1: reference/api/email/v1beta1/index.md
           - events.oracle.com/v1beta1: reference/api/events/v1beta1/index.md

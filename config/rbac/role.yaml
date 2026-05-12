@@ -954,6 +954,32 @@ rules:
   - patch
   - update
 - apiGroups:
+  - distributeddatabase.oracle.com
+  resources:
+  - distributeddatabaseprivateendpoints
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - distributeddatabase.oracle.com
+  resources:
+  - distributeddatabaseprivateendpoints/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - distributeddatabase.oracle.com
+  resources:
+  - distributeddatabaseprivateendpoints/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - dns.oracle.com
   resources:
   - steeringpolicies

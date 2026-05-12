@@ -67,6 +67,7 @@ resources:
 - bases/devops.oracle.com_repositories.yaml
 - bases/devops.oracle.com_triggers.yaml
 - bases/disasterrecovery.oracle.com_drprotectiongroups.yaml
+- bases/distributeddatabase.oracle.com_distributeddatabaseprivateendpoints.yaml
 - bases/dns.oracle.com_steeringpolicies.yaml
 - bases/dns.oracle.com_steeringpolicyattachments.yaml
 - bases/dns.oracle.com_tsigkeys.yaml

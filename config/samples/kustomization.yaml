@@ -250,4 +250,6 @@ resources:
 - databasemigration_v1beta1_assessment.yaml
 - appmgmtcontrol_v1beta1_monitoredinstance.yaml
 - disasterrecovery_v1beta1_drprotectiongroup.yaml
+- distributeddatabase_v1beta1_distributeddatabaseprivateendpoint.yaml
+- computeinstanceagent_v1beta1_instanceagentplugin.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples
