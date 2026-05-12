@@ -37,7 +37,7 @@ func TestApplyDistributedDatabasePrivateEndpointRuntimeHooksOverridesGeneratedDe
 	if hooks.Semantics == nil {
 		t.Fatal("hooks.Semantics = nil, want reviewed semantics")
 	}
-	if got, want := hooks.Semantics.List.MatchFields, []string{"compartmentId", "displayName"}; !reflect.DeepEqual(got, want) {
+	if got, want := hooks.Semantics.List.MatchFields, []string{"compartmentId", "displayName", "lifecycleState"}; !reflect.DeepEqual(got, want) {
 		t.Fatalf("hooks.Semantics.List.MatchFields = %#v, want %#v", got, want)
 	}
 	if got, want := hooks.List.Fields, reviewedDistributedDatabasePrivateEndpointListFields(); !reflect.DeepEqual(got, want) {

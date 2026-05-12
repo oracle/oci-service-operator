@@ -80,11 +80,12 @@ compartmentId, subnetId
 create-only fields: none
 list lookup:
 oci_distributeddatabase_distributed_database_private_endpoints
-filters compartmentId, displayName; exact
-compartmentId plus displayName list filters,
-then reuse only a unique summary candidate;
-lifecycleState is intentionally omitted from the
-list request and the runtime rereads
+filters compartmentId, displayName,
+lifecycleState; exact compartmentId plus
+displayName list filters preserve the
+service-supported lifecycleState filter, then
+reuse only a unique summary candidate; the
+runtime rereads
 GetDistributedDatabasePrivateEndpoint before
 binding or status projection
 conflicts: none

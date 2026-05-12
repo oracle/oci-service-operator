@@ -130,7 +130,7 @@
     "Pinned OCI SDK contract: ListDistributedDatabasePrivateEndpoints requires compartmentId and supports lifecycleState plus displayName filters, but returns DistributedDatabasePrivateEndpointSummary items rather than full bodies.",
     "Pinned provider coverage is unconfirmed in this checkout. formal/sources.lock still points at terraform-provider-oci, but the repo-local onboarding audit did not prove a matching checked-in provider resource or datasource for DistributedDatabasePrivateEndpoint, so the providerResource and datasource names stay provisional placeholders.",
     "Repo-authored runtime contract keeps in-place mutation aligned with UpdateDistributedDatabasePrivateEndpointDetails for displayName, description, nsgIds, freeformTags, and definedTags. compartmentId and subnetId remain replacement-only drift on the published surface.",
-    "Repo-authored bind-versus-create stays explicit: pre-create lookup lists by exact compartmentId plus displayName, then narrows summary candidates in memory to a unique exact match before reuse. lifecycleState is intentionally not sent on that list request.",
+    "Repo-authored bind-versus-create stays explicit: pre-create lookup lists by exact compartmentId plus displayName while preserving the service-supported lifecycleState filter, then narrows summary candidates in memory to a unique exact match before reuse.",
     "List summaries omit privateIp, so the reviewed runtime always rereads GetDistributedDatabasePrivateEndpoint before status projection after bind, create, or update. The runtime has no Kubernetes Secret side effects."
   ]
 }

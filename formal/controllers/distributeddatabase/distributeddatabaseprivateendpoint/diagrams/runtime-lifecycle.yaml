@@ -21,7 +21,8 @@ repoAuthored:
     filters:
       - compartmentId
       - displayName
-    matchRule: "exact compartmentId plus displayName list filters, then reuse only a unique summary candidate; lifecycleState is intentionally omitted from the list request and the runtime rereads GetDistributedDatabasePrivateEndpoint before binding or status projection"
+      - lifecycleState
+    matchRule: "exact compartmentId plus displayName list filters preserve the service-supported lifecycleState filter, then reuse only a unique summary candidate; the runtime rereads GetDistributedDatabasePrivateEndpoint before binding or status projection"
   mutation:
     mutable:
       - definedTags

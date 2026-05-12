@@ -26,9 +26,9 @@ controller-backed publication.
   `UPDATING` as updating, `ACTIVE` and `INACTIVE` as success, `FAILED` as
   terminal, and confirms delete through `DELETING` until `DELETED` or NotFound.
 - Pre-create lookup is explicit. The runtime lists by exact `compartmentId`
-  plus `displayName` and only reuses a unique exact summary match.
-  `lifecycleState` is intentionally omitted from the list request so desired
-  drift cannot hide a reusable candidate.
+  plus `displayName`, preserves the service-supported `lifecycleState` filter
+  in the published list contract, and only reuses a unique exact summary
+  match.
 - Update semantics are explicit. The runtime sends only `displayName`,
   `description`, `nsgIds`, `freeformTags`, and `definedTags` through
   `UpdateDistributedDatabasePrivateEndpointDetails`; `compartmentId` and

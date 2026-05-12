@@ -46,7 +46,7 @@ func reviewedDistributedDatabasePrivateEndpointRuntimeSemantics() *generatedrunt
 	semantics := newDistributedDatabasePrivateEndpointRuntimeSemantics()
 	semantics.List = &generatedruntime.ListSemantics{
 		ResponseItemsField: "Items",
-		MatchFields:        []string{"compartmentId", "displayName"},
+		MatchFields:        []string{"compartmentId", "displayName", "lifecycleState"},
 	}
 	semantics.AuxiliaryOperations = nil
 	return semantics
@@ -55,6 +55,7 @@ func reviewedDistributedDatabasePrivateEndpointRuntimeSemantics() *generatedrunt
 func reviewedDistributedDatabasePrivateEndpointListFields() []generatedruntime.RequestField {
 	return []generatedruntime.RequestField{
 		{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
+		{FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query"},
 		{FieldName: "Limit", RequestName: "limit", Contribution: "query"},
 		{FieldName: "Page", RequestName: "page", Contribution: "query"},
 		{FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query"},
