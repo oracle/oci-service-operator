@@ -655,9 +655,11 @@ var seedTargets = []Target{
 	// Dashboardservice CRD support
 	newTarget("dashboardservice", "CreateDashboardGroupDetails", reflect.TypeOf(dashboardservice.CreateDashboardGroupDetails{})),
 	newTarget("dashboardservice", "UpdateDashboardGroupDetails", reflect.TypeOf(dashboardservice.UpdateDashboardGroupDetails{})),
+	newTarget("dashboardservice", "DashboardCollection", reflect.TypeOf(dashboardservice.DashboardCollection{})),
 	newTarget("dashboardservice", "DashboardGroup", reflect.TypeOf(dashboardservice.DashboardGroup{})),
 	newTarget("dashboardservice", "DashboardGroupCollection", reflect.TypeOf(dashboardservice.DashboardGroupCollection{})),
 	newTarget("dashboardservice", "DashboardGroupSummary", reflect.TypeOf(dashboardservice.DashboardGroupSummary{})),
+	newTarget("dashboardservice", "DashboardSummary", reflect.TypeOf(dashboardservice.DashboardSummary{})),
 
 	// Databasemigration CRD support
 	newTarget("databasemigration", "ConnectionCollection", reflect.TypeOf(databasemigration.ConnectionCollection{})),

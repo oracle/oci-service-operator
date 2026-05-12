@@ -335,16 +335,20 @@ packages:
 
   - package: dashboardservice
     displayName: Dashboard Service
-    summary: Manage OCI dashboard groups from Kubernetes with a reviewed controller-backed runtime.
+    summary: Manage OCI dashboards and dashboard groups from Kubernetes with a reviewed controller-backed runtime.
     supportStatus: preview
     customerVisible: false
     guidePath: docs/installation.md
     packageNotes:
-      - Current package scope is intentionally limited to DashboardGroup while the dashboard content model itself stays unpublished.
-      - The published runtime keeps lifecycle-based generatedruntime semantics, scopes existing-before-create reuse to exact `compartmentId` plus `displayName`, updates non-empty `displayName` and `description` values in place, and preserves explicit empty-map clears for `freeformTags` and `definedTags`.
-      - Empty-string `displayName` and `description` values currently behave as omission rather than explicit clear because the generated spec cannot distinguish those intents.
-      - Dashboard resources created outside the tenancy home region are not viewable in the Console, so that Dashboards service caveat remains explicit in the published docs and formal metadata.
+      - 'Current package scope publishes both `dashboardservice/Dashboard` and `dashboardservice/DashboardGroup`.'
+      - '`Dashboard` keeps lifecycle-based generatedruntime semantics, scopes existing-before-create reuse to exact `dashboardGroupId` plus `displayName`, dispatches create and update bodies by `schemaVersion`, and preserves explicit empty-list widget clears plus explicit empty-map tag clears.'
+      - '`DashboardGroup` keeps lifecycle-based generatedruntime semantics, scopes existing-before-create reuse to exact `compartmentId` plus `displayName`, and preserves explicit empty-map tag clears.'
+      - 'Empty-string `displayName` and `description` values currently behave as omission rather than explicit clear because the generated specs cannot distinguish those intents. `Dashboard` also treats null `config` clears as omission for the same reason.'
+      - 'Dashboard resources created outside the tenancy home region are not viewable in the Console, so that Dashboards service caveat remains explicit in the published docs and formal metadata.'
     kindOverrides:
+      - group: dashboardservice
+        kind: Dashboard
+        summary: Manage OCI dashboards with schemaVersion-aware V1 model handling.
       - group: dashboardservice
         kind: DashboardGroup
         summary: Manage OCI dashboard groups.

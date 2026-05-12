@@ -246,4 +246,5 @@ resources:
 - wlms_v1beta1_managedinstance.yaml
 - tenantmanagercontrolplane_v1beta1_domain.yaml
 - mngdmac_v1beta1_macdevice.yaml
+- dashboardservice_v1beta1_dashboard.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

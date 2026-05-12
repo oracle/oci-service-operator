@@ -2298,6 +2298,19 @@ var targets = []Target{
 		},
 	},
 	{
+		Name:       "DashboardserviceDashboard",
+		SpecType:   reflect.TypeOf(dashboardservicev1beta1.DashboardSpec{}),
+		StatusType: reflect.TypeOf(dashboardservicev1beta1.DashboardStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "dashboardservice.DashboardCollection",
+			},
+			{
+				SDKStruct: "dashboardservice.DashboardSummary",
+			},
+		},
+	},
+	{
 		Name:       "DashboardserviceDashboardGroup",
 		SpecType:   reflect.TypeOf(dashboardservicev1beta1.DashboardGroupSpec{}),
 		StatusType: reflect.TypeOf(dashboardservicev1beta1.DashboardGroupStatus{}),

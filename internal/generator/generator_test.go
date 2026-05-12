@@ -24,6 +24,26 @@ import (
 	"github.com/oracle/oci-service-operator/internal/ocisdk"
 )
 
+func TestMergeFieldOverridesCanDropFieldWithJSONIgnoreTag(t *testing.T) {
+	t.Parallel()
+
+	fields := []FieldModel{
+		{Name: "DisplayName", Type: "string", Tag: `json:"displayName,omitempty"`},
+		{Name: "JsonData", Type: "string", Tag: `json:"jsonData,omitempty"`},
+	}
+	overrides := []FieldOverride{
+		{Name: "JsonData", Tag: `json:"-"`},
+	}
+
+	merged := mergeFieldOverrides(fields, overrides)
+	if len(merged) != 1 {
+		t.Fatalf("mergeFieldOverrides() len = %d, want 1", len(merged))
+	}
+	if merged[0].Name != "DisplayName" {
+		t.Fatalf("mergeFieldOverrides() remaining field = %q, want DisplayName", merged[0].Name)
+	}
+}
+
 func TestBuildPackageModelDiscoversResources(t *testing.T) {
 	t.Parallel()
 

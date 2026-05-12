@@ -13,6 +13,7 @@ import (
 	dashboardservicev1beta1 "github.com/oracle/oci-service-operator/api/dashboardservice/v1beta1"
 	dashboardservicecontrollers "github.com/oracle/oci-service-operator/controllers/dashboardservice"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
+	dashboardservicedashboardservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/dashboardservice/dashboard"
 	dashboardservicedashboardgroupservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/dashboardservice/dashboardgroup"
 )
 
@@ -21,6 +22,17 @@ func init() {
 		Group:       "dashboardservice",
 		AddToScheme: dashboardservicev1beta1.AddToScheme,
 		SetupWithManager: func(ctx Context) error {
+			if err := (&dashboardservicecontrollers.DashboardReconciler{
+				Reconciler: NewBaseReconciler(
+					ctx,
+					"Dashboard",
+					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
+						return dashboardservicedashboardservicemanager.NewDashboardServiceManagerWithDeps(deps)
+					},
+				),
+			}).SetupWithManager(ctx.Manager); err != nil {
+				return fmt.Errorf("setup Dashboard controller: %w", err)
+			}
 			if err := (&dashboardservicecontrollers.DashboardGroupReconciler{
 				Reconciler: NewBaseReconciler(
 					ctx,

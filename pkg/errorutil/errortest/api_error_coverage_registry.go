@@ -531,6 +531,16 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 				retryableConflictGeneratedRuntime,
 				"DashboardGroup keeps generatedruntime CRUD and lifecycle rereads, while a small handwritten seam skips unsafe pre-create reuse when displayName is empty, preserves explicit empty-map clears for tag maps, and treats empty-string displayName/description values as omission until the spec can distinguish clear from omit.",
 			),
+			resourceKey("dashboardservice", "Dashboard"): reviewedRegistration(
+				"dashboardservice",
+				"dashboardservice",
+				apiErrorCoverageDefaultVersion,
+				"Dashboard",
+				APIErrorCoverageFamilyGeneratedRuntimePlain,
+				deleteNotFoundGeneratedRuntime,
+				retryableConflictGeneratedRuntime,
+				"Dashboard keeps generatedruntime CRUD and lifecycle rereads, while a handwritten seam dispatches polymorphic V1 create/update bodies by schemaVersion, scopes existing-before-create reuse to exact dashboardGroupId plus displayName, preserves explicit empty-list widget clears plus empty-map tag clears, and treats empty-string or null clears as omission until the spec can distinguish clear from omit.",
+			),
 			resourceKey("delegateaccesscontrol", "DelegationControl"): reviewedRegistration(
 				"delegateaccesscontrol",
 				"delegateaccesscontrol",
@@ -2322,13 +2332,6 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 			"datascience",
 			apiErrorCoverageDefaultVersion,
 			"WorkRequestLog",
-			"`services.yaml` keeps this subresource out of the active controller-backed surface with controller.strategy=none and serviceManager.strategy=none.",
-		),
-		resourceKey("dashboardservice", "Dashboard"): reviewedException(
-			"dashboardservice",
-			"dashboardservice",
-			apiErrorCoverageDefaultVersion,
-			"Dashboard",
 			"`services.yaml` keeps this subresource out of the active controller-backed surface with controller.strategy=none and serviceManager.strategy=none.",
 		),
 		resourceKey("keymanagement", "Key"): reviewedException(

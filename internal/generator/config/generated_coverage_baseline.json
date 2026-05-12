@@ -337,17 +337,17 @@
     },
     {
       "service": "dashboardservice",
-      "specs": 1,
-      "mappings": 5,
-      "trackedMappings": 5,
+      "specs": 2,
+      "mappings": 7,
+      "trackedMappings": 7,
       "untrackedMappings": 0,
-      "presentFields": 29,
-      "missingFields": 1,
-      "mandatoryPresentFields": 18,
-      "mandatoryMissingFields": 1,
+      "presentFields": 40,
+      "missingFields": 2,
+      "mandatoryPresentFields": 27,
+      "mandatoryMissingFields": 2,
       "extraSpecFields": 1,
-      "overallCoveragePercent": 96.66666666666667,
-      "mandatoryCoveragePercent": 94.73684210526315
+      "overallCoveragePercent": 95.23809523809523,
+      "mandatoryCoveragePercent": 93.10344827586206
     },
     {
       "service": "database",
