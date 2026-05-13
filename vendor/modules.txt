@@ -193,6 +193,7 @@ github.com/oracle/oci-go-sdk/v65/functions
 github.com/oracle/oci-go-sdk/v65/gdp
 github.com/oracle/oci-go-sdk/v65/generativeai
 github.com/oracle/oci-go-sdk/v65/generativeaiagent
+github.com/oracle/oci-go-sdk/v65/generativeaiagentruntime
 github.com/oracle/oci-go-sdk/v65/generativeaidata
 github.com/oracle/oci-go-sdk/v65/governancerulescontrolplane
 github.com/oracle/oci-go-sdk/v65/healthchecks
@@ -200,6 +201,7 @@ github.com/oracle/oci-go-sdk/v65/identity
 github.com/oracle/oci-go-sdk/v65/integration
 github.com/oracle/oci-go-sdk/v65/iot
 github.com/oracle/oci-go-sdk/v65/jms
+github.com/oracle/oci-go-sdk/v65/jmsjavadownloads
 github.com/oracle/oci-go-sdk/v65/keymanagement
 github.com/oracle/oci-go-sdk/v65/licensemanager
 github.com/oracle/oci-go-sdk/v65/limits
@@ -225,6 +227,7 @@ github.com/oracle/oci-go-sdk/v65/objectstorage
 github.com/oracle/oci-go-sdk/v65/oce
 github.com/oracle/oci-go-sdk/v65/ocvp
 github.com/oracle/oci-go-sdk/v65/oda
+github.com/oracle/oci-go-sdk/v65/onesubscription
 github.com/oracle/oci-go-sdk/v65/ons
 github.com/oracle/oci-go-sdk/v65/opa
 github.com/oracle/oci-go-sdk/v65/opensearch
@@ -232,6 +235,7 @@ github.com/oracle/oci-go-sdk/v65/operatoraccesscontrol
 github.com/oracle/oci-go-sdk/v65/opsi
 github.com/oracle/oci-go-sdk/v65/optimizer
 github.com/oracle/oci-go-sdk/v65/osmanagementhub
+github.com/oracle/oci-go-sdk/v65/osubsubscription
 github.com/oracle/oci-go-sdk/v65/psa
 github.com/oracle/oci-go-sdk/v65/psql
 github.com/oracle/oci-go-sdk/v65/queue
