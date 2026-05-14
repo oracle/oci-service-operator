@@ -14,10 +14,10 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	}
 
 	byKey := inventoryByKey(inventory)
-	if got, want := len(inventory), 370; got != want {
+	if got, want := len(inventory), 371; got != want {
 		t.Fatalf("len(inventory) = %d, want %d", got, want)
 	}
-	if got, want := countRegistrations(inventory), 247; got != want {
+	if got, want := countRegistrations(inventory), 248; got != want {
 		t.Fatalf("registration inventory count = %d, want %d", got, want)
 	}
 	if got, want := countExceptions(inventory), 123; got != want {
@@ -77,6 +77,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventorySelectionSource(t, byKey, "rover/RoverCluster", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "rover/RoverNode", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "servicemanagerproxy/ServiceEnvironment", "selection.includeKinds")
+	assertInventorySelectionSource(t, byKey, "onesubscription/Subscription", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "tenantmanagercontrolplane/Domain", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "usageapi/Query", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "vbsinst/VbsInstance", "selection.includeKinds")
@@ -173,6 +174,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventoryException(t, byKey, "opa/WorkRequestLog", `controller.strategy="none"`)
 	assertInventoryException(t, byKey, "opensearch/WorkRequestLog", `controller.strategy="none"`)
 	assertInventoryRegistration(t, byKey, "psa/PrivateServiceAccess")
+	assertInventoryRegistration(t, byKey, "onesubscription/Subscription")
 	assertInventoryRegistration(t, byKey, "rover/RoverNode")
 	assertInventoryRegistration(t, byKey, "self/Subscription")
 	assertInventoryRegistration(t, byKey, "servicemanagerproxy/ServiceEnvironment")
@@ -258,6 +260,7 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedFamily(t, "opa/OpaInstance", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "objectstorage/Bucket", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "psa/PrivateServiceAccess", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
+	assertReviewedFamily(t, "onesubscription/Subscription", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "self/Subscription", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "psql/DbSystem", APIErrorCoverageFamilyLegacyAdapter)
 	assertReviewedFamily(t, "queue/Queue", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
