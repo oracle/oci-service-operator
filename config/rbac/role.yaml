@@ -2266,6 +2266,7 @@ rules:
   - update
 - apiGroups:
   - onesubscription.oracle.com
+  - osubsubscription.oracle.com
   - self.oracle.com
   resources:
   - subscriptions
@@ -2279,6 +2280,7 @@ rules:
   - watch
 - apiGroups:
   - onesubscription.oracle.com
+  - osubsubscription.oracle.com
   - self.oracle.com
   resources:
   - subscriptions/finalizers
@@ -2286,6 +2288,7 @@ rules:
   - update
 - apiGroups:
   - onesubscription.oracle.com
+  - osubsubscription.oracle.com
   - self.oracle.com
   resources:
   - subscriptions/status
@@ -2528,35 +2531,6 @@ rules:
   - profiles/status
   - scheduledjobs/status
   - softwaresources/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - osubsubscription.oracle.com
-  - self.oracle.com
-  resources:
-  - subscriptions
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - osubsubscription.oracle.com
-  - self.oracle.com
-  resources:
-  - subscriptions/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - osubsubscription.oracle.com
-  - self.oracle.com
-  resources:
-  - subscriptions/status
   verbs:
   - get
   - patch
