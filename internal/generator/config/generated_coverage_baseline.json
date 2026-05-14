@@ -1,15 +1,15 @@
 {
   "aggregate": {
-    "specs": 249,
-    "mappings": 1050,
-    "trackedMappings": 1049,
+    "specs": 250,
+    "mappings": 1051,
+    "trackedMappings": 1050,
     "untrackedMappings": 1,
-    "presentFields": 10416,
+    "presentFields": 10422,
     "missingFields": 198,
     "mandatoryPresentFields": 3737,
     "mandatoryMissingFields": 157,
     "extraSpecFields": 876,
-    "overallCoveragePercent": 98.13453928773318,
+    "overallCoveragePercent": 98.13559322033898,
     "mandatoryCoveragePercent": 95.96815613764767
   },
   "services": [
@@ -1188,6 +1188,20 @@
       "extraSpecFields": 33,
       "overallCoveragePercent": 96.81978798586573,
       "mandatoryCoveragePercent": 92.04545454545455
+    },
+    {
+      "service": "osubsubscription",
+      "specs": 1,
+      "mappings": 1,
+      "trackedMappings": 1,
+      "untrackedMappings": 0,
+      "presentFields": 6,
+      "missingFields": 0,
+      "mandatoryPresentFields": 0,
+      "mandatoryMissingFields": 0,
+      "extraSpecFields": 0,
+      "overallCoveragePercent": 100,
+      "mandatoryCoveragePercent": 100
     },
     {
       "service": "psa",

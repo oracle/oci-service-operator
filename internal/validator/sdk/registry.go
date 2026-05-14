@@ -88,6 +88,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/opsi"
 	"github.com/oracle/oci-go-sdk/v65/optimizer"
 	"github.com/oracle/oci-go-sdk/v65/osmanagementhub"
+	"github.com/oracle/oci-go-sdk/v65/osubsubscription"
 	"github.com/oracle/oci-go-sdk/v65/psa"
 	"github.com/oracle/oci-go-sdk/v65/psql"
 	"github.com/oracle/oci-go-sdk/v65/queue"
@@ -1161,6 +1162,9 @@ var seedTargets = []Target{
 	newTarget("osmanagementhub", "ManagementStationSummary", reflect.TypeOf(osmanagementhub.ManagementStationSummary{})),
 	newTarget("osmanagementhub", "ProfileSummary", reflect.TypeOf(osmanagementhub.ProfileSummary{})),
 	newTarget("osmanagementhub", "ScheduledJobSummary", reflect.TypeOf(osmanagementhub.ScheduledJobSummary{})),
+
+	// Osubsubscription CRD support
+	newTarget("osubsubscription", "SubscriptionSummary", reflect.TypeOf(osubsubscription.SubscriptionSummary{})),
 
 	// Psa CRD support
 	newTarget("psa", "CreatePrivateServiceAccessDetails", reflect.TypeOf(psa.CreatePrivateServiceAccessDetails{})),
