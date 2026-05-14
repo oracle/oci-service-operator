@@ -14,10 +14,10 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	}
 
 	byKey := inventoryByKey(inventory)
-	if got, want := len(inventory), 370; got != want {
+	if got, want := len(inventory), 371; got != want {
 		t.Fatalf("len(inventory) = %d, want %d", got, want)
 	}
-	if got, want := countRegistrations(inventory), 247; got != want {
+	if got, want := countRegistrations(inventory), 248; got != want {
 		t.Fatalf("registration inventory count = %d, want %d", got, want)
 	}
 	if got, want := countExceptions(inventory), 123; got != want {
@@ -82,6 +82,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventorySelectionSource(t, byKey, "vbsinst/VbsInstance", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "visualbuilder/VbInstance", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "jms/Fleet", "selection.includeKinds")
+	assertInventorySelectionSource(t, byKey, "jmsjavadownloads/JavaDownloadToken", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "vnmonitoring/PathAnalyzerTest", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "wlms/ManagedInstance", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "wlms/WlsDomain", "selection.includeKinds")
@@ -180,6 +181,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventoryRegistration(t, byKey, "vbsinst/VbsInstance")
 	assertInventoryRegistration(t, byKey, "visualbuilder/VbInstance")
 	assertInventoryRegistration(t, byKey, "jms/Fleet")
+	assertInventoryRegistration(t, byKey, "jmsjavadownloads/JavaDownloadToken")
 	assertInventoryRegistration(t, byKey, "vnmonitoring/PathAnalyzerTest")
 	assertInventoryRegistration(t, byKey, "wlms/ManagedInstance")
 	assertInventoryRegistration(t, byKey, "wlms/WlsDomain")
@@ -272,6 +274,7 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedFamily(t, "vbsinst/VbsInstance", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "visualbuilder/VbInstance", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "jms/Fleet", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
+	assertReviewedFamily(t, "jmsjavadownloads/JavaDownloadToken", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "vnmonitoring/PathAnalyzerTest", APIErrorCoverageFamilyGeneratedRuntimeFollowUp)
 	assertReviewedFamily(t, "wlms/ManagedInstance", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "wlms/WlsDomain", APIErrorCoverageFamilyGeneratedRuntimePlain)
