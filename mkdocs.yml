@@ -175,6 +175,7 @@ nav:
           - gdp.oracle.com/v1beta1: reference/api/gdp/v1beta1/index.md
           - generativeai.oracle.com/v1beta1: reference/api/generativeai/v1beta1/index.md
           - generativeaiagent.oracle.com/v1beta1: reference/api/generativeaiagent/v1beta1/index.md
+          - generativeaiagentruntime.oracle.com/v1beta1: reference/api/generativeaiagentruntime/v1beta1/index.md
           - generativeaidata.oracle.com/v1beta1: reference/api/generativeaidata/v1beta1/index.md
           - governancerulescontrolplane.oracle.com/v1beta1: reference/api/governancerulescontrolplane/v1beta1/index.md
           - healthchecks.oracle.com/v1beta1: reference/api/healthchecks/v1beta1/index.md
@@ -182,6 +183,7 @@ nav:
           - integration.oracle.com/v1beta1: reference/api/integration/v1beta1/index.md
           - iot.oracle.com/v1beta1: reference/api/iot/v1beta1/index.md
           - jms.oracle.com/v1beta1: reference/api/jms/v1beta1/index.md
+          - jmsjavadownloads.oracle.com/v1beta1: reference/api/jmsjavadownloads/v1beta1/index.md
           - keymanagement.oracle.com/v1beta1: reference/api/keymanagement/v1beta1/index.md
           - licensemanager.oracle.com/v1beta1: reference/api/licensemanager/v1beta1/index.md
           - limits.oracle.com/v1beta1: reference/api/limits/v1beta1/index.md
@@ -215,6 +217,7 @@ nav:
           - opsi.oracle.com/v1beta1: reference/api/opsi/v1beta1/index.md
           - optimizer.oracle.com/v1beta1: reference/api/optimizer/v1beta1/index.md
           - osmanagementhub.oracle.com/v1beta1: reference/api/osmanagementhub/v1beta1/index.md
+          - osubsubscription.oracle.com/v1beta1: reference/api/osubsubscription/v1beta1/index.md
           - psa.oracle.com/v1beta1: reference/api/psa/v1beta1/index.md
           - psql.oracle.com/v1beta1: reference/api/psql/v1beta1/index.md
           - queue.oracle.com/v1beta1: reference/api/queue/v1beta1/index.md

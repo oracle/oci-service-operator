@@ -3054,6 +3054,69 @@ services:
           serviceManager:
             strategy: none
 
+  - service: generativeaiagentruntime
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/generativeaiagentruntime
+    group: generativeaiagentruntime
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Session
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: Session
+          formalSpec: session
+          async:
+            strategy: none
+            runtime: generatedruntime
+            formalClassification: none
+          specFields:
+            - name: AgentEndpointId
+              type: string
+              tag: 'json:"agentEndpointId"'
+              comments:
+                - The OCID of the agent endpoint that scopes this session.
+                - Required for create, reread, update, and delete requests.
+              markers:
+                - +kubebuilder:validation:Required
+          statusFields:
+            - name: AgentEndpointId
+              type: string
+              tag: 'json:"agentEndpointId,omitempty"'
+              comments:
+                - The bound agent endpoint ID used to address this session.
+            - name: SessionId
+              type: string
+              tag: 'json:"sessionId,omitempty"'
+              comments:
+                - The bound session identifier used together with agentEndpointId for reread, update, and delete requests.
+          sample:
+            body: |-
+              #
+              # Replace the agentEndpointId below before running e2e.
+              # This rollout always creates a new session and then records the returned
+              # sessionId in status for subsequent read, update, and delete calls.
+              #
+              apiVersion: generativeaiagentruntime.oracle.com/v1beta1
+              kind: Session
+              metadata:
+                name: session-sample
+              spec:
+                agentEndpointId: ocid1.generativeaiagentendpoint.oc1..exampleuniqueID
+                displayName: osok-generativeaiagentruntime-session-sample
+                description: OSOK Generative AI Agent Runtime Session sample
+
   - service: healthchecks
     sdkPackage: github.com/oracle/oci-go-sdk/v65/healthchecks
     group: healthchecks
@@ -4594,6 +4657,118 @@ services:
         WorkRequestLog:
           - WorkRequestLogEntry
 
+  - service: osubsubscription
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/osubsubscription
+    group: osubsubscription
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Subscription
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: Subscription
+          formalSpec: subscription
+          async:
+            strategy: none
+            runtime: generatedruntime
+            formalClassification: none
+          serviceManager:
+            packagePath: osubsubscription/subscription
+          specFields:
+            - name: CompartmentId
+              type: string
+              tag: 'json:"compartmentId"'
+              comments:
+                - The OCID of the compartment that contains the subscription summary projection.
+                - Required for every ListSubscriptions reread.
+              markers:
+                - +kubebuilder:validation:Required
+            - name: PlanNumber
+              type: string
+              tag: 'json:"planNumber,omitempty"'
+              comments:
+                - Optional plan-number selector for the query-backed observe contract.
+                - Set exactly one of planNumber, subscriptionId, or buyerEmail.
+            - name: SubscriptionId
+              type: string
+              tag: 'json:"subscriptionId,omitempty"'
+              comments:
+                - Optional line-level subscription selector for the query-backed observe contract.
+                - This value is not a top-level OCI OCID and is not published as tracked controller identity.
+                - Set exactly one of planNumber, subscriptionId, or buyerEmail.
+            - name: BuyerEmail
+              type: string
+              tag: 'json:"buyerEmail,omitempty"'
+              comments:
+                - Optional buyer email selector for the query-backed observe contract.
+                - Set exactly one of planNumber, subscriptionId, or buyerEmail.
+            - name: IsCommitInfoRequired
+              type: bool
+              tag: 'json:"isCommitInfoRequired,omitempty"'
+              comments:
+                - When true, request commitment details on the subscription summary list call.
+            - name: SortOrder
+              type: string
+              tag: 'json:"sortOrder,omitempty"'
+              comments:
+                - Optional list sort order for the observed subscription query.
+              markers:
+                - +kubebuilder:validation:Enum=ASC;DESC
+            - name: SortBy
+              type: string
+              tag: 'json:"sortBy,omitempty"'
+              comments:
+                - Optional list sort field for the observed subscription query.
+              markers:
+                - +kubebuilder:validation:Enum=TIMECREATED;TIMESTART
+            - name: XOneGatewaySubscriptionId
+              type: string
+              tag: 'json:"xOneGatewaySubscriptionId,omitempty"'
+              comments:
+                - Optional request header passthrough for environments that require x-one-gateway-subscription-id on list reads.
+            - name: XOneOriginRegion
+              type: string
+              tag: 'json:"xOneOriginRegion,omitempty"'
+              comments:
+                - Optional request header passthrough for environments whose home region is not us-ashburn-1.
+          statusFields:
+            - name: Status
+              type: string
+              tag: 'json:"sdkStatus,omitempty"'
+              comments:
+                - The raw subscription status string returned by OSubscription.
+          sample:
+            body: |-
+              #
+              # Subscription is query-backed and observe-only in this rollout.
+              # Provide compartmentId plus exactly one of planNumber, subscriptionId,
+              # or buyerEmail for a unique reread query. The top-level summary does
+              # not expose a tracked OCI identity, so Kubernetes delete is local-only.
+              # If your tenancy requires request-scoped access headers, also set
+              # xOneGatewaySubscriptionId and/or xOneOriginRegion.
+              #
+              apiVersion: osubsubscription.oracle.com/v1beta1
+              kind: Subscription
+              metadata:
+                name: subscription-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                subscriptionId: example-line-subscription-id
+                isCommitInfoRequired: true
+                xOneOriginRegion: us-phoenix-1
+
   - service: psa
     sdkPackage: github.com/oracle/oci-go-sdk/v65/psa
     group: psa
@@ -5551,6 +5726,65 @@ services:
                   workload: java
           serviceManager:
             packagePath: jms/fleet
+
+  - service: jmsjavadownloads
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/jmsjavadownloads
+    group: jmsjavadownloads
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - JavaDownloadToken
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: JavaDownloadToken
+          formalSpec: javadownloadtoken
+          async:
+            strategy: workrequest
+            runtime: generatedruntime
+            formalClassification: workrequest
+            workRequest:
+              source: service-sdk
+              phases:
+                - create
+                - update
+                - delete
+          sample:
+            body: |-
+              #
+              # Replace the compartment OCID and expiry before running e2e.
+              # The token value itself is sensitive and is intentionally not
+              # projected into status or docs after OCI returns it.
+              apiVersion: jmsjavadownloads.oracle.com/v1beta1
+              kind: JavaDownloadToken
+              metadata:
+                name: javadownloadtoken-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                displayName: osok-java-download-token
+                description: Java download token managed by OSOK
+                timeExpires: "2030-01-01T00:00:00Z"
+                javaVersion: "17"
+                licenseType:
+                  - NFTC
+                isDefault: false
+                freeformTags:
+                  managed-by: oci-service-operator
+    observedState:
+      excludedFieldPaths:
+        JavaDownloadToken:
+          - Value
 
   - service: licensemanager
     sdkPackage: github.com/oracle/oci-go-sdk/v65/licensemanager

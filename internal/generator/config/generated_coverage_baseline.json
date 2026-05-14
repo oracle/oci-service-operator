@@ -1,16 +1,16 @@
 {
   "aggregate": {
-    "specs": 248,
-    "mappings": 1045,
-    "trackedMappings": 1044,
+    "specs": 251,
+    "mappings": 1054,
+    "trackedMappings": 1053,
     "untrackedMappings": 1,
-    "presentFields": 10364,
-    "missingFields": 195,
-    "mandatoryPresentFields": 3713,
-    "mandatoryMissingFields": 154,
-    "extraSpecFields": 874,
-    "overallCoveragePercent": 98.15323420778482,
-    "mandatoryCoveragePercent": 96.01758469097491
+    "presentFields": 10432,
+    "missingFields": 198,
+    "mandatoryPresentFields": 3739,
+    "mandatoryMissingFields": 157,
+    "extraSpecFields": 878,
+    "overallCoveragePercent": 98.137347130762,
+    "mandatoryCoveragePercent": 95.97022587268994
   },
   "services": [
     {
@@ -616,6 +616,20 @@
       "mandatoryCoveragePercent": 92.85714285714286
     },
     {
+      "service": "generativeaiagentruntime",
+      "specs": 1,
+      "mappings": 3,
+      "trackedMappings": 3,
+      "untrackedMappings": 0,
+      "presentFields": 10,
+      "missingFields": 0,
+      "mandatoryPresentFields": 2,
+      "mandatoryMissingFields": 0,
+      "extraSpecFields": 2,
+      "overallCoveragePercent": 100,
+      "mandatoryCoveragePercent": 100
+    },
+    {
       "service": "generativeaidata",
       "specs": 1,
       "mappings": 3,
@@ -712,6 +726,20 @@
       "extraSpecFields": 1,
       "overallCoveragePercent": 98.21428571428571,
       "mandatoryCoveragePercent": 96.66666666666667
+    },
+    {
+      "service": "jmsjavadownloads",
+      "specs": 1,
+      "mappings": 5,
+      "trackedMappings": 5,
+      "untrackedMappings": 0,
+      "presentFields": 52,
+      "missingFields": 3,
+      "mandatoryPresentFields": 24,
+      "mandatoryMissingFields": 3,
+      "extraSpecFields": 2,
+      "overallCoveragePercent": 94.54545454545455,
+      "mandatoryCoveragePercent": 88.88888888888889
     },
     {
       "service": "keymanagement",
@@ -1174,6 +1202,20 @@
       "extraSpecFields": 33,
       "overallCoveragePercent": 96.81978798586573,
       "mandatoryCoveragePercent": 92.04545454545455
+    },
+    {
+      "service": "osubsubscription",
+      "specs": 1,
+      "mappings": 1,
+      "trackedMappings": 1,
+      "untrackedMappings": 0,
+      "presentFields": 6,
+      "missingFields": 0,
+      "mandatoryPresentFields": 0,
+      "mandatoryMissingFields": 0,
+      "extraSpecFields": 0,
+      "overallCoveragePercent": 100,
+      "mandatoryCoveragePercent": 100
     },
     {
       "service": "psa",
