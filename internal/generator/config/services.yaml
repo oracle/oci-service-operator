@@ -5461,6 +5461,65 @@ services:
           serviceManager:
             packagePath: jms/fleet
 
+  - service: jmsjavadownloads
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/jmsjavadownloads
+    group: jmsjavadownloads
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - JavaDownloadToken
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: JavaDownloadToken
+          formalSpec: javadownloadtoken
+          async:
+            strategy: workrequest
+            runtime: generatedruntime
+            formalClassification: workrequest
+            workRequest:
+              source: service-sdk
+              phases:
+                - create
+                - update
+                - delete
+          sample:
+            body: |-
+              #
+              # Replace the compartment OCID and expiry before running e2e.
+              # The token value itself is sensitive and is intentionally not
+              # projected into status or docs after OCI returns it.
+              apiVersion: jmsjavadownloads.oracle.com/v1beta1
+              kind: JavaDownloadToken
+              metadata:
+                name: javadownloadtoken-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                displayName: osok-java-download-token
+                description: Java download token managed by OSOK
+                timeExpires: "2030-01-01T00:00:00Z"
+                javaVersion: "17"
+                licenseType:
+                  - NFTC
+                isDefault: false
+                freeformTags:
+                  managed-by: oci-service-operator
+    observedState:
+      excludedFieldPaths:
+        JavaDownloadToken:
+          - Value
+
   - service: licensemanager
     sdkPackage: github.com/oracle/oci-go-sdk/v65/licensemanager
     group: licensemanager

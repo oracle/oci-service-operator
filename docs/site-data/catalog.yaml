@@ -701,6 +701,21 @@ packages:
         kind: Fleet
         summary: Manage OCI Java Management Service fleets.
 
+  - package: jmsjavadownloads
+    displayName: Java Downloads
+    summary: Manage OCI Java download tokens from Kubernetes with a reviewed controller-backed runtime.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to JavaDownloadToken while report, license, download-record, generated download-url, and work-request helper families stay unpublished.
+      - The published runtime uses service-SDK work requests for create, update, and delete, keeps generic bind matching scoped to exact compartmentId plus displayName, and leaves the sensitive token value out of status and generated docs.
+      - This story does not emit Kubernetes Secret side effects for the returned token value; operators must preserve that one-time sensitive output through an out-of-band reviewed path.
+    kindOverrides:
+      - group: jmsjavadownloads
+        kind: JavaDownloadToken
+        summary: Manage OCI Java download tokens.
+
   - package: keymanagement
     displayName: Key Management
     summary: Manage OCI Vault resources from Kubernetes.

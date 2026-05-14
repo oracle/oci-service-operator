@@ -53,6 +53,7 @@ import (
 	integrationv1beta1 "github.com/oracle/oci-service-operator/api/integration/v1beta1"
 	iotv1beta1 "github.com/oracle/oci-service-operator/api/iot/v1beta1"
 	jmsv1beta1 "github.com/oracle/oci-service-operator/api/jms/v1beta1"
+	jmsjavadownloadsv1beta1 "github.com/oracle/oci-service-operator/api/jmsjavadownloads/v1beta1"
 	keymanagementv1beta1 "github.com/oracle/oci-service-operator/api/keymanagement/v1beta1"
 	licensemanagerv1beta1 "github.com/oracle/oci-service-operator/api/licensemanager/v1beta1"
 	limitsv1beta1 "github.com/oracle/oci-service-operator/api/limits/v1beta1"
@@ -2322,8 +2323,6 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "containerinstances.ContainerInstanceCollection",
-				Exclude:   true,
-				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
 			},
 			{
 				SDKStruct: "containerinstances.ContainerInstanceSummary",
@@ -3027,6 +3026,28 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "jms.FleetSummary",
+			},
+		},
+	},
+	{
+		Name:       "JmsjavadownloadsJavaDownloadToken",
+		SpecType:   reflect.TypeOf(jmsjavadownloadsv1beta1.JavaDownloadTokenSpec{}),
+		StatusType: reflect.TypeOf(jmsjavadownloadsv1beta1.JavaDownloadTokenStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "jmsjavadownloads.CreateJavaDownloadTokenDetails",
+			},
+			{
+				SDKStruct: "jmsjavadownloads.UpdateJavaDownloadTokenDetails",
+			},
+			{
+				SDKStruct: "jmsjavadownloads.JavaDownloadToken",
+			},
+			{
+				SDKStruct: "jmsjavadownloads.JavaDownloadTokenCollection",
+			},
+			{
+				SDKStruct: "jmsjavadownloads.JavaDownloadTokenSummary",
 			},
 		},
 	},
@@ -3784,8 +3805,6 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "opensearch.OpensearchClusterCollection",
-				Exclude:   true,
-				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
 			},
 			{
 				SDKStruct: "opensearch.OpensearchClusterSummary",
@@ -4335,8 +4354,6 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "redis.RedisClusterCollection",
-				Exclude:   true,
-				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
 			},
 			{
 				SDKStruct: "redis.RedisClusterSummary",
