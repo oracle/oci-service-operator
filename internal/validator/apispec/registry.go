@@ -78,6 +78,7 @@ import (
 	ocev1beta1 "github.com/oracle/oci-service-operator/api/oce/v1beta1"
 	ocvpv1beta1 "github.com/oracle/oci-service-operator/api/ocvp/v1beta1"
 	odav1beta1 "github.com/oracle/oci-service-operator/api/oda/v1beta1"
+	onesubscriptionv1beta1 "github.com/oracle/oci-service-operator/api/onesubscription/v1beta1"
 	onsv1beta1 "github.com/oracle/oci-service-operator/api/ons/v1beta1"
 	opav1beta1 "github.com/oracle/oci-service-operator/api/opa/v1beta1"
 	opensearchv1beta1 "github.com/oracle/oci-service-operator/api/opensearch/v1beta1"
@@ -3743,6 +3744,16 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "oce.OceInstanceSummary",
+			},
+		},
+	},
+	{
+		Name:       "OnesubscriptionSubscription",
+		SpecType:   reflect.TypeOf(onesubscriptionv1beta1.SubscriptionSpec{}),
+		StatusType: reflect.TypeOf(onesubscriptionv1beta1.SubscriptionStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "onesubscription.SubscriptionSummary",
 			},
 		},
 	},

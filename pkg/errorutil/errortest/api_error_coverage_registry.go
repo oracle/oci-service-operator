@@ -1011,6 +1011,21 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 			"Subscription",
 			"Topic",
 		),
+		map[string]APIErrorCoverageRegistration{
+			resourceKey("onesubscription", "Subscription"): {
+				Resource: APIErrorCoverageResource{
+					Service: "onesubscription",
+					Group:   "onesubscription",
+					Version: apiErrorCoverageDefaultVersion,
+					Kind:    "Subscription",
+				},
+				Family:                     APIErrorCoverageFamilyGeneratedRuntimePlain,
+				SupportedOperations:        []Operation{OperationRead},
+				DeleteNotFoundSemantics:    "delete is Kubernetes-local only; the published OneSubscription contract does not issue OCI delete requests",
+				RetryableConflictSemantics: "update and delete conflicts are not applicable because the published OneSubscription contract is query-backed and observe-only",
+				Deviation:                  "A handwritten runtime wrapper keeps ListSubscriptions as the only OCI call, validates compartmentId plus exactly one of planNumber/subscriptionId/buyerEmail, paginates until one summary remains, and intentionally leaves status.status.ocid empty because the top-level SubscriptionSummary exposes no truthful tracked identity.",
+			},
+		},
 		reviewedRegistrationSet(
 			"sch",
 			"sch",

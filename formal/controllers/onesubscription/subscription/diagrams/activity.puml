@@ -1,0 +1,121 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Activity - onesubscription/Subscription
+skinparam activity {
+  backgroundColor #f8fafc
+  borderColor #0f172a
+  fontColor #0f172a
+  diamondBackgroundColor #e2e8f0
+  diamondBorderColor #1d4ed8
+  diamondFontColor #0f172a
+  startColor #1d4ed8
+  endColor #0f172a
+  barColor #1d4ed8
+}
+start
+partition "Observe and Bind" {
+:Start from shared flow\nshared/diagrams/shared-reconcile-activity.svg;
+:Read desired Subscription spec, tracked\nstatus, and delete intent;
+if ("Tracked or explicit OCI identity present?") then (yes)
+:Use the tracked OCI identity for follow-up\nreconciliation;
+else (no)
+:Resolve an existing OCI resource through\nListSubscriptions using filters\ncompartment_id, plan_number, subscription_id,\nbuyer_email;
+:Persist the resolved or created OCI identity\ninto status;
+endif
+}
+if ("Delete requested?") then (yes)
+partition "Delete" {
+:Delete path is not represented by imported\nprovider facts;
+:Confirm deletion via ListSubscriptions until\nOCI reaches LOCAL_DELETE;
+:Allow best-effort completion without finalizer\nretention;
+}
+stop
+else (no)
+partition "Lifecycle Classification" {
+if ("OCI state is outside success targets?") then (yes)
+:Return an unsuccessful reconcile result until\nOCI reaches ACTIVE;
+stop
+endif
+}
+partition "Ready and Drift Handling" {
+:Compare live OCI state against the imported\nfield surface;
+if ("Force-new or conflicting drift detected?") then (yes)
+:Reject drift before OCI mutation for force-new\nfields compartment_id, plan_number,\nsubscription_id, buyer_email and conflicts\nbuyer_email -> plan_number, subscription_id,\nplan_number -> subscription_id, buyer_email,\nsubscription_id -> plan_number, buyer_email;
+stop
+endif
+:Enforce conflictsWith rules buyer_email ->\nplan_number, subscription_id, plan_number ->\nsubscription_id, buyer_email, subscription_id\n-> plan_number, buyer_email before any OCI\nmutation;
+:Return success for the ACTIVE success state;
+:Project required status and finalizer policy\nnone;
+:Requeue on provisioning, updating;
+:Keep promotion blocked on list-lookup;
+}
+endif
+stop
+note right
+shared diagram:
+shared/diagrams/shared-reconcile-activity.svg
+Start from the shared reconcile activity and
+specialize provider-backed CRUD, wait, and
+status-projection details here.
+Controller-local activity diagrams add
+list-lookup hints, secret policies, delete
+handling, and open formal gaps.
+archetype batch: Generated service-manager
+controllers specialize the shared reconcile path
+with formal runtime ownership.
+service: onesubscription
+slug: subscription
+kind: Subscription
+archetype: generated-service-manager
+status/finalizer: required / none
+requeue: provisioning, updating
+provider states: create none; update none;
+delete none
+supported drift: none
+reject before mutate: force-new fields
+compartment_id, plan_number, subscription_id,
+buyer_email and conflicts buyer_email ->
+plan_number, subscription_id, plan_number ->
+subscription_id, buyer_email, subscription_id ->
+plan_number, buyer_email
+create-only fields: none
+list lookup: oci_onesubscription_subscriptions
+filters compartment_id, plan_number,
+subscription_id, buyer_email
+conflicts: buyer_email -> plan_number,
+subscription_id, plan_number -> subscription_id,
+buyer_email, subscription_id -> plan_number,
+buyer_email
+open gaps: list-lookup
+The published Subscription contract is
+query-backed and observe-only. Reconcile issues
+ListSubscriptions with compartmentId plus
+exactly one of planNumber, subscriptionId, or
+buyerEmail, paginates every result page, and
+accepts only a single returned summary.
+SubscriptionSummary exposes no stable top-level
+OCID or reread path. The runtime therefore
+leaves status.status.ocid empty and records only
+the projected subscription summary fields on the
+CR.
+The raw subscription status is an untyped
+business-state string, not a typed OCI lifecycle
+enum. The runtime requeues only clearly
+transitional create-like and update-like tokens,
+treats FAIL/ERROR values as terminal failure,
+and settles all other values as observed
+success.
+Delete is CR-local unbind only. The controller
+releases Kubernetes control immediately and
+never calls an OCI delete helper because the
+pinned SDK exposes none.
+end note
+@enduml

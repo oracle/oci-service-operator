@@ -4448,6 +4448,97 @@ services:
         ConfirmSubscription:
           - ConfirmationResult
 
+  - service: onesubscription
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/onesubscription
+    group: onesubscription
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Subscription
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: Subscription
+          formalSpec: subscription
+          async:
+            strategy: none
+            runtime: generatedruntime
+            formalClassification: none
+          serviceManager:
+            packagePath: onesubscription/subscription
+          specFields:
+            - name: CompartmentId
+              type: string
+              tag: 'json:"compartmentId"'
+              comments:
+                - The compartment OCID required by ListSubscriptions.
+                - Provide exactly one of `planNumber`, `subscriptionId`, or `buyerEmail` with it.
+              markers:
+                - +kubebuilder:validation:Required
+            - name: PlanNumber
+              type: string
+              tag: 'json:"planNumber,omitempty"'
+              comments:
+                - Optional plan number filter for the observe-only subscription query.
+                - Exactly one of `planNumber`, `subscriptionId`, or `buyerEmail` must be set.
+              markers:
+                - +kubebuilder:validation:Optional
+            - name: SubscriptionId
+              type: string
+              tag: 'json:"subscriptionId,omitempty"'
+              comments:
+                - Optional subscription identifier filter for the observe-only subscription query.
+                - This scopes the list request, but it does not prove a gettable top-level OCI Subscription identity.
+              markers:
+                - +kubebuilder:validation:Optional
+            - name: BuyerEmail
+              type: string
+              tag: 'json:"buyerEmail,omitempty"'
+              comments:
+                - Optional buyer email filter for the observe-only subscription query.
+                - Exactly one of `planNumber`, `subscriptionId`, or `buyerEmail` must be set.
+              markers:
+                - +kubebuilder:validation:Optional
+            - name: IsCommitInfoRequired
+              type: bool
+              tag: 'json:"isCommitInfoRequired,omitempty"'
+              comments:
+                - Whether OCI should include commitment details in the returned subscription summary payload.
+              markers:
+                - +kubebuilder:validation:Optional
+          statusFields:
+            - name: Status
+              type: string
+              tag: 'json:"sdkStatus,omitempty"'
+              comments:
+                - The raw subscription status returned by OneSubscription.
+          sample:
+            body: |-
+              #
+              # Replace the compartment OCID and subscriptionId below before running e2e.
+              # This `onesubscription/Subscription` sample is observe-only and list-backed.
+              # Provide exactly one of planNumber, subscriptionId, or buyerEmail.
+              # The controller does not invent CRUD or a tracked OCI subscription OCID for the top-level summary.
+              #
+              apiVersion: onesubscription.oracle.com/v1beta1
+              kind: Subscription
+              metadata:
+                name: onesubscription-subscription-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                subscriptionId: example-line-subscription-id
+
   - service: opa
     sdkPackage: github.com/oracle/oci-go-sdk/v65/opa
     group: opa

@@ -1196,6 +1196,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"oda",
 		"opensearch",
 		"ons",
+		"onesubscription",
 		"opa",
 		"psa",
 		"psql",
@@ -1309,6 +1310,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"oda",
 		"opensearch",
 		"ons",
+		"onesubscription",
 		"opa",
 		"psa",
 		"psql",
@@ -1414,9 +1416,10 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	assertServiceSelection(t, services["oce"], true, SelectionModeExplicit, []string{"OceInstance"})
 	assertServiceSelection(t, services["ocvp"], true, SelectionModeExplicit, []string{"Cluster", "EsxiHost", "Sddc"})
 	assertServiceSelection(t, services["oda"], true, SelectionModeExplicit, []string{"AuthenticationProvider", "Channel", "DigitalAssistant", "ImportedPackage", "OdaInstance", "OdaInstanceAttachment", "OdaPrivateEndpoint", "OdaPrivateEndpointAttachment", "OdaPrivateEndpointScanProxy", "Skill", "SkillParameter", "Translator"})
-	assertServiceSelection(t, services["opa"], true, SelectionModeExplicit, []string{"OpaInstance"})
 	assertServiceSelection(t, services["opensearch"], true, SelectionModeExplicit, []string{"OpensearchCluster"})
 	assertServiceSelection(t, services["ons"], true, SelectionModeExplicit, []string{"Subscription", "Topic"})
+	assertServiceSelection(t, services["onesubscription"], true, SelectionModeExplicit, []string{"Subscription"})
+	assertServiceSelection(t, services["opa"], true, SelectionModeExplicit, []string{"OpaInstance"})
 	assertServiceSelection(t, services["psa"], true, SelectionModeExplicit, []string{"PrivateServiceAccess"})
 	assertServiceSelection(t, services["psql"], true, SelectionModeExplicit, []string{"DbSystem"})
 	assertServiceSelection(t, services["queue"], true, SelectionModeExplicit, []string{"Queue"})
@@ -2217,9 +2220,10 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 		"oce":                         {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
 		"ocvp":                        {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"oda":                         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"opa":                         {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
 		"opensearch":                  {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"ons":                         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"onesubscription":             {strategy: AsyncStrategyNone, runtime: AsyncRuntimeGeneratedRuntime},
+		"opa":                         {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
 		"psa":                         {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
 		"psql":                        {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeHandwritten},
 		"queue":                       {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
