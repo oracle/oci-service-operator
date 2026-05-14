@@ -621,6 +621,21 @@ packages:
         kind: KnowledgeBase
         summary: Manage OCI Generative AI Agent knowledge bases.
 
+  - package: generativeaiagentruntime
+    displayName: Generative AI Agent Runtime
+    summary: Manage OCI Generative AI Agent Runtime sessions from Kubernetes with a reviewed synchronous controller-backed runtime.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to Session while Chat and the broader conversational, retrieval, and trace helper families stay unpublished.
+      - The published runtime keeps explicit `agentEndpointId + sessionId` path identity, uses synchronous read-after-write follow-up semantics, and does not invent list-based bind or search behavior because the SDK exposes no `ListSessions` operation.
+      - The published package keeps `generativeaiagentruntime/Session` explicitly distinct from the existing `bastion/Session` rollout in docs, catalog metadata, and formal/runtime surfaces.
+    kindOverrides:
+      - group: generativeaiagentruntime
+        kind: Session
+        summary: Manage OCI Generative AI Agent Runtime sessions.
+
   - package: generativeaidata
     displayName: Generative AI Data
     summary: Manage OCI Generative AI Data enrichment jobs from Kubernetes with a reviewed job-shaped runtime contract.

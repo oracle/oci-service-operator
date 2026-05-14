@@ -255,4 +255,5 @@ resources:
 - onesubscription_v1beta1_subscription.yaml
 - jmsjavadownloads_v1beta1_javadownloadtoken.yaml
 - osubsubscription_v1beta1_subscription.yaml
+- generativeaiagentruntime_v1beta1_session.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

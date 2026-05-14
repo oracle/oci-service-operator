@@ -1,16 +1,16 @@
 {
   "aggregate": {
-    "specs": 250,
-    "mappings": 1051,
-    "trackedMappings": 1050,
+    "specs": 251,
+    "mappings": 1054,
+    "trackedMappings": 1053,
     "untrackedMappings": 1,
-    "presentFields": 10422,
+    "presentFields": 10432,
     "missingFields": 198,
-    "mandatoryPresentFields": 3737,
+    "mandatoryPresentFields": 3739,
     "mandatoryMissingFields": 157,
-    "extraSpecFields": 876,
-    "overallCoveragePercent": 98.13559322033898,
-    "mandatoryCoveragePercent": 95.96815613764767
+    "extraSpecFields": 878,
+    "overallCoveragePercent": 98.137347130762,
+    "mandatoryCoveragePercent": 95.97022587268994
   },
   "services": [
     {
@@ -614,6 +614,20 @@
       "extraSpecFields": 2,
       "overallCoveragePercent": 97.5,
       "mandatoryCoveragePercent": 92.85714285714286
+    },
+    {
+      "service": "generativeaiagentruntime",
+      "specs": 1,
+      "mappings": 3,
+      "trackedMappings": 3,
+      "untrackedMappings": 0,
+      "presentFields": 10,
+      "missingFields": 0,
+      "mandatoryPresentFields": 2,
+      "mandatoryMissingFields": 0,
+      "extraSpecFields": 2,
+      "overallCoveragePercent": 100,
+      "mandatoryCoveragePercent": 100
     },
     {
       "service": "generativeaidata",

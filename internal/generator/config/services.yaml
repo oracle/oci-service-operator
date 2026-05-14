@@ -3054,6 +3054,69 @@ services:
           serviceManager:
             strategy: none
 
+  - service: generativeaiagentruntime
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/generativeaiagentruntime
+    group: generativeaiagentruntime
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Session
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: Session
+          formalSpec: session
+          async:
+            strategy: none
+            runtime: generatedruntime
+            formalClassification: none
+          specFields:
+            - name: AgentEndpointId
+              type: string
+              tag: 'json:"agentEndpointId"'
+              comments:
+                - The OCID of the agent endpoint that scopes this session.
+                - Required for create, reread, update, and delete requests.
+              markers:
+                - +kubebuilder:validation:Required
+          statusFields:
+            - name: AgentEndpointId
+              type: string
+              tag: 'json:"agentEndpointId,omitempty"'
+              comments:
+                - The bound agent endpoint ID used to address this session.
+            - name: SessionId
+              type: string
+              tag: 'json:"sessionId,omitempty"'
+              comments:
+                - The bound session identifier used together with agentEndpointId for reread, update, and delete requests.
+          sample:
+            body: |-
+              #
+              # Replace the agentEndpointId below before running e2e.
+              # This rollout always creates a new session and then records the returned
+              # sessionId in status for subsequent read, update, and delete calls.
+              #
+              apiVersion: generativeaiagentruntime.oracle.com/v1beta1
+              kind: Session
+              metadata:
+                name: session-sample
+              spec:
+                agentEndpointId: ocid1.generativeaiagentendpoint.oc1..exampleuniqueID
+                displayName: osok-generativeaiagentruntime-session-sample
+                description: OSOK Generative AI Agent Runtime Session sample
+
   - service: healthchecks
     sdkPackage: github.com/oracle/oci-go-sdk/v65/healthchecks
     group: healthchecks
