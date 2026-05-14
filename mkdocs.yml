@@ -207,6 +207,7 @@ nav:
           - oce.oracle.com/v1beta1: reference/api/oce/v1beta1/index.md
           - ocvp.oracle.com/v1beta1: reference/api/ocvp/v1beta1/index.md
           - oda.oracle.com/v1beta1: reference/api/oda/v1beta1/index.md
+          - onesubscription.oracle.com/v1beta1: reference/api/onesubscription/v1beta1/index.md
           - ons.oracle.com/v1beta1: reference/api/ons/v1beta1/index.md
           - opa.oracle.com/v1beta1: reference/api/opa/v1beta1/index.md
           - opensearch.oracle.com/v1beta1: reference/api/opensearch/v1beta1/index.md

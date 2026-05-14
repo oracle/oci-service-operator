@@ -79,6 +79,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/oce"
 	"github.com/oracle/oci-go-sdk/v65/ocvp"
 	"github.com/oracle/oci-go-sdk/v65/oda"
+	"github.com/oracle/oci-go-sdk/v65/onesubscription"
 	"github.com/oracle/oci-go-sdk/v65/ons"
 	"github.com/oracle/oci-go-sdk/v65/opa"
 	"github.com/oracle/oci-go-sdk/v65/opensearch"
@@ -1033,6 +1034,9 @@ var seedTargets = []Target{
 	newTarget("oce", "UpdateOceInstanceDetails", reflect.TypeOf(oce.UpdateOceInstanceDetails{})),
 	newTarget("oce", "OceInstance", reflect.TypeOf(oce.OceInstance{})),
 	newTarget("oce", "OceInstanceSummary", reflect.TypeOf(oce.OceInstanceSummary{})),
+
+	// Onesubscription CRD support
+	newTarget("onesubscription", "SubscriptionSummary", reflect.TypeOf(onesubscription.SubscriptionSummary{})),
 
 	// Opa CRD support
 	newTarget("opa", "CreateOpaInstanceDetails", reflect.TypeOf(opa.CreateOpaInstanceDetails{})),

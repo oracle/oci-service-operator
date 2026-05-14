@@ -1,0 +1,16 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: onesubscription
+slug: subscription
+kind: Subscription
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - failed
+notes:
+  - "The published Subscription contract is query-backed and observe-only. Reconcile issues ListSubscriptions with compartmentId plus exactly one of planNumber, subscriptionId, or buyerEmail, paginates every result page, and accepts only a single returned summary."
+  - "SubscriptionSummary exposes no stable top-level OCID or reread path. The runtime therefore leaves status.status.ocid empty and records only the projected subscription summary fields on the CR."
+  - "The raw subscription status is an untyped business-state string, not a typed OCI lifecycle enum. The runtime requeues only clearly transitional create-like and update-like tokens, treats FAIL/ERROR values as terminal failure, and settles all other values as observed success."
+  - "Delete is CR-local unbind only. The controller releases Kubernetes control immediately and never calls an OCI delete helper because the pinned SDK exposes none."
