@@ -46,6 +46,7 @@ import (
 	gdpv1beta1 "github.com/oracle/oci-service-operator/api/gdp/v1beta1"
 	generativeaiv1beta1 "github.com/oracle/oci-service-operator/api/generativeai/v1beta1"
 	generativeaiagentv1beta1 "github.com/oracle/oci-service-operator/api/generativeaiagent/v1beta1"
+	generativeaiagentruntimev1beta1 "github.com/oracle/oci-service-operator/api/generativeaiagentruntime/v1beta1"
 	generativeaidatav1beta1 "github.com/oracle/oci-service-operator/api/generativeaidata/v1beta1"
 	governancerulescontrolplanev1beta1 "github.com/oracle/oci-service-operator/api/governancerulescontrolplane/v1beta1"
 	healthchecksv1beta1 "github.com/oracle/oci-service-operator/api/healthchecks/v1beta1"
@@ -53,6 +54,7 @@ import (
 	integrationv1beta1 "github.com/oracle/oci-service-operator/api/integration/v1beta1"
 	iotv1beta1 "github.com/oracle/oci-service-operator/api/iot/v1beta1"
 	jmsv1beta1 "github.com/oracle/oci-service-operator/api/jms/v1beta1"
+	jmsjavadownloadsv1beta1 "github.com/oracle/oci-service-operator/api/jmsjavadownloads/v1beta1"
 	keymanagementv1beta1 "github.com/oracle/oci-service-operator/api/keymanagement/v1beta1"
 	licensemanagerv1beta1 "github.com/oracle/oci-service-operator/api/licensemanager/v1beta1"
 	limitsv1beta1 "github.com/oracle/oci-service-operator/api/limits/v1beta1"
@@ -86,6 +88,7 @@ import (
 	opsiv1beta1 "github.com/oracle/oci-service-operator/api/opsi/v1beta1"
 	optimizerv1beta1 "github.com/oracle/oci-service-operator/api/optimizer/v1beta1"
 	osmanagementhubv1beta1 "github.com/oracle/oci-service-operator/api/osmanagementhub/v1beta1"
+	osubsubscriptionv1beta1 "github.com/oracle/oci-service-operator/api/osubsubscription/v1beta1"
 	psav1beta1 "github.com/oracle/oci-service-operator/api/psa/v1beta1"
 	psqlv1beta1 "github.com/oracle/oci-service-operator/api/psql/v1beta1"
 	queuev1beta1 "github.com/oracle/oci-service-operator/api/queue/v1beta1"
@@ -2764,6 +2767,22 @@ var targets = []Target{
 		},
 	},
 	{
+		Name:       "GenerativeaiagentruntimeSession",
+		SpecType:   reflect.TypeOf(generativeaiagentruntimev1beta1.SessionSpec{}),
+		StatusType: reflect.TypeOf(generativeaiagentruntimev1beta1.SessionStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "generativeaiagentruntime.CreateSessionDetails",
+			},
+			{
+				SDKStruct: "generativeaiagentruntime.UpdateSessionDetails",
+			},
+			{
+				SDKStruct: "generativeaiagentruntime.Session",
+			},
+		},
+	},
+	{
 		Name:       "GenerativeaidataEnrichmentJob",
 		SpecType:   reflect.TypeOf(generativeaidatav1beta1.EnrichmentJobSpec{}),
 		StatusType: reflect.TypeOf(generativeaidatav1beta1.EnrichmentJobStatus{}),
@@ -3028,6 +3047,28 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "jms.FleetSummary",
+			},
+		},
+	},
+	{
+		Name:       "JmsjavadownloadsJavaDownloadToken",
+		SpecType:   reflect.TypeOf(jmsjavadownloadsv1beta1.JavaDownloadTokenSpec{}),
+		StatusType: reflect.TypeOf(jmsjavadownloadsv1beta1.JavaDownloadTokenStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "jmsjavadownloads.CreateJavaDownloadTokenDetails",
+			},
+			{
+				SDKStruct: "jmsjavadownloads.UpdateJavaDownloadTokenDetails",
+			},
+			{
+				SDKStruct: "jmsjavadownloads.JavaDownloadToken",
+			},
+			{
+				SDKStruct: "jmsjavadownloads.JavaDownloadTokenCollection",
+			},
+			{
+				SDKStruct: "jmsjavadownloads.JavaDownloadTokenSummary",
 			},
 		},
 	},
@@ -4236,6 +4277,16 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "osmanagementhub.SoftwareSourceCollection",
+			},
+		},
+	},
+	{
+		Name:       "OsubsubscriptionSubscription",
+		SpecType:   reflect.TypeOf(osubsubscriptionv1beta1.SubscriptionSpec{}),
+		StatusType: reflect.TypeOf(osubsubscriptionv1beta1.SubscriptionStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "osubsubscription.SubscriptionSummary",
 			},
 		},
 	},

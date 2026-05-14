@@ -774,6 +774,16 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 				retryableConflictWorkRequest,
 				"Fleet runtime persists create, update, and delete work-request IDs in shared async status, recovers the Fleet OCID from work-request resources, bounds pre-create reuse to exact compartmentId plus displayName matches in ACTIVE, CREATING, UPDATING, or NEEDS_ATTENTION, and leaves ChangeFleetCompartment out of scope while inventoryLog stays required.",
 			),
+			resourceKey("jmsjavadownloads", "JavaDownloadToken"): reviewedRegistration(
+				"jmsjavadownloads",
+				"jmsjavadownloads",
+				apiErrorCoverageDefaultVersion,
+				"JavaDownloadToken",
+				APIErrorCoverageFamilyGeneratedRuntimeWorkRequest,
+				deleteNotFoundReadback,
+				retryableConflictWorkRequest,
+				"JavaDownloadToken runtime persists create, update, and delete work-request IDs in shared async status, recovers the token OCID from work-request resources, bounds pre-create reuse to exact compartmentId plus displayName matches, and intentionally omits the sensitive token value from status and generic bind matching.",
+			),
 			resourceKey("redis", "RedisCluster"): reviewedRegistration(
 				"redis",
 				"redis",
@@ -845,6 +855,16 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 				deleteNotFoundReadback,
 				retryableConflictWorkRequest,
 				"Agent runtime persists create, update, and delete work-request IDs in shared async status, prefers create response-body identity when OCI returns it, recovers the OCID from work-request resources otherwise, bounds pre-create reuse to exact compartmentId plus displayName matches, and rebuilds llmConfig selections into concrete SDK request bodies while keeping ChangeAgentCompartment out of the published surface.",
+			),
+			resourceKey("generativeaiagentruntime", "Session"): reviewedRegistration(
+				"generativeaiagentruntime",
+				"generativeaiagentruntime",
+				apiErrorCoverageDefaultVersion,
+				"Session",
+				APIErrorCoverageFamilyGeneratedRuntimePlain,
+				deleteNotFoundGeneratedRuntime,
+				retryableConflictGeneratedRuntime,
+				"Session keeps generatedruntime create/update/delete and confirm-delete handling, while a handwritten hook layer builds the nested CreateSessionDetails and UpdateSessionDetails bodies, records explicit status.agentEndpointId plus status.sessionId path identity, and settles synchronous create and update rereads as Active because the SDK exposes no lifecycle or work-request surface.",
 			),
 			resourceKey("generativeaidata", "EnrichmentJob"): {
 				Resource: APIErrorCoverageResource{
@@ -1000,6 +1020,21 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 			"Listener",
 			"NetworkLoadBalancer",
 		),
+		map[string]APIErrorCoverageRegistration{
+			resourceKey("osubsubscription", "Subscription"): {
+				Resource: APIErrorCoverageResource{
+					Service: "osubsubscription",
+					Group:   "osubsubscription",
+					Version: apiErrorCoverageDefaultVersion,
+					Kind:    "Subscription",
+				},
+				Family:                     APIErrorCoverageFamilyGeneratedRuntimePlain,
+				SupportedOperations:        []Operation{OperationRead},
+				DeleteNotFoundSemantics:    "delete is Kubernetes-local only; the published OSubscription Subscription contract does not issue OCI delete requests",
+				RetryableConflictSemantics: "update and delete conflicts are not applicable because the published OSubscription Subscription contract is observe-only",
+				Deviation:                  "A package-local runtime wrapper validates the exactly-one selector query, passes x-one-gateway-subscription-id plus x-one-origin-region when set, projects selector fields back into ListSubscriptions items for unique matching, and releases the Kubernetes finalizer locally without inventing a top-level OCI identity.",
+			},
+		},
 		reviewedRegistrationSet(
 			"ons",
 			"ons",

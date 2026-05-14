@@ -86,6 +86,7 @@ resources:
 - bases/generativeai.oracle.com_models.yaml
 - bases/generativeaiagent.oracle.com_agents.yaml
 - bases/generativeaiagent.oracle.com_knowledgebases.yaml
+- bases/generativeaiagentruntime.oracle.com_sessions.yaml
 - bases/generativeaidata.oracle.com_enrichmentjobs.yaml
 - bases/governancerulescontrolplane.oracle.com_governancerules.yaml
 - bases/governancerulescontrolplane.oracle.com_inclusioncriteria.yaml
@@ -100,6 +101,7 @@ resources:
 - bases/iot.oracle.com_iotdomaingroups.yaml
 - bases/iot.oracle.com_iotdomains.yaml
 - bases/jms.oracle.com_fleets.yaml
+- bases/jmsjavadownloads.oracle.com_javadownloadtokens.yaml
 - bases/keymanagement.oracle.com_ekmsprivateendpoints.yaml
 - bases/keymanagement.oracle.com_vaults.yaml
 - bases/licensemanager.oracle.com_licenserecords.yaml
@@ -206,6 +208,7 @@ resources:
 - bases/osmanagementhub.oracle.com_profiles.yaml
 - bases/osmanagementhub.oracle.com_scheduledjobs.yaml
 - bases/osmanagementhub.oracle.com_softwaresources.yaml
+- bases/osubsubscription.oracle.com_subscriptions.yaml
 - bases/psa.oracle.com_privateserviceaccesses.yaml
 - bases/psql.oracle.com_dbsystems.yaml
 - bases/queue.oracle.com_queues.yaml
