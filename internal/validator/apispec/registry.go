@@ -85,6 +85,7 @@ import (
 	opsiv1beta1 "github.com/oracle/oci-service-operator/api/opsi/v1beta1"
 	optimizerv1beta1 "github.com/oracle/oci-service-operator/api/optimizer/v1beta1"
 	osmanagementhubv1beta1 "github.com/oracle/oci-service-operator/api/osmanagementhub/v1beta1"
+	osubsubscriptionv1beta1 "github.com/oracle/oci-service-operator/api/osubsubscription/v1beta1"
 	psav1beta1 "github.com/oracle/oci-service-operator/api/psa/v1beta1"
 	psqlv1beta1 "github.com/oracle/oci-service-operator/api/psql/v1beta1"
 	queuev1beta1 "github.com/oracle/oci-service-operator/api/queue/v1beta1"
@@ -4225,6 +4226,16 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "osmanagementhub.SoftwareSourceCollection",
+			},
+		},
+	},
+	{
+		Name:       "OsubsubscriptionSubscription",
+		SpecType:   reflect.TypeOf(osubsubscriptionv1beta1.SubscriptionSpec{}),
+		StatusType: reflect.TypeOf(osubsubscriptionv1beta1.SubscriptionStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "osubsubscription.SubscriptionSummary",
 			},
 		},
 	},

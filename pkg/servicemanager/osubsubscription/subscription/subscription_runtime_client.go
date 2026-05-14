@@ -212,10 +212,15 @@ func (c subscriptionLifecycleClient) CreateOrUpdate(
 }
 
 func (c subscriptionLifecycleClient) Delete(
-	ctx context.Context,
+	_ context.Context,
 	resource *osubsubscriptionv1beta1.Subscription,
 ) (bool, error) {
-	return c.delegate.Delete(ctx, resource)
+	if resource == nil {
+		return false, fmt.Errorf("Subscription resource must not be nil")
+	}
+
+	markSubscriptionDeleted(resource, c.log)
+	return true, nil
 }
 
 func subscriptionReadFields() []generatedruntime.RequestField {
@@ -385,6 +390,22 @@ func applySubscriptionObservedLifecycle(
 	return servicemanager.OSOKResponse{IsSuccessful: true}, nil
 }
 
+func markSubscriptionDeleted(
+	resource *osubsubscriptionv1beta1.Subscription,
+	log loggerutil.OSOKLogger,
+) {
+	status := &resource.Status.OsokStatus
+	servicemanager.ClearAsyncOperation(status)
+
+	now := metav1.Now()
+	status.DeletedAt = &now
+	status.UpdatedAt = &now
+	status.Ocid = ""
+	status.Message = subscriptionDeleteMessage(resource)
+	status.Reason = string(shared.Terminating)
+	*status = util.UpdateOSOKStatusCondition(*status, shared.Terminating, corev1.ConditionTrue, "", status.Message, log)
+}
+
 func dropSubscriptionStaleConditions(
 	status shared.OSOKStatus,
 	current shared.OSOKConditionType,
@@ -408,6 +429,19 @@ func dropSubscriptionStaleConditions(
 	}
 	status.Conditions = conditions
 	return status
+}
+
+func subscriptionDeleteMessage(resource *osubsubscriptionv1beta1.Subscription) string {
+	selector := firstNonEmptyTrim(
+		resource.Status.ServiceName,
+		resource.Spec.SubscriptionId,
+		resource.Spec.PlanNumber,
+		resource.Spec.BuyerEmail,
+	)
+	if selector == "" {
+		selector = "Subscription"
+	}
+	return fmt.Sprintf("%s was released from Kubernetes control", selector)
 }
 
 func listSubscriptionsAllPages(
@@ -465,4 +499,13 @@ func stringPtrValue(value *string) string {
 		return ""
 	}
 	return strings.TrimSpace(*value)
+}
+
+func firstNonEmptyTrim(values ...string) string {
+	for _, value := range values {
+		if trimmed := strings.TrimSpace(value); trimmed != "" {
+			return trimmed
+		}
+	}
+	return ""
 }

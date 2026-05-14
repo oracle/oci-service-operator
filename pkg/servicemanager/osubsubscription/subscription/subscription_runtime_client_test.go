@@ -209,6 +209,45 @@ func TestSubscriptionCreateOrUpdateFailsOnAmbiguousListMatch(t *testing.T) {
 	}
 }
 
+func TestSubscriptionDeleteIsKubernetesLocalOnly(t *testing.T) {
+	t.Parallel()
+
+	client := &fakeSubscriptionOCIClient{
+		listFn: func(_ context.Context, request osubsubscriptionsdk.ListSubscriptionsRequest) (osubsubscriptionsdk.ListSubscriptionsResponse, error) {
+			t.Fatalf("ListSubscriptions(%#v) should not be called during Kubernetes-local delete", request)
+			return osubsubscriptionsdk.ListSubscriptionsResponse{}, nil
+		},
+	}
+
+	resource := &osubsubscriptionv1beta1.Subscription{
+		Spec: osubsubscriptionv1beta1.SubscriptionSpec{
+			CompartmentId:  "ocid1.compartment.oc1..test",
+			SubscriptionId: "line-subscription-id",
+		},
+	}
+	resource.Status.ServiceName = "Oracle Analytics"
+
+	deleted, err := newSubscriptionServiceClientWithOCIClient(loggerutil.OSOKLogger{}, client).Delete(context.Background(), resource)
+	if err != nil {
+		t.Fatalf("Delete() error = %v", err)
+	}
+	if !deleted {
+		t.Fatal("Delete() deleted = false, want true for local finalizer cleanup")
+	}
+	if resource.Status.OsokStatus.DeletedAt == nil {
+		t.Fatal("status.deletedAt = nil, want timestamp after local delete")
+	}
+	if got := resource.Status.OsokStatus.Message; !strings.Contains(got, "released from Kubernetes control") {
+		t.Fatalf("status.message = %q, want local delete note", got)
+	}
+	if got := string(resource.Status.OsokStatus.Ocid); got != "" {
+		t.Fatalf("status.status.ocid = %q, want empty for local delete", got)
+	}
+	if got := lastConditionType(t, resource); got != string(shared.Terminating) {
+		t.Fatalf("last condition type = %q, want %q", got, shared.Terminating)
+	}
+}
+
 func requireStringPtr(t *testing.T, label string, value *string, want string) {
 	t.Helper()
 	if value == nil {
@@ -227,4 +266,13 @@ func requireBoolPtr(t *testing.T, label string, value *bool, want bool) {
 	if *value != want {
 		t.Fatalf("%s = %t, want %t", label, *value, want)
 	}
+}
+
+func lastConditionType(t *testing.T, resource *osubsubscriptionv1beta1.Subscription) string {
+	t.Helper()
+	conditions := resource.Status.OsokStatus.Conditions
+	if len(conditions) == 0 {
+		t.Fatal("status.conditions = empty, want at least one condition")
+	}
+	return string(conditions[len(conditions)-1].Type)
 }

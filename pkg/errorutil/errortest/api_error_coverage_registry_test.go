@@ -14,10 +14,10 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	}
 
 	byKey := inventoryByKey(inventory)
-	if got, want := len(inventory), 370; got != want {
+	if got, want := len(inventory), 371; got != want {
 		t.Fatalf("len(inventory) = %d, want %d", got, want)
 	}
-	if got, want := countRegistrations(inventory), 247; got != want {
+	if got, want := countRegistrations(inventory), 248; got != want {
 		t.Fatalf("registration inventory count = %d, want %d", got, want)
 	}
 	if got, want := countExceptions(inventory), 123; got != want {
@@ -72,6 +72,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventorySelectionSource(t, byKey, "mngdmac/MacOrder", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "oda/Skill", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "opa/OpaInstance", "selection.includeKinds")
+	assertInventorySelectionSource(t, byKey, "osubsubscription/Subscription", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "psa/PrivateServiceAccess", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "queue/Queue", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "rover/RoverCluster", "selection.includeKinds")
@@ -168,6 +169,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventoryRegistration(t, byKey, "ocvp/Cluster")
 	assertInventoryRegistration(t, byKey, "oda/Skill")
 	assertInventoryRegistration(t, byKey, "opa/OpaInstance")
+	assertInventoryRegistration(t, byKey, "osubsubscription/Subscription")
 	assertInventoryException(t, byKey, "opa/WorkRequest", `controller.strategy="none"`)
 	assertInventoryException(t, byKey, "opa/WorkRequestError", `controller.strategy="none"`)
 	assertInventoryException(t, byKey, "opa/WorkRequestLog", `controller.strategy="none"`)
@@ -257,6 +259,7 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedFamily(t, "oda/Skill", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "opa/OpaInstance", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "objectstorage/Bucket", APIErrorCoverageFamilyGeneratedRuntimePlain)
+	assertReviewedFamily(t, "osubsubscription/Subscription", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "psa/PrivateServiceAccess", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "self/Subscription", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "psql/DbSystem", APIErrorCoverageFamilyLegacyAdapter)

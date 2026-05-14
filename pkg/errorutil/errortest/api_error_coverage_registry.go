@@ -1000,6 +1000,21 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 			"Listener",
 			"NetworkLoadBalancer",
 		),
+		map[string]APIErrorCoverageRegistration{
+			resourceKey("osubsubscription", "Subscription"): {
+				Resource: APIErrorCoverageResource{
+					Service: "osubsubscription",
+					Group:   "osubsubscription",
+					Version: apiErrorCoverageDefaultVersion,
+					Kind:    "Subscription",
+				},
+				Family:                     APIErrorCoverageFamilyGeneratedRuntimePlain,
+				SupportedOperations:        []Operation{OperationRead},
+				DeleteNotFoundSemantics:    "delete is Kubernetes-local only; the published OSubscription Subscription contract does not issue OCI delete requests",
+				RetryableConflictSemantics: "update and delete conflicts are not applicable because the published OSubscription Subscription contract is observe-only",
+				Deviation:                  "A package-local runtime wrapper validates the exactly-one selector query, passes x-one-gateway-subscription-id plus x-one-origin-region when set, projects selector fields back into ListSubscriptions items for unique matching, and releases the Kubernetes finalizer locally without inventing a top-level OCI identity.",
+			},
+		},
 		reviewedRegistrationSet(
 			"ons",
 			"ons",
