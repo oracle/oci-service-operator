@@ -214,6 +214,7 @@ nav:
           - opsi.oracle.com/v1beta1: reference/api/opsi/v1beta1/index.md
           - optimizer.oracle.com/v1beta1: reference/api/optimizer/v1beta1/index.md
           - osmanagementhub.oracle.com/v1beta1: reference/api/osmanagementhub/v1beta1/index.md
+          - osubsubscription.oracle.com/v1beta1: reference/api/osubsubscription/v1beta1/index.md
           - psa.oracle.com/v1beta1: reference/api/psa/v1beta1/index.md
           - psql.oracle.com/v1beta1: reference/api/psql/v1beta1/index.md
           - queue.oracle.com/v1beta1: reference/api/queue/v1beta1/index.md

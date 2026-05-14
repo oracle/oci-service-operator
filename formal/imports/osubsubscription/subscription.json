@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "osubsubscription",
+  "slug": "subscription",
+  "kind": "Subscription",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_osubsubscription_subscription",
+  "operations": {
+    "create": [],
+    "get": [],
+    "list": [
+      {
+        "operation": "ListSubscriptions",
+        "requestType": "osubsubscription.ListSubscriptionsRequest",
+        "responseType": "osubsubscription.ListSubscriptionsResponse"
+      }
+    ],
+    "update": [],
+    "delete": []
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [],
+    "forceNew": [
+      "compartment_id",
+      "plan_number",
+      "subscription_id",
+      "buyer_email",
+      "is_commit_info_required",
+      "sort_order",
+      "sort_by",
+      "x_one_gateway_subscription_id",
+      "x_one_origin_region"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [],
+    "update": [],
+    "delete": []
+  },
+  "deleteConfirmation": {
+    "pending": [],
+    "target": [
+      "LOCAL_DELETE"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_osubsubscription_subscriptions",
+    "collectionField": "subscriptions",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "plan_number",
+      "subscription_id",
+      "buyer_email"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/osubsubscription/subscription/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/osubsubscription/subscription/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "list-lookup",
+      "status-projection",
+      "lifecycle-classification",
+      "delete-confirmation",
+      "shared-surface-qualification"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: OSubscription exposes ListSubscriptions only for Subscription in v65.110.0. The request requires compartmentId plus exactly one of planNumber, subscriptionId, or buyerEmail, and the response body is []SubscriptionSummary.",
+    "Pinned provider coverage is unconfirmed. formal/sources.lock still points at github.com/oracle/terraform-provider-oci@eb653febb1bab4cc6650a96d404a8baf36fdf671, but the accessible provider inventory did not expose a matching OSubscription Subscription resource or data source. The providerResource and datasource names therefore stay provisional OCI-style placeholders so generator-owned registry artifacts can derive stable links without claiming verified provider coverage.",
+    "Repo-authored runtime is narrower than the visible SDK surface: the published kind is query-backed and observe-only, keeps create/update/delete/get out of scope, and projects a unique list match only when the selector query returns exactly one SubscriptionSummary.",
+    "SubscriptionSummary does not expose a clean top-level OCID or the request filter fields. The current rollout therefore leaves status.status.ocid empty, mirrors the raw sdkStatus string, and documents the identity and lifecycle taxonomy gaps explicitly in repo-authored formal metadata.",
+    "The list request also exposes x-one-gateway-subscription-id and x-one-origin-region headers. The published runtime surfaces those request knobs explicitly in spec so callers can satisfy access requirements without silently dropping the headers.",
+    "The osubsubscription/Subscription rollout must remain explicitly group-qualified and distinct from self/Subscription and ons/Subscription across formal, docs, package, and catalog surfaces."
+  ]
+}

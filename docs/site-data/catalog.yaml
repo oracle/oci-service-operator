@@ -1026,6 +1026,21 @@ packages:
     customerVisible: false
     guidePath: docs/installation.md
 
+  - package: osubsubscription
+    displayName: OSubscription
+    summary: Observe existing OCI OSubscription subscription summaries from Kubernetes with a query-backed, controller-backed read-only contract.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to Subscription and publishes only a query-backed observe-only contract.
+      - The reviewed runtime uses ListSubscriptions only, requires compartmentId plus exactly one of planNumber, subscriptionId, or buyerEmail, and surfaces xOneGatewaySubscriptionId plus xOneOriginRegion when request-scoped access headers are needed.
+      - The top-level SubscriptionSummary does not expose a tracked OCI identity, so the runtime accepts only a unique list match and intentionally leaves `status.status.ocid` empty.
+    kindOverrides:
+      - group: osubsubscription
+        kind: Subscription
+        summary: Observe existing OCI OSubscription subscription summaries.
+
   - package: psa
     displayName: Private Service Access
     summary: Manage OCI Private Service Access resources from Kubernetes.

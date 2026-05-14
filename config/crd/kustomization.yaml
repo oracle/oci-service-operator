@@ -205,6 +205,7 @@ resources:
 - bases/osmanagementhub.oracle.com_profiles.yaml
 - bases/osmanagementhub.oracle.com_scheduledjobs.yaml
 - bases/osmanagementhub.oracle.com_softwaresources.yaml
+- bases/osubsubscription.oracle.com_subscriptions.yaml
 - bases/psa.oracle.com_privateserviceaccesses.yaml
 - bases/psql.oracle.com_dbsystems.yaml
 - bases/queue.oracle.com_queues.yaml

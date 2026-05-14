@@ -2452,6 +2452,35 @@ rules:
   - patch
   - update
 - apiGroups:
+  - osubsubscription.oracle.com
+  - self.oracle.com
+  resources:
+  - subscriptions
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - osubsubscription.oracle.com
+  - self.oracle.com
+  resources:
+  - subscriptions/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - osubsubscription.oracle.com
+  - self.oracle.com
+  resources:
+  - subscriptions/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - psa.oracle.com
   resources:
   - privateserviceaccesses
@@ -2699,32 +2728,6 @@ rules:
   resources:
   - securityattributenamespaces/status
   - securityattributes/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - self.oracle.com
-  resources:
-  - subscriptions
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - self.oracle.com
-  resources:
-  - subscriptions/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - self.oracle.com
-  resources:
-  - subscriptions/status
   verbs:
   - get
   - patch
