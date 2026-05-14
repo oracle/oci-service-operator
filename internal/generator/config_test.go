@@ -1174,6 +1174,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"generativeai",
 		"generativeaidata",
 		"generativeaiagent",
+		"generativeaiagentruntime",
 		"healthchecks",
 		"identity",
 		"integration",
@@ -1288,6 +1289,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"generativeai",
 		"generativeaidata",
 		"generativeaiagent",
+		"generativeaiagentruntime",
 		"healthchecks",
 		"identity",
 		"integration",
@@ -1395,6 +1397,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	assertServiceSelection(t, services["generativeai"], true, SelectionModeExplicit, []string{"DedicatedAiCluster", "Endpoint", "Model"})
 	assertServiceSelection(t, services["generativeaidata"], true, SelectionModeExplicit, []string{"EnrichmentJob"})
 	assertServiceSelection(t, services["generativeaiagent"], true, SelectionModeExplicit, []string{"KnowledgeBase", "Agent"})
+	assertServiceSelection(t, services["generativeaiagentruntime"], true, SelectionModeExplicit, []string{"Session"})
 	assertServiceSelection(t, services["healthchecks"], true, SelectionModeExplicit, []string{"HttpMonitor", "PingMonitor"})
 	assertServiceSelection(t, services["identity"], true, SelectionModeExplicit, []string{"Compartment"})
 	assertServiceSelection(t, services["integration"], true, SelectionModeExplicit, []string{"IntegrationInstance"})
@@ -2198,6 +2201,7 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 		"generativeai":                {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"generativeaidata":            {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"generativeaiagent":           {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"generativeaiagentruntime":    {strategy: AsyncStrategyNone, runtime: AsyncRuntimeGeneratedRuntime},
 		"healthchecks":                {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"identity":                    {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"integration":                 {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},

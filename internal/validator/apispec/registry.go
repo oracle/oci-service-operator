@@ -46,6 +46,7 @@ import (
 	gdpv1beta1 "github.com/oracle/oci-service-operator/api/gdp/v1beta1"
 	generativeaiv1beta1 "github.com/oracle/oci-service-operator/api/generativeai/v1beta1"
 	generativeaiagentv1beta1 "github.com/oracle/oci-service-operator/api/generativeaiagent/v1beta1"
+	generativeaiagentruntimev1beta1 "github.com/oracle/oci-service-operator/api/generativeaiagentruntime/v1beta1"
 	generativeaidatav1beta1 "github.com/oracle/oci-service-operator/api/generativeaidata/v1beta1"
 	governancerulescontrolplanev1beta1 "github.com/oracle/oci-service-operator/api/governancerulescontrolplane/v1beta1"
 	healthchecksv1beta1 "github.com/oracle/oci-service-operator/api/healthchecks/v1beta1"
@@ -2759,6 +2760,22 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "generativeaiagent.KnowledgeBaseSummary",
+			},
+		},
+	},
+	{
+		Name:       "GenerativeaiagentruntimeSession",
+		SpecType:   reflect.TypeOf(generativeaiagentruntimev1beta1.SessionSpec{}),
+		StatusType: reflect.TypeOf(generativeaiagentruntimev1beta1.SessionStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "generativeaiagentruntime.CreateSessionDetails",
+			},
+			{
+				SDKStruct: "generativeaiagentruntime.UpdateSessionDetails",
+			},
+			{
+				SDKStruct: "generativeaiagentruntime.Session",
 			},
 		},
 	},

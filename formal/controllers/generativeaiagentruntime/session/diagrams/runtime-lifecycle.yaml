@@ -1,0 +1,40 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: generativeaiagentruntime
+slug: session
+kind: Session
+archetype: generated-service-manager
+states:
+  - active
+  - terminating
+  - deleted
+repoAuthored:
+  mutation:
+    mutable:
+      - description
+      - displayName
+    forceNew:
+      - agentEndpointId
+  hooks:
+    create:
+      - helper: tfresource.CreateResource
+    update:
+      - helper: tfresource.UpdateResource
+    delete:
+      - helper: tfresource.DeleteResource
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - Session create and update are synchronous reread flows. OCI returns the
+    body immediately and the model exposes no lifecycle or work-request
+    surface, so the reviewed runtime settles Active after a confirmed reread.
+  - "The published runtime keeps path identity explicit: agentEndpointId is
+    required from spec, sessionId is learned from the OCI body, and status
+    records both values for reread, update, and delete addressing."
+  - No ListSessions API exists in the pinned SDK, so the controller does not
+    publish list-based pre-create reuse or delete-confirmation fallback
+    semantics.
+  - Delete confirmation relies on GetSession returning NotFound after
+    DeleteSession because delete responses carry headers only.

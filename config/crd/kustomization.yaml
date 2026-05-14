@@ -86,6 +86,7 @@ resources:
 - bases/generativeai.oracle.com_models.yaml
 - bases/generativeaiagent.oracle.com_agents.yaml
 - bases/generativeaiagent.oracle.com_knowledgebases.yaml
+- bases/generativeaiagentruntime.oracle.com_sessions.yaml
 - bases/generativeaidata.oracle.com_enrichmentjobs.yaml
 - bases/governancerulescontrolplane.oracle.com_governancerules.yaml
 - bases/governancerulescontrolplane.oracle.com_inclusioncriteria.yaml

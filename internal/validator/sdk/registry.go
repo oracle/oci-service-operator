@@ -47,6 +47,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/gdp"
 	"github.com/oracle/oci-go-sdk/v65/generativeai"
 	"github.com/oracle/oci-go-sdk/v65/generativeaiagent"
+	"github.com/oracle/oci-go-sdk/v65/generativeaiagentruntime"
 	"github.com/oracle/oci-go-sdk/v65/generativeaidata"
 	"github.com/oracle/oci-go-sdk/v65/governancerulescontrolplane"
 	"github.com/oracle/oci-go-sdk/v65/healthchecks"
@@ -782,6 +783,11 @@ var seedTargets = []Target{
 	newTarget("generativeaiagent", "KnowledgeBaseCollection", reflect.TypeOf(generativeaiagent.KnowledgeBaseCollection{})),
 	newTarget("generativeaiagent", "AgentSummary", reflect.TypeOf(generativeaiagent.AgentSummary{})),
 	newTarget("generativeaiagent", "KnowledgeBaseSummary", reflect.TypeOf(generativeaiagent.KnowledgeBaseSummary{})),
+
+	// Generativeaiagentruntime CRD support
+	newTarget("generativeaiagentruntime", "CreateSessionDetails", reflect.TypeOf(generativeaiagentruntime.CreateSessionDetails{})),
+	newTarget("generativeaiagentruntime", "UpdateSessionDetails", reflect.TypeOf(generativeaiagentruntime.UpdateSessionDetails{})),
+	newTarget("generativeaiagentruntime", "Session", reflect.TypeOf(generativeaiagentruntime.Session{})),
 
 	// Generativeaidata CRD support
 	newTarget("generativeaidata", "EnrichmentJob", reflect.TypeOf(generativeaidata.EnrichmentJob{})),

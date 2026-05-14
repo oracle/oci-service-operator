@@ -846,6 +846,16 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 				retryableConflictWorkRequest,
 				"Agent runtime persists create, update, and delete work-request IDs in shared async status, prefers create response-body identity when OCI returns it, recovers the OCID from work-request resources otherwise, bounds pre-create reuse to exact compartmentId plus displayName matches, and rebuilds llmConfig selections into concrete SDK request bodies while keeping ChangeAgentCompartment out of the published surface.",
 			),
+			resourceKey("generativeaiagentruntime", "Session"): reviewedRegistration(
+				"generativeaiagentruntime",
+				"generativeaiagentruntime",
+				apiErrorCoverageDefaultVersion,
+				"Session",
+				APIErrorCoverageFamilyGeneratedRuntimePlain,
+				deleteNotFoundGeneratedRuntime,
+				retryableConflictGeneratedRuntime,
+				"Session keeps generatedruntime create/update/delete and confirm-delete handling, while a handwritten hook layer builds the nested CreateSessionDetails and UpdateSessionDetails bodies, records explicit status.agentEndpointId plus status.sessionId path identity, and settles synchronous create and update rereads as Active because the SDK exposes no lifecycle or work-request surface.",
+			),
 			resourceKey("generativeaidata", "EnrichmentJob"): {
 				Resource: APIErrorCoverageResource{
 					Service: "generativeaidata",

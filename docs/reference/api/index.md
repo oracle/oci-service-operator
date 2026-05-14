@@ -52,6 +52,7 @@ This landing page is generated from the checked-in package and release inventory
 | [gdp.oracle.com/v1beta1](gdp/v1beta1/index.md) | [GdpPipeline](gdp/v1beta1/index.md#kind-gdppipeline) | - |
 | [generativeai.oracle.com/v1beta1](generativeai/v1beta1/index.md) | [DedicatedAiCluster](generativeai/v1beta1/index.md#kind-dedicatedaicluster), [Endpoint](generativeai/v1beta1/index.md#kind-endpoint), [Model](generativeai/v1beta1/index.md#kind-model) | - |
 | [generativeaiagent.oracle.com/v1beta1](generativeaiagent/v1beta1/index.md) | [Agent](generativeaiagent/v1beta1/index.md#kind-agent), [KnowledgeBase](generativeaiagent/v1beta1/index.md#kind-knowledgebase) | - |
+| [generativeaiagentruntime.oracle.com/v1beta1](generativeaiagentruntime/v1beta1/index.md) | [Session](generativeaiagentruntime/v1beta1/index.md#kind-session) | - |
 | [generativeaidata.oracle.com/v1beta1](generativeaidata/v1beta1/index.md) | [EnrichmentJob](generativeaidata/v1beta1/index.md#kind-enrichmentjob) | - |
 | [governancerulescontrolplane.oracle.com/v1beta1](governancerulescontrolplane/v1beta1/index.md) | [GovernanceRule](governancerulescontrolplane/v1beta1/index.md#kind-governancerule), [InclusionCriterion](governancerulescontrolplane/v1beta1/index.md#kind-inclusioncriterion) | - |
 | [healthchecks.oracle.com/v1beta1](healthchecks/v1beta1/index.md) | [HttpMonitor](healthchecks/v1beta1/index.md#kind-httpmonitor), [PingMonitor](healthchecks/v1beta1/index.md#kind-pingmonitor) | - |

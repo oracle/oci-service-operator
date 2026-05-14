@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-vap-update-policy-input",
+  "contractVersion": "v1alpha1",
+  "metadata": {
+    "sourceSurface": "generator-mutability-overlay",
+    "providerSourceRef": "terraform-provider-oci",
+    "providerRevision": "eb653febb1bab4cc6650a96d404a8baf36fdf671",
+    "terraformDocsVersion": "7.22.0"
+  },
+  "target": {
+    "service": "generativeaiagentruntime",
+    "apiVersion": "generativeaiagentruntime.oracle.com/v1beta1",
+    "kind": "Session",
+    "formalSlug": "session",
+    "providerResource": "oci_generative_ai_agent_runtime_session",
+    "specPathPrefix": "spec"
+  },
+  "update": {
+    "allowInPlacePaths": [
+      "description",
+      "displayName"
+    ],
+    "denyRules": [
+      {
+        "fieldPath": "agentEndpointId",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      }
+    ]
+  }
+}

@@ -1195,6 +1195,32 @@ rules:
   - patch
   - update
 - apiGroups:
+  - generativeaiagentruntime.oracle.com
+  resources:
+  - sessions
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - generativeaiagentruntime.oracle.com
+  resources:
+  - sessions/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - generativeaiagentruntime.oracle.com
+  resources:
+  - sessions/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - generativeaidata.oracle.com
   resources:
   - enrichmentjobs

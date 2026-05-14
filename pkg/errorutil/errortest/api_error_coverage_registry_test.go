@@ -14,10 +14,10 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	}
 
 	byKey := inventoryByKey(inventory)
-	if got, want := len(inventory), 370; got != want {
+	if got, want := len(inventory), 371; got != want {
 		t.Fatalf("len(inventory) = %d, want %d", got, want)
 	}
-	if got, want := countRegistrations(inventory), 247; got != want {
+	if got, want := countRegistrations(inventory), 248; got != want {
 		t.Fatalf("registration inventory count = %d, want %d", got, want)
 	}
 	if got, want := countExceptions(inventory), 123; got != want {
@@ -60,6 +60,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventorySelectionSource(t, byKey, "email/Dkim", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "functions/Application", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "generativeaiagent/Agent", "selection.includeKinds")
+	assertInventorySelectionSource(t, byKey, "generativeaiagentruntime/Session", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "generativeaidata/EnrichmentJob", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "loadbalancer/LoadBalancer", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "lustrefilestorage/LustreFileSystem", "selection.includeKinds")
@@ -152,6 +153,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventoryRegistration(t, byKey, "distributeddatabase/DistributedDatabasePrivateEndpoint")
 	assertInventoryRegistration(t, byKey, "email/Dkim")
 	assertInventoryRegistration(t, byKey, "generativeaiagent/Agent")
+	assertInventoryRegistration(t, byKey, "generativeaiagentruntime/Session")
 	assertInventoryRegistration(t, byKey, "generativeaidata/EnrichmentJob")
 	assertInventoryRegistration(t, byKey, "keymanagement/Vault")
 	assertInventoryException(t, byKey, "keymanagement/Key", `controller.strategy="none"`)
@@ -237,6 +239,7 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedFamily(t, "functions/Application", APIErrorCoverageFamilyLegacyAdapter)
 	assertReviewedFamily(t, "functions/Function", APIErrorCoverageFamilyLegacyAdapter)
 	assertReviewedFamily(t, "generativeaiagent/Agent", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
+	assertReviewedFamily(t, "generativeaiagentruntime/Session", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "generativeai/DedicatedAiCluster", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "generativeaidata/EnrichmentJob", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "identity/Compartment", APIErrorCoverageFamilyLegacyAdapter)
