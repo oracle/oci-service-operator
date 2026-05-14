@@ -1213,6 +1213,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"governancerulescontrolplane",
 		"iot",
 		"jms",
+		"jmsjavadownloads",
 		"licensemanager",
 		"limitsincrease",
 		"lockbox",
@@ -1327,6 +1328,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"governancerulescontrolplane",
 		"iot",
 		"jms",
+		"jmsjavadownloads",
 		"licensemanager",
 		"limitsincrease",
 		"lockbox",
@@ -1434,6 +1436,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	assertServiceSelection(t, services["governancerulescontrolplane"], true, SelectionModeExplicit, []string{"GovernanceRule", "InclusionCriterion"})
 	assertServiceSelection(t, services["iot"], true, SelectionModeExplicit, []string{"DigitalTwinAdapter", "DigitalTwinInstance", "DigitalTwinModel", "DigitalTwinRelationship", "IotDomain", "IotDomainGroup"})
 	assertServiceSelection(t, services["jms"], true, SelectionModeExplicit, []string{"Fleet"})
+	assertServiceSelection(t, services["jmsjavadownloads"], true, SelectionModeExplicit, []string{"JavaDownloadToken"})
 	assertServiceSelection(t, services["licensemanager"], true, SelectionModeExplicit, []string{"LicenseRecord", "ProductLicense"})
 	assertServiceSelection(t, services["limitsincrease"], true, SelectionModeExplicit, []string{"LimitsIncreaseRequest"})
 	assertServiceSelection(t, services["lockbox"], true, SelectionModeExplicit, []string{"ApprovalTemplate", "Lockbox"})
@@ -2237,6 +2240,7 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 		"governancerulescontrolplane": {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"iot":                         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"jms":                         {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"jmsjavadownloads":            {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
 		"licensemanager":              {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"limitsincrease":              {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"lockbox":                     {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},

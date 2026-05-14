@@ -1398,6 +1398,32 @@ rules:
   - patch
   - update
 - apiGroups:
+  - jmsjavadownloads.oracle.com
+  resources:
+  - javadownloadtokens
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - jmsjavadownloads.oracle.com
+  resources:
+  - javadownloadtokens/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - jmsjavadownloads.oracle.com
+  resources:
+  - javadownloadtokens/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - keymanagement.oracle.com
   resources:
   - ekmsprivateendpoints

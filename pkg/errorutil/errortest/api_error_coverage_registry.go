@@ -774,6 +774,16 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 				retryableConflictWorkRequest,
 				"Fleet runtime persists create, update, and delete work-request IDs in shared async status, recovers the Fleet OCID from work-request resources, bounds pre-create reuse to exact compartmentId plus displayName matches in ACTIVE, CREATING, UPDATING, or NEEDS_ATTENTION, and leaves ChangeFleetCompartment out of scope while inventoryLog stays required.",
 			),
+			resourceKey("jmsjavadownloads", "JavaDownloadToken"): reviewedRegistration(
+				"jmsjavadownloads",
+				"jmsjavadownloads",
+				apiErrorCoverageDefaultVersion,
+				"JavaDownloadToken",
+				APIErrorCoverageFamilyGeneratedRuntimeWorkRequest,
+				deleteNotFoundReadback,
+				retryableConflictWorkRequest,
+				"JavaDownloadToken runtime persists create, update, and delete work-request IDs in shared async status, recovers the token OCID from work-request resources, bounds pre-create reuse to exact compartmentId plus displayName matches, and intentionally omits the sensitive token value from status and generic bind matching.",
+			),
 			resourceKey("redis", "RedisCluster"): reviewedRegistration(
 				"redis",
 				"redis",

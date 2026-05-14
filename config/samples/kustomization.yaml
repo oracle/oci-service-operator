@@ -253,4 +253,5 @@ resources:
 - distributeddatabase_v1beta1_distributeddatabaseprivateendpoint.yaml
 - computeinstanceagent_v1beta1_instanceagentplugin.yaml
 - onesubscription_v1beta1_subscription.yaml
+- jmsjavadownloads_v1beta1_javadownloadtoken.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

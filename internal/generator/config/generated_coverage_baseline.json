@@ -1,16 +1,16 @@
 {
   "aggregate": {
-    "specs": 248,
-    "mappings": 1045,
-    "trackedMappings": 1044,
+    "specs": 249,
+    "mappings": 1050,
+    "trackedMappings": 1049,
     "untrackedMappings": 1,
-    "presentFields": 10364,
-    "missingFields": 195,
-    "mandatoryPresentFields": 3713,
-    "mandatoryMissingFields": 154,
-    "extraSpecFields": 874,
-    "overallCoveragePercent": 98.15323420778482,
-    "mandatoryCoveragePercent": 96.01758469097491
+    "presentFields": 10416,
+    "missingFields": 198,
+    "mandatoryPresentFields": 3737,
+    "mandatoryMissingFields": 157,
+    "extraSpecFields": 876,
+    "overallCoveragePercent": 98.13453928773318,
+    "mandatoryCoveragePercent": 95.96815613764767
   },
   "services": [
     {
@@ -712,6 +712,20 @@
       "extraSpecFields": 1,
       "overallCoveragePercent": 98.21428571428571,
       "mandatoryCoveragePercent": 96.66666666666667
+    },
+    {
+      "service": "jmsjavadownloads",
+      "specs": 1,
+      "mappings": 5,
+      "trackedMappings": 5,
+      "untrackedMappings": 0,
+      "presentFields": 52,
+      "missingFields": 3,
+      "mandatoryPresentFields": 24,
+      "mandatoryMissingFields": 3,
+      "extraSpecFields": 2,
+      "overallCoveragePercent": 94.54545454545455,
+      "mandatoryCoveragePercent": 88.88888888888889
     },
     {
       "service": "keymanagement",
