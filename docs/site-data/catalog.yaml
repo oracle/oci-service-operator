@@ -621,21 +621,6 @@ packages:
         kind: KnowledgeBase
         summary: Manage OCI Generative AI Agent knowledge bases.
 
-  - package: generativeaiagentruntime
-    displayName: Generative AI Agent Runtime
-    summary: Manage OCI Generative AI Agent Runtime sessions from Kubernetes with a reviewed synchronous controller-backed runtime.
-    supportStatus: preview
-    customerVisible: false
-    guidePath: docs/installation.md
-    packageNotes:
-      - Current package scope is intentionally limited to Session while Chat and the broader conversational, retrieval, and trace helper families stay unpublished.
-      - The published runtime keeps explicit `agentEndpointId + sessionId` path identity, uses synchronous read-after-write follow-up semantics, and does not invent list-based bind or search behavior because the SDK exposes no `ListSessions` operation.
-      - The published package keeps `generativeaiagentruntime/Session` explicitly distinct from the existing `bastion/Session` rollout in docs, catalog metadata, and formal/runtime surfaces.
-    kindOverrides:
-      - group: generativeaiagentruntime
-        kind: Session
-        summary: Manage OCI Generative AI Agent Runtime sessions.
-
   - package: generativeaidata
     displayName: Generative AI Data
     summary: Manage OCI Generative AI Data enrichment jobs from Kubernetes with a reviewed job-shaped runtime contract.
@@ -715,21 +700,6 @@ packages:
       - group: jms
         kind: Fleet
         summary: Manage OCI Java Management Service fleets.
-
-  - package: jmsjavadownloads
-    displayName: Java Downloads
-    summary: Manage OCI Java download tokens from Kubernetes with a reviewed controller-backed runtime.
-    supportStatus: preview
-    customerVisible: false
-    guidePath: docs/installation.md
-    packageNotes:
-      - Current package scope is intentionally limited to JavaDownloadToken while report, license, download-record, generated download-url, and work-request helper families stay unpublished.
-      - The published runtime uses service-SDK work requests for create, update, and delete, keeps generic bind matching scoped to exact compartmentId plus displayName, and leaves the sensitive token value out of status and generated docs.
-      - This story does not emit Kubernetes Secret side effects for the returned token value; operators must preserve that one-time sensitive output through an out-of-band reviewed path.
-    kindOverrides:
-      - group: jmsjavadownloads
-        kind: JavaDownloadToken
-        summary: Manage OCI Java download tokens.
 
   - package: keymanagement
     displayName: Key Management
@@ -1069,21 +1039,6 @@ packages:
     supportStatus: preview
     customerVisible: false
     guidePath: docs/installation.md
-
-  - package: osubsubscription
-    displayName: OSubscription
-    summary: Observe existing OCI OSubscription subscription summaries from Kubernetes with a query-backed, controller-backed read-only contract.
-    supportStatus: preview
-    customerVisible: false
-    guidePath: docs/installation.md
-    packageNotes:
-      - Current package scope is intentionally limited to Subscription and publishes only a query-backed observe-only contract.
-      - The reviewed runtime uses ListSubscriptions only, requires compartmentId plus exactly one of planNumber, subscriptionId, or buyerEmail, and surfaces xOneGatewaySubscriptionId plus xOneOriginRegion when request-scoped access headers are needed.
-      - The top-level SubscriptionSummary does not expose a tracked OCI identity, so the runtime accepts only a unique list match and intentionally leaves `status.status.ocid` empty.
-    kindOverrides:
-      - group: osubsubscription
-        kind: Subscription
-        summary: Observe existing OCI OSubscription subscription summaries.
 
   - package: psa
     displayName: Private Service Access

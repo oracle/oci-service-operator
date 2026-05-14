@@ -14,10 +14,10 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	}
 
 	byKey := inventoryByKey(inventory)
-	if got, want := len(inventory), 374; got != want {
+	if got, want := len(inventory), 371; got != want {
 		t.Fatalf("len(inventory) = %d, want %d", got, want)
 	}
-	if got, want := countRegistrations(inventory), 251; got != want {
+	if got, want := countRegistrations(inventory), 248; got != want {
 		t.Fatalf("registration inventory count = %d, want %d", got, want)
 	}
 	if got, want := countExceptions(inventory), 123; got != want {
@@ -60,7 +60,6 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventorySelectionSource(t, byKey, "email/Dkim", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "functions/Application", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "generativeaiagent/Agent", "selection.includeKinds")
-	assertInventorySelectionSource(t, byKey, "generativeaiagentruntime/Session", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "generativeaidata/EnrichmentJob", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "loadbalancer/LoadBalancer", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "lustrefilestorage/LustreFileSystem", "selection.includeKinds")
@@ -73,7 +72,6 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventorySelectionSource(t, byKey, "mngdmac/MacOrder", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "oda/Skill", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "opa/OpaInstance", "selection.includeKinds")
-	assertInventorySelectionSource(t, byKey, "osubsubscription/Subscription", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "psa/PrivateServiceAccess", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "queue/Queue", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "rover/RoverCluster", "selection.includeKinds")
@@ -85,7 +83,6 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventorySelectionSource(t, byKey, "vbsinst/VbsInstance", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "visualbuilder/VbInstance", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "jms/Fleet", "selection.includeKinds")
-	assertInventorySelectionSource(t, byKey, "jmsjavadownloads/JavaDownloadToken", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "vnmonitoring/PathAnalyzerTest", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "wlms/ManagedInstance", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "wlms/WlsDomain", "selection.includeKinds")
@@ -156,7 +153,6 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventoryRegistration(t, byKey, "distributeddatabase/DistributedDatabasePrivateEndpoint")
 	assertInventoryRegistration(t, byKey, "email/Dkim")
 	assertInventoryRegistration(t, byKey, "generativeaiagent/Agent")
-	assertInventoryRegistration(t, byKey, "generativeaiagentruntime/Session")
 	assertInventoryRegistration(t, byKey, "generativeaidata/EnrichmentJob")
 	assertInventoryRegistration(t, byKey, "keymanagement/Vault")
 	assertInventoryException(t, byKey, "keymanagement/Key", `controller.strategy="none"`)
@@ -173,7 +169,6 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventoryRegistration(t, byKey, "ocvp/Cluster")
 	assertInventoryRegistration(t, byKey, "oda/Skill")
 	assertInventoryRegistration(t, byKey, "opa/OpaInstance")
-	assertInventoryRegistration(t, byKey, "osubsubscription/Subscription")
 	assertInventoryException(t, byKey, "opa/WorkRequest", `controller.strategy="none"`)
 	assertInventoryException(t, byKey, "opa/WorkRequestError", `controller.strategy="none"`)
 	assertInventoryException(t, byKey, "opa/WorkRequestLog", `controller.strategy="none"`)
@@ -187,7 +182,6 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventoryRegistration(t, byKey, "vbsinst/VbsInstance")
 	assertInventoryRegistration(t, byKey, "visualbuilder/VbInstance")
 	assertInventoryRegistration(t, byKey, "jms/Fleet")
-	assertInventoryRegistration(t, byKey, "jmsjavadownloads/JavaDownloadToken")
 	assertInventoryRegistration(t, byKey, "vnmonitoring/PathAnalyzerTest")
 	assertInventoryRegistration(t, byKey, "wlms/ManagedInstance")
 	assertInventoryRegistration(t, byKey, "wlms/WlsDomain")
@@ -245,7 +239,6 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedFamily(t, "functions/Application", APIErrorCoverageFamilyLegacyAdapter)
 	assertReviewedFamily(t, "functions/Function", APIErrorCoverageFamilyLegacyAdapter)
 	assertReviewedFamily(t, "generativeaiagent/Agent", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
-	assertReviewedFamily(t, "generativeaiagentruntime/Session", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "generativeai/DedicatedAiCluster", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "generativeaidata/EnrichmentJob", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "identity/Compartment", APIErrorCoverageFamilyLegacyAdapter)
@@ -266,7 +259,6 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedFamily(t, "oda/Skill", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "opa/OpaInstance", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "objectstorage/Bucket", APIErrorCoverageFamilyGeneratedRuntimePlain)
-	assertReviewedFamily(t, "osubsubscription/Subscription", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "psa/PrivateServiceAccess", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "onesubscription/Subscription", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "self/Subscription", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
@@ -283,7 +275,6 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedFamily(t, "vbsinst/VbsInstance", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "visualbuilder/VbInstance", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "jms/Fleet", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
-	assertReviewedFamily(t, "jmsjavadownloads/JavaDownloadToken", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "vnmonitoring/PathAnalyzerTest", APIErrorCoverageFamilyGeneratedRuntimeFollowUp)
 	assertReviewedFamily(t, "wlms/ManagedInstance", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "wlms/WlsDomain", APIErrorCoverageFamilyGeneratedRuntimePlain)

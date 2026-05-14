@@ -47,7 +47,6 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/gdp"
 	"github.com/oracle/oci-go-sdk/v65/generativeai"
 	"github.com/oracle/oci-go-sdk/v65/generativeaiagent"
-	"github.com/oracle/oci-go-sdk/v65/generativeaiagentruntime"
 	"github.com/oracle/oci-go-sdk/v65/generativeaidata"
 	"github.com/oracle/oci-go-sdk/v65/governancerulescontrolplane"
 	"github.com/oracle/oci-go-sdk/v65/healthchecks"
@@ -55,7 +54,6 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/integration"
 	"github.com/oracle/oci-go-sdk/v65/iot"
 	"github.com/oracle/oci-go-sdk/v65/jms"
-	"github.com/oracle/oci-go-sdk/v65/jmsjavadownloads"
 	"github.com/oracle/oci-go-sdk/v65/keymanagement"
 	"github.com/oracle/oci-go-sdk/v65/licensemanager"
 	"github.com/oracle/oci-go-sdk/v65/limits"
@@ -89,7 +87,6 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/opsi"
 	"github.com/oracle/oci-go-sdk/v65/optimizer"
 	"github.com/oracle/oci-go-sdk/v65/osmanagementhub"
-	"github.com/oracle/oci-go-sdk/v65/osubsubscription"
 	"github.com/oracle/oci-go-sdk/v65/psa"
 	"github.com/oracle/oci-go-sdk/v65/psql"
 	"github.com/oracle/oci-go-sdk/v65/queue"
@@ -787,11 +784,6 @@ var seedTargets = []Target{
 	newTarget("generativeaiagent", "AgentSummary", reflect.TypeOf(generativeaiagent.AgentSummary{})),
 	newTarget("generativeaiagent", "KnowledgeBaseSummary", reflect.TypeOf(generativeaiagent.KnowledgeBaseSummary{})),
 
-	// Generativeaiagentruntime CRD support
-	newTarget("generativeaiagentruntime", "CreateSessionDetails", reflect.TypeOf(generativeaiagentruntime.CreateSessionDetails{})),
-	newTarget("generativeaiagentruntime", "UpdateSessionDetails", reflect.TypeOf(generativeaiagentruntime.UpdateSessionDetails{})),
-	newTarget("generativeaiagentruntime", "Session", reflect.TypeOf(generativeaiagentruntime.Session{})),
-
 	// Generativeaidata CRD support
 	newTarget("generativeaidata", "EnrichmentJob", reflect.TypeOf(generativeaidata.EnrichmentJob{})),
 	newTarget("generativeaidata", "EnrichmentJobCollection", reflect.TypeOf(generativeaidata.EnrichmentJobCollection{})),
@@ -862,13 +854,6 @@ var seedTargets = []Target{
 	newTarget("jms", "Fleet", reflect.TypeOf(jms.Fleet{})),
 	newTarget("jms", "FleetCollection", reflect.TypeOf(jms.FleetCollection{})),
 	newTarget("jms", "FleetSummary", reflect.TypeOf(jms.FleetSummary{})),
-
-	// Jmsjavadownloads CRD support
-	newTarget("jmsjavadownloads", "CreateJavaDownloadTokenDetails", reflect.TypeOf(jmsjavadownloads.CreateJavaDownloadTokenDetails{})),
-	newTarget("jmsjavadownloads", "UpdateJavaDownloadTokenDetails", reflect.TypeOf(jmsjavadownloads.UpdateJavaDownloadTokenDetails{})),
-	newTarget("jmsjavadownloads", "JavaDownloadToken", reflect.TypeOf(jmsjavadownloads.JavaDownloadToken{})),
-	newTarget("jmsjavadownloads", "JavaDownloadTokenCollection", reflect.TypeOf(jmsjavadownloads.JavaDownloadTokenCollection{})),
-	newTarget("jmsjavadownloads", "JavaDownloadTokenSummary", reflect.TypeOf(jmsjavadownloads.JavaDownloadTokenSummary{})),
 
 	// Licensemanager CRD support
 	newTarget("licensemanager", "CreateLicenseRecordDetails", reflect.TypeOf(licensemanager.CreateLicenseRecordDetails{})),
@@ -1168,9 +1153,6 @@ var seedTargets = []Target{
 	newTarget("osmanagementhub", "ManagementStationSummary", reflect.TypeOf(osmanagementhub.ManagementStationSummary{})),
 	newTarget("osmanagementhub", "ProfileSummary", reflect.TypeOf(osmanagementhub.ProfileSummary{})),
 	newTarget("osmanagementhub", "ScheduledJobSummary", reflect.TypeOf(osmanagementhub.ScheduledJobSummary{})),
-
-	// Osubsubscription CRD support
-	newTarget("osubsubscription", "SubscriptionSummary", reflect.TypeOf(osubsubscription.SubscriptionSummary{})),
 
 	// Psa CRD support
 	newTarget("psa", "CreatePrivateServiceAccessDetails", reflect.TypeOf(psa.CreatePrivateServiceAccessDetails{})),

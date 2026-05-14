@@ -1195,32 +1195,6 @@ rules:
   - patch
   - update
 - apiGroups:
-  - generativeaiagentruntime.oracle.com
-  resources:
-  - sessions
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - generativeaiagentruntime.oracle.com
-  resources:
-  - sessions/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - generativeaiagentruntime.oracle.com
-  resources:
-  - sessions/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
   - generativeaidata.oracle.com
   resources:
   - enrichmentjobs
@@ -1419,32 +1393,6 @@ rules:
   - jms.oracle.com
   resources:
   - fleets/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - jmsjavadownloads.oracle.com
-  resources:
-  - javadownloadtokens
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - jmsjavadownloads.oracle.com
-  resources:
-  - javadownloadtokens/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - jmsjavadownloads.oracle.com
-  resources:
-  - javadownloadtokens/status
   verbs:
   - get
   - patch
@@ -2266,7 +2214,6 @@ rules:
   - update
 - apiGroups:
   - onesubscription.oracle.com
-  - osubsubscription.oracle.com
   - self.oracle.com
   resources:
   - subscriptions
@@ -2280,7 +2227,6 @@ rules:
   - watch
 - apiGroups:
   - onesubscription.oracle.com
-  - osubsubscription.oracle.com
   - self.oracle.com
   resources:
   - subscriptions/finalizers
@@ -2288,7 +2234,6 @@ rules:
   - update
 - apiGroups:
   - onesubscription.oracle.com
-  - osubsubscription.oracle.com
   - self.oracle.com
   resources:
   - subscriptions/status

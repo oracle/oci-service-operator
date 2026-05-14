@@ -1174,7 +1174,6 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"generativeai",
 		"generativeaidata",
 		"generativeaiagent",
-		"generativeaiagentruntime",
 		"healthchecks",
 		"identity",
 		"integration",
@@ -1199,7 +1198,6 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"ons",
 		"onesubscription",
 		"opa",
-		"osubsubscription",
 		"psa",
 		"psql",
 		"queue",
@@ -1215,7 +1213,6 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"governancerulescontrolplane",
 		"iot",
 		"jms",
-		"jmsjavadownloads",
 		"licensemanager",
 		"limitsincrease",
 		"lockbox",
@@ -1292,7 +1289,6 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"generativeai",
 		"generativeaidata",
 		"generativeaiagent",
-		"generativeaiagentruntime",
 		"healthchecks",
 		"identity",
 		"integration",
@@ -1316,7 +1312,6 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"ons",
 		"onesubscription",
 		"opa",
-		"osubsubscription",
 		"psa",
 		"psql",
 		"queue",
@@ -1332,7 +1327,6 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"governancerulescontrolplane",
 		"iot",
 		"jms",
-		"jmsjavadownloads",
 		"licensemanager",
 		"limitsincrease",
 		"lockbox",
@@ -1403,7 +1397,6 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	assertServiceSelection(t, services["generativeai"], true, SelectionModeExplicit, []string{"DedicatedAiCluster", "Endpoint", "Model"})
 	assertServiceSelection(t, services["generativeaidata"], true, SelectionModeExplicit, []string{"EnrichmentJob"})
 	assertServiceSelection(t, services["generativeaiagent"], true, SelectionModeExplicit, []string{"KnowledgeBase", "Agent"})
-	assertServiceSelection(t, services["generativeaiagentruntime"], true, SelectionModeExplicit, []string{"Session"})
 	assertServiceSelection(t, services["healthchecks"], true, SelectionModeExplicit, []string{"HttpMonitor", "PingMonitor"})
 	assertServiceSelection(t, services["identity"], true, SelectionModeExplicit, []string{"Compartment"})
 	assertServiceSelection(t, services["integration"], true, SelectionModeExplicit, []string{"IntegrationInstance"})
@@ -1426,7 +1419,6 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	assertServiceSelection(t, services["opensearch"], true, SelectionModeExplicit, []string{"OpensearchCluster"})
 	assertServiceSelection(t, services["ons"], true, SelectionModeExplicit, []string{"Subscription", "Topic"})
 	assertServiceSelection(t, services["onesubscription"], true, SelectionModeExplicit, []string{"Subscription"})
-	assertServiceSelection(t, services["osubsubscription"], true, SelectionModeExplicit, []string{"Subscription"})
 	assertServiceSelection(t, services["opa"], true, SelectionModeExplicit, []string{"OpaInstance"})
 	assertServiceSelection(t, services["psa"], true, SelectionModeExplicit, []string{"PrivateServiceAccess"})
 	assertServiceSelection(t, services["psql"], true, SelectionModeExplicit, []string{"DbSystem"})
@@ -1442,7 +1434,6 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	assertServiceSelection(t, services["governancerulescontrolplane"], true, SelectionModeExplicit, []string{"GovernanceRule", "InclusionCriterion"})
 	assertServiceSelection(t, services["iot"], true, SelectionModeExplicit, []string{"DigitalTwinAdapter", "DigitalTwinInstance", "DigitalTwinModel", "DigitalTwinRelationship", "IotDomain", "IotDomainGroup"})
 	assertServiceSelection(t, services["jms"], true, SelectionModeExplicit, []string{"Fleet"})
-	assertServiceSelection(t, services["jmsjavadownloads"], true, SelectionModeExplicit, []string{"JavaDownloadToken"})
 	assertServiceSelection(t, services["licensemanager"], true, SelectionModeExplicit, []string{"LicenseRecord", "ProductLicense"})
 	assertServiceSelection(t, services["limitsincrease"], true, SelectionModeExplicit, []string{"LimitsIncreaseRequest"})
 	assertServiceSelection(t, services["lockbox"], true, SelectionModeExplicit, []string{"ApprovalTemplate", "Lockbox"})
@@ -2210,7 +2201,6 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 		"generativeai":                {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"generativeaidata":            {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"generativeaiagent":           {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
-		"generativeaiagentruntime":    {strategy: AsyncStrategyNone, runtime: AsyncRuntimeGeneratedRuntime},
 		"healthchecks":                {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"identity":                    {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"integration":                 {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
@@ -2247,7 +2237,6 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 		"governancerulescontrolplane": {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"iot":                         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"jms":                         {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
-		"jmsjavadownloads":            {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
 		"licensemanager":              {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"limitsincrease":              {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"lockbox":                     {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
@@ -2261,7 +2250,6 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 		"opsi":                        {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"optimizer":                   {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"osmanagementhub":             {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"osubsubscription":            {strategy: AsyncStrategyNone, runtime: AsyncRuntimeGeneratedRuntime},
 		"recovery":                    {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"resourceanalytics":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"resourcescheduler":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
