@@ -1,0 +1,14 @@
+{
+  "role": "implementation",
+  "resolution": "ready_for_review",
+  "summary": "Fixed TargetAlertPolicyAssociation mutable string clearing.",
+  "details": [
+    "Update shaping now sends explicit empty displayName and description values when observed OCI state still has stale strings.",
+    "Projected resource status is cleared/restored around writes so async update handoff does not retain stale observed strings, with focused regression coverage for both fields."
+  ],
+  "validation": [
+    "gofmt -w pkg/servicemanager/datasafe/targetalertpolicyassociation/targetalertpolicyassociation_runtime_client.go pkg/servicemanager/datasafe/targetalertpolicyassociation/targetalertpolicyassociation_runtime_client_test.go: passed",
+    "env GOCACHE=/tmp/osok-149-go-build-cache GOTMPDIR=/tmp go test ./pkg/servicemanager/datasafe/targetalertpolicyassociation/...: passed",
+    "make fmt/make vet/make lint/make test/make build: skipped (implementation role; reviewer-owned gates)"
+  ]
+}
