@@ -24,6 +24,26 @@ import (
 	"github.com/oracle/oci-service-operator/internal/ocisdk"
 )
 
+func TestMergeFieldOverridesCanDropFieldWithJSONIgnoreTag(t *testing.T) {
+	t.Parallel()
+
+	fields := []FieldModel{
+		{Name: "DisplayName", Type: "string", Tag: `json:"displayName,omitempty"`},
+		{Name: "JsonData", Type: "string", Tag: `json:"jsonData,omitempty"`},
+	}
+	overrides := []FieldOverride{
+		{Name: "JsonData", Tag: `json:"-"`},
+	}
+
+	merged := mergeFieldOverrides(fields, overrides)
+	if len(merged) != 1 {
+		t.Fatalf("mergeFieldOverrides() len = %d, want 1", len(merged))
+	}
+	if merged[0].Name != "DisplayName" {
+		t.Fatalf("mergeFieldOverrides() remaining field = %q, want DisplayName", merged[0].Name)
+	}
+}
+
 func TestBuildPackageModelDiscoversResources(t *testing.T) {
 	t.Parallel()
 
@@ -1689,6 +1709,108 @@ func TestRenderServiceClientFileHandlesEndpointConstructors(t *testing.T) {
 	}
 	assertContains(t, runtimeHooksContent, []string{
 		"return sdkClient.CreateCursor(ctx, request)",
+	})
+}
+
+func TestRenderServiceClientFileHandlesMultipleSDKClients(t *testing.T) {
+	t.Parallel()
+
+	model := ServiceManagerModel{
+		Kind:                  "EnrichmentJob",
+		SDKName:               "EnrichmentJob",
+		PackageName:           "enrichmentjob",
+		APIImportPath:         "github.com/oracle/oci-service-operator/api/generativeaidata/v1beta1",
+		APIImportAlias:        "generativeaidatav1beta1",
+		SDKImportPath:         "github.com/oracle/oci-go-sdk/v65/generativeaidata",
+		SDKImportAlias:        "generativeaidatasdk",
+		ManagerTypeName:       "EnrichmentJobServiceManager",
+		ClientInterfaceName:   "EnrichmentJobServiceClient",
+		DefaultClientTypeName: "defaultEnrichmentJobServiceClient",
+		SDKClients: []SDKClientModel{
+			{
+				TypeName:        "GenerateEnrichmentJobClient",
+				Constructor:     "NewGenerateEnrichmentJobClientWithConfigurationProvider",
+				ConstructorKind: "provider",
+				FieldName:       "generateEnrichmentJobClient",
+				VarName:         "generateEnrichmentJobClient",
+			},
+			{
+				TypeName:        "GetEnrichmentJobClient",
+				Constructor:     "NewGetEnrichmentJobClientWithConfigurationProvider",
+				ConstructorKind: "provider",
+				FieldName:       "getEnrichmentJobClient",
+				VarName:         "getEnrichmentJobClient",
+			},
+			{
+				TypeName:        "ListEnrichmentJobsClient",
+				Constructor:     "NewListEnrichmentJobsClientWithConfigurationProvider",
+				ConstructorKind: "provider",
+				FieldName:       "listEnrichmentJobsClient",
+				VarName:         "listEnrichmentJobsClient",
+			},
+			{
+				TypeName:        "CancelEnrichmentJobClient",
+				Constructor:     "NewCancelEnrichmentJobClientWithConfigurationProvider",
+				ConstructorKind: "provider",
+				FieldName:       "cancelEnrichmentJobClient",
+				VarName:         "cancelEnrichmentJobClient",
+			},
+		},
+		CreateOperation: &RuntimeOperationModel{
+			MethodName:       "GenerateEnrichmentJob",
+			RequestTypeName:  "GenerateEnrichmentJobRequest",
+			ResponseTypeName: "GenerateEnrichmentJobResponse",
+			UsesRequest:      true,
+			ClientFieldName:  "generateEnrichmentJobClient",
+		},
+		GetOperation: &RuntimeOperationModel{
+			MethodName:       "GetEnrichmentJob",
+			RequestTypeName:  "GetEnrichmentJobRequest",
+			ResponseTypeName: "GetEnrichmentJobResponse",
+			UsesRequest:      true,
+			ClientFieldName:  "getEnrichmentJobClient",
+		},
+		ListOperation: &RuntimeOperationModel{
+			MethodName:       "ListEnrichmentJobs",
+			RequestTypeName:  "ListEnrichmentJobsRequest",
+			ResponseTypeName: "ListEnrichmentJobsResponse",
+			UsesRequest:      true,
+			ClientFieldName:  "listEnrichmentJobsClient",
+		},
+		DeleteOperation: &RuntimeOperationModel{
+			MethodName:       "CancelEnrichmentJob",
+			RequestTypeName:  "CancelEnrichmentJobRequest",
+			ResponseTypeName: "CancelEnrichmentJobResponse",
+			UsesRequest:      true,
+			ClientFieldName:  "cancelEnrichmentJobClient",
+		},
+	}
+
+	content, err := renderServiceClientFile(model)
+	if err != nil {
+		t.Fatalf("renderServiceClientFile() error = %v", err)
+	}
+
+	assertContains(t, content, []string{
+		"type EnrichmentJobSDKClients struct {",
+		"generateEnrichmentJobClient generativeaidatasdk.GenerateEnrichmentJobClient",
+		"cancelEnrichmentJobClient",
+		"generativeaidatasdk.CancelEnrichmentJobClient",
+		"generateEnrichmentJobClient, err := generativeaidatasdk.NewGenerateEnrichmentJobClientWithConfigurationProvider(manager.Provider)",
+		"cancelEnrichmentJobClient, err := generativeaidatasdk.NewCancelEnrichmentJobClientWithConfigurationProvider(manager.Provider)",
+		"sdkClient, err := newEnrichmentJobSDKClients(manager)",
+		"hooks := newEnrichmentJobRuntimeHooks(manager, sdkClient)",
+	})
+
+	runtimeHooksContent, err := renderServiceRuntimeHooksFile(model)
+	if err != nil {
+		t.Fatalf("renderServiceRuntimeHooksFile() error = %v", err)
+	}
+
+	assertContains(t, runtimeHooksContent, []string{
+		"func newEnrichmentJobDefaultRuntimeHooks(sdkClient EnrichmentJobSDKClients) EnrichmentJobRuntimeHooks {",
+		"return sdkClient.generateEnrichmentJobClient.GenerateEnrichmentJob(ctx, request)",
+		"return sdkClient.cancelEnrichmentJobClient.CancelEnrichmentJob(ctx, request)",
 	})
 }
 
@@ -3571,6 +3693,55 @@ func TestCheckedInAILanguageProjectRuntimeDiscoveryMatchesPinnedSDK(t *testing.T
 	assertRuntimeRequestFieldNamesInclude(t, project.Runtime.List, []string{"CompartmentId", "LifecycleState", "DisplayName", "ProjectId"})
 }
 
+func TestCheckedInGenerativeAIDataEnrichmentJobRuntimeDiscoveryMatchesPinnedSDK(t *testing.T) {
+	t.Parallel()
+
+	const sdkPackage = "github.com/oracle/oci-go-sdk/v65/generativeaidata"
+	index := loadCheckedInSDKPackage(t, sdkPackage)
+
+	candidates, err := discoverResourceCandidates(index)
+	if err != nil {
+		t.Fatalf("discoverResourceCandidates() error = %v", err)
+	}
+
+	enrichmentJob, err := buildResourceModel(index, ServiceConfig{
+		Service:        "generativeaidata",
+		SDKPackage:     sdkPackage,
+		Group:          "generativeaidata",
+		PackageProfile: PackageProfileCRDOnly,
+	}, findResourceCandidate(t, candidates, "EnrichmentJob"))
+	if err != nil {
+		t.Fatalf("buildResourceModel(EnrichmentJob) error = %v", err)
+	}
+
+	if enrichmentJob.Runtime == nil {
+		t.Fatal("EnrichmentJob runtime model was not attached")
+	}
+	assertRuntimeMethodName(t, enrichmentJob.Runtime.Create, "GenerateEnrichmentJob")
+	assertRuntimeMethodName(t, enrichmentJob.Runtime.Get, "GetEnrichmentJob")
+	assertRuntimeMethodName(t, enrichmentJob.Runtime.List, "ListEnrichmentJobs")
+	if enrichmentJob.Runtime.Update != nil {
+		t.Fatalf("EnrichmentJob update method = %#v, want nil because the pinned SDK has no update surface", enrichmentJob.Runtime.Update)
+	}
+	assertRuntimeMethodName(t, enrichmentJob.Runtime.Delete, "CancelEnrichmentJob")
+	assertRuntimeRequestFieldNamesInclude(t, enrichmentJob.Runtime.Get, []string{"SemanticStoreId", "EnrichmentJobId"})
+	assertRuntimeRequestFieldNamesInclude(t, enrichmentJob.Runtime.List, []string{"SemanticStoreId", "CompartmentId", "DisplayName", "LifecycleState"})
+
+	gotClientTypes := make([]string, 0, len(enrichmentJob.Runtime.Clients))
+	for _, client := range enrichmentJob.Runtime.Clients {
+		gotClientTypes = append(gotClientTypes, client.TypeName)
+	}
+	wantClientTypes := []string{
+		"GenerateEnrichmentJobClient",
+		"GetEnrichmentJobClient",
+		"ListEnrichmentJobsClient",
+		"CancelEnrichmentJobClient",
+	}
+	if !slices.Equal(gotClientTypes, wantClientTypes) {
+		t.Fatalf("EnrichmentJob runtime clients = %v, want %v", gotClientTypes, wantClientTypes)
+	}
+}
+
 func TestCheckedInAIVisionSDKDiscoveryFindsProjectAndAuxiliaryFamilies(t *testing.T) {
 	t.Parallel()
 
@@ -3786,6 +3957,7 @@ func TestCheckedInBDSSDKDiscoveryFindsBdsInstanceAndAuxiliaryFamilies(t *testing
 		"AutoScalingConfiguration",
 		"BdsApiKey",
 		"BdsCapacityReport",
+		"BdsCertificate",
 		"BdsCertificateConfiguration",
 		"BdsClusterVersion",
 		"BdsInstance",

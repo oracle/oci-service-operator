@@ -1,0 +1,159 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "psa",
+  "slug": "privateserviceaccess",
+  "kind": "PrivateServiceAccess",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_psa_private_service_access",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreatePrivateServiceAccess",
+        "requestType": "psa.CreatePrivateServiceAccessRequest",
+        "responseType": "psa.CreatePrivateServiceAccessResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetPrivateServiceAccess",
+        "requestType": "psa.GetPrivateServiceAccessRequest",
+        "responseType": "psa.GetPrivateServiceAccessResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListPrivateServiceAccesses",
+        "requestType": "psa.ListPrivateServiceAccessesRequest",
+        "responseType": "psa.ListPrivateServiceAccessesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangePrivateServiceAccessCompartment",
+        "requestType": "psa.ChangePrivateServiceAccessCompartmentRequest",
+        "responseType": "psa.ChangePrivateServiceAccessCompartmentResponse"
+      },
+      {
+        "operation": "UpdatePrivateServiceAccess",
+        "requestType": "psa.UpdatePrivateServiceAccessRequest",
+        "responseType": "psa.UpdatePrivateServiceAccessResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeletePrivateServiceAccess",
+        "requestType": "psa.DeletePrivateServiceAccessRequest",
+        "responseType": "psa.DeletePrivateServiceAccessResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags",
+      "nsg_ids",
+      "security_attributes"
+    ],
+    "forceNew": [
+      "compartment_id",
+      "ipv4_ip",
+      "service_id",
+      "subnet_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "privateserviceaccess",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "privateserviceaccess",
+        "action": "UPDATED"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "privateserviceaccess",
+        "action": "DELETED"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_psa_private_service_accesses",
+    "collectionField": "private_service_access_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "id",
+      "lifecycle_state",
+      "service_id",
+      "vcn_id"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/psa/privateserviceaccess/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/psa/privateserviceaccess/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "list-lookup",
+      "mutation-policy",
+      "status-projection",
+      "waiter-work-request",
+      "delete-confirmation",
+      "secret-output"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: CreatePrivateServiceAccess, GetPrivateServiceAccess, ListPrivateServiceAccesses, UpdatePrivateServiceAccess, DeletePrivateServiceAccess, ChangePrivateServiceAccessCompartment, and GetPsaWorkRequest are present in v65.110.0. Create returns a PrivateServiceAccess body plus opc-work-request-id; update and delete expose opc-work-request-id without returning the resource body.",
+    "Pinned provider implementation: oci_psa_private_service_access is work-request-backed for create, update, delete, and compartment changes. The reviewed runtime keeps using service-sdk GetPsaWorkRequest polling and shared async status for CRUD only.",
+    "Repo-authored bind-versus-create stays explicit: when no OCI identifier is tracked, the runtime uses ListPrivateServiceAccesses matches on exact compartmentId plus displayName plus serviceId, then keeps only unique matches whose returned subnetId also matches and whose lifecycle is ACTIVE, CREATING, or UPDATING.",
+    "Repo-authored mutation policy stays explicit: only definedTags, freeformTags, securityAttributes, displayName, description, and nsgIds reconcile in place. ChangePrivateServiceAccessCompartment remains out-of-scope drift because the published runtime treats compartmentId as replacement-only and never calls the auxiliary move operation."
+  ]
+}

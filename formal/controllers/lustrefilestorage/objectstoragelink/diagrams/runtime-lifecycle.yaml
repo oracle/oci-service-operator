@@ -1,0 +1,18 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: lustrefilestorage
+slug: objectstoragelink
+kind: ObjectStorageLink
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - terminating
+  - failed
+  - deleted
+notes:
+  - Ready state maps to OCI ACTIVE.
+  - Requeue continues while OCI reports CREATING during create or DELETING during delete confirmation.
+  - Bind-before-create reuses only exact compartment, availability-domain, Lustre-file-system, and display-name matches that remain in ACTIVE or CREATING.
+  - Create and update settle from the ObjectStorageLink read model; delete is the only work-request-backed phase.
+  - Delete completes after GetObjectStorageLink or ListObjectStorageLinks returns DELETED or no longer finds the resource.

@@ -25,4 +25,5 @@ Manage OCI Database Migration connections from Kubernetes with a reviewed contro
 
 | Resource | API Version | Summary | Guide | Sample | API Spec |
 | --- | --- | --- | --- | --- | --- |
+| `databasemigration/Assessment` | `databasemigration.oracle.com/v1beta1` | — | — | [Sample](../../samples/databasemigration/v1beta1/assessment.md) | [Reference](../../api/databasemigration/v1beta1/index.md#kind-assessment) |
 | `databasemigration/Connection` | `databasemigration.oracle.com/v1beta1` | Manage OCI Database Migration connections. | — | [Sample](../../samples/databasemigration/v1beta1/connection.md) | [Reference](../../api/databasemigration/v1beta1/index.md#kind-connection) |

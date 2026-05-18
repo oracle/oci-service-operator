@@ -27,6 +27,7 @@ resources:
 - bases/apmcontrolplane.oracle.com_apmdomains.yaml
 - bases/apmsynthetics.oracle.com_scripts.yaml
 - bases/apmtraces.oracle.com_scheduledqueries.yaml
+- bases/appmgmtcontrol.oracle.com_monitoredinstances.yaml
 - bases/artifacts.oracle.com_containerimagesignatures.yaml
 - bases/artifacts.oracle.com_containerrepositories.yaml
 - bases/artifacts.oracle.com_repositories.yaml
@@ -74,6 +75,7 @@ resources:
 - bases/clusterplacementgroups.oracle.com_clusterplacementgroups.yaml
 - bases/computecloudatcustomer.oracle.com_cccinfrastructures.yaml
 - bases/computecloudatcustomer.oracle.com_cccupgradeschedules.yaml
+- bases/computeinstanceagent.oracle.com_instanceagentplugins.yaml
 - bases/containerengine.oracle.com_clusters.yaml
 - bases/containerengine.oracle.com_nodepools.yaml
 - bases/containerinstances.oracle.com_containerinstances.yaml
@@ -88,7 +90,9 @@ resources:
 - bases/core.oracle.com_subnets.yaml
 - bases/core.oracle.com_vcns.yaml
 - bases/dashboardservice.oracle.com_dashboardgroups.yaml
+- bases/dashboardservice.oracle.com_dashboards.yaml
 - bases/database.oracle.com_autonomousdatabases.yaml
+- bases/databasemigration.oracle.com_assessments.yaml
 - bases/databasemigration.oracle.com_connections.yaml
 - bases/databasetools.oracle.com_databasetoolsconnections.yaml
 - bases/datacatalog.oracle.com_attributes.yaml
@@ -194,6 +198,8 @@ resources:
 - bases/devops.oracle.com_repositories.yaml
 - bases/devops.oracle.com_triggers.yaml
 - bases/dif.oracle.com_stacks.yaml
+- bases/disasterrecovery.oracle.com_drprotectiongroups.yaml
+- bases/distributeddatabase.oracle.com_distributeddatabaseprivateendpoints.yaml
 - bases/dns.oracle.com_steeringpolicies.yaml
 - bases/dns.oracle.com_steeringpolicyattachments.yaml
 - bases/dns.oracle.com_tsigkeys.yaml
@@ -240,9 +246,14 @@ resources:
 - bases/fusionapps.oracle.com_fusionenvironments.yaml
 - bases/fusionapps.oracle.com_refreshactivities.yaml
 - bases/fusionapps.oracle.com_serviceattachments.yaml
+- bases/gdp.oracle.com_gdppipelines.yaml
 - bases/generativeai.oracle.com_dedicatedaiclusters.yaml
 - bases/generativeai.oracle.com_endpoints.yaml
 - bases/generativeai.oracle.com_models.yaml
+- bases/generativeaiagent.oracle.com_agents.yaml
+- bases/generativeaiagent.oracle.com_knowledgebases.yaml
+- bases/generativeaiagentruntime.oracle.com_sessions.yaml
+- bases/generativeaidata.oracle.com_enrichmentjobs.yaml
 - bases/goldengate.oracle.com_certificates.yaml
 - bases/goldengate.oracle.com_connectionassignments.yaml
 - bases/goldengate.oracle.com_connections.yaml
@@ -262,6 +273,8 @@ resources:
 - bases/iot.oracle.com_digitaltwinrelationships.yaml
 - bases/iot.oracle.com_iotdomaingroups.yaml
 - bases/iot.oracle.com_iotdomains.yaml
+- bases/jms.oracle.com_fleets.yaml
+- bases/jmsjavadownloads.oracle.com_javadownloadtokens.yaml
 - bases/keymanagement.oracle.com_ekmsprivateendpoints.yaml
 - bases/keymanagement.oracle.com_vaults.yaml
 - bases/licensemanager.oracle.com_licenserecords.yaml
@@ -291,6 +304,8 @@ resources:
 - bases/logging.oracle.com_logs.yaml
 - bases/logging.oracle.com_logsavedsearches.yaml
 - bases/logging.oracle.com_unifiedagentconfigurations.yaml
+- bases/lustrefilestorage.oracle.com_lustrefilesystems.yaml
+- bases/lustrefilestorage.oracle.com_objectstoragelinks.yaml
 - bases/managedkafka.oracle.com_kafkaclusterconfigs.yaml
 - bases/managedkafka.oracle.com_kafkaclusters.yaml
 - bases/managementagent.oracle.com_datasources.yaml
@@ -310,6 +325,10 @@ resources:
 - bases/marketplacepublisher.oracle.com_listings.yaml
 - bases/marketplacepublisher.oracle.com_terms.yaml
 - bases/marketplacepublisher.oracle.com_termversions.yaml
+- bases/mediaservices.oracle.com_mediaassets.yaml
+- bases/mediaservices.oracle.com_mediaworkflows.yaml
+- bases/mngdmac.oracle.com_macdevices.yaml
+- bases/mngdmac.oracle.com_macorders.yaml
 - bases/monitoring.oracle.com_alarms.yaml
 - bases/monitoring.oracle.com_alarmsuppressions.yaml
 - bases/mysql.oracle.com_dbsystems.yaml
@@ -333,6 +352,7 @@ resources:
 - bases/networkloadbalancer.oracle.com_networkloadbalancers.yaml
 - bases/nosql.oracle.com_tables.yaml
 - bases/objectstorage.oracle.com_buckets.yaml
+- bases/oce.oracle.com_oceinstances.yaml
 - bases/ocvp.oracle.com_clusters.yaml
 - bases/ocvp.oracle.com_esxihosts.yaml
 - bases/ocvp.oracle.com_sddcs.yaml
@@ -348,8 +368,10 @@ resources:
 - bases/oda.oracle.com_skillparameters.yaml
 - bases/oda.oracle.com_skills.yaml
 - bases/oda.oracle.com_translators.yaml
+- bases/onesubscription.oracle.com_subscriptions.yaml
 - bases/ons.oracle.com_subscriptions.yaml
 - bases/ons.oracle.com_topics.yaml
+- bases/opa.oracle.com_opainstances.yaml
 - bases/opensearch.oracle.com_opensearchclusters.yaml
 - bases/operatoraccesscontrol.oracle.com_operatorcontrolassignments.yaml
 - bases/operatoraccesscontrol.oracle.com_operatorcontrols.yaml
@@ -373,6 +395,8 @@ resources:
 - bases/osmanagementhub.oracle.com_profiles.yaml
 - bases/osmanagementhub.oracle.com_scheduledjobs.yaml
 - bases/osmanagementhub.oracle.com_softwaresources.yaml
+- bases/osubsubscription.oracle.com_subscriptions.yaml
+- bases/psa.oracle.com_privateserviceaccesses.yaml
 - bases/psql.oracle.com_dbsystems.yaml
 - bases/queue.oracle.com_queues.yaml
 - bases/recovery.oracle.com_protecteddatabases.yaml
@@ -387,11 +411,15 @@ resources:
 - bases/resourcemanager.oracle.com_stacks.yaml
 - bases/resourcemanager.oracle.com_templates.yaml
 - bases/resourcescheduler.oracle.com_schedules.yaml
+- bases/rover.oracle.com_roverclusters.yaml
+- bases/rover.oracle.com_rovernodes.yaml
 - bases/sch.oracle.com_serviceconnectors.yaml
 - bases/securityattribute.oracle.com_securityattributenamespaces.yaml
 - bases/securityattribute.oracle.com_securityattributes.yaml
+- bases/self.oracle.com_subscriptions.yaml
 - bases/servicecatalog.oracle.com_privateapplications.yaml
 - bases/servicecatalog.oracle.com_servicecatalogs.yaml
+- bases/servicemanagerproxy.oracle.com_serviceenvironments.yaml
 - bases/stackmonitoring.oracle.com_alarmconditions.yaml
 - bases/stackmonitoring.oracle.com_baselineablemetrics.yaml
 - bases/stackmonitoring.oracle.com_configs.yaml
@@ -403,10 +431,15 @@ resources:
 - bases/stackmonitoring.oracle.com_monitoringtemplates.yaml
 - bases/stackmonitoring.oracle.com_processsets.yaml
 - bases/streaming.oracle.com_streams.yaml
+- bases/tenantmanagercontrolplane.oracle.com_domains.yaml
+- bases/tenantmanagercontrolplane.oracle.com_organizations.yaml
 - bases/usageapi.oracle.com_customtables.yaml
 - bases/usageapi.oracle.com_queries.yaml
 - bases/usageapi.oracle.com_schedules.yaml
 - bases/usageapi.oracle.com_usagecarbonemissionsqueries.yaml
+- bases/vbsinst.oracle.com_vbsinstances.yaml
+- bases/visualbuilder.oracle.com_vbinstances.yaml
+- bases/vnmonitoring.oracle.com_pathanalyzertests.yaml
 - bases/vulnerabilityscanning.oracle.com_containerscanrecipes.yaml
 - bases/vulnerabilityscanning.oracle.com_containerscantargets.yaml
 - bases/vulnerabilityscanning.oracle.com_hostscanrecipes.yaml
@@ -421,6 +454,10 @@ resources:
 - bases/waf.oracle.com_networkaddresslists.yaml
 - bases/waf.oracle.com_webappfirewallpolicies.yaml
 - bases/waf.oracle.com_webappfirewalls.yaml
+- bases/wlms.oracle.com_managedinstances.yaml
+- bases/wlms.oracle.com_wlsdomains.yaml
+- bases/zpr.oracle.com_configurations.yaml
+- bases/zpr.oracle.com_zprpolicies.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 
 # patches:

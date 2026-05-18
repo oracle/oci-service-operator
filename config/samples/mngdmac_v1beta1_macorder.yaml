@@ -1,0 +1,23 @@
+#
+# Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+#
+
+#
+# Replace the OCI identifiers below before running e2e.
+# Update metadata.name and spec.displayName if you want to force a fresh create
+# instead of binding to an existing MacOrder with the same display name in the same
+# compartment.
+# Kubernetes delete maps to CancelMacOrder for the published contract.
+#
+apiVersion: mngdmac.oracle.com/v1beta1
+kind: MacOrder
+metadata:
+  name: macorder-sample
+spec:
+  compartmentId: ocid1.compartment.oc1..exampleuniqueID
+  displayName: "macorder-sample"
+  orderDescription: "Initial Mac server order"
+  orderSize: 1
+  shape: M4_PRO_MAC_MINI_64GB_2TB
+  commitmentTerm: YEARS_3

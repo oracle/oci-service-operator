@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <h2 id="argument-reference">Argument Reference</h2>
+    <p>The following arguments are supported:</p>
+    <ul>
+      <li><code>compartment_id</code> - (Required) (Updatable) The OCID of the compartment that contains the Visual Builder instance.</li>
+      <li><code>display_name</code> - (Optional) (Updatable) A user-friendly name for the Visual Builder instance.</li>
+      <li><code>defined_tags</code> - (Optional) (Updatable) Defined tags for this resource.</li>
+      <li><code>freeform_tags</code> - (Optional) (Updatable) Free-form tags for this resource.</li>
+      <li><code>idcs_open_id</code> - (Optional) (Updatable) The encrypted IDCS Open ID token used by the Visual Builder instance.</li>
+      <li><code>is_visual_builder_enabled</code> - (Optional) (Updatable) Enables Visual Builder for the instance.</li>
+      <li><code>node_count</code> - (Optional) (Updatable) The number of nodes for the Visual Builder instance.</li>
+      <li><code>custom_endpoint</code> - (Optional) (Updatable) Custom endpoint configuration.
+        <ul>
+          <li><code>hostname</code> - (Required) (Updatable) The custom hostname to use for the Visual Builder instance URL.</li>
+          <li><code>certificate_secret_id</code> - (Optional) (Updatable) The certificate secret OCID for the custom hostname.</li>
+        </ul>
+      </li>
+      <li><code>alternate_custom_endpoints</code> - (Optional) (Updatable) Alternate custom endpoints for the Visual Builder instance URL.
+        <ul>
+          <li><code>hostname</code> - (Required) (Updatable) The alternate custom hostname.</li>
+          <li><code>certificate_secret_id</code> - (Optional) (Updatable) The certificate secret OCID for the alternate custom hostname.</li>
+        </ul>
+      </li>
+      <li><code>network_endpoint_details</code> - (Optional) (Updatable) Public or private endpoint configuration for the Visual Builder instance.
+        <ul>
+          <li><code>network_endpoint_type</code> - (Required) (Updatable) The network endpoint type for the Visual Builder instance.</li>
+          <li><code>subnet_id</code> - (Optional) (Updatable) The subnet OCID for a private endpoint.</li>
+          <li><code>network_security_group_ids</code> - (Optional) (Updatable) Network security groups for a private endpoint.</li>
+          <li><code>allowlisted_http_ips</code> - (Optional) (Updatable) Allowlisted ingress CIDRs for a public endpoint.</li>
+          <li><code>allowlisted_http_vcns</code> - (Optional) (Updatable) Allowlisted VCNs for a public endpoint.
+            <ul>
+              <li><code>id</code> - (Required) (Updatable) The VCN OCID.</li>
+              <li><code>allowlisted_ip_cidrs</code> - (Optional) (Updatable) Allowlisted CIDRs for the VCN.</li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </body>
+</html>

@@ -555,6 +555,44 @@ func TestPackageResourceOperations(t *testing.T) {
 			},
 		},
 		{
+			name:       "generativeaidata EnrichmentJob maps generate and cancel aliases",
+			importPath: "github.com/oracle/oci-go-sdk/v65/generativeaidata",
+			rawName:    "EnrichmentJob",
+			assert: func(t *testing.T, operations map[string]OperationMethod) {
+				create := operations["Create"]
+				if create.MethodName != "GenerateEnrichmentJob" {
+					t.Fatalf("EnrichmentJob create method = %q, want GenerateEnrichmentJob", create.MethodName)
+				}
+				if create.RequestType != "GenerateEnrichmentJobRequest" {
+					t.Fatalf("EnrichmentJob create request type = %q, want GenerateEnrichmentJobRequest", create.RequestType)
+				}
+				if create.ClientType != "GenerateEnrichmentJobClient" {
+					t.Fatalf("EnrichmentJob create client type = %q, want GenerateEnrichmentJobClient", create.ClientType)
+				}
+				get := operations["Get"]
+				if get.MethodName != "GetEnrichmentJob" {
+					t.Fatalf("EnrichmentJob get method = %q, want GetEnrichmentJob", get.MethodName)
+				}
+				list := operations["List"]
+				if list.MethodName != "ListEnrichmentJobs" {
+					t.Fatalf("EnrichmentJob list method = %q, want ListEnrichmentJobs", list.MethodName)
+				}
+				deleteOp := operations["Delete"]
+				if deleteOp.MethodName != "CancelEnrichmentJob" {
+					t.Fatalf("EnrichmentJob delete method = %q, want CancelEnrichmentJob", deleteOp.MethodName)
+				}
+				if deleteOp.RequestType != "CancelEnrichmentJobRequest" {
+					t.Fatalf("EnrichmentJob delete request type = %q, want CancelEnrichmentJobRequest", deleteOp.RequestType)
+				}
+				if deleteOp.ClientType != "CancelEnrichmentJobClient" {
+					t.Fatalf("EnrichmentJob delete client type = %q, want CancelEnrichmentJobClient", deleteOp.ClientType)
+				}
+				if _, ok := operations["Update"]; ok {
+					t.Fatal("EnrichmentJob runtime metadata should not invent an Update operation")
+				}
+			},
+		},
+		{
 			name:       "queue Message prefers exact singular operations",
 			importPath: "github.com/oracle/oci-go-sdk/v65/queue",
 			rawName:    "Message",

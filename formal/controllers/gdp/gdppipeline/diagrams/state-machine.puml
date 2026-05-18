@@ -1,0 +1,133 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title State Machine - gdp/GdpPipeline
+skinparam state {
+  backgroundColor #f8fafc
+  borderColor #0f172a
+  fontColor #0f172a
+  startColor #1d4ed8
+  endColor #0f172a
+}
+left to right direction
+hide empty description
+state "Observe" as observe
+state "EvaluateReady" as evaluate_ready
+state "Ready" as ready
+state "Retryable" as retryable
+state "Failed" as failed
+observe : read spec, tracked status, delete intent,\nand current OCI lifecycle
+state "ResolveByLookup" as resolve_by_lookup
+state "RejectUnsupportedDrift" as reject_unsupported_drift
+state "ApplyUpdate" as apply_update
+state "DeletePending" as delete_pending
+state "Deleted" as deleted
+state "DeleteCleanupBlocked" as delete_cleanup_blocked
+[*] --> observe : CreateGdpPipeline
+observe --> resolve_by_lookup : tracked identity missing
+resolve_by_lookup --> evaluate_ready : lookup or create reaches\nACTIVE, INACTIVE
+resolve_by_lookup --> retryable : OCI state in CREATING,\nUPDATING, DELETING
+resolve_by_lookup --> failed : unresolved OCI error or non-success state
+observe --> evaluate_ready : OCI state in ACTIVE,\nINACTIVE
+observe --> retryable : OCI state in CREATING,\nUPDATING, DELETING
+observe --> failed : unresolved OCI error or non-success state
+evaluate_ready --> reject_unsupported_drift : force-new or conflicting\ndrift detected
+reject_unsupported_drift --> ready : wait for spec or live state change
+evaluate_ready --> apply_update : supported mutable drift for\napproval_key_vault_id,\nauthorization_details,\ndefined_tags (+9 more)
+apply_update --> ready : update path completes
+evaluate_ready --> ready : no supported drift remains
+ready --> ready : no supported drift remains
+retryable --> retryable : OCI remains retryable
+failed --> failed : OCI remains terminal
+ready --> delete_pending : delete requested
+retryable --> delete_pending : delete requested
+failed --> delete_pending : delete requested
+delete_pending --> delete_cleanup_blocked : cleanup or finalizer release remains blocked
+delete_cleanup_blocked --> deleted : retry delete completion until allowed
+deleted --> deleted : terminal stutter
+note right of ready
+shared diagram:
+shared/diagrams/shared-controller-state-machine.svg
+Start from the shared controller phase model and
+specialize imported provider states, delete
+targets, and failure exits here.
+archetype batch: Generated service-manager
+controllers map provider states into the shared
+controller phases with explicit finalizer and
+requeue policies.
+service: gdp
+slug: gdppipeline
+kind: GdpPipeline
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: provisioning, updating, terminating
+provider states: create CREATING, UPDATING;
+update UPDATING; delete DELETING
+supported drift: approval_key_vault_id,
+authorization_details, defined_tags, description
+(+8 more)
+reject before mutate: force-new fields
+bucket_details, compartment_id, peering_region,
+pipeline_type
+create-only fields: none
+list lookup: oci_gdp_gdp_pipelines filters
+compartment_id, display_name, gdp_pipeline_id,
+lifecycle_state
+conflicts: none
+open gaps: none
+GdpPipeline create, update, and delete are
+work-request-backed. The runtime records the
+opening opc-work-request-id, polls
+GetGdpWorkRequest through the generatedruntime
+async seam, and rereads GetGdpPipeline before
+projecting status or completing delete
+confirmation.
+GDP work-request OperationStatus values
+normalize into the shared async classes and GDP
+operation types normalize into create, update,
+and delete phases. Raw work-request status,
+operation type, message, percent complete, and
+work-request ID remain visible in
+status.async.current for debugging.
+Success states are explicit: ACTIVE and INACTIVE
+settle success, while NEEDS_ATTENTION is
+terminal non-success rather than a default
+active state.
+Pre-create reuse is exact on compartmentId,
+displayName, pipelineType, and peeringRegion,
+and the runtime confirms bucketDetails from a
+follow-up GET before binding to an existing
+pipeline. When a tracked OCID already exists,
+list reuse stays keyed to the service-specific
+gdpPipelineId filter.
+Mutable drift is limited to
+UpdateGdpPipelineDetails fields displayName,
+description, serviceLogGroupId, fileTypes,
+authorizationDetails,
+isFileOverrideInDestinationEnabled,
+isScanningEnabled, isChunkingEnabled,
+isApprovalNeeded, approvalKeyVaultId,
+freeformTags, and definedTags. Strings, maps,
+and false booleans keep explicit clear intent,
+while zero-length fileTypes clears remain
+unpublished because the pinned SDK update
+request omits empty slices.
+Start/Stop/Peer/Rotate/ChangeCompartment
+auxiliaries remain out-of-scope drift for the
+published contract.
+end note
+note right of delete_pending
+delete policy: required
+delete observe: GetGdpPipeline or
+ListGdpPipelines
+delete targets: DELETED
+end note
+@enduml

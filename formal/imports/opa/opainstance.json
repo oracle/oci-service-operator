@@ -1,0 +1,156 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "opa",
+  "slug": "opainstance",
+  "kind": "OpaInstance",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_opa_opa_instance",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOpaInstance",
+        "requestType": "opa.CreateOpaInstanceRequest",
+        "responseType": "opa.CreateOpaInstanceResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOpaInstance",
+        "requestType": "opa.GetOpaInstanceRequest",
+        "responseType": "opa.GetOpaInstanceResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOpaInstances",
+        "requestType": "opa.ListOpaInstancesRequest",
+        "responseType": "opa.ListOpaInstancesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOpaInstance",
+        "requestType": "opa.UpdateOpaInstanceRequest",
+        "responseType": "opa.UpdateOpaInstanceResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOpaInstance",
+        "requestType": "opa.DeleteOpaInstanceRequest",
+        "responseType": "opa.DeleteOpaInstanceResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "INACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags"
+    ],
+    "forceNew": [
+      "compartment_id",
+      "consumption_model",
+      "idcs_at",
+      "is_breakglass_enabled",
+      "metering_type",
+      "shape_name"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "opainstance",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "opainstance",
+        "action": "UPDATED"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "opainstance",
+        "action": "DELETED"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED",
+      "NOT_FOUND"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_opa_opa_instances",
+    "collectionField": "opa_instances",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "id",
+      "lifecycle_state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/opa/opainstance/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/opa/opainstance/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "list-lookup",
+      "mutation-policy",
+      "status-projection",
+      "waiter-work-request",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: CreateOpaInstance, GetOpaInstance, ListOpaInstances, UpdateOpaInstance, DeleteOpaInstance, ChangeOpaInstanceCompartment, StartOpaInstance, StopOpaInstance, GetWorkRequest, ListWorkRequests, ListWorkRequestErrors, and ListWorkRequestLogs are present in v65.110.0. ListOpaInstances filters compartmentId, lifecycleState, displayName, and id, while create, update, and delete responses expose opc-work-request-id but do not return an OpaInstance body.",
+    "Pinned provider surfaces from the onboarding audit: oci_opa_opa_instance is the resource and singular data source, and oci_opa_opa_instances is the list data source. The reviewed runtime keeps using service-SDK GetWorkRequest polling and shared async status instead of provider helper waiters.",
+    "Repo-authored bind-versus-create stays explicit: when no OCI identifier is tracked, the runtime uses exact compartmentId plus displayName matching, ignores FAILED, DELETING, and DELETED summaries, and fails on duplicate exact-name matches instead of adopting arbitrarily.",
+    "Repo-authored mutation policy stays explicit: only displayName, description, freeformTags, and definedTags reconcile in place. ChangeOpaInstanceCompartment, StartOpaInstance, and StopOpaInstance remain out-of-scope auxiliary operations, while compartmentId, shapeName, consumptionModel, meteringType, IdcsAt, and isBreakglassEnabled stay replacement-only drift.",
+    "IdcsAt remains a create-time input only. OCI does not echo it back on OpaInstance, so the reviewed runtime intentionally normalizes it out of post-create parity checks instead of treating the missing value as replacement-required drift.",
+    "Reviewed lifecycle handling treats INACTIVE as a successful steady state alongside ACTIVE because the service exposes START/STOP auxiliaries that remain out of scope for the published runtime surface."
+  ]
+}

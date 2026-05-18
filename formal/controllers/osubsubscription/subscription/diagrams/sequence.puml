@@ -1,0 +1,122 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Sequence - osubsubscription/Subscription
+hide footbox
+skinparam sequence {
+  actorBorderColor #0f172a
+  actorBackgroundColor #e2e8f0
+  participantBorderColor #0f172a
+  participantBackgroundColor #e2e8f0
+  participantFontColor #0f172a
+  lifeLineBorderColor #94a3b8
+  groupBorderColor #cbd5e1
+  groupBackgroundColor #f8fafc
+}
+actor Kubernetes
+participant Controller
+participant BaseReconciler
+participant "OSOKServiceManager" as ServiceManager
+participant OCI
+note over BaseReconciler,ServiceManager
+shared resolution:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete:
+shared/diagrams/shared-delete-sequence.svg
+end note
+Kubernetes -> Controller: enqueue Subscription reconcile
+Controller -> BaseReconciler: Reconcile(request)
+BaseReconciler -> ServiceManager: reconcile desired Subscription
+group Lookup and bind
+else tracked identity is missing
+ServiceManager -> OCI: ListSubscriptions(filters:\ncompartment_id, plan_number,\nsubscription_id, buyer_email)
+ServiceManager --> BaseReconciler: persist resolved OCI identity in status
+end
+alt delete requested
+group Delete
+ServiceManager -> OCI: none
+ServiceManager -> OCI: confirm delete via ListSubscriptions
+ServiceManager --> BaseReconciler: best-effort delete completion observed
+end
+else live state requires field-aware\ndrift evaluation
+group Drift handling
+note over ServiceManager,OCI
+Supported update surface: none
+Reject before mutate: force-new fields
+compartment_id, plan_number,
+subscription_id, buyer_email (+5 more)
+Lookup filters: compartment_id,
+plan_number, subscription_id,
+buyer_email
+end note
+opt force-new or conflicting drift is detected
+ServiceManager --> BaseReconciler: reject before OCI mutation
+end
+end
+ServiceManager --> BaseReconciler: status=required, finalizer=none
+end
+BaseReconciler --> Controller: requeue on updating
+note right of ServiceManager
+shared diagram:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete diagram:
+shared/diagrams/shared-delete-sequence.svg
+Start from the shared resolution sequence for
+OCID binding, datasource pagination, and
+create-or-update dispatch.
+Layer the shared delete sequence when finalizer
+retention, delete confirmation, work-request
+polling, or Secret cleanup apply.
+archetype batch: Generated service-manager
+controllers follow the shared resolution and
+delete sequences with imported waits and
+controller-local policy.
+service: osubsubscription
+slug: subscription
+kind: Subscription
+archetype: generated-service-manager
+status/finalizer: required / none
+requeue: updating
+provider states: create none; update none;
+delete none
+supported drift: none
+reject before mutate: force-new fields
+compartment_id, plan_number, subscription_id,
+buyer_email (+5 more)
+create-only fields: none
+list lookup: oci_osubsubscription_subscriptions
+filters compartment_id, plan_number,
+subscription_id, buyer_email
+conflicts: none
+open gaps: bind-versus-create,
+lifecycle-classification
+OSubscription exposes ListSubscriptions only in
+the pinned SDK, so the published runtime is
+query-backed and observe-only.
+Reconcile requires compartmentId plus exactly
+one of planNumber, subscriptionId, or
+buyerEmail. The runtime also passes
+isCommitInfoRequired, sort controls,
+xOneGatewaySubscriptionId, and xOneOriginRegion
+when those spec fields are populated.
+SubscriptionSummary does not expose a clean
+top-level OCID or the request filter fields, so
+the package-local read model echoes the selector
+fields into projected list items and accepts
+only a unique exact match.
+No OCI create, update, get, or delete operation
+is published. Kubernetes delete is local-only,
+and the runtime leaves status.status.ocid empty.
+A blank sdkStatus string is treated as retryable
+updating. Any non-empty sdkStatus settles
+success while the raw string remains visible on
+the CR.
+end note
+@enduml

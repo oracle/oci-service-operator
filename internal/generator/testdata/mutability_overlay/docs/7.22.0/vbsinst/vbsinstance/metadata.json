@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "vbsinst",
+  "kind": "VbsInstance",
+  "formalSlug": "vbsinstance",
+  "providerResource": "oci_vbs_inst_vbs_instance",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/vbs_inst_vbs_instance",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/vbs_inst_vbs_instance",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/vbsinst/vbsinstance/page.html",
+  "bodySHA256": "ec5195d9265b93bbf5e1de928676860551b886301e5694102ac8d356b3139a2d",
+  "bodyBytes": 1300,
+  "fixtureBodyPath": "7.22.0/vbsinst/vbsinstance/page.html"
+}

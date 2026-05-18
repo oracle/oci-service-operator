@@ -1,0 +1,149 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Activity - gdp/GdpPipeline
+skinparam activity {
+  backgroundColor #f8fafc
+  borderColor #0f172a
+  fontColor #0f172a
+  diamondBackgroundColor #e2e8f0
+  diamondBorderColor #1d4ed8
+  diamondFontColor #0f172a
+  startColor #1d4ed8
+  endColor #0f172a
+  barColor #1d4ed8
+}
+start
+partition "Observe and Bind" {
+:Start from shared flow\nshared/diagrams/shared-reconcile-activity.svg;
+:Read desired GdpPipeline spec, tracked status,\nand delete intent;
+if ("Tracked or explicit OCI identity present?") then (yes)
+:Get the current OCI resource via\nGetGdpPipeline;
+else (no)
+:Resolve an existing OCI resource through\nListGdpPipelines using filters compartment_id,\ndisplay_name, gdp_pipeline_id, lifecycle_state;
+:Create the OCI resource via CreateGdpPipeline\nwhen no reusable match is found;
+:Persist the resolved or created OCI identity\ninto status;
+endif
+}
+if ("Delete requested?") then (yes)
+partition "Delete" {
+:Delete path uses DeleteGdpPipeline with\nrequired via GetGdpPipeline or\nListGdpPipelines to DELETED confirmation;
+:Confirm deletion via GetGdpPipeline or\nListGdpPipelines until OCI reaches DELETED;
+if ("Delete cleanup and finalizer release succeed?") then (yes)
+:Remove the finalizer after delete completion;
+else (no)
+:Stay blocked until cleanup or finalizer\nrelease succeeds;
+endif
+}
+stop
+else (no)
+partition "Lifecycle Classification" {
+if ("OCI state in retryable set?") then (yes)
+:Request requeue while OCI remains in CREATING,\nUPDATING, DELETING;
+stop
+endif
+if ("OCI state is outside success targets?") then (yes)
+:Return an unsuccessful reconcile result until\nOCI reaches ACTIVE, INACTIVE;
+stop
+endif
+}
+partition "Ready and Drift Handling" {
+:Compare live OCI state against the imported\nfield surface;
+if ("Force-new or conflicting drift detected?") then (yes)
+:Reject drift before OCI mutation for force-new\nfields bucket_details, compartment_id,\npeering_region, pipeline_type;
+stop
+endif
+if ("Supported mutable drift detected?") then (yes)
+:Apply UpdateGdpPipeline only for mutable\nfields approval_key_vault_id,\nauthorization_details, defined_tags,\ndescription (+8 more);
+else (no)
+:Skip the no-op mutation path;
+endif
+:Run provider helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=gdppipeline action=CREATED;\nupdate=tfresource.UpdateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=gdppipeline action=UPDATED;\ndelete=tfresource.DeleteResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=gdppipeline action=DELETED when the\nmatching field-driven path executes;
+:Return success for the ACTIVE, INACTIVE\nsuccess state;
+:Project required status and finalizer policy\nretain-until-confirmed-delete;
+:Requeue on provisioning, updating, terminating;
+}
+endif
+stop
+note right
+shared diagram:
+shared/diagrams/shared-reconcile-activity.svg
+Start from the shared reconcile activity and
+specialize provider-backed CRUD, wait, and
+status-projection details here.
+Controller-local activity diagrams add
+list-lookup hints, secret policies, delete
+handling, and open formal gaps.
+archetype batch: Generated service-manager
+controllers specialize the shared reconcile path
+with formal runtime ownership.
+service: gdp
+slug: gdppipeline
+kind: GdpPipeline
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: provisioning, updating, terminating
+provider states: create CREATING, UPDATING;
+update UPDATING; delete DELETING
+supported drift: approval_key_vault_id,
+authorization_details, defined_tags, description
+(+8 more)
+reject before mutate: force-new fields
+bucket_details, compartment_id, peering_region,
+pipeline_type
+create-only fields: none
+list lookup: oci_gdp_gdp_pipelines filters
+compartment_id, display_name, gdp_pipeline_id,
+lifecycle_state
+conflicts: none
+open gaps: none
+GdpPipeline create, update, and delete are
+work-request-backed. The runtime records the
+opening opc-work-request-id, polls
+GetGdpWorkRequest through the generatedruntime
+async seam, and rereads GetGdpPipeline before
+projecting status or completing delete
+confirmation.
+GDP work-request OperationStatus values
+normalize into the shared async classes and GDP
+operation types normalize into create, update,
+and delete phases. Raw work-request status,
+operation type, message, percent complete, and
+work-request ID remain visible in
+status.async.current for debugging.
+Success states are explicit: ACTIVE and INACTIVE
+settle success, while NEEDS_ATTENTION is
+terminal non-success rather than a default
+active state.
+Pre-create reuse is exact on compartmentId,
+displayName, pipelineType, and peeringRegion,
+and the runtime confirms bucketDetails from a
+follow-up GET before binding to an existing
+pipeline. When a tracked OCID already exists,
+list reuse stays keyed to the service-specific
+gdpPipelineId filter.
+Mutable drift is limited to
+UpdateGdpPipelineDetails fields displayName,
+description, serviceLogGroupId, fileTypes,
+authorizationDetails,
+isFileOverrideInDestinationEnabled,
+isScanningEnabled, isChunkingEnabled,
+isApprovalNeeded, approvalKeyVaultId,
+freeformTags, and definedTags. Strings, maps,
+and false booleans keep explicit clear intent,
+while zero-length fileTypes clears remain
+unpublished because the pinned SDK update
+request omits empty slices.
+Start/Stop/Peer/Rotate/ChangeCompartment
+auxiliaries remain out-of-scope drift for the
+published contract.
+end note
+@enduml

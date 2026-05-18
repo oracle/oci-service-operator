@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "distributeddatabase",
+  "kind": "DistributedDatabasePrivateEndpoint",
+  "formalSlug": "distributeddatabaseprivateendpoint",
+  "providerResource": "oci_distributeddatabase_distributed_database_private_endpoint",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/distributeddatabase_distributed_database_private_endpoint",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/distributeddatabase_distributed_database_private_endpoint",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/distributeddatabase/distributeddatabaseprivateendpoint/page.html",
+  "bodySHA256": "d72bb0036bbb8701a890e32b0842730146ebafaef54a49a3e45cc6cfaf7f6d9b",
+  "bodyBytes": 971,
+  "fixtureBodyPath": "7.22.0/distributeddatabase/distributeddatabaseprivateendpoint/page.html"
+}

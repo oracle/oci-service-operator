@@ -1,0 +1,46 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: wlms
+slug: wlsdomain
+kind: WlsDomain
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  listLookup:
+    filters:
+      - compartmentId
+      - displayName
+      - id
+      - middlewareType
+      - weblogicVersion
+    matchRule: exact id or exact compartmentId plus displayName plus optional middlewareType and weblogicVersion unique match in ACTIVE, CREATING, or UPDATING; duplicate matches fail
+  mutation:
+    mutable:
+      - configuration
+      - definedTags
+      - freeformTags
+    forceNew:
+      - compartmentId
+      - displayName
+      - id
+      - middlewareType
+      - weblogicVersion
+notes:
+  - WLMS does not expose CreateWlsDomain in v65.110.0, so the published
+    runtime is bind/manage-existing only. Untracked reconciles must resolve an
+    existing domain by explicit spec.id or by an exact unique list match
+    before any update or delete can proceed.
+  - Reviewed lifecycle mapping treats CREATING as provisioning, UPDATING as
+    updating, ACTIVE as success, DELETING as terminating, and FAILED or
+    NEEDS_ATTENTION as terminal failure.
+  - UpdateWlsDomain only reconciles configuration and tag fields.
+    ChangeWlsDomainCompartment remains out of scope, so compartmentId,
+    displayName, middlewareType, and weblogicVersion stay bind-only
+    replacement drift.
+  - DeleteWlsDomain returns no work-request identifier. The runtime relies on
+    GetWlsDomain or ListWlsDomains rereads to confirm DELETED or NOT_FOUND
+    before finalizer release.

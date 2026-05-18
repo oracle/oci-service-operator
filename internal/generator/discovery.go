@@ -19,7 +19,7 @@ import (
 	"github.com/oracle/oci-service-operator/internal/ocisdk"
 )
 
-var operationPattern = regexp.MustCompile(`^(Create|Get|List|Update|Delete|Launch|Terminate)(.+?)(Request|Response)$`)
+var operationPattern = regexp.MustCompile(`^(Create|Get|List|Update|Delete|Launch|Terminate|Generate|Cancel)(.+?)(Request|Response)$`)
 
 type packageDirResolver = ocisdk.ResolveDirFunc
 
@@ -326,20 +326,7 @@ func buildRuntimeModel(pkg *ocisdk.Package, rawName string, operations []string,
 		return nil, fmt.Errorf("sdk package metadata is required")
 	}
 
-	clientType, err := runtimeClientType(rawName, discovered)
-	if err != nil {
-		return nil, err
-	}
-	constructor, ok := pkg.ClientConstructor(clientType)
-	if !ok {
-		return nil, fmt.Errorf("client %q does not expose a WithConfigurationProvider constructor", clientType)
-	}
-
-	model := &RuntimeModel{
-		ClientType:            clientType,
-		ClientConstructor:     constructor.Name,
-		ClientConstructorKind: string(constructor.Kind),
-	}
+	model := &RuntimeModel{}
 	for _, operation := range operations {
 		method, ok := discovered[operation]
 		if !ok {
@@ -351,22 +338,18 @@ func buildRuntimeModel(pkg *ocisdk.Package, rawName string, operations []string,
 		}
 		assignRuntimeOperation(model, operation, binding)
 	}
+	clients, err := collectRuntimeClients(model)
+	if err != nil {
+		return nil, fmt.Errorf("collect SDK clients for %q: %w", rawName, err)
+	}
+	model.Clients = clients
+	if len(clients) == 1 {
+		model.ClientType = clients[0].TypeName
+		model.ClientConstructor = clients[0].Constructor
+		model.ClientConstructorKind = clients[0].ConstructorKind
+	}
 
 	return model, nil
-}
-
-func runtimeClientType(rawName string, discovered map[string]ocisdk.OperationMethod) (string, error) {
-	var clientType string
-	for _, method := range discovered {
-		if clientType == "" {
-			clientType = method.ClientType
-			continue
-		}
-		if method.ClientType != clientType {
-			return "", fmt.Errorf("resource %q spans multiple SDK clients: %q and %q", rawName, clientType, method.ClientType)
-		}
-	}
-	return clientType, nil
 }
 
 func assignRuntimeOperation(model *RuntimeModel, operation string, binding *RuntimeOperationModel) {
@@ -393,14 +376,81 @@ func buildRuntimeOperationModel(pkg *ocisdk.Package, rawName string, operation s
 	if err != nil {
 		return nil, fmt.Errorf("build %s request fields for %q: %w", operation, rawName, err)
 	}
+	constructor, ok := pkg.ClientConstructor(method.ClientType)
+	if !ok {
+		return nil, fmt.Errorf("client %q does not expose a WithConfigurationProvider constructor", method.ClientType)
+	}
 
 	return &RuntimeOperationModel{
-		MethodName:       method.MethodName,
-		RequestTypeName:  method.RequestType,
-		ResponseTypeName: method.ResponseType,
-		UsesRequest:      method.UsesRequest,
-		RequestFields:    requestFields,
+		MethodName:            method.MethodName,
+		RequestTypeName:       method.RequestType,
+		ResponseTypeName:      method.ResponseType,
+		UsesRequest:           method.UsesRequest,
+		RequestFields:         requestFields,
+		ClientType:            method.ClientType,
+		ClientConstructor:     constructor.Name,
+		ClientConstructorKind: string(constructor.Kind),
 	}, nil
+}
+
+func collectRuntimeClients(model *RuntimeModel) ([]SDKClientModel, error) {
+	if model == nil {
+		return nil, nil
+	}
+
+	operations := []*RuntimeOperationModel{model.Create, model.Get, model.List, model.Update, model.Delete}
+	clients := make([]SDKClientModel, 0, len(operations))
+	clientIndexes := make(map[string]int, len(operations))
+	usedFieldNames := make(map[string]struct{}, len(operations))
+
+	for _, operation := range operations {
+		if operation == nil || strings.TrimSpace(operation.ClientType) == "" {
+			continue
+		}
+		if index, ok := clientIndexes[operation.ClientType]; ok {
+			existing := clients[index]
+			if existing.Constructor != operation.ClientConstructor || existing.ConstructorKind != operation.ClientConstructorKind {
+				return nil, fmt.Errorf("client %q uses inconsistent constructors %q/%q and %q/%q",
+					operation.ClientType,
+					existing.Constructor,
+					existing.ConstructorKind,
+					operation.ClientConstructor,
+					operation.ClientConstructorKind,
+				)
+			}
+			operation.ClientFieldName = existing.FieldName
+			continue
+		}
+
+		fieldName := uniqueRuntimeClientFieldName(operation.ClientType, usedFieldNames)
+		clientIndexes[operation.ClientType] = len(clients)
+		clients = append(clients, SDKClientModel{
+			TypeName:        operation.ClientType,
+			Constructor:     operation.ClientConstructor,
+			ConstructorKind: operation.ClientConstructorKind,
+			FieldName:       fieldName,
+			VarName:         fieldName + "Client",
+		})
+		operation.ClientFieldName = fieldName
+	}
+
+	return clients, nil
+}
+
+func uniqueRuntimeClientFieldName(typeName string, used map[string]struct{}) string {
+	base := safeGoIdentifier(lowerCamel(strings.TrimSpace(typeName)))
+	if base == "" {
+		base = "sdkClient"
+	}
+
+	candidate := base
+	for suffix := 2; ; suffix++ {
+		if _, exists := used[candidate]; !exists {
+			used[candidate] = struct{}{}
+			return candidate
+		}
+		candidate = fmt.Sprintf("%s%d", base, suffix)
+	}
 }
 
 func runtimeRequestFields(pkg *ocisdk.Package, rawName string, operation string, method ocisdk.OperationMethod) ([]RuntimeRequestFieldModel, error) {
@@ -479,13 +529,16 @@ func shouldPreferResourceID(operation string, rawName string, field ocisdk.Field
 	if operation == "Create" || field.Contribution != ocisdk.FieldContributionPath {
 		return false
 	}
+	requestName := strings.ToLower(strings.TrimSpace(field.RequestName))
+	if requestName == "" {
+		requestName = strings.ToLower(strings.TrimSpace(field.Name))
+	}
+	rawName = strings.ToLower(strings.TrimSpace(rawName))
+	matchesResourceID := requestName != "" && rawName != "" && strings.Contains(requestName, rawName) && strings.HasSuffix(requestName, "id")
 	if pathFieldCount == 1 {
 		return true
 	}
-
-	requestName := strings.ToLower(strings.TrimSpace(field.RequestName))
-	rawName = strings.ToLower(strings.TrimSpace(rawName))
-	return requestName != "" && rawName != "" && strings.Contains(requestName, rawName) && strings.HasSuffix(requestName, "id")
+	return matchesResourceID
 }
 
 func hasField(fields []FieldModel, name string) bool {

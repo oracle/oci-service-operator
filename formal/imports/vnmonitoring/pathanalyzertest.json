@@ -1,0 +1,130 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "vnmonitoring",
+  "slug": "pathanalyzertest",
+  "kind": "PathAnalyzerTest",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_vn_monitoring_path_analyzer_test",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreatePathAnalyzerTest",
+        "requestType": "vnmonitoring.CreatePathAnalyzerTestRequest",
+        "responseType": "vnmonitoring.CreatePathAnalyzerTestResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetPathAnalyzerTest",
+        "requestType": "vnmonitoring.GetPathAnalyzerTestRequest",
+        "responseType": "vnmonitoring.GetPathAnalyzerTestResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListPathAnalyzerTests",
+        "requestType": "vnmonitoring.ListPathAnalyzerTestsRequest",
+        "responseType": "vnmonitoring.ListPathAnalyzerTestsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdatePathAnalyzerTest",
+        "requestType": "vnmonitoring.UpdatePathAnalyzerTestRequest",
+        "responseType": "vnmonitoring.UpdatePathAnalyzerTestResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeletePathAnalyzerTest",
+        "requestType": "vnmonitoring.DeletePathAnalyzerTestRequest",
+        "responseType": "vnmonitoring.DeletePathAnalyzerTestResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "defined_tags",
+      "destination_endpoint",
+      "display_name",
+      "freeform_tags",
+      "protocol",
+      "protocol_parameters",
+      "query_options",
+      "source_endpoint"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [],
+    "target": [
+      "DELETED",
+      "NOT_FOUND"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_vn_monitoring_path_analyzer_tests",
+    "collectionField": "path_analyzer_tests",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "lifecycle_state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/vnmonitoring/pathanalyzertest/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/vnmonitoring/pathanalyzertest/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "lifecycle-classification",
+      "list-lookup",
+      "status-projection",
+      "synchronous-write-success",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: CreatePathAnalyzerTest, GetPathAnalyzerTest, ListPathAnalyzerTests, UpdatePathAnalyzerTest, and DeletePathAnalyzerTest expose the full CRUD family for PathAnalyzerTest.",
+    "Pinned OCI SDK contract: CreatePathAnalyzerTestResponse and UpdatePathAnalyzerTestResponse return the PathAnalyzerTest body directly and do not expose work-request identifiers. DeletePathAnalyzerTestResponse returns only headers.",
+    "Pinned OCI SDK contract: PathAnalyzerTest exposes only ACTIVE and DELETED lifecycle states. The reviewed runtime therefore treats create and update as synchronous read-after-write flows and treats either DELETED or NOT_FOUND as terminal during confirm-delete rereads instead of relying on lifecycle polling or work-request tracking.",
+    "ListPathAnalyzerTestsRequest filters by compartmentId, optional displayName, and optional lifecycleState. The published runtime scopes by compartmentId, uses displayName when present, and narrows candidates in memory with the reviewed identity surface compartmentId, displayName, protocol, sourceEndpoint, destinationEndpoint, queryOptions, and protocolParameters.",
+    "UpdatePathAnalyzerTestDetails exposes displayName, protocol, sourceEndpoint, destinationEndpoint, protocolParameters, queryOptions, freeformTags, and definedTags. Repo-authored behavior keeps compartmentId replacement-only while reconciling the update-body surface in place. The separate change-compartment action remains unpublished."
+  ]
+}

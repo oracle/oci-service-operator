@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <h2 id="argument-reference">Argument Reference</h2>
+    <p>The following arguments are supported:</p>
+    <ul>
+      <li><code>compartment_id</code> - (Required) (Updatable) The [OCID](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment to create the knowledge base in.</li>
+      <li><code>defined_tags</code> - (Optional) (Updatable) Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).  Example: <code>{&#34;Operations.CostCenter&#34;: &#34;42&#34;}</code></li>
+      <li><code>description</code> - (Optional) (Updatable) A user-friendly description of the knowledge base.</li>
+      <li><code>display_name</code> - (Optional) (Updatable) A user-friendly name. Does not have to be unique, and it&#39;s changeable. Avoid entering confidential information.</li>
+      <li><code>freeform_tags</code> - (Optional) (Updatable) Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).  Example: <code>{&#34;Department&#34;: &#34;Finance&#34;}</code></li>
+      <li><code>index_config</code> - (Required) (Updatable) The index configuration of Knowledge bases.
+        <ul>
+          <li><code>cluster_id</code> - (Required when index_config_type=OCI_OPEN_SEARCH_INDEX_CONFIG) (Updatable) The [OCID](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the OpenSearch Cluster.</li>
+          <li><code>database_connection</code> - (Required when index_config_type=OCI_DATABASE_CONFIG) (Updatable) The connection type for Databases.
+            <ul>
+              <li><code>connection_id</code> - (Required) (Updatable) The [OCID](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Database Tools Connection.</li>
+              <li><code>connection_type</code> - (Required) (Updatable) The type of Database connection.</li>
+            </ul>
+          </li>
+          <li><code>database_functions</code> - (Required when index_config_type=OCI_DATABASE_CONFIG) (Updatable) Array of Database functions to be used.
+            <ul>
+              <li><code>name</code> - (Required when index_config_type=OCI_DATABASE_CONFIG) (Updatable) The name of the Database function.</li>
+            </ul>
+          </li>
+          <li><code>index_config_type</code> - (Required) (Updatable) The type of index.</li>
+          <li><code>indexes</code> - (Required when index_config_type=OCI_OPEN_SEARCH_INDEX_CONFIG) (Updatable) Index configuration for open search.
+            <ul>
+              <li><code>name</code> - (Required when index_config_type=OCI_OPEN_SEARCH_INDEX_CONFIG) (Updatable) The index name in opensearch.</li>
+              <li><code>schema</code> - (Required when index_config_type=OCI_OPEN_SEARCH_INDEX_CONFIG) (Updatable) The index schema details.
+                <ul>
+                  <li><code>body_key</code> - (Required when index_config_type=OCI_OPEN_SEARCH_INDEX_CONFIG) (Updatable) Body key name.</li>
+                  <li><code>embedding_body_key</code> - (Applicable when index_config_type=OCI_OPEN_SEARCH_INDEX_CONFIG) (Updatable) Field within customer managed Oracle Cloud Infrastructure OpenSearch document containing the vector embedding for queries.</li>
+                  <li><code>title_key</code> - (Applicable when index_config_type=OCI_OPEN_SEARCH_INDEX_CONFIG) (Updatable) Title key that stores the Title of a document, if available.</li>
+                  <li><code>url_key</code> - (Applicable when index_config_type=OCI_OPEN_SEARCH_INDEX_CONFIG) (Updatable) URL key that stores the URL of a document, if available.</li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <li><code>secret_detail</code> - (Required when index_config_type=OCI_OPEN_SEARCH_INDEX_CONFIG) (Updatable) The details of configured security configuration on OpenSearch.
+            <ul>
+              <li><code>client_id</code> - (Required when type=IDCS_SECRET) (Updatable) The IDCS Connect clientId.</li>
+              <li><code>idcs_url</code> - (Required when type=IDCS_SECRET) (Updatable) The URL represent authentication url of the IDCS.</li>
+              <li><code>scope_url</code> - (Required when type=IDCS_SECRET) (Updatable) Fully qualified scope url</li>
+              <li><code>type</code> - (Required) (Updatable) The type of OpenID.</li>
+              <li><code>vault_secret_id</code> - (Required) (Updatable) The [OCID](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the secret for basic authentication.</li>
+            </ul>
+          </li>
+          <li><code>should_enable_hybrid_search</code> - (Applicable when index_config_type=DEFAULT_INDEX_CONFIG) (Updatable) Whether to enable Hybrid search in service managed OpenSearch. ** IMPORTANT ** Any change to a property that does not support update will force the destruction and recreation of the resource with the new property values</li>
+        </ul>
+      </li>
+    </ul>
+  </body>
+</html>

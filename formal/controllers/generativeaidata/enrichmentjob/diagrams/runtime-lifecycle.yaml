@@ -1,0 +1,73 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: generativeaidata
+slug: enrichmentjob
+kind: EnrichmentJob
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - terminating
+  - failed
+repoAuthored:
+  providerLifecycle:
+    createPending:
+      - ACCEPTED
+      - IN_PROGRESS
+    deletePending:
+      - CANCELING
+  listLookup:
+    filters:
+      - semantic_store_id
+      - compartment_id
+      - display_name
+    matchRule: Exact displayName match within the requested semanticStoreId and compartmentId. Duplicate matches fail.
+  mutation:
+    forceNew:
+      - compartment_id
+      - semantic_store_id
+    createOnly:
+      - defined_tags
+      - description
+      - display_name
+      - enrichment_job_configuration
+      - enrichment_job_type
+      - freeform_tags
+  hooks:
+    create:
+      - helper: tfresource.CreateResource
+    delete:
+      - helper: tfresource.DeleteResource
+  followUp:
+    create: read-after-write
+    delete: confirm-delete
+notes:
+  - >-
+    EnrichmentJob keeps the generated controller and service-manager shell, but
+    the handwritten runtime client overrides the published contract so
+    Kubernetes create calls GenerateEnrichmentJob and Kubernetes delete
+    requests CancelEnrichmentJob instead of claiming a plain CRUD surface.
+  - >-
+    ACCEPTED and IN_PROGRESS remain the provisioning states for create and
+    ordinary observe. SUCCEEDED is the only steady success state, while FAILED
+    and CANCELED are terminal unsuccessful outcomes that surface directly on
+    the CR status.
+  - >-
+    Delete confirmation is explicit repo-authored cancel behavior: the
+    finalizer is retained until GetEnrichmentJob reports CANCELED, SUCCEEDED,
+    FAILED, or NotFound, and a post-cancel read that still shows ACCEPTED or
+    IN_PROGRESS is treated as pending until OCI reflects the cancellation.
+  - >-
+    Pre-create reuse only runs when spec.displayName is present.
+    ListEnrichmentJobs is narrowed by semanticStoreId, compartmentId, and
+    displayName, then duplicate exact matches fail instead of binding
+    arbitrarily.
+  - >-
+    Because the pinned SDK has no UpdateEnrichmentJob, compartmentId and
+    semanticStoreId remain create-time identity inputs and every other
+    published spec field is create-only drift after create. The runtime
+    rejects that drift instead of simulating an update surface.
+  - >-
+    The pinned terraform-provider-oci revision has no matching
+    generativeaidata resource, so the import catalog for this row is
+    SDK-shaped and repo-curated.

@@ -1,0 +1,83 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: psa
+slug: privateserviceaccess
+kind: PrivateServiceAccess
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending:
+      - CREATING
+    updatePending:
+      - UPDATING
+    deletePending:
+      - DELETING
+  listLookup:
+    filters:
+      - compartmentId
+      - displayName
+      - serviceId
+      - id
+    matchRule: >-
+      Adopt only a unique exact ListPrivateServiceAccesses match on
+      compartmentId plus displayName plus serviceId whose returned subnetId
+      also matches and whose lifecycle is ACTIVE, CREATING, or UPDATING;
+      duplicate matches fail, and pre-create lookup is skipped when
+      compartmentId, subnetId, serviceId, or displayName is empty.
+  mutation:
+    mutable:
+      - definedTags
+      - description
+      - displayName
+      - freeformTags
+      - nsgIds
+      - securityAttributes
+    forceNew:
+      - compartmentId
+      - ipv4Ip
+      - serviceId
+      - subnetId
+  hooks:
+    create:
+      - helper: tfresource.CreateResource
+      - helper: tfresource.WaitForWorkRequestWithErrorHandling
+        entityType: privateserviceaccess
+        action: CREATED
+    update:
+      - helper: tfresource.UpdateResource
+      - helper: tfresource.WaitForWorkRequestWithErrorHandling
+        entityType: privateserviceaccess
+        action: UPDATED
+    delete:
+      - helper: tfresource.DeleteResource
+      - helper: tfresource.WaitForWorkRequestWithErrorHandling
+        entityType: privateserviceaccess
+        action: DELETED
+  followUp:
+    create: GetPsaWorkRequest -> GetPrivateServiceAccess
+    update: GetPsaWorkRequest -> GetPrivateServiceAccess
+    delete: GetPsaWorkRequest -> GetPrivateServiceAccess/ListPrivateServiceAccesses confirm-delete
+notes:
+  - Create, update, and delete persist the in-flight OCI work request in
+    `status.async.current`, normalize PSA `OperationStatus*` values into shared
+    async classes, and normalize work-request `OperationType*` values into
+    create/update/delete phases before deriving conditions and requeue
+    behavior.
+  - Create prefers the returned `PrivateServiceAccess` body when OCI exposes an
+    identifier and otherwise recovers the OCID from work-request resources
+    before polling `GetPrivateServiceAccess`. Update also gates completion on a
+    succeeded work request plus a readable `GetPrivateServiceAccess`.
+  - Only `definedTags`, `freeformTags`, `securityAttributes`, `displayName`,
+    `description`, and `nsgIds` reconcile in place. `compartmentId`,
+    `subnetId`, `serviceId`, and `ipv4Ip` remain replacement-only drift, so
+    the published runtime never exercises provider-only
+    `ChangePrivateServiceAccessCompartment`.
+  - Reviewed lifecycle mapping treats `FAILED` and `NEEDS_ATTENTION` as
+    terminal failure without requeue, and delete retains the finalizer until
+    `GetPrivateServiceAccess` or fallback `ListPrivateServiceAccesses` confirms
+    the resource is deleted or not found.

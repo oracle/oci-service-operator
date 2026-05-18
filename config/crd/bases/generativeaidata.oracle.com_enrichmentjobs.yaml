@@ -1,0 +1,357 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: enrichmentjobs.generativeaidata.oracle.com
+spec:
+  group: generativeaidata.oracle.com
+  names:
+    kind: EnrichmentJob
+    listKind: EnrichmentJobList
+    plural: enrichmentjobs
+    singular: enrichmentjob
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the EnrichmentJob
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the EnrichmentJob
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: EnrichmentJob is the Schema for the enrichmentjobs API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: EnrichmentJobSpec defines the desired state of EnrichmentJob.
+            properties:
+              compartmentId:
+                description: The compartment OCID used only for exact ListEnrichmentJobs
+                  lookup before a new job is generated.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: An optional description of the EnrichmentJob.
+                type: string
+              displayName:
+                description: A user-friendly display name. It does not have to be
+                  unique and can be modified. Avoid entering confidential information.
+                type: string
+              enrichmentJobConfiguration:
+                description: EnrichmentJobConfiguration defines nested fields for
+                  EnrichmentJob.EnrichmentJobConfiguration.
+                properties:
+                  databaseObjects:
+                    description: Collection of the DatabaseObjects to be enriched
+                      for the given schema.
+                    items:
+                      description: EnrichmentJobConfigurationDatabaseObject defines
+                        nested fields for EnrichmentJob.EnrichmentJobConfiguration.DatabaseObject.
+                      properties:
+                        description:
+                          description: An optional description of the DatabaseObject.
+                          type: string
+                        name:
+                          description: The fully qualified name of the database object.
+                          type: string
+                        type:
+                          description: The type of the database object (e.g., table,
+                            view, procedure).
+                          type: string
+                      required:
+                      - name
+                      - type
+                      type: object
+                    type: array
+                  deltaRefreshSchedule:
+                    description: Schedule for occurrences of Delta Refresh jobs
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                  enrichmentJobType:
+                    type: string
+                  jsonData:
+                    type: string
+                  schemaName:
+                    description: Name of the DB Schema to be enriched
+                    type: string
+                type: object
+              enrichmentJobType:
+                description: Enrichment job type. Currently supported Full Build (All
+                  supported objects in a given schema) and Partial Build (Selected
+                  tables and/or supported objects in a given schema).
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              semanticStoreId:
+                description: The OCID of the semantic store that scopes GenerateEnrichmentJob,
+                  GetEnrichmentJob, and CancelEnrichmentJob.
+                type: string
+            required:
+            - compartmentId
+            - enrichmentJobConfiguration
+            - enrichmentJobType
+            - semanticStoreId
+            type: object
+          status:
+            description: EnrichmentJobStatus defines the observed state of EnrichmentJob.
+            properties:
+              compartmentId:
+                description: The bound compartment ID carried forward for exact ListEnrichmentJobs
+                  lookup and create-only drift validation.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: An optional description of the EnrichmentJob.
+                type: string
+              displayName:
+                description: A user-friendly display name. It does not have to be
+                  unique and can be modified. Avoid entering confidential information.
+                type: string
+              enrichmentJobConfiguration:
+                description: EnrichmentJobConfiguration defines nested fields for
+                  EnrichmentJob.EnrichmentJobConfiguration.
+                properties:
+                  databaseObjects:
+                    description: Collection of the DatabaseObjects to be enriched
+                      for the given schema.
+                    items:
+                      description: EnrichmentJobConfigurationDatabaseObject defines
+                        nested fields for EnrichmentJob.EnrichmentJobConfiguration.DatabaseObject.
+                      properties:
+                        description:
+                          description: An optional description of the DatabaseObject.
+                          type: string
+                        name:
+                          description: The fully qualified name of the database object.
+                          type: string
+                        type:
+                          description: The type of the database object (e.g., table,
+                            view, procedure).
+                          type: string
+                      required:
+                      - name
+                      - type
+                      type: object
+                    type: array
+                  deltaRefreshSchedule:
+                    description: Schedule for occurrences of Delta Refresh jobs
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                  enrichmentJobType:
+                    type: string
+                  jsonData:
+                    type: string
+                  schemaName:
+                    description: Name of the DB Schema to be enriched
+                    type: string
+                type: object
+              enrichmentJobType:
+                description: Enrichment job type. Currently supported Full Build (All
+                  supported objects in a given schema) and Partial Build (Selected
+                  tables and/or supported objects in a given schema).
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              id:
+                description: Unique identifier that is immutable on creation.
+                type: string
+              lifecycleDetails:
+                description: A message describing the current state in more detail
+                  that can provide actionable information.
+                type: string
+              lifecycleState:
+                description: The lifecycleState of GenerateSqlJob.
+                type: string
+              percentComplete:
+                description: The percentage of the enrichment job that has been completed.
+                type: number
+              semanticStoreId:
+                description: Owning SemanticStore OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  for an EnrichmentJob.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  System tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              timeAccepted:
+                description: The date and time that the enrichment job was accepted
+                  in the format of an RFC3339 datetime string.
+                type: string
+              timeFinished:
+                description: The date and time that the enrichment job was finished
+                  in the format of an RFC3339 datetime string.
+                type: string
+              timeStarted:
+                description: The date and time that the enrichment job was started
+                  in the format of an RFC3339 datetime string.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

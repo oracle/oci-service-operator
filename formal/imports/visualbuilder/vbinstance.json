@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "visualbuilder",
+  "slug": "vbinstance",
+  "kind": "VbInstance",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_visual_builder_vb_instance",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateVbInstance",
+        "requestType": "visualbuilder.CreateVbInstanceRequest",
+        "responseType": "visualbuilder.CreateVbInstanceResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetVbInstance",
+        "requestType": "visualbuilder.GetVbInstanceRequest",
+        "responseType": "visualbuilder.GetVbInstanceResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListVbInstances",
+        "requestType": "visualbuilder.ListVbInstancesRequest",
+        "responseType": "visualbuilder.ListVbInstancesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateVbInstance",
+        "requestType": "visualbuilder.UpdateVbInstanceRequest",
+        "responseType": "visualbuilder.UpdateVbInstanceResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteVbInstance",
+        "requestType": "visualbuilder.DeleteVbInstanceRequest",
+        "responseType": "visualbuilder.DeleteVbInstanceResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "INACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "INACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "display_name",
+      "defined_tags",
+      "freeform_tags",
+      "idcs_open_id",
+      "is_visual_builder_enabled",
+      "node_count",
+      "custom_endpoint.hostname",
+      "custom_endpoint.certificate_secret_id",
+      "alternate_custom_endpoints.hostname",
+      "alternate_custom_endpoints.certificate_secret_id",
+      "network_endpoint_details.network_endpoint_type",
+      "network_endpoint_details.subnet_id",
+      "network_endpoint_details.network_security_group_ids",
+      "network_endpoint_details.allowlisted_http_ips",
+      "network_endpoint_details.allowlisted_http_vcns.id",
+      "network_endpoint_details.allowlisted_http_vcns.allowlisted_ip_cidrs"
+    ],
+    "forceNew": [
+      "consumption_model",
+      "network_endpoint_details.private_endpoint_ip"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_visual_builder_vb_instances",
+    "collectionField": "vb_instances",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/visualbuilder/vbinstance/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/visualbuilder/vbinstance/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "mutation-policy",
+      "secret-output"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: Create/Get/List/Update/DeleteVbInstance are present, with lifecycle states CREATING, UPDATING, ACTIVE, INACTIVE, DELETING, DELETED, and FAILED. The reviewed runtime treats CREATING, UPDATING, and DELETING as requeue states; ACTIVE and INACTIVE as success; and FAILED as terminal without requeue.",
+    "Pinned OCI SDK contract: CreateVbInstanceResponse, UpdateVbInstanceResponse, and DeleteVbInstanceResponse expose opc-work-request-id headers but no resource body. The reviewed runtime follows service-local GetWorkRequest responses, recovers the VbInstance OCID from work-request resources, and rereads GetVbInstance as the authoritative observed-state source.",
+    "Pinned OCI SDK contract: ListVbInstancesRequest filters by compartmentId, displayName, and lifecycleState and returns Items []VbInstanceSummary. Safe pre-create reuse is exact compartment_id plus display_name, restricted to reusable ACTIVE, CREATING, UPDATING, or INACTIVE candidates; duplicate exact matches fail instead of guessing.",
+    "Pinned OCI SDK contract: VbInstance and VbInstanceSummary both project nested customEndpoint, alternateCustomEndpoints, and polymorphic networkEndpointDetails state. The reviewed runtime keeps those nested shapes inside required status projection and preserves explicit empty-map and empty-slice clears for tag maps, alternate custom endpoints, and supported public/private endpoint collections.",
+    "Repo-authored runtime contract stays narrower than the imported provider surface: ChangeVbInstanceCompartment, StartVbInstance, StopVbInstance, and ReconfigurePrivateEndpointVbInstance remain out-of-scope auxiliary drift for the published kind; consumptionModel and privateEndpointIp remain create-time only; IdcsOpenId is accepted on create but not reconciled after live reads because OCI does not project it back; and isVisualBuilderEnabled is only driven toward true, not disabled in place."
+  ]
+}

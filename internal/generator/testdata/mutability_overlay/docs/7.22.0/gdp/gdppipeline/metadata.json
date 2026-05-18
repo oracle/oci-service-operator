@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "gdp",
+  "kind": "GdpPipeline",
+  "formalSlug": "gdppipeline",
+  "providerResource": "oci_gdp_gdp_pipeline",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/gdp_gdp_pipeline",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/gdp_gdp_pipeline",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/gdp/gdppipeline/page.html",
+  "bodySHA256": "8245470d255f8f7be721036617dc9768b38bee2233e25307ffe4e22f1b9e799c",
+  "bodyBytes": 3321,
+  "fixtureBodyPath": "7.22.0/gdp/gdppipeline/page.html"
+}

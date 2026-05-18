@@ -94,6 +94,8 @@ nav:
               - Bucket: guides/objectstorage/bucket.md
           - opensearch:
               - OpensearchCluster: guides/opensearch/opensearchcluster.md
+          - psa:
+              - PrivateServiceAccess: guides/psa/privateserviceaccess.md
           - psql:
               - DbSystem: guides/psql/dbsystem.md
           - queue:
@@ -119,6 +121,7 @@ nav:
           - NoSQL: reference/packages/nosql/index.md
           - Object Storage: reference/packages/objectstorage/index.md
           - OpenSearch: reference/packages/opensearch/index.md
+          - Private Service Access: reference/packages/psa/index.md
           - PostgreSQL: reference/packages/psql/index.md
           - Queue: reference/packages/queue/index.md
           - Redis: reference/packages/redis/index.md
@@ -144,6 +147,7 @@ nav:
           - apmcontrolplane.oracle.com/v1beta1: reference/api/apmcontrolplane/v1beta1/index.md
           - apmsynthetics.oracle.com/v1beta1: reference/api/apmsynthetics/v1beta1/index.md
           - apmtraces.oracle.com/v1beta1: reference/api/apmtraces/v1beta1/index.md
+          - appmgmtcontrol.oracle.com/v1beta1: reference/api/appmgmtcontrol/v1beta1/index.md
           - artifacts.oracle.com/v1beta1: reference/api/artifacts/v1beta1/index.md
           - autoscaling.oracle.com/v1beta1: reference/api/autoscaling/v1beta1/index.md
           - bastion.oracle.com/v1beta1: reference/api/bastion/v1beta1/index.md
@@ -158,6 +162,7 @@ nav:
           - cloudmigrations.oracle.com/v1beta1: reference/api/cloudmigrations/v1beta1/index.md
           - clusterplacementgroups.oracle.com/v1beta1: reference/api/clusterplacementgroups/v1beta1/index.md
           - computecloudatcustomer.oracle.com/v1beta1: reference/api/computecloudatcustomer/v1beta1/index.md
+          - computeinstanceagent.oracle.com/v1beta1: reference/api/computeinstanceagent/v1beta1/index.md
           - containerengine.oracle.com/v1beta1: reference/api/containerengine/v1beta1/index.md
           - containerinstances.oracle.com/v1beta1: reference/api/containerinstances/v1beta1/index.md
           - core.oracle.com/v1beta1: reference/api/core/v1beta1/index.md
@@ -178,6 +183,8 @@ nav:
           - desktops.oracle.com/v1beta1: reference/api/desktops/v1beta1/index.md
           - devops.oracle.com/v1beta1: reference/api/devops/v1beta1/index.md
           - dif.oracle.com/v1beta1: reference/api/dif/v1beta1/index.md
+          - disasterrecovery.oracle.com/v1beta1: reference/api/disasterrecovery/v1beta1/index.md
+          - distributeddatabase.oracle.com/v1beta1: reference/api/distributeddatabase/v1beta1/index.md
           - dns.oracle.com/v1beta1: reference/api/dns/v1beta1/index.md
           - email.oracle.com/v1beta1: reference/api/email/v1beta1/index.md
           - emwarehouse.oracle.com/v1beta1: reference/api/emwarehouse/v1beta1/index.md
@@ -187,13 +194,19 @@ nav:
           - fleetsoftwareupdate.oracle.com/v1beta1: reference/api/fleetsoftwareupdate/v1beta1/index.md
           - functions.oracle.com/v1beta1: reference/api/functions/v1beta1/index.md
           - fusionapps.oracle.com/v1beta1: reference/api/fusionapps/v1beta1/index.md
+          - gdp.oracle.com/v1beta1: reference/api/gdp/v1beta1/index.md
           - generativeai.oracle.com/v1beta1: reference/api/generativeai/v1beta1/index.md
+          - generativeaiagent.oracle.com/v1beta1: reference/api/generativeaiagent/v1beta1/index.md
+          - generativeaiagentruntime.oracle.com/v1beta1: reference/api/generativeaiagentruntime/v1beta1/index.md
+          - generativeaidata.oracle.com/v1beta1: reference/api/generativeaidata/v1beta1/index.md
           - goldengate.oracle.com/v1beta1: reference/api/goldengate/v1beta1/index.md
           - governancerulescontrolplane.oracle.com/v1beta1: reference/api/governancerulescontrolplane/v1beta1/index.md
           - healthchecks.oracle.com/v1beta1: reference/api/healthchecks/v1beta1/index.md
           - identity.oracle.com/v1beta1: reference/api/identity/v1beta1/index.md
           - integration.oracle.com/v1beta1: reference/api/integration/v1beta1/index.md
           - iot.oracle.com/v1beta1: reference/api/iot/v1beta1/index.md
+          - jms.oracle.com/v1beta1: reference/api/jms/v1beta1/index.md
+          - jmsjavadownloads.oracle.com/v1beta1: reference/api/jmsjavadownloads/v1beta1/index.md
           - keymanagement.oracle.com/v1beta1: reference/api/keymanagement/v1beta1/index.md
           - licensemanager.oracle.com/v1beta1: reference/api/licensemanager/v1beta1/index.md
           - limits.oracle.com/v1beta1: reference/api/limits/v1beta1/index.md
@@ -202,26 +215,34 @@ nav:
           - lockbox.oracle.com/v1beta1: reference/api/lockbox/v1beta1/index.md
           - loganalytics.oracle.com/v1beta1: reference/api/loganalytics/v1beta1/index.md
           - logging.oracle.com/v1beta1: reference/api/logging/v1beta1/index.md
+          - lustrefilestorage.oracle.com/v1beta1: reference/api/lustrefilestorage/v1beta1/index.md
           - managedkafka.oracle.com/v1beta1: reference/api/managedkafka/v1beta1/index.md
           - managementagent.oracle.com/v1beta1: reference/api/managementagent/v1beta1/index.md
           - managementdashboard.oracle.com/v1beta1: reference/api/managementdashboard/v1beta1/index.md
           - marketplace.oracle.com/v1beta1: reference/api/marketplace/v1beta1/index.md
           - marketplaceprivateoffer.oracle.com/v1beta1: reference/api/marketplaceprivateoffer/v1beta1/index.md
           - marketplacepublisher.oracle.com/v1beta1: reference/api/marketplacepublisher/v1beta1/index.md
+          - mediaservices.oracle.com/v1beta1: reference/api/mediaservices/v1beta1/index.md
+          - mngdmac.oracle.com/v1beta1: reference/api/mngdmac/v1beta1/index.md
           - monitoring.oracle.com/v1beta1: reference/api/monitoring/v1beta1/index.md
           - mysql.oracle.com/v1beta1: reference/api/mysql/v1beta1/index.md
           - networkfirewall.oracle.com/v1beta1: reference/api/networkfirewall/v1beta1/index.md
           - networkloadbalancer.oracle.com/v1beta1: reference/api/networkloadbalancer/v1beta1/index.md
           - nosql.oracle.com/v1beta1: reference/api/nosql/v1beta1/index.md
           - objectstorage.oracle.com/v1beta1: reference/api/objectstorage/v1beta1/index.md
+          - oce.oracle.com/v1beta1: reference/api/oce/v1beta1/index.md
           - ocvp.oracle.com/v1beta1: reference/api/ocvp/v1beta1/index.md
           - oda.oracle.com/v1beta1: reference/api/oda/v1beta1/index.md
+          - onesubscription.oracle.com/v1beta1: reference/api/onesubscription/v1beta1/index.md
           - ons.oracle.com/v1beta1: reference/api/ons/v1beta1/index.md
+          - opa.oracle.com/v1beta1: reference/api/opa/v1beta1/index.md
           - opensearch.oracle.com/v1beta1: reference/api/opensearch/v1beta1/index.md
           - operatoraccesscontrol.oracle.com/v1beta1: reference/api/operatoraccesscontrol/v1beta1/index.md
           - opsi.oracle.com/v1beta1: reference/api/opsi/v1beta1/index.md
           - optimizer.oracle.com/v1beta1: reference/api/optimizer/v1beta1/index.md
           - osmanagementhub.oracle.com/v1beta1: reference/api/osmanagementhub/v1beta1/index.md
+          - osubsubscription.oracle.com/v1beta1: reference/api/osubsubscription/v1beta1/index.md
+          - psa.oracle.com/v1beta1: reference/api/psa/v1beta1/index.md
           - psql.oracle.com/v1beta1: reference/api/psql/v1beta1/index.md
           - queue.oracle.com/v1beta1: reference/api/queue/v1beta1/index.md
           - recovery.oracle.com/v1beta1: reference/api/recovery/v1beta1/index.md
@@ -229,16 +250,25 @@ nav:
           - resourceanalytics.oracle.com/v1beta1: reference/api/resourceanalytics/v1beta1/index.md
           - resourcemanager.oracle.com/v1beta1: reference/api/resourcemanager/v1beta1/index.md
           - resourcescheduler.oracle.com/v1beta1: reference/api/resourcescheduler/v1beta1/index.md
+          - rover.oracle.com/v1beta1: reference/api/rover/v1beta1/index.md
           - sch.oracle.com/v1beta1: reference/api/sch/v1beta1/index.md
           - securityattribute.oracle.com/v1beta1: reference/api/securityattribute/v1beta1/index.md
+          - self.oracle.com/v1beta1: reference/api/self/v1beta1/index.md
           - servicecatalog.oracle.com/v1beta1: reference/api/servicecatalog/v1beta1/index.md
+          - servicemanagerproxy.oracle.com/v1beta1: reference/api/servicemanagerproxy/v1beta1/index.md
           - stackmonitoring.oracle.com/v1beta1: reference/api/stackmonitoring/v1beta1/index.md
           - streaming.oracle.com/v1beta1: reference/api/streaming/v1beta1/index.md
+          - tenantmanagercontrolplane.oracle.com/v1beta1: reference/api/tenantmanagercontrolplane/v1beta1/index.md
           - usageapi.oracle.com/v1beta1: reference/api/usageapi/v1beta1/index.md
+          - vbsinst.oracle.com/v1beta1: reference/api/vbsinst/v1beta1/index.md
+          - visualbuilder.oracle.com/v1beta1: reference/api/visualbuilder/v1beta1/index.md
+          - vnmonitoring.oracle.com/v1beta1: reference/api/vnmonitoring/v1beta1/index.md
           - vulnerabilityscanning.oracle.com/v1beta1: reference/api/vulnerabilityscanning/v1beta1/index.md
           - waa.oracle.com/v1beta1: reference/api/waa/v1beta1/index.md
           - waas.oracle.com/v1beta1: reference/api/waas/v1beta1/index.md
           - waf.oracle.com/v1beta1: reference/api/waf/v1beta1/index.md
+          - wlms.oracle.com/v1beta1: reference/api/wlms/v1beta1/index.md
+          - zpr.oracle.com/v1beta1: reference/api/zpr/v1beta1/index.md
       # END GENERATED API VERSION NAV
   - Contributor Docs:
       - contributor/index.md

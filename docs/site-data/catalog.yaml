@@ -207,6 +207,20 @@ packages:
         kind: ScheduledQuery
         summary: Manage OCI Application Performance Monitoring scheduled trace queries.
 
+  - package: appmgmtcontrol
+    displayName: Application Management Control
+    summary: Observe existing OCI AppMgmt Control monitored instances from Kubernetes with a bind-existing, controller-backed read-only contract.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to MonitoredInstance while monitoring-plugin activation, top-process metrics publishing, and workrequest helper families stay unpublished.
+      - "The published runtime is bind-existing and observe-only: direct binds preflight `instanceId`, list-based binds require exact `compartmentId` plus `displayName`, and the runtime reruns `GetMonitoredInstance` after list adoption so status projects the full body."
+    kindOverrides:
+      - group: appmgmtcontrol
+        kind: MonitoredInstance
+        summary: Observe existing OCI AppMgmt Control monitored instances.
+
   - package: artifacts
     displayName: Artifacts
     summary: Manage OCI Artifact Registry repositories, container repositories, and image signatures from Kubernetes.
@@ -351,6 +365,20 @@ packages:
     customerVisible: false
     guidePath: docs/installation.md
 
+  - package: computeinstanceagent
+    displayName: Compute Instance Agent
+    summary: Observe existing OCI Compute Instance Agent plugins from Kubernetes with a bind-existing, controller-backed read-only contract.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to InstanceAgentPlugin and publishes only a bind-existing observe-only contract.
+      - The reviewed runtime uses GetInstanceAgentPlugin for read projection, keeps ListInstanceAgentPlugins in a confirmation-only role, and does not expose OCI create, update, or delete behavior or plugin enable-disable mutation.
+    kindOverrides:
+      - group: computeinstanceagent
+        kind: InstanceAgentPlugin
+        summary: Observe existing OCI Compute Instance Agent plugins on compute instances.
+
   - package: containerengine
     displayName: Container Engine for Kubernetes
     summary: Manage OCI Container Engine for Kubernetes clusters and node pools from Kubernetes.
@@ -398,16 +426,20 @@ packages:
 
   - package: dashboardservice
     displayName: Dashboard Service
-    summary: Manage OCI dashboard groups from Kubernetes with a reviewed controller-backed runtime.
+    summary: Manage OCI dashboards and dashboard groups from Kubernetes with a reviewed controller-backed runtime.
     supportStatus: preview
     customerVisible: false
     guidePath: docs/installation.md
     packageNotes:
-      - Current package scope is intentionally limited to DashboardGroup while the dashboard content model itself stays unpublished.
-      - The published runtime keeps lifecycle-based generatedruntime semantics, scopes existing-before-create reuse to exact `compartmentId` plus `displayName`, updates non-empty `displayName` and `description` values in place, and preserves explicit empty-map clears for `freeformTags` and `definedTags`.
-      - Empty-string `displayName` and `description` values currently behave as omission rather than explicit clear because the generated spec cannot distinguish those intents.
-      - Dashboard resources created outside the tenancy home region are not viewable in the Console, so that Dashboards service caveat remains explicit in the published docs and formal metadata.
+      - 'Current package scope publishes both `dashboardservice/Dashboard` and `dashboardservice/DashboardGroup`.'
+      - '`Dashboard` keeps lifecycle-based generatedruntime semantics, scopes existing-before-create reuse to exact `dashboardGroupId` plus `displayName`, dispatches create and update bodies by `schemaVersion`, and preserves explicit empty-list widget clears plus explicit empty-map tag clears.'
+      - '`DashboardGroup` keeps lifecycle-based generatedruntime semantics, scopes existing-before-create reuse to exact `compartmentId` plus `displayName`, and preserves explicit empty-map tag clears.'
+      - 'Empty-string `displayName` and `description` values currently behave as omission rather than explicit clear because the generated specs cannot distinguish those intents. `Dashboard` also treats null `config` clears as omission for the same reason.'
+      - 'Dashboard resources created outside the tenancy home region are not viewable in the Console, so that Dashboards service caveat remains explicit in the published docs and formal metadata.'
     kindOverrides:
+      - group: dashboardservice
+        kind: Dashboard
+        summary: Manage OCI dashboards with schemaVersion-aware V1 model handling.
       - group: dashboardservice
         kind: DashboardGroup
         summary: Manage OCI dashboard groups.
@@ -586,6 +618,34 @@ packages:
     customerVisible: false
     guidePath: docs/installation.md
 
+  - package: disasterrecovery
+    displayName: Disaster Recovery
+    summary: Manage OCI Disaster Recovery protection groups from Kubernetes with an initial controller-backed DrProtectionGroup rollout.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to DrProtectionGroup while associate, disassociate, role-change, DR plan, and work-request helper families stay unpublished.
+      - The published runtime uses service-SDK work requests for create, update, and delete, keeps peer and lifecycle state truthfully projected in status, and preserves polymorphic member content instead of flattening the DR protection group membership surface.
+    kindOverrides:
+      - group: disasterrecovery
+        kind: DrProtectionGroup
+        summary: Manage OCI Disaster Recovery protection groups.
+
+  - package: distributeddatabase
+    displayName: Distributed Database
+    summary: Manage OCI Distributed Database private endpoints from Kubernetes with a reviewed controller-backed lifecycle runtime.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to DistributedDatabasePrivateEndpoint while distributed databases, validation helpers, wallet flows, and other service families stay unpublished.
+      - The published runtime is lifecycle-classified, rereads GetDistributedDatabasePrivateEndpoint after bind and write paths because list returns summaries, and keeps delete confirmation explicit until DELETED or NotFound.
+    kindOverrides:
+      - group: distributeddatabase
+        kind: DistributedDatabasePrivateEndpoint
+        summary: Manage OCI Distributed Database private endpoints.
+
   - package: dns
     displayName: DNS
     summary: Manage OCI DNS zones, views, TSIG keys, steering policies, and attachments from Kubernetes.
@@ -676,12 +736,73 @@ packages:
     customerVisible: false
     guidePath: docs/installation.md
 
+  - package: gdp
+    displayName: Guarded Data Pipelines
+    summary: Manage OCI Guarded Data Pipeline resources from Kubernetes with a reviewed controller-backed GdpPipeline rollout.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to GdpPipeline while GDP work-request helper and auxiliary operation families stay unpublished.
+      - The published runtime uses service-SDK work requests for create, update, and delete, scopes pre-create reuse by exact `compartmentId`, `displayName`, `pipelineType`, `peeringRegion`, and `bucketDetails`, and keeps `bucketDetails`, `compartmentId`, `peeringRegion`, and `pipelineType` replacement-only.
+    kindOverrides:
+      - group: gdp
+        kind: GdpPipeline
+        summary: Manage OCI Guarded Data Pipeline resources.
+
   - package: generativeai
     displayName: Generative AI
     summary: Manage OCI Generative AI resources from Kubernetes.
     supportStatus: preview
     customerVisible: false
     guidePath: docs/installation.md
+
+  - package: generativeaiagent
+    displayName: Generative AI Agent
+    summary: Manage OCI Generative AI Agent agents and knowledge bases from Kubernetes with reviewed controller-backed runtimes.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to Agent and KnowledgeBase while AgentEndpoint, DataSource, DataIngestionJob, ProvisionedCapacity, Tool, and work-request helper families stay unpublished.
+      - The published runtimes use service-SDK work requests for create, update, and delete. `ChangeAgentCompartment` and `ChangeKnowledgeBaseCompartment` both stay out of scope for the controller-backed surface.
+      - The published package keeps `generativeaiagent/KnowledgeBase` explicitly distinct from the existing `adm/KnowledgeBase` rollout in docs, catalog metadata, and formal/runtime surfaces.
+    kindOverrides:
+      - group: generativeaiagent
+        kind: Agent
+        summary: Manage OCI Generative AI Agents.
+      - group: generativeaiagent
+        kind: KnowledgeBase
+        summary: Manage OCI Generative AI Agent knowledge bases.
+
+  - package: generativeaiagentruntime
+    displayName: Generative AI Agent Runtime
+    summary: Manage OCI Generative AI Agent Runtime sessions from Kubernetes with a reviewed synchronous controller-backed runtime.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to Session while Chat and the broader conversational, retrieval, and trace helper families stay unpublished.
+      - The published runtime keeps explicit `agentEndpointId + sessionId` path identity, uses synchronous read-after-write follow-up semantics, and does not invent list-based bind or search behavior because the SDK exposes no `ListSessions` operation.
+      - The published package keeps `generativeaiagentruntime/Session` explicitly distinct from the existing `bastion/Session` rollout in docs, catalog metadata, and formal/runtime surfaces.
+    kindOverrides:
+      - group: generativeaiagentruntime
+        kind: Session
+        summary: Manage OCI Generative AI Agent Runtime sessions.
+
+  - package: generativeaidata
+    displayName: Generative AI Data
+    summary: Manage OCI Generative AI Data enrichment jobs from Kubernetes with a reviewed job-shaped runtime contract.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to EnrichmentJob while the remaining Generative AI Data job families stay unpublished.
+      - Kubernetes create calls `GenerateEnrichmentJob`, and Kubernetes delete requests `CancelEnrichmentJob`; the published runtime does not claim the OCI service exposes plain update or delete operations for EnrichmentJob.
+    kindOverrides:
+      - group: generativeaidata
+        kind: EnrichmentJob
+        summary: Manage OCI Generative AI Data enrichment jobs.
 
   - package: goldengate
     displayName: GoldenGate
@@ -741,6 +862,35 @@ packages:
     supportStatus: preview
     customerVisible: false
     guidePath: docs/installation.md
+
+  - package: jms
+    displayName: Java Management Service
+    summary: Manage OCI Java Management Service fleets from Kubernetes with a reviewed controller-backed runtime.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to Fleet while advanced feature configuration, agent configuration, DRS, analysis, and work-request helper families stay unpublished.
+      - The published runtime uses service-SDK work requests for create, update, and delete, keeps `inventoryLog` required from the first spec, treats `NEEDS_ATTENTION` as a steady success state, and leaves `ChangeFleetCompartment` out of scope.
+    kindOverrides:
+      - group: jms
+        kind: Fleet
+        summary: Manage OCI Java Management Service fleets.
+
+  - package: jmsjavadownloads
+    displayName: Java Downloads
+    summary: Manage OCI Java download tokens from Kubernetes with a reviewed controller-backed runtime.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to JavaDownloadToken while report, license, download-record, generated download-url, and work-request helper families stay unpublished.
+      - The published runtime uses service-SDK work requests for create, update, and delete, keeps generic bind matching scoped to exact compartmentId plus displayName, and leaves the sensitive token value out of status and generated docs.
+      - This story does not emit Kubernetes Secret side effects for the returned token value; operators must preserve that one-time sensitive output through an out-of-band reviewed path.
+    kindOverrides:
+      - group: jmsjavadownloads
+        kind: JavaDownloadToken
+        summary: Manage OCI Java download tokens.
 
   - package: keymanagement
     displayName: Key Management
@@ -808,6 +958,23 @@ packages:
     customerVisible: false
     guidePath: docs/installation.md
 
+  - package: lustrefilestorage
+    displayName: Lustre File Storage
+    summary: Manage OCI Lustre File Storage file systems and object storage links from Kubernetes with a reviewed controller-backed runtime.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to LustreFileSystem and ObjectStorageLink while sync jobs and work-request helper families stay unpublished.
+      - LustreFileSystem uses service-SDK work requests for create, update, and delete, while ObjectStorageLink uses service-SDK work requests only for delete confirmation.
+    kindOverrides:
+      - group: lustrefilestorage
+        kind: LustreFileSystem
+        summary: Manage OCI Lustre File Storage file systems.
+      - group: lustrefilestorage
+        kind: ObjectStorageLink
+        summary: Manage OCI Lustre File Storage object storage links.
+
   - package: managedkafka
     displayName: Managed Kafka
     summary: Manage OCI Managed Kafka clusters and cluster configurations from Kubernetes.
@@ -856,6 +1023,37 @@ packages:
     supportStatus: preview
     customerVisible: false
     guidePath: docs/installation.md
+
+  - package: mediaservices
+    displayName: Media Services
+    summary: Manage OCI Media Services media assets from Kubernetes with a reviewed controller-backed runtime.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to MediaAsset while workflow, packaging, and attachment families stay unpublished.
+      - The published runtime keeps lifecycle-based CRUD semantics, guarded pre-create reuse on exact identity subsets, and an explicit delete contract that omits hierarchical delete modes.
+    kindOverrides:
+      - group: mediaservices
+        kind: MediaAsset
+        summary: Manage OCI Media Services media assets.
+
+  - package: mngdmac
+    displayName: Managed Services for Mac
+    summary: Manage OCI Mac orders and devices from Kubernetes with a reviewed controller-backed runtime.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope publishes MacOrder plus bind-existing terminate-only MacDevice, while auxiliary order-management and device-management workflows stay unpublished.
+      - The published runtime uses service-SDK work requests for MacOrder create/update/delete and MacDevice delete, maps Kubernetes delete to CancelMacOrder or TerminateMacDevice as appropriate, and keeps ChangeMacOrderCompartment out of scope.
+    kindOverrides:
+      - group: mngdmac
+        kind: MacDevice
+        summary: Bind an existing OCI Managed Services for Mac device and terminate it from Kubernetes.
+      - group: mngdmac
+        kind: MacOrder
+        summary: Manage OCI Managed Services for Mac orders.
 
   - package: monitoring
     displayName: Monitoring
@@ -929,6 +1127,20 @@ packages:
         kind: Bucket
         summary: Manage OCI Object Storage buckets.
 
+  - package: oce
+    displayName: Oracle Content Management
+    summary: Manage OCI Oracle Content Management instances from Kubernetes with a reviewed controller-backed runtime.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to OceInstance while work-request helper families stay unpublished.
+      - The published runtime uses service-SDK work requests for create, update, and delete, with exact `compartmentId` plus `tenancyId` plus `name` pre-create reuse through the list API's `displayName` filter.
+    kindOverrides:
+      - group: oce
+        kind: OceInstance
+        summary: Manage OCI Oracle Content Management instances.
+
   - package: ocvp
     displayName: Oracle Cloud VMware Solution
     summary: Manage OCI Oracle Cloud VMware Solution resources from Kubernetes.
@@ -943,6 +1155,20 @@ packages:
     customerVisible: false
     guidePath: docs/installation.md
 
+  - package: onesubscription
+    displayName: OneSubscription
+    summary: Observe existing OCI OneSubscription subscription summaries from Kubernetes with a query-backed, controller-managed read-only contract.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to onesubscription/Subscription while commitment, invoice, rate-card, and subscribed-service helper families stay unpublished.
+      - "The published runtime is query-backed and observe-only: it paginates ListSubscriptions with compartmentId plus exactly one of planNumber, subscriptionId, or buyerEmail, rejects ambiguous results, and does not invent a tracked top-level OCI Subscription identity."
+    kindOverrides:
+      - group: onesubscription
+        kind: Subscription
+        summary: Observe existing OCI OneSubscription subscription summaries.
+
   - package: ons
     displayName: Notifications
     summary: Manage OCI Notifications topics and subscriptions from Kubernetes.
@@ -956,6 +1182,20 @@ packages:
       - group: ons
         kind: Topic
         summary: Manage OCI Notifications topics.
+
+  - package: opa
+    displayName: Process Automation
+    summary: Manage OCI Process Automation instances from Kubernetes with a reviewed controller-backed runtime.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to OpaInstance while service-local work-request helper families stay unpublished.
+      - The published runtime uses service-SDK work requests for create, update, and delete, with explicit create-only handling for `idcsAt` and no automatic compartment-change or start/stop auxiliary actions.
+    kindOverrides:
+      - group: opa
+        kind: OpaInstance
+        summary: Manage OCI Process Automation instances.
 
   - package: opensearch
     displayName: OpenSearch
@@ -997,6 +1237,35 @@ packages:
     supportStatus: preview
     customerVisible: false
     guidePath: docs/installation.md
+
+  - package: osubsubscription
+    displayName: OSubscription
+    summary: Observe existing OCI OSubscription subscription summaries from Kubernetes with a query-backed, controller-backed read-only contract.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to Subscription and publishes only a query-backed observe-only contract.
+      - The reviewed runtime uses ListSubscriptions only, requires compartmentId plus exactly one of planNumber, subscriptionId, or buyerEmail, and surfaces xOneGatewaySubscriptionId plus xOneOriginRegion when request-scoped access headers are needed.
+      - The top-level SubscriptionSummary does not expose a tracked OCI identity, so the runtime accepts only a unique list match and intentionally leaves `status.status.ocid` empty.
+    kindOverrides:
+      - group: osubsubscription
+        kind: Subscription
+        summary: Observe existing OCI OSubscription subscription summaries.
+
+  - package: psa
+    displayName: Private Service Access
+    summary: Manage OCI Private Service Access resources from Kubernetes.
+    supportStatus: preview
+    customerVisible: true
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to PrivateServiceAccess.
+      - PsaService and PSA work-request family resources remain unpublished with this package.
+    kindOverrides:
+      - group: psa
+        kind: PrivateServiceAccess
+        summary: Manage OCI Private Service Access resources.
 
   - package: psql
     displayName: PostgreSQL
@@ -1065,6 +1334,23 @@ packages:
     customerVisible: false
     guidePath: docs/installation.md
 
+  - package: rover
+    displayName: Rover
+    summary: Manage OCI Rover clusters and nodes from Kubernetes.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope includes RoverCluster and RoverNode while RoverEntitlement and auxiliary bundle or node workflows stay unpublished.
+      - The published runtime is lifecycle-driven and workrequest-aware, but RoverCluster and RoverNode CRUD do not expose service-local work-request IDs and no Kubernetes Secret side effects are emitted.
+    kindOverrides:
+      - group: rover
+        kind: RoverCluster
+        summary: Manage OCI Rover clusters.
+      - group: rover
+        kind: RoverNode
+        summary: Manage OCI Rover nodes.
+
   - package: sch
     displayName: Service Connector Hub
     summary: Manage OCI Service Connector Hub service connectors from Kubernetes.
@@ -1083,6 +1369,20 @@ packages:
     customerVisible: false
     guidePath: docs/installation.md
 
+  - package: self
+    displayName: SELF
+    summary: Manage OCI SELF marketplace subscriptions from Kubernetes with a reviewed controller-backed runtime.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to self/Subscription and must stay distinct from ons/Subscription in all shared docs and catalog surfaces.
+      - The published runtime uses service-SDK work requests for create, update, and delete, with bounded existing-before-create reuse on exact compartmentId plus displayName plus tenantId/sellerId/productId rereads.
+    kindOverrides:
+      - group: self
+        kind: Subscription
+        summary: Manage OCI SELF marketplace subscriptions.
+
   - package: servicecatalog
     displayName: Service Catalog
     summary: Manage OCI Service Catalog catalogs and private applications from Kubernetes.
@@ -1096,6 +1396,20 @@ packages:
       - group: servicecatalog
         kind: ServiceCatalog
         summary: Manage OCI Service Catalog resources.
+
+  - package: servicemanagerproxy
+    displayName: Service Manager Proxy
+    summary: Observe existing OCI Service Manager service environments from Kubernetes with a bind-existing, controller-backed read-only contract.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to ServiceEnvironment and publishes only a bind-existing observe-only contract.
+      - The reviewed runtime uses GetServiceEnvironment for read projection, keeps ListServiceEnvironments in a confirmation-only role, and does not expose OCI create, update, or delete behavior.
+    kindOverrides:
+      - group: servicemanagerproxy
+        kind: ServiceEnvironment
+        summary: Observe existing OCI Service Manager service environments.
 
   - package: stackmonitoring
     displayName: Stack Monitoring
@@ -1117,12 +1431,71 @@ packages:
         kind: Stream
         summary: Manage OCI Streaming streams.
 
+  - package: tenantmanagercontrolplane
+    displayName: Tenant Manager Control Plane
+    summary: Manage OCI domains and existing organizations from Kubernetes with truthful service-specific runtime behavior.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope includes Domain and Organization while OrganizationTenancy, DomainGovernance, invitation, and subscription-mapping helper families stay unpublished.
+      - "The published runtime is intentionally mixed: Domain exposes workrequest-aware create, direct-body update, and confirmed OCI delete; Organization remains bind-existing plus update-only with local unbind on CR delete."
+    kindOverrides:
+      - group: tenantmanagercontrolplane
+        kind: Domain
+        summary: Manage OCI domains with workrequest-aware create behavior and confirmed OCI delete semantics.
+      - group: tenantmanagercontrolplane
+        kind: Organization
+        summary: Manage existing OCI organizations with an update-only default subscription contract.
+
   - package: usageapi
     displayName: Usage API
     summary: Manage OCI Usage API resources from Kubernetes.
     supportStatus: preview
     customerVisible: false
     guidePath: docs/installation.md
+
+  - package: vbsinst
+    displayName: Visual Builder Studio
+    summary: Manage OCI Visual Builder Studio instances from Kubernetes with a reviewed controller-backed runtime.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to VbsInstance while the service-local work-request helper families stay unpublished.
+      - The published runtime uses service-SDK work requests for create, update, and delete, and binds only on exact `compartmentId` plus immutable `name`.
+    kindOverrides:
+      - group: vbsinst
+        kind: VbsInstance
+        summary: Manage OCI Visual Builder Studio instances.
+
+  - package: visualbuilder
+    displayName: Visual Builder
+    summary: Manage OCI Visual Builder instances from Kubernetes with a reviewed controller-backed runtime.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to VbInstance while the Visual Builder work-request helper families stay unpublished.
+      - The published runtime uses service-SDK work requests for create, update, and delete, treats `compartmentId`, `consumptionModel`, and `networkEndpointDetails.privateEndpointIp` as replacement-only, and preserves explicit empty-collection clears for supported tag and endpoint fields.
+    kindOverrides:
+      - group: visualbuilder
+        kind: VbInstance
+        summary: Manage OCI Visual Builder instances.
+
+  - package: vnmonitoring
+    displayName: Network Monitoring
+    summary: Manage OCI Network Monitoring path analyzer tests from Kubernetes with a reviewed controller-backed runtime.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to PathAnalyzerTest while path analyses, work-request helper families, and the separate change-compartment action stay unpublished.
+      - The published runtime uses synchronous read-after-write follow-up semantics, paginated exact-match reuse on displayName plus endpoint and protocol identity within one compartment, and explicit in-place updates for endpoint, protocol, query-option, and tag fields.
+    kindOverrides:
+      - group: vnmonitoring
+        kind: PathAnalyzerTest
+        summary: Manage OCI Network Monitoring path analyzer tests.
 
   - package: vulnerabilityscanning
     displayName: Vulnerability Scanning
@@ -1151,3 +1524,34 @@ packages:
     supportStatus: preview
     customerVisible: false
     guidePath: docs/installation.md
+  - package: wlms
+    displayName: WebLogic Management Service
+    summary: Manage OCI WebLogic Management Service resources from Kubernetes with reviewed controller-backed manage-existing runtimes.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to WlsDomain and ManagedInstance while AgreementRecord, Configuration, WlsDomainCredential, and other WLMS helper families stay unpublished.
+      - WlsDomain is manage-existing because WLMS does not expose CreateWlsDomain; bind by `id` or a unique `compartmentId` plus `displayName`, then reconcile configuration and tag updates with confirm-delete observation.
+      - ManagedInstance is bind-existing plus update-only because WLMS does not expose CreateManagedInstance or DeleteManagedInstance; bind by `id` or a unique `compartmentId` plus `displayName` with optional `pluginStatus`, then reconcile configuration updates with one bounded confirmation reread.
+    kindOverrides:
+      - group: wlms
+        kind: ManagedInstance
+        summary: Manage OCI managed instances already onboarded into OCI WebLogic Management Service.
+      - group: wlms
+        kind: WlsDomain
+        summary: Manage OCI WebLogic domains already onboarded into OCI WebLogic Management Service.
+
+  - package: zpr
+    displayName: Zero Trust Packet Routing
+    summary: Manage OCI Zero Trust Packet Routing policies from Kubernetes with a reviewed work-request-backed runtime.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to ZprPolicy while Configuration and policy work-request helper families stay unpublished.
+      - The published runtime uses service-SDK work requests for create, update, and delete, binds only on exact `compartmentId` plus immutable `name`, and limits in-place updates to description, statements, and tags.
+    kindOverrides:
+      - group: zpr
+        kind: ZprPolicy
+        summary: Manage OCI Zero Trust Packet Routing policies.

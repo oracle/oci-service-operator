@@ -1,0 +1,168 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Sequence - opa/OpaInstance
+hide footbox
+skinparam sequence {
+  actorBorderColor #0f172a
+  actorBackgroundColor #e2e8f0
+  participantBorderColor #0f172a
+  participantBackgroundColor #e2e8f0
+  participantFontColor #0f172a
+  lifeLineBorderColor #94a3b8
+  groupBorderColor #cbd5e1
+  groupBackgroundColor #f8fafc
+}
+actor Kubernetes
+participant Controller
+participant BaseReconciler
+participant "OSOKServiceManager" as ServiceManager
+participant OCI
+note over BaseReconciler,ServiceManager
+shared resolution:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete:
+shared/diagrams/shared-delete-sequence.svg
+end note
+Kubernetes -> Controller: enqueue OpaInstance reconcile
+Controller -> BaseReconciler: Reconcile(request)
+BaseReconciler -> ServiceManager: reconcile desired OpaInstance
+group Lookup and bind
+alt tracked or explicit OCI identity already exists
+ServiceManager -> OCI: GetOpaInstance
+else tracked identity is missing
+ServiceManager -> OCI: ListOpaInstances(filters:\ncompartmentId, displayName)
+alt reusable OCI resource is not found
+ServiceManager -> OCI: CreateOpaInstance
+loop create pending CREATING
+ServiceManager -> OCI: GetOpaInstance
+end
+else reusable OCI resource already exists
+ServiceManager -> OCI: GetOpaInstance
+end
+ServiceManager --> BaseReconciler: persist resolved OCI identity in status
+end
+alt delete requested
+group Delete
+ServiceManager -> OCI: DeleteOpaInstance
+ServiceManager -> OCI: confirm delete via GetOpaInstance or\nListOpaInstances
+loop delete pending DELETING
+ServiceManager -> OCI: GetOpaInstance or ListOpaInstances
+end
+alt cleanup or finalizer release is blocked
+ServiceManager --> BaseReconciler: retain delete state and retry
+else delete completion observed
+ServiceManager --> BaseReconciler: release finalizer after delete completion
+end
+end
+else OCI state is retryable
+ServiceManager --> BaseReconciler: requeue while OCI remains in\nCREATING, UPDATING, DELETING
+else live state requires field-aware\ndrift evaluation
+group Drift handling
+note over ServiceManager,OCI
+Supported update surface: definedTags,
+description, displayName, freeformTags
+Reject before mutate: force-new fields
+compartmentId, consumptionModel, idcsAt,
+isBreakglassEnabled (+2 more)
+Lookup filters: compartmentId,
+displayName
+Lookup matching: exact compartmentId
+plus displayName unique match in ACTIVE,
+CREATING, UPDATING, or INACTIVE;
+duplicate matches fail
+end note
+opt force-new or conflicting drift is detected
+ServiceManager --> BaseReconciler: reject before OCI mutation
+end
+opt supported mutable drift is detected
+ServiceManager -> OCI: Apply UpdateOpaInstance only for\nmutable fields definedTags,\ndescription, displayName,\nfreeformTags
+loop update pending UPDATING
+ServiceManager -> OCI: GetOpaInstance
+end
+end
+ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=opainstance action=CREATED;\nupdate=tfresource.UpdateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=opainstance action=UPDATED;\ndelete=tfresource.DeleteResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=opainstance action=DELETED
+ServiceManager -> OCI: apply follow-up strategy\ncreate=GetWorkRequest ->\nGetOpaInstance;\nupdate=GetWorkRequest ->\nGetOpaInstance;\ndelete=GetWorkRequest ->\nGetOpaInstance/ListOpaInstances\nconfirm-delete
+end
+ServiceManager --> BaseReconciler: status=required,\nfinalizer=retain-until-confirmed-delete
+end
+BaseReconciler --> Controller: requeue on provisioning, updating,\nterminating
+note right of ServiceManager
+shared diagram:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete diagram:
+shared/diagrams/shared-delete-sequence.svg
+Start from the shared resolution sequence for
+OCID binding, datasource pagination, and
+create-or-update dispatch.
+Layer the shared delete sequence when finalizer
+retention, delete confirmation, work-request
+polling, or Secret cleanup apply.
+archetype batch: Generated service-manager
+controllers follow the shared resolution and
+delete sequences with imported waits and
+controller-local policy.
+service: opa
+slug: opainstance
+kind: OpaInstance
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: provisioning, updating, terminating
+provider states: create CREATING; update
+UPDATING; delete DELETING
+follow-up: create=GetWorkRequest ->
+GetOpaInstance; update=GetWorkRequest ->
+GetOpaInstance; delete=GetWorkRequest ->
+GetOpaInstance/ListOpaInstances confirm-delete
+supported drift: definedTags, description,
+displayName, freeformTags
+reject before mutate: force-new fields
+compartmentId, consumptionModel, idcsAt,
+isBreakglassEnabled (+2 more)
+create-only fields: none
+list lookup: oci_opa_opa_instances filters
+compartmentId, displayName; exact compartmentId
+plus displayName unique match in ACTIVE,
+CREATING, UPDATING, or INACTIVE; duplicate
+matches fail
+conflicts: none
+open gaps: none
+Reviewed lifecycle mapping treats CREATING as
+provisioning, UPDATING as updating, ACTIVE and
+INACTIVE as success, and DELETING as
+terminating; FAILED is terminal and DELETED is
+only a delete-confirmation target.
+Create, update, and delete responses expose
+work-request headers but do not return an
+OpaInstance body. The runtime resumes through
+GetWorkRequest, recovers the affected
+OpaInstance OCID from work-request resources,
+and rereads GetOpaInstance before settling.
+Pre-create reuse only runs when both
+spec.compartmentId and spec.displayName are
+present and keeps exact compartmentId plus
+displayName matching bounded to ACTIVE,
+CREATING, UPDATING, or INACTIVE summaries.
+Only displayName, description, freeformTags, and
+definedTags reconcile in place; IdcsAt is
+create-time-only and normalized out of
+post-create parity because OCI does not echo it,
+while compartmentId, shapeName,
+consumptionModel, meteringType, and
+isBreakglassEnabled remain replacement-only.
+ChangeOpaInstanceCompartment, StartOpaInstance,
+and StopOpaInstance remain out of scope for the
+published runtime surface. Delete keeps the
+finalizer until the work request is terminal and
+GetOpaInstance or fallback ListOpaInstances
+confirms the resource is gone.
+end note
+@enduml

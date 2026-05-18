@@ -1,0 +1,52 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: vnmonitoring
+slug: pathanalyzertest
+kind: PathAnalyzerTest
+archetype: generated-service-manager
+states:
+  - active
+  - terminating
+  - deleted
+repoAuthored:
+  listLookup:
+    filters:
+      - compartmentId
+      - displayName
+    matchRule: exact compartmentId plus displayName plus protocol plus sourceEndpoint plus destinationEndpoint plus queryOptions plus protocolParameters unique match; empty displayName skips pre-create lookup; duplicate matches fail
+  mutation:
+    mutable:
+      - definedTags
+      - destinationEndpoint
+      - displayName
+      - freeformTags
+      - protocol
+      - protocolParameters
+      - queryOptions
+      - sourceEndpoint
+    forceNew:
+      - compartmentId
+  hooks:
+    create:
+      - helper: tfresource.CreateResource
+    update:
+      - helper: tfresource.UpdateResource
+    delete:
+      - helper: tfresource.DeleteResource
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - PathAnalyzerTest create and update are synchronous reread flows. OCI returns
+    the body immediately and the resource exposes only ACTIVE and DELETED, so
+    the reviewed runtime does not publish provisioning or updating lifecycle
+    buckets.
+  - Pre-create reuse always scopes by compartmentId and only uses the SDK
+    displayName filter when spec.displayName is present, but adoption still
+    requires a unique exact match on the reviewed identity surface.
+  - The published status surface mirrors the observed PathAnalyzerTest body,
+    including the polymorphic endpoint and protocol-parameter read model.
+  - Delete confirmation treats either a DELETED lifecycle response or a
+    NotFound reread as terminal and otherwise keeps the finalizer until OCI
+    stops returning the resource.

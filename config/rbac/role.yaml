@@ -400,6 +400,32 @@ rules:
   - patch
   - update
 - apiGroups:
+  - appmgmtcontrol.oracle.com
+  resources:
+  - monitoredinstances
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - appmgmtcontrol.oracle.com
+  resources:
+  - monitoredinstances/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - appmgmtcontrol.oracle.com
+  resources:
+  - monitoredinstances/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - artifacts.oracle.com
   resources:
   - containerimagesignatures
@@ -863,6 +889,32 @@ rules:
   - patch
   - update
 - apiGroups:
+  - computeinstanceagent.oracle.com
+  resources:
+  - instanceagentplugins
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - computeinstanceagent.oracle.com
+  resources:
+  - instanceagentplugins/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - computeinstanceagent.oracle.com
+  resources:
+  - instanceagentplugins/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - containerengine.oracle.com
   resources:
   - clusters
@@ -974,6 +1026,7 @@ rules:
   - dashboardservice.oracle.com
   resources:
   - dashboardgroups
+  - dashboards
   verbs:
   - create
   - delete
@@ -986,12 +1039,14 @@ rules:
   - dashboardservice.oracle.com
   resources:
   - dashboardgroups/finalizers
+  - dashboards/finalizers
   verbs:
   - update
 - apiGroups:
   - dashboardservice.oracle.com
   resources:
   - dashboardgroups/status
+  - dashboards/status
   verbs:
   - get
   - patch
@@ -1025,6 +1080,7 @@ rules:
 - apiGroups:
   - databasemigration.oracle.com
   resources:
+  - assessments
   - connections
   verbs:
   - create
@@ -1037,12 +1093,14 @@ rules:
 - apiGroups:
   - databasemigration.oracle.com
   resources:
+  - assessments/finalizers
   - connections/finalizers
   verbs:
   - update
 - apiGroups:
   - databasemigration.oracle.com
   resources:
+  - assessments/status
   - connections/status
   verbs:
   - get
@@ -1657,6 +1715,58 @@ rules:
   - patch
   - update
 - apiGroups:
+  - disasterrecovery.oracle.com
+  resources:
+  - drprotectiongroups
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - disasterrecovery.oracle.com
+  resources:
+  - drprotectiongroups/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - disasterrecovery.oracle.com
+  resources:
+  - drprotectiongroups/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - distributeddatabase.oracle.com
+  resources:
+  - distributeddatabaseprivateendpoints
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - distributeddatabase.oracle.com
+  resources:
+  - distributeddatabaseprivateendpoints/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - distributeddatabase.oracle.com
+  resources:
+  - distributeddatabaseprivateendpoints/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - dns.oracle.com
   resources:
   - steeringpolicies
@@ -2002,6 +2112,32 @@ rules:
   - patch
   - update
 - apiGroups:
+  - gdp.oracle.com
+  resources:
+  - gdppipelines
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - gdp.oracle.com
+  resources:
+  - gdppipelines/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - gdp.oracle.com
+  resources:
+  - gdppipelines/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - generativeai.oracle.com
   resources:
   - dedicatedaiclusters
@@ -2029,6 +2165,87 @@ rules:
   - dedicatedaiclusters/status
   - endpoints/status
   - models/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - generativeaiagent.oracle.com
+  resources:
+  - agents
+  - knowledgebases
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - generativeaiagent.oracle.com
+  resources:
+  - agents/finalizers
+  - knowledgebases/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - generativeaiagent.oracle.com
+  resources:
+  - agents/status
+  - knowledgebases/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - generativeaiagentruntime.oracle.com
+  resources:
+  - sessions
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - generativeaiagentruntime.oracle.com
+  resources:
+  - sessions/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - generativeaiagentruntime.oracle.com
+  resources:
+  - sessions/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - generativeaidata.oracle.com
+  resources:
+  - enrichmentjobs
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - generativeaidata.oracle.com
+  resources:
+  - enrichmentjobs/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - generativeaidata.oracle.com
+  resources:
+  - enrichmentjobs/status
   verbs:
   - get
   - patch
@@ -2224,6 +2441,58 @@ rules:
   - digitaltwinrelationships/status
   - iotdomaingroups/status
   - iotdomains/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - jms.oracle.com
+  resources:
+  - fleets
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - jms.oracle.com
+  resources:
+  - fleets/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - jms.oracle.com
+  resources:
+  - fleets/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - jmsjavadownloads.oracle.com
+  resources:
+  - javadownloadtokens
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - jmsjavadownloads.oracle.com
+  resources:
+  - javadownloadtokens/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - jmsjavadownloads.oracle.com
+  resources:
+  - javadownloadtokens/status
   verbs:
   - get
   - patch
@@ -2500,6 +2769,35 @@ rules:
   - patch
   - update
 - apiGroups:
+  - lustrefilestorage.oracle.com
+  resources:
+  - lustrefilesystems
+  - objectstoragelinks
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - lustrefilestorage.oracle.com
+  resources:
+  - lustrefilesystems/finalizers
+  - objectstoragelinks/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - lustrefilestorage.oracle.com
+  resources:
+  - lustrefilesystems/status
+  - objectstoragelinks/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - managedkafka.oracle.com
   resources:
   - kafkaclusterconfigs
@@ -2690,6 +2988,64 @@ rules:
   - listings/status
   - terms/status
   - termversions/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - mediaservices.oracle.com
+  resources:
+  - mediaassets
+  - mediaworkflows
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - mediaservices.oracle.com
+  resources:
+  - mediaassets/finalizers
+  - mediaworkflows/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - mediaservices.oracle.com
+  resources:
+  - mediaassets/status
+  - mediaworkflows/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - mngdmac.oracle.com
+  resources:
+  - macdevices
+  - macorders
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - mngdmac.oracle.com
+  resources:
+  - macdevices/finalizers
+  - macorders/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - mngdmac.oracle.com
+  resources:
+  - macdevices/status
+  - macorders/status
   verbs:
   - get
   - patch
@@ -2905,6 +3261,32 @@ rules:
   - patch
   - update
 - apiGroups:
+  - oce.oracle.com
+  resources:
+  - oceinstances
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - oce.oracle.com
+  resources:
+  - oceinstances/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - oce.oracle.com
+  resources:
+  - oceinstances/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - ocvp.oracle.com
   resources:
   - clusters
@@ -2996,6 +3378,38 @@ rules:
   - patch
   - update
 - apiGroups:
+  - onesubscription.oracle.com
+  - osubsubscription.oracle.com
+  - self.oracle.com
+  resources:
+  - subscriptions
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - onesubscription.oracle.com
+  - osubsubscription.oracle.com
+  - self.oracle.com
+  resources:
+  - subscriptions/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - onesubscription.oracle.com
+  - osubsubscription.oracle.com
+  - self.oracle.com
+  resources:
+  - subscriptions/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - ons.oracle.com
   resources:
   - subscriptions
@@ -3020,6 +3434,32 @@ rules:
   resources:
   - subscriptions/status
   - topics/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - opa.oracle.com
+  resources:
+  - opainstances
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - opa.oracle.com
+  resources:
+  - opainstances/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - opa.oracle.com
+  resources:
+  - opainstances/status
   verbs:
   - get
   - patch
@@ -3209,6 +3649,32 @@ rules:
   - patch
   - update
 - apiGroups:
+  - psa.oracle.com
+  resources:
+  - privateserviceaccesses
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - psa.oracle.com
+  resources:
+  - privateserviceaccesses/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - psa.oracle.com
+  resources:
+  - privateserviceaccesses/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - queue.oracle.com
   resources:
   - queues
@@ -3386,6 +3852,35 @@ rules:
   - patch
   - update
 - apiGroups:
+  - rover.oracle.com
+  resources:
+  - roverclusters
+  - rovernodes
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - rover.oracle.com
+  resources:
+  - roverclusters/finalizers
+  - rovernodes/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - rover.oracle.com
+  resources:
+  - roverclusters/status
+  - rovernodes/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - sch.oracle.com
   resources:
   - serviceconnectors
@@ -3470,6 +3965,32 @@ rules:
   - patch
   - update
 - apiGroups:
+  - servicemanagerproxy.oracle.com
+  resources:
+  - serviceenvironments
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - servicemanagerproxy.oracle.com
+  resources:
+  - serviceenvironments/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - servicemanagerproxy.oracle.com
+  resources:
+  - serviceenvironments/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - stackmonitoring.oracle.com
   resources:
   - alarmconditions
@@ -3549,6 +4070,35 @@ rules:
   - patch
   - update
 - apiGroups:
+  - tenantmanagercontrolplane.oracle.com
+  resources:
+  - domains
+  - organizations
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - tenantmanagercontrolplane.oracle.com
+  resources:
+  - domains/finalizers
+  - organizations/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - tenantmanagercontrolplane.oracle.com
+  resources:
+  - domains/status
+  - organizations/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - usageapi.oracle.com
   resources:
   - customtables
@@ -3579,6 +4129,84 @@ rules:
   - queries/status
   - schedules/status
   - usagecarbonemissionsqueries/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - vbsinst.oracle.com
+  resources:
+  - vbsinstances
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - vbsinst.oracle.com
+  resources:
+  - vbsinstances/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - vbsinst.oracle.com
+  resources:
+  - vbsinstances/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - visualbuilder.oracle.com
+  resources:
+  - vbinstances
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - visualbuilder.oracle.com
+  resources:
+  - vbinstances/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - visualbuilder.oracle.com
+  resources:
+  - vbinstances/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - vnmonitoring.oracle.com
+  resources:
+  - pathanalyzertests
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - vnmonitoring.oracle.com
+  resources:
+  - pathanalyzertests/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - vnmonitoring.oracle.com
+  resources:
+  - pathanalyzertests/status
   verbs:
   - get
   - patch
@@ -3713,6 +4341,64 @@ rules:
   - networkaddresslists/status
   - webappfirewallpolicies/status
   - webappfirewalls/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - wlms.oracle.com
+  resources:
+  - managedinstances
+  - wlsdomains
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - wlms.oracle.com
+  resources:
+  - managedinstances/finalizers
+  - wlsdomains/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - wlms.oracle.com
+  resources:
+  - managedinstances/status
+  - wlsdomains/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - zpr.oracle.com
+  resources:
+  - configurations
+  - zprpolicies
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - zpr.oracle.com
+  resources:
+  - configurations/finalizers
+  - zprpolicies/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - zpr.oracle.com
+  resources:
+  - configurations/status
+  - zprpolicies/status
   verbs:
   - get
   - patch

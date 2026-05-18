@@ -1,0 +1,100 @@
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
+// This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
+// Code generated. DO NOT EDIT.
+
+// Network Monitoring API
+//
+// Use the Network Monitoring API to troubleshoot routing and security issues for resources such as virtual cloud networks (VCNs) and compute instances. For more information, see the console
+// documentation for the Network Path Analyzer (https://docs.oracle.com/iaas/Content/Network/Concepts/path_analyzer.htm) tool.
+//
+
+package vnmonitoring
+
+import (
+	"encoding/json"
+	"fmt"
+	"github.com/oracle/oci-go-sdk/v65/common"
+	"strings"
+)
+
+// IpsecTunnelDrgAttachmentNetworkDetails Specifies the IPSec tunnel attached to the DRG.
+type IpsecTunnelDrgAttachmentNetworkDetails struct {
+
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the network attached to the DRG.
+	Id *string `mandatory:"false" json:"id"`
+
+	// The IPSec connection that contains the attached IPSec tunnel.
+	IpsecConnectionId *string `mandatory:"false" json:"ipsecConnectionId"`
+
+	// Routes which may be imported from the attachment (subject to import policy) appear in the route reflectors
+	// tagged with the attachment's import route target.
+	ImportRouteTarget *string `mandatory:"false" json:"importRouteTarget"`
+
+	// Routes which are exported to the attachment are exported to the route reflectors
+	// with the route target set to the value of the attachment's export route target.
+	ExportRouteTarget *string `mandatory:"false" json:"exportRouteTarget"`
+
+	// The MPLS label of the DRG attachment.
+	MplsLabel *int `mandatory:"false" json:"mplsLabel"`
+
+	// The BGP ASN to use for the IPSec connection's route target.
+	RegionalOciAsn *string `mandatory:"false" json:"regionalOciAsn"`
+
+	// IPv4 address used to encapsulate ingress traffic to the DRG through this attachment
+	IngressVip *string `mandatory:"false" json:"ingressVip"`
+
+	// Whether traffic from this network is forwarded to the El Paso Gamma VIPs (or not)
+	IsGammaDrg *bool `mandatory:"false" json:"isGammaDrg"`
+
+	// Common Export route target to use for the DRG Attachment instead of per-attachment route target.
+	// This is applicable to DRG attachments that are assigned to a DRG route table which is whitelisted for
+	// route unification.
+	CommonExportRT *string `mandatory:"false" json:"commonExportRT"`
+
+	// Common Import route target to use for the DRG attachment instead of per-attachment import route target.
+	// This is applicable to DRG attachments that are assigned to a DRG route table which is whitelisted for
+	// route unification.
+	CommonImportRT *string `mandatory:"false" json:"commonImportRT"`
+
+	// This indicates whether the DRG route table associated with the DRG attachment is whitelisted for route unification.
+	// Example: `true`
+	IsRouteUnificationEnabled *bool `mandatory:"false" json:"isRouteUnificationEnabled"`
+
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the virtual circuit's DRG attachment.
+	TransportAttachmentId *string `mandatory:"false" json:"transportAttachmentId"`
+}
+
+// GetId returns Id
+func (m IpsecTunnelDrgAttachmentNetworkDetails) GetId() *string {
+	return m.Id
+}
+
+func (m IpsecTunnelDrgAttachmentNetworkDetails) String() string {
+	return common.PointerString(m)
+}
+
+// ValidateEnumValue returns an error when providing an unsupported enum value
+// This function is being called during constructing API request process
+// Not recommended for calling this function directly
+func (m IpsecTunnelDrgAttachmentNetworkDetails) ValidateEnumValue() (bool, error) {
+	errMessage := []string{}
+
+	if len(errMessage) > 0 {
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
+	}
+	return false, nil
+}
+
+// MarshalJSON marshals to json representation
+func (m IpsecTunnelDrgAttachmentNetworkDetails) MarshalJSON() (buff []byte, e error) {
+	type MarshalTypeIpsecTunnelDrgAttachmentNetworkDetails IpsecTunnelDrgAttachmentNetworkDetails
+	s := struct {
+		DiscriminatorParam string `json:"type"`
+		MarshalTypeIpsecTunnelDrgAttachmentNetworkDetails
+	}{
+		"IPSEC_TUNNEL",
+		(MarshalTypeIpsecTunnelDrgAttachmentNetworkDetails)(m),
+	}
+
+	return json.Marshal(&s)
+}

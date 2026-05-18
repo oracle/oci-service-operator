@@ -1,0 +1,61 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: mngdmac
+slug: macorder
+kind: MacOrder
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending:
+      - CREATING
+    updatePending:
+      - UPDATING
+    deletePending:
+      - DELETING
+  listLookup:
+    filters:
+      - compartmentId
+      - displayName
+    matchRule: exact compartmentId plus displayName unique match in ACTIVE, CREATING, or UPDATING; duplicate matches fail
+  mutation:
+    mutable:
+      - displayName
+      - ipRange
+      - orderDescription
+      - orderSize
+      - shape
+    forceNew:
+      - commitmentTerm
+      - compartmentId
+  hooks:
+    create:
+      - helper: tfresource.CreateResource
+    update:
+      - helper: tfresource.UpdateResource
+    delete:
+      - helper: tfresource.DeleteResource
+  followUp:
+    create: GetWorkRequest -> GetMacOrder
+    update: GetWorkRequest -> GetMacOrder
+    delete: GetWorkRequest -> CancelMacOrder/GetMacOrder/ListMacOrders confirm-delete
+notes:
+  - Reviewed lifecycle mapping treats CREATING as provisioning, UPDATING as
+    updating, ACTIVE as success, and NEEDS_ATTENTION or FAILED as terminal
+    failure; DELETING stays terminating and DELETED is a delete target.
+  - CreateMacOrder returns a MacOrder body plus opc-work-request-id, while
+    UpdateMacOrder and CancelMacOrder return work-request headers only. The
+    runtime follows the service-local GetWorkRequest helper, recovers the
+    affected MacOrder OCID from work-request resources, and rereads GetMacOrder
+    as the authoritative observed-state source.
+  - Delete maps to CancelMacOrder for the published Kubernetes contract. The
+    finalizer is released when rereads confirm DELETED, NotFound, or a canceled
+    order read-model (`orderStatus=CANCELED`) after the cancel work request
+    succeeds.
+  - ChangeMacOrderCompartment remains out of scope; compartmentId and
+    commitmentTerm stay replacement-only, while displayName, ipRange,
+    orderDescription, orderSize, and shape reconcile in place.

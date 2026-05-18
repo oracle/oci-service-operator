@@ -1,0 +1,172 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Sequence - gdp/GdpPipeline
+hide footbox
+skinparam sequence {
+  actorBorderColor #0f172a
+  actorBackgroundColor #e2e8f0
+  participantBorderColor #0f172a
+  participantBackgroundColor #e2e8f0
+  participantFontColor #0f172a
+  lifeLineBorderColor #94a3b8
+  groupBorderColor #cbd5e1
+  groupBackgroundColor #f8fafc
+}
+actor Kubernetes
+participant Controller
+participant BaseReconciler
+participant "OSOKServiceManager" as ServiceManager
+participant OCI
+note over BaseReconciler,ServiceManager
+shared resolution:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete:
+shared/diagrams/shared-delete-sequence.svg
+end note
+Kubernetes -> Controller: enqueue GdpPipeline reconcile
+Controller -> BaseReconciler: Reconcile(request)
+BaseReconciler -> ServiceManager: reconcile desired GdpPipeline
+group Lookup and bind
+alt tracked or explicit OCI identity already exists
+ServiceManager -> OCI: GetGdpPipeline
+else tracked identity is missing
+ServiceManager -> OCI: ListGdpPipelines(filters:\ncompartment_id, display_name,\ngdp_pipeline_id, lifecycle_state)
+alt reusable OCI resource is not found
+ServiceManager -> OCI: CreateGdpPipeline
+loop create pending CREATING, UPDATING
+ServiceManager -> OCI: GetGdpPipeline
+end
+else reusable OCI resource already exists
+ServiceManager -> OCI: GetGdpPipeline
+end
+ServiceManager --> BaseReconciler: persist resolved OCI identity in status
+end
+alt delete requested
+group Delete
+ServiceManager -> OCI: DeleteGdpPipeline
+ServiceManager -> OCI: confirm delete via GetGdpPipeline or\nListGdpPipelines
+loop delete pending DELETING
+ServiceManager -> OCI: GetGdpPipeline or ListGdpPipelines
+end
+alt cleanup or finalizer release is blocked
+ServiceManager --> BaseReconciler: retain delete state and retry
+else delete completion observed
+ServiceManager --> BaseReconciler: release finalizer after delete completion
+end
+end
+else OCI state is retryable
+ServiceManager --> BaseReconciler: requeue while OCI remains in\nCREATING, UPDATING, DELETING
+else live state requires field-aware\ndrift evaluation
+group Drift handling
+note over ServiceManager,OCI
+Supported update surface:
+approval_key_vault_id,
+authorization_details, defined_tags,
+description (+8 more)
+Reject before mutate: force-new fields
+bucket_details, compartment_id,
+peering_region, pipeline_type
+Lookup filters: compartment_id,
+display_name, gdp_pipeline_id,
+lifecycle_state
+end note
+opt force-new or conflicting drift is detected
+ServiceManager --> BaseReconciler: reject before OCI mutation
+end
+opt supported mutable drift is detected
+ServiceManager -> OCI: Apply UpdateGdpPipeline only for\nmutable fields\napproval_key_vault_id,\nauthorization_details, defined_tags,\ndescription (+8 more)
+loop update pending UPDATING
+ServiceManager -> OCI: GetGdpPipeline
+end
+end
+ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=gdppipeline action=CREATED;\nupdate=tfresource.UpdateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=gdppipeline action=UPDATED;\ndelete=tfresource.DeleteResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=gdppipeline action=DELETED
+end
+ServiceManager --> BaseReconciler: status=required,\nfinalizer=retain-until-confirmed-delete
+end
+BaseReconciler --> Controller: requeue on provisioning, updating,\nterminating
+note right of ServiceManager
+shared diagram:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete diagram:
+shared/diagrams/shared-delete-sequence.svg
+Start from the shared resolution sequence for
+OCID binding, datasource pagination, and
+create-or-update dispatch.
+Layer the shared delete sequence when finalizer
+retention, delete confirmation, work-request
+polling, or Secret cleanup apply.
+archetype batch: Generated service-manager
+controllers follow the shared resolution and
+delete sequences with imported waits and
+controller-local policy.
+service: gdp
+slug: gdppipeline
+kind: GdpPipeline
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: provisioning, updating, terminating
+provider states: create CREATING, UPDATING;
+update UPDATING; delete DELETING
+supported drift: approval_key_vault_id,
+authorization_details, defined_tags, description
+(+8 more)
+reject before mutate: force-new fields
+bucket_details, compartment_id, peering_region,
+pipeline_type
+create-only fields: none
+list lookup: oci_gdp_gdp_pipelines filters
+compartment_id, display_name, gdp_pipeline_id,
+lifecycle_state
+conflicts: none
+open gaps: none
+GdpPipeline create, update, and delete are
+work-request-backed. The runtime records the
+opening opc-work-request-id, polls
+GetGdpWorkRequest through the generatedruntime
+async seam, and rereads GetGdpPipeline before
+projecting status or completing delete
+confirmation.
+GDP work-request OperationStatus values
+normalize into the shared async classes and GDP
+operation types normalize into create, update,
+and delete phases. Raw work-request status,
+operation type, message, percent complete, and
+work-request ID remain visible in
+status.async.current for debugging.
+Success states are explicit: ACTIVE and INACTIVE
+settle success, while NEEDS_ATTENTION is
+terminal non-success rather than a default
+active state.
+Pre-create reuse is exact on compartmentId,
+displayName, pipelineType, and peeringRegion,
+and the runtime confirms bucketDetails from a
+follow-up GET before binding to an existing
+pipeline. When a tracked OCID already exists,
+list reuse stays keyed to the service-specific
+gdpPipelineId filter.
+Mutable drift is limited to
+UpdateGdpPipelineDetails fields displayName,
+description, serviceLogGroupId, fileTypes,
+authorizationDetails,
+isFileOverrideInDestinationEnabled,
+isScanningEnabled, isChunkingEnabled,
+isApprovalNeeded, approvalKeyVaultId,
+freeformTags, and definedTags. Strings, maps,
+and false booleans keep explicit clear intent,
+while zero-length fileTypes clears remain
+unpublished because the pinned SDK update
+request omits empty slices.
+Start/Stop/Peer/Rotate/ChangeCompartment
+auxiliaries remain out-of-scope drift for the
+published contract.
+end note
+@enduml

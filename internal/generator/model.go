@@ -107,6 +107,7 @@ type ServiceManagerModel struct {
 	ClientInterfaceName      string
 	DefaultClientTypeName    string
 	UsesCredentialClient     bool
+	SDKClients               []SDKClientModel
 	SDKClientTypeName        string
 	SDKClientConstructor     string
 	SDKClientConstructorKind string
@@ -123,11 +124,15 @@ type ServiceManagerModel struct {
 
 // RuntimeOperationModel describes one generated SDK-backed operation binding.
 type RuntimeOperationModel struct {
-	MethodName       string
-	RequestTypeName  string
-	ResponseTypeName string
-	UsesRequest      bool
-	RequestFields    []RuntimeRequestFieldModel
+	MethodName            string
+	RequestTypeName       string
+	ResponseTypeName      string
+	UsesRequest           bool
+	RequestFields         []RuntimeRequestFieldModel
+	ClientType            string
+	ClientConstructor     string
+	ClientConstructorKind string
+	ClientFieldName       string
 }
 
 // ResourceModel describes one generated top-level kind inside an OSOK API package.
@@ -159,12 +164,22 @@ type RuntimeModel struct {
 	ClientType            string
 	ClientConstructor     string
 	ClientConstructorKind string
+	Clients               []SDKClientModel
 	Semantics             *RuntimeSemanticsModel
 	Create                *RuntimeOperationModel
 	Get                   *RuntimeOperationModel
 	List                  *RuntimeOperationModel
 	Update                *RuntimeOperationModel
 	Delete                *RuntimeOperationModel
+}
+
+// SDKClientModel describes one OCI SDK client constructor used by a generated runtime surface.
+type SDKClientModel struct {
+	TypeName        string
+	Constructor     string
+	ConstructorKind string
+	FieldName       string
+	VarName         string
 }
 
 // RuntimeRequestFieldModel describes one explicit generatedruntime request-field assignment.

@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "appmgmtcontrol",
+  "slug": "monitoredinstance",
+  "kind": "MonitoredInstance",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_appmgmtcontrol_monitored_instance",
+  "operations": {
+    "create": [],
+    "get": [
+      {
+        "operation": "GetMonitoredInstance",
+        "requestType": "appmgmtcontrol.GetMonitoredInstanceRequest",
+        "responseType": "appmgmtcontrol.GetMonitoredInstanceResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListMonitoredInstances",
+        "requestType": "appmgmtcontrol.ListMonitoredInstancesRequest",
+        "responseType": "appmgmtcontrol.ListMonitoredInstancesResponse"
+      }
+    ],
+    "update": [],
+    "delete": []
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "INACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "INACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [],
+    "forceNew": [
+      "compartment_id",
+      "display_name",
+      "instance_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [],
+    "update": [],
+    "delete": []
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED",
+      "NOT_FOUND"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_appmgmtcontrol_monitored_instances",
+    "collectionField": "monitored_instances",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/appmgmtcontrol/monitoredinstance/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/appmgmtcontrol/monitoredinstance/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "delete-confirmation",
+      "lifecycle-classification",
+      "list-lookup",
+      "mutation-policy",
+      "status-projection",
+      "secret-output"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: GetMonitoredInstance and ListMonitoredInstances are present in v65.110.0. Create, update, delete, and work-request helpers for MonitoredInstance are not exposed. ListMonitoredInstances requires compartmentId, supports displayName plus sort controls, returns Items []MonitoredInstanceSummary, and GetMonitoredInstance returns the full MonitoredInstance body.",
+    "Pinned provider coverage is unconfirmed. formal/sources.lock still points at github.com/oracle/terraform-provider-oci@eb653febb1bab4cc6650a96d404a8baf36fdf671, but the accessible local provider inventory did not expose a matching MonitoredInstance resource or data source. The providerResource and datasource names therefore stay provisional OCI-style placeholders so generator-owned registry artifacts can derive stable links without claiming verified provider coverage.",
+    "Repo-authored runtime contract is narrower than the visible SDK surface: the published kind is bind-existing and observe-only, binds by explicit instanceId or a unique ListMonitoredInstances match on compartmentId plus displayName, immediately rereads GetMonitoredInstance after list-based binding so status projects the full body, and treats CR delete as local unbind without calling auxiliary monitoring or workrequest APIs.",
+    "Repo-authored lifecycle classification stays explicit: CREATING requeues as provisioning, UPDATING requeues as updating, ACTIVE and INACTIVE settle success, DELETING and DELETED remain terminating observations, FAILED is terminal failure, and monitoringState is published as observed status only."
+  ]
+}

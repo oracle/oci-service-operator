@@ -1,0 +1,159 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "rover",
+  "slug": "rovercluster",
+  "kind": "RoverCluster",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_rover_rover_cluster",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateRoverCluster",
+        "requestType": "rover.CreateRoverClusterRequest",
+        "responseType": "rover.CreateRoverClusterResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetRoverCluster",
+        "requestType": "rover.GetRoverClusterRequest",
+        "responseType": "rover.GetRoverClusterResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListRoverClusters",
+        "requestType": "rover.ListRoverClustersRequest",
+        "responseType": "rover.ListRoverClustersResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeRoverClusterCompartment",
+        "requestType": "rover.ChangeRoverClusterCompartmentRequest",
+        "responseType": "rover.ChangeRoverClusterCompartmentResponse"
+      },
+      {
+        "operation": "UpdateRoverCluster",
+        "requestType": "rover.UpdateRoverClusterRequest",
+        "responseType": "rover.UpdateRoverClusterResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteRoverCluster",
+        "requestType": "rover.DeleteRoverClusterRequest",
+        "responseType": "rover.DeleteRoverClusterResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "cluster_size",
+      "cluster_workloads",
+      "customer_shipping_address",
+      "data_validation_code",
+      "defined_tags",
+      "display_name",
+      "enclosure_type",
+      "freeform_tags",
+      "import_compartment_id",
+      "import_file_bucket",
+      "is_import_requested",
+      "oracle_shipping_tracking_url",
+      "point_of_contact",
+      "point_of_contact_phone_number",
+      "shipping_preference",
+      "shipping_vendor",
+      "subscription_id",
+      "super_user_password",
+      "time_pickup_expected",
+      "unlock_passphrase"
+    ],
+    "forceNew": [
+      "cluster_type",
+      "compartment_id",
+      "master_key_id",
+      "system_tags"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED",
+      "NOT_FOUND"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_rover_rover_clusters",
+    "collectionField": "rover_clusters",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "cluster_type",
+      "lifecycle_state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/rover/rovercluster/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/rover/rovercluster/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "delete-confirmation",
+      "lifecycle-classification",
+      "list-lookup",
+      "mutation-policy",
+      "secret-output"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: CreateRoverCluster, GetRoverCluster, ListRoverClusters, UpdateRoverCluster, DeleteRoverCluster, and ChangeRoverClusterCompartment are present in v65.110.0. Create, get, and update return the RoverCluster body plus opc-request-id, while delete returns only headers.",
+    "Pinned provider coverage is unconfirmed. formal/sources.lock still points at github.com/oracle/terraform-provider-oci@eb653febb1bab4cc6650a96d404a8baf36fdf671, but the accessible provider inventory did not expose a matching RoverCluster resource or data source. The providerResource and datasource names therefore stay provisional OCI-style placeholders so generator-owned registry artifacts can derive stable links without claiming verified provider coverage.",
+    "Repo-authored runtime contract keeps the in-place mutation surface aligned with UpdateRoverClusterDetails for displayName, clusterSize, customerShippingAddress, clusterWorkloads, superUserPassword, unlockPassphrase, enclosureType, pointOfContact, pointOfContactPhoneNumber, shippingPreference, oracleShippingTrackingUrl, subscriptionId, shippingVendor, timePickupExpected, isImportRequested, importCompartmentId, importFileBucket, dataValidationCode, freeformTags, and definedTags. ChangeRoverClusterCompartment remains out of scope, while compartmentId, clusterType, masterKeyId, and systemTags stay replacement-only or provider-managed drift.",
+    "Repo-authored bind-versus-create stays explicit: pre-create lookup lists by exact compartmentId plus displayName and clusterType, then narrows summary candidates in memory to exact clusterSize matches in reusable ACTIVE, CREATING, or UPDATING states. Duplicate exact matches fail instead of guessing.",
+    "LifecycleState, LifecycleStateDetails, SystemTags, and clusterWorkloads.workRequestId appear on the SDK create/update payloads but are provider-managed or auxiliary breadcrumbs. The reviewed runtime normalizes them out of desired parity instead of treating them as supported user-managed inputs.",
+    "The rover package exposes generic GetWorkRequest and ListWorkRequests helpers, but the ListWorkRequests operation type enum only models ADD_NODES and the RoverCluster CRUD responses never return opc-work-request-id. The reviewed runtime is therefore workrequest-aware but not workrequest-driven: it records request breadcrumbs when available and relies on lifecycle projection plus confirm-delete rereads instead of trying to correlate RoverCluster CRUD operations to service-local work requests.",
+    "OCI echoes credential-like values and one-time URLs/codes such as dataValidationCode, exteriorDoorCode, imageExportPar, interiorAlarmDisarmCode, returnShippingLabelUri, superUserPassword, and unlockPassphrase. The published runtime excludes those fields from status projection and has no Kubernetes Secret side effects."
+  ]
+}

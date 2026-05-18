@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "psa",
+  "kind": "PrivateServiceAccess",
+  "formalSlug": "privateserviceaccess",
+  "providerResource": "oci_psa_private_service_access",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/psa_private_service_access",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/psa_private_service_access",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/psa/privateserviceaccess/page.html",
+  "bodySHA256": "535dffd1aac6523eb210781f98655f404a7b463463fb7bda4f86fe67e7a88ade",
+  "bodyBytes": 1293,
+  "fixtureBodyPath": "7.22.0/psa/privateserviceaccess/page.html"
+}

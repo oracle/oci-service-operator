@@ -407,6 +407,10 @@ func buildServiceManagerModels(service ServiceConfig, version string, resources 
 		}
 
 		packagePath := service.ServiceManagerPackagePathFor(resource.Kind, resource.FileStem)
+		var sdkClients []SDKClientModel
+		if len(resource.Runtime.Clients) > 1 {
+			sdkClients = append([]SDKClientModel(nil), resource.Runtime.Clients...)
+		}
 		serviceManagers = append(serviceManagers, ServiceManagerModel{
 			Kind:                     resource.Kind,
 			SDKName:                  resource.SDKName,
@@ -425,6 +429,7 @@ func buildServiceManagerModels(service ServiceConfig, version string, resources 
 			ClientInterfaceName:      fmt.Sprintf("%sServiceClient", resource.Kind),
 			DefaultClientTypeName:    fmt.Sprintf("default%sServiceClient", resource.Kind),
 			UsesCredentialClient:     resourceUsesCredentialClient(resource),
+			SDKClients:               sdkClients,
 			SDKClientTypeName:        resource.Runtime.ClientType,
 			SDKClientConstructor:     resource.Runtime.ClientConstructor,
 			SDKClientConstructorKind: resource.Runtime.ClientConstructorKind,
@@ -613,10 +618,15 @@ func mergeFieldOverrides(existing []FieldModel, overrides []FieldOverride) []Fie
 	for index, field := range existing {
 		indexByKey[fieldMergeKey(field.Name, field.Type, field.Tag)] = index
 	}
+	removed := make(map[int]struct{})
 
 	for _, override := range overrides {
 		key := fieldMergeKey(override.Name, override.Type, override.Tag)
 		if index, ok := indexByKey[key]; ok {
+			if fieldOverrideDropsField(override) {
+				removed[index] = struct{}{}
+				continue
+			}
 			converted := merged[index]
 			converted.Name = override.Name
 			converted.Type = override.Type
@@ -631,6 +641,9 @@ func mergeFieldOverrides(existing []FieldModel, overrides []FieldOverride) []Fie
 			merged[index] = converted
 			continue
 		}
+		if fieldOverrideDropsField(override) {
+			continue
+		}
 		converted := FieldModel{
 			Name:     override.Name,
 			Type:     override.Type,
@@ -643,7 +656,23 @@ func mergeFieldOverrides(existing []FieldModel, overrides []FieldOverride) []Fie
 		merged = append(merged, converted)
 	}
 
-	return merged
+	if len(removed) == 0 {
+		return merged
+	}
+
+	filtered := make([]FieldModel, 0, len(merged)-len(removed))
+	for index, field := range merged {
+		if _, ok := removed[index]; ok {
+			continue
+		}
+		filtered = append(filtered, field)
+	}
+
+	return filtered
+}
+
+func fieldOverrideDropsField(override FieldOverride) bool {
+	return jsonTagName(override.Tag) == "-"
 }
 
 func fieldMergeKey(name string, typ string, tag string) string {

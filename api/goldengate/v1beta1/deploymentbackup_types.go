@@ -47,6 +47,10 @@ type DeploymentBackupSpec struct {
 	// Locks associated with this resource.
 	// +kubebuilder:validation:Optional
 	Locks []DeploymentBackupLock `json:"locks,omitempty"`
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
+	Type string `json:"type,omitempty"`
 }
 
 // DeploymentBackupLock defines nested fields for DeploymentBackup.Lock.

@@ -19,6 +19,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/apmcontrolplane"
 	"github.com/oracle/oci-go-sdk/v65/apmsynthetics"
 	"github.com/oracle/oci-go-sdk/v65/apmtraces"
+	"github.com/oracle/oci-go-sdk/v65/appmgmtcontrol"
 	"github.com/oracle/oci-go-sdk/v65/artifacts"
 	"github.com/oracle/oci-go-sdk/v65/autoscaling"
 	"github.com/oracle/oci-go-sdk/v65/bastion"
@@ -33,6 +34,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/cloudmigrations"
 	"github.com/oracle/oci-go-sdk/v65/clusterplacementgroups"
 	"github.com/oracle/oci-go-sdk/v65/computecloudatcustomer"
+	"github.com/oracle/oci-go-sdk/v65/computeinstanceagent"
 	"github.com/oracle/oci-go-sdk/v65/containerengine"
 	"github.com/oracle/oci-go-sdk/v65/containerinstances"
 	"github.com/oracle/oci-go-sdk/v65/core"
@@ -53,6 +55,8 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/desktops"
 	"github.com/oracle/oci-go-sdk/v65/devops"
 	"github.com/oracle/oci-go-sdk/v65/dif"
+	"github.com/oracle/oci-go-sdk/v65/disasterrecovery"
+	"github.com/oracle/oci-go-sdk/v65/distributeddatabase"
 	"github.com/oracle/oci-go-sdk/v65/dns"
 	"github.com/oracle/oci-go-sdk/v65/email"
 	"github.com/oracle/oci-go-sdk/v65/emwarehouse"
@@ -62,13 +66,19 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/fleetsoftwareupdate"
 	"github.com/oracle/oci-go-sdk/v65/functions"
 	"github.com/oracle/oci-go-sdk/v65/fusionapps"
+	"github.com/oracle/oci-go-sdk/v65/gdp"
 	"github.com/oracle/oci-go-sdk/v65/generativeai"
+	"github.com/oracle/oci-go-sdk/v65/generativeaiagent"
+	"github.com/oracle/oci-go-sdk/v65/generativeaiagentruntime"
+	"github.com/oracle/oci-go-sdk/v65/generativeaidata"
 	"github.com/oracle/oci-go-sdk/v65/goldengate"
 	"github.com/oracle/oci-go-sdk/v65/governancerulescontrolplane"
 	"github.com/oracle/oci-go-sdk/v65/healthchecks"
 	"github.com/oracle/oci-go-sdk/v65/identity"
 	"github.com/oracle/oci-go-sdk/v65/integration"
 	"github.com/oracle/oci-go-sdk/v65/iot"
+	"github.com/oracle/oci-go-sdk/v65/jms"
+	"github.com/oracle/oci-go-sdk/v65/jmsjavadownloads"
 	"github.com/oracle/oci-go-sdk/v65/keymanagement"
 	"github.com/oracle/oci-go-sdk/v65/licensemanager"
 	"github.com/oracle/oci-go-sdk/v65/limits"
@@ -77,26 +87,34 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/lockbox"
 	"github.com/oracle/oci-go-sdk/v65/loganalytics"
 	"github.com/oracle/oci-go-sdk/v65/logging"
+	"github.com/oracle/oci-go-sdk/v65/lustrefilestorage"
 	"github.com/oracle/oci-go-sdk/v65/managedkafka"
 	"github.com/oracle/oci-go-sdk/v65/managementagent"
 	"github.com/oracle/oci-go-sdk/v65/managementdashboard"
 	"github.com/oracle/oci-go-sdk/v65/marketplace"
 	"github.com/oracle/oci-go-sdk/v65/marketplaceprivateoffer"
 	"github.com/oracle/oci-go-sdk/v65/marketplacepublisher"
+	"github.com/oracle/oci-go-sdk/v65/mediaservices"
+	"github.com/oracle/oci-go-sdk/v65/mngdmac"
 	"github.com/oracle/oci-go-sdk/v65/monitoring"
 	"github.com/oracle/oci-go-sdk/v65/mysql"
 	"github.com/oracle/oci-go-sdk/v65/networkfirewall"
 	"github.com/oracle/oci-go-sdk/v65/networkloadbalancer"
 	"github.com/oracle/oci-go-sdk/v65/nosql"
 	"github.com/oracle/oci-go-sdk/v65/objectstorage"
+	"github.com/oracle/oci-go-sdk/v65/oce"
 	"github.com/oracle/oci-go-sdk/v65/ocvp"
 	"github.com/oracle/oci-go-sdk/v65/oda"
+	"github.com/oracle/oci-go-sdk/v65/onesubscription"
 	"github.com/oracle/oci-go-sdk/v65/ons"
+	"github.com/oracle/oci-go-sdk/v65/opa"
 	"github.com/oracle/oci-go-sdk/v65/opensearch"
 	"github.com/oracle/oci-go-sdk/v65/operatoraccesscontrol"
 	"github.com/oracle/oci-go-sdk/v65/opsi"
 	"github.com/oracle/oci-go-sdk/v65/optimizer"
 	"github.com/oracle/oci-go-sdk/v65/osmanagementhub"
+	"github.com/oracle/oci-go-sdk/v65/osubsubscription"
+	"github.com/oracle/oci-go-sdk/v65/psa"
 	"github.com/oracle/oci-go-sdk/v65/psql"
 	"github.com/oracle/oci-go-sdk/v65/queue"
 	"github.com/oracle/oci-go-sdk/v65/recovery"
@@ -104,16 +122,25 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/resourceanalytics"
 	"github.com/oracle/oci-go-sdk/v65/resourcemanager"
 	"github.com/oracle/oci-go-sdk/v65/resourcescheduler"
+	"github.com/oracle/oci-go-sdk/v65/rover"
 	"github.com/oracle/oci-go-sdk/v65/sch"
 	"github.com/oracle/oci-go-sdk/v65/securityattribute"
+	"github.com/oracle/oci-go-sdk/v65/self"
 	"github.com/oracle/oci-go-sdk/v65/servicecatalog"
+	"github.com/oracle/oci-go-sdk/v65/servicemanagerproxy"
 	"github.com/oracle/oci-go-sdk/v65/stackmonitoring"
 	"github.com/oracle/oci-go-sdk/v65/streaming"
+	"github.com/oracle/oci-go-sdk/v65/tenantmanagercontrolplane"
 	"github.com/oracle/oci-go-sdk/v65/usageapi"
+	"github.com/oracle/oci-go-sdk/v65/vbsinst"
+	"github.com/oracle/oci-go-sdk/v65/visualbuilder"
+	"github.com/oracle/oci-go-sdk/v65/vnmonitoring"
 	"github.com/oracle/oci-go-sdk/v65/vulnerabilityscanning"
 	"github.com/oracle/oci-go-sdk/v65/waa"
 	"github.com/oracle/oci-go-sdk/v65/waas"
 	"github.com/oracle/oci-go-sdk/v65/waf"
+	"github.com/oracle/oci-go-sdk/v65/wlms"
+	"github.com/oracle/oci-go-sdk/v65/zpr"
 )
 
 const (
@@ -630,6 +657,11 @@ var seedTargets = []Target{
 	newTarget("apmtraces", "ScheduledQueryCollection", reflect.TypeOf(apmtraces.ScheduledQueryCollection{})),
 	newTarget("apmtraces", "ScheduledQuerySummary", reflect.TypeOf(apmtraces.ScheduledQuerySummary{})),
 
+	// Appmgmtcontrol CRD support
+	newTarget("appmgmtcontrol", "MonitoredInstance", reflect.TypeOf(appmgmtcontrol.MonitoredInstance{})),
+	newTarget("appmgmtcontrol", "MonitoredInstanceCollection", reflect.TypeOf(appmgmtcontrol.MonitoredInstanceCollection{})),
+	newTarget("appmgmtcontrol", "MonitoredInstanceSummary", reflect.TypeOf(appmgmtcontrol.MonitoredInstanceSummary{})),
+
 	// Autoscaling CRD support
 	newTarget("autoscaling", "CreateAutoScalingConfigurationDetails", reflect.TypeOf(autoscaling.CreateAutoScalingConfigurationDetails{})),
 	newTarget("autoscaling", "UpdateAutoScalingConfigurationDetails", reflect.TypeOf(autoscaling.UpdateAutoScalingConfigurationDetails{})),
@@ -849,6 +881,10 @@ var seedTargets = []Target{
 	newTarget("computecloudatcustomer", "CccInfrastructureSummary", reflect.TypeOf(computecloudatcustomer.CccInfrastructureSummary{})),
 	newTarget("computecloudatcustomer", "CccUpgradeScheduleSummary", reflect.TypeOf(computecloudatcustomer.CccUpgradeScheduleSummary{})),
 
+	// Computeinstanceagent CRD support
+	newTarget("computeinstanceagent", "InstanceAgentPlugin", reflect.TypeOf(computeinstanceagent.InstanceAgentPlugin{})),
+	newTarget("computeinstanceagent", "InstanceAgentPluginSummary", reflect.TypeOf(computeinstanceagent.InstanceAgentPluginSummary{})),
+
 	// Containerinstances CRD support
 	newTarget("containerinstances", "CreateContainerInstanceDetails", reflect.TypeOf(containerinstances.CreateContainerInstanceDetails{})),
 	newTarget("containerinstances", "UpdateContainerInstanceDetails", reflect.TypeOf(containerinstances.UpdateContainerInstanceDetails{})),
@@ -859,11 +895,14 @@ var seedTargets = []Target{
 	// Dashboardservice CRD support
 	newTarget("dashboardservice", "CreateDashboardGroupDetails", reflect.TypeOf(dashboardservice.CreateDashboardGroupDetails{})),
 	newTarget("dashboardservice", "UpdateDashboardGroupDetails", reflect.TypeOf(dashboardservice.UpdateDashboardGroupDetails{})),
+	newTarget("dashboardservice", "DashboardCollection", reflect.TypeOf(dashboardservice.DashboardCollection{})),
 	newTarget("dashboardservice", "DashboardGroup", reflect.TypeOf(dashboardservice.DashboardGroup{})),
 	newTarget("dashboardservice", "DashboardGroupCollection", reflect.TypeOf(dashboardservice.DashboardGroupCollection{})),
 	newTarget("dashboardservice", "DashboardGroupSummary", reflect.TypeOf(dashboardservice.DashboardGroupSummary{})),
+	newTarget("dashboardservice", "DashboardSummary", reflect.TypeOf(dashboardservice.DashboardSummary{})),
 
 	// Databasemigration CRD support
+	newTarget("databasemigration", "AssessmentCollection", reflect.TypeOf(databasemigration.AssessmentCollection{})),
 	newTarget("databasemigration", "ConnectionCollection", reflect.TypeOf(databasemigration.ConnectionCollection{})),
 
 	// Databasetools CRD support
@@ -1340,6 +1379,20 @@ var seedTargets = []Target{
 	newTarget("dif", "StackCollection", reflect.TypeOf(dif.StackCollection{})),
 	newTarget("dif", "StackSummary", reflect.TypeOf(dif.StackSummary{})),
 
+	// Disasterrecovery CRD support
+	newTarget("disasterrecovery", "CreateDrProtectionGroupDetails", reflect.TypeOf(disasterrecovery.CreateDrProtectionGroupDetails{})),
+	newTarget("disasterrecovery", "UpdateDrProtectionGroupDetails", reflect.TypeOf(disasterrecovery.UpdateDrProtectionGroupDetails{})),
+	newTarget("disasterrecovery", "DrProtectionGroup", reflect.TypeOf(disasterrecovery.DrProtectionGroup{})),
+	newTarget("disasterrecovery", "DrProtectionGroupCollection", reflect.TypeOf(disasterrecovery.DrProtectionGroupCollection{})),
+	newTarget("disasterrecovery", "DrProtectionGroupSummary", reflect.TypeOf(disasterrecovery.DrProtectionGroupSummary{})),
+
+	// Distributeddatabase CRD support
+	newTarget("distributeddatabase", "CreateDistributedDatabasePrivateEndpointDetails", reflect.TypeOf(distributeddatabase.CreateDistributedDatabasePrivateEndpointDetails{})),
+	newTarget("distributeddatabase", "UpdateDistributedDatabasePrivateEndpointDetails", reflect.TypeOf(distributeddatabase.UpdateDistributedDatabasePrivateEndpointDetails{})),
+	newTarget("distributeddatabase", "DistributedDatabasePrivateEndpoint", reflect.TypeOf(distributeddatabase.DistributedDatabasePrivateEndpoint{})),
+	newTarget("distributeddatabase", "DistributedDatabasePrivateEndpointCollection", reflect.TypeOf(distributeddatabase.DistributedDatabasePrivateEndpointCollection{})),
+	newTarget("distributeddatabase", "DistributedDatabasePrivateEndpointSummary", reflect.TypeOf(distributeddatabase.DistributedDatabasePrivateEndpointSummary{})),
+
 	// Emwarehouse CRD support
 	newTarget("emwarehouse", "CreateEmWarehouseDetails", reflect.TypeOf(emwarehouse.CreateEmWarehouseDetails{})),
 	newTarget("emwarehouse", "UpdateEmWarehouseDetails", reflect.TypeOf(emwarehouse.UpdateEmWarehouseDetails{})),
@@ -1493,6 +1546,35 @@ var seedTargets = []Target{
 	newTarget("fusionapps", "RefreshActivitySummary", reflect.TypeOf(fusionapps.RefreshActivitySummary{})),
 	newTarget("fusionapps", "ServiceAttachmentSummary", reflect.TypeOf(fusionapps.ServiceAttachmentSummary{})),
 
+	// Gdp CRD support
+	newTarget("gdp", "CreateGdpPipelineDetails", reflect.TypeOf(gdp.CreateGdpPipelineDetails{})),
+	newTarget("gdp", "UpdateGdpPipelineDetails", reflect.TypeOf(gdp.UpdateGdpPipelineDetails{})),
+	newTarget("gdp", "GdpPipeline", reflect.TypeOf(gdp.GdpPipeline{})),
+	newTarget("gdp", "GdpPipelineCollection", reflect.TypeOf(gdp.GdpPipelineCollection{})),
+	newTarget("gdp", "GdpPipelineSummary", reflect.TypeOf(gdp.GdpPipelineSummary{})),
+
+	// Generativeaiagent CRD support
+	newTarget("generativeaiagent", "CreateAgentDetails", reflect.TypeOf(generativeaiagent.CreateAgentDetails{})),
+	newTarget("generativeaiagent", "CreateKnowledgeBaseDetails", reflect.TypeOf(generativeaiagent.CreateKnowledgeBaseDetails{})),
+	newTarget("generativeaiagent", "UpdateAgentDetails", reflect.TypeOf(generativeaiagent.UpdateAgentDetails{})),
+	newTarget("generativeaiagent", "UpdateKnowledgeBaseDetails", reflect.TypeOf(generativeaiagent.UpdateKnowledgeBaseDetails{})),
+	newTarget("generativeaiagent", "Agent", reflect.TypeOf(generativeaiagent.Agent{})),
+	newTarget("generativeaiagent", "AgentCollection", reflect.TypeOf(generativeaiagent.AgentCollection{})),
+	newTarget("generativeaiagent", "KnowledgeBase", reflect.TypeOf(generativeaiagent.KnowledgeBase{})),
+	newTarget("generativeaiagent", "KnowledgeBaseCollection", reflect.TypeOf(generativeaiagent.KnowledgeBaseCollection{})),
+	newTarget("generativeaiagent", "AgentSummary", reflect.TypeOf(generativeaiagent.AgentSummary{})),
+	newTarget("generativeaiagent", "KnowledgeBaseSummary", reflect.TypeOf(generativeaiagent.KnowledgeBaseSummary{})),
+
+	// Generativeaiagentruntime CRD support
+	newTarget("generativeaiagentruntime", "CreateSessionDetails", reflect.TypeOf(generativeaiagentruntime.CreateSessionDetails{})),
+	newTarget("generativeaiagentruntime", "UpdateSessionDetails", reflect.TypeOf(generativeaiagentruntime.UpdateSessionDetails{})),
+	newTarget("generativeaiagentruntime", "Session", reflect.TypeOf(generativeaiagentruntime.Session{})),
+
+	// Generativeaidata CRD support
+	newTarget("generativeaidata", "EnrichmentJob", reflect.TypeOf(generativeaidata.EnrichmentJob{})),
+	newTarget("generativeaidata", "EnrichmentJobCollection", reflect.TypeOf(generativeaidata.EnrichmentJobCollection{})),
+	newTarget("generativeaidata", "EnrichmentJobSummary", reflect.TypeOf(generativeaidata.EnrichmentJobSummary{})),
+
 	// Goldengate CRD support
 	newTarget("goldengate", "CreateCertificateDetails", reflect.TypeOf(goldengate.CreateCertificateDetails{})),
 	newTarget("goldengate", "CreateConnectionAssignmentDetails", reflect.TypeOf(goldengate.CreateConnectionAssignmentDetails{})),
@@ -1580,6 +1662,20 @@ var seedTargets = []Target{
 	newTarget("iot", "IotDomainGroupSummary", reflect.TypeOf(iot.IotDomainGroupSummary{})),
 	newTarget("iot", "IotDomainSummary", reflect.TypeOf(iot.IotDomainSummary{})),
 
+	// Jms CRD support
+	newTarget("jms", "CreateFleetDetails", reflect.TypeOf(jms.CreateFleetDetails{})),
+	newTarget("jms", "UpdateFleetDetails", reflect.TypeOf(jms.UpdateFleetDetails{})),
+	newTarget("jms", "Fleet", reflect.TypeOf(jms.Fleet{})),
+	newTarget("jms", "FleetCollection", reflect.TypeOf(jms.FleetCollection{})),
+	newTarget("jms", "FleetSummary", reflect.TypeOf(jms.FleetSummary{})),
+
+	// Jmsjavadownloads CRD support
+	newTarget("jmsjavadownloads", "CreateJavaDownloadTokenDetails", reflect.TypeOf(jmsjavadownloads.CreateJavaDownloadTokenDetails{})),
+	newTarget("jmsjavadownloads", "UpdateJavaDownloadTokenDetails", reflect.TypeOf(jmsjavadownloads.UpdateJavaDownloadTokenDetails{})),
+	newTarget("jmsjavadownloads", "JavaDownloadToken", reflect.TypeOf(jmsjavadownloads.JavaDownloadToken{})),
+	newTarget("jmsjavadownloads", "JavaDownloadTokenCollection", reflect.TypeOf(jmsjavadownloads.JavaDownloadTokenCollection{})),
+	newTarget("jmsjavadownloads", "JavaDownloadTokenSummary", reflect.TypeOf(jmsjavadownloads.JavaDownloadTokenSummary{})),
+
 	// Licensemanager CRD support
 	newTarget("licensemanager", "CreateLicenseRecordDetails", reflect.TypeOf(licensemanager.CreateLicenseRecordDetails{})),
 	newTarget("licensemanager", "CreateProductLicenseDetails", reflect.TypeOf(licensemanager.CreateProductLicenseDetails{})),
@@ -1641,6 +1737,18 @@ var seedTargets = []Target{
 	newTarget("loganalytics", "LogAnalyticsLogGroupSummary", reflect.TypeOf(loganalytics.LogAnalyticsLogGroupSummary{})),
 	newTarget("loganalytics", "LogAnalyticsObjectCollectionRuleSummary", reflect.TypeOf(loganalytics.LogAnalyticsObjectCollectionRuleSummary{})),
 	newTarget("loganalytics", "ScheduledTaskSummary", reflect.TypeOf(loganalytics.ScheduledTaskSummary{})),
+
+	// Lustrefilestorage CRD support
+	newTarget("lustrefilestorage", "CreateLustreFileSystemDetails", reflect.TypeOf(lustrefilestorage.CreateLustreFileSystemDetails{})),
+	newTarget("lustrefilestorage", "CreateObjectStorageLinkDetails", reflect.TypeOf(lustrefilestorage.CreateObjectStorageLinkDetails{})),
+	newTarget("lustrefilestorage", "UpdateLustreFileSystemDetails", reflect.TypeOf(lustrefilestorage.UpdateLustreFileSystemDetails{})),
+	newTarget("lustrefilestorage", "UpdateObjectStorageLinkDetails", reflect.TypeOf(lustrefilestorage.UpdateObjectStorageLinkDetails{})),
+	newTarget("lustrefilestorage", "LustreFileSystem", reflect.TypeOf(lustrefilestorage.LustreFileSystem{})),
+	newTarget("lustrefilestorage", "LustreFileSystemCollection", reflect.TypeOf(lustrefilestorage.LustreFileSystemCollection{})),
+	newTarget("lustrefilestorage", "ObjectStorageLink", reflect.TypeOf(lustrefilestorage.ObjectStorageLink{})),
+	newTarget("lustrefilestorage", "ObjectStorageLinkCollection", reflect.TypeOf(lustrefilestorage.ObjectStorageLinkCollection{})),
+	newTarget("lustrefilestorage", "LustreFileSystemSummary", reflect.TypeOf(lustrefilestorage.LustreFileSystemSummary{})),
+	newTarget("lustrefilestorage", "ObjectStorageLinkSummary", reflect.TypeOf(lustrefilestorage.ObjectStorageLinkSummary{})),
 
 	// Managedkafka CRD support
 	newTarget("managedkafka", "CreateKafkaClusterConfigDetails", reflect.TypeOf(managedkafka.CreateKafkaClusterConfigDetails{})),
@@ -1720,6 +1828,28 @@ var seedTargets = []Target{
 	newTarget("marketplacepublisher", "ListingSummary", reflect.TypeOf(marketplacepublisher.ListingSummary{})),
 	newTarget("marketplacepublisher", "TermSummary", reflect.TypeOf(marketplacepublisher.TermSummary{})),
 
+	// Mediaservices CRD support
+	newTarget("mediaservices", "CreateMediaAssetDetails", reflect.TypeOf(mediaservices.CreateMediaAssetDetails{})),
+	newTarget("mediaservices", "CreateMediaWorkflowDetails", reflect.TypeOf(mediaservices.CreateMediaWorkflowDetails{})),
+	newTarget("mediaservices", "UpdateMediaAssetDetails", reflect.TypeOf(mediaservices.UpdateMediaAssetDetails{})),
+	newTarget("mediaservices", "UpdateMediaWorkflowDetails", reflect.TypeOf(mediaservices.UpdateMediaWorkflowDetails{})),
+	newTarget("mediaservices", "MediaAsset", reflect.TypeOf(mediaservices.MediaAsset{})),
+	newTarget("mediaservices", "MediaAssetCollection", reflect.TypeOf(mediaservices.MediaAssetCollection{})),
+	newTarget("mediaservices", "MediaWorkflow", reflect.TypeOf(mediaservices.MediaWorkflow{})),
+	newTarget("mediaservices", "MediaWorkflowCollection", reflect.TypeOf(mediaservices.MediaWorkflowCollection{})),
+	newTarget("mediaservices", "MediaAssetSummary", reflect.TypeOf(mediaservices.MediaAssetSummary{})),
+	newTarget("mediaservices", "MediaWorkflowSummary", reflect.TypeOf(mediaservices.MediaWorkflowSummary{})),
+
+	// Mngdmac CRD support
+	newTarget("mngdmac", "CreateMacOrderDetails", reflect.TypeOf(mngdmac.CreateMacOrderDetails{})),
+	newTarget("mngdmac", "UpdateMacOrderDetails", reflect.TypeOf(mngdmac.UpdateMacOrderDetails{})),
+	newTarget("mngdmac", "MacDevice", reflect.TypeOf(mngdmac.MacDevice{})),
+	newTarget("mngdmac", "MacDeviceCollection", reflect.TypeOf(mngdmac.MacDeviceCollection{})),
+	newTarget("mngdmac", "MacOrder", reflect.TypeOf(mngdmac.MacOrder{})),
+	newTarget("mngdmac", "MacOrderCollection", reflect.TypeOf(mngdmac.MacOrderCollection{})),
+	newTarget("mngdmac", "MacDeviceSummary", reflect.TypeOf(mngdmac.MacDeviceSummary{})),
+	newTarget("mngdmac", "MacOrderSummary", reflect.TypeOf(mngdmac.MacOrderSummary{})),
+
 	// Networkfirewall CRD support
 	newTarget("networkfirewall", "CreateAddressListDetails", reflect.TypeOf(networkfirewall.CreateAddressListDetails{})),
 	newTarget("networkfirewall", "CreateApplicationGroupDetails", reflect.TypeOf(networkfirewall.CreateApplicationGroupDetails{})),
@@ -1757,6 +1887,22 @@ var seedTargets = []Target{
 	newTarget("networkfirewall", "ServiceListSummary", reflect.TypeOf(networkfirewall.ServiceListSummary{})),
 	newTarget("networkfirewall", "ServiceSummary", reflect.TypeOf(networkfirewall.ServiceSummary{})),
 	newTarget("networkfirewall", "UrlListSummary", reflect.TypeOf(networkfirewall.UrlListSummary{})),
+
+	// Oce CRD support
+	newTarget("oce", "CreateOceInstanceDetails", reflect.TypeOf(oce.CreateOceInstanceDetails{})),
+	newTarget("oce", "UpdateOceInstanceDetails", reflect.TypeOf(oce.UpdateOceInstanceDetails{})),
+	newTarget("oce", "OceInstance", reflect.TypeOf(oce.OceInstance{})),
+	newTarget("oce", "OceInstanceSummary", reflect.TypeOf(oce.OceInstanceSummary{})),
+
+	// Onesubscription CRD support
+	newTarget("onesubscription", "SubscriptionSummary", reflect.TypeOf(onesubscription.SubscriptionSummary{})),
+
+	// Opa CRD support
+	newTarget("opa", "CreateOpaInstanceDetails", reflect.TypeOf(opa.CreateOpaInstanceDetails{})),
+	newTarget("opa", "UpdateOpaInstanceDetails", reflect.TypeOf(opa.UpdateOpaInstanceDetails{})),
+	newTarget("opa", "OpaInstance", reflect.TypeOf(opa.OpaInstance{})),
+	newTarget("opa", "OpaInstanceCollection", reflect.TypeOf(opa.OpaInstanceCollection{})),
+	newTarget("opa", "OpaInstanceSummary", reflect.TypeOf(opa.OpaInstanceSummary{})),
 
 	// Opensearch CRD support
 	newTarget("opensearch", "CreateOpensearchClusterDetails", reflect.TypeOf(opensearch.CreateOpensearchClusterDetails{})),
@@ -1867,6 +2013,16 @@ var seedTargets = []Target{
 	newTarget("osmanagementhub", "ProfileSummary", reflect.TypeOf(osmanagementhub.ProfileSummary{})),
 	newTarget("osmanagementhub", "ScheduledJobSummary", reflect.TypeOf(osmanagementhub.ScheduledJobSummary{})),
 
+	// Osubsubscription CRD support
+	newTarget("osubsubscription", "SubscriptionSummary", reflect.TypeOf(osubsubscription.SubscriptionSummary{})),
+
+	// Psa CRD support
+	newTarget("psa", "CreatePrivateServiceAccessDetails", reflect.TypeOf(psa.CreatePrivateServiceAccessDetails{})),
+	newTarget("psa", "UpdatePrivateServiceAccessDetails", reflect.TypeOf(psa.UpdatePrivateServiceAccessDetails{})),
+	newTarget("psa", "PrivateServiceAccess", reflect.TypeOf(psa.PrivateServiceAccess{})),
+	newTarget("psa", "PrivateServiceAccessCollection", reflect.TypeOf(psa.PrivateServiceAccessCollection{})),
+	newTarget("psa", "PrivateServiceAccessSummary", reflect.TypeOf(psa.PrivateServiceAccessSummary{})),
+
 	// Recovery CRD support
 	newTarget("recovery", "CreateProtectedDatabaseDetails", reflect.TypeOf(recovery.CreateProtectedDatabaseDetails{})),
 	newTarget("recovery", "CreateProtectionPolicyDetails", reflect.TypeOf(recovery.CreateProtectionPolicyDetails{})),
@@ -1931,6 +2087,18 @@ var seedTargets = []Target{
 	newTarget("resourcescheduler", "ScheduleCollection", reflect.TypeOf(resourcescheduler.ScheduleCollection{})),
 	newTarget("resourcescheduler", "ScheduleSummary", reflect.TypeOf(resourcescheduler.ScheduleSummary{})),
 
+	// Rover CRD support
+	newTarget("rover", "CreateRoverClusterDetails", reflect.TypeOf(rover.CreateRoverClusterDetails{})),
+	newTarget("rover", "CreateRoverNodeDetails", reflect.TypeOf(rover.CreateRoverNodeDetails{})),
+	newTarget("rover", "UpdateRoverClusterDetails", reflect.TypeOf(rover.UpdateRoverClusterDetails{})),
+	newTarget("rover", "UpdateRoverNodeDetails", reflect.TypeOf(rover.UpdateRoverNodeDetails{})),
+	newTarget("rover", "RoverCluster", reflect.TypeOf(rover.RoverCluster{})),
+	newTarget("rover", "RoverClusterCollection", reflect.TypeOf(rover.RoverClusterCollection{})),
+	newTarget("rover", "RoverNode", reflect.TypeOf(rover.RoverNode{})),
+	newTarget("rover", "RoverNodeCollection", reflect.TypeOf(rover.RoverNodeCollection{})),
+	newTarget("rover", "RoverClusterSummary", reflect.TypeOf(rover.RoverClusterSummary{})),
+	newTarget("rover", "RoverNodeSummary", reflect.TypeOf(rover.RoverNodeSummary{})),
+
 	// Sch CRD support
 	newTarget("sch", "CreateServiceConnectorDetails", reflect.TypeOf(sch.CreateServiceConnectorDetails{})),
 	newTarget("sch", "UpdateServiceConnectorDetails", reflect.TypeOf(sch.UpdateServiceConnectorDetails{})),
@@ -1948,6 +2116,14 @@ var seedTargets = []Target{
 	newTarget("securityattribute", "SecurityAttributeNamespaceSummary", reflect.TypeOf(securityattribute.SecurityAttributeNamespaceSummary{})),
 	newTarget("securityattribute", "SecurityAttributeSummary", reflect.TypeOf(securityattribute.SecurityAttributeSummary{})),
 
+	// Self CRD support
+	newTarget("self", "CreateSubscriptionDetails", reflect.TypeOf(self.CreateSubscriptionDetails{})),
+	newTarget("self", "UpdateSubscriptionDetails", reflect.TypeOf(self.UpdateSubscriptionDetails{})),
+	newTarget("self", "SubscriptionDetails", reflect.TypeOf(self.SubscriptionDetails{})),
+	newTarget("self", "Subscription", reflect.TypeOf(self.Subscription{})),
+	newTarget("self", "SubscriptionCollection", reflect.TypeOf(self.SubscriptionCollection{})),
+	newTarget("self", "SubscriptionSummary", reflect.TypeOf(self.SubscriptionSummary{})),
+
 	// Servicecatalog CRD support
 	newTarget("servicecatalog", "CreatePrivateApplicationDetails", reflect.TypeOf(servicecatalog.CreatePrivateApplicationDetails{})),
 	newTarget("servicecatalog", "CreateServiceCatalogDetails", reflect.TypeOf(servicecatalog.CreateServiceCatalogDetails{})),
@@ -1959,6 +2135,11 @@ var seedTargets = []Target{
 	newTarget("servicecatalog", "ServiceCatalogCollection", reflect.TypeOf(servicecatalog.ServiceCatalogCollection{})),
 	newTarget("servicecatalog", "PrivateApplicationSummary", reflect.TypeOf(servicecatalog.PrivateApplicationSummary{})),
 	newTarget("servicecatalog", "ServiceCatalogSummary", reflect.TypeOf(servicecatalog.ServiceCatalogSummary{})),
+
+	// Servicemanagerproxy CRD support
+	newTarget("servicemanagerproxy", "ServiceEnvironment", reflect.TypeOf(servicemanagerproxy.ServiceEnvironment{})),
+	newTarget("servicemanagerproxy", "ServiceEnvironmentCollection", reflect.TypeOf(servicemanagerproxy.ServiceEnvironmentCollection{})),
+	newTarget("servicemanagerproxy", "ServiceEnvironmentSummary", reflect.TypeOf(servicemanagerproxy.ServiceEnvironmentSummary{})),
 
 	// Stackmonitoring CRD support
 	newTarget("stackmonitoring", "CreateAlarmConditionDetails", reflect.TypeOf(stackmonitoring.CreateAlarmConditionDetails{})),
@@ -2005,6 +2186,36 @@ var seedTargets = []Target{
 	newTarget("stackmonitoring", "MonitoredResourceTypeSummary", reflect.TypeOf(stackmonitoring.MonitoredResourceTypeSummary{})),
 	newTarget("stackmonitoring", "MonitoringTemplateSummary", reflect.TypeOf(stackmonitoring.MonitoringTemplateSummary{})),
 	newTarget("stackmonitoring", "ProcessSetSummary", reflect.TypeOf(stackmonitoring.ProcessSetSummary{})),
+
+	// Tenantmanagercontrolplane CRD support
+	newTarget("tenantmanagercontrolplane", "CreateDomainDetails", reflect.TypeOf(tenantmanagercontrolplane.CreateDomainDetails{})),
+	newTarget("tenantmanagercontrolplane", "UpdateDomainDetails", reflect.TypeOf(tenantmanagercontrolplane.UpdateDomainDetails{})),
+	newTarget("tenantmanagercontrolplane", "UpdateOrganizationDetails", reflect.TypeOf(tenantmanagercontrolplane.UpdateOrganizationDetails{})),
+	newTarget("tenantmanagercontrolplane", "Domain", reflect.TypeOf(tenantmanagercontrolplane.Domain{})),
+	newTarget("tenantmanagercontrolplane", "DomainCollection", reflect.TypeOf(tenantmanagercontrolplane.DomainCollection{})),
+	newTarget("tenantmanagercontrolplane", "Organization", reflect.TypeOf(tenantmanagercontrolplane.Organization{})),
+	newTarget("tenantmanagercontrolplane", "OrganizationCollection", reflect.TypeOf(tenantmanagercontrolplane.OrganizationCollection{})),
+	newTarget("tenantmanagercontrolplane", "DomainSummary", reflect.TypeOf(tenantmanagercontrolplane.DomainSummary{})),
+	newTarget("tenantmanagercontrolplane", "OrganizationSummary", reflect.TypeOf(tenantmanagercontrolplane.OrganizationSummary{})),
+
+	// Vbsinst CRD support
+	newTarget("vbsinst", "CreateVbsInstanceDetails", reflect.TypeOf(vbsinst.CreateVbsInstanceDetails{})),
+	newTarget("vbsinst", "UpdateVbsInstanceDetails", reflect.TypeOf(vbsinst.UpdateVbsInstanceDetails{})),
+	newTarget("vbsinst", "VbsInstance", reflect.TypeOf(vbsinst.VbsInstance{})),
+	newTarget("vbsinst", "VbsInstanceSummary", reflect.TypeOf(vbsinst.VbsInstanceSummary{})),
+
+	// Visualbuilder CRD support
+	newTarget("visualbuilder", "CreateVbInstanceDetails", reflect.TypeOf(visualbuilder.CreateVbInstanceDetails{})),
+	newTarget("visualbuilder", "UpdateVbInstanceDetails", reflect.TypeOf(visualbuilder.UpdateVbInstanceDetails{})),
+	newTarget("visualbuilder", "VbInstance", reflect.TypeOf(visualbuilder.VbInstance{})),
+	newTarget("visualbuilder", "VbInstanceSummary", reflect.TypeOf(visualbuilder.VbInstanceSummary{})),
+
+	// Vnmonitoring CRD support
+	newTarget("vnmonitoring", "CreatePathAnalyzerTestDetails", reflect.TypeOf(vnmonitoring.CreatePathAnalyzerTestDetails{})),
+	newTarget("vnmonitoring", "UpdatePathAnalyzerTestDetails", reflect.TypeOf(vnmonitoring.UpdatePathAnalyzerTestDetails{})),
+	newTarget("vnmonitoring", "PathAnalyzerTest", reflect.TypeOf(vnmonitoring.PathAnalyzerTest{})),
+	newTarget("vnmonitoring", "PathAnalyzerTestCollection", reflect.TypeOf(vnmonitoring.PathAnalyzerTestCollection{})),
+	newTarget("vnmonitoring", "PathAnalyzerTestSummary", reflect.TypeOf(vnmonitoring.PathAnalyzerTestSummary{})),
 
 	// Vulnerabilityscanning CRD support
 	newTarget("vulnerabilityscanning", "CreateContainerScanRecipeDetails", reflect.TypeOf(vulnerabilityscanning.CreateContainerScanRecipeDetails{})),
@@ -2064,6 +2275,25 @@ var seedTargets = []Target{
 	newTarget("waf", "WebAppFirewallPolicy", reflect.TypeOf(waf.WebAppFirewallPolicy{})),
 	newTarget("waf", "WebAppFirewallPolicyCollection", reflect.TypeOf(waf.WebAppFirewallPolicyCollection{})),
 	newTarget("waf", "WebAppFirewallPolicySummary", reflect.TypeOf(waf.WebAppFirewallPolicySummary{})),
+
+	// Wlms CRD support
+	newTarget("wlms", "UpdateManagedInstanceDetails", reflect.TypeOf(wlms.UpdateManagedInstanceDetails{})),
+	newTarget("wlms", "UpdateWlsDomainDetails", reflect.TypeOf(wlms.UpdateWlsDomainDetails{})),
+	newTarget("wlms", "ManagedInstance", reflect.TypeOf(wlms.ManagedInstance{})),
+	newTarget("wlms", "ManagedInstanceCollection", reflect.TypeOf(wlms.ManagedInstanceCollection{})),
+	newTarget("wlms", "WlsDomain", reflect.TypeOf(wlms.WlsDomain{})),
+	newTarget("wlms", "WlsDomainCollection", reflect.TypeOf(wlms.WlsDomainCollection{})),
+	newTarget("wlms", "ManagedInstanceSummary", reflect.TypeOf(wlms.ManagedInstanceSummary{})),
+	newTarget("wlms", "WlsDomainSummary", reflect.TypeOf(wlms.WlsDomainSummary{})),
+
+	// Zpr CRD support
+	newTarget("zpr", "CreateConfigurationDetails", reflect.TypeOf(zpr.CreateConfigurationDetails{})),
+	newTarget("zpr", "CreateZprPolicyDetails", reflect.TypeOf(zpr.CreateZprPolicyDetails{})),
+	newTarget("zpr", "UpdateZprPolicyDetails", reflect.TypeOf(zpr.UpdateZprPolicyDetails{})),
+	newTarget("zpr", "Configuration", reflect.TypeOf(zpr.Configuration{})),
+	newTarget("zpr", "ZprPolicy", reflect.TypeOf(zpr.ZprPolicy{})),
+	newTarget("zpr", "ZprPolicyCollection", reflect.TypeOf(zpr.ZprPolicyCollection{})),
+	newTarget("zpr", "ZprPolicySummary", reflect.TypeOf(zpr.ZprPolicySummary{})),
 }
 
 var interfaceImplementations = map[string][]reflect.Type{

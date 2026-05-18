@@ -1,0 +1,79 @@
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
+// This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
+// Code generated. DO NOT EDIT.
+
+// Generative AI Agents Management API
+//
+// OCI Generative AI Agents is a fully managed service that combines the power of large language models (LLMs) with an intelligent retrieval system to create contextually relevant answers by searching your knowledge base, making your AI applications smart and efficient.
+// OCI Generative AI Agents supports several ways to onboard your data and then allows you and your customers to interact with your data using a chat interface or API.
+// Use the Generative AI Agents API to create and manage agents, knowledge bases, data sources, endpoints, data ingestion jobs, and work requests.
+// For creating and managing client chat sessions see the /EN/generative-ai-agents-client/latest/.
+// To learn more about the service, see the Generative AI Agents documentation (https://docs.oracle.com/iaas/Content/generative-ai-agents/home.htm).
+//
+
+package generativeaiagent
+
+import (
+	"encoding/json"
+	"fmt"
+	"github.com/oracle/oci-go-sdk/v65/common"
+	"strings"
+)
+
+// LlmCustomization Configuration to customize LLM.
+type LlmCustomization struct {
+	LlmSelection LlmSelection `mandatory:"false" json:"llmSelection"`
+
+	// Hyper parameters for LLM configuration. Accepts Key-value pairs to configure various hyper parameters.
+	// Refer to the guide for examples and the JSON Schema documentation for details on the format.
+	LlmHyperParameters map[string]interface{} `mandatory:"false" json:"llmHyperParameters"`
+
+	// If specified, the default instruction is replaced with provided instruction.
+	Instruction *string `mandatory:"false" json:"instruction"`
+}
+
+func (m LlmCustomization) String() string {
+	return common.PointerString(m)
+}
+
+// ValidateEnumValue returns an error when providing an unsupported enum value
+// This function is being called during constructing API request process
+// Not recommended for calling this function directly
+func (m LlmCustomization) ValidateEnumValue() (bool, error) {
+	errMessage := []string{}
+
+	if len(errMessage) > 0 {
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
+	}
+	return false, nil
+}
+
+// UnmarshalJSON unmarshals from json
+func (m *LlmCustomization) UnmarshalJSON(data []byte) (e error) {
+	model := struct {
+		LlmSelection       llmselection           `json:"llmSelection"`
+		LlmHyperParameters map[string]interface{} `json:"llmHyperParameters"`
+		Instruction        *string                `json:"instruction"`
+	}{}
+
+	e = json.Unmarshal(data, &model)
+	if e != nil {
+		return
+	}
+	var nn interface{}
+	nn, e = model.LlmSelection.UnmarshalPolymorphicJSON(model.LlmSelection.JsonData)
+	if e != nil {
+		return
+	}
+	if nn != nil {
+		m.LlmSelection = nn.(LlmSelection)
+	} else {
+		m.LlmSelection = nil
+	}
+
+	m.LlmHyperParameters = model.LlmHyperParameters
+
+	m.Instruction = model.Instruction
+
+	return
+}

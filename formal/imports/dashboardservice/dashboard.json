@@ -1,0 +1,143 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "dashboardservice",
+  "slug": "dashboard",
+  "kind": "Dashboard",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_dashboard_service_dashboard",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDashboard",
+        "requestType": "dashboardservice.CreateDashboardRequest",
+        "responseType": "dashboardservice.CreateDashboardResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDashboard",
+        "requestType": "dashboardservice.GetDashboardRequest",
+        "responseType": "dashboardservice.GetDashboardResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDashboards",
+        "requestType": "dashboardservice.ListDashboardsRequest",
+        "responseType": "dashboardservice.ListDashboardsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeDashboardGroup",
+        "requestType": "dashboardservice.ChangeDashboardGroupRequest",
+        "responseType": "dashboardservice.ChangeDashboardGroupResponse"
+      },
+      {
+        "operation": "UpdateDashboard",
+        "requestType": "dashboardservice.UpdateDashboardRequest",
+        "responseType": "dashboardservice.UpdateDashboardResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDashboard",
+        "requestType": "dashboardservice.DeleteDashboardRequest",
+        "responseType": "dashboardservice.DeleteDashboardResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "config",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags",
+      "widgets"
+    ],
+    "forceNew": [
+      "dashboard_group_id",
+      "schema_version",
+      "system_tags"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED",
+      "NOT_FOUND"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_dashboard_service_dashboards",
+    "collectionField": "dashboards",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "dashboard_group_id",
+      "display_name"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/dashboardservice/dashboard/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/dashboardservice/dashboard/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "delete-confirmation",
+      "lifecycle-classification",
+      "list-lookup",
+      "mutation-policy",
+      "polymorphic-dispatch",
+      "regional-caveat"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: CreateDashboard, GetDashboard, and UpdateDashboard return the polymorphic Dashboard interface, while ListDashboards returns DashboardCollection with DashboardSummary items and DeleteDashboard returns headers only. The vendored v65.110.0 SDK currently dispatches schemaVersion V1 to V1Dashboard.",
+    "Pinned OCI SDK contract: Dashboard lifecycle exposes CREATING, UPDATING, ACTIVE, DELETING, DELETED, and FAILED.",
+    "Pinned provider coverage is unconfirmed. formal/sources.lock still points at github.com/oracle/terraform-provider-oci@eb653febb1bab4cc6650a96d404a8baf36fdf671, but the accessible provider inventory did not expose a matching Dashboard resource or data source. The providerResource and datasource names therefore stay provisional OCI-style placeholders, and the checked-in mutability docs fixture is a conservative repo-authored fallback until a pinned provider page is proven directly.",
+    "Repo-authored runtime is narrower than the imported SDK surface: existing-before-create reuse is bounded to exact dashboardGroupId plus displayName matches in reusable lifecycle states, mutable drift focuses on UpdateDashboardDetails fields displayName, description, freeformTags, definedTags, config, and widgets, and ChangeDashboardGroup stays out of scope for the published surface.",
+    "The reviewed runtime dispatches create and update request bodies by schemaVersion, currently supports V1 only, defaults an omitted schemaVersion to V1, and rejects unsupported schema versions before OCI mutation.",
+    "The Dashboards service warns that dashboard resources created outside the tenancy home region are not viewable in the Console. The repo-authored runtime and docs must keep that regional caveat explicit even though the SDK still permits the calls.",
+    "The handwritten update builder preserves explicit empty-list clears for widgets and explicit empty-map clears for freeformTags and definedTags, but it intentionally treats empty-string displayName and description values plus null config values as omission until the generated spec can distinguish omission from clear intent."
+  ]
+}

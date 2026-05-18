@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <h2 id="argument-reference">Argument Reference</h2>
+    <p>The following arguments are supported:</p>
+    <ul>
+      <li><code>approval_key_vault_id</code> - (Optional) (Updatable) The KMS vault OCID used for cryptographic approvals of transfers.</li>
+      <li><code>authorization_details</code> - (Optional) (Updatable) Authorization information about the pipeline being configured.</li>
+      <li><code>bucket_details</code> - (Required) Configuration information about the buckets used for this pipeline.
+        <ul>
+          <li><code>bucket_type</code> - (Required) Type of bucket. SENDER pipelines can be SOURCE, TRANSFER, REJECT, or FAILED. RECEIVER pipelines have a DESTINATION bucket.</li>
+          <li><code>id</code> - (Required) OCID of the bucket.</li>
+          <li><code>name</code> - (Required) Name of the bucket.</li>
+          <li><code>namespace</code> - (Required) Namespace of the bucket.</li>
+        </ul>
+      </li>
+      <li><code>compartment_id</code> - (Required) (Updatable) The OCID of the compartment.</li>
+      <li><code>defined_tags</code> - (Optional) (Updatable) Defined tags for this resource. Each key is predefined and scoped to a namespace. Example: <code>{&#34;foo-namespace.bar-key&#34;: &#34;value&#34;}</code></li>
+      <li><code>description</code> - (Optional) (Updatable) Short field input by customer for a description of the data pipeline use-case.</li>
+      <li><code>display_name</code> - (Required) (Updatable) Pipeline short name.</li>
+      <li><code>env</code> - (Optional) The environment where the pipeline resides. Valid values are COMMERCIAL or USGOV. Defaults to COMMERCIAL.</li>
+      <li><code>file_types</code> - (Optional) (Updatable) List of file types allowed to be transferred in the pipeline according to the authorization details (e.g. .pdf, .xml, .doc).</li>
+      <li><code>freeform_tags</code> - (Optional) (Updatable) Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only. Example: <code>{&#34;bar-key&#34;: &#34;value&#34;}</code></li>
+      <li><code>is_approval_needed</code> - (Optional) (Updatable) Determines whether file transfers need to go through an approval workflow.</li>
+      <li><code>is_chunking_enabled</code> - (Optional) (Updatable) Determines whether file must be chunked during the transfer. This is only a property of SENDER pipelines.</li>
+      <li><code>is_file_override_in_destination_enabled</code> - (Optional) (Updatable) Enable file override feature in destination bucket. If 2 files with same name exist in destination bucket, original file will be overwritten.</li>
+      <li><code>is_scanning_enabled</code> - (Optional) (Updatable) Determines whether GDP Scanning should be enabled for the pipeline.</li>
+      <li><code>peering_region</code> - (Required) Public region name where the peered pipeline exists.</li>
+      <li><code>pipeline_type</code> - (Required) Type of pipeline. Can be SENDER or RECEIVER.</li>
+      <li><code>service_log_group_id</code> - (Optional) (Updatable) the OCID of the service log group. ** IMPORTANT ** Any change to a property that does not support update will force the destruction and recreation of the resource with the new property values</li>
+    </ul>
+  </body>
+</html>

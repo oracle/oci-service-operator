@@ -18,6 +18,7 @@ import (
 	apmcontrolplanev1beta1 "github.com/oracle/oci-service-operator/api/apmcontrolplane/v1beta1"
 	apmsyntheticsv1beta1 "github.com/oracle/oci-service-operator/api/apmsynthetics/v1beta1"
 	apmtracesv1beta1 "github.com/oracle/oci-service-operator/api/apmtraces/v1beta1"
+	appmgmtcontrolv1beta1 "github.com/oracle/oci-service-operator/api/appmgmtcontrol/v1beta1"
 	artifactsv1beta1 "github.com/oracle/oci-service-operator/api/artifacts/v1beta1"
 	autoscalingv1beta1 "github.com/oracle/oci-service-operator/api/autoscaling/v1beta1"
 	bastionv1beta1 "github.com/oracle/oci-service-operator/api/bastion/v1beta1"
@@ -32,6 +33,7 @@ import (
 	cloudmigrationsv1beta1 "github.com/oracle/oci-service-operator/api/cloudmigrations/v1beta1"
 	clusterplacementgroupsv1beta1 "github.com/oracle/oci-service-operator/api/clusterplacementgroups/v1beta1"
 	computecloudatcustomerv1beta1 "github.com/oracle/oci-service-operator/api/computecloudatcustomer/v1beta1"
+	computeinstanceagentv1beta1 "github.com/oracle/oci-service-operator/api/computeinstanceagent/v1beta1"
 	containerenginev1beta1 "github.com/oracle/oci-service-operator/api/containerengine/v1beta1"
 	containerinstancesv1beta1 "github.com/oracle/oci-service-operator/api/containerinstances/v1beta1"
 	corev1beta1 "github.com/oracle/oci-service-operator/api/core/v1beta1"
@@ -52,6 +54,8 @@ import (
 	desktopsv1beta1 "github.com/oracle/oci-service-operator/api/desktops/v1beta1"
 	devopsv1beta1 "github.com/oracle/oci-service-operator/api/devops/v1beta1"
 	difv1beta1 "github.com/oracle/oci-service-operator/api/dif/v1beta1"
+	disasterrecoveryv1beta1 "github.com/oracle/oci-service-operator/api/disasterrecovery/v1beta1"
+	distributeddatabasev1beta1 "github.com/oracle/oci-service-operator/api/distributeddatabase/v1beta1"
 	dnsv1beta1 "github.com/oracle/oci-service-operator/api/dns/v1beta1"
 	emailv1beta1 "github.com/oracle/oci-service-operator/api/email/v1beta1"
 	emwarehousev1beta1 "github.com/oracle/oci-service-operator/api/emwarehouse/v1beta1"
@@ -61,13 +65,19 @@ import (
 	fleetsoftwareupdatev1beta1 "github.com/oracle/oci-service-operator/api/fleetsoftwareupdate/v1beta1"
 	functionsv1beta1 "github.com/oracle/oci-service-operator/api/functions/v1beta1"
 	fusionappsv1beta1 "github.com/oracle/oci-service-operator/api/fusionapps/v1beta1"
+	gdpv1beta1 "github.com/oracle/oci-service-operator/api/gdp/v1beta1"
 	generativeaiv1beta1 "github.com/oracle/oci-service-operator/api/generativeai/v1beta1"
+	generativeaiagentv1beta1 "github.com/oracle/oci-service-operator/api/generativeaiagent/v1beta1"
+	generativeaiagentruntimev1beta1 "github.com/oracle/oci-service-operator/api/generativeaiagentruntime/v1beta1"
+	generativeaidatav1beta1 "github.com/oracle/oci-service-operator/api/generativeaidata/v1beta1"
 	goldengatev1beta1 "github.com/oracle/oci-service-operator/api/goldengate/v1beta1"
 	governancerulescontrolplanev1beta1 "github.com/oracle/oci-service-operator/api/governancerulescontrolplane/v1beta1"
 	healthchecksv1beta1 "github.com/oracle/oci-service-operator/api/healthchecks/v1beta1"
 	identityv1beta1 "github.com/oracle/oci-service-operator/api/identity/v1beta1"
 	integrationv1beta1 "github.com/oracle/oci-service-operator/api/integration/v1beta1"
 	iotv1beta1 "github.com/oracle/oci-service-operator/api/iot/v1beta1"
+	jmsv1beta1 "github.com/oracle/oci-service-operator/api/jms/v1beta1"
+	jmsjavadownloadsv1beta1 "github.com/oracle/oci-service-operator/api/jmsjavadownloads/v1beta1"
 	keymanagementv1beta1 "github.com/oracle/oci-service-operator/api/keymanagement/v1beta1"
 	licensemanagerv1beta1 "github.com/oracle/oci-service-operator/api/licensemanager/v1beta1"
 	limitsv1beta1 "github.com/oracle/oci-service-operator/api/limits/v1beta1"
@@ -76,26 +86,34 @@ import (
 	lockboxv1beta1 "github.com/oracle/oci-service-operator/api/lockbox/v1beta1"
 	loganalyticsv1beta1 "github.com/oracle/oci-service-operator/api/loganalytics/v1beta1"
 	loggingv1beta1 "github.com/oracle/oci-service-operator/api/logging/v1beta1"
+	lustrefilestoragev1beta1 "github.com/oracle/oci-service-operator/api/lustrefilestorage/v1beta1"
 	managedkafkav1beta1 "github.com/oracle/oci-service-operator/api/managedkafka/v1beta1"
 	managementagentv1beta1 "github.com/oracle/oci-service-operator/api/managementagent/v1beta1"
 	managementdashboardv1beta1 "github.com/oracle/oci-service-operator/api/managementdashboard/v1beta1"
 	marketplacev1beta1 "github.com/oracle/oci-service-operator/api/marketplace/v1beta1"
 	marketplaceprivateofferv1beta1 "github.com/oracle/oci-service-operator/api/marketplaceprivateoffer/v1beta1"
 	marketplacepublisherv1beta1 "github.com/oracle/oci-service-operator/api/marketplacepublisher/v1beta1"
+	mediaservicesv1beta1 "github.com/oracle/oci-service-operator/api/mediaservices/v1beta1"
+	mngdmacv1beta1 "github.com/oracle/oci-service-operator/api/mngdmac/v1beta1"
 	monitoringv1beta1 "github.com/oracle/oci-service-operator/api/monitoring/v1beta1"
 	mysqlv1beta1 "github.com/oracle/oci-service-operator/api/mysql/v1beta1"
 	networkfirewallv1beta1 "github.com/oracle/oci-service-operator/api/networkfirewall/v1beta1"
 	networkloadbalancerv1beta1 "github.com/oracle/oci-service-operator/api/networkloadbalancer/v1beta1"
 	nosqlv1beta1 "github.com/oracle/oci-service-operator/api/nosql/v1beta1"
 	objectstoragev1beta1 "github.com/oracle/oci-service-operator/api/objectstorage/v1beta1"
+	ocev1beta1 "github.com/oracle/oci-service-operator/api/oce/v1beta1"
 	ocvpv1beta1 "github.com/oracle/oci-service-operator/api/ocvp/v1beta1"
 	odav1beta1 "github.com/oracle/oci-service-operator/api/oda/v1beta1"
+	onesubscriptionv1beta1 "github.com/oracle/oci-service-operator/api/onesubscription/v1beta1"
 	onsv1beta1 "github.com/oracle/oci-service-operator/api/ons/v1beta1"
+	opav1beta1 "github.com/oracle/oci-service-operator/api/opa/v1beta1"
 	opensearchv1beta1 "github.com/oracle/oci-service-operator/api/opensearch/v1beta1"
 	operatoraccesscontrolv1beta1 "github.com/oracle/oci-service-operator/api/operatoraccesscontrol/v1beta1"
 	opsiv1beta1 "github.com/oracle/oci-service-operator/api/opsi/v1beta1"
 	optimizerv1beta1 "github.com/oracle/oci-service-operator/api/optimizer/v1beta1"
 	osmanagementhubv1beta1 "github.com/oracle/oci-service-operator/api/osmanagementhub/v1beta1"
+	osubsubscriptionv1beta1 "github.com/oracle/oci-service-operator/api/osubsubscription/v1beta1"
+	psav1beta1 "github.com/oracle/oci-service-operator/api/psa/v1beta1"
 	psqlv1beta1 "github.com/oracle/oci-service-operator/api/psql/v1beta1"
 	queuev1beta1 "github.com/oracle/oci-service-operator/api/queue/v1beta1"
 	recoveryv1beta1 "github.com/oracle/oci-service-operator/api/recovery/v1beta1"
@@ -103,16 +121,25 @@ import (
 	resourceanalyticsv1beta1 "github.com/oracle/oci-service-operator/api/resourceanalytics/v1beta1"
 	resourcemanagerv1beta1 "github.com/oracle/oci-service-operator/api/resourcemanager/v1beta1"
 	resourceschedulerv1beta1 "github.com/oracle/oci-service-operator/api/resourcescheduler/v1beta1"
+	roverv1beta1 "github.com/oracle/oci-service-operator/api/rover/v1beta1"
 	schv1beta1 "github.com/oracle/oci-service-operator/api/sch/v1beta1"
 	securityattributev1beta1 "github.com/oracle/oci-service-operator/api/securityattribute/v1beta1"
+	selfv1beta1 "github.com/oracle/oci-service-operator/api/self/v1beta1"
 	servicecatalogv1beta1 "github.com/oracle/oci-service-operator/api/servicecatalog/v1beta1"
+	servicemanagerproxyv1beta1 "github.com/oracle/oci-service-operator/api/servicemanagerproxy/v1beta1"
 	stackmonitoringv1beta1 "github.com/oracle/oci-service-operator/api/stackmonitoring/v1beta1"
 	streamingv1beta1 "github.com/oracle/oci-service-operator/api/streaming/v1beta1"
+	tenantmanagercontrolplanev1beta1 "github.com/oracle/oci-service-operator/api/tenantmanagercontrolplane/v1beta1"
 	usageapiv1beta1 "github.com/oracle/oci-service-operator/api/usageapi/v1beta1"
+	vbsinstv1beta1 "github.com/oracle/oci-service-operator/api/vbsinst/v1beta1"
+	visualbuilderv1beta1 "github.com/oracle/oci-service-operator/api/visualbuilder/v1beta1"
+	vnmonitoringv1beta1 "github.com/oracle/oci-service-operator/api/vnmonitoring/v1beta1"
 	vulnerabilityscanningv1beta1 "github.com/oracle/oci-service-operator/api/vulnerabilityscanning/v1beta1"
 	waav1beta1 "github.com/oracle/oci-service-operator/api/waa/v1beta1"
 	waasv1beta1 "github.com/oracle/oci-service-operator/api/waas/v1beta1"
 	wafv1beta1 "github.com/oracle/oci-service-operator/api/waf/v1beta1"
+	wlmsv1beta1 "github.com/oracle/oci-service-operator/api/wlms/v1beta1"
+	zprv1beta1 "github.com/oracle/oci-service-operator/api/zpr/v1beta1"
 )
 
 type SDKMapping struct {
@@ -2205,6 +2232,22 @@ var targets = []Target{
 		},
 	},
 	{
+		Name:       "AppmgmtcontrolMonitoredInstance",
+		SpecType:   reflect.TypeOf(appmgmtcontrolv1beta1.MonitoredInstanceSpec{}),
+		StatusType: reflect.TypeOf(appmgmtcontrolv1beta1.MonitoredInstanceStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "appmgmtcontrol.MonitoredInstance",
+			},
+			{
+				SDKStruct: "appmgmtcontrol.MonitoredInstanceCollection",
+			},
+			{
+				SDKStruct: "appmgmtcontrol.MonitoredInstanceSummary",
+			},
+		},
+	},
+	{
 		Name:       "AutoscalingAutoScalingConfiguration",
 		SpecType:   reflect.TypeOf(autoscalingv1beta1.AutoScalingConfigurationSpec{}),
 		StatusType: reflect.TypeOf(autoscalingv1beta1.AutoScalingConfigurationStatus{}),
@@ -3091,6 +3134,19 @@ var targets = []Target{
 		},
 	},
 	{
+		Name:       "ComputeinstanceagentInstanceAgentPlugin",
+		SpecType:   reflect.TypeOf(computeinstanceagentv1beta1.InstanceAgentPluginSpec{}),
+		StatusType: reflect.TypeOf(computeinstanceagentv1beta1.InstanceAgentPluginStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "computeinstanceagent.InstanceAgentPlugin",
+			},
+			{
+				SDKStruct: "computeinstanceagent.InstanceAgentPluginSummary",
+			},
+		},
+	},
+	{
 		Name:       "ContainerinstancesContainerInstance",
 		SpecType:   reflect.TypeOf(containerinstancesv1beta1.ContainerInstanceSpec{}),
 		StatusType: reflect.TypeOf(containerinstancesv1beta1.ContainerInstanceStatus{}),
@@ -3115,6 +3171,19 @@ var targets = []Target{
 		},
 	},
 	{
+		Name:       "DashboardserviceDashboard",
+		SpecType:   reflect.TypeOf(dashboardservicev1beta1.DashboardSpec{}),
+		StatusType: reflect.TypeOf(dashboardservicev1beta1.DashboardStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "dashboardservice.DashboardCollection",
+			},
+			{
+				SDKStruct: "dashboardservice.DashboardSummary",
+			},
+		},
+	},
+	{
 		Name:       "DashboardserviceDashboardGroup",
 		SpecType:   reflect.TypeOf(dashboardservicev1beta1.DashboardGroupSpec{}),
 		StatusType: reflect.TypeOf(dashboardservicev1beta1.DashboardGroupStatus{}),
@@ -3133,6 +3202,16 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "dashboardservice.DashboardGroupSummary",
+			},
+		},
+	},
+	{
+		Name:       "DatabasemigrationAssessment",
+		SpecType:   reflect.TypeOf(databasemigrationv1beta1.AssessmentSpec{}),
+		StatusType: reflect.TypeOf(databasemigrationv1beta1.AssessmentStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "databasemigration.AssessmentCollection",
 			},
 		},
 	},
@@ -5218,6 +5297,50 @@ var targets = []Target{
 		},
 	},
 	{
+		Name:       "DisasterrecoveryDrProtectionGroup",
+		SpecType:   reflect.TypeOf(disasterrecoveryv1beta1.DrProtectionGroupSpec{}),
+		StatusType: reflect.TypeOf(disasterrecoveryv1beta1.DrProtectionGroupStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "disasterrecovery.CreateDrProtectionGroupDetails",
+			},
+			{
+				SDKStruct: "disasterrecovery.UpdateDrProtectionGroupDetails",
+			},
+			{
+				SDKStruct: "disasterrecovery.DrProtectionGroup",
+			},
+			{
+				SDKStruct: "disasterrecovery.DrProtectionGroupCollection",
+			},
+			{
+				SDKStruct: "disasterrecovery.DrProtectionGroupSummary",
+			},
+		},
+	},
+	{
+		Name:       "DistributeddatabaseDistributedDatabasePrivateEndpoint",
+		SpecType:   reflect.TypeOf(distributeddatabasev1beta1.DistributedDatabasePrivateEndpointSpec{}),
+		StatusType: reflect.TypeOf(distributeddatabasev1beta1.DistributedDatabasePrivateEndpointStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "distributeddatabase.CreateDistributedDatabasePrivateEndpointDetails",
+			},
+			{
+				SDKStruct: "distributeddatabase.UpdateDistributedDatabasePrivateEndpointDetails",
+			},
+			{
+				SDKStruct: "distributeddatabase.DistributedDatabasePrivateEndpoint",
+			},
+			{
+				SDKStruct: "distributeddatabase.DistributedDatabasePrivateEndpointCollection",
+			},
+			{
+				SDKStruct: "distributeddatabase.DistributedDatabasePrivateEndpointSummary",
+			},
+		},
+	},
+	{
 		Name:       "EmwarehouseEmWarehouse",
 		SpecType:   reflect.TypeOf(emwarehousev1beta1.EmWarehouseSpec{}),
 		StatusType: reflect.TypeOf(emwarehousev1beta1.EmWarehouseStatus{}),
@@ -5887,6 +6010,104 @@ var targets = []Target{
 		},
 	},
 	{
+		Name:       "GdpGdpPipeline",
+		SpecType:   reflect.TypeOf(gdpv1beta1.GdpPipelineSpec{}),
+		StatusType: reflect.TypeOf(gdpv1beta1.GdpPipelineStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "gdp.CreateGdpPipelineDetails",
+			},
+			{
+				SDKStruct: "gdp.UpdateGdpPipelineDetails",
+			},
+			{
+				SDKStruct: "gdp.GdpPipeline",
+			},
+			{
+				SDKStruct: "gdp.GdpPipelineCollection",
+			},
+			{
+				SDKStruct: "gdp.GdpPipelineSummary",
+			},
+		},
+	},
+	{
+		Name:       "GenerativeaiagentAgent",
+		SpecType:   reflect.TypeOf(generativeaiagentv1beta1.AgentSpec{}),
+		StatusType: reflect.TypeOf(generativeaiagentv1beta1.AgentStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "generativeaiagent.CreateAgentDetails",
+			},
+			{
+				SDKStruct: "generativeaiagent.UpdateAgentDetails",
+			},
+			{
+				SDKStruct: "generativeaiagent.Agent",
+			},
+			{
+				SDKStruct: "generativeaiagent.AgentCollection",
+			},
+			{
+				SDKStruct: "generativeaiagent.AgentSummary",
+			},
+		},
+	},
+	{
+		Name:       "GenerativeaiagentKnowledgeBase",
+		SpecType:   reflect.TypeOf(generativeaiagentv1beta1.KnowledgeBaseSpec{}),
+		StatusType: reflect.TypeOf(generativeaiagentv1beta1.KnowledgeBaseStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "generativeaiagent.CreateKnowledgeBaseDetails",
+			},
+			{
+				SDKStruct: "generativeaiagent.UpdateKnowledgeBaseDetails",
+			},
+			{
+				SDKStruct: "generativeaiagent.KnowledgeBase",
+			},
+			{
+				SDKStruct: "generativeaiagent.KnowledgeBaseCollection",
+			},
+			{
+				SDKStruct: "generativeaiagent.KnowledgeBaseSummary",
+			},
+		},
+	},
+	{
+		Name:       "GenerativeaiagentruntimeSession",
+		SpecType:   reflect.TypeOf(generativeaiagentruntimev1beta1.SessionSpec{}),
+		StatusType: reflect.TypeOf(generativeaiagentruntimev1beta1.SessionStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "generativeaiagentruntime.CreateSessionDetails",
+			},
+			{
+				SDKStruct: "generativeaiagentruntime.UpdateSessionDetails",
+			},
+			{
+				SDKStruct: "generativeaiagentruntime.Session",
+			},
+		},
+	},
+	{
+		Name:       "GenerativeaidataEnrichmentJob",
+		SpecType:   reflect.TypeOf(generativeaidatav1beta1.EnrichmentJobSpec{}),
+		StatusType: reflect.TypeOf(generativeaidatav1beta1.EnrichmentJobStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "generativeaidata.EnrichmentJob",
+			},
+			{
+				SDKStruct: "generativeaidata.EnrichmentJobCollection",
+			},
+			{
+				SDKStruct: "generativeaidata.EnrichmentJobSummary",
+			},
+		},
+	},
+	{
 		Name:       "GoldengateCertificate",
 		SpecType:   reflect.TypeOf(goldengatev1beta1.CertificateSpec{}),
 		StatusType: reflect.TypeOf(goldengatev1beta1.CertificateStatus{}),
@@ -6244,6 +6465,50 @@ var targets = []Target{
 		},
 	},
 	{
+		Name:       "JmsFleet",
+		SpecType:   reflect.TypeOf(jmsv1beta1.FleetSpec{}),
+		StatusType: reflect.TypeOf(jmsv1beta1.FleetStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "jms.CreateFleetDetails",
+			},
+			{
+				SDKStruct: "jms.UpdateFleetDetails",
+			},
+			{
+				SDKStruct: "jms.Fleet",
+			},
+			{
+				SDKStruct: "jms.FleetCollection",
+			},
+			{
+				SDKStruct: "jms.FleetSummary",
+			},
+		},
+	},
+	{
+		Name:       "JmsjavadownloadsJavaDownloadToken",
+		SpecType:   reflect.TypeOf(jmsjavadownloadsv1beta1.JavaDownloadTokenSpec{}),
+		StatusType: reflect.TypeOf(jmsjavadownloadsv1beta1.JavaDownloadTokenStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "jmsjavadownloads.CreateJavaDownloadTokenDetails",
+			},
+			{
+				SDKStruct: "jmsjavadownloads.UpdateJavaDownloadTokenDetails",
+			},
+			{
+				SDKStruct: "jmsjavadownloads.JavaDownloadToken",
+			},
+			{
+				SDKStruct: "jmsjavadownloads.JavaDownloadTokenCollection",
+			},
+			{
+				SDKStruct: "jmsjavadownloads.JavaDownloadTokenSummary",
+			},
+		},
+	},
+	{
 		Name:       "LicensemanagerLicenseRecord",
 		SpecType:   reflect.TypeOf(licensemanagerv1beta1.LicenseRecordSpec{}),
 		StatusType: reflect.TypeOf(licensemanagerv1beta1.LicenseRecordStatus{}),
@@ -6486,6 +6751,50 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "loganalytics.ScheduledTaskSummary",
+			},
+		},
+	},
+	{
+		Name:       "LustrefilestorageLustreFileSystem",
+		SpecType:   reflect.TypeOf(lustrefilestoragev1beta1.LustreFileSystemSpec{}),
+		StatusType: reflect.TypeOf(lustrefilestoragev1beta1.LustreFileSystemStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "lustrefilestorage.CreateLustreFileSystemDetails",
+			},
+			{
+				SDKStruct: "lustrefilestorage.UpdateLustreFileSystemDetails",
+			},
+			{
+				SDKStruct: "lustrefilestorage.LustreFileSystem",
+			},
+			{
+				SDKStruct: "lustrefilestorage.LustreFileSystemCollection",
+			},
+			{
+				SDKStruct: "lustrefilestorage.LustreFileSystemSummary",
+			},
+		},
+	},
+	{
+		Name:       "LustrefilestorageObjectStorageLink",
+		SpecType:   reflect.TypeOf(lustrefilestoragev1beta1.ObjectStorageLinkSpec{}),
+		StatusType: reflect.TypeOf(lustrefilestoragev1beta1.ObjectStorageLinkStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "lustrefilestorage.CreateObjectStorageLinkDetails",
+			},
+			{
+				SDKStruct: "lustrefilestorage.UpdateObjectStorageLinkDetails",
+			},
+			{
+				SDKStruct: "lustrefilestorage.ObjectStorageLink",
+			},
+			{
+				SDKStruct: "lustrefilestorage.ObjectStorageLinkCollection",
+			},
+			{
+				SDKStruct: "lustrefilestorage.ObjectStorageLinkSummary",
 			},
 		},
 	},
@@ -6815,6 +7124,88 @@ var targets = []Target{
 		},
 	},
 	{
+		Name:       "MediaservicesMediaAsset",
+		SpecType:   reflect.TypeOf(mediaservicesv1beta1.MediaAssetSpec{}),
+		StatusType: reflect.TypeOf(mediaservicesv1beta1.MediaAssetStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "mediaservices.CreateMediaAssetDetails",
+			},
+			{
+				SDKStruct: "mediaservices.UpdateMediaAssetDetails",
+			},
+			{
+				SDKStruct: "mediaservices.MediaAsset",
+			},
+			{
+				SDKStruct: "mediaservices.MediaAssetCollection",
+			},
+			{
+				SDKStruct: "mediaservices.MediaAssetSummary",
+			},
+		},
+	},
+	{
+		Name:       "MediaservicesMediaWorkflow",
+		SpecType:   reflect.TypeOf(mediaservicesv1beta1.MediaWorkflowSpec{}),
+		StatusType: reflect.TypeOf(mediaservicesv1beta1.MediaWorkflowStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "mediaservices.CreateMediaWorkflowDetails",
+			},
+			{
+				SDKStruct: "mediaservices.UpdateMediaWorkflowDetails",
+			},
+			{
+				SDKStruct: "mediaservices.MediaWorkflow",
+			},
+			{
+				SDKStruct: "mediaservices.MediaWorkflowCollection",
+			},
+			{
+				SDKStruct: "mediaservices.MediaWorkflowSummary",
+			},
+		},
+	},
+	{
+		Name:       "MngdmacMacDevice",
+		SpecType:   reflect.TypeOf(mngdmacv1beta1.MacDeviceSpec{}),
+		StatusType: reflect.TypeOf(mngdmacv1beta1.MacDeviceStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "mngdmac.MacDevice",
+			},
+			{
+				SDKStruct: "mngdmac.MacDeviceCollection",
+			},
+			{
+				SDKStruct: "mngdmac.MacDeviceSummary",
+			},
+		},
+	},
+	{
+		Name:       "MngdmacMacOrder",
+		SpecType:   reflect.TypeOf(mngdmacv1beta1.MacOrderSpec{}),
+		StatusType: reflect.TypeOf(mngdmacv1beta1.MacOrderStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "mngdmac.CreateMacOrderDetails",
+			},
+			{
+				SDKStruct: "mngdmac.UpdateMacOrderDetails",
+			},
+			{
+				SDKStruct: "mngdmac.MacOrder",
+			},
+			{
+				SDKStruct: "mngdmac.MacOrderCollection",
+			},
+			{
+				SDKStruct: "mngdmac.MacOrderSummary",
+			},
+		},
+	},
+	{
 		Name:       "NetworkfirewallAddressList",
 		SpecType:   reflect.TypeOf(networkfirewallv1beta1.AddressListSpec{}),
 		StatusType: reflect.TypeOf(networkfirewallv1beta1.AddressListStatus{}),
@@ -7015,6 +7406,57 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "networkfirewall.UrlListSummary",
+			},
+		},
+	},
+	{
+		Name:       "OceOceInstance",
+		SpecType:   reflect.TypeOf(ocev1beta1.OceInstanceSpec{}),
+		StatusType: reflect.TypeOf(ocev1beta1.OceInstanceStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "oce.CreateOceInstanceDetails",
+			},
+			{
+				SDKStruct: "oce.UpdateOceInstanceDetails",
+			},
+			{
+				SDKStruct: "oce.OceInstance",
+			},
+			{
+				SDKStruct: "oce.OceInstanceSummary",
+			},
+		},
+	},
+	{
+		Name:       "OnesubscriptionSubscription",
+		SpecType:   reflect.TypeOf(onesubscriptionv1beta1.SubscriptionSpec{}),
+		StatusType: reflect.TypeOf(onesubscriptionv1beta1.SubscriptionStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "onesubscription.SubscriptionSummary",
+			},
+		},
+	},
+	{
+		Name:       "OpaOpaInstance",
+		SpecType:   reflect.TypeOf(opav1beta1.OpaInstanceSpec{}),
+		StatusType: reflect.TypeOf(opav1beta1.OpaInstanceStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "opa.CreateOpaInstanceDetails",
+			},
+			{
+				SDKStruct: "opa.UpdateOpaInstanceDetails",
+			},
+			{
+				SDKStruct: "opa.OpaInstance",
+			},
+			{
+				SDKStruct: "opa.OpaInstanceCollection",
+			},
+			{
+				SDKStruct: "opa.OpaInstanceSummary",
 			},
 		},
 	},
@@ -7479,6 +7921,38 @@ var targets = []Target{
 		},
 	},
 	{
+		Name:       "OsubsubscriptionSubscription",
+		SpecType:   reflect.TypeOf(osubsubscriptionv1beta1.SubscriptionSpec{}),
+		StatusType: reflect.TypeOf(osubsubscriptionv1beta1.SubscriptionStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "osubsubscription.SubscriptionSummary",
+			},
+		},
+	},
+	{
+		Name:       "PsaPrivateServiceAccess",
+		SpecType:   reflect.TypeOf(psav1beta1.PrivateServiceAccessSpec{}),
+		StatusType: reflect.TypeOf(psav1beta1.PrivateServiceAccessStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "psa.CreatePrivateServiceAccessDetails",
+			},
+			{
+				SDKStruct: "psa.UpdatePrivateServiceAccessDetails",
+			},
+			{
+				SDKStruct: "psa.PrivateServiceAccess",
+			},
+			{
+				SDKStruct: "psa.PrivateServiceAccessCollection",
+			},
+			{
+				SDKStruct: "psa.PrivateServiceAccessSummary",
+			},
+		},
+	},
+	{
 		Name:       "RecoveryProtectedDatabase",
 		SpecType:   reflect.TypeOf(recoveryv1beta1.ProtectedDatabaseSpec{}),
 		StatusType: reflect.TypeOf(recoveryv1beta1.ProtectedDatabaseStatus{}),
@@ -7727,6 +8201,50 @@ var targets = []Target{
 		},
 	},
 	{
+		Name:       "RoverRoverCluster",
+		SpecType:   reflect.TypeOf(roverv1beta1.RoverClusterSpec{}),
+		StatusType: reflect.TypeOf(roverv1beta1.RoverClusterStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "rover.CreateRoverClusterDetails",
+			},
+			{
+				SDKStruct: "rover.UpdateRoverClusterDetails",
+			},
+			{
+				SDKStruct: "rover.RoverCluster",
+			},
+			{
+				SDKStruct: "rover.RoverClusterCollection",
+			},
+			{
+				SDKStruct: "rover.RoverClusterSummary",
+			},
+		},
+	},
+	{
+		Name:       "RoverRoverNode",
+		SpecType:   reflect.TypeOf(roverv1beta1.RoverNodeSpec{}),
+		StatusType: reflect.TypeOf(roverv1beta1.RoverNodeStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "rover.CreateRoverNodeDetails",
+			},
+			{
+				SDKStruct: "rover.UpdateRoverNodeDetails",
+			},
+			{
+				SDKStruct: "rover.RoverNode",
+			},
+			{
+				SDKStruct: "rover.RoverNodeCollection",
+			},
+			{
+				SDKStruct: "rover.RoverNodeSummary",
+			},
+		},
+	},
+	{
 		Name:       "SchServiceConnector",
 		SpecType:   reflect.TypeOf(schv1beta1.ServiceConnectorSpec{}),
 		StatusType: reflect.TypeOf(schv1beta1.ServiceConnectorStatus{}),
@@ -7787,6 +8305,31 @@ var targets = []Target{
 		},
 	},
 	{
+		Name:       "SelfSubscription",
+		SpecType:   reflect.TypeOf(selfv1beta1.SubscriptionSpec{}),
+		StatusType: reflect.TypeOf(selfv1beta1.SubscriptionStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "self.CreateSubscriptionDetails",
+			},
+			{
+				SDKStruct: "self.UpdateSubscriptionDetails",
+			},
+			{
+				SDKStruct: "self.SubscriptionDetails",
+			},
+			{
+				SDKStruct: "self.Subscription",
+			},
+			{
+				SDKStruct: "self.SubscriptionCollection",
+			},
+			{
+				SDKStruct: "self.SubscriptionSummary",
+			},
+		},
+	},
+	{
 		Name:       "ServicecatalogPrivateApplication",
 		SpecType:   reflect.TypeOf(servicecatalogv1beta1.PrivateApplicationSpec{}),
 		StatusType: reflect.TypeOf(servicecatalogv1beta1.PrivateApplicationStatus{}),
@@ -7827,6 +8370,22 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "servicecatalog.ServiceCatalogSummary",
+			},
+		},
+	},
+	{
+		Name:       "ServicemanagerproxyServiceEnvironment",
+		SpecType:   reflect.TypeOf(servicemanagerproxyv1beta1.ServiceEnvironmentSpec{}),
+		StatusType: reflect.TypeOf(servicemanagerproxyv1beta1.ServiceEnvironmentStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "servicemanagerproxy.ServiceEnvironment",
+			},
+			{
+				SDKStruct: "servicemanagerproxy.ServiceEnvironmentCollection",
+			},
+			{
+				SDKStruct: "servicemanagerproxy.ServiceEnvironmentSummary",
 			},
 		},
 	},
@@ -8029,6 +8588,107 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "stackmonitoring.ProcessSetSummary",
+			},
+		},
+	},
+	{
+		Name:       "TenantmanagercontrolplaneDomain",
+		SpecType:   reflect.TypeOf(tenantmanagercontrolplanev1beta1.DomainSpec{}),
+		StatusType: reflect.TypeOf(tenantmanagercontrolplanev1beta1.DomainStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "tenantmanagercontrolplane.CreateDomainDetails",
+			},
+			{
+				SDKStruct: "tenantmanagercontrolplane.UpdateDomainDetails",
+			},
+			{
+				SDKStruct: "tenantmanagercontrolplane.Domain",
+			},
+			{
+				SDKStruct: "tenantmanagercontrolplane.DomainCollection",
+			},
+			{
+				SDKStruct: "tenantmanagercontrolplane.DomainSummary",
+			},
+		},
+	},
+	{
+		Name:       "TenantmanagercontrolplaneOrganization",
+		SpecType:   reflect.TypeOf(tenantmanagercontrolplanev1beta1.OrganizationSpec{}),
+		StatusType: reflect.TypeOf(tenantmanagercontrolplanev1beta1.OrganizationStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "tenantmanagercontrolplane.UpdateOrganizationDetails",
+			},
+			{
+				SDKStruct: "tenantmanagercontrolplane.Organization",
+			},
+			{
+				SDKStruct: "tenantmanagercontrolplane.OrganizationCollection",
+			},
+			{
+				SDKStruct: "tenantmanagercontrolplane.OrganizationSummary",
+			},
+		},
+	},
+	{
+		Name:       "VbsinstVbsInstance",
+		SpecType:   reflect.TypeOf(vbsinstv1beta1.VbsInstanceSpec{}),
+		StatusType: reflect.TypeOf(vbsinstv1beta1.VbsInstanceStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "vbsinst.CreateVbsInstanceDetails",
+			},
+			{
+				SDKStruct: "vbsinst.UpdateVbsInstanceDetails",
+			},
+			{
+				SDKStruct: "vbsinst.VbsInstance",
+			},
+			{
+				SDKStruct: "vbsinst.VbsInstanceSummary",
+			},
+		},
+	},
+	{
+		Name:       "VisualbuilderVbInstance",
+		SpecType:   reflect.TypeOf(visualbuilderv1beta1.VbInstanceSpec{}),
+		StatusType: reflect.TypeOf(visualbuilderv1beta1.VbInstanceStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "visualbuilder.CreateVbInstanceDetails",
+			},
+			{
+				SDKStruct: "visualbuilder.UpdateVbInstanceDetails",
+			},
+			{
+				SDKStruct: "visualbuilder.VbInstance",
+			},
+			{
+				SDKStruct: "visualbuilder.VbInstanceSummary",
+			},
+		},
+	},
+	{
+		Name:       "VnmonitoringPathAnalyzerTest",
+		SpecType:   reflect.TypeOf(vnmonitoringv1beta1.PathAnalyzerTestSpec{}),
+		StatusType: reflect.TypeOf(vnmonitoringv1beta1.PathAnalyzerTestStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "vnmonitoring.CreatePathAnalyzerTestDetails",
+			},
+			{
+				SDKStruct: "vnmonitoring.UpdatePathAnalyzerTestDetails",
+			},
+			{
+				SDKStruct: "vnmonitoring.PathAnalyzerTest",
+			},
+			{
+				SDKStruct: "vnmonitoring.PathAnalyzerTestCollection",
+			},
+			{
+				SDKStruct: "vnmonitoring.PathAnalyzerTestSummary",
 			},
 		},
 	},
@@ -8280,6 +8940,79 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "waf.WebAppFirewallPolicySummary",
+			},
+		},
+	},
+	{
+		Name:       "WlmsManagedInstance",
+		SpecType:   reflect.TypeOf(wlmsv1beta1.ManagedInstanceSpec{}),
+		StatusType: reflect.TypeOf(wlmsv1beta1.ManagedInstanceStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "wlms.UpdateManagedInstanceDetails",
+			},
+			{
+				SDKStruct: "wlms.ManagedInstance",
+			},
+			{
+				SDKStruct: "wlms.ManagedInstanceCollection",
+			},
+			{
+				SDKStruct: "wlms.ManagedInstanceSummary",
+			},
+		},
+	},
+	{
+		Name:       "WlmsWlsDomain",
+		SpecType:   reflect.TypeOf(wlmsv1beta1.WlsDomainSpec{}),
+		StatusType: reflect.TypeOf(wlmsv1beta1.WlsDomainStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "wlms.UpdateWlsDomainDetails",
+			},
+			{
+				SDKStruct: "wlms.WlsDomain",
+			},
+			{
+				SDKStruct: "wlms.WlsDomainCollection",
+			},
+			{
+				SDKStruct: "wlms.WlsDomainSummary",
+			},
+		},
+	},
+	{
+		Name:       "ZprConfiguration",
+		SpecType:   reflect.TypeOf(zprv1beta1.ConfigurationSpec{}),
+		StatusType: reflect.TypeOf(zprv1beta1.ConfigurationStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "zpr.CreateConfigurationDetails",
+			},
+			{
+				SDKStruct: "zpr.Configuration",
+			},
+		},
+	},
+	{
+		Name:       "ZprZprPolicy",
+		SpecType:   reflect.TypeOf(zprv1beta1.ZprPolicySpec{}),
+		StatusType: reflect.TypeOf(zprv1beta1.ZprPolicyStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "zpr.CreateZprPolicyDetails",
+			},
+			{
+				SDKStruct: "zpr.UpdateZprPolicyDetails",
+			},
+			{
+				SDKStruct: "zpr.ZprPolicy",
+			},
+			{
+				SDKStruct: "zpr.ZprPolicyCollection",
+			},
+			{
+				SDKStruct: "zpr.ZprPolicySummary",
 			},
 		},
 	},

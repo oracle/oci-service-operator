@@ -1,0 +1,17 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: appmgmtcontrol
+slug: monitoredinstance
+kind: MonitoredInstance
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+  - failed
+notes:
+  - "The published MonitoredInstance contract is bind-existing and observe-only. Reconcile binds by explicit instanceId or a unique ListMonitoredInstances match on compartmentId plus displayName, and it never invents create, update, or delete operations."
+  - "Direct binds are explicit. The runtime preflights GetMonitoredInstance when instanceId is set so a missing direct bind does not fall back to list adoption."
+  - "ListMonitoredInstances returns MonitoredInstanceSummary rather than the full body, so the runtime reruns GetMonitoredInstance after a list bind to project timeCreated, timeUpdated, and lifecycleDetails from the full object."
+  - "Delete is CR-local unbind only. The controller clears the finalizer immediately, never calls auxiliary monitoring or workrequest helpers, and treats observed DELETING or DELETED lifecycle as terminating read state rather than managed delete progress."

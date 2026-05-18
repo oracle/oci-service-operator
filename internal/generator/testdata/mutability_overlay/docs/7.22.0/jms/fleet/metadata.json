@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "jms",
+  "kind": "Fleet",
+  "formalSlug": "fleet",
+  "providerResource": "oci_jms_fleet",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/jms_fleet",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/jms_fleet",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/jms/fleet/page.html",
+  "bodySHA256": "ba5442792858dbdc35831f49ffb4406230ad64fbd80d71d390d0a73854d71de0",
+  "bodyBytes": 1499,
+  "fixtureBodyPath": "7.22.0/jms/fleet/page.html"
+}

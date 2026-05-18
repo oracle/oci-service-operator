@@ -1,0 +1,55 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: mediaservices
+slug: mediaworkflow
+kind: MediaWorkflow
+archetype: generated-service-manager
+states:
+  - active
+  - terminating
+  - deleted
+repoAuthored:
+  listLookup:
+    filters:
+      - compartmentId
+      - displayName
+    matchRule: exact compartmentId plus displayName unique match; empty displayName skips pre-create lookup; duplicate matches fail
+  mutation:
+    mutable:
+      - definedTags
+      - displayName
+      - freeformTags
+      - mediaWorkflowConfigurationIds
+      - parameters
+      - tasks
+    forceNew:
+      - compartmentId
+    createOnly:
+      - locks
+  hooks:
+    create:
+      - helper: tfresource.CreateResource
+    update:
+      - helper: tfresource.UpdateResource
+    delete:
+      - helper: tfresource.DeleteResource
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - MediaWorkflow create and update are synchronous reread flows. OCI returns
+    the body immediately and the resource exposes only ACTIVE,
+    NEEDS_ATTENTION, and DELETED, so the reviewed runtime does not publish
+    provisioning or updating lifecycle buckets.
+  - The published runtime treats NEEDS_ATTENTION as terminal failure without
+    requeue and does not invent service-local work-request polling.
+  - Pre-create reuse scopes by compartmentId and uses the SDK displayName
+    filter when spec.displayName is present. Adoption requires a unique exact
+    match on the reviewed identity surface.
+  - Delete confirmation treats either a DELETED lifecycle response or a
+    NotFound reread as terminal and otherwise keeps the finalizer until OCI
+    stops returning the resource.
+  - Matching create-time locks are normalized out of steady-state parity by
+    ignoring OCI-populated timeCreated metadata, but changing requested locks
+    after create remains out of scope.

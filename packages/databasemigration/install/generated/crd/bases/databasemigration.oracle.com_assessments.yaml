@@ -1,0 +1,426 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: assessments.databasemigration.oracle.com
+spec:
+  group: databasemigration.oracle.com
+  names:
+    kind: Assessment
+    listKind: AssessmentList
+    plural: assessments
+    singular: assessment
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the Assessment
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the Assessment
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: Assessment is the Schema for the assessments API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: AssessmentSpec defines the desired state of Assessment.
+            properties:
+              acceptableDowntime:
+                description: Time allowed for the application downtime.
+                type: string
+              bulkIncludeExcludeData:
+                description: |-
+                  Specifies the database objects to be excluded from the migration in bulk.
+                  The definition accepts input in a CSV format, newline separated for each entry.
+                  More details can be found in the documentation.
+                type: string
+              compartmentId:
+                description: The OCID of the resource being referenced.
+                type: string
+              creationType:
+                description: The type of assessment creation.
+                type: string
+              databaseCombination:
+                type: string
+              databaseDataSize:
+                description: The size of a source database.
+                type: string
+              ddlExpectation:
+                description: DDL expectation values.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: |-
+                  A user-friendly description. Does not have to be unique, and it's changeable.
+                  Avoid entering confidential information.
+                type: string
+              displayName:
+                description: |-
+                  A user-friendly name. Does not have to be unique, and it's changeable.
+                  Avoid entering confidential information.
+                type: string
+              excludeObjects:
+                description: Database objects to exclude from migration, cannot be
+                  specified alongside 'includeObjects'
+                items:
+                  description: AssessmentExcludeObject defines nested fields for Assessment.ExcludeObject.
+                  properties:
+                    isOmitExcludedTableFromReplication:
+                      description: |-
+                        Whether an excluded table should be omitted from replication. Only valid for database objects
+                        that have are of type TABLE and object status EXCLUDE.
+                      type: boolean
+                    objectName:
+                      description: Name of the object (regular expression is allowed)
+                      type: string
+                    owner:
+                      description: Owner of the object (regular expression is allowed)
+                      type: string
+                    type:
+                      description: |-
+                        Type of object to exclude.
+                        If not specified, matching owners and object names of type TABLE would be excluded.
+                      type: string
+                  required:
+                  - objectName
+                  - owner
+                  type: object
+                type: array
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags. Example: {"Department": "Finance"}
+                type: object
+              includeObjects:
+                description: Database objects to include from migration, cannot be
+                  specified alongside 'excludeObjects'
+                items:
+                  description: AssessmentIncludeObject defines nested fields for Assessment.IncludeObject.
+                  properties:
+                    isOmitExcludedTableFromReplication:
+                      description: |-
+                        Whether an excluded table should be omitted from replication. Only valid for database objects
+                        that have are of type TABLE and object status EXCLUDE.
+                      type: boolean
+                    objectName:
+                      description: Name of the object (regular expression is allowed)
+                      type: string
+                    owner:
+                      description: Owner of the object (regular expression is allowed)
+                      type: string
+                    type:
+                      description: |-
+                        Type of object to exclude.
+                        If not specified, matching owners and object names of type TABLE would be excluded.
+                      type: string
+                  required:
+                  - objectName
+                  - owner
+                  type: object
+                type: array
+              jsonData:
+                type: string
+              networkSpeedMegabitPerSecond:
+                description: A network speed in Megabits per second.
+                type: string
+              sourceDatabaseConnection:
+                description: AssessmentSourceDatabaseConnection defines nested fields
+                  for Assessment.SourceDatabaseConnection.
+                properties:
+                  id:
+                    description: The OCID of the resource being referenced.
+                    type: string
+                required:
+                - id
+                type: object
+              targetDatabaseConnection:
+                description: AssessmentTargetDatabaseConnection defines nested fields
+                  for Assessment.TargetDatabaseConnection.
+                properties:
+                  connectionType:
+                    description: Defines the type of connection. For example, ORACLE.
+                    type: string
+                  databaseVersion:
+                    description: The database version
+                    type: string
+                  id:
+                    description: The OCID of the resource being referenced.
+                    type: string
+                  technologySubType:
+                    description: Technology sub-type e.g. ADW_SHARED, ADW_DEDICATED,
+                      ATP_SHARED, ATP_DEDICATED
+                    type: string
+                  technologyType:
+                    description: The technology type.
+                    type: string
+                type: object
+            required:
+            - acceptableDowntime
+            - compartmentId
+            - databaseDataSize
+            - ddlExpectation
+            - networkSpeedMegabitPerSecond
+            - sourceDatabaseConnection
+            - targetDatabaseConnection
+            type: object
+          status:
+            description: AssessmentStatus defines the observed state of Assessment.
+            properties:
+              acceptableDowntime:
+                description: Time allowed for the application downtime.
+                type: string
+              assessmentMigrationType:
+                description: The migration type of the migration to be performed.
+                type: string
+              compartmentId:
+                description: The OCID of the resource being referenced.
+                type: string
+              creationType:
+                description: The type of assessment creation.
+                type: string
+              databaseCombination:
+                type: string
+              databaseDataSize:
+                description: The size of a source database.
+                type: string
+              ddlExpectation:
+                description: DDL expectation values.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: |-
+                  A user-friendly description. Does not have to be unique, and it's changeable.
+                  Avoid entering confidential information.
+                type: string
+              displayName:
+                description: |-
+                  A user-friendly name. Does not have to be unique, and it's changeable.
+                  Avoid entering confidential information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags. Example: {"Department": "Finance"}
+                type: object
+              id:
+                description: The OCID of the resource being referenced.
+                type: string
+              isCdbSupported:
+                description: True if CDB should be defined, false otherwise.
+                type: boolean
+              jsonData:
+                type: string
+              lifecycleState:
+                description: The current state of the Assessment resource.
+                type: string
+              migrationId:
+                description: The OCID of the resource being referenced.
+                type: string
+              networkSpeedMegabitPerSecond:
+                description: A network speed in Megabits per second.
+                type: string
+              sourceDatabaseConnection:
+                description: AssessmentSourceDatabaseConnection defines nested fields
+                  for Assessment.SourceDatabaseConnection.
+                properties:
+                  id:
+                    description: The OCID of the resource being referenced.
+                    type: string
+                required:
+                - id
+                type: object
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of system tag keys. These predefined keys are scoped to namespaces.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              targetDatabaseConnection:
+                description: AssessmentTargetDatabaseConnection defines nested fields
+                  for Assessment.TargetDatabaseConnection.
+                properties:
+                  connectionType:
+                    description: Defines the type of connection. For example, ORACLE.
+                    type: string
+                  databaseVersion:
+                    description: The database version
+                    type: string
+                  id:
+                    description: The OCID of the resource being referenced.
+                    type: string
+                  technologySubType:
+                    description: Technology sub-type e.g. ADW_SHARED, ADW_DEDICATED,
+                      ATP_SHARED, ATP_DEDICATED
+                    type: string
+                  technologyType:
+                    description: The technology type.
+                    type: string
+                type: object
+              timeCreated:
+                description: An RFC3339 formatted datetime string such as `2016-08-25T21:10:29.600Z`.
+                type: string
+              timeUpdated:
+                description: An RFC3339 formatted datetime string such as `2016-08-25T21:10:29.600Z`.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

@@ -189,8 +189,9 @@ and service-manager generation is enabled.
 - A generated kind comes from an OCI SDK resource family discovered from the
   service package, not from the service name itself.
 - The generator pipeline should normalize OCI SDK CRUD request families
-  (`Create*`, `Get*`, `List*`, `Update*`, `Delete*`) into a shared resource
-  stem and render that stem as the OSOK kind.
+  (`Create*`, `Get*`, `List*`, `Update*`, `Delete*`) plus the checked-in
+  alias verbs (`Launch*`, `Terminate*`, `Generate*`, `Cancel*`) into a shared
+  resource stem and render that stem as the OSOK kind.
 - Checked-in kinds now follow the current v2 contract directly; the generator
   does not preserve older published GVK names through remap layers.
 
@@ -236,6 +237,10 @@ and service-manager generation is enabled.
   `WithClient(...)`, typed conversion, and `GetCrdStatus(...)` helpers stay in
   the scaffold so manual logic can live in separate files without editing the
   generated baseline.
+- When the pinned OCI SDK splits a resource's request families across multiple
+  SDK client types, the generated scaffold now emits a small same-package
+  client bundle and constructor helper instead of assuming one shared SDK
+  client type per resource.
 - `<file-stem>_runtimehooks_generated.go` owns the default generated-runtime
   hook set, the typed mutator registration seam, and the extracted
   `build<Kind>GeneratedRuntimeConfig(...)` builder used by the baseline service

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <h2 id="argument-reference">Argument Reference</h2>
+    <p>The following arguments are supported:</p>
+    <ul>
+      <li><code>display_name</code> - (Required) (Updatable) The name of the Fleet.</li>
+      <li><code>compartment_id</code> - (Required) (Updatable) The OCID of the compartment that contains the Fleet.</li>
+      <li><code>description</code> - (Optional) (Updatable) The Fleet description.</li>
+      <li><code>inventory_log</code> - (Required) (Updatable) Inventory log configuration for the Fleet.
+        <ul>
+          <li><code>log_group_id</code> - (Required) (Updatable) The OCID of the inventory log group.</li>
+          <li><code>log_id</code> - (Required) (Updatable) The OCID of the inventory log.</li>
+        </ul>
+      </li>
+      <li><code>operation_log</code> - (Optional) (Updatable) Operation log configuration for the Fleet.
+        <ul>
+          <li><code>log_group_id</code> - (Required) (Updatable) The OCID of the operation log group.</li>
+          <li><code>log_id</code> - (Required) (Updatable) The OCID of the operation log.</li>
+        </ul>
+      </li>
+      <li><code>is_advanced_features_enabled</code> - (Optional) (Updatable) Whether advanced features are enabled for the Fleet.</li>
+      <li><code>freeform_tags</code> - (Optional) (Updatable) Free-form tags for this resource.</li>
+      <li><code>defined_tags</code> - (Optional) (Updatable) Defined tags for this resource.</li>
+    </ul>
+  </body>
+</html>

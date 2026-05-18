@@ -1256,9 +1256,11 @@ DeploymentBackupSpec defines the desired state of DeploymentBackup.
 | `displayName` | An object's Display Name. | `string` | Yes | - | - |
 | `freeformTags` | A simple key-value pair that is applied without any predefined name, type, or scope. Exists for cross-compatibility only. Example: `{"bar-key": "value"}` | `map[string, string]` | No | - | - |
 | `isMetadataOnly` | Parameter to allow users to create backup without trails | `boolean` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
 | [`locks`](#kind-deploymentbackup-spec-locks) | Locks associated with this resource. | `list[object]` | No | - | - |
 | `namespaceName` | Name of namespace that serves as a container for all of your buckets | `string` | Yes | - | - |
 | `objectName` | Name of the object to be uploaded to object storage | `string` | Yes | - | - |
+| `type` | - | `string` | No | - | - |
 
 <a id="kind-deploymentbackup-spec-locks"></a>
 #### Spec.locks[]

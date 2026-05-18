@@ -1,0 +1,22 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: tenantmanagercontrolplane
+slug: organization
+kind: Organization
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+  - failed
+repoAuthored:
+  followUp:
+    create: none
+    update: "GetWorkRequest -> GetOrganization"
+    delete: none
+notes:
+  - "The published Organization contract is bind-existing plus update-only. Reconcile binds by explicit organizationId or a unique ListOrganizations match on compartmentId, and it never invents a create path."
+  - "Update only reconciles defaultUcmSubscriptionId and resumes through GetWorkRequest until a follow-up GetOrganization read confirms the bound organization state."
+  - "Delete is CR-local unbind only. The controller clears the finalizer immediately, never calls OCI delete helpers, and treats observed DELETING or DELETED organization lifecycle as terminating read state rather than managed delete progress."
+  - "FAILED remains terminal non-success and no Kubernetes secret side effects are part of this rollout."

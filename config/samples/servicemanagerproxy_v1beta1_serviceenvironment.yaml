@@ -1,0 +1,18 @@
+#
+# Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+#
+
+#
+# ServiceEnvironment is bind-existing and observe-only in this rollout.
+# Provide the Service Manager service environment identifier and the
+# compartment OCID for an existing environment. The serviceEnvironmentId
+# is not an OCID.
+#
+apiVersion: servicemanagerproxy.oracle.com/v1beta1
+kind: ServiceEnvironment
+metadata:
+  name: serviceenvironment-sample
+spec:
+  compartmentId: ocid1.compartment.oc1..exampleuniqueID
+  serviceEnvironmentId: example-service-environment-id

@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-vap-update-policy-input",
+  "contractVersion": "v1alpha1",
+  "metadata": {
+    "sourceSurface": "generator-mutability-overlay",
+    "providerSourceRef": "terraform-provider-oci",
+    "providerRevision": "eb653febb1bab4cc6650a96d404a8baf36fdf671",
+    "terraformDocsVersion": "7.22.0"
+  },
+  "target": {
+    "service": "vnmonitoring",
+    "apiVersion": "vnmonitoring.oracle.com/v1beta1",
+    "kind": "PathAnalyzerTest",
+    "formalSlug": "pathanalyzertest",
+    "providerResource": "oci_vn_monitoring_path_analyzer_test",
+    "specPathPrefix": "spec"
+  },
+  "update": {
+    "allowInPlacePaths": [
+      "definedTags",
+      "destinationEndpoint",
+      "displayName",
+      "freeformTags",
+      "protocol",
+      "protocolParameters",
+      "queryOptions",
+      "sourceEndpoint"
+    ],
+    "denyRules": [
+      {
+        "fieldPath": "compartmentId",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      }
+    ]
+  }
+}

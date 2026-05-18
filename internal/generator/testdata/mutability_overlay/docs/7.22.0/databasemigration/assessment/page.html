@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <h2 id="argument-reference">Argument Reference</h2>
+    <p>The following arguments are supported:</p>
+    <ul>
+      <li><code>display_name</code> - (Optional) (Updatable) A user-friendly display name for the assessment.</li>
+      <li><code>description</code> - (Optional) (Updatable) A user-friendly description for the assessment.</li>
+      <li><code>freeform_tags</code> - (Optional) (Updatable) Free-form tags for this assessment.</li>
+      <li><code>defined_tags</code> - (Optional) (Updatable) Defined tags for this assessment.</li>
+      <li><code>source_database_connection</code> - (Required) (Updatable) The source connection reference for the assessment.</li>
+      <li><code>target_database_connection</code> - (Required) (Updatable) The target connection reference for the assessment.</li>
+      <li><code>network_speed_megabit_per_second</code> - (Required) (Updatable) The expected network speed for the migration path.</li>
+      <li><code>acceptable_downtime</code> - (Required) (Updatable) The acceptable application downtime for the assessment.</li>
+      <li><code>database_data_size</code> - (Required) (Updatable) The source database size bucket used by the assessment.</li>
+      <li><code>ddl_expectation</code> - (Required) (Updatable) The expected DDL workload during migration.</li>
+      <li><code>creation_type</code> - (Optional) (Updatable) Whether the assessment is created only or also runs assessors.</li>
+      <li><code>compartment_id</code> - (Required) Updating this field after creation is not supported.</li>
+      <li><code>database_combination</code> - (Required) Updating this field after creation is not supported.</li>
+      <li><code>include_objects</code> - (Optional) The published controller-backed Assessment rollout does not support the object-helper families behind this field.</li>
+      <li><code>exclude_objects</code> - (Optional) The published controller-backed Assessment rollout does not support the object-helper families behind this field.</li>
+      <li><code>bulk_include_exclude_data</code> - (Optional) The published controller-backed Assessment rollout does not support the object-helper families behind this field.</li>
+    </ul>
+  </body>
+</html>

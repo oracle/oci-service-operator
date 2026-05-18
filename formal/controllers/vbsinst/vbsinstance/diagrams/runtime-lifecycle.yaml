@@ -1,0 +1,75 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: vbsinst
+slug: vbsinstance
+kind: VbsInstance
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending:
+      - CREATING
+    updatePending:
+      - UPDATING
+    deletePending:
+      - DELETING
+  listLookup:
+    filters:
+      - compartmentId
+      - name
+      - id
+    matchRule: exact compartmentId plus name unique match in ACTIVE, CREATING, or UPDATING; duplicate matches fail
+  mutation:
+    mutable:
+      - definedTags
+      - displayName
+      - freeformTags
+      - isResourceUsageAgreementGranted
+      - resourceCompartmentId
+    forceNew:
+      - compartmentId
+      - name
+  hooks:
+    create:
+      - helper: tfresource.CreateResource
+      - helper: tfresource.WaitForWorkRequestWithErrorHandling
+        entityType: vbsinstance
+        action: CREATED
+    update:
+      - helper: tfresource.UpdateResource
+      - helper: tfresource.WaitForWorkRequestWithErrorHandling
+        entityType: vbsinstance
+        action: UPDATED
+    delete:
+      - helper: tfresource.DeleteResource
+      - helper: tfresource.WaitForWorkRequestWithErrorHandling
+        entityType: vbsinstance
+        action: DELETED
+  followUp:
+    create: GetWorkRequest -> GetVbsInstance
+    update: GetWorkRequest -> GetVbsInstance
+    delete: GetWorkRequest -> GetVbsInstance/ListVbsInstances confirm-delete
+notes:
+  - Reviewed lifecycle mapping treats CREATING as provisioning, UPDATING as
+    updating, ACTIVE as success, and DELETING as terminating; FAILED is
+    terminal and DELETED is only a delete-confirmation target.
+  - Create, update, and delete responses expose work-request headers but do
+    not return a VbsInstance body. The runtime resumes through GetWorkRequest,
+    recovers the affected VbsInstance OCID from work-request resources, and
+    then rereads GetVbsInstance before settling.
+  - Pre-create reuse only runs when spec.compartmentId and spec.name are
+    present and keeps exact compartmentId plus name matching bounded to
+    ACTIVE, CREATING, or UPDATING summaries.
+  - Only displayName, isResourceUsageAgreementGranted,
+    resourceCompartmentId, freeformTags, and definedTags reconcile in place;
+    name remains create-time identity and ChangeVbsInstanceCompartment stays
+    out of scope for the published runtime.
+  - The provider-only idcs_access_token header input is intentionally not part
+    of the published CRD surface for VbsInstance.
+  - Required status projection keeps VbsAccessUrl, lifecycleDetails, and
+    systemTags on the published kind, and the runtime has no secret side
+    effects.

@@ -1,0 +1,23 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: osubsubscription
+slug: subscription
+kind: Subscription
+archetype: generated-service-manager
+states:
+  - updating
+  - active
+notes:
+  - OSubscription exposes ListSubscriptions only in the pinned SDK, so the
+    published runtime is query-backed and observe-only.
+  - "Reconcile requires compartmentId plus exactly one of planNumber,
+    subscriptionId, or buyerEmail. The runtime also passes
+    isCommitInfoRequired, sort controls, xOneGatewaySubscriptionId, and
+    xOneOriginRegion when those spec fields are populated."
+  - SubscriptionSummary does not expose a clean top-level OCID or the request
+    filter fields, so the package-local read model echoes the selector fields
+    into projected list items and accepts only a unique exact match.
+  - No OCI create, update, get, or delete operation is published. Kubernetes
+    delete is local-only, and the runtime leaves status.status.ocid empty.
+  - A blank sdkStatus string is treated as retryable updating. Any non-empty
+    sdkStatus settles success while the raw string remains visible on the CR.

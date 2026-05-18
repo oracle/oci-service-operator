@@ -1,0 +1,116 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Activity - appmgmtcontrol/MonitoredInstance
+skinparam activity {
+  backgroundColor #f8fafc
+  borderColor #0f172a
+  fontColor #0f172a
+  diamondBackgroundColor #e2e8f0
+  diamondBorderColor #1d4ed8
+  diamondFontColor #0f172a
+  startColor #1d4ed8
+  endColor #0f172a
+  barColor #1d4ed8
+}
+start
+partition "Observe and Bind" {
+:Start from shared flow\nshared/diagrams/shared-reconcile-activity.svg;
+:Read desired MonitoredInstance spec, tracked\nstatus, and delete intent;
+if ("Tracked or explicit OCI identity present?") then (yes)
+:Get the current OCI resource via\nGetMonitoredInstance;
+else (no)
+:Resolve an existing OCI resource through\nListMonitoredInstances using filters\ncompartment_id, display_name;
+:Persist the resolved or created OCI identity\ninto status;
+endif
+}
+if ("Delete requested?") then (yes)
+partition "Delete" {
+:Delete path is not represented by imported\nprovider facts;
+:Confirm deletion via GetMonitoredInstance or\nListMonitoredInstances until OCI reaches\nDELETED, NOT_FOUND;
+:Allow best-effort completion without finalizer\nretention;
+}
+stop
+else (no)
+partition "Lifecycle Classification" {
+if ("OCI state in retryable set?") then (yes)
+:Request requeue while OCI remains in CREATING,\nUPDATING, DELETING;
+stop
+endif
+if ("OCI state is outside success targets?") then (yes)
+:Return an unsuccessful reconcile result until\nOCI reaches ACTIVE, INACTIVE;
+stop
+endif
+}
+partition "Ready and Drift Handling" {
+:Compare live OCI state against the imported\nfield surface;
+if ("Force-new or conflicting drift detected?") then (yes)
+:Reject drift before OCI mutation for force-new\nfields compartment_id, display_name,\ninstance_id;
+stop
+endif
+:Return success for the ACTIVE, INACTIVE\nsuccess state;
+:Project required status and finalizer policy\nnone;
+:Requeue on provisioning, updating, terminating;
+}
+endif
+stop
+note right
+shared diagram:
+shared/diagrams/shared-reconcile-activity.svg
+Start from the shared reconcile activity and
+specialize provider-backed CRUD, wait, and
+status-projection details here.
+Controller-local activity diagrams add
+list-lookup hints, secret policies, delete
+handling, and open formal gaps.
+archetype batch: Generated service-manager
+controllers specialize the shared reconcile path
+with formal runtime ownership.
+service: appmgmtcontrol
+slug: monitoredinstance
+kind: MonitoredInstance
+archetype: generated-service-manager
+status/finalizer: required / none
+requeue: provisioning, updating, terminating
+provider states: create CREATING; update
+UPDATING; delete DELETING
+supported drift: none
+reject before mutate: force-new fields
+compartment_id, display_name, instance_id
+create-only fields: none
+list lookup:
+oci_appmgmtcontrol_monitored_instances filters
+compartment_id, display_name
+conflicts: none
+open gaps: none
+The published MonitoredInstance contract is
+bind-existing and observe-only. Reconcile binds
+by explicit instanceId or a unique
+ListMonitoredInstances match on compartmentId
+plus displayName, and it never invents create,
+update, or delete operations.
+Direct binds are explicit. The runtime
+preflights GetMonitoredInstance when instanceId
+is set so a missing direct bind does not fall
+back to list adoption.
+ListMonitoredInstances returns
+MonitoredInstanceSummary rather than the full
+body, so the runtime reruns GetMonitoredInstance
+after a list bind to project timeCreated,
+timeUpdated, and lifecycleDetails from the full
+object.
+Delete is CR-local unbind only. The controller
+clears the finalizer immediately, never calls
+auxiliary monitoring or workrequest helpers, and
+treats observed DELETING or DELETED lifecycle as
+terminating read state rather than managed
+delete progress.
+end note
+@enduml

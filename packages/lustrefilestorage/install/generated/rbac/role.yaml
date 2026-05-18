@@ -1,0 +1,42 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
+  - lustrefilestorage.oracle.com
+  resources:
+  - lustrefilesystems
+  - objectstoragelinks
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - lustrefilestorage.oracle.com
+  resources:
+  - lustrefilesystems/finalizers
+  - objectstoragelinks/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - lustrefilestorage.oracle.com
+  resources:
+  - lustrefilesystems/status
+  - objectstoragelinks/status
+  verbs:
+  - get
+  - patch
+  - update

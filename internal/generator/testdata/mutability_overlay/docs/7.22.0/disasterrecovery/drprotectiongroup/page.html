@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <h2 id="argument-reference">Argument Reference</h2>
+    <p>The following arguments are supported:</p>
+    <ul>
+      <li><code>association</code> - (Optional) Association details used only during create; updating this field after creation is not supported.</li>
+      <li><code>compartment_id</code> - (Required) Updating this field after creation is not supported.</li>
+      <li><code>defined_tags</code> - (Optional) (Updatable) Defined tags for this resource.</li>
+      <li><code>display_name</code> - (Required) (Updatable) A user-friendly display name for the DR protection group.</li>
+      <li><code>freeform_tags</code> - (Optional) (Updatable) Free-form tags for this resource.</li>
+      <li><code>log_location</code> - (Required) (Updatable) Object storage log location configuration for the DR protection group.
+        <ul>
+          <li><code>namespace</code> - (Required) (Updatable) Object storage namespace for DR protection group logs.</li>
+          <li><code>bucket</code> - (Required) (Updatable) Object storage bucket for DR protection group logs.</li>
+        </ul>
+      </li>
+      <li><code>members</code> - (Optional) (Updatable) Full retained member list for the DR protection group. Updating this field replaces the retained set with the supplied polymorphic member entries.</li>
+    </ul>
+  </body>
+</html>

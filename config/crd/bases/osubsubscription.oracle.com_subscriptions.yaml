@@ -1,0 +1,362 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: subscriptions.osubsubscription.oracle.com
+spec:
+  group: osubsubscription.oracle.com
+  names:
+    kind: Subscription
+    listKind: SubscriptionList
+    plural: subscriptions
+    singular: subscription
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: status of the Subscription
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the Subscription
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: Subscription is the Schema for the subscriptions API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: SubscriptionSpec defines the desired state of Subscription.
+            properties:
+              buyerEmail:
+                description: |-
+                  Optional buyer email selector for the query-backed observe contract.
+                  Set exactly one of planNumber, subscriptionId, or buyerEmail.
+                type: string
+              compartmentId:
+                description: |-
+                  The OCID of the compartment that contains the subscription summary projection.
+                  Required for every ListSubscriptions reread.
+                type: string
+              isCommitInfoRequired:
+                description: When true, request commitment details on the subscription
+                  summary list call.
+                type: boolean
+              planNumber:
+                description: |-
+                  Optional plan-number selector for the query-backed observe contract.
+                  Set exactly one of planNumber, subscriptionId, or buyerEmail.
+                type: string
+              sortBy:
+                description: Optional list sort field for the observed subscription
+                  query.
+                enum:
+                - TIMECREATED
+                - TIMESTART
+                type: string
+              sortOrder:
+                description: Optional list sort order for the observed subscription
+                  query.
+                enum:
+                - ASC
+                - DESC
+                type: string
+              subscriptionId:
+                description: |-
+                  Optional line-level subscription selector for the query-backed observe contract.
+                  This value is not a top-level OCI OCID and is not published as tracked controller identity.
+                  Set exactly one of planNumber, subscriptionId, or buyerEmail.
+                type: string
+              xOneGatewaySubscriptionId:
+                description: Optional request header passthrough for environments
+                  that require x-one-gateway-subscription-id on list reads.
+                type: string
+              xOneOriginRegion:
+                description: Optional request header passthrough for environments
+                  whose home region is not us-ashburn-1.
+                type: string
+            required:
+            - compartmentId
+            type: object
+          status:
+            description: SubscriptionStatus defines the observed state of Subscription.
+            properties:
+              currency:
+                description: SubscriptionCurrency defines nested fields for Subscription.Currency.
+                properties:
+                  isoCode:
+                    description: Currency Code
+                    type: string
+                  name:
+                    description: Currency name
+                    type: string
+                  stdPrecision:
+                    description: Standard Precision of the Currency
+                    format: int64
+                    type: integer
+                type: object
+              sdkStatus:
+                description: The raw subscription status string returned by OSubscription.
+                type: string
+              serviceName:
+                description: Customer friendly service name provided by PRG
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              subscribedServices:
+                description: List of Subscribed Services of the plan
+                items:
+                  description: SubscriptionSubscribedService defines nested fields
+                    for Subscription.SubscribedService.
+                  properties:
+                    bookingOptyNumber:
+                      description: Booking Opportunity Number of Subscribed Service
+                      type: string
+                    commitmentServices:
+                      description: List of Commitment services of a line
+                      items:
+                        description: SubscriptionSubscribedServiceCommitmentService
+                          defines nested fields for Subscription.SubscribedService.CommitmentService.
+                        properties:
+                          availableAmount:
+                            description: Commitment available amount
+                            type: string
+                          fundedAllocationValue:
+                            description: Funded Allocation line value
+                            type: string
+                          lineNetAmount:
+                            description: Commitment line net amount
+                            type: string
+                          quantity:
+                            description: Commitment quantity
+                            type: string
+                          timeEnd:
+                            description: Commitment end date
+                            type: string
+                          timeStart:
+                            description: Commitment start date
+                            type: string
+                        type: object
+                      type: array
+                    csi:
+                      description: Subscribed service CSI number
+                      format: int64
+                      type: integer
+                    dataCenterRegion:
+                      description: Subscribed service data center region
+                      type: string
+                    fundedAllocationValue:
+                      description: |-
+                        Funded Allocation line value
+                        example: 12000.00
+                      type: string
+                    id:
+                      description: SPM internal Subscribed Service ID
+                      type: string
+                    isIntentToPay:
+                      description: Subscribed service intent to pay flag
+                      type: boolean
+                    netUnitPrice:
+                      description: Subscribed service net unit price
+                      type: string
+                    operationType:
+                      description: Subscribed service operation type
+                      type: string
+                    orderNumber:
+                      description: Sales Order Number associated to the subscribed
+                        service
+                      format: int64
+                      type: integer
+                    partnerTransactionType:
+                      description: This field contains the name of the partner to
+                        which the subscription belongs - depending on which the invoicing
+                        may differ
+                      type: string
+                    pricingModel:
+                      description: Subscribed service pricing model
+                      type: string
+                    product:
+                      description: SubscriptionSubscribedServiceProduct defines nested
+                        fields for Subscription.SubscribedService.Product.
+                      properties:
+                        name:
+                          description: Product name
+                          type: string
+                        partNumber:
+                          description: Product part numner
+                          type: string
+                        provisioningGroup:
+                          description: Product provisioning group
+                          type: string
+                        unitOfMeasure:
+                          description: Unit of measure
+                          type: string
+                      type: object
+                    programType:
+                      description: Subscribed service program type
+                      type: string
+                    promoType:
+                      description: Subscribed service promotion type
+                      type: string
+                    quantity:
+                      description: Subscribed service quantity
+                      type: string
+                    status:
+                      description: Subscribed service status
+                      type: string
+                    termValue:
+                      description: Term value in Months
+                      format: int64
+                      type: integer
+                    termValueUOM:
+                      description: Term value UOM
+                      type: string
+                    timeEnd:
+                      description: Subscribed service end date
+                      type: string
+                    timeStart:
+                      description: Subscribed service start date
+                      type: string
+                    totalValue:
+                      description: Subscribed service total value
+                      type: string
+                  type: object
+                type: array
+              timeEnd:
+                description: Represents the date when the last service of the subscription
+                  ends
+                type: string
+              timeStart:
+                description: Represents the date when the first service of the subscription
+                  was activated
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

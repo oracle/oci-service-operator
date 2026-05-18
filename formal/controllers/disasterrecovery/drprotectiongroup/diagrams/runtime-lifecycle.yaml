@@ -1,0 +1,71 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: disasterrecovery
+slug: drprotectiongroup
+kind: DrProtectionGroup
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+  - failed
+repoAuthored:
+  providerLifecycle:
+    createPending:
+      - CREATING
+    updatePending:
+      - UPDATING
+    deletePending:
+      - DELETING
+  listLookup:
+    filters:
+      - compartmentId
+      - displayName
+      - lifecycleState
+      - role
+      - lifecycleSubState
+    matchRule: exact compartmentId plus displayName unique match, optionally narrowed by lifecycleState, role, and lifecycleSubState; duplicate matches fail
+  mutation:
+    mutable:
+      - definedTags
+      - displayName
+      - freeformTags
+      - logLocation.bucket
+      - logLocation.namespace
+      - members
+    forceNew:
+      - association
+      - compartmentId
+  hooks:
+    create:
+      - helper: tfresource.CreateResource
+      - helper: tfresource.WaitForWorkRequestWithErrorHandling
+        entityType: drprotectiongroup
+        action: CREATED
+    update:
+      - helper: tfresource.UpdateResource
+      - helper: tfresource.WaitForWorkRequestWithErrorHandling
+        entityType: drprotectiongroup
+        action: UPDATED
+    delete:
+      - helper: tfresource.DeleteResource
+      - helper: tfresource.WaitForWorkRequestWithErrorHandling
+        entityType: drprotectiongroup
+        action: DELETED
+  followUp:
+    create: GetWorkRequest -> GetDrProtectionGroup
+    update: GetWorkRequest -> GetDrProtectionGroup
+    delete: GetWorkRequest -> GetDrProtectionGroup/ListDrProtectionGroups confirm-delete
+notes:
+  - DrProtectionGroup create, update, and delete are work-request-backed and
+    resume through status.async.current as the canonical in-flight tracker.
+  - List responses expose DrProtectionGroupSummary items only, so the runtime
+    rereads GetDrProtectionGroup for authoritative logLocation and members
+    projection instead of treating summaries as complete observed state.
+  - The published runtime keeps role, lifecycleState, lifecycleSubState, peer
+    fields, and polymorphic members truthful in status while limiting in-place
+    writes to UpdateDrProtectionGroupDetails.
+  - Associate/Disassociate role changes, compartment moves, DR plans, and the
+    broader member-action families remain out of scope for this first
+    controller-backed disasterrecovery rollout.

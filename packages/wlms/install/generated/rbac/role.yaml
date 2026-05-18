@@ -1,0 +1,42 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
+  - wlms.oracle.com
+  resources:
+  - managedinstances
+  - wlsdomains
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - wlms.oracle.com
+  resources:
+  - managedinstances/finalizers
+  - wlsdomains/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - wlms.oracle.com
+  resources:
+  - managedinstances/status
+  - wlsdomains/status
+  verbs:
+  - get
+  - patch
+  - update

@@ -1,0 +1,26 @@
+#
+# Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+#
+
+#
+# Replace the semanticStoreId and compartmentId before running e2e. Creating this resource calls
+# GenerateEnrichmentJob on the OCI service. Deleting the Kubernetes resource requests
+# CancelEnrichmentJob and waits for the job to reach a terminal lifecycle state; it
+# does not claim the OCI service exposes a plain delete operation for EnrichmentJob.
+#
+apiVersion: generativeaidata.oracle.com/v1beta1
+kind: EnrichmentJob
+metadata:
+  name: enrichmentjob-sample
+spec:
+  semanticStoreId: ocid1.semanticstore.oc1..exampleuniqueID
+  compartmentId: ocid1.compartment.oc1..exampleuniqueID
+  enrichmentJobType: FULL_BUILD
+  enrichmentJobConfiguration:
+    enrichmentJobType: FULL_BUILD
+    schemaName: SALES
+  displayName: osok-generativeaidata-enrichmentjob-sample
+  description: OSOK Generative AI Data EnrichmentJob sample
+  freeformTags:
+    managed-by: oci-service-operator

@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-vap-update-policy-input",
+  "contractVersion": "v1alpha1",
+  "metadata": {
+    "sourceSurface": "generator-mutability-overlay",
+    "providerSourceRef": "terraform-provider-oci",
+    "providerRevision": "eb653febb1bab4cc6650a96d404a8baf36fdf671",
+    "terraformDocsVersion": "7.22.0"
+  },
+  "target": {
+    "service": "rover",
+    "apiVersion": "rover.oracle.com/v1beta1",
+    "kind": "RoverCluster",
+    "formalSlug": "rovercluster",
+    "providerResource": "oci_rover_rover_cluster",
+    "specPathPrefix": "spec"
+  },
+  "update": {
+    "allowInPlacePaths": [
+      "clusterSize",
+      "clusterWorkloads",
+      "customerShippingAddress",
+      "dataValidationCode",
+      "definedTags",
+      "displayName",
+      "enclosureType",
+      "freeformTags",
+      "importCompartmentId",
+      "importFileBucket",
+      "isImportRequested",
+      "oracleShippingTrackingUrl",
+      "pointOfContact",
+      "pointOfContactPhoneNumber",
+      "shippingPreference",
+      "shippingVendor",
+      "subscriptionId",
+      "superUserPassword",
+      "timePickupExpected",
+      "unlockPassphrase"
+    ],
+    "denyRules": [
+      {
+        "fieldPath": "clusterType",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      {
+        "fieldPath": "compartmentId",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      {
+        "fieldPath": "masterKeyId",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      }
+    ]
+  }
+}

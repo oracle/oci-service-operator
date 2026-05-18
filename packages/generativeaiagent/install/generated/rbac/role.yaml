@@ -1,0 +1,42 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
+  - generativeaiagent.oracle.com
+  resources:
+  - agents
+  - knowledgebases
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - generativeaiagent.oracle.com
+  resources:
+  - agents/finalizers
+  - knowledgebases/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - generativeaiagent.oracle.com
+  resources:
+  - agents/status
+  - knowledgebases/status
+  verbs:
+  - get
+  - patch
+  - update
