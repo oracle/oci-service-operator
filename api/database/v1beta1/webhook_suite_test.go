@@ -49,7 +49,13 @@ var _ = BeforeSuite(func() {
 
 	By("bootstrapping test environment")
 	testEnv = &envtest.Environment{
-		CRDDirectoryPaths: []string{filepath.Join("..", "..", "..", "config", "crd", "bases")},
+		CRDInstallOptions: envtest.CRDInstallOptions{
+			Paths: []string{
+				filepath.Join("..", "..", "..", "config", "crd", "bases", "database.oracle.com_autonomousdatabases.yaml"),
+			},
+			MaxTime:      time.Minute,
+			PollInterval: 500 * time.Millisecond,
+		},
 		WebhookInstallOptions: envtest.WebhookInstallOptions{
 			Paths: []string{filepath.Join("..", "..", "..", "config", "webhook")},
 		},
@@ -109,7 +115,7 @@ var _ = BeforeSuite(func() {
 		return conn.Close()
 	}).Should(Succeed())
 
-}, 60)
+}, 90)
 
 var _ = AfterSuite(func() {
 	cancel()

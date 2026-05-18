@@ -1,0 +1,23 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- bases/datacatalog.oracle.com_attributes.yaml
+- bases/datacatalog.oracle.com_attributetags.yaml
+- bases/datacatalog.oracle.com_catalogprivateendpoints.yaml
+- bases/datacatalog.oracle.com_catalogs.yaml
+- bases/datacatalog.oracle.com_connections.yaml
+- bases/datacatalog.oracle.com_customproperties.yaml
+- bases/datacatalog.oracle.com_dataassets.yaml
+- bases/datacatalog.oracle.com_dataassettags.yaml
+- bases/datacatalog.oracle.com_entities.yaml
+- bases/datacatalog.oracle.com_entitytags.yaml
+- bases/datacatalog.oracle.com_folders.yaml
+- bases/datacatalog.oracle.com_foldertags.yaml
+- bases/datacatalog.oracle.com_glossaries.yaml
+- bases/datacatalog.oracle.com_jobdefinitions.yaml
+- bases/datacatalog.oracle.com_jobs.yaml
+- bases/datacatalog.oracle.com_metastores.yaml
+- bases/datacatalog.oracle.com_namespaces.yaml
+- bases/datacatalog.oracle.com_patterns.yaml
+- bases/datacatalog.oracle.com_termrelationships.yaml
+- bases/datacatalog.oracle.com_terms.yaml

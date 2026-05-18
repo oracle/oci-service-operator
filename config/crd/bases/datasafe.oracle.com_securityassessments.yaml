@@ -1,0 +1,708 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: securityassessments.datasafe.oracle.com
+spec:
+  group: datasafe.oracle.com
+  names:
+    kind: SecurityAssessment
+    listKind: SecurityAssessmentList
+    plural: securityassessments
+    singular: securityassessment
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the SecurityAssessment
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the SecurityAssessment
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: SecurityAssessment is the Schema for the securityassessments
+          API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: SecurityAssessmentSpec defines the desired state of SecurityAssessment.
+            properties:
+              baseSecurityAssessmentId:
+                description: |-
+                  The OCID of the security assessment. The assessment should be of type SAVED.
+                  It will be required while creating the template baseline assessment for individual targets to fetch the detailed information from an existing security assessment.
+                type: string
+              compartmentId:
+                description: The OCID of the compartment that contains the security
+                  assessment.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm)
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              description:
+                description: Description of the security assessment.
+                type: string
+              displayName:
+                description: The display name of the security assessment.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm)
+                  Example: `{"Department": "Finance"}`
+                type: object
+              isAssessmentScheduled:
+                description: Indicates whether the assessment is scheduled to run.
+                type: boolean
+              schedule:
+                description: |-
+                  To schedule the assessment for running periodically, specify the schedule in this attribute.
+                  Create or schedule one assessment per compartment. If not defined, the assessment runs immediately.
+                  Format -
+                  <version-string>;<version-specific-schedule>
+                  Allowed version strings - "v1"
+                  v1's version specific schedule -<ss> <mm> <hh> <day-of-week> <day-of-month>
+                  Each of the above fields potentially introduce constraints. A workrequest is created only
+                  when clock time satisfies all the constraints. Constraints introduced:
+                  1. seconds = <ss> (So, the allowed range for <ss> is [0, 59])
+                  2. minutes = <mm> (So, the allowed range for <mm> is [0, 59])
+                  3. hours = <hh> (So, the allowed range for <hh> is [0, 23])
+                  <day-of-week> can be either '*' (without quotes or a number between 1(Monday) and 7(Sunday))
+                  4. No constraint introduced when it is '*'. When not, day of week must equal the given value
+                  <day-of-month> can be either '*' (without quotes or a number between 1 and 28)
+                  5. No constraint introduced when it is '*'. When not, day of month must equal the given value
+                type: string
+              targetId:
+                description: The OCID of the target database or target database group
+                  on which security assessment is to be run.
+                type: string
+              targetType:
+                description: The type of security assessment resource whether it is
+                  individual or group resource. For individual target use type TARGET_DATABASE
+                  and for group resource use type TARGET_DATABASE_GROUP. If not provided,
+                  TARGET_DATABASE would be used as default value.
+                type: string
+              templateAssessmentId:
+                description: The OCID of the template assessment. It will be required
+                  while creating the template baseline assessment.
+                type: string
+              type:
+                description: The type of the security assessment
+                type: string
+            required:
+            - compartmentId
+            type: object
+          status:
+            description: SecurityAssessmentStatus defines the observed state of SecurityAssessment.
+            properties:
+              baselineAssessmentId:
+                description: The ocid of a security assessment which is of type TEMPLATE_BASELINE,
+                  this will be null or empty when type is TEMPLATE_BASELINE.
+                type: string
+              checks:
+                description: The security checks to be evaluated for type template.
+                items:
+                  description: SecurityAssessmentCheck defines nested fields for SecurityAssessment.Check.
+                  properties:
+                    category:
+                      description: The category to which the check belongs to.
+                      type: string
+                    key:
+                      description: A unique identifier for the check.
+                      type: string
+                    oneline:
+                      description: Provides a recommended approach to take to remediate
+                        the check reported.
+                      type: string
+                    references:
+                      description: Provides information on whether the check is related
+                        to a CIS Oracle Database Benchmark recommendation, STIG rule,
+                        GDPR Article/Recital or related to the Oracle Recommended
+                        Practice.
+                      properties:
+                        cis:
+                          description: Relevant section from CIS.
+                          type: string
+                        gdpr:
+                          description: Relevant section from GDPR.
+                          type: string
+                        obp:
+                          description: Relevant section from OBP.
+                          type: string
+                        orp:
+                          description: Relevant section from ORP.
+                          type: string
+                        stig:
+                          description: Relevant section from STIG.
+                          type: string
+                      type: object
+                    remarks:
+                      description: The explanation of the issue in this check. It
+                        explains the reason for the rule and, if a risk is reported,
+                        it may also explain the recommended actions for remediation.
+                      type: string
+                    suggestedSeverity:
+                      description: The severity of the check as suggested by Data
+                        Safe security assessment. This will be the default severity
+                        in the template baseline security assessment.
+                      type: string
+                    title:
+                      description: The short title for the check.
+                      type: string
+                  type: object
+                type: array
+              compartmentId:
+                description: The OCID of the compartment that contains the security
+                  assessment.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm)
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              description:
+                description: The description of the security assessment.
+                type: string
+              displayName:
+                description: The display name of the security assessment.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm)
+                  Example: `{"Department": "Finance"}`
+                type: object
+              id:
+                description: The OCID of the security assessment.
+                type: string
+              ignoredAssessmentIds:
+                description: |-
+                  List containing maps as values.
+                  Example: `{"Operations": [ {"CostCenter": "42"} ] }`
+                items:
+                  description: JSONValue preserves arbitrary JSON values inside generated
+                    CRD fields.
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+                type: array
+              ignoredTargetIds:
+                description: |-
+                  List containing maps as values.
+                  Example: `{"Operations": [ {"CostCenter": "42"} ] }`
+                items:
+                  description: JSONValue preserves arbitrary JSON values inside generated
+                    CRD fields.
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+                type: array
+              ignoredTargets:
+                description: |-
+                  List containing maps as values.
+                  Example: `{"Operations": [ {"CostCenter": "42"} ] }`
+                items:
+                  description: JSONValue preserves arbitrary JSON values inside generated
+                    CRD fields.
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+                type: array
+              isAssessmentScheduled:
+                description: Indicates whether the assessment is scheduled to run.
+                type: boolean
+              isBaseline:
+                description: Indicates whether or not the security assessment is set
+                  as a baseline. This is applicable only for saved security assessments.
+                type: boolean
+              isDeviatedFromBaseline:
+                description: Indicates if the assessment has deviated from the baseline.
+                type: boolean
+              lastComparedBaselineId:
+                description: The OCID of the baseline against which the latest security
+                  assessment was compared.
+                type: string
+              lifecycleDetails:
+                description: Details about the current state of the security assessment.
+                type: string
+              lifecycleState:
+                description: The current state of the security assessment.
+                type: string
+              link:
+                description: The summary of findings for the security assessment
+                type: string
+              schedule:
+                description: |-
+                  Schedule to save the assessment periodically in the specified format:
+                  <version-string>;<version-specific-schedule>
+                  Allowed version strings - "v1"
+                  v1's version specific schedule -<ss> <mm> <hh> <day-of-week> <day-of-month>
+                  Each of the above fields potentially introduce constraints. A workrequest is created only
+                  when clock time satisfies all the constraints. Constraints introduced:
+                  1. seconds = <ss> (So, the allowed range for <ss> is [0, 59])
+                  2. minutes = <mm> (So, the allowed range for <mm> is [0, 59])
+                  3. hours = <hh> (So, the allowed range for <hh> is [0, 23])
+                  <day-of-week> can be either '*' (without quotes or a number between 1(Monday) and 7(Sunday))
+                  4. No constraint introduced when it is '*'. When not, day of week must equal the given value
+                  <day-of-month> can be either '*' (without quotes or a number between 1 and 28)
+                  5. No constraint introduced when it is '*'. When not, day of month must equal the given value
+                type: string
+              scheduleSecurityAssessmentId:
+                description: The OCID of the security assessment that is responsible
+                  for creating this scheduled save assessment.
+                type: string
+              statistics:
+                description: SecurityAssessmentStatistics defines nested fields for
+                  SecurityAssessment.Statistics.
+                properties:
+                  advisory:
+                    description: SecurityAssessmentStatisticsAdvisory defines nested
+                      fields for SecurityAssessment.Statistics.Advisory.
+                    properties:
+                      auditingFindingsCount:
+                        description: The number of findings in the Auditing category.
+                        type: integer
+                      authorizationControlFindingsCount:
+                        description: The number of findings in the Authorization Control
+                          category.
+                        type: integer
+                      dataEncryptionFindingsCount:
+                        description: The number of findings in the Data Encryption
+                          category.
+                        type: integer
+                      dbConfigurationFindingsCount:
+                        description: The number of findings in the Database Configuration
+                          category.
+                        type: integer
+                      fineGrainedAccessControlFindingsCount:
+                        description: The number of findings in the Fine-Grained Access
+                          Control category.
+                        type: integer
+                      privilegesAndRolesFindingsCount:
+                        description: The number of findings in the Privileges and
+                          Roles category.
+                        type: integer
+                      targetsCount:
+                        description: The number of targets that contributed to the
+                          counts at this risk level.
+                        type: integer
+                      userAccountsFindingsCount:
+                        description: The number of findings in the User Accounts category.
+                        type: integer
+                    type: object
+                  deferred:
+                    description: SecurityAssessmentStatisticsDeferred defines nested
+                      fields for SecurityAssessment.Statistics.Deferred.
+                    properties:
+                      auditingFindingsCount:
+                        description: The number of findings in the Auditing category.
+                        type: integer
+                      authorizationControlFindingsCount:
+                        description: The number of findings in the Authorization Control
+                          category.
+                        type: integer
+                      dataEncryptionFindingsCount:
+                        description: The number of findings in the Data Encryption
+                          category.
+                        type: integer
+                      dbConfigurationFindingsCount:
+                        description: The number of findings in the Database Configuration
+                          category.
+                        type: integer
+                      fineGrainedAccessControlFindingsCount:
+                        description: The number of findings in the Fine-Grained Access
+                          Control category.
+                        type: integer
+                      privilegesAndRolesFindingsCount:
+                        description: The number of findings in the Privileges and
+                          Roles category.
+                        type: integer
+                      targetsCount:
+                        description: The number of targets that contributed to the
+                          counts at this risk level.
+                        type: integer
+                      userAccountsFindingsCount:
+                        description: The number of findings in the User Accounts category.
+                        type: integer
+                    type: object
+                  evaluate:
+                    description: SecurityAssessmentStatisticsEvaluate defines nested
+                      fields for SecurityAssessment.Statistics.Evaluate.
+                    properties:
+                      auditingFindingsCount:
+                        description: The number of findings in the Auditing category.
+                        type: integer
+                      authorizationControlFindingsCount:
+                        description: The number of findings in the Authorization Control
+                          category.
+                        type: integer
+                      dataEncryptionFindingsCount:
+                        description: The number of findings in the Data Encryption
+                          category.
+                        type: integer
+                      dbConfigurationFindingsCount:
+                        description: The number of findings in the Database Configuration
+                          category.
+                        type: integer
+                      fineGrainedAccessControlFindingsCount:
+                        description: The number of findings in the Fine-Grained Access
+                          Control category.
+                        type: integer
+                      privilegesAndRolesFindingsCount:
+                        description: The number of findings in the Privileges and
+                          Roles category.
+                        type: integer
+                      targetsCount:
+                        description: The number of targets that contributed to the
+                          counts at this risk level.
+                        type: integer
+                      userAccountsFindingsCount:
+                        description: The number of findings in the User Accounts category.
+                        type: integer
+                    type: object
+                  highRisk:
+                    description: SecurityAssessmentStatisticsHighRisk defines nested
+                      fields for SecurityAssessment.Statistics.HighRisk.
+                    properties:
+                      auditingFindingsCount:
+                        description: The number of findings in the Auditing category.
+                        type: integer
+                      authorizationControlFindingsCount:
+                        description: The number of findings in the Authorization Control
+                          category.
+                        type: integer
+                      dataEncryptionFindingsCount:
+                        description: The number of findings in the Data Encryption
+                          category.
+                        type: integer
+                      dbConfigurationFindingsCount:
+                        description: The number of findings in the Database Configuration
+                          category.
+                        type: integer
+                      fineGrainedAccessControlFindingsCount:
+                        description: The number of findings in the Fine-Grained Access
+                          Control category.
+                        type: integer
+                      privilegesAndRolesFindingsCount:
+                        description: The number of findings in the Privileges and
+                          Roles category.
+                        type: integer
+                      targetsCount:
+                        description: The number of targets that contributed to the
+                          counts at this risk level.
+                        type: integer
+                      userAccountsFindingsCount:
+                        description: The number of findings in the User Accounts category.
+                        type: integer
+                    type: object
+                  lowRisk:
+                    description: SecurityAssessmentStatisticsLowRisk defines nested
+                      fields for SecurityAssessment.Statistics.LowRisk.
+                    properties:
+                      auditingFindingsCount:
+                        description: The number of findings in the Auditing category.
+                        type: integer
+                      authorizationControlFindingsCount:
+                        description: The number of findings in the Authorization Control
+                          category.
+                        type: integer
+                      dataEncryptionFindingsCount:
+                        description: The number of findings in the Data Encryption
+                          category.
+                        type: integer
+                      dbConfigurationFindingsCount:
+                        description: The number of findings in the Database Configuration
+                          category.
+                        type: integer
+                      fineGrainedAccessControlFindingsCount:
+                        description: The number of findings in the Fine-Grained Access
+                          Control category.
+                        type: integer
+                      privilegesAndRolesFindingsCount:
+                        description: The number of findings in the Privileges and
+                          Roles category.
+                        type: integer
+                      targetsCount:
+                        description: The number of targets that contributed to the
+                          counts at this risk level.
+                        type: integer
+                      userAccountsFindingsCount:
+                        description: The number of findings in the User Accounts category.
+                        type: integer
+                    type: object
+                  mediumRisk:
+                    description: SecurityAssessmentStatisticsMediumRisk defines nested
+                      fields for SecurityAssessment.Statistics.MediumRisk.
+                    properties:
+                      auditingFindingsCount:
+                        description: The number of findings in the Auditing category.
+                        type: integer
+                      authorizationControlFindingsCount:
+                        description: The number of findings in the Authorization Control
+                          category.
+                        type: integer
+                      dataEncryptionFindingsCount:
+                        description: The number of findings in the Data Encryption
+                          category.
+                        type: integer
+                      dbConfigurationFindingsCount:
+                        description: The number of findings in the Database Configuration
+                          category.
+                        type: integer
+                      fineGrainedAccessControlFindingsCount:
+                        description: The number of findings in the Fine-Grained Access
+                          Control category.
+                        type: integer
+                      privilegesAndRolesFindingsCount:
+                        description: The number of findings in the Privileges and
+                          Roles category.
+                        type: integer
+                      targetsCount:
+                        description: The number of targets that contributed to the
+                          counts at this risk level.
+                        type: integer
+                      userAccountsFindingsCount:
+                        description: The number of findings in the User Accounts category.
+                        type: integer
+                    type: object
+                  pass:
+                    description: SecurityAssessmentStatisticsPass defines nested fields
+                      for SecurityAssessment.Statistics.Pass.
+                    properties:
+                      auditingFindingsCount:
+                        description: The number of findings in the Auditing category.
+                        type: integer
+                      authorizationControlFindingsCount:
+                        description: The number of findings in the Authorization Control
+                          category.
+                        type: integer
+                      dataEncryptionFindingsCount:
+                        description: The number of findings in the Data Encryption
+                          category.
+                        type: integer
+                      dbConfigurationFindingsCount:
+                        description: The number of findings in the Database Configuration
+                          category.
+                        type: integer
+                      fineGrainedAccessControlFindingsCount:
+                        description: The number of findings in the Fine-Grained Access
+                          Control category.
+                        type: integer
+                      privilegesAndRolesFindingsCount:
+                        description: The number of findings in the Privileges and
+                          Roles category.
+                        type: integer
+                      targetsCount:
+                        description: The number of targets that contributed to the
+                          counts at this risk level.
+                        type: integer
+                      userAccountsFindingsCount:
+                        description: The number of findings in the User Accounts category.
+                        type: integer
+                    type: object
+                  targetsCount:
+                    description: The total number of targets in this security assessment.
+                    type: integer
+                type: object
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  System tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              targetDatabaseGroupId:
+                description: The OCID of the target database group that the group
+                  assessment is created for.
+                type: string
+              targetIds:
+                description: Array of database target OCIDs.
+                items:
+                  type: string
+                type: array
+              targetType:
+                description: Indicates whether the security assessment is for a target
+                  database or a target database group.
+                type: string
+              targetVersion:
+                description: The version of the target database.
+                type: string
+              templateAssessmentId:
+                description: The ocid of a security assessment which is of type TEMPLATE,
+                  this will be null or empty when type is TEMPLATE.
+                type: string
+              timeCreated:
+                description: The date and time the security assessment was created,
+                  in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+                type: string
+              timeLastAssessed:
+                description: The date and time the security assessment was last executed,
+                  in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+                type: string
+              timeUpdated:
+                description: The date and time the security assessment was last updated,
+                  in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+                type: string
+              triggeredBy:
+                description: Indicates whether the security assessment was created
+                  by system or by a user.
+                type: string
+              type:
+                description: |-
+                  The type of this security assessment. The possible types are:
+                  LATEST: The most up-to-date assessment that is running automatically for a target. It is system generated.
+                  SAVED: A saved security assessment. LATEST assessments are always saved in order to maintain the history of runs. A SAVED assessment is also generated by a 'refresh' action (triggered by the user).
+                  SAVE_SCHEDULE: The schedule for periodic saves of LATEST assessments.
+                  COMPARTMENT: An automatically managed assessment type that stores all details of targets in one compartment.
+                   This type keeps an up-to-date assessment of all database risks in one compartment. It is automatically updated when
+                   the latest assessment or refresh action is executed. It is also automatically updated when a target is deleted or move to a different compartment.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

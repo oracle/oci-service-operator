@@ -1,0 +1,478 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: catalogitems.fleetappsmanagement.oracle.com
+spec:
+  group: fleetappsmanagement.oracle.com
+  names:
+    kind: CatalogItem
+    listKind: CatalogItemList
+    plural: catalogitems
+    singular: catalogitem
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the CatalogItem
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the CatalogItem
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: CatalogItem is the Schema for the catalogitems API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: CatalogItemSpec defines the desired state of CatalogItem.
+            properties:
+              catalogSourcePayload:
+                description: CatalogItemCatalogSourcePayload defines nested fields
+                  for CatalogItem.CatalogSourcePayload.
+                properties:
+                  accessUri:
+                    description: access uri
+                    type: string
+                  branchName:
+                    description: branch Name
+                    type: string
+                  bucketName:
+                    description: bucket name
+                    type: string
+                  configSourceType:
+                    type: string
+                  configurationSourceProviderId:
+                    description: configuration Source Provider OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                    type: string
+                  description:
+                    description: Template Description
+                    type: string
+                  jsonData:
+                    type: string
+                  listingId:
+                    description: This listing Id parameter of Payload.
+                    type: string
+                  longDescription:
+                    description: Template Long Description
+                    type: string
+                  namespaceName:
+                    description: nameSpace
+                    type: string
+                  objectName:
+                    description: object name
+                    type: string
+                  repositoryUrl:
+                    description: repository Url
+                    type: string
+                  templateDisplayName:
+                    description: Template Display Name
+                    type: string
+                  timeExpires:
+                    description: |-
+                      The date and time expires, in the format defined by RFC 3339 (https://tools.ietf.org/html/rfc3339).
+                      Example: `2016-08-25T21:10:29.600Z`
+                    type: string
+                  version:
+                    description: This version parameter of Payload.
+                    type: string
+                  workingDirectory:
+                    description: File path to the directory to use for running Terraform.
+                      If not specified, the root directory is used.
+                    type: string
+                  zipFileBase64Encoded:
+                    description: The Base64 encoded template. This payload will trigger
+                      CreateTemplate API, where the parameter will be passed.
+                    type: string
+                type: object
+              compartmentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment.
+                type: string
+              configSourceType:
+                description: 'Config source type Eg: STACK_TEMPLATE_CATALOG_SOURCE,
+                  PAR_CATALOG_SOURCE, GIT_CATALOG_SOURCE, MARKETPLACE_CATALOG_SOURCE.'
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: The description of the CatalogItem.
+                type: string
+              displayName:
+                description: The CatalogItem name.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              isItemLocked:
+                description: Indicates if the CatalogItem is immutable or not.
+                type: boolean
+              listingId:
+                description: The catalog listing Id.
+                type: string
+              listingVersion:
+                description: The catalog package version.
+                type: string
+              packageType:
+                description: 'Config package type Eg: TF_PACKAGE, NON_TF_PACKAGE,
+                  CONFIG_FILE.'
+                type: string
+              shortDescription:
+                description: Short description about the catalog item.
+                type: string
+              timeReleased:
+                description: |-
+                  The date and time the CatalogItem was released, in the format defined by RFC 3339 (https://tools.ietf.org/html/rfc3339).
+                  Example: `2016-08-25T21:10:29.600Z`
+                type: string
+              versionDescription:
+                description: Version description about the catalog item.
+                type: string
+            required:
+            - compartmentId
+            - configSourceType
+            - description
+            - displayName
+            - packageType
+            type: object
+          status:
+            description: CatalogItemStatus defines the observed state of CatalogItem.
+            properties:
+              catalogResultPayload:
+                description: CatalogItemCatalogResultPayload defines nested fields
+                  for CatalogItem.CatalogResultPayload.
+                properties:
+                  branchName:
+                    description: branch Name
+                    type: string
+                  configResultType:
+                    type: string
+                  configurationSourceProviderId:
+                    description: configuration Source Provider OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                    type: string
+                  jsonData:
+                    type: string
+                  packageUrl:
+                    description: package url
+                    type: string
+                  repositoryUrl:
+                    description: repository Url
+                    type: string
+                  templateId:
+                    description: template id
+                    type: string
+                  timeExpires:
+                    description: |-
+                      The date and time expires, in the format defined by RFC 3339 (https://tools.ietf.org/html/rfc3339).
+                      Example: `2016-08-25T21:10:29.600Z`
+                    type: string
+                  workingDirectory:
+                    description: working directory
+                    type: string
+                type: object
+              catalogSourcePayload:
+                description: CatalogItemCatalogSourcePayload defines nested fields
+                  for CatalogItem.CatalogSourcePayload.
+                properties:
+                  accessUri:
+                    description: access uri
+                    type: string
+                  branchName:
+                    description: branch Name
+                    type: string
+                  bucketName:
+                    description: bucket name
+                    type: string
+                  configSourceType:
+                    type: string
+                  configurationSourceProviderId:
+                    description: configuration Source Provider OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                    type: string
+                  description:
+                    description: Template Description
+                    type: string
+                  jsonData:
+                    type: string
+                  listingId:
+                    description: This listing Id parameter of Payload.
+                    type: string
+                  longDescription:
+                    description: Template Long Description
+                    type: string
+                  namespaceName:
+                    description: nameSpace
+                    type: string
+                  objectName:
+                    description: object name
+                    type: string
+                  repositoryUrl:
+                    description: repository Url
+                    type: string
+                  templateDisplayName:
+                    description: Template Display Name
+                    type: string
+                  timeExpires:
+                    description: |-
+                      The date and time expires, in the format defined by RFC 3339 (https://tools.ietf.org/html/rfc3339).
+                      Example: `2016-08-25T21:10:29.600Z`
+                    type: string
+                  version:
+                    description: This version parameter of Payload.
+                    type: string
+                  workingDirectory:
+                    description: File path to the directory to use for running Terraform.
+                      If not specified, the root directory is used.
+                    type: string
+                  zipFileBase64Encoded:
+                    description: The Base64 encoded template. This payload will trigger
+                      CreateTemplate API, where the parameter will be passed.
+                    type: string
+                type: object
+              compartmentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment.
+                type: string
+              configSourceType:
+                description: 'Config source type Eg: STACK_TEMPLATE_CATALOG_SOURCE,
+                  PAR_CATALOG_SOURCE, GIT_CATALOG_SOURCE, MARKETPLACE_CATALOG_SOURCE.'
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: Description about the catalog item.
+                type: string
+              displayName:
+                description: A user-friendly name. Does not have to be unique, and
+                  it's changeable. Avoid entering confidential information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              id:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the catalog.
+                type: string
+              isItemLocked:
+                description: Indicates if the CatalogItem is immutable or not.
+                type: boolean
+              lifecycleDetails:
+                description: The details of lifecycle state CatalogItem.
+                type: string
+              lifecycleState:
+                description: The current state of the CatalogItem.
+                type: string
+              listingId:
+                description: The catalog listing Id.
+                type: string
+              listingVersion:
+                description: The catalog package version.
+                type: string
+              packageType:
+                description: 'Config package type Eg: TF_PACKAGE, NON_TF_PACKAGE,
+                  CONFIG_FILE.'
+                type: string
+              shortDescription:
+                description: Short description about the catalog item.
+                type: string
+              shouldListPublicItems:
+                description: The indicator to append Public Items from the root compartment
+                  to any query, when set to TRUE.
+                type: boolean
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  System tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              timeBackfillLastChecked:
+                description: |-
+                  The date and time the CatalogItem was last checked by backfill job, in the format defined by
+                  RFC 3339 (https://tools.ietf.org/html/rfc3339).
+                  Example: `2016-08-25T21:10:29.600Z`
+                type: string
+              timeCreated:
+                description: |-
+                  The date and time the CatalogItem was created, in the format defined by RFC 3339 (https://tools.ietf.org/html/rfc3339).
+                  Example: `2016-08-25T21:10:29.600Z`
+                type: string
+              timeLastChecked:
+                description: |-
+                  The date and time the CatalogItem was last checked, in the format defined by
+                  RFC 3339 (https://tools.ietf.org/html/rfc3339).
+                  Example: `2016-08-25T21:10:29.600Z`
+                type: string
+              timeReleased:
+                description: |-
+                  The date and time the CatalogItem was released, in the format defined by RFC 3339 (https://tools.ietf.org/html/rfc3339).
+                  Example: `2016-08-25T21:10:29.600Z`
+                type: string
+              timeUpdated:
+                description: |-
+                  The date and time the CatalogItem was updated, in the format defined by RFC 3339 (https://tools.ietf.org/html/rfc3339).
+                  Example: `2016-08-25T21:10:29.600Z`
+                type: string
+              versionDescription:
+                description: Version description about the catalog item.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

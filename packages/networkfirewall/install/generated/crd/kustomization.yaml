@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- bases/networkfirewall.oracle.com_addresslists.yaml
+- bases/networkfirewall.oracle.com_applicationgroups.yaml
+- bases/networkfirewall.oracle.com_applications.yaml
+- bases/networkfirewall.oracle.com_decryptionprofiles.yaml
+- bases/networkfirewall.oracle.com_decryptionrules.yaml
+- bases/networkfirewall.oracle.com_mappedsecrets.yaml
+- bases/networkfirewall.oracle.com_natrules.yaml
+- bases/networkfirewall.oracle.com_networkfirewallpolicies.yaml
+- bases/networkfirewall.oracle.com_networkfirewalls.yaml
+- bases/networkfirewall.oracle.com_securityrules.yaml
+- bases/networkfirewall.oracle.com_servicelists.yaml
+- bases/networkfirewall.oracle.com_services.yaml
+- bases/networkfirewall.oracle.com_tunnelinspectionrules.yaml
+- bases/networkfirewall.oracle.com_urllists.yaml

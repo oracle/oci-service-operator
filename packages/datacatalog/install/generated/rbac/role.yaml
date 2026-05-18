@@ -1,0 +1,96 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
+  - datacatalog.oracle.com
+  resources:
+  - attributes
+  - attributetags
+  - catalogprivateendpoints
+  - catalogs
+  - connections
+  - customproperties
+  - dataassets
+  - dataassettags
+  - entities
+  - entitytags
+  - folders
+  - foldertags
+  - glossaries
+  - jobdefinitions
+  - jobs
+  - metastores
+  - namespaces
+  - patterns
+  - termrelationships
+  - terms
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - datacatalog.oracle.com
+  resources:
+  - attributes/finalizers
+  - attributetags/finalizers
+  - catalogprivateendpoints/finalizers
+  - catalogs/finalizers
+  - connections/finalizers
+  - customproperties/finalizers
+  - dataassets/finalizers
+  - dataassettags/finalizers
+  - entities/finalizers
+  - entitytags/finalizers
+  - folders/finalizers
+  - foldertags/finalizers
+  - glossaries/finalizers
+  - jobdefinitions/finalizers
+  - jobs/finalizers
+  - metastores/finalizers
+  - namespaces/finalizers
+  - patterns/finalizers
+  - termrelationships/finalizers
+  - terms/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - datacatalog.oracle.com
+  resources:
+  - attributes/status
+  - attributetags/status
+  - catalogprivateendpoints/status
+  - catalogs/status
+  - connections/status
+  - customproperties/status
+  - dataassets/status
+  - dataassettags/status
+  - entities/status
+  - entitytags/status
+  - folders/status
+  - foldertags/status
+  - glossaries/status
+  - jobdefinitions/status
+  - jobs/status
+  - metastores/status
+  - namespaces/status
+  - patterns/status
+  - termrelationships/status
+  - terms/status
+  verbs:
+  - get
+  - patch
+  - update

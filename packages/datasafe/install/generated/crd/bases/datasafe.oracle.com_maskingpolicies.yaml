@@ -1,0 +1,366 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: maskingpolicies.datasafe.oracle.com
+spec:
+  group: datasafe.oracle.com
+  names:
+    kind: MaskingPolicy
+    listKind: MaskingPolicyList
+    plural: maskingpolicies
+    singular: maskingpolicy
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the MaskingPolicy
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the MaskingPolicy
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: MaskingPolicy is the Schema for the maskingpolicies API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: MaskingPolicySpec defines the desired state of MaskingPolicy.
+            properties:
+              columnSource:
+                description: MaskingPolicyColumnSource defines nested fields for MaskingPolicy.ColumnSource.
+                properties:
+                  columnSource:
+                    type: string
+                  jsonData:
+                    type: string
+                  sensitiveDataModelId:
+                    description: The OCID of the sensitive data model to be associated
+                      as the column source with the masking policy.
+                    type: string
+                  targetId:
+                    description: The OCID of the target database to be associated
+                      as the column source with the masking policy.
+                    type: string
+                type: object
+              compartmentId:
+                description: The OCID of the compartment where the masking policy
+                  should be created.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm)
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              description:
+                description: The description of the masking policy.
+                type: string
+              displayName:
+                description: The display name of the masking policy. The name does
+                  not have to be unique, and it's changeable.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm)
+                  Example: `{"Department": "Finance"}`
+                type: object
+              isDropTempTablesEnabled:
+                description: |-
+                  Indicates if the temporary tables created during a masking operation should be dropped after masking. It's enabled by default.
+                  Set this attribute to false to preserve the temporary tables. Masking creates temporary tables that map the original sensitive
+                  data values to mask values. By default, these temporary tables are dropped after masking. But, in some cases, you may want
+                  to preserve this information to track how masking changed your data. Note that doing so compromises security. These tables
+                  must be dropped before the database is available for unprivileged users.
+                type: boolean
+              isRedoLoggingEnabled:
+                description: |-
+                  Indicates if redo logging is enabled during a masking operation. It's disabled by default. Set this attribute to true to
+                  enable redo logging. By default, masking disables redo logging and flashback logging to purge any original unmasked
+                  data from logs. However, in certain circumstances when you only want to test masking, rollback changes, and retry masking,
+                  you could enable logging and use a flashback database to retrieve the original unmasked data after it has been masked.
+                type: boolean
+              isRefreshStatsEnabled:
+                description: |-
+                  Indicates if statistics gathering is enabled. It's enabled by default. Set this attribute to false to disable statistics
+                  gathering. The masking process gathers statistics on masked database tables after masking completes.
+                type: boolean
+              parallelDegree:
+                description: |-
+                  Specifies options to enable parallel execution when running data masking. Allowed values are 'NONE' (no parallelism),
+                  'DEFAULT' (the Oracle Database computes the optimum degree of parallelism) or an integer value to be used as the degree
+                  of parallelism. Parallel execution helps effectively use multiple CPUs and improve masking performance. Refer to the
+                  Oracle Database parallel execution framework when choosing an explicit degree of parallelism.
+                type: string
+              postMaskingScript:
+                description: |-
+                  A post-masking script, which can contain SQL and PL/SQL statements. It's executed after
+                  the core masking script generated using the masking policy. It's usually used to perform
+                  additional transformation or cleanup work after masking.
+                type: string
+              preMaskingScript:
+                description: |-
+                  A pre-masking script, which can contain SQL and PL/SQL statements. It's executed before
+                  the core masking script generated using the masking policy. It's usually used to perform
+                  any preparation or prerequisite work before masking data.
+                type: string
+              recompile:
+                description: |-
+                  Specifies how to recompile invalid objects post data masking. Allowed values are 'SERIAL' (recompile in serial),
+                  'PARALLEL' (recompile in parallel), 'NONE' (do not recompile). If it's set to PARALLEL, the value of parallelDegree
+                  attribute is used. Use the built-in UTL_RECOMP package to recompile any remaining invalid objects after masking completes.
+                type: string
+            required:
+            - columnSource
+            - compartmentId
+            type: object
+          status:
+            description: MaskingPolicyStatus defines the observed state of MaskingPolicy.
+            properties:
+              areTargetCredentialsRequired:
+                description: Specifies whether target database credentials are required
+                  to perform masking with this policy
+                type: boolean
+              columnSource:
+                description: MaskingPolicyColumnSource defines nested fields for MaskingPolicy.ColumnSource.
+                properties:
+                  columnSource:
+                    type: string
+                  jsonData:
+                    type: string
+                  sensitiveDataModelId:
+                    description: The OCID of the sensitive data model to be associated
+                      as the column source with the masking policy.
+                    type: string
+                  targetId:
+                    description: The OCID of the target database to be associated
+                      as the column source with the masking policy.
+                    type: string
+                type: object
+              compartmentId:
+                description: The OCID of the compartment that contains the masking
+                  policy.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm)
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              description:
+                description: The description of the masking policy.
+                type: string
+              displayName:
+                description: The display name of the masking policy.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm)
+                  Example: `{"Department": "Finance"}`
+                type: object
+              id:
+                description: The OCID of the masking policy.
+                type: string
+              isDropTempTablesEnabled:
+                description: |-
+                  Indicates if the temporary tables created during a masking operation should be dropped after masking. It's enabled by default.
+                  Set this attribute to false to preserve the temporary tables. Masking creates temporary tables that map the original sensitive
+                  data values to mask values. By default, these temporary tables are dropped after masking. But, in some cases, you may want
+                  to preserve this information to track how masking changed your data. Note that doing so compromises security. These tables
+                  must be dropped before the database is available for unprivileged users.
+                type: boolean
+              isRedoLoggingEnabled:
+                description: |-
+                  Indicates if redo logging is enabled during a masking operation. It's disabled by default. Set this attribute to true to
+                  enable redo logging. By default, masking disables redo logging and flashback logging to purge any original unmasked
+                  data from logs. However, in certain circumstances when you only want to test masking, rollback changes, and retry masking,
+                  you could enable logging and use a flashback database to retrieve the original unmasked data after it has been masked.
+                type: boolean
+              isRefreshStatsEnabled:
+                description: |-
+                  Indicates if statistics gathering is enabled. It's enabled by default. Set this attribute to false to disable statistics
+                  gathering. The masking process gathers statistics on masked database tables after masking completes.
+                type: boolean
+              lifecycleState:
+                description: The current state of the masking policy.
+                type: string
+              parallelDegree:
+                description: |-
+                  Specifies options to enable parallel execution when running data masking. Allowed values are 'NONE' (no parallelism),
+                  'DEFAULT' (the Oracle Database computes the optimum degree of parallelism) or an integer value to be used as the degree
+                  of parallelism. Parallel execution helps effectively use multiple CPUs and improve masking performance. Refer to the
+                  Oracle Database parallel execution framework when choosing an explicit degree of parallelism.
+                type: string
+              postMaskingScript:
+                description: |-
+                  A post-masking script, which can contain SQL and PL/SQL statements. It's executed after
+                  the core masking script generated using the masking policy. It's usually used to perform
+                  additional transformation or cleanup work after masking.
+                type: string
+              preMaskingScript:
+                description: |-
+                  A pre-masking script, which can contain SQL and PL/SQL statements. It's executed before
+                  the core masking script generated using the masking policy. It's usually used to perform
+                  any preparation or prerequisite work before masking data.
+                type: string
+              recompile:
+                description: |-
+                  Specifies how to recompile invalid objects post data masking. Allowed values are 'SERIAL' (recompile in serial),
+                  'PARALLEL' (recompile in parallel), 'NONE' (do not recompile). If it's set to PARALLEL, the value of parallelDegree
+                  attribute is used. Use the built-in UTL_RECOMP package to recompile any remaining invalid objects after masking completes.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              timeCreated:
+                description: The date and time the masking policy was created, in
+                  the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+                type: string
+              timeUpdated:
+                description: The date and time the masking policy was last updated,
+                  in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339)
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

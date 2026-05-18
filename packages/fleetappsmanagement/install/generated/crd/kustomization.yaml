@@ -1,0 +1,19 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- bases/fleetappsmanagement.oracle.com_catalogitems.yaml
+- bases/fleetappsmanagement.oracle.com_compliancepolicyrules.yaml
+- bases/fleetappsmanagement.oracle.com_fleetcredentials.yaml
+- bases/fleetappsmanagement.oracle.com_fleetproperties.yaml
+- bases/fleetappsmanagement.oracle.com_fleetresources.yaml
+- bases/fleetappsmanagement.oracle.com_fleets.yaml
+- bases/fleetappsmanagement.oracle.com_maintenancewindows.yaml
+- bases/fleetappsmanagement.oracle.com_onboardings.yaml
+- bases/fleetappsmanagement.oracle.com_patches.yaml
+- bases/fleetappsmanagement.oracle.com_platformconfigurations.yaml
+- bases/fleetappsmanagement.oracle.com_properties.yaml
+- bases/fleetappsmanagement.oracle.com_provisions.yaml
+- bases/fleetappsmanagement.oracle.com_runbooks.yaml
+- bases/fleetappsmanagement.oracle.com_runbookversions.yaml
+- bases/fleetappsmanagement.oracle.com_schedulerdefinitions.yaml
+- bases/fleetappsmanagement.oracle.com_taskrecords.yaml

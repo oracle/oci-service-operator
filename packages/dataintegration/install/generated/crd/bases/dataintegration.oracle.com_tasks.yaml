@@ -1,0 +1,579 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: tasks.dataintegration.oracle.com
+spec:
+  group: dataintegration.oracle.com
+  names:
+    kind: Task
+    listKind: TaskList
+    plural: tasks
+    singular: task
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.name
+      name: Name
+      priority: 1
+      type: string
+    - description: status of the Task
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the Task
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: Task is the Schema for the tasks API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: TaskSpec defines the desired state of Task.
+            properties:
+              additionalProperties:
+                description: Header value.
+                type: string
+              apiCallMode:
+                description: The REST invocation pattern to use. ASYNC_OCI_WORKREQUEST
+                  is being deprecated as well as cancelEndpoint/MethodType.
+                type: string
+              authConfig:
+                description: JSONValue preserves arbitrary JSON values inside generated
+                  CRD fields.
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              authDetails:
+                description: JSONValue preserves arbitrary JSON values inside generated
+                  CRD fields.
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              cancelEndpoint:
+                description: JSONValue preserves arbitrary JSON values inside generated
+                  CRD fields.
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              cancelMethodType:
+                description: The REST method to use for canceling the original request.
+                type: string
+              cancelRestCallConfig:
+                description: JSONValue preserves arbitrary JSON values inside generated
+                  CRD fields.
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              conditionalCompositeFieldMap:
+                description: JSONValue preserves arbitrary JSON values inside generated
+                  CRD fields.
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              configProviderDelegate:
+                description: JSONValue preserves arbitrary JSON values inside generated
+                  CRD fields.
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              dataFlow:
+                description: JSONValue preserves arbitrary JSON values inside generated
+                  CRD fields.
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              dataflowApplication:
+                description: JSONValue preserves arbitrary JSON values inside generated
+                  CRD fields.
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              description:
+                description: Detailed description for the object.
+                type: string
+              driverShapeDetails:
+                description: JSONValue preserves arbitrary JSON values inside generated
+                  CRD fields.
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              endpoint:
+                description: JSONValue preserves arbitrary JSON values inside generated
+                  CRD fields.
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              executeRestCallConfig:
+                description: JSONValue preserves arbitrary JSON values inside generated
+                  CRD fields.
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              executorShapeDetails:
+                description: JSONValue preserves arbitrary JSON values inside generated
+                  CRD fields.
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              headers:
+                description: Headers data for the request.
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              identifier:
+                description: Value can only contain upper case letters, underscore,
+                  and numbers. It should begin with upper case letter or underscore.
+                  The value can be modified.
+                type: string
+              inputPorts:
+                description: An array of input ports.
+                items:
+                  description: JSONValue preserves arbitrary JSON values inside generated
+                    CRD fields.
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+                type: array
+              isConcurrentAllowed:
+                description: Whether the same task can be executed concurrently.
+                type: boolean
+              isSingleLoad:
+                description: Defines whether Data Loader task is used for single load
+                  or multiple
+                type: boolean
+              jsonData:
+                type: string
+              key:
+                description: Generated key that can be used in API calls to identify
+                  task. On scenarios where reference to the task is needed, a value
+                  can be passed in create.
+                type: string
+              methodType:
+                description: The REST method to use. This property is deprecated,
+                  use ExecuteRestCallConfig's methodType property instead.
+                type: string
+              modelType:
+                type: string
+              modelVersion:
+                description: The object's model version.
+                type: string
+              name:
+                description: Free form text without any restriction on permitted characters.
+                  Name can have letters, numbers, and special characters. The value
+                  is editable and is restricted to 1000 characters.
+                type: string
+              objectStatus:
+                description: The status of an object that can be set to value 1 for
+                  shallow references across objects, other values reserved.
+                type: integer
+              objectVersion:
+                description: The version of the object that is used to track changes
+                  in the object instance.
+                type: integer
+              opConfigValues:
+                description: JSONValue preserves arbitrary JSON values inside generated
+                  CRD fields.
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              operation:
+                description: Describes the shape of the execution result
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              outputPorts:
+                description: An array of output ports.
+                items:
+                  description: JSONValue preserves arbitrary JSON values inside generated
+                    CRD fields.
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+                type: array
+              parallelLoadLimit:
+                description: Defines the number of entities being loaded in parallel
+                  at a time for a Data Loader task
+                type: integer
+              parameters:
+                description: An array of parameters.
+                items:
+                  description: JSONValue preserves arbitrary JSON values inside generated
+                    CRD fields.
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+                type: array
+              parentRef:
+                description: TaskParentRef defines nested fields for Task.ParentRef.
+                properties:
+                  parent:
+                    description: Key of the parent object.
+                    type: string
+                  rootDocId:
+                    description: Key of the root document object.
+                    type: string
+                type: object
+              pipeline:
+                description: JSONValue preserves arbitrary JSON values inside generated
+                  CRD fields.
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              pollRestCallConfig:
+                description: JSONValue preserves arbitrary JSON values inside generated
+                  CRD fields.
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              registryMetadata:
+                description: JSONValue preserves arbitrary JSON values inside generated
+                  CRD fields.
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              script:
+                description: JSONValue preserves arbitrary JSON values inside generated
+                  CRD fields.
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              sqlScriptType:
+                description: Indicates whether the task is invoking a custom SQL script
+                  or stored procedure.
+                type: string
+              typedExpressions:
+                description: List of typed expressions.
+                items:
+                  description: JSONValue preserves arbitrary JSON values inside generated
+                    CRD fields.
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+                type: array
+            required:
+            - identifier
+            - name
+            - objectVersion
+            - registryMetadata
+            type: object
+          status:
+            description: TaskStatus defines the observed state of Task.
+            properties:
+              apiCallMode:
+                description: The REST invocation pattern to use. ASYNC_OCI_WORKREQUEST
+                  is being deprecated as well as cancelEndpoint/MethodType.
+                type: string
+              authConfig:
+                description: JSONValue preserves arbitrary JSON values inside generated
+                  CRD fields.
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              authDetails:
+                description: JSONValue preserves arbitrary JSON values inside generated
+                  CRD fields.
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              cancelEndpoint:
+                description: JSONValue preserves arbitrary JSON values inside generated
+                  CRD fields.
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              cancelMethodType:
+                description: The REST method to use for canceling the original request.
+                type: string
+              cancelRestCallConfig:
+                description: JSONValue preserves arbitrary JSON values inside generated
+                  CRD fields.
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              conditionalCompositeFieldMap:
+                description: JSONValue preserves arbitrary JSON values inside generated
+                  CRD fields.
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              configProviderDelegate:
+                description: JSONValue preserves arbitrary JSON values inside generated
+                  CRD fields.
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              dataFlow:
+                description: JSONValue preserves arbitrary JSON values inside generated
+                  CRD fields.
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              dataflowApplication:
+                description: JSONValue preserves arbitrary JSON values inside generated
+                  CRD fields.
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              description:
+                description: Detailed description for the object.
+                type: string
+              driverShapeDetails:
+                description: JSONValue preserves arbitrary JSON values inside generated
+                  CRD fields.
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              endpoint:
+                description: JSONValue preserves arbitrary JSON values inside generated
+                  CRD fields.
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              executeRestCallConfig:
+                description: JSONValue preserves arbitrary JSON values inside generated
+                  CRD fields.
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              executorShapeDetails:
+                description: JSONValue preserves arbitrary JSON values inside generated
+                  CRD fields.
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              headers:
+                description: The headers for the REST call. This property is deprecated,
+                  use ExecuteRestCallConfig's headers property instead.
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              identifier:
+                description: Value can only contain upper case letters, underscore,
+                  and numbers. It should begin with upper case letter or underscore.
+                  The value can be modified.
+                type: string
+              inputPorts:
+                description: An array of input ports.
+                items:
+                  description: JSONValue preserves arbitrary JSON values inside generated
+                    CRD fields.
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+                type: array
+              isConcurrentAllowed:
+                description: Whether the same task can be executed concurrently.
+                type: boolean
+              isSingleLoad:
+                description: Defines whether Data Loader task is used for single load
+                  or multiple
+                type: boolean
+              jsonData:
+                type: string
+              key:
+                description: Generated key that can be used in API calls to identify
+                  task. On scenarios where reference to the task is needed, a value
+                  can be passed in create.
+                type: string
+              keyMap:
+                additionalProperties:
+                  type: string
+                description: A key map. If provided, key is replaced with generated
+                  key. This structure provides mapping between user provided key and
+                  generated key.
+                type: object
+              metadata:
+                description: JSONValue preserves arbitrary JSON values inside generated
+                  CRD fields.
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              methodType:
+                description: The REST method to use. This property is deprecated,
+                  use ExecuteRestCallConfig's methodType property instead.
+                type: string
+              modelType:
+                type: string
+              modelVersion:
+                description: The object's model version.
+                type: string
+              name:
+                description: Free form text without any restriction on permitted characters.
+                  Name can have letters, numbers, and special characters. The value
+                  is editable and is restricted to 1000 characters.
+                type: string
+              objectStatus:
+                description: The status of an object that can be set to value 1 for
+                  shallow references across objects, other values reserved.
+                type: integer
+              objectVersion:
+                description: The version of the object that is used to track changes
+                  in the object instance.
+                type: integer
+              opConfigValues:
+                description: JSONValue preserves arbitrary JSON values inside generated
+                  CRD fields.
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              operation:
+                description: Describes the shape of the execution result
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              outputPorts:
+                description: An array of output ports.
+                items:
+                  description: JSONValue preserves arbitrary JSON values inside generated
+                    CRD fields.
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+                type: array
+              parallelLoadLimit:
+                description: Defines the number of entities being loaded in parallel
+                  at a time for a Data Loader task
+                type: integer
+              parameters:
+                description: An array of parameters.
+                items:
+                  description: JSONValue preserves arbitrary JSON values inside generated
+                    CRD fields.
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+                type: array
+              parentRef:
+                description: TaskParentRef defines nested fields for Task.ParentRef.
+                properties:
+                  parent:
+                    description: Key of the parent object.
+                    type: string
+                  rootDocId:
+                    description: Key of the root document object.
+                    type: string
+                type: object
+              pipeline:
+                description: JSONValue preserves arbitrary JSON values inside generated
+                  CRD fields.
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              pollRestCallConfig:
+                description: JSONValue preserves arbitrary JSON values inside generated
+                  CRD fields.
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              registryMetadata:
+                description: JSONValue preserves arbitrary JSON values inside generated
+                  CRD fields.
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              script:
+                description: JSONValue preserves arbitrary JSON values inside generated
+                  CRD fields.
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              sqlScriptType:
+                description: Indicates whether the task is invoking a custom SQL script
+                  or stored procedure.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              typedExpressions:
+                description: List of typed expressions.
+                items:
+                  description: JSONValue preserves arbitrary JSON values inside generated
+                    CRD fields.
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+                type: array
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

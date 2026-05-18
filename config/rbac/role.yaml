@@ -76,6 +76,32 @@ rules:
   - patch
   - update
 - apiGroups:
+  - aidataplatform.oracle.com
+  resources:
+  - aidataplatforms
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - aidataplatform.oracle.com
+  resources:
+  - aidataplatforms/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - aidataplatform.oracle.com
+  resources:
+  - aidataplatforms/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - aidocument.oracle.com
   - ailanguage.oracle.com
   - aivision.oracle.com
@@ -158,6 +184,32 @@ rules:
   - analytics.oracle.com
   resources:
   - analyticsinstances/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - announcementsservice.oracle.com
+  resources:
+  - announcementsubscriptions
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - announcementsservice.oracle.com
+  resources:
+  - announcementsubscriptions/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - announcementsservice.oracle.com
+  resources:
+  - announcementsubscriptions/status
   verbs:
   - get
   - patch
@@ -406,6 +458,35 @@ rules:
   - patch
   - update
 - apiGroups:
+  - autoscaling.oracle.com
+  resources:
+  - autoscalingconfigurations
+  - autoscalingpolicies
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - autoscaling.oracle.com
+  resources:
+  - autoscalingconfigurations/finalizers
+  - autoscalingpolicies/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - autoscaling.oracle.com
+  resources:
+  - autoscalingconfigurations/status
+  - autoscalingpolicies/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - bastion.oracle.com
   resources:
   - bastions
@@ -435,6 +516,41 @@ rules:
   - patch
   - update
 - apiGroups:
+  - batch.oracle.com
+  resources:
+  - batchcontexts
+  - batchjobpools
+  - batchtaskenvironments
+  - batchtaskprofiles
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - batch.oracle.com
+  resources:
+  - batchcontexts/finalizers
+  - batchjobpools/finalizers
+  - batchtaskenvironments/finalizers
+  - batchtaskprofiles/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - batch.oracle.com
+  resources:
+  - batchcontexts/status
+  - batchjobpools/status
+  - batchtaskenvironments/status
+  - batchtaskprofiles/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - bds.oracle.com
   resources:
   - bdsinstances
@@ -456,6 +572,38 @@ rules:
   - bds.oracle.com
   resources:
   - bdsinstances/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - blockchain.oracle.com
+  resources:
+  - blockchainplatforms
+  - osns
+  - peers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - blockchain.oracle.com
+  resources:
+  - blockchainplatforms/finalizers
+  - osns/finalizers
+  - peers/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - blockchain.oracle.com
+  resources:
+  - blockchainplatforms/status
+  - osns/status
+  - peers/status
   verbs:
   - get
   - patch
@@ -539,6 +687,153 @@ rules:
   - patch
   - update
 - apiGroups:
+  - cloudbridge.oracle.com
+  resources:
+  - agentdependencies
+  - agents
+  - assets
+  - assetsources
+  - discoveryschedules
+  - environments
+  - inventories
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - cloudbridge.oracle.com
+  resources:
+  - agentdependencies/finalizers
+  - agents/finalizers
+  - assets/finalizers
+  - assetsources/finalizers
+  - discoveryschedules/finalizers
+  - environments/finalizers
+  - inventories/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - cloudbridge.oracle.com
+  resources:
+  - agentdependencies/status
+  - agents/status
+  - assets/status
+  - assetsources/status
+  - discoveryschedules/status
+  - environments/status
+  - inventories/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - cloudguard.oracle.com
+  resources:
+  - adhocqueries
+  - datamaskrules
+  - datasources
+  - detectorrecipedetectorrules
+  - detectorrecipes
+  - managedlists
+  - responderrecipes
+  - savedqueries
+  - securityrecipes
+  - securityzones
+  - targetdetectorrecipes
+  - targetresponderrecipes
+  - targets
+  - wlpagents
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - cloudguard.oracle.com
+  resources:
+  - adhocqueries/finalizers
+  - datamaskrules/finalizers
+  - datasources/finalizers
+  - detectorrecipedetectorrules/finalizers
+  - detectorrecipes/finalizers
+  - managedlists/finalizers
+  - responderrecipes/finalizers
+  - savedqueries/finalizers
+  - securityrecipes/finalizers
+  - securityzones/finalizers
+  - targetdetectorrecipes/finalizers
+  - targetresponderrecipes/finalizers
+  - targets/finalizers
+  - wlpagents/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - cloudguard.oracle.com
+  resources:
+  - adhocqueries/status
+  - datamaskrules/status
+  - datasources/status
+  - detectorrecipedetectorrules/status
+  - detectorrecipes/status
+  - managedlists/status
+  - responderrecipes/status
+  - savedqueries/status
+  - securityrecipes/status
+  - securityzones/status
+  - targetdetectorrecipes/status
+  - targetresponderrecipes/status
+  - targets/status
+  - wlpagents/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - cloudmigrations.oracle.com
+  resources:
+  - migrationassets
+  - migrationplans
+  - migrations
+  - replicationschedules
+  - targetassets
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - cloudmigrations.oracle.com
+  resources:
+  - migrationassets/finalizers
+  - migrationplans/finalizers
+  - migrations/finalizers
+  - replicationschedules/finalizers
+  - targetassets/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - cloudmigrations.oracle.com
+  resources:
+  - migrationassets/status
+  - migrationplans/status
+  - migrations/status
+  - replicationschedules/status
+  - targetassets/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - clusterplacementgroups.oracle.com
   resources:
   - clusterplacementgroups
@@ -560,6 +855,35 @@ rules:
   - clusterplacementgroups.oracle.com
   resources:
   - clusterplacementgroups/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - computecloudatcustomer.oracle.com
+  resources:
+  - cccinfrastructures
+  - cccupgradeschedules
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - computecloudatcustomer.oracle.com
+  resources:
+  - cccinfrastructures/finalizers
+  - cccupgradeschedules/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - computecloudatcustomer.oracle.com
+  resources:
+  - cccinfrastructures/status
+  - cccupgradeschedules/status
   verbs:
   - get
   - patch
@@ -809,6 +1133,89 @@ rules:
   - patch
   - update
 - apiGroups:
+  - datacatalog.oracle.com
+  resources:
+  - attributes
+  - attributetags
+  - catalogprivateendpoints
+  - catalogs
+  - connections
+  - customproperties
+  - dataassets
+  - dataassettags
+  - entities
+  - entitytags
+  - folders
+  - foldertags
+  - glossaries
+  - jobdefinitions
+  - jobs
+  - metastores
+  - namespaces
+  - patterns
+  - termrelationships
+  - terms
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - datacatalog.oracle.com
+  resources:
+  - attributes/finalizers
+  - attributetags/finalizers
+  - catalogprivateendpoints/finalizers
+  - catalogs/finalizers
+  - connections/finalizers
+  - customproperties/finalizers
+  - dataassets/finalizers
+  - dataassettags/finalizers
+  - entities/finalizers
+  - entitytags/finalizers
+  - folders/finalizers
+  - foldertags/finalizers
+  - glossaries/finalizers
+  - jobdefinitions/finalizers
+  - jobs/finalizers
+  - metastores/finalizers
+  - namespaces/finalizers
+  - patterns/finalizers
+  - termrelationships/finalizers
+  - terms/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - datacatalog.oracle.com
+  resources:
+  - attributes/status
+  - attributetags/status
+  - catalogprivateendpoints/status
+  - catalogs/status
+  - connections/status
+  - customproperties/status
+  - dataassets/status
+  - dataassettags/status
+  - entities/status
+  - entitytags/status
+  - folders/status
+  - foldertags/status
+  - glossaries/status
+  - jobdefinitions/status
+  - jobs/status
+  - metastores/status
+  - namespaces/status
+  - patterns/status
+  - termrelationships/status
+  - terms/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - dataflow.oracle.com
   resources:
   - applications
@@ -830,6 +1237,113 @@ rules:
   - dataflow.oracle.com
   resources:
   - applications/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - dataintegration.oracle.com
+  resources:
+  - applicationdetaileddescriptions
+  - applications
+  - connections
+  - connectionvalidations
+  - copyobjectrequests
+  - dataassets
+  - dataflows
+  - dataflowvalidations
+  - disapplicationdetaileddescriptions
+  - disapplications
+  - exportrequests
+  - externalpublications
+  - externalpublicationvalidations
+  - folders
+  - functionlibraries
+  - importrequests
+  - patches
+  - pipelines
+  - pipelinevalidations
+  - projects
+  - schedules
+  - taskruns
+  - tasks
+  - taskschedules
+  - taskvalidations
+  - userdefinedfunctions
+  - userdefinedfunctionvalidations
+  - workspaces
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - dataintegration.oracle.com
+  resources:
+  - applicationdetaileddescriptions/finalizers
+  - applications/finalizers
+  - connections/finalizers
+  - connectionvalidations/finalizers
+  - copyobjectrequests/finalizers
+  - dataassets/finalizers
+  - dataflows/finalizers
+  - dataflowvalidations/finalizers
+  - disapplicationdetaileddescriptions/finalizers
+  - disapplications/finalizers
+  - exportrequests/finalizers
+  - externalpublications/finalizers
+  - externalpublicationvalidations/finalizers
+  - folders/finalizers
+  - functionlibraries/finalizers
+  - importrequests/finalizers
+  - patches/finalizers
+  - pipelines/finalizers
+  - pipelinevalidations/finalizers
+  - projects/finalizers
+  - schedules/finalizers
+  - taskruns/finalizers
+  - tasks/finalizers
+  - taskschedules/finalizers
+  - taskvalidations/finalizers
+  - userdefinedfunctions/finalizers
+  - userdefinedfunctionvalidations/finalizers
+  - workspaces/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - dataintegration.oracle.com
+  resources:
+  - applicationdetaileddescriptions/status
+  - applications/status
+  - connections/status
+  - connectionvalidations/status
+  - copyobjectrequests/status
+  - dataassets/status
+  - dataflows/status
+  - dataflowvalidations/status
+  - disapplicationdetaileddescriptions/status
+  - disapplications/status
+  - exportrequests/status
+  - externalpublications/status
+  - externalpublicationvalidations/status
+  - folders/status
+  - functionlibraries/status
+  - importrequests/status
+  - patches/status
+  - pipelines/status
+  - pipelinevalidations/status
+  - projects/status
+  - schedules/status
+  - taskruns/status
+  - tasks/status
+  - taskschedules/status
+  - taskvalidations/status
+  - userdefinedfunctions/status
+  - userdefinedfunctionvalidations/status
+  - workspaces/status
   verbs:
   - get
   - patch
@@ -861,6 +1375,201 @@ rules:
   - patch
   - update
 - apiGroups:
+  - datalabelingservicedataplane.oracle.com
+  resources:
+  - annotations
+  - records
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - datalabelingservicedataplane.oracle.com
+  resources:
+  - annotations/finalizers
+  - records/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - datalabelingservicedataplane.oracle.com
+  resources:
+  - annotations/status
+  - records/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - datasafe.oracle.com
+  resources:
+  - alertpolicies
+  - alertpolicyrules
+  - attributesets
+  - auditarchiveretrievals
+  - auditprofiles
+  - datasafeprivateendpoints
+  - discoveryjobs
+  - librarymaskingformats
+  - maskingcolumns
+  - maskingpolicies
+  - onpremconnectors
+  - peertargetdatabases
+  - referentialrelations
+  - reportdefinitions
+  - sdmmaskingpolicydifferences
+  - securityassessments
+  - securitypolicies
+  - securitypolicyconfigs
+  - securitypolicydeployments
+  - sensitivecolumns
+  - sensitivedatamodels
+  - sensitivetypegroups
+  - sensitivetypes
+  - sensitivetypesexports
+  - sqlcollections
+  - targetalertpolicyassociations
+  - targetdatabasegroups
+  - targetdatabases
+  - unifiedauditpolicies
+  - userassessments
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - datasafe.oracle.com
+  resources:
+  - alertpolicies/finalizers
+  - alertpolicyrules/finalizers
+  - attributesets/finalizers
+  - auditarchiveretrievals/finalizers
+  - auditprofiles/finalizers
+  - datasafeprivateendpoints/finalizers
+  - discoveryjobs/finalizers
+  - librarymaskingformats/finalizers
+  - maskingcolumns/finalizers
+  - maskingpolicies/finalizers
+  - onpremconnectors/finalizers
+  - peertargetdatabases/finalizers
+  - referentialrelations/finalizers
+  - reportdefinitions/finalizers
+  - sdmmaskingpolicydifferences/finalizers
+  - securityassessments/finalizers
+  - securitypolicies/finalizers
+  - securitypolicyconfigs/finalizers
+  - securitypolicydeployments/finalizers
+  - sensitivecolumns/finalizers
+  - sensitivedatamodels/finalizers
+  - sensitivetypegroups/finalizers
+  - sensitivetypes/finalizers
+  - sensitivetypesexports/finalizers
+  - sqlcollections/finalizers
+  - targetalertpolicyassociations/finalizers
+  - targetdatabasegroups/finalizers
+  - targetdatabases/finalizers
+  - unifiedauditpolicies/finalizers
+  - userassessments/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - datasafe.oracle.com
+  resources:
+  - alertpolicies/status
+  - alertpolicyrules/status
+  - attributesets/status
+  - auditarchiveretrievals/status
+  - auditprofiles/status
+  - datasafeprivateendpoints/status
+  - discoveryjobs/status
+  - librarymaskingformats/status
+  - maskingcolumns/status
+  - maskingpolicies/status
+  - onpremconnectors/status
+  - peertargetdatabases/status
+  - referentialrelations/status
+  - reportdefinitions/status
+  - sdmmaskingpolicydifferences/status
+  - securityassessments/status
+  - securitypolicies/status
+  - securitypolicyconfigs/status
+  - securitypolicydeployments/status
+  - sensitivecolumns/status
+  - sensitivedatamodels/status
+  - sensitivetypegroups/status
+  - sensitivetypes/status
+  - sensitivetypesexports/status
+  - sqlcollections/status
+  - targetalertpolicyassociations/status
+  - targetdatabasegroups/status
+  - targetdatabases/status
+  - unifiedauditpolicies/status
+  - userassessments/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - dbmulticloud.oracle.com
+  resources:
+  - multicloudresourcediscoveries
+  - oracledbawsidentityconnectors
+  - oracledbawskeys
+  - oracledbazureblobcontainers
+  - oracledbazureblobmounts
+  - oracledbazureconnectors
+  - oracledbazurevaultassociations
+  - oracledbazurevaults
+  - oracledbgcpidentityconnectors
+  - oracledbgcpkeyrings
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - dbmulticloud.oracle.com
+  resources:
+  - multicloudresourcediscoveries/finalizers
+  - oracledbawsidentityconnectors/finalizers
+  - oracledbawskeys/finalizers
+  - oracledbazureblobcontainers/finalizers
+  - oracledbazureblobmounts/finalizers
+  - oracledbazureconnectors/finalizers
+  - oracledbazurevaultassociations/finalizers
+  - oracledbazurevaults/finalizers
+  - oracledbgcpidentityconnectors/finalizers
+  - oracledbgcpkeyrings/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - dbmulticloud.oracle.com
+  resources:
+  - multicloudresourcediscoveries/status
+  - oracledbawsidentityconnectors/status
+  - oracledbawskeys/status
+  - oracledbazureblobcontainers/status
+  - oracledbazureblobmounts/status
+  - oracledbazureconnectors/status
+  - oracledbazurevaultassociations/status
+  - oracledbazurevaults/status
+  - oracledbgcpidentityconnectors/status
+  - oracledbgcpkeyrings/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - delegateaccesscontrol.oracle.com
   resources:
   - delegationcontrols
@@ -882,6 +1591,58 @@ rules:
   - delegateaccesscontrol.oracle.com
   resources:
   - delegationcontrols/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - demandsignal.oracle.com
+  resources:
+  - occdemandsignals
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - demandsignal.oracle.com
+  resources:
+  - occdemandsignals/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - demandsignal.oracle.com
+  resources:
+  - occdemandsignals/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - desktops.oracle.com
+  resources:
+  - desktoppools
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - desktops.oracle.com
+  resources:
+  - desktoppools/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - desktops.oracle.com
+  resources:
+  - desktoppools/status
   verbs:
   - get
   - patch
@@ -923,6 +1684,32 @@ rules:
   - projects/status
   - repositories/status
   - triggers/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - dif.oracle.com
+  resources:
+  - stacks
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - dif.oracle.com
+  resources:
+  - stacks/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - dif.oracle.com
+  resources:
+  - stacks/status
   verbs:
   - get
   - patch
@@ -1053,6 +1840,32 @@ rules:
   - patch
   - update
 - apiGroups:
+  - emwarehouse.oracle.com
+  resources:
+  - emwarehouses
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - emwarehouse.oracle.com
+  resources:
+  - emwarehouses/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - emwarehouse.oracle.com
+  resources:
+  - emwarehouses/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - events.oracle.com
   resources:
   - rules
@@ -1074,6 +1887,162 @@ rules:
   - events.oracle.com
   resources:
   - rules/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - filestorage.oracle.com
+  resources:
+  - exports
+  - filesystems
+  - filesystemsnapshotpolicies
+  - mounttargets
+  - outboundconnectors
+  - quotarules
+  - replications
+  - snapshots
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - filestorage.oracle.com
+  resources:
+  - exports/finalizers
+  - filesystems/finalizers
+  - filesystemsnapshotpolicies/finalizers
+  - mounttargets/finalizers
+  - outboundconnectors/finalizers
+  - quotarules/finalizers
+  - replications/finalizers
+  - snapshots/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - filestorage.oracle.com
+  resources:
+  - exports/status
+  - filesystems/status
+  - filesystemsnapshotpolicies/status
+  - mounttargets/status
+  - outboundconnectors/status
+  - quotarules/status
+  - replications/status
+  - snapshots/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - fleetappsmanagement.oracle.com
+  resources:
+  - catalogitems
+  - compliancepolicyrules
+  - fleetcredentials
+  - fleetproperties
+  - fleetresources
+  - fleets
+  - maintenancewindows
+  - onboardings
+  - patches
+  - platformconfigurations
+  - properties
+  - provisions
+  - runbooks
+  - runbookversions
+  - schedulerdefinitions
+  - taskrecords
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - fleetappsmanagement.oracle.com
+  resources:
+  - catalogitems/finalizers
+  - compliancepolicyrules/finalizers
+  - fleetcredentials/finalizers
+  - fleetproperties/finalizers
+  - fleetresources/finalizers
+  - fleets/finalizers
+  - maintenancewindows/finalizers
+  - onboardings/finalizers
+  - patches/finalizers
+  - platformconfigurations/finalizers
+  - properties/finalizers
+  - provisions/finalizers
+  - runbooks/finalizers
+  - runbookversions/finalizers
+  - schedulerdefinitions/finalizers
+  - taskrecords/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - fleetappsmanagement.oracle.com
+  resources:
+  - catalogitems/status
+  - compliancepolicyrules/status
+  - fleetcredentials/status
+  - fleetproperties/status
+  - fleetresources/status
+  - fleets/status
+  - maintenancewindows/status
+  - onboardings/status
+  - patches/status
+  - platformconfigurations/status
+  - properties/status
+  - provisions/status
+  - runbooks/status
+  - runbookversions/status
+  - schedulerdefinitions/status
+  - taskrecords/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - fleetsoftwareupdate.oracle.com
+  resources:
+  - fsuactions
+  - fsucollections
+  - fsucycles
+  - fsudiscoveries
+  - fsureadinesschecks
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - fleetsoftwareupdate.oracle.com
+  resources:
+  - fsuactions/finalizers
+  - fsucollections/finalizers
+  - fsucycles/finalizers
+  - fsudiscoveries/finalizers
+  - fsureadinesschecks/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - fleetsoftwareupdate.oracle.com
+  resources:
+  - fsuactions/status
+  - fsucollections/status
+  - fsucycles/status
+  - fsudiscoveries/status
+  - fsureadinesschecks/status
   verbs:
   - get
   - patch
@@ -1103,6 +2072,41 @@ rules:
   resources:
   - applications/status
   - functions/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - fusionapps.oracle.com
+  resources:
+  - fusionenvironmentfamilies
+  - fusionenvironments
+  - refreshactivities
+  - serviceattachments
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - fusionapps.oracle.com
+  resources:
+  - fusionenvironmentfamilies/finalizers
+  - fusionenvironments/finalizers
+  - refreshactivities/finalizers
+  - serviceattachments/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - fusionapps.oracle.com
+  resources:
+  - fusionenvironmentfamilies/status
+  - fusionenvironments/status
+  - refreshactivities/status
+  - serviceattachments/status
   verbs:
   - get
   - patch
@@ -1242,6 +2246,50 @@ rules:
   - generativeaidata.oracle.com
   resources:
   - enrichmentjobs/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - goldengate.oracle.com
+  resources:
+  - certificates
+  - connectionassignments
+  - connections
+  - databaseregistrations
+  - deploymentbackups
+  - deployments
+  - pipelines
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - goldengate.oracle.com
+  resources:
+  - certificates/finalizers
+  - connectionassignments/finalizers
+  - connections/finalizers
+  - databaseregistrations/finalizers
+  - deploymentbackups/finalizers
+  - deployments/finalizers
+  - pipelines/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - goldengate.oracle.com
+  resources:
+  - certificates/status
+  - connectionassignments/status
+  - connections/status
+  - databaseregistrations/status
+  - deploymentbackups/status
+  - deployments/status
+  - pipelines/status
   verbs:
   - get
   - patch
@@ -2061,6 +3109,71 @@ rules:
   - patch
   - update
 - apiGroups:
+  - networkfirewall.oracle.com
+  resources:
+  - addresslists
+  - applicationgroups
+  - applications
+  - decryptionprofiles
+  - decryptionrules
+  - mappedsecrets
+  - natrules
+  - networkfirewallpolicies
+  - networkfirewalls
+  - securityrules
+  - servicelists
+  - services
+  - tunnelinspectionrules
+  - urllists
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - networkfirewall.oracle.com
+  resources:
+  - addresslists/finalizers
+  - applicationgroups/finalizers
+  - applications/finalizers
+  - decryptionprofiles/finalizers
+  - decryptionrules/finalizers
+  - mappedsecrets/finalizers
+  - natrules/finalizers
+  - networkfirewallpolicies/finalizers
+  - networkfirewalls/finalizers
+  - securityrules/finalizers
+  - servicelists/finalizers
+  - services/finalizers
+  - tunnelinspectionrules/finalizers
+  - urllists/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - networkfirewall.oracle.com
+  resources:
+  - addresslists/status
+  - applicationgroups/status
+  - applications/status
+  - decryptionprofiles/status
+  - decryptionrules/status
+  - mappedsecrets/status
+  - natrules/status
+  - networkfirewallpolicies/status
+  - networkfirewalls/status
+  - securityrules/status
+  - servicelists/status
+  - services/status
+  - tunnelinspectionrules/status
+  - urllists/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - networkloadbalancer.oracle.com
   resources:
   - backends
@@ -2678,6 +3791,41 @@ rules:
   - patch
   - update
 - apiGroups:
+  - resourcemanager.oracle.com
+  resources:
+  - configurationsourceproviders
+  - privateendpoints
+  - stacks
+  - templates
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - resourcemanager.oracle.com
+  resources:
+  - configurationsourceproviders/finalizers
+  - privateendpoints/finalizers
+  - stacks/finalizers
+  - templates/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - resourcemanager.oracle.com
+  resources:
+  - configurationsourceproviders/status
+  - privateendpoints/status
+  - stacks/status
+  - templates/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - resourcescheduler.oracle.com
   resources:
   - schedules
@@ -3059,6 +4207,41 @@ rules:
   - vnmonitoring.oracle.com
   resources:
   - pathanalyzertests/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - vulnerabilityscanning.oracle.com
+  resources:
+  - containerscanrecipes
+  - containerscantargets
+  - hostscanrecipes
+  - hostscantargets
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - vulnerabilityscanning.oracle.com
+  resources:
+  - containerscanrecipes/finalizers
+  - containerscantargets/finalizers
+  - hostscanrecipes/finalizers
+  - hostscantargets/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - vulnerabilityscanning.oracle.com
+  resources:
+  - containerscanrecipes/status
+  - containerscantargets/status
+  - hostscanrecipes/status
+  - hostscantargets/status
   verbs:
   - get
   - patch

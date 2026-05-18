@@ -1,0 +1,414 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: filesystems.filestorage.oracle.com
+spec:
+  group: filestorage.oracle.com
+  names:
+    kind: FileSystem
+    listKind: FileSystemList
+    plural: filesystems
+    singular: filesystem
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the FileSystem
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the FileSystem
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: FileSystem is the Schema for the filesystems API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: FileSystemSpec defines the desired state of FileSystem.
+            properties:
+              areQuotaRulesEnabled:
+                description: Specifies the enforcement of quota rules on the file
+                  system.
+                type: boolean
+              availabilityDomain:
+                description: |-
+                  The availability domain to create the file system in.
+                  Example: `Uocm:PHX-AD-1`
+                type: string
+              cloneAttachStatus:
+                description: |-
+                  Specifies whether the clone file system is attached to its parent file system.
+                  If the value is set to 'DETACH', then the file system will be created, which is deep copied from the snapshot
+                  specified by sourceSnapshotId, else will remain attached to its parent.
+                type: string
+              compartmentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment to create the file system in.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              displayName:
+                description: |-
+                  A user-friendly name. It does not have to be unique, and it is changeable.
+                  Avoid entering confidential information.
+                  Example: `My file system`
+                type: string
+              filesystemSnapshotPolicyId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the associated file system snapshot policy, which
+                  controls the frequency of snapshot creation and retention period of the taken snapshots.
+                  May be unset as a blank value.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair
+                   with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              kmsKeyId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the KMS key used to encrypt the encryption keys associated with
+                  this file system.
+                type: string
+              locks:
+                description: Locks associated with this resource.
+                items:
+                  description: FileSystemLock defines nested fields for FileSystem.Lock.
+                  properties:
+                    message:
+                      description: |-
+                        A message added by the creator of the lock. This is typically used to give an
+                        indication of why the resource is locked.
+                      type: string
+                    relatedResourceId:
+                      description: The ID of the resource that is locking this resource.
+                        Indicates that deleting this resource will remove the lock.
+                      type: string
+                    timeCreated:
+                      description: When the lock was created.
+                      type: string
+                    type:
+                      description: Type of the lock.
+                      type: string
+                  required:
+                  - type
+                  type: object
+                type: array
+              sourceSnapshotId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the snapshot used to create a cloned file system.
+                  See Cloning a File System (https://docs.oracle.com/iaas/Content/File/Tasks/cloningFS.htm).
+                type: string
+            required:
+            - availabilityDomain
+            - compartmentId
+            type: object
+          status:
+            description: FileSystemStatus defines the observed state of FileSystem.
+            properties:
+              areQuotaRulesEnabled:
+                description: Specifies the enforcement of quota rules on the file
+                  system.
+                type: boolean
+              availabilityDomain:
+                description: |-
+                  The availability domain the file system is in. May be unset
+                  as a blank or NULL value.
+                  Example: `Uocm:PHX-AD-1`
+                type: string
+              cloneAttachStatus:
+                description: Specifies whether the file system is attached to its
+                  parent file system.
+                type: string
+              cloneCount:
+                description: Specifies the total number of children of a file system.
+                type: integer
+              compartmentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment that contains the file system.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              displayName:
+                description: |-
+                  A user-friendly name. It does not have to be unique, and it is changeable.
+                  Avoid entering confidential information.
+                  Example: `My file system`
+                type: string
+              filesystemSnapshotPolicyId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the associated file system snapshot policy, which
+                  controls the frequency of snapshot creation and retention period of the taken snapshots.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair
+                   with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              id:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the file system.
+                type: string
+              isCloneParent:
+                description: |-
+                  Specifies whether the file system has been cloned.
+                  See Cloning a File System (https://docs.oracle.com/iaas/Content/File/Tasks/cloningFS.htm).
+                type: boolean
+              isHydrated:
+                description: |-
+                  Specifies whether the data has finished copying from the source to the clone.
+                  Hydration can take up to several hours to complete depending on the size of the source.
+                  The source and clone remain available during hydration, but there may be some performance impact.
+                  See Cloning a File System (https://docs.oracle.com/iaas/Content/File/Tasks/cloningFS.htm#hydration).
+                type: boolean
+              isTargetable:
+                description: |-
+                  Specifies whether the file system can be used as a target file system for replication. The system sets this value to `true` if the file system is unexported, hasn't yet been specified as a target file system in any replication resource, and has no user snapshots. After the file system has been specified as a target in a replication, or if the file system contains user snapshots, the system sets this value to `false`.
+                  For more information, see Using Replication (https://docs.oracle.com/iaas/Content/File/Tasks/using-replication.htm).
+                type: boolean
+              kmsKeyId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the KMS key which is the master encryption key for the file system.
+                type: string
+              lifecycleDetails:
+                description: Additional information about the current 'lifecycleState'.
+                type: string
+              lifecycleState:
+                description: The current state of the file system.
+                type: string
+              locks:
+                description: Locks associated with this resource.
+                items:
+                  description: FileSystemLock defines nested fields for FileSystem.Lock.
+                  properties:
+                    message:
+                      description: |-
+                        A message added by the creator of the lock. This is typically used to give an
+                        indication of why the resource is locked.
+                      type: string
+                    relatedResourceId:
+                      description: The ID of the resource that is locking this resource.
+                        Indicates that deleting this resource will remove the lock.
+                      type: string
+                    timeCreated:
+                      description: When the lock was created.
+                      type: string
+                    type:
+                      description: Type of the lock.
+                      type: string
+                  required:
+                  - type
+                  type: object
+                type: array
+              meteredBytes:
+                description: |-
+                  The number of bytes consumed by the file system, including
+                  any snapshots. This number reflects the metered size of the file
+                  system and is updated asynchronously with respect to
+                  updates to the file system.
+                  For more information, see File System Usage and Metering (https://docs.oracle.com/iaas/Content/File/Concepts/FSutilization.htm).
+                format: int64
+                type: integer
+              quotaEnforcementState:
+                description: Displays the state of enforcement of quota rules on the
+                  file system.
+                type: string
+              replicationSourceCount:
+                description: Specifies the total number of replications for which
+                  this file system is a source.
+                type: integer
+              replicationTargetId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the replication target associated with the file system.
+                  Empty if the file system is not being used as target in a replication.
+                type: string
+              sourceDetails:
+                description: FileSystemSourceDetails defines nested fields for FileSystem.SourceDetails.
+                properties:
+                  parentFileSystemId:
+                    description: |-
+                      The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the file system that contains the source snapshot of a cloned file system.
+                      See Cloning a File System (https://docs.oracle.com/iaas/Content/File/Tasks/cloningFS.htm).
+                    type: string
+                  sourceSnapshotId:
+                    description: |-
+                      The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the source snapshot used to create a cloned file system.
+                      See Cloning a File System (https://docs.oracle.com/iaas/Content/File/Tasks/cloningFS.htm).
+                    type: string
+                type: object
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  System tags for this resource.
+                  System tags are applied to resources by internal OCI services.
+                type: object
+              timeCreated:
+                description: |-
+                  The date and time the file system was created, expressed in
+                  RFC 3339 (https://tools.ietf.org/rfc/rfc3339) timestamp format.
+                  Example: `2016-08-25T21:10:29.600Z`
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

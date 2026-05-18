@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- bases/cloudguard.oracle.com_adhocqueries.yaml
+- bases/cloudguard.oracle.com_datamaskrules.yaml
+- bases/cloudguard.oracle.com_datasources.yaml
+- bases/cloudguard.oracle.com_detectorrecipedetectorrules.yaml
+- bases/cloudguard.oracle.com_detectorrecipes.yaml
+- bases/cloudguard.oracle.com_managedlists.yaml
+- bases/cloudguard.oracle.com_responderrecipes.yaml
+- bases/cloudguard.oracle.com_savedqueries.yaml
+- bases/cloudguard.oracle.com_securityrecipes.yaml
+- bases/cloudguard.oracle.com_securityzones.yaml
+- bases/cloudguard.oracle.com_targetdetectorrecipes.yaml
+- bases/cloudguard.oracle.com_targetresponderrecipes.yaml
+- bases/cloudguard.oracle.com_targets.yaml
+- bases/cloudguard.oracle.com_wlpagents.yaml

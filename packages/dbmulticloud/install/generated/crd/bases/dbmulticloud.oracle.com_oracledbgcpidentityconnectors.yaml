@@ -1,0 +1,337 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: oracledbgcpidentityconnectors.dbmulticloud.oracle.com
+spec:
+  group: dbmulticloud.oracle.com
+  names:
+    kind: OracleDbGcpIdentityConnector
+    listKind: OracleDbGcpIdentityConnectorList
+    plural: oracledbgcpidentityconnectors
+    singular: oracledbgcpidentityconnector
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the OracleDbGcpIdentityConnector
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the OracleDbGcpIdentityConnector
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: OracleDbGcpIdentityConnector is the Schema for the oracledbgcpidentityconnectors
+          API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: OracleDbGcpIdentityConnectorSpec defines the desired state
+              of OracleDbGcpIdentityConnector.
+            properties:
+              compartmentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment that contains the Oracle DB GCP Identity Connector
+                  resource.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              displayName:
+                description: Oracle DB Google GCP Identity Connector resource name.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              gcpLocation:
+                description: GCP Location.
+                type: string
+              gcpResourceServiceAgentId:
+                description: The ID of the GCP resource service agent.
+                type: string
+              gcpWorkloadIdentityPoolId:
+                description: The ID of the cloud GCP Workload Identity Pool.
+                type: string
+              gcpWorkloadIdentityProviderId:
+                description: The ID of the GCP Workload Identity Provider.
+                type: string
+              issuerUrl:
+                description: OIDC token issuer Url
+                type: string
+              projectId:
+                description: Project id of the customer project.
+                type: string
+              resourceId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the GCP VM Cluster resource.
+                type: string
+            required:
+            - compartmentId
+            - displayName
+            - gcpLocation
+            - gcpResourceServiceAgentId
+            - gcpWorkloadIdentityPoolId
+            - gcpWorkloadIdentityProviderId
+            - issuerUrl
+            - projectId
+            - resourceId
+            type: object
+          status:
+            description: OracleDbGcpIdentityConnectorStatus defines the observed state
+              of OracleDbGcpIdentityConnector.
+            properties:
+              compartmentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment that contains the Oracle DB GCP Identity Connector
+                  resource.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              displayName:
+                description: Oracle DB GCP Identity Connector resource name.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              gcpIdentityConnectivityStatus:
+                description: The current Connectivity status of GCP Identity Connector
+                  resource.
+                type: string
+              gcpLocation:
+                description: GCP Location.
+                type: string
+              gcpNodes:
+                description: List of All VMs where GCP Identity Connector is configured
+                  for this VMCluster.
+                items:
+                  description: OracleDbGcpIdentityConnectorGcpNode defines nested
+                    fields for OracleDbGcpIdentityConnector.GcpNode.
+                  properties:
+                    hostId:
+                      description: Host ID.
+                      type: string
+                    hostName:
+                      description: Host Name or Identity Connector name.
+                      type: string
+                    status:
+                      description: The current status of the GCP Identity Connector
+                        resource.
+                      type: string
+                    timeLastChecked:
+                      description: time when the GCP Identity Connector's status was
+                        checked RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp
+                        format, e.g. '2020-05-22T21:10:29.600Z'
+                      type: string
+                  type: object
+                type: array
+              gcpResourceServiceAgentId:
+                description: The ID of the GCP resource service agent.
+                type: string
+              gcpWorkloadIdentityPoolId:
+                description: The ID of the cloud GCP Workload Identity Pool.
+                type: string
+              gcpWorkloadIdentityProviderId:
+                description: The ID of the GCP Workload Identity Provider.
+                type: string
+              id:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the Oracle DB GCP Identity Connector resource.
+                type: string
+              issuerUrl:
+                description: OIDC token issuer Url.
+                type: string
+              lifecycleState:
+                description: The current lifecycle state of the GCP Identity Connector
+                  resource.
+                type: string
+              lifecycleStateDetails:
+                description: Description of the current lifecycle state in more detail.
+                type: string
+              projectId:
+                description: Project id of the customer project.
+                type: string
+              resourceId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the GCP VM Cluster resource.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  System tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              timeCreated:
+                description: Time when the Oracle DB GCP Identity Connector resource
+                  was created expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339)
+                  timestamp format, e.g. '2020-05-22T21:10:29.600Z'
+                type: string
+              timeUpdated:
+                description: Time when the Oracle DB GCP Identity Connector resource
+                  was last modified expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339)
+                  timestamp format, e.g. '2020-05-22T21:10:29.600Z'
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

@@ -1,0 +1,80 @@
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
+// This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
+// Code generated. DO NOT EDIT.
+
+// Resource Manager API
+//
+// Use the Resource Manager API to automate deployment and operations for all Oracle Cloud Infrastructure resources.
+// Using the infrastructure-as-code (IaC) model, the service is based on Terraform, an open source industry standard that lets DevOps engineers develop and deploy their infrastructure anywhere.
+// For more information, see
+// the Resource Manager documentation (https://docs.oracle.com/iaas/Content/ResourceManager/home.htm).
+//
+
+package resourcemanager
+
+import (
+	"fmt"
+	"github.com/oracle/oci-go-sdk/v65/common"
+	"strings"
+)
+
+// TemplateSummary Summary information for a template.
+type TemplateSummary struct {
+
+	// Unique identifier of the specified template.
+	Id *string `mandatory:"false" json:"id"`
+
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing this template.
+	CompartmentId *string `mandatory:"false" json:"compartmentId"`
+
+	// A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information.
+	DisplayName *string `mandatory:"false" json:"displayName"`
+
+	// Brief description of the template.
+	Description *string `mandatory:"false" json:"description"`
+
+	// whether the template will work for free tier tenancy.
+	IsFreeTier *bool `mandatory:"false" json:"isFreeTier"`
+
+	// The date and time at which the template was created.
+	// Format is defined by RFC3339.
+	// Example: `2020-11-25T21:10:29.600Z`
+	TimeCreated *common.SDKTime `mandatory:"false" json:"timeCreated"`
+
+	// The current lifecycle state of the template.
+	LifecycleState TemplateLifecycleStateEnum `mandatory:"false" json:"lifecycleState,omitempty"`
+
+	// Free-form tags associated with the resource. Each tag is a key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `mandatory:"false" json:"freeformTags"`
+
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]map[string]interface{} `mandatory:"false" json:"definedTags"`
+
+	// The system tags associated with this resource, if any. The system tags are set by Oracle cloud infrastructure services. Each key is predefined and scoped to namespaces.
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{orcl-cloud: {free-tier-retain: true}}`
+	SystemTags map[string]map[string]interface{} `mandatory:"false" json:"systemTags"`
+}
+
+func (m TemplateSummary) String() string {
+	return common.PointerString(m)
+}
+
+// ValidateEnumValue returns an error when providing an unsupported enum value
+// This function is being called during constructing API request process
+// Not recommended for calling this function directly
+func (m TemplateSummary) ValidateEnumValue() (bool, error) {
+	errMessage := []string{}
+
+	if _, ok := GetMappingTemplateLifecycleStateEnum(string(m.LifecycleState)); !ok && m.LifecycleState != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for LifecycleState: %s. Supported values are: %s.", m.LifecycleState, strings.Join(GetTemplateLifecycleStateEnumStringValues(), ",")))
+	}
+	if len(errMessage) > 0 {
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
+	}
+	return false, nil
+}

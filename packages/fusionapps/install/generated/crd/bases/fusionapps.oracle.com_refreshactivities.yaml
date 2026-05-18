@@ -1,0 +1,245 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: refreshactivities.fusionapps.oracle.com
+spec:
+  group: fusionapps.oracle.com
+  names:
+    kind: RefreshActivity
+    listKind: RefreshActivityList
+    plural: refreshactivities
+    singular: refreshactivity
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: status of the RefreshActivity
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the RefreshActivity
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: RefreshActivity is the Schema for the refreshactivities API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: RefreshActivitySpec defines the desired state of RefreshActivity.
+            properties:
+              isDataMaskingOpted:
+                description: Represents if the customer opted for Data Masking or
+                  not during refreshActivity.
+                type: boolean
+              sourceFusionEnvironmentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the source environment
+                type: string
+              timeScheduledStart:
+                description: Current time the refresh activity is scheduled to start.
+                  An RFC3339 formatted datetime string.
+                type: string
+            required:
+            - sourceFusionEnvironmentId
+            type: object
+          status:
+            description: RefreshActivityStatus defines the observed state of RefreshActivity.
+            properties:
+              displayName:
+                description: A friendly name for the refresh activity. Can be changed
+                  later.
+                type: string
+              id:
+                description: The unique identifier (OCID) of the refresh activity.
+                  Can't be changed after creation.
+                type: string
+              isDataMaskingOpted:
+                description: Represents if the customer opted for Data Masking or
+                  not during refreshActivity.
+                type: boolean
+              lifecycleDetails:
+                description: A message describing the current state in more detail.
+                  For example, can be used to provide actionable information for a
+                  resource in Failed state.
+                type: string
+              lifecycleState:
+                description: The current state of the refreshActivity.
+                type: string
+              refreshIssueDetailsList:
+                description: Details of refresh investigation information, each item
+                  represents a different issue.
+                items:
+                  description: RefreshActivityRefreshIssueDetailsList defines nested
+                    fields for RefreshActivity.RefreshIssueDetailsList.
+                  properties:
+                    refreshIssues:
+                      description: Detail reasons of refresh failure or validation
+                        failure that needs to be shown to customer.
+                      type: string
+                  type: object
+                type: array
+              serviceAvailability:
+                description: Service availability / impact during refresh activity
+                  execution up down
+                type: string
+              sourceFusionEnvironmentId:
+                description: The OCID of the Fusion environment that is the source
+                  environment for the refresh.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              timeAccepted:
+                description: The time the refresh activity record was created. An
+                  RFC3339 formatted datetime string.
+                type: string
+              timeExpectedFinish:
+                description: The time the refresh activity is scheduled to end. An
+                  RFC3339 formatted datetime string.
+                type: string
+              timeFinished:
+                description: The time the refresh activity actually completed / cancelled
+                  / failed. An RFC3339 formatted datetime string.
+                type: string
+              timeOfRestorationPoint:
+                description: The date and time of the most recent source environment
+                  backup used for the environment refresh.
+                type: string
+              timeScheduledStart:
+                description: The time the refresh activity is scheduled to start.
+                  An RFC3339 formatted datetime string.
+                type: string
+              timeUpdated:
+                description: The time the refresh activity record was updated. An
+                  RFC3339 formatted datetime string.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

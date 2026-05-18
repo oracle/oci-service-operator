@@ -33,12 +33,29 @@ func (c ServiceClient[T]) applySuccessWithIdentityAndRequeue(
 	identity any,
 	preferredRequeueDuration time.Duration,
 ) (servicemanager.OSOKResponse, error) {
+	status, err := osokStatus(resource)
+	if err != nil {
+		return servicemanager.OSOKResponse{IsSuccessful: false}, err
+	}
+	previousRequestID := status.OpcRequestID
+	preserveRequestID := previousRequestID != "" &&
+		status.Async.Current != nil &&
+		status.Async.Current.Source == shared.OSOKAsyncSourceWorkRequest &&
+		responseWorkRequestID(response) == ""
+
 	if err := c.projectStatusWithHooks(resource, response); err != nil {
 		return servicemanager.OSOKResponse{IsSuccessful: false}, err
 	}
+	if preserveRequestID {
+		status, err = osokStatus(resource)
+		if err != nil {
+			return servicemanager.OSOKResponse{IsSuccessful: false}, err
+		}
+		status.OpcRequestID = previousRequestID
+	}
 	stampSecretSourceStatus(resource)
 
-	status, err := osokStatus(resource)
+	status, err = osokStatus(resource)
 	if err != nil {
 		return servicemanager.OSOKResponse{IsSuccessful: false}, err
 	}

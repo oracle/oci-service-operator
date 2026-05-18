@@ -1,0 +1,57 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
+  - goldengate.oracle.com
+  resources:
+  - certificates
+  - connectionassignments
+  - connections
+  - databaseregistrations
+  - deploymentbackups
+  - deployments
+  - pipelines
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - goldengate.oracle.com
+  resources:
+  - certificates/finalizers
+  - connectionassignments/finalizers
+  - connections/finalizers
+  - databaseregistrations/finalizers
+  - deploymentbackups/finalizers
+  - deployments/finalizers
+  - pipelines/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - goldengate.oracle.com
+  resources:
+  - certificates/status
+  - connectionassignments/status
+  - connections/status
+  - databaseregistrations/status
+  - deploymentbackups/status
+  - deployments/status
+  - pipelines/status
+  verbs:
+  - get
+  - patch
+  - update

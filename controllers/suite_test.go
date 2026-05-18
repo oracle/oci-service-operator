@@ -8,6 +8,7 @@ package controllers
 import (
 	"path/filepath"
 	"testing"
+	"time"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -41,7 +42,15 @@ var _ = BeforeSuite(func() {
 
 	By("bootstrapping test environment")
 	testEnv = &envtest.Environment{
-		CRDDirectoryPaths: []string{filepath.Join("..", "config", "crd", "bases")},
+		CRDInstallOptions: envtest.CRDInstallOptions{
+			Paths: []string{
+				filepath.Join("..", "config", "crd", "bases", "database.oracle.com_autonomousdatabases.yaml"),
+				filepath.Join("..", "config", "crd", "bases", "mysql.oracle.com_dbsystems.yaml"),
+				filepath.Join("..", "config", "crd", "bases", "streaming.oracle.com_streams.yaml"),
+			},
+			MaxTime:      time.Minute,
+			PollInterval: 500 * time.Millisecond,
+		},
 	}
 
 	cfg, err := testEnv.Start()
@@ -63,7 +72,7 @@ var _ = BeforeSuite(func() {
 	Expect(err).NotTo(HaveOccurred())
 	Expect(k8sClient).NotTo(BeNil())
 
-}, 60)
+}, 90)
 
 var _ = AfterSuite(func() {
 	By("tearing down the test environment")

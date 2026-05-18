@@ -1,0 +1,51 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
+  - fleetsoftwareupdate.oracle.com
+  resources:
+  - fsuactions
+  - fsucollections
+  - fsucycles
+  - fsudiscoveries
+  - fsureadinesschecks
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - fleetsoftwareupdate.oracle.com
+  resources:
+  - fsuactions/finalizers
+  - fsucollections/finalizers
+  - fsucycles/finalizers
+  - fsudiscoveries/finalizers
+  - fsureadinesschecks/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - fleetsoftwareupdate.oracle.com
+  resources:
+  - fsuactions/status
+  - fsucollections/status
+  - fsucycles/status
+  - fsudiscoveries/status
+  - fsureadinesschecks/status
+  verbs:
+  - get
+  - patch
+  - update

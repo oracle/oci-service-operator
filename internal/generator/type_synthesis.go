@@ -87,12 +87,14 @@ func (s *fieldSynthesizer) mergeStructFields(candidates []string, initial []Fiel
 		if !ok {
 			continue
 		}
+		typePath := appendTypePath(nil, underlyingTypeName(candidate))
 		for _, field := range fields {
 			fieldModel, ok := s.buildGeneratedField(
 				field,
 				options,
 				[]string{helperPathComponent(field)},
 				[]string{field.Name},
+				typePath,
 			)
 			if !ok {
 				continue
@@ -130,12 +132,21 @@ func (s *fieldSynthesizer) candidateFields(typeName string, options fieldRenderi
 	return nil, false
 }
 
-func (s *fieldSynthesizer) buildGeneratedField(field ocisdk.Field, options fieldRenderingOptions, helperPath []string, fieldPath []string) (FieldModel, bool) {
+func (s *fieldSynthesizer) buildGeneratedField(
+	field ocisdk.Field,
+	options fieldRenderingOptions,
+	helperPath []string,
+	fieldPath []string,
+	typePath []string,
+) (FieldModel, bool) {
 	if isObservedStateFieldExcluded(fieldPath, options) {
 		return FieldModel{}, false
 	}
+	if isSensitiveObservedStateField(field, options) {
+		return FieldModel{}, false
+	}
 
-	renderedType, ok := s.renderFieldType(field, options, helperPath, fieldPath)
+	renderedType, ok := s.renderFieldType(field, options, helperPath, fieldPath, typePath)
 	if !ok {
 		return FieldModel{}, false
 	}
@@ -150,20 +161,34 @@ func (s *fieldSynthesizer) buildGeneratedField(field ocisdk.Field, options field
 	return fieldModel, true
 }
 
-func (s *fieldSynthesizer) renderFieldType(field ocisdk.Field, options fieldRenderingOptions, helperPath []string, fieldPath []string) (string, bool) {
+func (s *fieldSynthesizer) renderFieldType(
+	field ocisdk.Field,
+	options fieldRenderingOptions,
+	helperPath []string,
+	fieldPath []string,
+	typePath []string,
+) (string, bool) {
 	if sharedType, ok := sharedSchemaType(field); ok {
 		return sharedType, true
 	}
 
 	switch {
 	case field.Kind == ocisdk.FieldKindStruct && len(field.NestedFields) > 0:
-		helperTypeName, ok := s.ensureHelperType(helperPath, fieldPath, field.NestedFields, options)
+		fieldType := underlyingTypeName(field.Type)
+		if isRecursiveFieldType(fieldType, typePath) {
+			return recursiveSchemaType(field.Type)
+		}
+		helperTypeName, ok := s.ensureHelperType(helperPath, fieldPath, field.NestedFields, options, appendTypePath(typePath, fieldType))
 		if !ok {
 			return "", false
 		}
 		return wrapRenderedType(field.Type, helperTypeName)
 	case field.Kind == ocisdk.FieldKindInterface:
-		family, ok := s.index.InterfaceFamily(underlyingTypeName(field.Type))
+		fieldType := underlyingTypeName(field.Type)
+		if isRecursiveFieldType(fieldType, typePath) {
+			return recursiveSchemaType(field.Type)
+		}
+		family, ok := s.index.InterfaceFamily(fieldType)
 		if !ok {
 			return "", false
 		}
@@ -171,19 +196,28 @@ func (s *fieldSynthesizer) renderFieldType(field ocisdk.Field, options fieldRend
 		if len(fields) == 0 {
 			return "", false
 		}
-		helperTypeName, ok := s.ensureHelperType(helperPath, fieldPath, fields, options)
+		helperTypeName, ok := s.ensureHelperType(helperPath, fieldPath, fields, options, appendTypePath(typePath, fieldType))
 		if !ok {
 			return "", false
 		}
 		return wrapRenderedType(field.Type, helperTypeName)
 	case field.RenderableType != "":
+		if options.scope == fieldScopeStatus && s.renderedTypeReferencesSensitiveHelper(field.RenderableType, nil) {
+			return recursiveSchemaType(field.RenderableType)
+		}
 		return field.RenderableType, true
 	default:
 		return "", false
 	}
 }
 
-func (s *fieldSynthesizer) ensureHelperType(helperPath []string, fieldPath []string, fields []ocisdk.Field, options fieldRenderingOptions) (string, bool) {
+func (s *fieldSynthesizer) ensureHelperType(
+	helperPath []string,
+	fieldPath []string,
+	fields []ocisdk.Field,
+	options fieldRenderingOptions,
+	typePath []string,
+) (string, bool) {
 	typeName := helperTypeName(s.resourceKind, helperPath)
 
 	nestedOptions := options
@@ -196,6 +230,7 @@ func (s *fieldSynthesizer) ensureHelperType(helperPath []string, fieldPath []str
 			nestedOptions,
 			append(append([]string(nil), helperPath...), helperPathComponent(field)),
 			append(append([]string(nil), fieldPath...), field.Name),
+			typePath,
 		)
 		if !ok {
 			continue
@@ -206,8 +241,13 @@ func (s *fieldSynthesizer) ensureHelperType(helperPath []string, fieldPath []str
 		return "", false
 	}
 
+	containsSensitiveObservedStateFields := containsSensitiveObservedStateField(fields, options)
 	if index, ok := s.helperIndex[typeName]; ok {
-		if helperFieldShapesEqual(s.helperTypes[index].Fields, helperFields) || len(options.excludedFieldPaths) == 0 {
+		existingHelperContainsSensitiveFields := options.scope == fieldScopeStatus && s.helperTypeContainsSensitiveFields(index, make(map[string]struct{}))
+		if helperFieldShapesEqual(s.helperTypes[index].Fields, helperFields) && !existingHelperContainsSensitiveFields {
+			return s.helperTypes[index].Name, true
+		}
+		if !existingHelperContainsSensitiveFields && !containsSensitiveObservedStateFields && len(options.excludedFieldPaths) == 0 {
 			return s.helperTypes[index].Name, true
 		}
 		typeName = s.uniqueScopedHelperTypeName(typeName, helperFields, options.scope)
@@ -309,6 +349,110 @@ func isObservedStateFieldExcluded(fieldPath []string, options fieldRenderingOpti
 	return excluded
 }
 
+var sensitiveObservedStateFieldNames = map[string]struct{}{
+	"BgpMd5AuthKey":           {},
+	"ChapSecret":              {},
+	"InstanceCredentials":     {},
+	"Password":                {},
+	"PrivateKeyPem":           {},
+	"PrivateKeyPemPassphrase": {},
+	"Secret":                  {},
+	"SecretBundleContent":     {},
+	"SharedSecret":            {},
+	"SwiftPassword":           {},
+	"Token":                   {},
+}
+
+var sensitiveObservedStateJSONNames = map[string]struct{}{
+	"bgpMd5AuthKey":           {},
+	"chapSecret":              {},
+	"instanceCredentials":     {},
+	"password":                {},
+	"privateKeyPem":           {},
+	"privateKeyPemPassphrase": {},
+	"secret":                  {},
+	"secretBundleContent":     {},
+	"sharedSecret":            {},
+	"swiftPassword":           {},
+	"token":                   {},
+}
+
+func isSensitiveObservedStateField(field ocisdk.Field, options fieldRenderingOptions) bool {
+	if options.scope != fieldScopeStatus {
+		return false
+	}
+	if _, sensitive := sensitiveObservedStateFieldNames[field.Name]; sensitive {
+		return true
+	}
+	jsonName := field.JSONName
+	if jsonName == "" {
+		jsonName = lowerCamel(field.Name)
+	}
+	_, sensitive := sensitiveObservedStateJSONNames[jsonName]
+	return sensitive
+}
+
+func containsSensitiveObservedStateField(fields []ocisdk.Field, options fieldRenderingOptions) bool {
+	if options.scope != fieldScopeStatus {
+		return false
+	}
+	for _, field := range fields {
+		if isSensitiveObservedStateField(field, options) {
+			return true
+		}
+		if containsSensitiveObservedStateField(field.NestedFields, options) {
+			return true
+		}
+	}
+	return false
+}
+
+func (s *fieldSynthesizer) renderedTypeReferencesSensitiveHelper(typeExpr string, seen map[string]struct{}) bool {
+	typeName := underlyingTypeName(typeExpr)
+	if typeName == "" {
+		return false
+	}
+	index, ok := s.helperIndex[typeName]
+	if !ok {
+		return false
+	}
+	if seen == nil {
+		seen = make(map[string]struct{})
+	}
+	return s.helperTypeContainsSensitiveFields(index, seen)
+}
+
+func (s *fieldSynthesizer) helperTypeContainsSensitiveFields(index int, seen map[string]struct{}) bool {
+	helperType := s.helperTypes[index]
+	if _, ok := seen[helperType.Name]; ok {
+		return false
+	}
+	seen[helperType.Name] = struct{}{}
+
+	for _, field := range helperType.Fields {
+		if isSensitiveGeneratedField(field) {
+			return true
+		}
+		nestedTypeName := underlyingTypeName(field.Type)
+		if nestedTypeName == "" {
+			continue
+		}
+		nestedIndex, ok := s.helperIndex[nestedTypeName]
+		if ok && s.helperTypeContainsSensitiveFields(nestedIndex, seen) {
+			return true
+		}
+	}
+	return false
+}
+
+func isSensitiveGeneratedField(field FieldModel) bool {
+	if _, sensitive := sensitiveObservedStateFieldNames[field.Name]; sensitive {
+		return true
+	}
+	_, sensitive := sensitiveObservedStateJSONNames[tagJSONName(field.Tag)]
+	return sensitive
+}
+
 func sharedSchemaType(field ocisdk.Field) (string, bool) {
 	if field.Type == "map[string]map[string]interface{}" {
 		return "map[string]shared.MapValue", true
@@ -383,6 +527,32 @@ func underlyingTypeName(typeExpr string) string {
 	default:
 		return trimmed
 	}
+}
+
+func isRecursiveFieldType(typeName string, typePath []string) bool {
+	typeName = strings.TrimSpace(typeName)
+	if typeName == "" {
+		return false
+	}
+	for _, visited := range typePath {
+		if strings.TrimSpace(visited) == typeName {
+			return true
+		}
+	}
+	return false
+}
+
+func appendTypePath(typePath []string, typeName string) []string {
+	typeName = strings.TrimSpace(typeName)
+	if typeName == "" {
+		return append([]string(nil), typePath...)
+	}
+	next := append([]string(nil), typePath...)
+	return append(next, typeName)
+}
+
+func recursiveSchemaType(typeExpr string) (string, bool) {
+	return wrapRenderedType(typeExpr, "shared.JSONValue")
 }
 
 func helperPathComponent(field ocisdk.Field) string {

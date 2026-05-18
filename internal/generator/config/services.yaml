@@ -144,6 +144,31 @@ services:
           serviceManager:
             strategy: none
 
+  - service: aidataplatform
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/aidataplatform
+    group: aidataplatform
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - AiDataPlatform
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
   - service: aidocument
     sdkPackage: github.com/oracle/oci-go-sdk/v65/aidocument
     group: aidocument
@@ -409,6 +434,31 @@ services:
           serviceManager:
             strategy: none
 
+  - service: announcementsservice
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/announcementsservice
+    group: announcementsservice
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - AnnouncementSubscription
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
   - service: apiaccesscontrol
     sdkPackage: github.com/oracle/oci-go-sdk/v65/apiaccesscontrol
     group: apiaccesscontrol
@@ -547,6 +597,75 @@ services:
           serviceManager:
             strategy: none
 
+  - service: apmconfig
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/apmconfig
+    group: apmconfig
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Config
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: Config
+          formalSpec: config
+          async:
+            strategy: none
+            runtime: generatedruntime
+            formalClassification: none
+          specFields:
+            - name: ApmDomainId
+              type: string
+              tag: 'json:"apmDomainId"'
+              comments:
+                - The APM Domain ID the request is intended for.
+              markers:
+                - +kubebuilder:validation:Required
+            - name: ConfigType
+              type: string
+              tag: 'json:"configType"'
+              comments:
+                - The discriminator that selects which OCI Config subtype to create or update.
+                - Supported values are `SPAN_FILTER`, `METRIC_GROUP`, `APDEX`, `OPTIONS`, `AGENT`, and `MACS_APM_EXTENSION`.
+              markers:
+                - +kubebuilder:validation:Required
+                - +kubebuilder:validation:Enum=SPAN_FILTER;METRIC_GROUP;APDEX;OPTIONS;AGENT;MACS_APM_EXTENSION
+          statusFields:
+            - name: ApmDomainId
+              type: string
+              tag: 'json:"apmDomainId,omitempty"'
+              comments:
+                - The bound APM Domain ID used to address this configuration item.
+          sample:
+            body: |-
+              #
+              # Replace the APM Domain OCID below before running e2e.
+              # Set spec.configType first, then only populate the top-level fields that belong to that subtype.
+              # Update metadata.name or spec.displayName if you want to force a fresh create instead of
+              # binding to an existing Config with the same apmDomainId, configType, and matching subtype fields.
+              #
+              apiVersion: apmconfig.oracle.com/v1beta1
+              kind: Config
+              metadata:
+                name: config-sample
+              spec:
+                apmDomainId: ocid1.apmdomain.oc1..exampleuniqueID
+                configType: SPAN_FILTER
+                displayName: span-filter-sample
+                filterText: 'service.name = "checkout"'
+                description: Sample span filter managed by OCI Service Operator
+
   - service: apmcontrolplane
     sdkPackage: github.com/oracle/oci-go-sdk/v65/apmcontrolplane
     group: apmcontrolplane
@@ -623,9 +742,9 @@ services:
           serviceManager:
             strategy: none
 
-  - service: apmconfig
-    sdkPackage: github.com/oracle/oci-go-sdk/v65/apmconfig
-    group: apmconfig
+  - service: apmsynthetics
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/apmsynthetics
+    group: apmsynthetics
     version: v1beta1
     phase: eventing-messaging-and-observability
     packageProfile: controller-backed
@@ -633,7 +752,12 @@ services:
       enabled: true
       mode: explicit
       includeKinds:
-        - Config
+        - Script
+    observedState:
+      excludedFieldPaths:
+        Script:
+          - Content
+          - Parameters
     generation:
       controller:
         strategy: generated
@@ -644,8 +768,8 @@ services:
       webhooks:
         strategy: none
       resources:
-        - kind: Config
-          formalSpec: config
+        - kind: Script
+          formalSpec: script
           async:
             strategy: none
             runtime: generatedruntime
@@ -658,39 +782,91 @@ services:
                 - The APM Domain ID the request is intended for.
               markers:
                 - +kubebuilder:validation:Required
-            - name: ConfigType
-              type: string
-              tag: 'json:"configType"'
-              comments:
-                - The discriminator that selects which OCI Config subtype to create or update.
-                - Supported values are `SPAN_FILTER`, `METRIC_GROUP`, `APDEX`, `OPTIONS`, `AGENT`, and `MACS_APM_EXTENSION`.
-              markers:
-                - +kubebuilder:validation:Required
-                - +kubebuilder:validation:Enum=SPAN_FILTER;METRIC_GROUP;APDEX;OPTIONS;AGENT;MACS_APM_EXTENSION
           statusFields:
             - name: ApmDomainId
               type: string
               tag: 'json:"apmDomainId,omitempty"'
               comments:
-                - The bound APM Domain ID used to address this configuration item.
+                - The bound APM Domain ID used to address this script.
           sample:
             body: |-
               #
               # Replace the APM Domain OCID below before running e2e.
-              # Set spec.configType first, then only populate the top-level fields that belong to that subtype.
               # Update metadata.name or spec.displayName if you want to force a fresh create instead of
-              # binding to an existing Config with the same apmDomainId, configType, and matching subtype fields.
+              # binding to an existing Script with the same apmDomainId, displayName, and contentType.
               #
-              apiVersion: apmconfig.oracle.com/v1beta1
-              kind: Config
+              apiVersion: apmsynthetics.oracle.com/v1beta1
+              kind: Script
               metadata:
-                name: config-sample
+                name: script-sample
               spec:
                 apmDomainId: ocid1.apmdomain.oc1..exampleuniqueID
-                configType: SPAN_FILTER
-                displayName: span-filter-sample
-                filterText: 'service.name = "checkout"'
-                description: Sample span filter managed by OCI Service Operator
+                displayName: script-sample
+                contentType: JS
+                content: "console.log('apmsynthetics script sample');"
+                contentFileName: script-sample.js
+                freeformTags:
+                  managed-by: oci-service-operator
+
+  - service: apmtraces
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/apmtraces
+    group: apmtraces
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - ScheduledQuery
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: ScheduledQuery
+          formalSpec: scheduledquery
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+          specFields:
+            - name: ApmDomainId
+              type: string
+              tag: 'json:"apmDomainId"'
+              comments:
+                - The APM Domain ID the request is intended for.
+              markers:
+                - +kubebuilder:validation:Required
+          statusFields:
+            - name: ApmDomainId
+              type: string
+              tag: 'json:"apmDomainId,omitempty"'
+              comments:
+                - The bound APM Domain ID used to address this scheduled query.
+          sample:
+            body: |-
+              #
+              # Replace the APM Domain OCID below before running e2e.
+              # Update metadata.name or spec.scheduledQueryName if you want to force a fresh create instead of
+              # binding to an existing ScheduledQuery with the same apmDomainId and exact scheduledQueryName.
+              #
+              apiVersion: apmtraces.oracle.com/v1beta1
+              kind: ScheduledQuery
+              metadata:
+                name: scheduledquery-sample
+              spec:
+                apmDomainId: ocid1.apmdomain.oc1..exampleuniqueID
+                scheduledQueryName: scheduled-query-sample
+                scheduledQueryProcessingType: QUERY
+                scheduledQueryText: 'show spans where service.name = "checkout"'
+                scheduledQuerySchedule: '0 */12 * * *'
+                scheduledQueryDescription: Sample scheduled query managed by OCI Service Operator
 
   - service: appmgmtcontrol
     sdkPackage: github.com/oracle/oci-go-sdk/v65/appmgmtcontrol
@@ -759,132 +935,6 @@ services:
               spec:
                 instanceId: ocid1.instance.oc1..exampleuniqueID
 
-  - service: apmtraces
-    sdkPackage: github.com/oracle/oci-go-sdk/v65/apmtraces
-    group: apmtraces
-    version: v1beta1
-    phase: eventing-messaging-and-observability
-    packageProfile: controller-backed
-    selection:
-      enabled: true
-      mode: explicit
-      includeKinds:
-        - ScheduledQuery
-    generation:
-      controller:
-        strategy: generated
-      serviceManager:
-        strategy: generated
-      registration:
-        strategy: generated
-      webhooks:
-        strategy: none
-      resources:
-        - kind: ScheduledQuery
-          formalSpec: scheduledquery
-          async:
-            strategy: lifecycle
-            runtime: generatedruntime
-            formalClassification: lifecycle
-          specFields:
-            - name: ApmDomainId
-              type: string
-              tag: 'json:"apmDomainId"'
-              comments:
-                - The APM Domain ID the request is intended for.
-              markers:
-                - +kubebuilder:validation:Required
-          statusFields:
-            - name: ApmDomainId
-              type: string
-              tag: 'json:"apmDomainId,omitempty"'
-              comments:
-                - The bound APM Domain ID used to address this scheduled query.
-          sample:
-            body: |-
-              #
-              # Replace the APM Domain OCID below before running e2e.
-              # Update metadata.name or spec.scheduledQueryName if you want to force a fresh create instead of
-              # binding to an existing ScheduledQuery with the same apmDomainId and exact scheduledQueryName.
-              #
-              apiVersion: apmtraces.oracle.com/v1beta1
-              kind: ScheduledQuery
-              metadata:
-                name: scheduledquery-sample
-              spec:
-                apmDomainId: ocid1.apmdomain.oc1..exampleuniqueID
-                scheduledQueryName: scheduled-query-sample
-                scheduledQueryProcessingType: QUERY
-                scheduledQueryText: 'show spans where service.name = "checkout"'
-                scheduledQuerySchedule: '0 */12 * * *'
-                scheduledQueryDescription: Sample scheduled query managed by OCI Service Operator
-
-  - service: apmsynthetics
-    sdkPackage: github.com/oracle/oci-go-sdk/v65/apmsynthetics
-    group: apmsynthetics
-    version: v1beta1
-    phase: eventing-messaging-and-observability
-    packageProfile: controller-backed
-    selection:
-      enabled: true
-      mode: explicit
-      includeKinds:
-        - Script
-    observedState:
-      excludedFieldPaths:
-        Script:
-          - Content
-          - Parameters
-    generation:
-      controller:
-        strategy: generated
-      serviceManager:
-        strategy: generated
-      registration:
-        strategy: generated
-      webhooks:
-        strategy: none
-      resources:
-        - kind: Script
-          formalSpec: script
-          async:
-            strategy: none
-            runtime: generatedruntime
-            formalClassification: none
-          specFields:
-            - name: ApmDomainId
-              type: string
-              tag: 'json:"apmDomainId"'
-              comments:
-                - The APM Domain ID the request is intended for.
-              markers:
-                - +kubebuilder:validation:Required
-          statusFields:
-            - name: ApmDomainId
-              type: string
-              tag: 'json:"apmDomainId,omitempty"'
-              comments:
-                - The bound APM Domain ID used to address this script.
-          sample:
-            body: |-
-              #
-              # Replace the APM Domain OCID below before running e2e.
-              # Update metadata.name or spec.displayName if you want to force a fresh create instead of
-              # binding to an existing Script with the same apmDomainId, displayName, and contentType.
-              #
-              apiVersion: apmsynthetics.oracle.com/v1beta1
-              kind: Script
-              metadata:
-                name: script-sample
-              spec:
-                apmDomainId: ocid1.apmdomain.oc1..exampleuniqueID
-                displayName: script-sample
-                contentType: JS
-                content: "console.log('apmsynthetics script sample');"
-                contentFileName: script-sample.js
-                freeformTags:
-                  managed-by: oci-service-operator
-
   - service: artifacts
     sdkPackage: github.com/oracle/oci-go-sdk/v65/artifacts
     group: artifacts
@@ -912,6 +962,32 @@ services:
       webhooks:
         strategy: none
 
+  - service: autoscaling
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/autoscaling
+    group: autoscaling
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - AutoScalingConfiguration
+        - AutoScalingPolicy
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
   - service: bastion
     sdkPackage: github.com/oracle/oci-go-sdk/v65/bastion
     group: bastion
@@ -924,6 +1000,34 @@ services:
       includeKinds:
         - Bastion
         - Session
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: batch
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/batch
+    group: batch
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - BatchContext
+        - BatchJobPool
+        - BatchTaskEnvironment
+        - BatchTaskProfile
     async:
       strategy: lifecycle
       runtime: generatedruntime
@@ -1014,6 +1118,33 @@ services:
             strategy: none
           serviceManager:
             strategy: none
+
+  - service: blockchain
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/blockchain
+    group: blockchain
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - BlockchainPlatform
+        - Osn
+        - Peer
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
 
   - service: budget
     sdkPackage: github.com/oracle/oci-go-sdk/v65/budget
@@ -1165,6 +1296,104 @@ services:
       webhooks:
         strategy: none
 
+  - service: cloudbridge
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/cloudbridge
+    group: cloudbridge
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Agent
+        - AgentDependency
+        - Asset
+        - AssetSource
+        - DiscoverySchedule
+        - Environment
+        - Inventory
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: cloudguard
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/cloudguard
+    group: cloudguard
+    version: v1beta1
+    phase: security-and-identity
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - AdhocQuery
+        - DataMaskRule
+        - DataSource
+        - DetectorRecipe
+        - DetectorRecipeDetectorRule
+        - ManagedList
+        - ResponderRecipe
+        - SavedQuery
+        - SecurityRecipe
+        - SecurityZone
+        - Target
+        - TargetDetectorRecipe
+        - TargetResponderRecipe
+        - WlpAgent
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: cloudmigrations
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/cloudmigrations
+    group: cloudmigrations
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Migration
+        - MigrationAsset
+        - MigrationPlan
+        - ReplicationSchedule
+        - TargetAsset
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
   - service: clusterplacementgroups
     sdkPackage: github.com/oracle/oci-go-sdk/v65/clusterplacementgroups
     group: clusterplacementgroups
@@ -1219,6 +1448,32 @@ services:
       sdkAliases:
         WorkRequestLog:
           - WorkRequestLogEntry
+
+  - service: computecloudatcustomer
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/computecloudatcustomer
+    group: computecloudatcustomer
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - CccInfrastructure
+        - CccUpgradeSchedule
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
 
   - service: computeinstanceagent
     sdkPackage: github.com/oracle/oci-go-sdk/v65/computeinstanceagent
@@ -1762,17 +2017,18 @@ services:
         WindowsInstanceInitialCredential:
           - Password
 
-  - service: dataflow
-    sdkPackage: github.com/oracle/oci-go-sdk/v65/dataflow
-    group: dataflow
+  - service: dashboardservice
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/dashboardservice
+    group: dashboardservice
     version: v1beta1
-    phase: data-and-storage
+    phase: eventing-messaging-and-observability
     packageProfile: controller-backed
     selection:
       enabled: true
       mode: explicit
       includeKinds:
-        - Application
+        - DashboardGroup
+        - Dashboard
     generation:
       controller:
         strategy: generated
@@ -1783,37 +2039,26 @@ services:
       webhooks:
         strategy: none
       resources:
-        - kind: Application
-          formalSpec: application
+        - kind: DashboardGroup
+          formalSpec: dashboardgroup
           async:
             strategy: lifecycle
             runtime: generatedruntime
             formalClassification: lifecycle
-          serviceManager:
-            packagePath: dataflow/application
-          sample:
-            body: |-
-              #
-              # Replace the OCI identifiers and Object Storage URI below before running e2e.
-              # Update metadata.name and spec.displayName if you want to force a fresh create
-              # instead of reusing an existing Application with the same display name in the
-              # same compartment.
-              # Replace the starter shapes and Spark version with values currently supported in
-              # your region if needed.
-              #
-              apiVersion: dataflow.oracle.com/v1beta1
-              kind: Application
-              metadata:
-                name: application-sample
-              spec:
-                compartmentId: ocid1.compartment.oc1..exampleuniqueID
-                displayName: "application-sample"
-                driverShape: "VM.Standard.E4.Flex"
-                executorShape: "VM.Standard.E4.Flex"
-                language: "PYTHON"
-                numExecutors: 2
-                sparkVersion: "3.5.0"
-                fileUri: "oci://bucket@namespace/app/main.py"
+        - kind: Dashboard
+          formalSpec: dashboard
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+          specFields:
+            - name: JsonData
+              type: string
+              tag: 'json:"-"'
+          statusFields:
+            - name: JsonData
+              type: string
+              tag: 'json:"-"'
 
   - service: database
     sdkPackage: github.com/oracle/oci-go-sdk/v65/database
@@ -1869,58 +2114,6 @@ services:
                 - The referenced Secret must contain a `password` key. Use `secretId` and `secretVersionNumber` instead to reference an OCI Vault secret.
               markers:
                 - +kubebuilder:validation:Optional
-
-  - service: databasetools
-    sdkPackage: github.com/oracle/oci-go-sdk/v65/databasetools
-    group: databasetools
-    version: v1beta1
-    phase: data-and-storage
-    packageProfile: controller-backed
-    selection:
-      enabled: true
-      mode: explicit
-      includeKinds:
-        - DatabaseToolsConnection
-    generation:
-      controller:
-        strategy: generated
-      serviceManager:
-        strategy: generated
-      registration:
-        strategy: generated
-      webhooks:
-        strategy: none
-      resources:
-        - kind: DatabaseToolsConnection
-          formalSpec: databasetoolsconnection
-          async:
-            strategy: lifecycle
-            runtime: generatedruntime
-        - kind: DatabaseToolsEndpointService
-          controller:
-            strategy: none
-          serviceManager:
-            strategy: none
-        - kind: DatabaseToolsPrivateEndpoint
-          controller:
-            strategy: none
-          serviceManager:
-            strategy: none
-        - kind: WorkRequest
-          controller:
-            strategy: none
-          serviceManager:
-            strategy: none
-        - kind: WorkRequestError
-          controller:
-            strategy: none
-          serviceManager:
-            strategy: none
-        - kind: WorkRequestLog
-          controller:
-            strategy: none
-          serviceManager:
-            strategy: none
 
   - service: databasemigration
     sdkPackage: github.com/oracle/oci-go-sdk/v65/databasemigration
@@ -2037,6 +2230,445 @@ services:
                 freeformTags:
                   managed-by: oci-service-operator
 
+  - service: databasetools
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/databasetools
+    group: databasetools
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - DatabaseToolsConnection
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: DatabaseToolsConnection
+          formalSpec: databasetoolsconnection
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+        - kind: DatabaseToolsEndpointService
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: DatabaseToolsPrivateEndpoint
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequest
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequestError
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequestLog
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+
+  - service: datacatalog
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/datacatalog
+    group: datacatalog
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Attribute
+        - AttributeTag
+        - Catalog
+        - CatalogPrivateEndpoint
+        - Connection
+        - CustomProperty
+        - DataAsset
+        - DataAssetTag
+        - Entity
+        - EntityTag
+        - Folder
+        - FolderTag
+        - Glossary
+        - Job
+        - JobDefinition
+        - Metastore
+        - Namespace
+        - Pattern
+        - Term
+        - TermRelationship
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: dataflow
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/dataflow
+    group: dataflow
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Application
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: Application
+          formalSpec: application
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+          serviceManager:
+            packagePath: dataflow/application
+          sample:
+            body: |-
+              #
+              # Replace the OCI identifiers and Object Storage URI below before running e2e.
+              # Update metadata.name and spec.displayName if you want to force a fresh create
+              # instead of reusing an existing Application with the same display name in the
+              # same compartment.
+              # Replace the starter shapes and Spark version with values currently supported in
+              # your region if needed.
+              #
+              apiVersion: dataflow.oracle.com/v1beta1
+              kind: Application
+              metadata:
+                name: application-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                displayName: "application-sample"
+                driverShape: "VM.Standard.E4.Flex"
+                executorShape: "VM.Standard.E4.Flex"
+                language: "PYTHON"
+                numExecutors: 2
+                sparkVersion: "3.5.0"
+                fileUri: "oci://bucket@namespace/app/main.py"
+
+  - service: dataintegration
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/dataintegration
+    group: dataintegration
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Application
+        - ApplicationDetailedDescription
+        - Connection
+        - ConnectionValidation
+        - CopyObjectRequest
+        - DataAsset
+        - DataFlow
+        - DataFlowValidation
+        - DisApplication
+        - DisApplicationDetailedDescription
+        - ExportRequest
+        - ExternalPublication
+        - ExternalPublicationValidation
+        - Folder
+        - FunctionLibrary
+        - ImportRequest
+        - Patch
+        - Pipeline
+        - PipelineValidation
+        - Project
+        - Schedule
+        - Task
+        - TaskRun
+        - TaskSchedule
+        - TaskValidation
+        - UserDefinedFunction
+        - UserDefinedFunctionValidation
+        - Workspace
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: DataFlow
+          specFields:
+            - name: Nodes
+              type: '[]shared.JSONValue'
+              tag: 'json:"nodes,omitempty"'
+            - name: Parameters
+              type: '[]shared.JSONValue'
+              tag: 'json:"parameters,omitempty"'
+            - name: FlowConfigValues
+              type: shared.JSONValue
+              tag: 'json:"flowConfigValues,omitempty"'
+          statusFields:
+            - name: Nodes
+              type: '[]shared.JSONValue'
+              tag: 'json:"nodes,omitempty"'
+            - name: Parameters
+              type: '[]shared.JSONValue'
+              tag: 'json:"parameters,omitempty"'
+            - name: FlowConfigValues
+              type: shared.JSONValue
+              tag: 'json:"flowConfigValues,omitempty"'
+            - name: Metadata
+              type: shared.JSONValue
+              tag: 'json:"metadata,omitempty"'
+            - name: TypedObjectMap
+              type: 'map[string]shared.JSONValue'
+              tag: 'json:"typedObjectMap,omitempty"'
+            - name: TargetFieldMapSummary
+              type: 'map[string]shared.JSONValue'
+              tag: 'json:"targetFieldMapSummary,omitempty"'
+        - kind: DataFlowValidation
+          specFields:
+            - name: Nodes
+              type: '[]shared.JSONValue'
+              tag: 'json:"nodes,omitempty"'
+            - name: Parameters
+              type: '[]shared.JSONValue'
+              tag: 'json:"parameters,omitempty"'
+            - name: FlowConfigValues
+              type: shared.JSONValue
+              tag: 'json:"flowConfigValues,omitempty"'
+            - name: Metadata
+              type: shared.JSONValue
+              tag: 'json:"metadata,omitempty"'
+            - name: TypedObjectMap
+              type: 'map[string]shared.JSONValue'
+              tag: 'json:"typedObjectMap,omitempty"'
+            - name: TargetFieldMapSummary
+              type: 'map[string]shared.JSONValue'
+              tag: 'json:"targetFieldMapSummary,omitempty"'
+        - kind: Pipeline
+          specFields:
+            - name: Nodes
+              type: '[]shared.JSONValue'
+              tag: 'json:"nodes,omitempty"'
+            - name: Parameters
+              type: '[]shared.JSONValue'
+              tag: 'json:"parameters,omitempty"'
+            - name: FlowConfigValues
+              type: shared.JSONValue
+              tag: 'json:"flowConfigValues,omitempty"'
+            - name: Variables
+              type: '[]shared.JSONValue'
+              tag: 'json:"variables,omitempty"'
+          statusFields:
+            - name: Nodes
+              type: '[]shared.JSONValue'
+              tag: 'json:"nodes,omitempty"'
+            - name: Parameters
+              type: '[]shared.JSONValue'
+              tag: 'json:"parameters,omitempty"'
+            - name: FlowConfigValues
+              type: shared.JSONValue
+              tag: 'json:"flowConfigValues,omitempty"'
+            - name: Variables
+              type: '[]shared.JSONValue'
+              tag: 'json:"variables,omitempty"'
+            - name: Metadata
+              type: shared.JSONValue
+              tag: 'json:"metadata,omitempty"'
+        - kind: PipelineValidation
+          specFields:
+            - name: Nodes
+              type: '[]shared.JSONValue'
+              tag: 'json:"nodes,omitempty"'
+            - name: Parameters
+              type: '[]shared.JSONValue'
+              tag: 'json:"parameters,omitempty"'
+            - name: FlowConfigValues
+              type: shared.JSONValue
+              tag: 'json:"flowConfigValues,omitempty"'
+            - name: Variables
+              type: '[]shared.JSONValue'
+              tag: 'json:"variables,omitempty"'
+            - name: Metadata
+              type: shared.JSONValue
+              tag: 'json:"metadata,omitempty"'
+        - kind: Task
+          specFields:
+            - name: InputPorts
+              type: '[]shared.JSONValue'
+              tag: 'json:"inputPorts,omitempty"'
+            - name: OutputPorts
+              type: '[]shared.JSONValue'
+              tag: 'json:"outputPorts,omitempty"'
+            - name: Parameters
+              type: '[]shared.JSONValue'
+              tag: 'json:"parameters,omitempty"'
+            - name: OpConfigValues
+              type: shared.JSONValue
+              tag: 'json:"opConfigValues,omitempty"'
+            - name: ConfigProviderDelegate
+              type: shared.JSONValue
+              tag: 'json:"configProviderDelegate,omitempty"'
+            - name: RegistryMetadata
+              type: shared.JSONValue
+              tag: 'json:"registryMetadata"'
+            - name: DataFlow
+              type: shared.JSONValue
+              tag: 'json:"dataFlow,omitempty"'
+            - name: ConditionalCompositeFieldMap
+              type: shared.JSONValue
+              tag: 'json:"conditionalCompositeFieldMap,omitempty"'
+            - name: Pipeline
+              type: shared.JSONValue
+              tag: 'json:"pipeline,omitempty"'
+            - name: DataflowApplication
+              type: shared.JSONValue
+              tag: 'json:"dataflowApplication,omitempty"'
+            - name: DriverShapeDetails
+              type: shared.JSONValue
+              tag: 'json:"driverShapeDetails,omitempty"'
+            - name: ExecutorShapeDetails
+              type: shared.JSONValue
+              tag: 'json:"executorShapeDetails,omitempty"'
+            - name: Script
+              type: shared.JSONValue
+              tag: 'json:"script,omitempty"'
+            - name: AuthDetails
+              type: shared.JSONValue
+              tag: 'json:"authDetails,omitempty"'
+            - name: AuthConfig
+              type: shared.JSONValue
+              tag: 'json:"authConfig,omitempty"'
+            - name: Endpoint
+              type: shared.JSONValue
+              tag: 'json:"endpoint,omitempty"'
+            - name: CancelEndpoint
+              type: shared.JSONValue
+              tag: 'json:"cancelEndpoint,omitempty"'
+            - name: ExecuteRestCallConfig
+              type: shared.JSONValue
+              tag: 'json:"executeRestCallConfig,omitempty"'
+            - name: CancelRestCallConfig
+              type: shared.JSONValue
+              tag: 'json:"cancelRestCallConfig,omitempty"'
+            - name: PollRestCallConfig
+              type: shared.JSONValue
+              tag: 'json:"pollRestCallConfig,omitempty"'
+            - name: TypedExpressions
+              type: '[]shared.JSONValue'
+              tag: 'json:"typedExpressions,omitempty"'
+          statusFields:
+            - name: InputPorts
+              type: '[]shared.JSONValue'
+              tag: 'json:"inputPorts,omitempty"'
+            - name: OutputPorts
+              type: '[]shared.JSONValue'
+              tag: 'json:"outputPorts,omitempty"'
+            - name: Parameters
+              type: '[]shared.JSONValue'
+              tag: 'json:"parameters,omitempty"'
+            - name: OpConfigValues
+              type: shared.JSONValue
+              tag: 'json:"opConfigValues,omitempty"'
+            - name: ConfigProviderDelegate
+              type: shared.JSONValue
+              tag: 'json:"configProviderDelegate,omitempty"'
+            - name: Metadata
+              type: shared.JSONValue
+              tag: 'json:"metadata,omitempty"'
+            - name: RegistryMetadata
+              type: shared.JSONValue
+              tag: 'json:"registryMetadata,omitempty"'
+            - name: Pipeline
+              type: shared.JSONValue
+              tag: 'json:"pipeline,omitempty"'
+            - name: DataFlow
+              type: shared.JSONValue
+              tag: 'json:"dataFlow,omitempty"'
+            - name: Script
+              type: shared.JSONValue
+              tag: 'json:"script,omitempty"'
+            - name: AuthDetails
+              type: shared.JSONValue
+              tag: 'json:"authDetails,omitempty"'
+            - name: AuthConfig
+              type: shared.JSONValue
+              tag: 'json:"authConfig,omitempty"'
+            - name: Endpoint
+              type: shared.JSONValue
+              tag: 'json:"endpoint,omitempty"'
+            - name: CancelEndpoint
+              type: shared.JSONValue
+              tag: 'json:"cancelEndpoint,omitempty"'
+            - name: ExecuteRestCallConfig
+              type: shared.JSONValue
+              tag: 'json:"executeRestCallConfig,omitempty"'
+            - name: CancelRestCallConfig
+              type: shared.JSONValue
+              tag: 'json:"cancelRestCallConfig,omitempty"'
+            - name: PollRestCallConfig
+              type: shared.JSONValue
+              tag: 'json:"pollRestCallConfig,omitempty"'
+            - name: TypedExpressions
+              type: '[]shared.JSONValue'
+              tag: 'json:"typedExpressions,omitempty"'
+            - name: DataflowApplication
+              type: shared.JSONValue
+              tag: 'json:"dataflowApplication,omitempty"'
+            - name: DriverShapeDetails
+              type: shared.JSONValue
+              tag: 'json:"driverShapeDetails,omitempty"'
+            - name: ExecutorShapeDetails
+              type: shared.JSONValue
+              tag: 'json:"executorShapeDetails,omitempty"'
+            - name: ConditionalCompositeFieldMap
+              type: shared.JSONValue
+              tag: 'json:"conditionalCompositeFieldMap,omitempty"'
+        - kind: TaskValidation
+          specFields:
+            - name: DataFlow
+              type: shared.JSONValue
+              tag: 'json:"dataFlow,omitempty"'
+            - name: Pipeline
+              type: shared.JSONValue
+              tag: 'json:"pipeline,omitempty"'
+
   - service: datalabelingservice
     sdkPackage: github.com/oracle/oci-go-sdk/v65/datalabelingservice
     group: datalabelingservice
@@ -2121,6 +2753,86 @@ services:
             strategy: none
           serviceManager:
             strategy: none
+
+  - service: datalabelingservicedataplane
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/datalabelingservicedataplane
+    group: datalabelingservicedataplane
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Annotation
+        - Record
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: datasafe
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/datasafe
+    group: datasafe
+    version: v1beta1
+    phase: security-and-identity
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - AlertPolicy
+        - AlertPolicyRule
+        - AttributeSet
+        - AuditArchiveRetrieval
+        - AuditProfile
+        - DataSafePrivateEndpoint
+        - DiscoveryJob
+        - LibraryMaskingFormat
+        - MaskingColumn
+        - MaskingPolicy
+        - OnPremConnector
+        - PeerTargetDatabase
+        - ReferentialRelation
+        - ReportDefinition
+        - SdmMaskingPolicyDifference
+        - SecurityAssessment
+        - SecurityPolicy
+        - SecurityPolicyConfig
+        - SecurityPolicyDeployment
+        - SensitiveColumn
+        - SensitiveDataModel
+        - SensitiveType
+        - SensitiveTypeGroup
+        - SensitiveTypesExport
+        - SqlCollection
+        - TargetAlertPolicyAssociation
+        - TargetDatabase
+        - TargetDatabaseGroup
+        - UnifiedAuditPolicy
+        - UserAssessment
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
 
   - service: datascience
     sdkPackage: github.com/oracle/oci-go-sdk/v65/datascience
@@ -2264,18 +2976,30 @@ services:
           serviceManager:
             strategy: none
 
-  - service: dashboardservice
-    sdkPackage: github.com/oracle/oci-go-sdk/v65/dashboardservice
-    group: dashboardservice
+  - service: dbmulticloud
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/dbmulticloud
+    group: dbmulticloud
     version: v1beta1
-    phase: eventing-messaging-and-observability
+    phase: data-and-storage
     packageProfile: controller-backed
     selection:
       enabled: true
       mode: explicit
       includeKinds:
-        - DashboardGroup
-        - Dashboard
+        - MultiCloudResourceDiscovery
+        - OracleDbAwsIdentityConnector
+        - OracleDbAwsKey
+        - OracleDbAzureBlobContainer
+        - OracleDbAzureBlobMount
+        - OracleDbAzureConnector
+        - OracleDbAzureVault
+        - OracleDbAzureVaultAssociation
+        - OracleDbGcpIdentityConnector
+        - OracleDbGcpKeyRing
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
     generation:
       controller:
         strategy: generated
@@ -2285,27 +3009,6 @@ services:
         strategy: generated
       webhooks:
         strategy: none
-      resources:
-        - kind: DashboardGroup
-          formalSpec: dashboardgroup
-          async:
-            strategy: lifecycle
-            runtime: generatedruntime
-            formalClassification: lifecycle
-        - kind: Dashboard
-          formalSpec: dashboard
-          async:
-            strategy: lifecycle
-            runtime: generatedruntime
-            formalClassification: lifecycle
-          specFields:
-            - name: JsonData
-              type: string
-              tag: 'json:"-"'
-          statusFields:
-            - name: JsonData
-              type: string
-              tag: 'json:"-"'
 
   - service: delegateaccesscontrol
     sdkPackage: github.com/oracle/oci-go-sdk/v65/delegateaccesscontrol
@@ -2367,6 +3070,111 @@ services:
                 description: Sample DelegationControl managed by OSOK
                 freeformTags:
                   managed-by: oci-service-operator
+
+  - service: demandsignal
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/demandsignal
+    group: demandsignal
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - OccDemandSignal
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: desktops
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/desktops
+    group: desktops
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - DesktopPool
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: devops
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/devops
+    group: devops
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Project
+        - Repository
+        - BuildPipeline
+        - DeployPipeline
+        - DeployArtifact
+        - Trigger
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: dif
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/dif
+    group: dif
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Stack
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
 
   - service: disasterrecovery
     sdkPackage: github.com/oracle/oci-go-sdk/v65/disasterrecovery
@@ -2450,36 +3258,6 @@ services:
                     memberId: ocid1.instance.oc1..exampleuniqueID
                 freeformTags:
                   managed-by: oci-service-operator
-
-  - service: devops
-    sdkPackage: github.com/oracle/oci-go-sdk/v65/devops
-    group: devops
-    version: v1beta1
-    phase: eventing-messaging-and-observability
-    packageProfile: controller-backed
-    selection:
-      enabled: true
-      mode: explicit
-      includeKinds:
-        - Project
-        - Repository
-        - BuildPipeline
-        - DeployPipeline
-        - DeployArtifact
-        - Trigger
-    async:
-      strategy: lifecycle
-      runtime: generatedruntime
-      formalClassification: lifecycle
-    generation:
-      controller:
-        strategy: generated
-      serviceManager:
-        strategy: generated
-      registration:
-        strategy: generated
-      webhooks:
-        strategy: none
 
   - service: distributeddatabase
     sdkPackage: github.com/oracle/oci-go-sdk/v65/distributeddatabase
@@ -2623,6 +3401,31 @@ services:
             runtime: generatedruntime
             formalClassification: lifecycle
 
+  - service: emwarehouse
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/emwarehouse
+    group: emwarehouse
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - EmWarehouse
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
   - service: events
     sdkPackage: github.com/oracle/oci-go-sdk/v65/events
     group: events
@@ -2634,6 +3437,107 @@ services:
       mode: explicit
       includeKinds:
         - Rule
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: filestorage
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/filestorage
+    group: filestorage
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Export
+        - FileSystem
+        - FilesystemSnapshotPolicy
+        - MountTarget
+        - OutboundConnector
+        - QuotaRule
+        - Replication
+        - Snapshot
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: fleetappsmanagement
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/fleetappsmanagement
+    group: fleetappsmanagement
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - CatalogItem
+        - CompliancePolicyRule
+        - Fleet
+        - FleetCredential
+        - FleetProperty
+        - FleetResource
+        - MaintenanceWindow
+        - Onboarding
+        - Patch
+        - PlatformConfiguration
+        - Property
+        - Provision
+        - Runbook
+        - RunbookVersion
+        - SchedulerDefinition
+        - TaskRecord
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: fleetsoftwareupdate
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/fleetsoftwareupdate
+    group: fleetsoftwareupdate
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - FsuAction
+        - FsuCollection
+        - FsuCycle
+        - FsuDiscovery
+        - FsuReadinessCheck
     async:
       strategy: lifecycle
       runtime: generatedruntime
@@ -2687,6 +3591,34 @@ services:
               - groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete
           serviceManager:
             packagePath: functions
+
+  - service: fusionapps
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/fusionapps
+    group: fusionapps
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - FusionEnvironment
+        - FusionEnvironmentFamily
+        - RefreshActivity
+        - ServiceAttachment
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
 
   - service: gdp
     sdkPackage: github.com/oracle/oci-go-sdk/v65/gdp
@@ -2854,78 +3786,6 @@ services:
                     namespaceName: object-storage-namespace
                     bucketName: generativeai-training-data
                     objectName: datasets/model-training.jsonl
-                freeformTags:
-                  managed-by: oci-service-operator
-
-  - service: generativeaidata
-    sdkPackage: github.com/oracle/oci-go-sdk/v65/generativeaidata
-    group: generativeaidata
-    version: v1beta1
-    phase: data-and-storage
-    packageProfile: controller-backed
-    selection:
-      enabled: true
-      mode: explicit
-      includeKinds:
-        - EnrichmentJob
-    generation:
-      controller:
-        strategy: generated
-      serviceManager:
-        strategy: generated
-      registration:
-        strategy: generated
-      webhooks:
-        strategy: none
-      resources:
-        - kind: EnrichmentJob
-          formalSpec: enrichmentjob
-          async:
-            strategy: lifecycle
-            runtime: generatedruntime
-            formalClassification: lifecycle
-          specFields:
-            - name: SemanticStoreId
-              type: string
-              tag: 'json:"semanticStoreId"'
-              comments:
-                - The OCID of the semantic store that scopes GenerateEnrichmentJob, GetEnrichmentJob, and CancelEnrichmentJob.
-              markers:
-                - +kubebuilder:validation:Required
-            - name: CompartmentId
-              type: string
-              tag: 'json:"compartmentId"'
-              comments:
-                - The compartment OCID used only for exact ListEnrichmentJobs lookup before a new job is generated.
-              markers:
-                - +kubebuilder:validation:Required
-          statusFields:
-            - name: CompartmentId
-              type: string
-              tag: 'json:"compartmentId,omitempty"'
-              comments:
-                - The bound compartment ID carried forward for exact ListEnrichmentJobs lookup and create-only drift validation.
-          sample:
-            body: |-
-              #
-              # Replace the semanticStoreId and compartmentId before running e2e. Creating this resource calls
-              # GenerateEnrichmentJob on the OCI service. Deleting the Kubernetes resource requests
-              # CancelEnrichmentJob and waits for the job to reach a terminal lifecycle state; it
-              # does not claim the OCI service exposes a plain delete operation for EnrichmentJob.
-              #
-              apiVersion: generativeaidata.oracle.com/v1beta1
-              kind: EnrichmentJob
-              metadata:
-                name: enrichmentjob-sample
-              spec:
-                semanticStoreId: ocid1.semanticstore.oc1..exampleuniqueID
-                compartmentId: ocid1.compartment.oc1..exampleuniqueID
-                enrichmentJobType: FULL_BUILD
-                enrichmentJobConfiguration:
-                  enrichmentJobType: FULL_BUILD
-                  schemaName: SALES
-                displayName: osok-generativeaidata-enrichmentjob-sample
-                description: OSOK Generative AI Data EnrichmentJob sample
                 freeformTags:
                   managed-by: oci-service-operator
 
@@ -3117,6 +3977,135 @@ services:
                 displayName: osok-generativeaiagentruntime-session-sample
                 description: OSOK Generative AI Agent Runtime Session sample
 
+  - service: generativeaidata
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/generativeaidata
+    group: generativeaidata
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - EnrichmentJob
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: EnrichmentJob
+          formalSpec: enrichmentjob
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+          specFields:
+            - name: SemanticStoreId
+              type: string
+              tag: 'json:"semanticStoreId"'
+              comments:
+                - The OCID of the semantic store that scopes GenerateEnrichmentJob, GetEnrichmentJob, and CancelEnrichmentJob.
+              markers:
+                - +kubebuilder:validation:Required
+            - name: CompartmentId
+              type: string
+              tag: 'json:"compartmentId"'
+              comments:
+                - The compartment OCID used only for exact ListEnrichmentJobs lookup before a new job is generated.
+              markers:
+                - +kubebuilder:validation:Required
+          statusFields:
+            - name: CompartmentId
+              type: string
+              tag: 'json:"compartmentId,omitempty"'
+              comments:
+                - The bound compartment ID carried forward for exact ListEnrichmentJobs lookup and create-only drift validation.
+          sample:
+            body: |-
+              #
+              # Replace the semanticStoreId and compartmentId before running e2e. Creating this resource calls
+              # GenerateEnrichmentJob on the OCI service. Deleting the Kubernetes resource requests
+              # CancelEnrichmentJob and waits for the job to reach a terminal lifecycle state; it
+              # does not claim the OCI service exposes a plain delete operation for EnrichmentJob.
+              #
+              apiVersion: generativeaidata.oracle.com/v1beta1
+              kind: EnrichmentJob
+              metadata:
+                name: enrichmentjob-sample
+              spec:
+                semanticStoreId: ocid1.semanticstore.oc1..exampleuniqueID
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                enrichmentJobType: FULL_BUILD
+                enrichmentJobConfiguration:
+                  enrichmentJobType: FULL_BUILD
+                  schemaName: SALES
+                displayName: osok-generativeaidata-enrichmentjob-sample
+                description: OSOK Generative AI Data EnrichmentJob sample
+                freeformTags:
+                  managed-by: oci-service-operator
+
+  - service: goldengate
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/goldengate
+    group: goldengate
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Certificate
+        - Connection
+        - ConnectionAssignment
+        - DatabaseRegistration
+        - Deployment
+        - DeploymentBackup
+        - Pipeline
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: governancerulescontrolplane
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/governancerulescontrolplane
+    group: governancerulescontrolplane
+    version: v1beta1
+    phase: security-and-identity
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - GovernanceRule
+        - InclusionCriterion
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
   - service: healthchecks
     sdkPackage: github.com/oracle/oci-go-sdk/v65/healthchecks
     group: healthchecks
@@ -3232,6 +4221,150 @@ services:
       webhooks:
         strategy: none
 
+  - service: iot
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/iot
+    group: iot
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - DigitalTwinAdapter
+        - DigitalTwinInstance
+        - DigitalTwinModel
+        - DigitalTwinRelationship
+        - IotDomain
+        - IotDomainGroup
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: jms
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/jms
+    group: jms
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Fleet
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: Fleet
+          formalSpec: fleet
+          async:
+            strategy: workrequest
+            runtime: generatedruntime
+            formalClassification: workrequest
+            workRequest:
+              source: service-sdk
+              phases:
+                - create
+                - update
+                - delete
+          sample:
+            body: |-
+              #
+              # Replace the OCI identifiers below before running e2e.
+              # Update metadata.name and spec.displayName if you want to force a fresh create
+              # instead of binding to an existing Fleet with the same display name in the same compartment.
+              apiVersion: jms.oracle.com/v1beta1
+              kind: Fleet
+              metadata:
+                name: fleet-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                displayName: fleet-sample
+                inventoryLog:
+                  logGroupId: ocid1.loggroup.oc1..exampleuniqueID
+                  logId: ocid1.log.oc1..exampleuniqueID
+                description: "Managed Java fleet"
+                freeformTags:
+                  workload: java
+          serviceManager:
+            packagePath: jms/fleet
+
+  - service: jmsjavadownloads
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/jmsjavadownloads
+    group: jmsjavadownloads
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - JavaDownloadToken
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: JavaDownloadToken
+          formalSpec: javadownloadtoken
+          async:
+            strategy: workrequest
+            runtime: generatedruntime
+            formalClassification: workrequest
+            workRequest:
+              source: service-sdk
+              phases:
+                - create
+                - update
+                - delete
+          sample:
+            body: |-
+              #
+              # Replace the compartment OCID and expiry before running e2e.
+              # The token value itself is sensitive and is intentionally not
+              # projected into status or docs after OCI returns it.
+              apiVersion: jmsjavadownloads.oracle.com/v1beta1
+              kind: JavaDownloadToken
+              metadata:
+                name: javadownloadtoken-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                displayName: osok-java-download-token
+                description: Java download token managed by OSOK
+                timeExpires: "2030-01-01T00:00:00Z"
+                javaVersion: "17"
+                licenseType:
+                  - NFTC
+                isDefault: false
+                freeformTags:
+                  managed-by: oci-service-operator
+    observedState:
+      excludedFieldPaths:
+        JavaDownloadToken:
+          - Value
+
   - service: keymanagement
     sdkPackage: github.com/oracle/oci-go-sdk/v65/keymanagement
     group: keymanagement
@@ -3321,6 +4454,32 @@ services:
           serviceManager:
             strategy: none
 
+  - service: licensemanager
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/licensemanager
+    group: licensemanager
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - LicenseRecord
+        - ProductLicense
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
   - service: limits
     sdkPackage: github.com/oracle/oci-go-sdk/v65/limits
     group: limits
@@ -3332,6 +4491,31 @@ services:
       mode: explicit
       includeKinds:
         - Quota
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: limitsincrease
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/limitsincrease
+    group: limitsincrease
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - LimitsIncreaseRequest
     async:
       strategy: lifecycle
       runtime: generatedruntime
@@ -3531,6 +4715,63 @@ services:
             runtime: generatedruntime
             formalClassification: lifecycle
 
+  - service: lockbox
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/lockbox
+    group: lockbox
+    version: v1beta1
+    phase: security-and-identity
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - ApprovalTemplate
+        - Lockbox
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: loganalytics
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/loganalytics
+    group: loganalytics
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - IngestTimeRule
+        - LogAnalyticsEmBridge
+        - LogAnalyticsEntity
+        - LogAnalyticsEntityType
+        - LogAnalyticsLogGroup
+        - LogAnalyticsObjectCollectionRule
+        - ScheduledTask
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
   - service: logging
     sdkPackage: github.com/oracle/oci-go-sdk/v65/logging
     group: logging
@@ -3606,32 +4847,6 @@ services:
             runtime: generatedruntime
             formalClassification: lifecycle
 
-  - service: managedkafka
-    sdkPackage: github.com/oracle/oci-go-sdk/v65/managedkafka
-    group: managedkafka
-    version: v1beta1
-    phase: eventing-messaging-and-observability
-    packageProfile: controller-backed
-    selection:
-      enabled: true
-      mode: explicit
-      includeKinds:
-        - KafkaCluster
-        - KafkaClusterConfig
-    async:
-      strategy: lifecycle
-      runtime: generatedruntime
-      formalClassification: lifecycle
-    generation:
-      controller:
-        strategy: generated
-      serviceManager:
-        strategy: generated
-      registration:
-        strategy: generated
-      webhooks:
-        strategy: none
-
   - service: lustrefilestorage
     sdkPackage: github.com/oracle/oci-go-sdk/v65/lustrefilestorage
     group: lustrefilestorage
@@ -3681,9 +4896,9 @@ services:
           serviceManager:
             packagePath: lustrefilestorage/objectstoragelink
 
-  - service: monitoring
-    sdkPackage: github.com/oracle/oci-go-sdk/v65/monitoring
-    group: monitoring
+  - service: managedkafka
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/managedkafka
+    group: managedkafka
     version: v1beta1
     phase: eventing-messaging-and-observability
     packageProfile: controller-backed
@@ -3691,8 +4906,8 @@ services:
       enabled: true
       mode: explicit
       includeKinds:
-        - Alarm
-        - AlarmSuppression
+        - KafkaCluster
+        - KafkaClusterConfig
     async:
       strategy: lifecycle
       runtime: generatedruntime
@@ -3706,39 +4921,59 @@ services:
         strategy: generated
       webhooks:
         strategy: none
-      resources:
-        - kind: Alarm
-          formalSpec: alarm
-          sample:
-            body: |-
-              #
-              # Replace the compartment OCIDs and destination OCID below before running e2e.
-              # Update spec.displayName or spec.query if you want to force a fresh create instead of
-              # binding to an existing Alarm with the same compartment and display name.
-              #
-              apiVersion: monitoring.oracle.com/v1beta1
-              kind: Alarm
-              metadata:
-                name: alarm-sample
-              spec:
-                displayName: osok-alarm-sample
-                compartmentId: ocid1.compartment.oc1..exampleuniqueID
-                metricCompartmentId: ocid1.compartment.oc1..exampleuniqueID
-                namespace: oci_computeagent
-                query: CpuUtilization[1m].mean() > 85
-                severity: CRITICAL
-                destinations:
-                  - ocid1.onstopic.oc1..exampleuniqueID
-                isEnabled: true
-        - kind: AlarmSuppression
-          async:
-            strategy: lifecycle
-            runtime: generatedruntime
-            formalClassification: lifecycle
-    observedState:
-      sdkAliases:
-        AlarmHistory:
-          - AlarmHistoryCollection
+
+  - service: managementagent
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/managementagent
+    group: managementagent
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - DataSource
+        - ManagementAgentInstallKey
+        - NamedCredential
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: managementdashboard
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/managementdashboard
+    group: managementdashboard
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - ManagementDashboard
+        - ManagementSavedSearch
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
 
   - service: marketplace
     sdkPackage: github.com/oracle/oci-go-sdk/v65/marketplace
@@ -3806,6 +5041,103 @@ services:
             strategy: lifecycle
             runtime: generatedruntime
             formalClassification: lifecycle
+
+  - service: marketplaceprivateoffer
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/marketplaceprivateoffer
+    group: marketplaceprivateoffer
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Attachment
+        - Offer
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: marketplacepublisher
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/marketplacepublisher
+    group: marketplacepublisher
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Artifact
+        - Listing
+        - ListingRevision
+        - ListingRevisionAttachment
+        - ListingRevisionNote
+        - ListingRevisionPackage
+        - Term
+        - TermVersion
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: mediaservices
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/mediaservices
+    group: mediaservices
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - MediaAsset
+        - MediaWorkflow
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: MediaAsset
+          formalSpec: mediaasset
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+          serviceManager:
+            packagePath: mediaservices/mediaasset
+        - kind: MediaWorkflow
+          formalSpec: mediaworkflow
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+          serviceManager:
+            packagePath: mediaservices/mediaworkflow
 
   - service: mngdmac
     sdkPackage: github.com/oracle/oci-go-sdk/v65/mngdmac
@@ -3911,18 +5243,22 @@ services:
         WorkRequestLog:
           - WorkRequestLogEntry
 
-  - service: mediaservices
-    sdkPackage: github.com/oracle/oci-go-sdk/v65/mediaservices
-    group: mediaservices
+  - service: monitoring
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/monitoring
+    group: monitoring
     version: v1beta1
-    phase: data-and-storage
+    phase: eventing-messaging-and-observability
     packageProfile: controller-backed
     selection:
       enabled: true
       mode: explicit
       includeKinds:
-        - MediaAsset
-        - MediaWorkflow
+        - Alarm
+        - AlarmSuppression
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
     generation:
       controller:
         strategy: generated
@@ -3933,22 +5269,38 @@ services:
       webhooks:
         strategy: none
       resources:
-        - kind: MediaAsset
-          formalSpec: mediaasset
+        - kind: Alarm
+          formalSpec: alarm
+          sample:
+            body: |-
+              #
+              # Replace the compartment OCIDs and destination OCID below before running e2e.
+              # Update spec.displayName or spec.query if you want to force a fresh create instead of
+              # binding to an existing Alarm with the same compartment and display name.
+              #
+              apiVersion: monitoring.oracle.com/v1beta1
+              kind: Alarm
+              metadata:
+                name: alarm-sample
+              spec:
+                displayName: osok-alarm-sample
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                metricCompartmentId: ocid1.compartment.oc1..exampleuniqueID
+                namespace: oci_computeagent
+                query: CpuUtilization[1m].mean() > 85
+                severity: CRITICAL
+                destinations:
+                  - ocid1.onstopic.oc1..exampleuniqueID
+                isEnabled: true
+        - kind: AlarmSuppression
           async:
             strategy: lifecycle
             runtime: generatedruntime
             formalClassification: lifecycle
-          serviceManager:
-            packagePath: mediaservices/mediaasset
-        - kind: MediaWorkflow
-          formalSpec: mediaworkflow
-          async:
-            strategy: lifecycle
-            runtime: generatedruntime
-            formalClassification: lifecycle
-          serviceManager:
-            packagePath: mediaservices/mediaworkflow
+    observedState:
+      sdkAliases:
+        AlarmHistory:
+          - AlarmHistoryCollection
 
   - service: mysql
     sdkPackage: github.com/oracle/oci-go-sdk/v65/mysql
@@ -4037,6 +5389,44 @@ services:
           serviceManager:
             packagePath: mysql/dbsystem
             needsCredentialClient: true
+
+  - service: networkfirewall
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/networkfirewall
+    group: networkfirewall
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - AddressList
+        - Application
+        - ApplicationGroup
+        - DecryptionProfile
+        - DecryptionRule
+        - MappedSecret
+        - NatRule
+        - NetworkFirewall
+        - NetworkFirewallPolicy
+        - SecurityRule
+        - Service
+        - ServiceList
+        - TunnelInspectionRule
+        - UrlList
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
 
   - service: networkloadbalancer
     sdkPackage: github.com/oracle/oci-go-sdk/v65/networkloadbalancer
@@ -4421,96 +5811,6 @@ services:
             runtime: generatedruntime
             formalClassification: lifecycle
 
-  - service: opensearch
-    sdkPackage: github.com/oracle/oci-go-sdk/v65/opensearch
-    group: opensearch
-    version: v1beta1
-    phase: data-and-storage
-    packageProfile: controller-backed
-    selection:
-      enabled: true
-      mode: explicit
-      includeKinds:
-        - OpensearchCluster
-    generation:
-      controller:
-        strategy: generated
-      serviceManager:
-        strategy: generated
-      registration:
-        strategy: generated
-      webhooks:
-        strategy: none
-      resources:
-        - kind: OpensearchCluster
-          formalSpec: opensearchopensearchcluster
-          async:
-            strategy: lifecycle
-            runtime: generatedruntime
-            formalClassification: lifecycle
-          serviceManager:
-            packagePath: opensearch/opensearchcluster
-        - kind: Manifest
-          controller:
-            strategy: none
-          serviceManager:
-            strategy: none
-        - kind: OpensearchClusterBackup
-          controller:
-            strategy: none
-          serviceManager:
-            strategy: none
-        - kind: OpensearchOpensearchVersion
-          controller:
-            strategy: none
-          serviceManager:
-            strategy: none
-        - kind: WorkRequest
-          controller:
-            strategy: none
-          serviceManager:
-            strategy: none
-        - kind: WorkRequestError
-          controller:
-            strategy: none
-          serviceManager:
-            strategy: none
-        - kind: WorkRequestLog
-          controller:
-            strategy: none
-          serviceManager:
-            strategy: none
-
-  - service: ons
-    sdkPackage: github.com/oracle/oci-go-sdk/v65/ons
-    group: ons
-    version: v1beta1
-    phase: eventing-messaging-and-observability
-    packageProfile: controller-backed
-    selection:
-      enabled: true
-      mode: explicit
-      includeKinds:
-        - Subscription
-        - Topic
-    async:
-      strategy: lifecycle
-      runtime: generatedruntime
-      formalClassification: lifecycle
-    generation:
-      controller:
-        strategy: generated
-      serviceManager:
-        strategy: generated
-      registration:
-        strategy: generated
-      webhooks:
-        strategy: none
-    observedState:
-      sdkAliases:
-        ConfirmSubscription:
-          - ConfirmationResult
-
   - service: onesubscription
     sdkPackage: github.com/oracle/oci-go-sdk/v65/onesubscription
     group: onesubscription
@@ -4602,6 +5902,36 @@ services:
                 compartmentId: ocid1.compartment.oc1..exampleuniqueID
                 subscriptionId: example-line-subscription-id
 
+  - service: ons
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/ons
+    group: ons
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Subscription
+        - Topic
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+    observedState:
+      sdkAliases:
+        ConfirmSubscription:
+          - ConfirmationResult
+
   - service: opa
     sdkPackage: github.com/oracle/oci-go-sdk/v65/opa
     group: opa
@@ -4656,6 +5986,184 @@ services:
       sdkAliases:
         WorkRequestLog:
           - WorkRequestLogEntry
+
+  - service: opensearch
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/opensearch
+    group: opensearch
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - OpensearchCluster
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: OpensearchCluster
+          formalSpec: opensearchopensearchcluster
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+          serviceManager:
+            packagePath: opensearch/opensearchcluster
+        - kind: Manifest
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: OpensearchClusterBackup
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: OpensearchOpensearchVersion
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequest
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequestError
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequestLog
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+
+  - service: operatoraccesscontrol
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/operatoraccesscontrol
+    group: operatoraccesscontrol
+    version: v1beta1
+    phase: security-and-identity
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - OperatorControl
+        - OperatorControlAssignment
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: opsi
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/opsi
+    group: opsi
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - AwrHub
+        - AwrHubSource
+        - ChargebackPlan
+        - ChargebackPlanReport
+        - DatabaseInsight
+        - EnterpriseManagerBridge
+        - ExadataInsight
+        - HostInsight
+        - NewsReport
+        - OperationsInsightsPrivateEndpoint
+        - OperationsInsightsWarehouse
+        - OperationsInsightsWarehouseUser
+        - OpsiConfiguration
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: optimizer
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/optimizer
+    group: optimizer
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Profile
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: osmanagementhub
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/osmanagementhub
+    group: osmanagementhub
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - LifecycleEnvironment
+        - ManagedInstanceGroup
+        - ManagementStation
+        - Profile
+        - ScheduledJob
+        - SoftwareSource
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
 
   - service: osubsubscription
     sdkPackage: github.com/oracle/oci-go-sdk/v65/osubsubscription
@@ -4995,6 +6503,33 @@ services:
         WorkRequestLog:
           - WorkRequestLogEntry
 
+  - service: recovery
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/recovery
+    group: recovery
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - ProtectedDatabase
+        - ProtectionPolicy
+        - RecoveryServiceSubnet
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
   - service: redis
     sdkPackage: github.com/oracle/oci-go-sdk/v65/redis
     group: redis
@@ -5030,6 +6565,141 @@ services:
                 - delete
           serviceManager:
             packagePath: redis/rediscluster
+
+  - service: resourceanalytics
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/resourceanalytics
+    group: resourceanalytics
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - MonitoredRegion
+        - ResourceAnalyticsInstance
+        - TenancyAttachment
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: resourcemanager
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/resourcemanager
+    group: resourcemanager
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - ConfigurationSourceProvider
+        - PrivateEndpoint
+        - Stack
+        - Template
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: resourcescheduler
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/resourcescheduler
+    group: resourcescheduler
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Schedule
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: rover
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/rover
+    group: rover
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - RoverCluster
+        - RoverNode
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: RoverCluster
+          formalSpec: rovercluster
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+          serviceManager:
+            packagePath: rover/rovercluster
+        - kind: RoverNode
+          formalSpec: rovernode
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+          serviceManager:
+            packagePath: rover/rovernode
+    observedState:
+      excludedFieldPaths:
+        RoverCluster:
+          - DataValidationCode
+          - ExteriorDoorCode
+          - ImageExportPar
+          - InteriorAlarmDisarmCode
+          - ReturnShippingLabelUri
+          - SuperUserPassword
+          - UnlockPassphrase
+        RoverNode:
+          - DataValidationCode
+          - ImageExportPar
+          - ReturnShippingLabelUri
+          - SuperUserPassword
+          - UnlockPassphrase
 
   - service: sch
     sdkPackage: github.com/oracle/oci-go-sdk/v65/sch
@@ -5083,6 +6753,32 @@ services:
       sdkAliases:
         SecretBundleByName:
           - SecretBundle
+
+  - service: securityattribute
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/securityattribute
+    group: securityattribute
+    version: v1beta1
+    phase: security-and-identity
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - SecurityAttribute
+        - SecurityAttributeNamespace
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
 
   - service: self
     sdkPackage: github.com/oracle/oci-go-sdk/v65/self
@@ -5254,6 +6950,40 @@ services:
         ServiceEnvironment:
           - DefinedTags
           - FreeformTags
+
+  - service: stackmonitoring
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/stackmonitoring
+    group: stackmonitoring
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - AlarmCondition
+        - BaselineableMetric
+        - Config
+        - DiscoveryJob
+        - MaintenanceWindow
+        - MetricExtension
+        - MonitoredResource
+        - MonitoredResourceType
+        - MonitoringTemplate
+        - ProcessSet
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
 
   - service: streaming
     sdkPackage: github.com/oracle/oci-go-sdk/v65/streaming
@@ -5555,6 +7285,25 @@ services:
             runtime: generatedruntime
             formalClassification: lifecycle
 
+  - service: vault
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/vault
+    group: vault
+    version: v1beta1
+    phase: security-and-identity
+    packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
   - service: vbsinst
     sdkPackage: github.com/oracle/oci-go-sdk/v65/vbsinst
     group: vbsinst
@@ -5616,35 +7365,9 @@ services:
         VbsInstance:
           - LifecyleDetails
 
-  - service: governancerulescontrolplane
-    sdkPackage: github.com/oracle/oci-go-sdk/v65/governancerulescontrolplane
-    group: governancerulescontrolplane
-    version: v1beta1
-    phase: security-and-identity
-    packageProfile: controller-backed
-    selection:
-      enabled: true
-      mode: explicit
-      includeKinds:
-        - GovernanceRule
-        - InclusionCriterion
-    async:
-      strategy: lifecycle
-      runtime: generatedruntime
-      formalClassification: lifecycle
-    generation:
-      controller:
-        strategy: generated
-      serviceManager:
-        strategy: generated
-      registration:
-        strategy: generated
-      webhooks:
-        strategy: none
-
-  - service: iot
-    sdkPackage: github.com/oracle/oci-go-sdk/v65/iot
-    group: iot
+  - service: visualbuilder
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/visualbuilder
+    group: visualbuilder
     version: v1beta1
     phase: eventing-messaging-and-observability
     packageProfile: controller-backed
@@ -5652,37 +7375,7 @@ services:
       enabled: true
       mode: explicit
       includeKinds:
-        - DigitalTwinAdapter
-        - DigitalTwinInstance
-        - DigitalTwinModel
-        - DigitalTwinRelationship
-        - IotDomain
-        - IotDomainGroup
-    async:
-      strategy: lifecycle
-      runtime: generatedruntime
-      formalClassification: lifecycle
-    generation:
-      controller:
-        strategy: generated
-      serviceManager:
-        strategy: generated
-      registration:
-        strategy: generated
-      webhooks:
-        strategy: none
-
-  - service: jms
-    sdkPackage: github.com/oracle/oci-go-sdk/v65/jms
-    group: jms
-    version: v1beta1
-    phase: eventing-messaging-and-observability
-    packageProfile: controller-backed
-    selection:
-      enabled: true
-      mode: explicit
-      includeKinds:
-        - Fleet
+        - VbInstance
     generation:
       controller:
         strategy: generated
@@ -5693,8 +7386,8 @@ services:
       webhooks:
         strategy: none
       resources:
-        - kind: Fleet
-          formalSpec: fleet
+        - kind: VbInstance
+          formalSpec: vbinstance
           async:
             strategy: workrequest
             runtime: generatedruntime
@@ -5705,39 +7398,54 @@ services:
                 - create
                 - update
                 - delete
+          serviceManager:
+            packagePath: visualbuilder/vbinstance
           sample:
             body: |-
               #
-              # Replace the OCI identifiers below before running e2e.
-              # Update metadata.name and spec.displayName if you want to force a fresh create
-              # instead of binding to an existing Fleet with the same display name in the same compartment.
-              apiVersion: jms.oracle.com/v1beta1
-              kind: Fleet
+              # Replace the OCIDs below before running e2e.
+              #
+              apiVersion: visualbuilder.oracle.com/v1beta1
+              kind: VbInstance
               metadata:
-                name: fleet-sample
+                name: vbinstance-sample
               spec:
                 compartmentId: ocid1.compartment.oc1..exampleuniqueID
-                displayName: fleet-sample
-                inventoryLog:
-                  logGroupId: ocid1.loggroup.oc1..exampleuniqueID
-                  logId: ocid1.log.oc1..exampleuniqueID
-                description: "Managed Java fleet"
-                freeformTags:
-                  workload: java
+                displayName: vbinstance-sample
+                nodeCount: 1
+                isVisualBuilderEnabled: true
+                networkEndpointDetails:
+                  networkEndpointType: PRIVATE
+                  subnetId: ocid1.subnet.oc1..exampleuniqueID
+                  networkSecurityGroupIds:
+                    - ocid1.nsg.oc1..exampleuniqueID
+        - kind: WorkRequest
+          controller:
+            strategy: none
           serviceManager:
-            packagePath: jms/fleet
+            strategy: none
+        - kind: WorkRequestError
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequestLog
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
 
-  - service: jmsjavadownloads
-    sdkPackage: github.com/oracle/oci-go-sdk/v65/jmsjavadownloads
-    group: jmsjavadownloads
+  - service: vnmonitoring
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/vnmonitoring
+    group: vnmonitoring
     version: v1beta1
-    phase: eventing-messaging-and-observability
+    phase: networking-and-infrastructure
     packageProfile: controller-backed
     selection:
       enabled: true
       mode: explicit
       includeKinds:
-        - JavaDownloadToken
+        - PathAnalyzerTest
     generation:
       controller:
         strategy: generated
@@ -5748,98 +7456,42 @@ services:
       webhooks:
         strategy: none
       resources:
-        - kind: JavaDownloadToken
-          formalSpec: javadownloadtoken
+        - kind: PathAnalyzerTest
+          formalSpec: pathanalyzertest
           async:
-            strategy: workrequest
+            strategy: none
             runtime: generatedruntime
-            formalClassification: workrequest
-            workRequest:
-              source: service-sdk
-              phases:
-                - create
-                - update
-                - delete
+            formalClassification: none
           sample:
             body: |-
               #
-              # Replace the compartment OCID and expiry before running e2e.
-              # The token value itself is sensitive and is intentionally not
-              # projected into status or docs after OCI returns it.
-              apiVersion: jmsjavadownloads.oracle.com/v1beta1
-              kind: JavaDownloadToken
+              # Replace the OCI compartment OCID and endpoint addresses below before running e2e.
+              # Update metadata.name or spec.displayName if you want to force a fresh create instead of
+              # binding to an existing PathAnalyzerTest with the same reviewed identity surface.
+              #
+              apiVersion: vnmonitoring.oracle.com/v1beta1
+              kind: PathAnalyzerTest
               metadata:
-                name: javadownloadtoken-sample
+                name: pathanalyzertest-sample
               spec:
                 compartmentId: ocid1.compartment.oc1..exampleuniqueID
-                displayName: osok-java-download-token
-                description: Java download token managed by OSOK
-                timeExpires: "2030-01-01T00:00:00Z"
-                javaVersion: "17"
-                licenseType:
-                  - NFTC
-                isDefault: false
-                freeformTags:
-                  managed-by: oci-service-operator
-    observedState:
-      excludedFieldPaths:
-        JavaDownloadToken:
-          - Value
+                displayName: pathanalyzertest-sample
+                protocol: 6
+                sourceEndpoint:
+                  type: IP_ADDRESS
+                  address: 10.0.0.10
+                destinationEndpoint:
+                  type: IP_ADDRESS
+                  address: 10.0.1.20
+                protocolParameters:
+                  type: TCP
+                  destinationPort: 443
+                queryOptions:
+                  isBiDirectionalAnalysis: true
 
-  - service: licensemanager
-    sdkPackage: github.com/oracle/oci-go-sdk/v65/licensemanager
-    group: licensemanager
-    version: v1beta1
-    phase: data-and-storage
-    packageProfile: controller-backed
-    selection:
-      enabled: true
-      mode: explicit
-      includeKinds:
-        - LicenseRecord
-        - ProductLicense
-    async:
-      strategy: lifecycle
-      runtime: generatedruntime
-      formalClassification: lifecycle
-    generation:
-      controller:
-        strategy: generated
-      serviceManager:
-        strategy: generated
-      registration:
-        strategy: generated
-      webhooks:
-        strategy: none
-
-  - service: limitsincrease
-    sdkPackage: github.com/oracle/oci-go-sdk/v65/limitsincrease
-    group: limitsincrease
-    version: v1beta1
-    phase: networking-and-infrastructure
-    packageProfile: controller-backed
-    selection:
-      enabled: true
-      mode: explicit
-      includeKinds:
-        - LimitsIncreaseRequest
-    async:
-      strategy: lifecycle
-      runtime: generatedruntime
-      formalClassification: lifecycle
-    generation:
-      controller:
-        strategy: generated
-      serviceManager:
-        strategy: generated
-      registration:
-        strategy: generated
-      webhooks:
-        strategy: none
-
-  - service: lockbox
-    sdkPackage: github.com/oracle/oci-go-sdk/v65/lockbox
-    group: lockbox
+  - service: vulnerabilityscanning
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/vulnerabilityscanning
+    group: vulnerabilityscanning
     version: v1beta1
     phase: security-and-identity
     packageProfile: controller-backed
@@ -5847,462 +7499,10 @@ services:
       enabled: true
       mode: explicit
       includeKinds:
-        - ApprovalTemplate
-        - Lockbox
-    async:
-      strategy: lifecycle
-      runtime: generatedruntime
-      formalClassification: lifecycle
-    generation:
-      controller:
-        strategy: generated
-      serviceManager:
-        strategy: generated
-      registration:
-        strategy: generated
-      webhooks:
-        strategy: none
-
-  - service: loganalytics
-    sdkPackage: github.com/oracle/oci-go-sdk/v65/loganalytics
-    group: loganalytics
-    version: v1beta1
-    phase: eventing-messaging-and-observability
-    packageProfile: controller-backed
-    selection:
-      enabled: true
-      mode: explicit
-      includeKinds:
-        - IngestTimeRule
-        - LogAnalyticsEmBridge
-        - LogAnalyticsEntity
-        - LogAnalyticsEntityType
-        - LogAnalyticsLogGroup
-        - LogAnalyticsObjectCollectionRule
-        - ScheduledTask
-    async:
-      strategy: lifecycle
-      runtime: generatedruntime
-      formalClassification: lifecycle
-    generation:
-      controller:
-        strategy: generated
-      serviceManager:
-        strategy: generated
-      registration:
-        strategy: generated
-      webhooks:
-        strategy: none
-
-  - service: managementagent
-    sdkPackage: github.com/oracle/oci-go-sdk/v65/managementagent
-    group: managementagent
-    version: v1beta1
-    phase: eventing-messaging-and-observability
-    packageProfile: controller-backed
-    selection:
-      enabled: true
-      mode: explicit
-      includeKinds:
-        - DataSource
-        - ManagementAgentInstallKey
-        - NamedCredential
-    async:
-      strategy: lifecycle
-      runtime: generatedruntime
-      formalClassification: lifecycle
-    generation:
-      controller:
-        strategy: generated
-      serviceManager:
-        strategy: generated
-      registration:
-        strategy: generated
-      webhooks:
-        strategy: none
-
-  - service: managementdashboard
-    sdkPackage: github.com/oracle/oci-go-sdk/v65/managementdashboard
-    group: managementdashboard
-    version: v1beta1
-    phase: eventing-messaging-and-observability
-    packageProfile: controller-backed
-    selection:
-      enabled: true
-      mode: explicit
-      includeKinds:
-        - ManagementDashboard
-        - ManagementSavedSearch
-    async:
-      strategy: lifecycle
-      runtime: generatedruntime
-      formalClassification: lifecycle
-    generation:
-      controller:
-        strategy: generated
-      serviceManager:
-        strategy: generated
-      registration:
-        strategy: generated
-      webhooks:
-        strategy: none
-
-  - service: marketplaceprivateoffer
-    sdkPackage: github.com/oracle/oci-go-sdk/v65/marketplaceprivateoffer
-    group: marketplaceprivateoffer
-    version: v1beta1
-    phase: data-and-storage
-    packageProfile: controller-backed
-    selection:
-      enabled: true
-      mode: explicit
-      includeKinds:
-        - Attachment
-        - Offer
-    async:
-      strategy: lifecycle
-      runtime: generatedruntime
-      formalClassification: lifecycle
-    generation:
-      controller:
-        strategy: generated
-      serviceManager:
-        strategy: generated
-      registration:
-        strategy: generated
-      webhooks:
-        strategy: none
-
-  - service: marketplacepublisher
-    sdkPackage: github.com/oracle/oci-go-sdk/v65/marketplacepublisher
-    group: marketplacepublisher
-    version: v1beta1
-    phase: data-and-storage
-    packageProfile: controller-backed
-    selection:
-      enabled: true
-      mode: explicit
-      includeKinds:
-        - Artifact
-        - Listing
-        - ListingRevision
-        - ListingRevisionAttachment
-        - ListingRevisionNote
-        - ListingRevisionPackage
-        - Term
-        - TermVersion
-    async:
-      strategy: lifecycle
-      runtime: generatedruntime
-      formalClassification: lifecycle
-    generation:
-      controller:
-        strategy: generated
-      serviceManager:
-        strategy: generated
-      registration:
-        strategy: generated
-      webhooks:
-        strategy: none
-
-  - service: operatoraccesscontrol
-    sdkPackage: github.com/oracle/oci-go-sdk/v65/operatoraccesscontrol
-    group: operatoraccesscontrol
-    version: v1beta1
-    phase: security-and-identity
-    packageProfile: controller-backed
-    selection:
-      enabled: true
-      mode: explicit
-      includeKinds:
-        - OperatorControl
-        - OperatorControlAssignment
-    async:
-      strategy: lifecycle
-      runtime: generatedruntime
-      formalClassification: lifecycle
-    generation:
-      controller:
-        strategy: generated
-      serviceManager:
-        strategy: generated
-      registration:
-        strategy: generated
-      webhooks:
-        strategy: none
-
-  - service: opsi
-    sdkPackage: github.com/oracle/oci-go-sdk/v65/opsi
-    group: opsi
-    version: v1beta1
-    phase: eventing-messaging-and-observability
-    packageProfile: controller-backed
-    selection:
-      enabled: true
-      mode: explicit
-      includeKinds:
-        - AwrHub
-        - AwrHubSource
-        - ChargebackPlan
-        - ChargebackPlanReport
-        - DatabaseInsight
-        - EnterpriseManagerBridge
-        - ExadataInsight
-        - HostInsight
-        - NewsReport
-        - OperationsInsightsPrivateEndpoint
-        - OperationsInsightsWarehouse
-        - OperationsInsightsWarehouseUser
-        - OpsiConfiguration
-    async:
-      strategy: lifecycle
-      runtime: generatedruntime
-      formalClassification: lifecycle
-    generation:
-      controller:
-        strategy: generated
-      serviceManager:
-        strategy: generated
-      registration:
-        strategy: generated
-      webhooks:
-        strategy: none
-
-  - service: optimizer
-    sdkPackage: github.com/oracle/oci-go-sdk/v65/optimizer
-    group: optimizer
-    version: v1beta1
-    phase: networking-and-infrastructure
-    packageProfile: controller-backed
-    selection:
-      enabled: true
-      mode: explicit
-      includeKinds:
-        - Profile
-    async:
-      strategy: lifecycle
-      runtime: generatedruntime
-      formalClassification: lifecycle
-    generation:
-      controller:
-        strategy: generated
-      serviceManager:
-        strategy: generated
-      registration:
-        strategy: generated
-      webhooks:
-        strategy: none
-
-  - service: osmanagementhub
-    sdkPackage: github.com/oracle/oci-go-sdk/v65/osmanagementhub
-    group: osmanagementhub
-    version: v1beta1
-    phase: networking-and-infrastructure
-    packageProfile: controller-backed
-    selection:
-      enabled: true
-      mode: explicit
-      includeKinds:
-        - LifecycleEnvironment
-        - ManagedInstanceGroup
-        - ManagementStation
-        - Profile
-        - ScheduledJob
-        - SoftwareSource
-    async:
-      strategy: lifecycle
-      runtime: generatedruntime
-      formalClassification: lifecycle
-    generation:
-      controller:
-        strategy: generated
-      serviceManager:
-        strategy: generated
-      registration:
-        strategy: generated
-      webhooks:
-        strategy: none
-
-  - service: recovery
-    sdkPackage: github.com/oracle/oci-go-sdk/v65/recovery
-    group: recovery
-    version: v1beta1
-    phase: data-and-storage
-    packageProfile: controller-backed
-    selection:
-      enabled: true
-      mode: explicit
-      includeKinds:
-        - ProtectedDatabase
-        - ProtectionPolicy
-        - RecoveryServiceSubnet
-    async:
-      strategy: lifecycle
-      runtime: generatedruntime
-      formalClassification: lifecycle
-    generation:
-      controller:
-        strategy: generated
-      serviceManager:
-        strategy: generated
-      registration:
-        strategy: generated
-      webhooks:
-        strategy: none
-
-  - service: resourceanalytics
-    sdkPackage: github.com/oracle/oci-go-sdk/v65/resourceanalytics
-    group: resourceanalytics
-    version: v1beta1
-    phase: eventing-messaging-and-observability
-    packageProfile: controller-backed
-    selection:
-      enabled: true
-      mode: explicit
-      includeKinds:
-        - MonitoredRegion
-        - ResourceAnalyticsInstance
-        - TenancyAttachment
-    async:
-      strategy: lifecycle
-      runtime: generatedruntime
-      formalClassification: lifecycle
-    generation:
-      controller:
-        strategy: generated
-      serviceManager:
-        strategy: generated
-      registration:
-        strategy: generated
-      webhooks:
-        strategy: none
-
-  - service: resourcescheduler
-    sdkPackage: github.com/oracle/oci-go-sdk/v65/resourcescheduler
-    group: resourcescheduler
-    version: v1beta1
-    phase: networking-and-infrastructure
-    packageProfile: controller-backed
-    selection:
-      enabled: true
-      mode: explicit
-      includeKinds:
-        - Schedule
-    async:
-      strategy: lifecycle
-      runtime: generatedruntime
-      formalClassification: lifecycle
-    generation:
-      controller:
-        strategy: generated
-      serviceManager:
-        strategy: generated
-      registration:
-        strategy: generated
-      webhooks:
-        strategy: none
-
-  - service: rover
-    sdkPackage: github.com/oracle/oci-go-sdk/v65/rover
-    group: rover
-    version: v1beta1
-    phase: data-and-storage
-    packageProfile: controller-backed
-    selection:
-      enabled: true
-      mode: explicit
-      includeKinds:
-        - RoverCluster
-        - RoverNode
-    generation:
-      controller:
-        strategy: generated
-      serviceManager:
-        strategy: generated
-      registration:
-        strategy: generated
-      webhooks:
-        strategy: none
-      resources:
-        - kind: RoverCluster
-          formalSpec: rovercluster
-          async:
-            strategy: lifecycle
-            runtime: generatedruntime
-            formalClassification: lifecycle
-          serviceManager:
-            packagePath: rover/rovercluster
-        - kind: RoverNode
-          formalSpec: rovernode
-          async:
-            strategy: lifecycle
-            runtime: generatedruntime
-            formalClassification: lifecycle
-          serviceManager:
-            packagePath: rover/rovernode
-    observedState:
-      excludedFieldPaths:
-        RoverCluster:
-          - DataValidationCode
-          - ExteriorDoorCode
-          - ImageExportPar
-          - InteriorAlarmDisarmCode
-          - ReturnShippingLabelUri
-          - SuperUserPassword
-          - UnlockPassphrase
-        RoverNode:
-          - DataValidationCode
-          - ImageExportPar
-          - ReturnShippingLabelUri
-          - SuperUserPassword
-          - UnlockPassphrase
-
-  - service: securityattribute
-    sdkPackage: github.com/oracle/oci-go-sdk/v65/securityattribute
-    group: securityattribute
-    version: v1beta1
-    phase: security-and-identity
-    packageProfile: controller-backed
-    selection:
-      enabled: true
-      mode: explicit
-      includeKinds:
-        - SecurityAttribute
-        - SecurityAttributeNamespace
-    async:
-      strategy: lifecycle
-      runtime: generatedruntime
-      formalClassification: lifecycle
-    generation:
-      controller:
-        strategy: generated
-      serviceManager:
-        strategy: generated
-      registration:
-        strategy: generated
-      webhooks:
-        strategy: none
-
-  - service: stackmonitoring
-    sdkPackage: github.com/oracle/oci-go-sdk/v65/stackmonitoring
-    group: stackmonitoring
-    version: v1beta1
-    phase: eventing-messaging-and-observability
-    packageProfile: controller-backed
-    selection:
-      enabled: true
-      mode: explicit
-      includeKinds:
-        - AlarmCondition
-        - BaselineableMetric
-        - Config
-        - DiscoveryJob
-        - MaintenanceWindow
-        - MetricExtension
-        - MonitoredResource
-        - MonitoredResourceType
-        - MonitoringTemplate
-        - ProcessSet
+        - ContainerScanRecipe
+        - ContainerScanTarget
+        - HostScanRecipe
+        - HostScanTarget
     async:
       strategy: lifecycle
       runtime: generatedruntime
@@ -6560,149 +7760,6 @@ services:
                   domainSearchPaths:
                     - /u01/oracle/user_projects/domains
 
-  - service: vault
-    sdkPackage: github.com/oracle/oci-go-sdk/v65/vault
-    group: vault
-    version: v1beta1
-    phase: security-and-identity
-    packageProfile: controller-backed
-    selection:
-      enabled: false
-      mode: all
-    generation:
-      controller:
-        strategy: generated
-      serviceManager:
-        strategy: generated
-      registration:
-        strategy: generated
-      webhooks:
-        strategy: none
-
-  - service: visualbuilder
-    sdkPackage: github.com/oracle/oci-go-sdk/v65/visualbuilder
-    group: visualbuilder
-    version: v1beta1
-    phase: eventing-messaging-and-observability
-    packageProfile: controller-backed
-    selection:
-      enabled: true
-      mode: explicit
-      includeKinds:
-        - VbInstance
-    generation:
-      controller:
-        strategy: generated
-      serviceManager:
-        strategy: generated
-      registration:
-        strategy: generated
-      webhooks:
-        strategy: none
-      resources:
-        - kind: VbInstance
-          formalSpec: vbinstance
-          async:
-            strategy: workrequest
-            runtime: generatedruntime
-            formalClassification: workrequest
-            workRequest:
-              source: service-sdk
-              phases:
-                - create
-                - update
-                - delete
-          serviceManager:
-            packagePath: visualbuilder/vbinstance
-          sample:
-            body: |-
-              #
-              # Replace the OCIDs below before running e2e.
-              #
-              apiVersion: visualbuilder.oracle.com/v1beta1
-              kind: VbInstance
-              metadata:
-                name: vbinstance-sample
-              spec:
-                compartmentId: ocid1.compartment.oc1..exampleuniqueID
-                displayName: vbinstance-sample
-                nodeCount: 1
-                isVisualBuilderEnabled: true
-                networkEndpointDetails:
-                  networkEndpointType: PRIVATE
-                  subnetId: ocid1.subnet.oc1..exampleuniqueID
-                  networkSecurityGroupIds:
-                    - ocid1.nsg.oc1..exampleuniqueID
-        - kind: WorkRequest
-          controller:
-            strategy: none
-          serviceManager:
-            strategy: none
-        - kind: WorkRequestError
-          controller:
-            strategy: none
-          serviceManager:
-            strategy: none
-        - kind: WorkRequestLog
-          controller:
-            strategy: none
-          serviceManager:
-            strategy: none
-
-  - service: vnmonitoring
-    sdkPackage: github.com/oracle/oci-go-sdk/v65/vnmonitoring
-    group: vnmonitoring
-    version: v1beta1
-    phase: networking-and-infrastructure
-    packageProfile: controller-backed
-    selection:
-      enabled: true
-      mode: explicit
-      includeKinds:
-        - PathAnalyzerTest
-    generation:
-      controller:
-        strategy: generated
-      serviceManager:
-        strategy: generated
-      registration:
-        strategy: generated
-      webhooks:
-        strategy: none
-      resources:
-        - kind: PathAnalyzerTest
-          formalSpec: pathanalyzertest
-          async:
-            strategy: none
-            runtime: generatedruntime
-            formalClassification: none
-          sample:
-            body: |-
-              #
-              # Replace the OCI compartment OCID and endpoint addresses below before running e2e.
-              # Update metadata.name or spec.displayName if you want to force a fresh create instead of
-              # binding to an existing PathAnalyzerTest with the same reviewed identity surface.
-              #
-              apiVersion: vnmonitoring.oracle.com/v1beta1
-              kind: PathAnalyzerTest
-              metadata:
-                name: pathanalyzertest-sample
-              spec:
-                compartmentId: ocid1.compartment.oc1..exampleuniqueID
-                displayName: pathanalyzertest-sample
-                protocol: 6
-                sourceEndpoint:
-                  type: IP_ADDRESS
-                  address: 10.0.0.10
-                destinationEndpoint:
-                  type: IP_ADDRESS
-                  address: 10.0.1.20
-                protocolParameters:
-                  type: TCP
-                  destinationPort: 443
-                queryOptions:
-                  isBiDirectionalAnalysis: true
-
   - service: workrequests
     sdkPackage: github.com/oracle/oci-go-sdk/v65/workrequests
     group: workrequests
@@ -6725,7 +7782,6 @@ services:
       sdkAliases:
         WorkRequestLog:
           - WorkRequestLogEntry
-
   - service: zpr
     sdkPackage: github.com/oracle/oci-go-sdk/v65/zpr
     group: zpr

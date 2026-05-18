@@ -1,0 +1,84 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
+  - fleetappsmanagement.oracle.com
+  resources:
+  - catalogitems
+  - compliancepolicyrules
+  - fleetcredentials
+  - fleetproperties
+  - fleetresources
+  - fleets
+  - maintenancewindows
+  - onboardings
+  - patches
+  - platformconfigurations
+  - properties
+  - provisions
+  - runbooks
+  - runbookversions
+  - schedulerdefinitions
+  - taskrecords
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - fleetappsmanagement.oracle.com
+  resources:
+  - catalogitems/finalizers
+  - compliancepolicyrules/finalizers
+  - fleetcredentials/finalizers
+  - fleetproperties/finalizers
+  - fleetresources/finalizers
+  - fleets/finalizers
+  - maintenancewindows/finalizers
+  - onboardings/finalizers
+  - patches/finalizers
+  - platformconfigurations/finalizers
+  - properties/finalizers
+  - provisions/finalizers
+  - runbooks/finalizers
+  - runbookversions/finalizers
+  - schedulerdefinitions/finalizers
+  - taskrecords/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - fleetappsmanagement.oracle.com
+  resources:
+  - catalogitems/status
+  - compliancepolicyrules/status
+  - fleetcredentials/status
+  - fleetproperties/status
+  - fleetresources/status
+  - fleets/status
+  - maintenancewindows/status
+  - onboardings/status
+  - patches/status
+  - platformconfigurations/status
+  - properties/status
+  - provisions/status
+  - runbooks/status
+  - runbookversions/status
+  - schedulerdefinitions/status
+  - taskrecords/status
+  verbs:
+  - get
+  - patch
+  - update

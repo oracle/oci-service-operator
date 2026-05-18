@@ -1,0 +1,317 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: securitypolicyconfigs.datasafe.oracle.com
+spec:
+  group: datasafe.oracle.com
+  names:
+    kind: SecurityPolicyConfig
+    listKind: SecurityPolicyConfigList
+    plural: securitypolicyconfigs
+    singular: securitypolicyconfig
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the SecurityPolicyConfig
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the SecurityPolicyConfig
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: SecurityPolicyConfig is the Schema for the securitypolicyconfigs
+          API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: SecurityPolicyConfigSpec defines the desired state of SecurityPolicyConfig.
+            properties:
+              compartmentId:
+                description: The OCID of the compartment containing the security policy
+                  configuration.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm)
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              description:
+                description: The description of the security policy.
+                type: string
+              displayName:
+                description: The display name of the security policy configuration.
+                  The name does not have to be unique, and it is changeable.
+                type: string
+              firewallConfig:
+                description: SecurityPolicyConfigFirewallConfig defines nested fields
+                  for SecurityPolicyConfig.FirewallConfig.
+                properties:
+                  excludeJob:
+                    description: Specifies whether the firewall should include or
+                      exclude the database internal job activities.
+                    type: string
+                  status:
+                    description: Specifies whether the firewall is enabled or disabled.
+                    type: string
+                  violationLogAutoPurge:
+                    description: |-
+                      Specifies whether Data Safe should automatically purge the violation logs
+                      from the database after collecting the violation logs and persisting them in Data Safe.
+                    type: string
+                type: object
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm)
+                  Example: `{"Department": "Finance"}`
+                type: object
+              securityPolicyId:
+                description: The OCID of the security policy corresponding to the
+                  security policy configuration.
+                type: string
+              unifiedAuditPolicyConfig:
+                description: SecurityPolicyConfigUnifiedAuditPolicyConfig defines
+                  nested fields for SecurityPolicyConfig.UnifiedAuditPolicyConfig.
+                properties:
+                  excludeDatasafeUser:
+                    description: Specifies whether the Data Safe service account on
+                      the target database should be excluded in the unified audit
+                      policy.
+                    type: string
+                type: object
+            required:
+            - compartmentId
+            - securityPolicyId
+            type: object
+          status:
+            description: SecurityPolicyConfigStatus defines the observed state of
+              SecurityPolicyConfig.
+            properties:
+              compartmentId:
+                description: The OCID of the compartment containing the security policy
+                  configuration.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm)
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              description:
+                description: The description of the security policy configuration.
+                type: string
+              displayName:
+                description: The display name of the security policy configuration.
+                type: string
+              firewallConfig:
+                description: SecurityPolicyConfigFirewallConfig defines nested fields
+                  for SecurityPolicyConfig.FirewallConfig.
+                properties:
+                  excludeJob:
+                    description: Specifies whether the firewall should include or
+                      exclude the database internal job activities.
+                    type: string
+                  status:
+                    description: Specifies whether the firewall is enabled or disabled.
+                    type: string
+                  violationLogAutoPurge:
+                    description: |-
+                      Specifies whether Data Safe should automatically purge the violation logs
+                      from the database after collecting the violation logs and persisting them in Data Safe.
+                    type: string
+                type: object
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm)
+                  Example: `{"Department": "Finance"}`
+                type: object
+              id:
+                description: The OCID of the security policy configuration.
+                type: string
+              lifecycleDetails:
+                description: Details about the current state of the security policy
+                  configuration.
+                type: string
+              lifecycleState:
+                description: The current state of the security policy configuration.
+                type: string
+              securityPolicyId:
+                description: The OCID of the security policy corresponding to the
+                  security policy configuration.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  System tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              timeCreated:
+                description: The time the security policy configuration was created,
+                  in the format defined by RFC3339.
+                type: string
+              timeUpdated:
+                description: The date and time the security policy configuration was
+                  last updated, in the format defined by RFC3339.
+                type: string
+              unifiedAuditPolicyConfig:
+                description: SecurityPolicyConfigUnifiedAuditPolicyConfig defines
+                  nested fields for SecurityPolicyConfig.UnifiedAuditPolicyConfig.
+                properties:
+                  excludeDatasafeUser:
+                    description: Specifies whether the Data Safe service account on
+                      the target database should be excluded in the unified audit
+                      policy.
+                    type: string
+                type: object
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
