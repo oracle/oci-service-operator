@@ -1,0 +1,1525 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: connections.goldengate.oracle.com
+spec:
+  group: goldengate.oracle.com
+  names:
+    kind: Connection
+    listKind: ConnectionList
+    plural: connections
+    singular: connection
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the Connection
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the Connection
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: Connection is the Schema for the connections API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ConnectionSpec defines the desired state of Connection.
+            properties:
+              accessKeyId:
+                description: Access key ID to access the Amazon Kinesis.
+                type: string
+              accountKey:
+                description: |-
+                  Azure storage account key. This property is required when 'authenticationType' is set to 'SHARED_KEY'.
+                  e.g.: pa3WbhVATzj56xD4DH1VjOUhApRGEGHvOo58eQJVWIzX+j8j4CUVFcTjpIqDSRaSa1Wo2LbWY5at+AStEgLOIQ==
+                  Deprecated: This field is deprecated and replaced by "accountKeySecretId". This field will be removed after February 15 2026.
+                type: string
+              accountKeySecretId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Secret where the account key is stored.
+                  Note: When provided, 'accountKey' field must not be provided.
+                type: string
+              accountName:
+                description: Sets the Azure storage account name.
+                type: string
+              additionalAttributes:
+                description: |-
+                  An array of name-value pair attribute entries.
+                  Used as additional parameters in connection string.
+                items:
+                  description: ConnectionAdditionalAttribute defines nested fields
+                    for Connection.AdditionalAttribute.
+                  properties:
+                    name:
+                      description: The name of the property entry.
+                      type: string
+                    value:
+                      description: The value of the property entry.
+                      type: string
+                  required:
+                  - name
+                  - value
+                  type: object
+                type: array
+              authenticationMode:
+                description: |-
+                  Authentication mode. It can be provided at creation of Oracle Autonomous Database Serverless connections,
+                  when a databaseId is provided. The default value is MTLS.
+                type: string
+              authenticationType:
+                description: Used authentication mechanism to access Schema Registry.
+                type: string
+              azureAuthorityHost:
+                description: |-
+                  The endpoint used for authentication with Microsoft Entra ID (formerly Azure Active Directory).
+                  Default value: https://login.microsoftonline.com
+                  When connecting to a non-public Azure Cloud, the endpoint must be provided, eg:
+                  * Azure China: https://login.chinacloudapi.cn/
+                  * Azure US Government: https://login.microsoftonline.us/
+                type: string
+              azureTenantId:
+                description: |-
+                  Azure tenant ID of the application. This property is required when 'authenticationType' is set to 'AZURE_ACTIVE_DIRECTORY'.
+                  e.g.: 14593954-d337-4a61-a364-9f758c64f97f
+                type: string
+              bootstrapServers:
+                description: |-
+                  Kafka bootstrap. Equivalent of bootstrap.servers configuration property in Kafka:
+                  list of KafkaBootstrapServer objects specified by host/port.
+                  Used for establishing the initial connection to the Kafka cluster.
+                  Example: `"server1.example.com:9092,server2.example.com:9092"`
+                items:
+                  description: ConnectionBootstrapServer defines nested fields for
+                    Connection.BootstrapServer.
+                  properties:
+                    host:
+                      description: The name or address of a host.
+                      type: string
+                    port:
+                      description: The port of an endpoint usually specified for a
+                        connection.
+                      type: integer
+                    privateIp:
+                      description: |-
+                        Deprecated: this field will be removed in future versions. Either specify the private IP in the connectionString or host
+                        field, or make sure the host name is resolvable in the target VCN.
+                        The private IP address of the connection's endpoint in the customer's VCN, typically a
+                        database endpoint or a big data endpoint (e.g. Kafka bootstrap server).
+                        In case the privateIp is provided, the subnetId must also be provided.
+                        In case the privateIp (and the subnetId) is not provided it is assumed the datasource is publicly accessible.
+                        In case the connection is accessible only privately, the lack of privateIp will result in not being able to access the connection.
+                      type: string
+                  required:
+                  - host
+                  type: object
+                type: array
+              catalog:
+                description: ConnectionCatalog defines nested fields for Connection.Catalog.
+                properties:
+                  branch:
+                    description: The active branch of the Nessie catalog from which
+                      Iceberg reads and writes table metadata.
+                    type: string
+                  catalogType:
+                    type: string
+                  clientId:
+                    description: The OAuth client ID used for authentication.
+                    type: string
+                  clientSecretSecretId:
+                    description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                      of the Secret that stores the password Oracle GoldenGate uses
+                      to connect to Snowflake platform.
+                    type: string
+                  glueId:
+                    description: The AWS Glue Catalog ID where Iceberg tables are
+                      registered.
+                    type: string
+                  jsonData:
+                    type: string
+                  name:
+                    description: The catalog name within Polaris where Iceberg tables
+                      are registered.
+                    type: string
+                  principalRole:
+                    description: The Snowflake role used to access Polaris.
+                    type: string
+                  propertiesSecretId:
+                    description: |-
+                      The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Secret that stores the content
+                      of the configuration file containing additional properties for the REST catalog.
+                      See documentation: https://docs.oracle.com/en-us/iaas/Content/Identity/Tasks/managingcredentials.htm
+                    type: string
+                  uri:
+                    description: |-
+                      The URL endpoint for the Polaris API.
+                      e.g.: 'https://<your-snowflake-account>.snowflakecomputing.com/polaris/api/catalog'
+                    type: string
+                type: object
+              clientId:
+                description: |-
+                  Azure client ID of the application. This property is required when 'authenticationType' is set to 'AZURE_ACTIVE_DIRECTORY'.
+                  e.g.: 06ecaabf-8b80-4ec8-a0ec-20cbf463703d
+                type: string
+              clientSecret:
+                description: |-
+                  Azure client secret (aka application password) for authentication. This property is required when 'authenticationType' is set to 'AZURE_ACTIVE_DIRECTORY'.
+                  e.g.: dO29Q~F5-VwnA.lZdd11xFF_t5NAXCaGwDl9NbT1
+                  Deprecated: This field is deprecated and replaced by "clientSecretSecretId". This field will be removed after February 15 2026.
+                type: string
+              clientSecretSecretId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Secret where the client secret is stored.
+                  Note: When provided, 'clientSecret' field must not be provided.
+                type: string
+              clusterId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Kafka cluster
+                  being referenced from OCI Streaming with Apache Kafka.
+                type: string
+              clusterPlacementGroupId:
+                description: |-
+                  The OCID(/Content/General/Concepts/identifiers.htm) of the cluster placement group for the resource.
+                  Only applicable for multicloud subscriptions. The cluster placement group id must be provided when a multicloud
+                  subscription id is provided. Otherwise the cluster placement group must not be provided.
+                type: string
+              compartmentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment being referenced.
+                type: string
+              connectionFactory:
+                description: |-
+                  The of Java class implementing javax.jms.ConnectionFactory interface
+                  supplied by the Java Message Service provider.
+                  e.g.: 'com.stc.jmsjca.core.JConnectionFactoryXA'
+                type: string
+              connectionString:
+                description: |-
+                  MongoDB connection string.
+                  e.g.: 'mongodb://mongodb0.example.com:27017/recordsrecords'
+                type: string
+              connectionType:
+                type: string
+              connectionUrl:
+                description: |-
+                  Connection URL of the Java Message Service, specifying the protocol, host, and port.
+                  e.g.: 'mq://myjms.host.domain:7676'
+                type: string
+              consumerProperties:
+                description: The base64 encoded content of the consumer.properties
+                  file.
+                type: string
+              coreSiteXml:
+                description: |-
+                  The base64 encoded content of the Hadoop Distributed File System configuration file (core-site.xml).
+                  It is not included in GET responses if the `view=COMPACT` query parameter is specified.
+                type: string
+              databaseId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the Oracle Autonomous Json Database.
+                type: string
+              databaseName:
+                description: The name of the database.
+                type: string
+              dbSystemId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the database system being referenced.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Tags defined for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              deploymentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the deployment being referenced.
+                type: string
+              description:
+                description: Metadata about this specific object.
+                type: string
+              displayName:
+                description: An object's Display Name.
+                type: string
+              doesUseSecretIds:
+                description: Indicates that sensitive attributes are provided via
+                  Secrets.
+                type: boolean
+              endpoint:
+                description: |-
+                  The endpoint URL of the Amazon Kinesis service.
+                  e.g.: 'https://kinesis.us-east-1.amazonaws.com'
+                  If not provided, GoldenGate will default to 'https://kinesis.<region>.amazonaws.com'.
+                type: string
+              fingerprint:
+                description: |-
+                  Fingerprint required by TLS security protocol.
+                  Eg.: '6152b2dfbff200f973c5074a5b91d06ab3b472c07c09a1ea57bb7fd406cdce9c'
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  A simple key-value pair that is applied without any predefined name, type, or scope. Exists
+                  for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              host:
+                description: The name or address of a host.
+                type: string
+              jndiConnectionFactory:
+                description: |-
+                  The Connection Factory can be looked up using this name.
+                  e.g.: 'ConnectionFactory'
+                type: string
+              jndiInitialContextFactory:
+                description: |-
+                  The implementation of javax.naming.spi.InitialContextFactory interface
+                  that the client uses to obtain initial naming context.
+                  e.g.: 'org.apache.activemq.jndi.ActiveMQInitialContextFactory'
+                type: string
+              jndiProviderUrl:
+                description: |-
+                  The URL that Java Message Service will use to contact the JNDI provider.
+                  e.g.: 'tcp://myjms.host.domain:61616?jms.prefetchPolicy.all=1000'
+                type: string
+              jndiSecurityCredentials:
+                description: |-
+                  The password associated to the principal.
+                  Deprecated: This field is deprecated and replaced by "jndiSecurityCredentialsSecretId". This field will be removed after February 15 2026.
+                type: string
+              jndiSecurityCredentialsSecretId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Secret where the security credentials are stored associated to the principal.
+                  Note: When provided, 'jndiSecurityCredentials' field must not be provided.
+                type: string
+              jndiSecurityPrincipal:
+                description: |-
+                  Specifies the identity of the principal (user) to be authenticated.
+                  e.g.: 'admin2'
+                type: string
+              jsonData:
+                type: string
+              keyId:
+                description: |-
+                  Refers to the customer's master key OCID.
+                  If provided, it references a key to manage secrets. Customers must add policies to permit GoldenGate to use this key.
+                type: string
+              keyStore:
+                description: |-
+                  The base64 encoded content of the KeyStore file.
+                  Deprecated: This field is deprecated and replaced by "keyStoreSecretId". This field will be removed after February 15 2026.
+                type: string
+              keyStorePassword:
+                description: |-
+                  The KeyStore password.
+                  Deprecated: This field is deprecated and replaced by "keyStorePasswordSecretId". This field will be removed after February 15 2026.
+                type: string
+              keyStorePasswordSecretId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Secret where the kafka Ssl KeyStore password is stored.
+                  Note: When provided, 'keyStorePassword' field must not be provided.
+                type: string
+              keyStoreSecretId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Secret that stores the content of the KeyStore file.
+                  Note: When provided, 'keyStore' field must not be provided.
+                type: string
+              locks:
+                description: Locks associated with this resource.
+                items:
+                  description: ConnectionLock defines nested fields for Connection.Lock.
+                  properties:
+                    message:
+                      description: |-
+                        A message added by the creator of the lock. This is typically used to give an
+                        indication of why the resource is locked.
+                      type: string
+                    type:
+                      description: Type of the lock.
+                      type: string
+                  required:
+                  - type
+                  type: object
+                type: array
+              nsgIds:
+                description: An array of Network Security Group OCIDs used to define
+                  network access for either Deployments or Connections.
+                items:
+                  type: string
+                type: array
+              password:
+                description: |-
+                  The password Oracle GoldenGate uses to connect the associated system of the given technology.
+                  It must conform to the specific security requirements including length, case sensitivity, and so on.
+                  Deprecated: This field is deprecated and replaced by "passwordSecretId". This field will be removed after February 15 2026.
+                type: string
+              passwordSecretId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Secret where the password is stored.
+                  The password Oracle GoldenGate uses to connect the associated system of the given technology.
+                  It must conform to the specific security requirements including length, case sensitivity, and so on.
+                  If secretId is used plaintext field must not be provided.
+                  Note: When provided, 'password' field must not be provided.
+                type: string
+              port:
+                description: The port of an endpoint usually specified for a connection.
+                type: integer
+              privateIp:
+                description: |-
+                  Deprecated: this field will be removed in future versions. Either specify the private IP in the connectionString or host
+                  field, or make sure the host name is resolvable in the target VCN.
+                  The private IP address of the connection's endpoint in the customer's VCN, typically a
+                  database endpoint or a big data endpoint (e.g. Kafka bootstrap server).
+                  In case the privateIp is provided, the subnetId must also be provided.
+                  In case the privateIp (and the subnetId) is not provided it is assumed the datasource is publicly accessible.
+                  In case the connection is accessible only privately, the lack of privateIp will result in not being able to access the connection.
+                type: string
+              privateKeyFile:
+                description: |-
+                  The base64 encoded content of the private key file (PEM file) corresponding to the API key of the fingerprint.
+                  See documentation: https://docs.oracle.com/en-us/iaas/Content/Identity/Tasks/managingcredentials.htm
+                  Deprecated: This field is deprecated and replaced by "privateKeyFileSecretId". This field will be removed after February 15 2026.
+                type: string
+              privateKeyFileSecretId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Secret that stores the content of the private key file (PEM file) corresponding to the API key of the fingerprint.
+                  See documentation: https://docs.oracle.com/en-us/iaas/Content/Identity/Tasks/managingcredentials.htm
+                  Note: When provided, 'privateKeyFile' field must not be provided.
+                type: string
+              privateKeyPassphrase:
+                description: |-
+                  The passphrase of the private key.
+                  Deprecated: This field is deprecated and replaced by "privateKeyPassphraseSecretId". This field will be removed after February 15 2026.
+                type: string
+              privateKeyPassphraseSecretId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Secret that stores the passphrase of the private key.
+                  Note: When provided, 'privateKeyPassphrase' field must not be provided.
+                type: string
+              producerProperties:
+                description: The base64 encoded content of the producer.properties
+                  file.
+                type: string
+              publicKeyFingerprint:
+                description: |-
+                  The fingerprint of the API Key of the user specified by the userId.
+                  See documentation: https://docs.oracle.com/en-us/iaas/Content/Identity/Tasks/managingcredentials.htm
+                type: string
+              redisClusterId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the Redis cluster.
+                type: string
+              region:
+                description: |-
+                  The name of the AWS region.
+                  If not provided, GoldenGate will default to 'us-west-1'.
+                  Note: this property will become mandatory after July 30, 2026.
+                type: string
+              routingMethod:
+                description: |-
+                  Controls the network traffic direction to the target:
+                  SHARED_SERVICE_ENDPOINT: Traffic flows through the Goldengate Service's network to public hosts. Cannot be used for private targets.
+                  SHARED_DEPLOYMENT_ENDPOINT: Network traffic flows from the assigned deployment's private endpoint through the deployment's subnet.
+                  DEDICATED_ENDPOINT: A dedicated private endpoint is created in the target VCN subnet for the connection. The subnetId is required when DEDICATED_ENDPOINT networking is selected.
+                type: string
+              sasToken:
+                description: |-
+                  Credential that uses a shared access signature (SAS) to authenticate to an Azure Service. This property is
+                  required when 'authenticationType' is set to 'SHARED_ACCESS_SIGNATURE'.
+                  e.g.: ?sv=2020-06-08&ss=bfqt&srt=sco&sp=rwdlacupyx&se=2020-09-10T20:27:28Z&st=2022-08-05T12:27:28Z&spr=https&sig=C1IgHsiLBmTSStYkXXGLTP8it0xBrArcgCqOsZbXwIQ%3D
+                  Deprecated: This field is deprecated and replaced by "sasTokenSecretId". This field will be removed after February 15 2026.
+                type: string
+              sasTokenSecretId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Secret where the sas token is stored.
+                  Note: When provided, 'sasToken' field must not be provided.
+                type: string
+              secretAccessKey:
+                description: |-
+                  Secret access key to access the Amazon Kinesis.
+                  Deprecated: This field is deprecated and replaced by "secretAccessKeySecretId". This field will be removed after February 15 2026.
+                type: string
+              secretAccessKeySecretId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Secret where the secret access key is stored.
+                  Note: When provided, 'secretAccessKey' field must not be provided.
+                type: string
+              securityAttributes:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Security attributes for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Oracle-ZPR": {"MaxEgressCount": {"value": "42", "mode": "enforce"}}}`
+                type: object
+              securityProtocol:
+                description: Security protocol for PostgreSQL.
+                type: string
+              servers:
+                description: |-
+                  Comma separated list of Redis server addresses, specified as host:port entries, where :port is optional.
+                  If port is not specified, it defaults to 6379.
+                  Used for establishing the initial connection to the Redis cluster.
+                  Example: `"server1.example.com:6379,server2.example.com:6379"`
+                type: string
+              serviceAccountKeyFile:
+                description: |-
+                  The base64 encoded content of the service account key file containing
+                  the credentials required to use Google PubSub.
+                  Deprecated: This field is deprecated and replaced by "serviceAccountKeyFileSecretId". This field will be removed after February 15 2026.
+                type: string
+              serviceAccountKeyFileSecretId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Secret where the content of the service account key file is stored,
+                  which contains the credentials required to use Google PubSub.
+                  Note: When provided, 'serviceAccountKeyFile' field must not be provided.
+                type: string
+              sessionMode:
+                description: |-
+                  The mode of the database connection session to be established by the data client.
+                  'REDIRECT' - for a RAC database, 'DIRECT' - for a non-RAC database.
+                  Connection to a RAC database involves a redirection received from the SCAN listeners
+                  to the database node to connect to. By default the mode would be DIRECT.
+                type: string
+              shouldUseJndi:
+                description: If set to true, Java Naming and Directory Interface (JNDI)
+                  properties should be provided.
+                type: boolean
+              shouldUseResourcePrincipal:
+                description: |-
+                  Specifies that the user intends to authenticate to the instance using a resource principal.
+                  Default: false
+                type: boolean
+              shouldValidateServerCertificate:
+                description: If set to true, the driver validates the certificate
+                  that is sent by the database server.
+                type: boolean
+              sslCa:
+                description: |-
+                  The base64 encoded certificate of the trusted certificate authorities (Trusted CA) for PostgreSQL.
+                  The supported file formats are .pem and .crt.
+                  It is not included in GET responses if the `view=COMPACT` query parameter is specified.
+                type: string
+              sslCert:
+                description: |-
+                  The base64 encoded certificate of the PostgreSQL server. The supported file formats are .pem and .crt.
+                  It is not included in GET responses if the `view=COMPACT` query parameter is specified.
+                type: string
+              sslClientKeystash:
+                description: |-
+                  The base64 encoded keystash file which contains the encrypted password to the key database file.
+                  This property is not supported for IBM Db2 for i, as client TLS mode is not available.
+                  Deprecated: This field is deprecated and replaced by "sslClientKeystashSecretId". This field will be removed after February 15 2026.
+                type: string
+              sslClientKeystashSecretId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Secret where the keystash file is stored,
+                  which contains the encrypted password to the key database file.
+                  This property is not supported for IBM Db2 for i, as client TLS mode is not available.
+                  Note: When provided, 'sslClientKeystash' field must not be provided.
+                type: string
+              sslClientKeystoredb:
+                description: |-
+                  The base64 encoded keystore file created at the client containing the server certificate / CA root certificate.
+                  This property is not supported for IBM Db2 for i, as client TLS mode is not available.
+                  Deprecated: This field is deprecated and replaced by "sslClientKeystoredbSecretId". This field will be removed after February 15 2026.
+                type: string
+              sslClientKeystoredbSecretId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Secret where the keystore file stored,
+                  which created at the client containing the server certificate / CA root certificate.
+                  This property is not supported for IBM Db2 for i, as client TLS mode is not available.
+                  Note: When provided, 'sslClientKeystoredb' field must not be provided.
+                type: string
+              sslCrl:
+                description: |-
+                  The base64 encoded list of certificates revoked by the trusted certificate authorities (Trusted CA).
+                  It is not included in GET responses if the `view=COMPACT` query parameter is specified.
+                type: string
+              sslKey:
+                description: |-
+                  The base64 encoded private key of the PostgreSQL server. The supported file formats are .pem and .crt.
+                  Deprecated: This field is deprecated and replaced by "sslKeySecretId". This field will be removed after February 15 2026.
+                type: string
+              sslKeyPassword:
+                description: |-
+                  The password for the cert inside the KeyStore.
+                  In case it differs from the KeyStore password, it should be provided.
+                  Deprecated: This field is deprecated and replaced by "sslKeyPasswordSecretId". This field will be removed after February 15 2026.
+                type: string
+              sslKeyPasswordSecretId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Secret that stores the password for the cert inside the KeyStore.
+                  In case it differs from the KeyStore password, it should be provided.
+                  Note: When provided, 'sslKeyPassword' field must not be provided.
+                type: string
+              sslKeySecretId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Secret that stores the private key of the PostgreSQL server. The supported file formats are .pem and .crt.
+                  Note: When provided, 'sslKey' field must not be provided.
+                type: string
+              sslMode:
+                description: SSL modes for PostgreSQL.
+                type: string
+              sslServerCertificate:
+                description: |-
+                  The base64 encoded file which contains the self-signed server certificate / Certificate Authority (CA) certificate.
+                  It is not included in GET responses if the `view=COMPACT` query parameter is specified.
+                type: string
+              storage:
+                description: ConnectionStorage defines nested fields for Connection.Storage.
+                properties:
+                  accessKeyId:
+                    description: Access key ID to access the Amazon S3 bucket.
+                    type: string
+                  accountKeySecretId:
+                    description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                      of the Secret where the account key is stored.
+                    type: string
+                  accountName:
+                    description: Sets the Azure storage account name.
+                    type: string
+                  bucket:
+                    description: Google Cloud Storage bucket where Iceberg stores
+                      metadata and data files.
+                    type: string
+                  container:
+                    description: The Azure Blob Storage container where Iceberg tables
+                      are stored.
+                    type: string
+                  endpoint:
+                    description: |-
+                      The Azure Blob Storage endpoint where Iceberg data is stored.
+                      e.g.: 'https://my-azure-storage-account.blob.core.windows.net'
+                    type: string
+                  jsonData:
+                    type: string
+                  projectId:
+                    description: The Google Cloud Project where the bucket exists.
+                    type: string
+                  region:
+                    description: |-
+                      The AMAZON region where the S3 bucket is hosted.
+                      e.g.: 'us-east-2'
+                    type: string
+                  schemeType:
+                    description: The scheme of the storage.
+                    type: string
+                  secretAccessKeySecretId:
+                    description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                      of the Secret where the Secret Access Key is stored.
+                    type: string
+                  serviceAccountKeyFileSecretId:
+                    description: |-
+                      The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Secret where the content of the service account key file is stored,
+                      which contains the credentials required to use Google Cloud Storage.
+                    type: string
+                  storageType:
+                    type: string
+                type: object
+              storageCredentialName:
+                description: Optional. External storage credential name to access
+                  files on object storage such as ADLS Gen2, S3 or GCS.
+                type: string
+              streamPoolId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the stream pool being referenced.
+                type: string
+              subnetId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the target subnet of the dedicated connection.
+                type: string
+              subscriptionId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the subscription with which resource needs to be associated with.
+                type: string
+              technologyType:
+                description: The PostgreSQL technology type.
+                type: string
+              tenancyId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the related OCI tenancy.
+                type: string
+              tenantId:
+                description: |-
+                  Azure tenant ID of the application.
+                  e.g.: 14593954-d337-4a61-a364-9f758c64f97f
+                type: string
+              tlsCaFile:
+                description: |-
+                  Database Certificate - The base64 encoded content of a .pem file, containing the server public key (for 1 and 2-way SSL).
+                  It is not included in GET responses if the `view=COMPACT` query parameter is specified.
+                type: string
+              tlsCertificateKeyFile:
+                description: |-
+                  Client Certificate - The base64 encoded content of a .pem file, containing the client public key (for 2-way SSL).
+                  Deprecated: This field is deprecated and replaced by "tlsCertificateKeyFileSecretId". This field will be removed after February 15 2026.
+                type: string
+              tlsCertificateKeyFilePassword:
+                description: |-
+                  Client Certificate key file password.
+                  Deprecated: This field is deprecated and replaced by "tlsCertificateKeyFilePasswordSecretId". This field will be removed after February 15 2026.
+                type: string
+              tlsCertificateKeyFilePasswordSecretId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Secret that stores the password of the tls certificate key file.
+                  Note: When provided, 'tlsCertificateKeyFilePassword' field must not be provided.
+                type: string
+              tlsCertificateKeyFileSecretId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Secret that stores the certificate key file of the mtls connection.
+                  - The content of a .pem file containing the client private key (for 2-way SSL).
+                  Note: When provided, 'tlsCertificateKeyFile' field must not be provided.
+                type: string
+              trustStore:
+                description: |-
+                  The base64 encoded content of the TrustStore file.
+                  Deprecated: This field is deprecated and replaced by "trustStoreSecretId". This field will be removed after February 15 2026.
+                type: string
+              trustStorePassword:
+                description: |-
+                  The TrustStore password.
+                  Deprecated: This field is deprecated and replaced by "trustStorePasswordSecretId". This field will be removed after February 15 2026.
+                type: string
+              trustStorePasswordSecretId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Secret where the kafka Ssl TrustStore password is stored.
+                  Note: When provided, 'trustStorePassword' field must not be provided.
+                type: string
+              trustStoreSecretId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Secret that stores the content of the TrustStore file.
+                  Note: When provided, 'trustStore' field must not be provided.
+                type: string
+              url:
+                description: |-
+                  Kafka Schema Registry URL.
+                  e.g.: 'https://server1.us.oracle.com:8081'
+                type: string
+              userId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the OCI user who will access the Object Storage.
+                  The user must have write access to the bucket they want to connect to.
+                  If the user is not provided, backend will default to the user who is calling the API endpoint.
+                type: string
+              username:
+                description: |-
+                  The username Oracle GoldenGate uses to connect the associated system of the given technology.
+                  This username must already exist and be available by the system/application to be connected to
+                  and must conform to the case sensitivty requirments defined in it.
+                type: string
+              vaultId:
+                description: |-
+                  Refers to the customer's vault OCID.
+                  If provided, it references a vault where GoldenGate can manage secrets. Customers must add policies to permit GoldenGate
+                  to manage secrets contained within this vault.
+                type: string
+              wallet:
+                description: |-
+                  The wallet contents Oracle GoldenGate uses to make connections to a database.
+                  This attribute is expected to be base64 encoded.
+                  Deprecated: This field is deprecated and replaced by "walletSecretId". This field will be removed after February 15 2026.
+                type: string
+              walletSecretId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Secret where the wallet file is stored.
+                  The wallet contents Oracle GoldenGate uses to make connections to a database.
+                  Note: When provided, 'wallet' field must not be provided.
+                type: string
+            required:
+            - compartmentId
+            - displayName
+            type: object
+          status:
+            description: ConnectionStatus defines the observed state of Connection.
+            properties:
+              accessKeyId:
+                description: |-
+                  Access key ID to access the Amazon S3 bucket.
+                  e.g.: "this-is-not-the-secret"
+                type: string
+              accountKeySecretId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Secret where the account key is stored.
+                  Note: When provided, 'accountKey' field must not be provided.
+                type: string
+              accountName:
+                description: Sets the Azure storage account name.
+                type: string
+              additionalAttributes:
+                description: |-
+                  An array of name-value pair attribute entries.
+                  Used as additional parameters in connection string.
+                items:
+                  description: ConnectionAdditionalAttribute defines nested fields
+                    for Connection.AdditionalAttribute.
+                  properties:
+                    name:
+                      description: The name of the property entry.
+                      type: string
+                    value:
+                      description: The value of the property entry.
+                      type: string
+                  required:
+                  - name
+                  - value
+                  type: object
+                type: array
+              authenticationMode:
+                description: |-
+                  Authentication mode. It can be provided at creation of Oracle Autonomous Database Serverless connections,
+                  when a databaseId is provided. The default value is MTLS.
+                type: string
+              authenticationType:
+                description: Authentication type for Elasticsearch.
+                type: string
+              azureAuthorityHost:
+                description: |-
+                  The endpoint used for authentication with Microsoft Entra ID (formerly Azure Active Directory).
+                  Default value: https://login.microsoftonline.com
+                  When connecting to a non-public Azure Cloud, the endpoint must be provided, eg:
+                  * Azure China: https://login.chinacloudapi.cn/
+                  * Azure US Government: https://login.microsoftonline.us/
+                type: string
+              azureTenantId:
+                description: |-
+                  Azure tenant ID of the application. This property is required when 'authenticationType' is set to 'AZURE_ACTIVE_DIRECTORY'.
+                  e.g.: 14593954-d337-4a61-a364-9f758c64f97f
+                type: string
+              bootstrapServers:
+                description: |-
+                  Kafka bootstrap. Equivalent of bootstrap.servers configuration property in Kafka:
+                  list of KafkaBootstrapServer objects specified by host/port.
+                  Used for establishing the initial connection to the Kafka cluster.
+                  Example: `"server1.example.com:9092,server2.example.com:9092"`
+                items:
+                  description: ConnectionBootstrapServer defines nested fields for
+                    Connection.BootstrapServer.
+                  properties:
+                    host:
+                      description: The name or address of a host.
+                      type: string
+                    port:
+                      description: The port of an endpoint usually specified for a
+                        connection.
+                      type: integer
+                    privateIp:
+                      description: |-
+                        Deprecated: this field will be removed in future versions. Either specify the private IP in the connectionString or host
+                        field, or make sure the host name is resolvable in the target VCN.
+                        The private IP address of the connection's endpoint in the customer's VCN, typically a
+                        database endpoint or a big data endpoint (e.g. Kafka bootstrap server).
+                        In case the privateIp is provided, the subnetId must also be provided.
+                        In case the privateIp (and the subnetId) is not provided it is assumed the datasource is publicly accessible.
+                        In case the connection is accessible only privately, the lack of privateIp will result in not being able to access the connection.
+                      type: string
+                  required:
+                  - host
+                  type: object
+                type: array
+              catalog:
+                description: ConnectionCatalog defines nested fields for Connection.Catalog.
+                properties:
+                  branch:
+                    description: The active branch of the Nessie catalog from which
+                      Iceberg reads and writes table metadata.
+                    type: string
+                  catalogType:
+                    type: string
+                  clientId:
+                    description: The OAuth client ID used for authentication.
+                    type: string
+                  clientSecretSecretId:
+                    description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                      of the Secret that stores the password Oracle GoldenGate uses
+                      to connect to Snowflake platform.
+                    type: string
+                  glueId:
+                    description: The AWS Glue Catalog ID where Iceberg tables are
+                      registered.
+                    type: string
+                  jsonData:
+                    type: string
+                  name:
+                    description: The catalog name within Polaris where Iceberg tables
+                      are registered.
+                    type: string
+                  principalRole:
+                    description: The Snowflake role used to access Polaris.
+                    type: string
+                  propertiesSecretId:
+                    description: |-
+                      The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Secret that stores the content
+                      of the configuration file containing additional properties for the REST catalog.
+                      See documentation: https://docs.oracle.com/en-us/iaas/Content/Identity/Tasks/managingcredentials.htm
+                    type: string
+                  uri:
+                    description: |-
+                      The URL endpoint for the Polaris API.
+                      e.g.: 'https://<your-snowflake-account>.snowflakecomputing.com/polaris/api/catalog'
+                    type: string
+                type: object
+              clientId:
+                description: |-
+                  Azure client ID of the application.
+                  e.g.: 06ecaabf-8b80-4ec8-a0ec-20cbf463703d
+                type: string
+              clientSecretSecretId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Secret where the client secret is stored.
+                  Note: When provided, 'clientSecret' field must not be provided.
+                type: string
+              clusterId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Kafka cluster
+                  being referenced from OCI Streaming with Apache Kafka.
+                type: string
+              clusterPlacementGroupId:
+                description: |-
+                  The OCID(/Content/General/Concepts/identifiers.htm) of the cluster placement group for the resource.
+                  Only applicable for multicloud subscriptions. The cluster placement group id must be provided when a multicloud
+                  subscription id is provided. Otherwise the cluster placement group must not be provided.
+                type: string
+              compartmentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment being referenced.
+                type: string
+              connectionFactory:
+                description: |-
+                  The of Java class implementing javax.jms.ConnectionFactory interface
+                  supplied by the Java Message Service provider.
+                  e.g.: 'com.stc.jmsjca.core.JConnectionFactoryXA'
+                type: string
+              connectionString:
+                description: |-
+                  MongoDB connection string.
+                  e.g.: 'mongodb://mongodb0.example.com:27017/recordsrecords'
+                type: string
+              connectionType:
+                type: string
+              connectionUrl:
+                description: |-
+                  Connection URL.
+                  e.g.: 'jdbc:redshift://aws-redshift-instance.aaaaaaaaaaaa.us-east-2.redshift.amazonaws.com:5439/mydb'
+                type: string
+              consumerProperties:
+                description: The base64 encoded content of the consumer.properties
+                  file.
+                type: string
+              coreSiteXml:
+                description: |-
+                  The base64 encoded content of the Hadoop Distributed File System configuration file (core-site.xml).
+                  It is not included in GET responses if the `view=COMPACT` query parameter is specified.
+                type: string
+              databaseId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the Oracle Autonomous Json Database.
+                type: string
+              databaseName:
+                description: The name of the database.
+                type: string
+              dbSystemId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the database system being referenced.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Tags defined for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              deploymentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the deployment being referenced.
+                type: string
+              description:
+                description: Metadata about this specific object.
+                type: string
+              displayName:
+                description: An object's Display Name.
+                type: string
+              doesUseSecretIds:
+                description: Indicates that sensitive attributes are provided via
+                  Secrets.
+                type: boolean
+              endpoint:
+                description: |-
+                  The Amazon Endpoint for S3.
+                  e.g.: 'https://my-bucket.s3.us-east-1.amazonaws.com'
+                  If not provided, GoldenGate will default to 'https://s3.<region>.amazonaws.com'.
+                type: string
+              fingerprint:
+                description: |-
+                  Fingerprint required by TLS security protocol.
+                  Eg.: '6152b2dfbff200f973c5074a5b91d06ab3b472c07c09a1ea57bb7fd406cdce9c'
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  A simple key-value pair that is applied without any predefined name, type, or scope. Exists
+                  for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              host:
+                description: The name or address of a host.
+                type: string
+              id:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the connection being
+                  referenced.
+                type: string
+              ingressIps:
+                description: |-
+                  List of ingress IP addresses from where the GoldenGate deployment connects to this connection's privateIp.
+                  Customers may optionally set up ingress security rules to restrict traffic from these IP addresses.
+                items:
+                  description: ConnectionIngressIp defines nested fields for Connection.IngressIp.
+                  properties:
+                    ingressIp:
+                      description: A Private Endpoint IPv4 or IPv6 Address created
+                        in the customer's subnet.
+                      type: string
+                  type: object
+                type: array
+              jndiConnectionFactory:
+                description: |-
+                  The Connection Factory can be looked up using this name.
+                  e.g.: 'ConnectionFactory'
+                type: string
+              jndiInitialContextFactory:
+                description: |-
+                  The implementation of javax.naming.spi.InitialContextFactory interface
+                  that the client uses to obtain initial naming context.
+                  e.g.: 'org.apache.activemq.jndi.ActiveMQInitialContextFactory'
+                type: string
+              jndiProviderUrl:
+                description: |-
+                  The URL that Java Message Service will use to contact the JNDI provider.
+                  e.g.: 'tcp://myjms.host.domain:61616?jms.prefetchPolicy.all=1000'
+                type: string
+              jndiSecurityCredentialsSecretId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Secret where the security credentials are stored associated to the principal.
+                  Note: When provided, 'jndiSecurityCredentials' field must not be provided.
+                type: string
+              jndiSecurityPrincipal:
+                description: |-
+                  Specifies the identity of the principal (user) to be authenticated.
+                  e.g.: 'admin2'
+                type: string
+              jsonData:
+                type: string
+              keyId:
+                description: |-
+                  Refers to the customer's master key OCID.
+                  If provided, it references a key to manage secrets. Customers must add policies to permit GoldenGate to use this key.
+                type: string
+              keyStorePasswordSecretId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Secret where the kafka KeyStore password is stored.
+                  Note: When provided, 'keyStorePassword' field must not be provided.
+                type: string
+              keyStoreSecretId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Secret where the content of the KeyStore file is stored.
+                  Note: When provided, 'keyStore' field must not be provided.
+                type: string
+              lifecycleDetails:
+                description: |-
+                  Describes the object's current state in detail. For example, it can be used to provide
+                  actionable information for a resource in a Failed state.
+                type: string
+              lifecycleState:
+                description: Possible lifecycle states for connection.
+                type: string
+              locks:
+                description: Locks associated with this resource.
+                items:
+                  description: ConnectionLock defines nested fields for Connection.Lock.
+                  properties:
+                    message:
+                      description: |-
+                        A message added by the creator of the lock. This is typically used to give an
+                        indication of why the resource is locked.
+                      type: string
+                    type:
+                      description: Type of the lock.
+                      type: string
+                  required:
+                  - type
+                  type: object
+                type: array
+              nsgIds:
+                description: An array of Network Security Group OCIDs used to define
+                  network access for either Deployments or Connections.
+                items:
+                  type: string
+                type: array
+              passwordSecretId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Secret where the password is stored.
+                  The password Oracle GoldenGate uses to connect the associated system of the given technology.
+                  It must conform to the specific security requirements including length, case sensitivity, and so on.
+                  If secretId is used plaintext field must not be provided.
+                  Note: When provided, 'password' field must not be provided.
+                type: string
+              port:
+                description: The port of an endpoint usually specified for a connection.
+                type: integer
+              privateIp:
+                description: |-
+                  Deprecated: this field will be removed in future versions. Either specify the private IP in the connectionString or host
+                  field, or make sure the host name is resolvable in the target VCN.
+                  The private IP address of the connection's endpoint in the customer's VCN, typically a
+                  database endpoint or a big data endpoint (e.g. Kafka bootstrap server).
+                  In case the privateIp is provided, the subnetId must also be provided.
+                  In case the privateIp (and the subnetId) is not provided it is assumed the datasource is publicly accessible.
+                  In case the connection is accessible only privately, the lack of privateIp will result in not being able to access the connection.
+                type: string
+              privateKeyFileSecretId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Secret that stores the content of the private key file (PEM file) corresponding to the API key of the fingerprint.
+                  See documentation: https://docs.oracle.com/en-us/iaas/Content/Identity/Tasks/managingcredentials.htm
+                  Note: When provided, 'privateKeyFile' field must not be provided.
+                type: string
+              privateKeyPassphraseSecretId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Secret that stores the passphrase of the private key.
+                  Note: When provided, 'privateKeyPassphrase' field must not be provided.
+                type: string
+              producerProperties:
+                description: The base64 encoded content of the producer.properties
+                  file.
+                type: string
+              publicKeyFingerprint:
+                description: |-
+                  The fingerprint of the API Key of the user specified by the userId.
+                  See documentation: https://docs.oracle.com/en-us/iaas/Content/Identity/Tasks/managingcredentials.htm
+                type: string
+              redisClusterId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the Redis cluster.
+                type: string
+              region:
+                description: |-
+                  The name of the AWS region where the bucket is created.
+                  If not provided, GoldenGate will default to 'us-west-2'.
+                  Note: this property will become mandatory after May 20, 2026.
+                type: string
+              routingMethod:
+                description: |-
+                  Controls the network traffic direction to the target:
+                  SHARED_SERVICE_ENDPOINT: Traffic flows through the Goldengate Service's network to public hosts. Cannot be used for private targets.
+                  SHARED_DEPLOYMENT_ENDPOINT: Network traffic flows from the assigned deployment's private endpoint through the deployment's subnet.
+                  DEDICATED_ENDPOINT: A dedicated private endpoint is created in the target VCN subnet for the connection. The subnetId is required when DEDICATED_ENDPOINT networking is selected.
+                type: string
+              sasTokenSecretId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Secret where the sas token is stored.
+                  Note: When provided, 'sasToken' field must not be provided.
+                type: string
+              secretAccessKeySecretId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Secret where the Secret Access Key is stored.
+                  Note: When provided, 'secretAccessKey' field must not be provided.
+                type: string
+              securityAttributes:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Security attributes for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Oracle-ZPR": {"MaxEgressCount": {"value": "42", "mode": "enforce"}}}`
+                type: object
+              securityProtocol:
+                description: Kafka security protocol.
+                type: string
+              servers:
+                description: |-
+                  Comma separated list of Elasticsearch server addresses, specified as host:port entries, where :port is optional.
+                  If port is not specified, it defaults to 9200.
+                  Used for establishing the initial connection to the Elasticsearch cluster.
+                  Example: `"server1.example.com:4000,server2.example.com:4000"`
+                type: string
+              serviceAccountKeyFileSecretId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Secret where the content of the service account key file is stored,
+                  which contains the credentials required to use Google BigQuery.
+                  Note: When provided, 'serviceAccountKeyFile' field must not be provided.
+                type: string
+              sessionMode:
+                description: |-
+                  The mode of the database connection session to be established by the data client.
+                  'REDIRECT' - for a RAC database, 'DIRECT' - for a non-RAC database.
+                  Connection to a RAC database involves a redirection received from the SCAN listeners
+                  to the database node to connect to. By default the mode would be DIRECT.
+                type: string
+              shouldUseJndi:
+                description: If set to true, Java Naming and Directory Interface (JNDI)
+                  properties should be provided.
+                type: boolean
+              shouldUseResourcePrincipal:
+                description: |-
+                  Specifies that the user intends to authenticate to the instance using a resource principal.
+                  Applicable only for OCI Streaming connections.
+                  Only available from 23.9.0.0.0 GoldenGate versions.
+                  Note: When specified, 'username'/'password'/'passwordSecretId' fields must not be provided.
+                  Default: false
+                type: boolean
+              shouldValidateServerCertificate:
+                description: If set to true, the driver validates the certificate
+                  that is sent by the database server.
+                type: boolean
+              sslCa:
+                description: |-
+                  The base64 encoded certificate of the trusted certificate authorities (Trusted CA) for PostgreSQL.
+                  The supported file formats are .pem and .crt.
+                  It is not included in GET responses if the `view=COMPACT` query parameter is specified.
+                type: string
+              sslCert:
+                description: |-
+                  The base64 encoded certificate of the PostgreSQL server. The supported file formats are .pem and .crt.
+                  It is not included in GET responses if the `view=COMPACT` query parameter is specified.
+                type: string
+              sslClientKeystashSecretId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Secret where the keystash file is stored,
+                  which contains the encrypted password to the key database file.
+                  This property is not supported for IBM Db2 for i, as client TLS mode is not available.
+                  Note: When provided, 'sslClientKeystash' field must not be provided.
+                type: string
+              sslClientKeystoredbSecretId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Secret where the keystore file stored,
+                  which created at the client containing the server certificate / CA root certificate.
+                  This property is not supported for IBM Db2 for i, as client TLS mode is not available.
+                  Note: When provided, 'sslClientKeystoredb' field must not be provided.
+                type: string
+              sslCrl:
+                description: |-
+                  The base64 encoded list of certificates revoked by the trusted certificate authorities (Trusted CA).
+                  It is not included in GET responses if the `view=COMPACT` query parameter is specified.
+                type: string
+              sslKeyPasswordSecretId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Secret where the kafka Ssl Key password is stored.
+                  Note: When provided, 'sslKeyPassword' field must not be provided.
+                type: string
+              sslKeySecretId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Secret that stores the private key of the PostgreSQL server. The supported file formats are .pem and .crt.
+                  Note: When provided, 'sslKey' field must not be provided.
+                type: string
+              sslMode:
+                description: SSL mode for PostgreSQL.
+                type: string
+              sslServerCertificate:
+                description: |-
+                  The base64 encoded file which contains the self-signed server certificate / Certificate Authority (CA) certificate.
+                  It is not included in GET responses if the `view=COMPACT` query parameter is specified.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              storage:
+                description: ConnectionStorage defines nested fields for Connection.Storage.
+                properties:
+                  accessKeyId:
+                    description: Access key ID to access the Amazon S3 bucket.
+                    type: string
+                  accountKeySecretId:
+                    description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                      of the Secret where the account key is stored.
+                    type: string
+                  accountName:
+                    description: Sets the Azure storage account name.
+                    type: string
+                  bucket:
+                    description: Google Cloud Storage bucket where Iceberg stores
+                      metadata and data files.
+                    type: string
+                  container:
+                    description: The Azure Blob Storage container where Iceberg tables
+                      are stored.
+                    type: string
+                  endpoint:
+                    description: |-
+                      The Azure Blob Storage endpoint where Iceberg data is stored.
+                      e.g.: 'https://my-azure-storage-account.blob.core.windows.net'
+                    type: string
+                  jsonData:
+                    type: string
+                  projectId:
+                    description: The Google Cloud Project where the bucket exists.
+                    type: string
+                  region:
+                    description: |-
+                      The AMAZON region where the S3 bucket is hosted.
+                      e.g.: 'us-east-2'
+                    type: string
+                  schemeType:
+                    description: The scheme of the storage.
+                    type: string
+                  secretAccessKeySecretId:
+                    description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                      of the Secret where the Secret Access Key is stored.
+                    type: string
+                  serviceAccountKeyFileSecretId:
+                    description: |-
+                      The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Secret where the content of the service account key file is stored,
+                      which contains the credentials required to use Google Cloud Storage.
+                    type: string
+                  storageType:
+                    type: string
+                type: object
+              storageCredentialName:
+                description: Optional. External storage credential name to access
+                  files on object storage such as ADLS Gen2, S3 or GCS.
+                type: string
+              streamPoolId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the stream pool being referenced.
+                type: string
+              subnetId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the target subnet of the dedicated connection.
+                type: string
+              subscriptionId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the subscription with which resource needs to be associated with.
+                type: string
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  The system tags associated with this resource, if any. The system tags are set by Oracle
+                  Cloud Infrastructure services. Each key is predefined and scoped to namespaces.  For more
+                  information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{orcl-cloud: {free-tier-retain: true}}`
+                type: object
+              technologyType:
+                description: The Kafka technology type.
+                type: string
+              tenancyId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the related OCI tenancy.
+                type: string
+              tenantId:
+                description: |-
+                  Azure tenant ID of the application.
+                  e.g.: 14593954-d337-4a61-a364-9f758c64f97f
+                type: string
+              timeCreated:
+                description: |-
+                  The time the resource was created. The format is defined by
+                  RFC3339 (https://tools.ietf.org/html/rfc3339), such as `2016-08-25T21:10:29.600Z`.
+                type: string
+              timeUpdated:
+                description: |-
+                  The time the resource was last updated. The format is defined by
+                  RFC3339 (https://tools.ietf.org/html/rfc3339), such as `2016-08-25T21:10:29.600Z`.
+                type: string
+              tlsCaFile:
+                description: |-
+                  Database Certificate - The base64 encoded content of a .pem file, containing the server public key (for 1 and 2-way SSL).
+                  It is not included in GET responses if the `view=COMPACT` query parameter is specified.
+                type: string
+              tlsCertificateKeyFilePasswordSecretId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Secret that stores the password of the tls certificate key file.
+                  Note: When provided, 'tlsCertificateKeyFilePassword' field must not be provided.
+                type: string
+              tlsCertificateKeyFileSecretId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Secret that stores the certificate key file of the mtls connection.
+                  - The content of a .pem file containing the client private key (for 2-way SSL).
+                  Note: When provided, 'tlsCertificateKeyFile' field must not be provided.
+                type: string
+              trustStorePasswordSecretId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Secret where the kafka TrustStore password is stored.
+                  Note: When provided, 'trustStorePassword' field must not be provided.
+                type: string
+              trustStoreSecretId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Secret where the content of the TrustStore file is stored.
+                  Note: When provided, 'trustStore' field must not be provided.
+                type: string
+              url:
+                description: |-
+                  Kafka Schema Registry URL.
+                  e.g.: 'https://server1.us.oracle.com:8081'
+                type: string
+              userId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the OCI user who will access the Object Storage.
+                  The user must have write access to the bucket they want to connect to.
+                  If the user is not provided, backend will default to the user who is calling the API endpoint.
+                type: string
+              username:
+                description: |-
+                  The username Oracle GoldenGate uses to connect the associated system of the given technology.
+                  This username must already exist and be available by the system/application to be connected to
+                  and must conform to the case sensitivty requirments defined in it.
+                type: string
+              vaultId:
+                description: |-
+                  Refers to the customer's vault OCID.
+                  If provided, it references a vault where GoldenGate can manage secrets. Customers must add policies to permit GoldenGate
+                  to manage secrets contained within this vault.
+                type: string
+              walletSecretId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Secret where the wallet file is stored.
+                  The wallet contents Oracle GoldenGate uses to make connections to a database.
+                  Note: When provided, 'wallet' field must not be provided.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

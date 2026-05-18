@@ -1,0 +1,348 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: jobs.datacatalog.oracle.com
+spec:
+  group: datacatalog.oracle.com
+  names:
+    kind: Job
+    listKind: JobList
+    plural: jobs
+    singular: job
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the Job
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the Job
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: Job is the Schema for the jobs API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: JobSpec defines the desired state of Job.
+            properties:
+              connectionKey:
+                description: |-
+                  The key of the connection used by the job. This connection will override the default connection specified in
+                  the associated job definition. All executions will use this connection.
+                type: string
+              description:
+                description: Detailed description of the job.
+                type: string
+              displayName:
+                description: |-
+                  A user-friendly display name. Does not have to be unique, and it's changeable.
+                  Avoid entering confidential information.
+                type: string
+              jobDefinitionKey:
+                description: The unique key of the job definition that defined the
+                  scope of this job.
+                type: string
+              scheduleCronExpression:
+                description: |-
+                  Interval on which the job will be run. Value is specified as a cron-supported time specification "nickname".
+                  The following subset of those is supported: @monthly, @weekly, @daily, @hourly.
+                  For metastore sync, an additional option @default is supported, which will schedule jobs at a more granular frequency.
+                type: string
+              timeScheduleBegin:
+                description: Date that the schedule should be operational. An RFC3339
+                  (https://tools.ietf.org/html/rfc3339) formatted datetime string.
+                type: string
+              timeScheduleEnd:
+                description: Date that the schedule should end from being operational.
+                  An RFC3339 (https://tools.ietf.org/html/rfc3339) formatted datetime
+                  string.
+                type: string
+            required:
+            - displayName
+            - jobDefinitionKey
+            type: object
+          status:
+            description: JobStatus defines the observed state of Job.
+            properties:
+              catalogId:
+                description: The data catalog's OCID.
+                type: string
+              connectionKey:
+                description: |-
+                  The key of the connection used by the job. This connection will override the default connection specified in
+                  the associated job definition. All executions will use this connection.
+                type: string
+              createdById:
+                description: OCID of the user who created this job.
+                type: string
+              dataAssetKey:
+                description: Unique key of the data asset to which this job applies,
+                  if the job involves a data asset.
+                type: string
+              description:
+                description: Detailed description of the job.
+                type: string
+              displayName:
+                description: |-
+                  A user-friendly display name. Does not have to be unique, and it's changeable.
+                  Avoid entering confidential information.
+                type: string
+              errorCode:
+                description: Error code returned from the latest job execution for
+                  this job. Useful when the latest Job execution is in FAILED state.
+                type: string
+              errorMessage:
+                description: Error message returned from the latest job execution
+                  for this job. Useful when the latest Job Execution is in a FAILED
+                  state.
+                type: string
+              executionCount:
+                description: The total number of executions for this job schedule.
+                type: integer
+              executions:
+                description: Array of the executions summary associated with this
+                  job.
+                items:
+                  description: JobExecution defines nested fields for Job.Execution.
+                  properties:
+                    jobKey:
+                      description: The unique key of the parent job.
+                      type: string
+                    jobType:
+                      description: Type of the job execution.
+                      type: string
+                    key:
+                      description: Unique key of the job execution resource.
+                      type: string
+                    lifecycleState:
+                      description: Status of the job execution, such as running, paused,
+                        or completed.
+                      type: string
+                    parentKey:
+                      description: The unique key of the parent execution or null
+                        if this job execution has no parent.
+                      type: string
+                    scheduleInstanceKey:
+                      description: The unique key of the triggering external scheduler
+                        resource or null if this job execution is not externally triggered.
+                      type: string
+                    timeCreated:
+                      description: |-
+                        The date and time the job execution was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+                        Example: `2019-03-25T21:10:29.600Z`
+                      type: string
+                    timeEnded:
+                      description: |-
+                        Time that the job execution ended or null if it hasn't yet completed.
+                        An RFC3339 (https://tools.ietf.org/html/rfc3339) formatted datetime string.
+                      type: string
+                    timeStarted:
+                      description: Time that job execution started. An RFC3339 (https://tools.ietf.org/html/rfc3339)
+                        formatted datetime string.
+                      type: string
+                    uri:
+                      description: URI to the job execution instance in the API.
+                      type: string
+                  type: object
+                type: array
+              glossaryKey:
+                description: Unique key of the glossary to which this job applies.
+                type: string
+              internalVersion:
+                description: Internal version of the job resource.
+                type: string
+              jobDefinitionKey:
+                description: The unique key of the job definition resource that defined
+                  the scope of this job.
+                type: string
+              jobDefinitionName:
+                description: The display name of the job definition resource that
+                  defined the scope of this job.
+                type: string
+              jobType:
+                description: Type of the job.
+                type: string
+              key:
+                description: Unique key of the job resource.
+                type: string
+              lifecycleState:
+                description: Lifecycle state for job.
+                type: string
+              scheduleCronExpression:
+                description: |-
+                  Interval on which the job will be run. Value is specified as a cron-supported time specification "nickname".
+                  The following subset of those is supported: @monthly, @weekly, @daily, @hourly.
+                  For metastore sync, an additional option @default is supported, which will schedule jobs at a more granular frequency.
+                type: string
+              scheduleType:
+                description: Type of job schedule that is inferred from the scheduling
+                  properties.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              timeCreated:
+                description: |-
+                  The date and time the job was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+                  Example: `2019-03-25T21:10:29.600Z`
+                type: string
+              timeOfLatestExecution:
+                description: |-
+                  The date and time of the most recent execution for this Job, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+                  Example: `2019-03-25T21:10:29.600Z`
+                type: string
+              timeScheduleBegin:
+                description: Date that the schedule should be operational. An RFC3339
+                  (https://tools.ietf.org/html/rfc3339) formatted datetime string.
+                type: string
+              timeScheduleEnd:
+                description: Date that the schedule should end from being operational.
+                  An RFC3339 (https://tools.ietf.org/html/rfc3339) formatted datetime
+                  string.
+                type: string
+              timeUpdated:
+                description: Time that this job was last updated. An RFC3339 (https://tools.ietf.org/html/rfc3339)
+                  formatted datetime string.
+                type: string
+              updatedById:
+                description: OCID of the user who updated this job.
+                type: string
+              uri:
+                description: URI to the job instance in the API.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

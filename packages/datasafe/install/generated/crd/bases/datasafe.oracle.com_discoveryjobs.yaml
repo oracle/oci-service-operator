@@ -1,0 +1,432 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: discoveryjobs.datasafe.oracle.com
+spec:
+  group: datasafe.oracle.com
+  names:
+    kind: DiscoveryJob
+    listKind: DiscoveryJobList
+    plural: discoveryjobs
+    singular: discoveryjob
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the DiscoveryJob
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the DiscoveryJob
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: DiscoveryJob is the Schema for the discoveryjobs API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: DiscoveryJobSpec defines the desired state of DiscoveryJob.
+            properties:
+              compartmentId:
+                description: The OCID of the compartment where the discovery job resource
+                  should be created.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm)
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              discoveryType:
+                description: |-
+                  The type of the discovery job. It defines the job's scope.
+                  NEW identifies new sensitive columns in the target database that are not in the sensitive data model.
+                  DELETED identifies columns that are present in the sensitive data model but have been deleted from the target database.
+                  MODIFIED identifies columns that are present in the target database as well as the sensitive data model but some of their attributes have been modified.
+                  ALL covers all the above three scenarios and reports new, deleted and modified columns.
+                type: string
+              displayName:
+                description: A user-friendly name for the discovery job. Does not
+                  have to be unique, and it is changeable. Avoid entering confidential
+                  information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm)
+                  Example: `{"Department": "Finance"}`
+                type: object
+              isAppDefinedRelationDiscoveryEnabled:
+                description: |-
+                  Indicates if the discovery job should identify potential application-level (non-dictionary) referential relationships
+                  between columns. Note that data discovery automatically identifies and adds database-level (dictionary-defined)
+                  relationships. This option helps identify application-level relationships that are not defined in the database
+                  dictionary, which in turn, helps identify additional sensitive columns and preserve referential integrity during
+                  data masking. It's disabled by default and should be used only if there is a need to identify application-level
+                  relationships.
+                type: boolean
+              isIncludeAllSchemas:
+                description: |-
+                  Indicates if all the schemas should be scanned by the discovery job. If it is set to true, sensitive data is discovered
+                  in all schemas (except for schemas maintained by Oracle). If both attributes are not provided, the configuration
+                  from the sensitive data model is used.
+                type: boolean
+              isIncludeAllSensitiveTypes:
+                description: |-
+                  Indicates if all the existing sensitive types should be used by the discovery job. If it's set to true, the
+                  sensitiveTypeIdsForDiscovery attribute is ignored and all sensitive types are used for data discovery. If both
+                  attributes are not provided, the configuration from the sensitive data model is used.
+                type: boolean
+              isSampleDataCollectionEnabled:
+                description: |-
+                  Indicates if the discovery job should collect and store sample data values for the discovered columns. Sample data
+                  helps review the discovered columns and ensure that they actually contain sensitive data. As it collects original
+                  data from the target database, it's disabled by default and should be used only if it's acceptable to store sample
+                  data in Data Safe's repository in Oracle Cloud. Note that sample data values are not collected for columns with the
+                  following data types: LONG, LOB, RAW, XMLTYPE and BFILE.
+                type: boolean
+              schemasForDiscovery:
+                description: |-
+                  The schemas to be scanned by the discovery job. If not provided, the schemasForDiscovery attribute of the sensitive
+                  data model is used to get the list of schemas.
+                items:
+                  type: string
+                type: array
+              sensitiveDataModelId:
+                description: The OCID of the sensitive data model.
+                type: string
+              sensitiveTypeGroupIdsForDiscovery:
+                description: |-
+                  The OCIDs of the sensitive type groups to be used by the discovery job. All the sensitive types present in
+                  sensitive type group will be used for discovery.
+                items:
+                  type: string
+                type: array
+              sensitiveTypeIdsForDiscovery:
+                description: |-
+                  The OCIDs of the sensitive types to be used by the discovery job. If not provided, the sensitiveTypeIdsForDiscovery
+                  attribute of the sensitive data model is used to get the list of sensitive types.
+                items:
+                  type: string
+                type: array
+              tablesForDiscovery:
+                description: |-
+                  The data discovery jobs will scan the tables specified here, including both schemas and tables. In the absence
+                  of explicit input, the list of tables is obtained from the tablesForDiscovery attribute of the sensitive data model.
+                items:
+                  description: DiscoveryJobTablesForDiscovery defines nested fields
+                    for DiscoveryJob.TablesForDiscovery.
+                  properties:
+                    schemaName:
+                      description: This contains the name of the schema.
+                      type: string
+                    tableNames:
+                      description: This contains an optional list of the table names.
+                      items:
+                        type: string
+                      type: array
+                  required:
+                  - schemaName
+                  type: object
+                type: array
+            required:
+            - compartmentId
+            - sensitiveDataModelId
+            type: object
+          status:
+            description: DiscoveryJobStatus defines the observed state of DiscoveryJob.
+            properties:
+              compartmentId:
+                description: The OCID of the compartment that contains the discovery
+                  job.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm)
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              discoveryType:
+                description: |-
+                  The type of the discovery job. It defines the job's scope.
+                  NEW identifies new sensitive columns in the target database that are not in the sensitive data model.
+                  DELETED identifies columns that are present in the sensitive data model but have been deleted from the target database.
+                  MODIFIED identifies columns that are present in the target database as well as the sensitive data model but some of their attributes have been modified.
+                  ALL covers all the above three scenarios and reports new, deleted and modified columns.
+                type: string
+              displayName:
+                description: The display name of the discovery job.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm)
+                  Example: `{"Department": "Finance"}`
+                type: object
+              id:
+                description: The OCID of the discovery job.
+                type: string
+              isAppDefinedRelationDiscoveryEnabled:
+                description: |-
+                  Indicates if the discovery job should identify potential application-level (non-dictionary) referential
+                  relationships between columns. Note that data discovery automatically identifies and adds database-level (dictionary-defined)
+                  relationships. This option helps identify application-level relationships that are not defined in the database dictionary,
+                  which in turn, helps identify additional sensitive columns and preserve referential integrity during data masking.
+                  It's disabled by default and should be used only if there is a need to identify application-level relationships.
+                type: boolean
+              isIncludeAllSchemas:
+                description: |-
+                  Indicates if all the schemas in the associated target database are used for data discovery.
+                  If it is set to true, sensitive data is discovered in all schemas (except for schemas maintained by Oracle).
+                type: boolean
+              isIncludeAllSensitiveTypes:
+                description: |-
+                  Indicates if all the existing sensitive types are used for data discovery. If it's set to true, the
+                  sensitiveTypeIdsForDiscovery attribute is ignored and all sensitive types are used.
+                type: boolean
+              isSampleDataCollectionEnabled:
+                description: |-
+                  Indicates if the discovery job should collect and store sample data values for the discovered columns.
+                  Sample data helps review the discovered columns and ensure that they actually contain sensitive data.
+                  As it collects original data from the target database, it's disabled by default and should be used only
+                  if it's acceptable to store sample data in Data Safe's repository in Oracle Cloud. Note that sample data
+                  values are not collected for columns with the following data types: LONG, LOB, RAW, XMLTYPE and BFILE.
+                type: boolean
+              lifecycleState:
+                description: The current state of the discovery job.
+                type: string
+              schemasForDiscovery:
+                description: The schemas used for data discovery.
+                items:
+                  type: string
+                type: array
+              sensitiveDataModelId:
+                description: The OCID of the sensitive data model associated with
+                  the discovery job.
+                type: string
+              sensitiveTypeGroupIdsForDiscovery:
+                description: The OCIDs of the sensitive type groups to be used by
+                  data discovery jobs.
+                items:
+                  type: string
+                type: array
+              sensitiveTypeIdsForDiscovery:
+                description: The OCIDs of the sensitive types used for data discovery.
+                items:
+                  type: string
+                type: array
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  System tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              tablesForDiscovery:
+                description: The data discovery jobs will scan the tables specified
+                  here, including both schemas and tables.
+                items:
+                  description: DiscoveryJobTablesForDiscovery defines nested fields
+                    for DiscoveryJob.TablesForDiscovery.
+                  properties:
+                    schemaName:
+                      description: This contains the name of the schema.
+                      type: string
+                    tableNames:
+                      description: This contains an optional list of the table names.
+                      items:
+                        type: string
+                      type: array
+                  required:
+                  - schemaName
+                  type: object
+                type: array
+              targetId:
+                description: The OCID of the target database associated with the discovery
+                  job.
+                type: string
+              timeFinished:
+                description: The date and time the discovery job finished, in the
+                  format defined by RFC3339 (https://tools.ietf.org/html/rfc3339)..
+                type: string
+              timeStarted:
+                description: The date and time the discovery job started, in the format
+                  defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+                type: string
+              totalColumnsScanned:
+                description: The total number of columns scanned by the discovery
+                  job.
+                format: int64
+                type: integer
+              totalDeletedSensitiveColumns:
+                description: The total number of deleted sensitive columns identified
+                  by the discovery job.
+                format: int64
+                type: integer
+              totalModifiedSensitiveColumns:
+                description: The total number of modified sensitive columns identified
+                  by the discovery job.
+                format: int64
+                type: integer
+              totalNewSensitiveColumns:
+                description: The total number of new sensitive columns identified
+                  by the discovery job.
+                format: int64
+                type: integer
+              totalObjectsScanned:
+                description: The total number of objects (tables and editioning views)
+                  scanned by the discovery job.
+                format: int64
+                type: integer
+              totalSchemasScanned:
+                description: The total number of schemas scanned by the discovery
+                  job.
+                format: int64
+                type: integer
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

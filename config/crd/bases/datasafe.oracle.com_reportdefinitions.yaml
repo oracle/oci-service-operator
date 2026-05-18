@@ -1,0 +1,620 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: reportdefinitions.datasafe.oracle.com
+spec:
+  group: datasafe.oracle.com
+  names:
+    kind: ReportDefinition
+    listKind: ReportDefinitionList
+    plural: reportdefinitions
+    singular: reportdefinition
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the ReportDefinition
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the ReportDefinition
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: ReportDefinition is the Schema for the reportdefinitions API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ReportDefinitionSpec defines the desired state of ReportDefinition.
+            properties:
+              columnFilters:
+                description: An array of column filter objects. A column Filter object
+                  stores all information about a column filter including field name,
+                  an operator, one or more expressions, if the filter is enabled,
+                  or if the filter is hidden.
+                items:
+                  description: ReportDefinitionColumnFilter defines nested fields
+                    for ReportDefinition.ColumnFilter.
+                  properties:
+                    expressions:
+                      description: An array of expressions based on the operator type.
+                        A filter may have one or more expressions.
+                      items:
+                        type: string
+                      type: array
+                    fieldName:
+                      description: Name of the column on which the filter must be
+                        applied.
+                      type: string
+                    isEnabled:
+                      description: Indicates whether the filter is enabled. Values
+                        can either be 'true' or 'false'.
+                      type: boolean
+                    isHidden:
+                      description: Indicates whether the filter is hidden. Values
+                        can either be 'true' or 'false'.
+                      type: boolean
+                    operator:
+                      description: Specifies the type of operator that must be applied
+                        for example in, eq etc.
+                      type: string
+                  required:
+                  - expressions
+                  - fieldName
+                  - isEnabled
+                  - isHidden
+                  - operator
+                  type: object
+                type: array
+              columnInfo:
+                description: An array of column objects in the order (left to right)
+                  displayed in the report. A column object stores all information
+                  about a column, including the name displayed on the UI, corresponding
+                  field name in the data source, data type of the column, and column
+                  visibility (if the column is visible to the user).
+                items:
+                  description: ReportDefinitionColumnInfo defines nested fields for
+                    ReportDefinition.ColumnInfo.
+                  properties:
+                    applicableOperators:
+                      description: An array of operators that can be supported by
+                        column fieldName.
+                      items:
+                        type: string
+                      type: array
+                    dataType:
+                      description: Specifies the data type of the column.
+                      type: string
+                    displayName:
+                      description: Name of the column displayed on UI.
+                      type: string
+                    displayOrder:
+                      description: Specifies the display order of the column.
+                      type: integer
+                    fieldName:
+                      description: Specifies the corresponding field name in the data
+                        source.
+                      type: string
+                    isHidden:
+                      description: Indicates if the column is hidden. Values can either
+                        be 'true' or 'false'.
+                      type: boolean
+                    isVirtual:
+                      description: Specifies if column is virtual and can only be
+                        used as column filter.
+                      type: boolean
+                  required:
+                  - displayName
+                  - displayOrder
+                  - fieldName
+                  - isHidden
+                  type: object
+                type: array
+              columnSortings:
+                description: An array of column sorting objects. Each column sorting
+                  object stores the column name to be sorted and if the sorting is
+                  in ascending order; sorting is done by the first column in the array,
+                  then by the second column in the array, etc.
+                items:
+                  description: ReportDefinitionColumnSorting defines nested fields
+                    for ReportDefinition.ColumnSorting.
+                  properties:
+                    fieldName:
+                      description: Name of the column that must be sorted.
+                      type: string
+                    isAscending:
+                      description: Indicates if the column must be sorted in ascending
+                        order. Values can either be 'true' or 'false'.
+                      type: boolean
+                    sortingOrder:
+                      description: Indicates the order at which column must be sorted.
+                      type: integer
+                  required:
+                  - fieldName
+                  - isAscending
+                  - sortingOrder
+                  type: object
+                type: array
+              compartmentId:
+                description: The OCID of the compartment containing the report definition.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm)
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              description:
+                description: The description of the report definition.
+                type: string
+              displayName:
+                description: Specifies the name of the report definition.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm)
+                  Example: `{"Department": "Finance"}`
+                type: object
+              parentId:
+                description: The OCID of the parent report definition.
+                type: string
+              summary:
+                description: An array of report summary objects in the order (left
+                  to right)  displayed in the report.  A  report summary object stores
+                  all information about summary of report to be displayed, including
+                  the name displayed on UI, the display order, corresponding group
+                  by and count of values, summary visibility (if the summary is visible
+                  to user).
+                items:
+                  description: ReportDefinitionSummary defines nested fields for ReportDefinition.Summary.
+                  properties:
+                    countOf:
+                      description: Name of the key or count of object.
+                      type: string
+                    displayOrder:
+                      description: Specifies the order in which the summary must be
+                        displayed.
+                      type: integer
+                    groupByFieldName:
+                      description: A comma-delimited string that specifies the names
+                        of the fields by which the records must be aggregated to get
+                        the summary.
+                      type: string
+                    isHidden:
+                      description: Indicates if the summary is hidden. Values can
+                        either be 'true' or 'false'.
+                      type: boolean
+                    name:
+                      description: Name of the report summary.
+                      type: string
+                    scimFilter:
+                      description: Additional scim filters used to get the specific
+                        summary.
+                      type: string
+                  required:
+                  - displayOrder
+                  - name
+                  type: object
+                type: array
+            required:
+            - columnFilters
+            - columnInfo
+            - columnSortings
+            - compartmentId
+            - displayName
+            - parentId
+            - summary
+            type: object
+          status:
+            description: ReportDefinitionStatus defines the observed state of ReportDefinition.
+            properties:
+              category:
+                description: Specifies the name of the category that this report belongs
+                  to.
+                type: string
+              columnFilters:
+                description: An array of columnFilter objects. A columnFilter object
+                  stores all information about a column filter including field name,
+                  an operator, one or more expressions, if the filter is enabled,
+                  or if the filter is hidden.
+                items:
+                  description: ReportDefinitionColumnFilter defines nested fields
+                    for ReportDefinition.ColumnFilter.
+                  properties:
+                    expressions:
+                      description: An array of expressions based on the operator type.
+                        A filter may have one or more expressions.
+                      items:
+                        type: string
+                      type: array
+                    fieldName:
+                      description: Name of the column on which the filter must be
+                        applied.
+                      type: string
+                    isEnabled:
+                      description: Indicates whether the filter is enabled. Values
+                        can either be 'true' or 'false'.
+                      type: boolean
+                    isHidden:
+                      description: Indicates whether the filter is hidden. Values
+                        can either be 'true' or 'false'.
+                      type: boolean
+                    operator:
+                      description: Specifies the type of operator that must be applied
+                        for example in, eq etc.
+                      type: string
+                  required:
+                  - expressions
+                  - fieldName
+                  - isEnabled
+                  - isHidden
+                  - operator
+                  type: object
+                type: array
+              columnInfo:
+                description: An array of column objects in the order (left to right)
+                  displayed in the report. A column object stores all information
+                  about a column, including the name displayed on the UI, corresponding
+                  field name in the data source, data type of the column, and column
+                  visibility (if the column is visible to the user).
+                items:
+                  description: ReportDefinitionColumnInfo defines nested fields for
+                    ReportDefinition.ColumnInfo.
+                  properties:
+                    applicableOperators:
+                      description: An array of operators that can be supported by
+                        column fieldName.
+                      items:
+                        type: string
+                      type: array
+                    dataType:
+                      description: Specifies the data type of the column.
+                      type: string
+                    displayName:
+                      description: Name of the column displayed on UI.
+                      type: string
+                    displayOrder:
+                      description: Specifies the display order of the column.
+                      type: integer
+                    fieldName:
+                      description: Specifies the corresponding field name in the data
+                        source.
+                      type: string
+                    isHidden:
+                      description: Indicates if the column is hidden. Values can either
+                        be 'true' or 'false'.
+                      type: boolean
+                    isVirtual:
+                      description: Specifies if column is virtual and can only be
+                        used as column filter.
+                      type: boolean
+                  required:
+                  - displayName
+                  - displayOrder
+                  - fieldName
+                  - isHidden
+                  type: object
+                type: array
+              columnSortings:
+                description: An array of column sorting objects. Each column sorting
+                  object stores the column name to be sorted and if the sorting is
+                  in ascending order; sorting is done by the first column in the array,
+                  then by the second column in the array, etc.
+                items:
+                  description: ReportDefinitionColumnSorting defines nested fields
+                    for ReportDefinition.ColumnSorting.
+                  properties:
+                    fieldName:
+                      description: Name of the column that must be sorted.
+                      type: string
+                    isAscending:
+                      description: Indicates if the column must be sorted in ascending
+                        order. Values can either be 'true' or 'false'.
+                      type: boolean
+                    sortingOrder:
+                      description: Indicates the order at which column must be sorted.
+                      type: integer
+                  required:
+                  - fieldName
+                  - isAscending
+                  - sortingOrder
+                  type: object
+                type: array
+              compartmentId:
+                description: The OCID of the compartment containing the report definition.
+                type: string
+              complianceStandards:
+                description: The list of the data protection regulations/standards
+                  used in the report that will help demonstrate compliance.
+                items:
+                  type: string
+                type: array
+              dataSource:
+                description: Specifies the name of a resource that provides data for
+                  the report. For example alerts, events.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm)
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              description:
+                description: A description of the report definition.
+                type: string
+              displayName:
+                description: Name of the report definition.
+                type: string
+              displayOrder:
+                description: Specifies how the report definitions are ordered in the
+                  display.
+                type: integer
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm)
+                  Example: `{"Department": "Finance"}`
+                type: object
+              id:
+                description: The OCID of the report definition.
+                type: string
+              isSeeded:
+                description: Signifies whether the definition is seeded or user defined.
+                  Values can either be 'true' or 'false'.
+                type: boolean
+              lifecycleDetails:
+                description: Details about the current state of the report definition
+                  in Data Safe.
+                type: string
+              lifecycleState:
+                description: The current state of the report.
+                type: string
+              parentId:
+                description: The OCID of the parent report definition. In the case
+                  of seeded report definition, this is same as definition OCID.
+                type: string
+              recordTimeSpan:
+                description: |-
+                  The time span for the records in the report to be scheduled.
+                  <period-value><period>
+                  Allowed period strings - "H","D","M","Y"
+                  Each of the above fields potentially introduce constraints. A workRequest is created only
+                  when period-value satisfies all the constraints. Constraints introduced:
+                  1. period = H (The allowed range for period-value is [1, 23])
+                  2. period = D (The allowed range for period-value is [1, 30])
+                  3. period = M (The allowed range for period-value is [1, 11])
+                  4. period = Y (The minimum period-value is 1)
+                type: string
+              schedule:
+                description: |-
+                  The schedule to generate the report periodically in the specified format:
+                  <version-string>;<version-specific-schedule>
+                  Allowed version strings - "v1"
+                  v1's version specific schedule -<ss> <mm> <hh> <day-of-week> <day-of-month>
+                  Each of the above fields potentially introduce constraints. A workrequest is created only
+                  when clock time satisfies all the constraints. Constraints introduced:
+                  1. seconds = <ss> (So, the allowed range for <ss> is [0, 59])
+                  2. minutes = <mm> (So, the allowed range for <mm> is [0, 59])
+                  3. hours = <hh> (So, the allowed range for <hh> is [0, 23])
+                  4. <day-of-week> can be either '*' (without quotes or a number between 1(Monday) and 7(Sunday))
+                  No constraint introduced when it is '*'. When not, day of week must equal the given value
+                  5. <day-of-month> can be either '*' (without quotes or a number between 1 and 28)
+                  No constraint introduced when it is '*'. When not, day of month must equal the given value
+                type: string
+              scheduledReportCompartmentId:
+                description: The OCID of the compartment in which the scheduled resource
+                  will be created.
+                type: string
+              scheduledReportMimeType:
+                description: Specifies the format of the report ( either .xls or .pdf
+                  or .json)
+                type: string
+              scheduledReportName:
+                description: The name of the report to be scheduled.
+                type: string
+              scheduledReportRowLimit:
+                description: Specifies the limit on the number of rows in the report.
+                type: integer
+              scimFilter:
+                description: Additional SCIM filters used to define the report.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              summary:
+                description: An array of report summary objects in the order (left
+                  to right)  displayed in the report.  A  report summary object stores
+                  all information about summary of report to be displayed, including
+                  the name displayed on UI, the display order, corresponding group
+                  by and count of values, summary visibility (if the summary is visible
+                  to user).
+                items:
+                  description: ReportDefinitionSummary defines nested fields for ReportDefinition.Summary.
+                  properties:
+                    countOf:
+                      description: Name of the key or count of object.
+                      type: string
+                    displayOrder:
+                      description: Specifies the order in which the summary must be
+                        displayed.
+                      type: integer
+                    groupByFieldName:
+                      description: A comma-delimited string that specifies the names
+                        of the fields by which the records must be aggregated to get
+                        the summary.
+                      type: string
+                    isHidden:
+                      description: Indicates if the summary is hidden. Values can
+                        either be 'true' or 'false'.
+                      type: boolean
+                    name:
+                      description: Name of the report summary.
+                      type: string
+                    scimFilter:
+                      description: Additional scim filters used to get the specific
+                        summary.
+                      type: string
+                  required:
+                  - displayOrder
+                  - name
+                  type: object
+                type: array
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  System tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              timeCreated:
+                description: Specifies the date and time the report definition was
+                  created.
+                type: string
+              timeUpdated:
+                description: The date and time the report definition was updated.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

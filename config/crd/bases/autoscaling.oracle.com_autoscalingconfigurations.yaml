@@ -1,0 +1,629 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: autoscalingconfigurations.autoscaling.oracle.com
+spec:
+  group: autoscaling.oracle.com
+  names:
+    kind: AutoScalingConfiguration
+    listKind: AutoScalingConfigurationList
+    plural: autoscalingconfigurations
+    singular: autoscalingconfiguration
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the AutoScalingConfiguration
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the AutoScalingConfiguration
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: AutoScalingConfiguration is the Schema for the autoscalingconfigurations
+          API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: AutoScalingConfigurationSpec defines the desired state of
+              AutoScalingConfiguration.
+            properties:
+              compartmentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment containing the autoscaling configuration.
+                type: string
+              coolDownInSeconds:
+                description: |-
+                  For threshold-based autoscaling policies, this value is the minimum period of time to wait between scaling actions.
+                  The cooldown period gives the system time to stabilize before rescaling. The minimum value is 300 seconds, which
+                  is also the default. The cooldown period starts when the instance pool reaches the running state.
+                  For schedule-based autoscaling policies, this value is not used.
+                type: integer
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a
+                  namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              displayName:
+                description: A user-friendly name. Does not have to be unique, and
+                  it's changeable. Avoid entering confidential information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no
+                  predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              isEnabled:
+                description: Whether the autoscaling configuration is enabled.
+                type: boolean
+              policies:
+                items:
+                  description: AutoScalingConfigurationPolicy defines nested fields
+                    for AutoScalingConfiguration.Policy.
+                  properties:
+                    capacity:
+                      description: The capacity requirements of the autoscaling policy.
+                      properties:
+                        initial:
+                          description: |-
+                            For a threshold-based autoscaling policy, this value is the initial number of instances to launch in the instance pool
+                            immediately after autoscaling is enabled. After autoscaling retrieves performance metrics, the number of
+                            instances is automatically adjusted from this initial number to a number that is based on the limits that
+                            you set.
+                            For a schedule-based autoscaling policy, this value is the target pool size to scale to when executing the schedule
+                            that's defined in the autoscaling policy.
+                          type: integer
+                        max:
+                          description: |-
+                            For a threshold-based autoscaling policy, this value is the maximum number of instances the instance pool is allowed
+                            to increase to (scale out).
+                            For a schedule-based autoscaling policy, this value is not used.
+                          type: integer
+                        min:
+                          description: |-
+                            For a threshold-based autoscaling policy, this value is the minimum number of instances the instance pool is allowed
+                            to decrease to (scale in).
+                            For a schedule-based autoscaling policy, this value is not used.
+                          type: integer
+                      type: object
+                    displayName:
+                      description: A user-friendly name. Does not have to be unique,
+                        and it's changeable. Avoid entering confidential information.
+                      type: string
+                    executionSchedule:
+                      description: AutoScalingConfigurationPolicyExecutionSchedule
+                        defines nested fields for AutoScalingConfiguration.Policy.ExecutionSchedule.
+                      properties:
+                        expression:
+                          description: |-
+                            A cron expression that represents the time at which to execute the autoscaling policy.
+                            Cron expressions have this format: `<second> <minute> <hour> <day of month> <month> <day of week> <year>`
+                            You can use special characters that are supported with the Quartz cron implementation.
+                            You must specify `0` as the value for seconds.
+                            Example: `0 15 10 ? * *`
+                          type: string
+                        jsonData:
+                          type: string
+                        timezone:
+                          description: The time zone for the execution schedule.
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - timezone
+                      type: object
+                    isEnabled:
+                      description: Whether the autoscaling policy is enabled.
+                      type: boolean
+                    jsonData:
+                      type: string
+                    policyType:
+                      type: string
+                    resourceAction:
+                      description: AutoScalingConfigurationPolicyResourceAction defines
+                        nested fields for AutoScalingConfiguration.Policy.ResourceAction.
+                      properties:
+                        action:
+                          type: string
+                        actionType:
+                          type: string
+                        jsonData:
+                          type: string
+                      type: object
+                    rules:
+                      items:
+                        description: AutoScalingConfigurationPolicyRule defines nested
+                          fields for AutoScalingConfiguration.Policy.Rule.
+                        properties:
+                          action:
+                            description: AutoScalingConfigurationPolicyRuleAction
+                              defines nested fields for AutoScalingConfiguration.Policy.Rule.Action.
+                            properties:
+                              type:
+                                description: The type of action to take.
+                                type: string
+                              value:
+                                description: |-
+                                  To scale out (increase the number of instances), provide a positive value. To scale in (decrease the number of
+                                  instances), provide a negative value.
+                                type: integer
+                            required:
+                            - type
+                            - value
+                            type: object
+                          displayName:
+                            description: A user-friendly name. Does not have to be
+                              unique, and it's changeable. Avoid entering confidential
+                              information.
+                            type: string
+                          metric:
+                            description: AutoScalingConfigurationPolicyRuleMetric
+                              defines nested fields for AutoScalingConfiguration.Policy.Rule.Metric.
+                            properties:
+                              jsonData:
+                                type: string
+                              metricCompartmentId:
+                                description: The OCID of the compartment containing
+                                  the metrics.
+                                type: string
+                              metricSource:
+                                type: string
+                              metricType:
+                                type: string
+                              namespace:
+                                description: The namespace for the query.
+                                type: string
+                              pendingDuration:
+                                description: |-
+                                  The period of time that the condition defined in the alarm must persist before the alarm state
+                                  changes from "OK" to "FIRING" or vice versa. For example, a value of 5 minutes means that the
+                                  alarm must persist in breaching the condition for five minutes before the alarm updates its
+                                  state to "FIRING"; likewise, the alarm must persist in not breaching the condition for five
+                                  minutes before the alarm updates its state to "OK."
+                                  The duration is specified as a string in ISO 8601 format (`PT10M` for ten minutes or `PT1H`
+                                  for one hour). Minimum: PT3M. Maximum: PT1H. Default: PT3M.
+                                type: string
+                              query:
+                                description: |-
+                                  The Monitoring Query Language (MQL) expression to evaluate for the alarm. The Alarms feature of
+                                  the Monitoring service interprets results for each returned time series as Boolean values,
+                                  where zero represents false and a non-zero value represents true. A true value means that the trigger
+                                  rule condition has been met. The query must specify a metric, statistic, interval, and trigger
+                                  rule (threshold or absence). Supported values for interval: `1m`-`60m` (also `1h`). You can optionally
+                                  specify dimensions and grouping functions. Supported grouping functions: `grouping()`, `groupBy()`.
+                                  Example of threshold alarm:
+                                    -----
+                                      CpuUtilization[1m]{availabilityDomain="cumS:PHX-AD-1"}.groupBy(availabilityDomain).percentile(0.9) > 85
+                                    -----
+                                type: string
+                              resourceGroup:
+                                description: The resource group for the query.
+                                type: string
+                              threshold:
+                                description: AutoScalingConfigurationPolicyRuleMetricThreshold
+                                  defines nested fields for AutoScalingConfiguration.Policy.Rule.Metric.Threshold.
+                                properties:
+                                  operator:
+                                    description: |-
+                                      The comparison operator to use. Options are greater than (`GT`), greater than or equal to
+                                      (`GTE`), less than (`LT`), and less than or equal to (`LTE`).
+                                    type: string
+                                  value:
+                                    type: integer
+                                required:
+                                - operator
+                                - value
+                                type: object
+                            type: object
+                        required:
+                        - action
+                        - metric
+                        type: object
+                      type: array
+                  type: object
+                type: array
+              resource:
+                description: AutoScalingConfigurationResource defines nested fields
+                  for AutoScalingConfiguration.Resource.
+                properties:
+                  id:
+                    description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                      of the resource that is managed by the autoscaling configuration.
+                    type: string
+                  jsonData:
+                    type: string
+                  type:
+                    type: string
+                required:
+                - id
+                type: object
+            required:
+            - compartmentId
+            - policies
+            - resource
+            type: object
+          status:
+            description: AutoScalingConfigurationStatus defines the observed state
+              of AutoScalingConfiguration.
+            properties:
+              compartmentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment containing the autoscaling configuration.
+                type: string
+              coolDownInSeconds:
+                description: |-
+                  For threshold-based autoscaling policies, this value is the minimum period of time to wait between scaling actions.
+                  The cooldown period gives the system time to stabilize before rescaling. The minimum value is 300 seconds, which
+                  is also the default. The cooldown period starts when the instance pool reaches the running state.
+                  For schedule-based autoscaling policies, this value is not used.
+                type: integer
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a
+                  namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              displayName:
+                description: A user-friendly name. Does not have to be unique, and
+                  it's changeable. Avoid entering confidential information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no
+                  predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              id:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the autoscaling configuration.
+                type: string
+              isEnabled:
+                description: Whether the autoscaling configuration is enabled.
+                type: boolean
+              maxResourceCount:
+                description: The maximum number of resources to scale out to.
+                type: integer
+              minResourceCount:
+                description: The minimum number of resources to scale in to.
+                type: integer
+              policies:
+                description: |-
+                  Autoscaling policy definitions for the autoscaling configuration. An autoscaling policy defines the criteria that
+                  trigger autoscaling actions and the actions to take.
+                items:
+                  description: AutoScalingConfigurationPolicy defines nested fields
+                    for AutoScalingConfiguration.Policy.
+                  properties:
+                    capacity:
+                      description: The capacity requirements of the autoscaling policy.
+                      properties:
+                        initial:
+                          description: |-
+                            For a threshold-based autoscaling policy, this value is the initial number of instances to launch in the instance pool
+                            immediately after autoscaling is enabled. After autoscaling retrieves performance metrics, the number of
+                            instances is automatically adjusted from this initial number to a number that is based on the limits that
+                            you set.
+                            For a schedule-based autoscaling policy, this value is the target pool size to scale to when executing the schedule
+                            that's defined in the autoscaling policy.
+                          type: integer
+                        max:
+                          description: |-
+                            For a threshold-based autoscaling policy, this value is the maximum number of instances the instance pool is allowed
+                            to increase to (scale out).
+                            For a schedule-based autoscaling policy, this value is not used.
+                          type: integer
+                        min:
+                          description: |-
+                            For a threshold-based autoscaling policy, this value is the minimum number of instances the instance pool is allowed
+                            to decrease to (scale in).
+                            For a schedule-based autoscaling policy, this value is not used.
+                          type: integer
+                      type: object
+                    displayName:
+                      description: A user-friendly name. Does not have to be unique,
+                        and it's changeable. Avoid entering confidential information.
+                      type: string
+                    executionSchedule:
+                      description: AutoScalingConfigurationPolicyExecutionSchedule
+                        defines nested fields for AutoScalingConfiguration.Policy.ExecutionSchedule.
+                      properties:
+                        expression:
+                          description: |-
+                            A cron expression that represents the time at which to execute the autoscaling policy.
+                            Cron expressions have this format: `<second> <minute> <hour> <day of month> <month> <day of week> <year>`
+                            You can use special characters that are supported with the Quartz cron implementation.
+                            You must specify `0` as the value for seconds.
+                            Example: `0 15 10 ? * *`
+                          type: string
+                        jsonData:
+                          type: string
+                        timezone:
+                          description: The time zone for the execution schedule.
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - timezone
+                      type: object
+                    isEnabled:
+                      description: Whether the autoscaling policy is enabled.
+                      type: boolean
+                    jsonData:
+                      type: string
+                    policyType:
+                      type: string
+                    resourceAction:
+                      description: AutoScalingConfigurationPolicyResourceAction defines
+                        nested fields for AutoScalingConfiguration.Policy.ResourceAction.
+                      properties:
+                        action:
+                          type: string
+                        actionType:
+                          type: string
+                        jsonData:
+                          type: string
+                      type: object
+                    rules:
+                      items:
+                        description: AutoScalingConfigurationPolicyRule defines nested
+                          fields for AutoScalingConfiguration.Policy.Rule.
+                        properties:
+                          action:
+                            description: AutoScalingConfigurationPolicyRuleAction
+                              defines nested fields for AutoScalingConfiguration.Policy.Rule.Action.
+                            properties:
+                              type:
+                                description: The type of action to take.
+                                type: string
+                              value:
+                                description: |-
+                                  To scale out (increase the number of instances), provide a positive value. To scale in (decrease the number of
+                                  instances), provide a negative value.
+                                type: integer
+                            required:
+                            - type
+                            - value
+                            type: object
+                          displayName:
+                            description: A user-friendly name. Does not have to be
+                              unique, and it's changeable. Avoid entering confidential
+                              information.
+                            type: string
+                          metric:
+                            description: AutoScalingConfigurationPolicyRuleMetric
+                              defines nested fields for AutoScalingConfiguration.Policy.Rule.Metric.
+                            properties:
+                              jsonData:
+                                type: string
+                              metricCompartmentId:
+                                description: The OCID of the compartment containing
+                                  the metrics.
+                                type: string
+                              metricSource:
+                                type: string
+                              metricType:
+                                type: string
+                              namespace:
+                                description: The namespace for the query.
+                                type: string
+                              pendingDuration:
+                                description: |-
+                                  The period of time that the condition defined in the alarm must persist before the alarm state
+                                  changes from "OK" to "FIRING" or vice versa. For example, a value of 5 minutes means that the
+                                  alarm must persist in breaching the condition for five minutes before the alarm updates its
+                                  state to "FIRING"; likewise, the alarm must persist in not breaching the condition for five
+                                  minutes before the alarm updates its state to "OK."
+                                  The duration is specified as a string in ISO 8601 format (`PT10M` for ten minutes or `PT1H`
+                                  for one hour). Minimum: PT3M. Maximum: PT1H. Default: PT3M.
+                                type: string
+                              query:
+                                description: |-
+                                  The Monitoring Query Language (MQL) expression to evaluate for the alarm. The Alarms feature of
+                                  the Monitoring service interprets results for each returned time series as Boolean values,
+                                  where zero represents false and a non-zero value represents true. A true value means that the trigger
+                                  rule condition has been met. The query must specify a metric, statistic, interval, and trigger
+                                  rule (threshold or absence). Supported values for interval: `1m`-`60m` (also `1h`). You can optionally
+                                  specify dimensions and grouping functions. Supported grouping functions: `grouping()`, `groupBy()`.
+                                  Example of threshold alarm:
+                                    -----
+                                      CpuUtilization[1m]{availabilityDomain="cumS:PHX-AD-1"}.groupBy(availabilityDomain).percentile(0.9) > 85
+                                    -----
+                                type: string
+                              resourceGroup:
+                                description: The resource group for the query.
+                                type: string
+                              threshold:
+                                description: AutoScalingConfigurationPolicyRuleMetricThreshold
+                                  defines nested fields for AutoScalingConfiguration.Policy.Rule.Metric.Threshold.
+                                properties:
+                                  operator:
+                                    description: |-
+                                      The comparison operator to use. Options are greater than (`GT`), greater than or equal to
+                                      (`GTE`), less than (`LT`), and less than or equal to (`LTE`).
+                                    type: string
+                                  value:
+                                    type: integer
+                                required:
+                                - operator
+                                - value
+                                type: object
+                            type: object
+                        required:
+                        - action
+                        - metric
+                        type: object
+                      type: array
+                  type: object
+                type: array
+              resource:
+                description: AutoScalingConfigurationResource defines nested fields
+                  for AutoScalingConfiguration.Resource.
+                properties:
+                  id:
+                    description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                      of the resource that is managed by the autoscaling configuration.
+                    type: string
+                  jsonData:
+                    type: string
+                  type:
+                    type: string
+                required:
+                - id
+                type: object
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              timeCreated:
+                description: |-
+                  The date and time the autoscaling configuration was created, in the format defined by RFC3339.
+                  Example: `2016-08-25T21:10:29.600Z`
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

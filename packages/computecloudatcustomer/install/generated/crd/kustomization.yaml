@@ -1,0 +1,5 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- bases/computecloudatcustomer.oracle.com_cccinfrastructures.yaml
+- bases/computecloudatcustomer.oracle.com_cccupgradeschedules.yaml

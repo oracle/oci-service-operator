@@ -1,0 +1,501 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: targetresponderrecipes.cloudguard.oracle.com
+spec:
+  group: cloudguard.oracle.com
+  names:
+    kind: TargetResponderRecipe
+    listKind: TargetResponderRecipeList
+    plural: targetresponderrecipes
+    singular: targetresponderrecipe
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: status of the TargetResponderRecipe
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the TargetResponderRecipe
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: TargetResponderRecipe is the Schema for the targetresponderrecipes
+          API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: TargetResponderRecipeSpec defines the desired state of TargetResponderRecipe.
+            properties:
+              responderRecipeId:
+                description: Unique identifier for responder recipe
+                type: string
+              responderRules:
+                description: List of overrides to be applied to responder rules associated
+                  with the target
+                items:
+                  description: TargetResponderRecipeResponderRuleFields defines nested
+                    fields for TargetResponderRecipe.ResponderRule.
+                  properties:
+                    details:
+                      description: TargetResponderRecipeResponderRuleDetailsFields
+                        defines nested fields for TargetResponderRecipe.ResponderRule.Details.
+                      properties:
+                        condition:
+                          description: TargetResponderRecipeResponderRuleDetailsConditionFields
+                            defines nested fields for TargetResponderRecipe.ResponderRule.Details.Condition.
+                          properties:
+                            compositeOperator:
+                              description: Composite condition operator
+                              type: string
+                            jsonData:
+                              type: string
+                            kind:
+                              type: string
+                            leftOperand:
+                              description: JSONValue preserves arbitrary JSON values
+                                inside generated CRD fields.
+                              type: object
+                              x-kubernetes-preserve-unknown-fields: true
+                            operator:
+                              description: Type of operator
+                              type: string
+                            parameter:
+                              description: Parameter key
+                              type: string
+                            rightOperand:
+                              description: JSONValue preserves arbitrary JSON values
+                                inside generated CRD fields.
+                              type: object
+                              x-kubernetes-preserve-unknown-fields: true
+                            value:
+                              description: Value of operator in condition
+                              type: string
+                            valueType:
+                              description: Type of value in condition
+                              type: string
+                          type: object
+                        configurations:
+                          description: List of responder rule configurations
+                          items:
+                            description: TargetResponderRecipeResponderRuleDetailsConfigurationFields
+                              defines nested fields for TargetResponderRecipe.ResponderRule.Details.Configuration.
+                            properties:
+                              configKey:
+                                description: Unique identifier of the configuration
+                                type: string
+                              name:
+                                description: Configuration name
+                                type: string
+                              value:
+                                description: Configuration value
+                                type: string
+                            required:
+                            - configKey
+                            - name
+                            - value
+                            type: object
+                          type: array
+                        mode:
+                          description: Execution mode for the responder rule
+                          type: string
+                      type: object
+                    responderRuleId:
+                      description: Unique identifier for target detector recipe
+                      type: string
+                  required:
+                  - details
+                  - responderRuleId
+                  type: object
+                type: array
+            required:
+            - responderRecipeId
+            type: object
+          status:
+            description: TargetResponderRecipeStatus defines the observed state of
+              TargetResponderRecipe.
+            properties:
+              compartmentId:
+                description: Compartment OCID
+                type: string
+              description:
+                description: Target responder description
+                type: string
+              displayName:
+                description: Target responder recipe display name
+                type: string
+              effectiveResponderRules:
+                description: List of currently enabled responder rules for the responder
+                  type for recipe after applying defaults
+                items:
+                  description: TargetResponderRecipeEffectiveResponderRuleFields defines
+                    nested fields for TargetResponderRecipe.EffectiveResponderRule.
+                  properties:
+                    compartmentId:
+                      description: Compartment OCID
+                      type: string
+                    description:
+                      description: Responder rule description
+                      type: string
+                    details:
+                      description: TargetResponderRecipeEffectiveResponderRuleDetailsFields
+                        defines nested fields for TargetResponderRecipe.EffectiveResponderRule.Details.
+                      properties:
+                        condition:
+                          description: TargetResponderRecipeEffectiveResponderRuleDetailsConditionFields
+                            defines nested fields for TargetResponderRecipe.EffectiveResponderRule.Details.Condition.
+                          properties:
+                            compositeOperator:
+                              description: Composite condition operator
+                              type: string
+                            jsonData:
+                              type: string
+                            kind:
+                              type: string
+                            leftOperand:
+                              description: JSONValue preserves arbitrary JSON values
+                                inside generated CRD fields.
+                              type: object
+                              x-kubernetes-preserve-unknown-fields: true
+                            operator:
+                              description: Type of operator
+                              type: string
+                            parameter:
+                              description: Parameter key
+                              type: string
+                            rightOperand:
+                              description: JSONValue preserves arbitrary JSON values
+                                inside generated CRD fields.
+                              type: object
+                              x-kubernetes-preserve-unknown-fields: true
+                            value:
+                              description: Value of operator in condition
+                              type: string
+                            valueType:
+                              description: Type of value in condition
+                              type: string
+                          type: object
+                        configurations:
+                          description: List of responder rule configurations
+                          items:
+                            description: TargetResponderRecipeEffectiveResponderRuleDetailsConfigurationFields
+                              defines nested fields for TargetResponderRecipe.EffectiveResponderRule.Details.Configuration.
+                            properties:
+                              configKey:
+                                description: Unique identifier of the configuration
+                                type: string
+                              name:
+                                description: Configuration name
+                                type: string
+                              value:
+                                description: Configuration value
+                                type: string
+                            type: object
+                          type: array
+                        isEnabled:
+                          description: Enabled state for the responder rule
+                          type: boolean
+                        mode:
+                          description: Execution mode for the responder rule
+                          type: string
+                      type: object
+                    displayName:
+                      description: Responder rule display name
+                      type: string
+                    lifecycleDetails:
+                      description: A message describing the current state in more
+                        detail. For example, can be used to provide actionable information
+                        for a resource in Failed state.
+                      type: string
+                    lifecycleState:
+                      description: The current lifecycle state of the responder rule
+                      type: string
+                    policies:
+                      description: List of policies
+                      items:
+                        type: string
+                      type: array
+                    responderRuleId:
+                      description: Unique identifier for the responder rule
+                      type: string
+                    supportedModes:
+                      description: Supported execution modes for the responder rule
+                      items:
+                        type: string
+                      type: array
+                    timeCreated:
+                      description: The date and time the target responder recipe rule
+                        was created. Format defined by RFC3339.
+                      type: string
+                    timeUpdated:
+                      description: The date and time the target responder recipe rule
+                        was last updated. Format defined by RFC3339.
+                      type: string
+                    type:
+                      description: Type of responder
+                      type: string
+                  type: object
+                type: array
+              id:
+                description: Unique identifier of target responder recipe that can't
+                  be changed after creation
+                type: string
+              lifecycleDetails:
+                description: A message describing the current state in more detail.
+                  For example, can be used to provide actionable information for a
+                  resource in Failed state.
+                type: string
+              lifecycleState:
+                description: The current lifecycle state of the example
+                type: string
+              locks:
+                description: Locks associated with this resource.
+                items:
+                  description: TargetResponderRecipeLockFields defines nested fields
+                    for TargetResponderRecipe.Lock.
+                  properties:
+                    message:
+                      description: |-
+                        A message added by the creator of the lock. This is typically used to give an
+                        indication of why the resource is locked.
+                      type: string
+                    relatedResourceId:
+                      description: The ID of the resource that is locking this resource.
+                        Indicates that deleting this resource will remove the lock.
+                      type: string
+                    timeCreated:
+                      description: When the lock was created, in the format defined
+                        by RFC 3339.
+                      type: string
+                    type:
+                      description: Type of the lock.
+                      type: string
+                  type: object
+                type: array
+              owner:
+                description: Owner of target responder recipe
+                type: string
+              responderRecipeId:
+                description: Unique identifier for the Oracle-managed responder recipe
+                  from which this recipe was cloned
+                type: string
+              responderRules:
+                description: List of responder rules associated with the recipe -
+                  user input
+                items:
+                  description: TargetResponderRecipeResponderRuleFields defines nested
+                    fields for TargetResponderRecipe.ResponderRule.
+                  properties:
+                    details:
+                      description: TargetResponderRecipeResponderRuleDetailsFields
+                        defines nested fields for TargetResponderRecipe.ResponderRule.Details.
+                      properties:
+                        condition:
+                          description: TargetResponderRecipeResponderRuleDetailsConditionFields
+                            defines nested fields for TargetResponderRecipe.ResponderRule.Details.Condition.
+                          properties:
+                            compositeOperator:
+                              description: Composite condition operator
+                              type: string
+                            jsonData:
+                              type: string
+                            kind:
+                              type: string
+                            leftOperand:
+                              description: JSONValue preserves arbitrary JSON values
+                                inside generated CRD fields.
+                              type: object
+                              x-kubernetes-preserve-unknown-fields: true
+                            operator:
+                              description: Type of operator
+                              type: string
+                            parameter:
+                              description: Parameter key
+                              type: string
+                            rightOperand:
+                              description: JSONValue preserves arbitrary JSON values
+                                inside generated CRD fields.
+                              type: object
+                              x-kubernetes-preserve-unknown-fields: true
+                            value:
+                              description: Value of operator in condition
+                              type: string
+                            valueType:
+                              description: Type of value in condition
+                              type: string
+                          type: object
+                        configurations:
+                          description: List of responder rule configurations
+                          items:
+                            description: TargetResponderRecipeResponderRuleDetailsConfigurationFields
+                              defines nested fields for TargetResponderRecipe.ResponderRule.Details.Configuration.
+                            properties:
+                              configKey:
+                                description: Unique identifier of the configuration
+                                type: string
+                              name:
+                                description: Configuration name
+                                type: string
+                              value:
+                                description: Configuration value
+                                type: string
+                            required:
+                            - configKey
+                            - name
+                            - value
+                            type: object
+                          type: array
+                        mode:
+                          description: Execution mode for the responder rule
+                          type: string
+                      type: object
+                    responderRuleId:
+                      description: Unique identifier for target detector recipe
+                      type: string
+                  required:
+                  - details
+                  - responderRuleId
+                  type: object
+                type: array
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              timeCreated:
+                description: The date and time the target responder recipe rule was
+                  created. Format defined by RFC3339.
+                type: string
+              timeUpdated:
+                description: The date and time the target responder recipe rule was
+                  last updated. Format defined by RFC3339.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

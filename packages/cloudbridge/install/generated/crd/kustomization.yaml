@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- bases/cloudbridge.oracle.com_agentdependencies.yaml
+- bases/cloudbridge.oracle.com_agents.yaml
+- bases/cloudbridge.oracle.com_assets.yaml
+- bases/cloudbridge.oracle.com_assetsources.yaml
+- bases/cloudbridge.oracle.com_discoveryschedules.yaml
+- bases/cloudbridge.oracle.com_environments.yaml
+- bases/cloudbridge.oracle.com_inventories.yaml

@@ -1,0 +1,1742 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: assets.cloudbridge.oracle.com
+spec:
+  group: cloudbridge.oracle.com
+  names:
+    kind: Asset
+    listKind: AssetList
+    plural: assets
+    singular: asset
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the Asset
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the Asset
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: Asset is the Schema for the assets API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: AssetSpec defines the desired state of Asset.
+            properties:
+              assetSourceIds:
+                description: List of asset source OCID.
+                items:
+                  type: string
+                type: array
+              assetType:
+                type: string
+              attachedEbsVolumesCost:
+                description: AssetAttachedEbsVolumesCost defines nested fields for
+                  Asset.AttachedEbsVolumesCost.
+                properties:
+                  amount:
+                    description: Monthly costs for maintenance of this asset.
+                    type: number
+                  currencyCode:
+                    description: Currency code
+                    type: string
+                required:
+                - amount
+                - currencyCode
+                type: object
+              awsEbs:
+                description: AssetAwsEbs defines nested fields for Asset.AwsEbs.
+                properties:
+                  attachments:
+                    description: Information about the volume attachments.
+                    items:
+                      description: AssetAwsEbsAttachment defines nested fields for
+                        Asset.AwsEbs.Attachment.
+                      properties:
+                        device:
+                          description: The device name.
+                          type: string
+                        instanceKey:
+                          description: The ID of the instance.
+                          type: string
+                        isDeleteOnTermination:
+                          description: Indicates whether the EBS volume is deleted
+                            on instance termination.
+                          type: boolean
+                        status:
+                          description: The attachment state of the volume.
+                          type: string
+                        volumeKey:
+                          description: The ID of the volume.
+                          type: string
+                      type: object
+                    type: array
+                  availabilityZone:
+                    description: The Availability Zone for the volume.
+                    type: string
+                  iops:
+                    description: The number of I/O operations per second.
+                    type: integer
+                  isEncrypted:
+                    description: Indicates whether the volume is encrypted.
+                    type: boolean
+                  isMultiAttachEnabled:
+                    description: Indicates whether Amazon EBS Multi-Attach is enabled.
+                    type: boolean
+                  sizeInGiBs:
+                    description: The size of the volume, in GiBs.
+                    type: integer
+                  status:
+                    description: The volume state.
+                    type: string
+                  tags:
+                    description: Any tags assigned to the volume.
+                    items:
+                      description: AssetAwsEbsTag defines nested fields for Asset.AwsEbs.Tag.
+                      properties:
+                        key:
+                          description: The key of the tag.
+                          type: string
+                        value:
+                          description: The value of the tag.
+                          type: string
+                      type: object
+                    type: array
+                  throughput:
+                    description: The throughput that the volume supports, in MiB/s.
+                    type: integer
+                  volumeKey:
+                    description: The ID of the volume.
+                    type: string
+                  volumeType:
+                    description: The volume type.
+                    type: string
+                required:
+                - isEncrypted
+                - isMultiAttachEnabled
+                - sizeInGiBs
+                - volumeKey
+                - volumeType
+                type: object
+              awsEc2:
+                description: AssetAwsEc2 defines nested fields for Asset.AwsEc2.
+                properties:
+                  architecture:
+                    description: The architecture of the image.
+                    type: string
+                  areElasticInferenceAcceleratorsPresent:
+                    description: Indicates if the elastic inference accelerators attached
+                      to an instance
+                    type: boolean
+                  bootMode:
+                    description: The boot mode of the instance.
+                    type: string
+                  capacityReservationKey:
+                    description: The ID of the Capacity Reservation.
+                    type: string
+                  imageKey:
+                    description: The ID of the AMI used to launch the instance.
+                    type: string
+                  instanceKey:
+                    description: The ID of the instance.
+                    type: string
+                  instanceLifecycle:
+                    description: Indicates whether this is a Spot Instance or a Scheduled
+                      Instance.
+                    type: string
+                  instanceType:
+                    description: The instance type.
+                    type: string
+                  ipAddress:
+                    description: The public IPv4 address, or the Carrier IP address
+                      assigned to the instance.
+                    type: string
+                  ipv6Address:
+                    description: The IPv6 address assigned to the instance.
+                    type: string
+                  isEnclaveOptions:
+                    description: Indicates whether the instance is enabled for AWS
+                      Nitro Enclaves.
+                    type: boolean
+                  isHibernationOptions:
+                    description: Indicates whether the instance is enabled for hibernation.
+                    type: boolean
+                  isSourceDestCheck:
+                    description: Indicates whether source/destination checking is
+                      enabled.
+                    type: boolean
+                  isSpotInstance:
+                    description: If the request is a Spot Instance request, this value
+                      will be true.
+                    type: boolean
+                  kernelKey:
+                    description: The kernel associated with this instance, if applicable.
+                    type: string
+                  licenses:
+                    description: The license configurations for the instance.
+                    items:
+                      type: string
+                    type: array
+                  maintenanceOptions:
+                    description: Provides information on the recovery and maintenance
+                      options of your instance.
+                    type: string
+                  monitoring:
+                    description: The monitoring for the instance.
+                    type: string
+                  networkInterfaces:
+                    description: The network interfaces for the instance.
+                    items:
+                      description: AssetAwsEc2NetworkInterface defines nested fields
+                        for Asset.AwsEc2.NetworkInterface.
+                      properties:
+                        association:
+                          description: AssetAwsEc2NetworkInterfaceAssociation defines
+                            nested fields for Asset.AwsEc2.NetworkInterface.Association.
+                          properties:
+                            carrierIp:
+                              description: The carrier IP address associated with
+                                the network interface.
+                              type: string
+                            customerOwnedIp:
+                              description: The customer-owned IP address associated
+                                with the network interface.
+                              type: string
+                            ipOwnerKey:
+                              description: The ID of the owner of the Elastic IP address.
+                              type: string
+                            publicDnsName:
+                              description: The public DNS name.
+                              type: string
+                            publicIp:
+                              description: The public IP address or Elastic IP address
+                                bound to the network interface.
+                              type: string
+                          type: object
+                        attachment:
+                          description: AssetAwsEc2NetworkInterfaceAttachment defines
+                            nested fields for Asset.AwsEc2.NetworkInterface.Attachment.
+                          properties:
+                            attachmentKey:
+                              description: The ID of the network interface attachment.
+                              type: string
+                            deviceIndex:
+                              description: The index of the device on the instance
+                                for the network interface attachment.
+                              type: integer
+                            isDeleteOnTermination:
+                              description: Indicates whether the network interface
+                                is deleted when the instance is terminated.
+                              type: boolean
+                            networkCardIndex:
+                              description: The index of the network card.
+                              type: integer
+                            status:
+                              description: The attachment state.
+                              type: string
+                            timeAttach:
+                              description: The timestamp when the attachment initiated.
+                              type: string
+                          type: object
+                        description:
+                          description: The description.
+                          type: string
+                        interfaceType:
+                          description: The type of network interface.
+                          type: string
+                        ipv4Prefixes:
+                          description: The IPv4 delegated prefixes that are assigned
+                            to the network interface.
+                          items:
+                            type: string
+                          type: array
+                        ipv6Addresses:
+                          description: The IPv6 addresses associated with the network
+                            interface.
+                          items:
+                            type: string
+                          type: array
+                        ipv6Prefixes:
+                          description: The IPv6 delegated prefixes that are assigned
+                            to the network interface.
+                          items:
+                            type: string
+                          type: array
+                        isSourceDestCheck:
+                          description: Indicates whether source/destination checking
+                            is enabled.
+                          type: boolean
+                        macAddress:
+                          description: The MAC address.
+                          type: string
+                        networkInterfaceKey:
+                          description: The ID of the network interface.
+                          type: string
+                        ownerKey:
+                          description: The ID of the AWS account that created the
+                            network interface.
+                          type: string
+                        privateIpAddresses:
+                          description: The private IPv4 addresses associated with
+                            the network interface.
+                          items:
+                            description: AssetAwsEc2NetworkInterfacePrivateIpAddress
+                              defines nested fields for Asset.AwsEc2.NetworkInterface.PrivateIpAddress.
+                            properties:
+                              association:
+                                description: AssetAwsEc2NetworkInterfacePrivateIpAddressAssociation
+                                  defines nested fields for Asset.AwsEc2.NetworkInterface.PrivateIpAddress.Association.
+                                properties:
+                                  carrierIp:
+                                    description: The carrier IP address associated
+                                      with the network interface.
+                                    type: string
+                                  customerOwnedIp:
+                                    description: The customer-owned IP address associated
+                                      with the network interface.
+                                    type: string
+                                  ipOwnerKey:
+                                    description: The ID of the owner of the Elastic
+                                      IP address.
+                                    type: string
+                                  publicDnsName:
+                                    description: The public DNS name.
+                                    type: string
+                                  publicIp:
+                                    description: The public IP address or Elastic
+                                      IP address bound to the network interface.
+                                    type: string
+                                type: object
+                              isPrimary:
+                                description: Indicates whether this IPv4 address is
+                                  the primary private IP address of the network interface.
+                                type: boolean
+                              privateDnsName:
+                                description: The private IPv4 DNS name.
+                                type: string
+                              privateIpAddress:
+                                description: The private IPv4 address of the network
+                                  interface.
+                                type: string
+                            type: object
+                          type: array
+                        securityGroups:
+                          description: The security groups.
+                          items:
+                            description: AssetAwsEc2NetworkInterfaceSecurityGroup
+                              defines nested fields for Asset.AwsEc2.NetworkInterface.SecurityGroup.
+                            properties:
+                              groupKey:
+                                description: The ID of the security group.
+                                type: string
+                              groupName:
+                                description: The name of the security group.
+                                type: string
+                            type: object
+                          type: array
+                        status:
+                          description: The status of the network interface.
+                          type: string
+                        subnetKey:
+                          description: The ID of the subnet.
+                          type: string
+                      type: object
+                    type: array
+                  placement:
+                    description: AssetAwsEc2Placement defines nested fields for Asset.AwsEc2.Placement.
+                    properties:
+                      affinity:
+                        description: The affinity setting for the instance on the
+                          Dedicated Host.
+                        type: string
+                      availabilityZone:
+                        description: The Availability Zone of the instance.
+                        type: string
+                      groupName:
+                        description: The name of the placement group the instance
+                          is in.
+                        type: string
+                      hostKey:
+                        description: The ID of the Dedicated Host on which the instance
+                          resides.
+                        type: string
+                      hostResourceGroupArn:
+                        description: The ARN of the host resource group in which to
+                          launch the instances.
+                        type: string
+                      partitionNumber:
+                        description: The number of the partition that the instance
+                          is in.
+                        type: integer
+                      spreadDomain:
+                        description: Reserved for future use.
+                        type: string
+                      tenancy:
+                        description: The tenancy of the instance (if the instance
+                          is running in a VPC).
+                        type: string
+                    type: object
+                  privateDnsName:
+                    description: (IPv4 only) The private DNS hostname name assigned
+                      to the instance.
+                    type: string
+                  privateIpAddress:
+                    description: The private IPv4 address assigned to the instance.
+                    type: string
+                  rootDeviceName:
+                    description: The device name of the root device volume.
+                    type: string
+                  rootDeviceType:
+                    description: The root device type used by the AMI. The AMI can
+                      use an EBS volume or an instance store volume.
+                    type: string
+                  securityGroups:
+                    description: The security groups for the instance.
+                    items:
+                      description: AssetAwsEc2SecurityGroup defines nested fields
+                        for Asset.AwsEc2.SecurityGroup.
+                      properties:
+                        groupKey:
+                          description: The ID of the security group.
+                          type: string
+                        groupName:
+                          description: The name of the security group.
+                          type: string
+                      type: object
+                    type: array
+                  sriovNetSupport:
+                    description: Specifies whether enhanced networking with the Intel
+                      82599 Virtual Function interface is enabled.
+                    type: string
+                  state:
+                    description: AssetAwsEc2State defines nested fields for Asset.AwsEc2.State.
+                    properties:
+                      code:
+                        description: The state of the instance as a 16-bit unsigned
+                          integer.
+                        type: integer
+                      name:
+                        description: The current state of the instance.
+                        type: string
+                    type: object
+                  subnetKey:
+                    description: EC2-VPC The ID of the subnet in which the instance
+                      is running.
+                    type: string
+                  tags:
+                    description: Any tags assigned to the instance.
+                    items:
+                      description: AssetAwsEc2Tag defines nested fields for Asset.AwsEc2.Tag.
+                      properties:
+                        key:
+                          description: The key of the tag.
+                          type: string
+                        value:
+                          description: The value of the tag.
+                          type: string
+                      type: object
+                    type: array
+                  timeLaunch:
+                    description: The time the instance was launched.
+                    type: string
+                  tpmSupport:
+                    description: If the instance is configured for NitroTPM support,
+                      the value is v2.0.
+                    type: string
+                  virtualizationType:
+                    description: The virtualization type of the instance.
+                    type: string
+                  vpcKey:
+                    description: EC2-VPC The ID of the VPC in which the instance is
+                      running.
+                    type: string
+                required:
+                - architecture
+                - instanceKey
+                - instanceType
+                - rootDeviceName
+                - state
+                type: object
+              awsEc2Cost:
+                description: AssetAwsEc2Cost defines nested fields for Asset.AwsEc2Cost.
+                properties:
+                  amount:
+                    description: Monthly costs for maintenance of this asset.
+                    type: number
+                  currencyCode:
+                    description: Currency code
+                    type: string
+                required:
+                - amount
+                - currencyCode
+                type: object
+              compartmentId:
+                description: The OCID of the compartment that the asset belongs to.
+                type: string
+              compute:
+                description: AssetCompute defines nested fields for Asset.Compute.
+                properties:
+                  connectedNetworks:
+                    description: Number of connected networks.
+                    type: integer
+                  coresCount:
+                    description: Number of CPUs.
+                    type: integer
+                  cpuModel:
+                    description: CPU model name.
+                    type: string
+                  description:
+                    description: Information about the asset.
+                    type: string
+                  disks:
+                    description: Lists the set of disks belonging to the virtual machine.
+                      This list is unordered.
+                    items:
+                      description: AssetComputeDisk defines nested fields for Asset.Compute.Disk.
+                      properties:
+                        bootOrder:
+                          description: Order of boot volumes.
+                          type: integer
+                        isCbtEnabled:
+                          description: Indicates that CBT (change disk tracking) is
+                            enabled for this virtual disk.
+                          type: boolean
+                        location:
+                          description: Location of the boot/data volume.
+                          type: string
+                        name:
+                          description: Disk name.
+                          type: string
+                        persistentMode:
+                          description: The disk persistent mode.
+                          type: string
+                        sizeInMBs:
+                          description: The size of the volume in MBs.
+                          format: int64
+                          type: integer
+                        uuid:
+                          description: Disk UUID for the virtual disk, if available.
+                          type: string
+                        uuidLun:
+                          description: Disk UUID LUN for the virtual disk, if available.
+                          type: string
+                      type: object
+                    type: array
+                  disksCount:
+                    description: Number of disks.
+                    type: integer
+                  dnsName:
+                    description: Fully Qualified DNS Name.
+                    type: string
+                  firmware:
+                    description: Information about firmware type for this virtual
+                      machine.
+                    type: string
+                  gpuDevices:
+                    description: List of GPU devices attached to a virtual machine.
+                    items:
+                      description: AssetComputeGpuDevice defines nested fields for
+                        Asset.Compute.GpuDevice.
+                      properties:
+                        coresCount:
+                          description: Number of GPU cores.
+                          type: integer
+                        description:
+                          description: GPU device description.
+                          type: string
+                        manufacturer:
+                          description: The manufacturer of GPU.
+                          type: string
+                        memoryInMBs:
+                          description: GPU memory size in MBs.
+                          format: int64
+                          type: integer
+                        name:
+                          description: GPU device name.
+                          type: string
+                      type: object
+                    type: array
+                  gpuDevicesCount:
+                    description: Number of GPU devices.
+                    type: integer
+                  guestState:
+                    description: Guest state.
+                    type: string
+                  hardwareVersion:
+                    description: Hardware version.
+                    type: string
+                  hostName:
+                    description: Host name of the VM.
+                    type: string
+                  isPmemEnabled:
+                    description: Whether Pmem is enabled. Decides if NVDIMMs are used
+                      as a permanent memory.
+                    type: boolean
+                  isTpmEnabled:
+                    description: Whether Trusted Platform Module (TPM) is enabled.
+                    type: boolean
+                  latencySensitivity:
+                    description: Latency sensitivity.
+                    type: string
+                  memoryInMBs:
+                    description: Memory size in MBs.
+                    format: int64
+                    type: integer
+                  nics:
+                    description: List of network ethernet cards attached to a virtual
+                      machine.
+                    items:
+                      description: AssetComputeNic defines nested fields for Asset.Compute.Nic.
+                      properties:
+                        ipAddresses:
+                          description: List of IP addresses.
+                          items:
+                            type: string
+                          type: array
+                        label:
+                          description: Provides a label and summary information for
+                            the device.
+                          type: string
+                        macAddress:
+                          description: Mac address of the VM.
+                          type: string
+                        macAddressType:
+                          description: Mac address type.
+                          type: string
+                        networkName:
+                          description: Network name.
+                          type: string
+                        switchName:
+                          description: Switch name.
+                          type: string
+                      type: object
+                    type: array
+                  nicsCount:
+                    description: Number of network ethernet cards.
+                    type: integer
+                  nvdimmController:
+                    description: AssetComputeNvdimmController defines nested fields
+                      for Asset.Compute.NvdimmController.
+                    properties:
+                      busNumber:
+                        description: Bus number.
+                        type: integer
+                      label:
+                        description: Provides a label and summary information for
+                          the device.
+                        type: string
+                    type: object
+                  nvdimms:
+                    description: The properties of the NVDIMMs attached to a virtual
+                      machine.
+                    items:
+                      description: AssetComputeNvdimm defines nested fields for Asset.Compute.Nvdimm.
+                      properties:
+                        controllerKey:
+                          description: Controller key.
+                          type: integer
+                        label:
+                          description: Provides a label and summary information for
+                            the device.
+                          type: string
+                        unitNumber:
+                          description: The unit number of NVDIMM.
+                          type: integer
+                      type: object
+                    type: array
+                  operatingSystem:
+                    description: Operating system.
+                    type: string
+                  operatingSystemVersion:
+                    description: Operating system version.
+                    type: string
+                  pmemInMBs:
+                    description: Pmem size in MBs.
+                    format: int64
+                    type: integer
+                  powerState:
+                    description: The current power state of the virtual machine.
+                    type: string
+                  primaryIp:
+                    description: Primary IP address of the compute instance.
+                    type: string
+                  scsiController:
+                    description: AssetComputeScsiController defines nested fields
+                      for Asset.Compute.ScsiController.
+                    properties:
+                      label:
+                        description: Provides a label and summary information for
+                          the device.
+                        type: string
+                      sharedBus:
+                        description: Shared bus.
+                        type: string
+                      unitNumber:
+                        description: The unit number of the SCSI controller.
+                        type: integer
+                    type: object
+                  storageProvisionedInMBs:
+                    description: Provision storage size in MBs.
+                    format: int64
+                    type: integer
+                  threadsPerCoreCount:
+                    description: Number of threads per core.
+                    type: integer
+                type: object
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  The defined tags associated with this resource, if any. Each key is predefined and scoped to namespaces.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              displayName:
+                description: Asset display name.
+                type: string
+              externalAssetKey:
+                description: The key of the asset from the external environment.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  The freeform tags associated with this resource, if any. Each tag is a simple key-value pair with no
+                  predefined name, type, or namespace/scope. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              inventoryId:
+                description: Inventory ID to which an asset belongs.
+                type: string
+              jsonData:
+                type: string
+              sourceKey:
+                description: The source key to which the asset belongs.
+                type: string
+              vm:
+                description: AssetVm defines nested fields for Asset.Vm.
+                properties:
+                  hypervisorHost:
+                    description: Host name/IP address of VM on which the host is running.
+                    type: string
+                  hypervisorVendor:
+                    description: Hypervisor vendor.
+                    type: string
+                  hypervisorVersion:
+                    description: Hypervisor version.
+                    type: string
+                type: object
+              vmwareVCenter:
+                description: AssetVmwareVCenter defines nested fields for Asset.VmwareVCenter.
+                properties:
+                  dataCenter:
+                    description: Data center name.
+                    type: string
+                  vcenterKey:
+                    description: vCenter unique key.
+                    type: string
+                  vcenterVersion:
+                    description: Dot-separated version string.
+                    type: string
+                type: object
+              vmwareVm:
+                description: AssetVmwareVm defines nested fields for Asset.VmwareVm.
+                properties:
+                  cluster:
+                    description: Cluster name.
+                    type: string
+                  customerFields:
+                    description: Customer fields.
+                    items:
+                      type: string
+                    type: array
+                  customerTags:
+                    description: Customer defined tags.
+                    items:
+                      description: AssetVmwareVmCustomerTag defines nested fields
+                        for Asset.VmwareVm.CustomerTag.
+                      properties:
+                        description:
+                          description: The tag description.
+                          type: string
+                        name:
+                          description: The tag name.
+                          type: string
+                      type: object
+                    type: array
+                  faultToleranceBandwidth:
+                    description: Fault tolerance bandwidth.
+                    type: integer
+                  faultToleranceSecondaryLatency:
+                    description: Fault tolerance to secondary latency.
+                    type: integer
+                  faultToleranceState:
+                    description: Fault tolerance state.
+                    type: string
+                  instanceUuid:
+                    description: vCenter-specific identifier of the virtual machine.
+                    type: string
+                  isDisksCbtEnabled:
+                    description: |-
+                      Indicates that change tracking is supported for virtual disks of this virtual machine.
+                      However, even if change tracking is supported, it might not be available for all disks of the virtual machine.
+                    type: boolean
+                  isDisksUuidEnabled:
+                    description: Whether changed block tracking for this VM's disk
+                      is active.
+                    type: boolean
+                  path:
+                    description: Path directory of the asset.
+                    type: string
+                  vmwareToolsStatus:
+                    description: VMware tools status.
+                    type: string
+                type: object
+            required:
+            - compartmentId
+            - externalAssetKey
+            - inventoryId
+            - sourceKey
+            type: object
+          status:
+            description: AssetStatus defines the observed state of Asset.
+            properties:
+              assetSourceIds:
+                description: List of asset source OCID.
+                items:
+                  type: string
+                type: array
+              assetType:
+                type: string
+              attachedEbsVolumesCost:
+                description: AssetAttachedEbsVolumesCost defines nested fields for
+                  Asset.AttachedEbsVolumesCost.
+                properties:
+                  amount:
+                    description: Monthly costs for maintenance of this asset.
+                    type: number
+                  currencyCode:
+                    description: Currency code
+                    type: string
+                required:
+                - amount
+                - currencyCode
+                type: object
+              awsEbs:
+                description: AssetAwsEbs defines nested fields for Asset.AwsEbs.
+                properties:
+                  attachments:
+                    description: Information about the volume attachments.
+                    items:
+                      description: AssetAwsEbsAttachment defines nested fields for
+                        Asset.AwsEbs.Attachment.
+                      properties:
+                        device:
+                          description: The device name.
+                          type: string
+                        instanceKey:
+                          description: The ID of the instance.
+                          type: string
+                        isDeleteOnTermination:
+                          description: Indicates whether the EBS volume is deleted
+                            on instance termination.
+                          type: boolean
+                        status:
+                          description: The attachment state of the volume.
+                          type: string
+                        volumeKey:
+                          description: The ID of the volume.
+                          type: string
+                      type: object
+                    type: array
+                  availabilityZone:
+                    description: The Availability Zone for the volume.
+                    type: string
+                  iops:
+                    description: The number of I/O operations per second.
+                    type: integer
+                  isEncrypted:
+                    description: Indicates whether the volume is encrypted.
+                    type: boolean
+                  isMultiAttachEnabled:
+                    description: Indicates whether Amazon EBS Multi-Attach is enabled.
+                    type: boolean
+                  sizeInGiBs:
+                    description: The size of the volume, in GiBs.
+                    type: integer
+                  status:
+                    description: The volume state.
+                    type: string
+                  tags:
+                    description: Any tags assigned to the volume.
+                    items:
+                      description: AssetAwsEbsTag defines nested fields for Asset.AwsEbs.Tag.
+                      properties:
+                        key:
+                          description: The key of the tag.
+                          type: string
+                        value:
+                          description: The value of the tag.
+                          type: string
+                      type: object
+                    type: array
+                  throughput:
+                    description: The throughput that the volume supports, in MiB/s.
+                    type: integer
+                  volumeKey:
+                    description: The ID of the volume.
+                    type: string
+                  volumeType:
+                    description: The volume type.
+                    type: string
+                required:
+                - isEncrypted
+                - isMultiAttachEnabled
+                - sizeInGiBs
+                - volumeKey
+                - volumeType
+                type: object
+              awsEc2:
+                description: AssetAwsEc2 defines nested fields for Asset.AwsEc2.
+                properties:
+                  architecture:
+                    description: The architecture of the image.
+                    type: string
+                  areElasticInferenceAcceleratorsPresent:
+                    description: Indicates if the elastic inference accelerators attached
+                      to an instance
+                    type: boolean
+                  bootMode:
+                    description: The boot mode of the instance.
+                    type: string
+                  capacityReservationKey:
+                    description: The ID of the Capacity Reservation.
+                    type: string
+                  imageKey:
+                    description: The ID of the AMI used to launch the instance.
+                    type: string
+                  instanceKey:
+                    description: The ID of the instance.
+                    type: string
+                  instanceLifecycle:
+                    description: Indicates whether this is a Spot Instance or a Scheduled
+                      Instance.
+                    type: string
+                  instanceType:
+                    description: The instance type.
+                    type: string
+                  ipAddress:
+                    description: The public IPv4 address, or the Carrier IP address
+                      assigned to the instance.
+                    type: string
+                  ipv6Address:
+                    description: The IPv6 address assigned to the instance.
+                    type: string
+                  isEnclaveOptions:
+                    description: Indicates whether the instance is enabled for AWS
+                      Nitro Enclaves.
+                    type: boolean
+                  isHibernationOptions:
+                    description: Indicates whether the instance is enabled for hibernation.
+                    type: boolean
+                  isSourceDestCheck:
+                    description: Indicates whether source/destination checking is
+                      enabled.
+                    type: boolean
+                  isSpotInstance:
+                    description: If the request is a Spot Instance request, this value
+                      will be true.
+                    type: boolean
+                  kernelKey:
+                    description: The kernel associated with this instance, if applicable.
+                    type: string
+                  licenses:
+                    description: The license configurations for the instance.
+                    items:
+                      type: string
+                    type: array
+                  maintenanceOptions:
+                    description: Provides information on the recovery and maintenance
+                      options of your instance.
+                    type: string
+                  monitoring:
+                    description: The monitoring for the instance.
+                    type: string
+                  networkInterfaces:
+                    description: The network interfaces for the instance.
+                    items:
+                      description: AssetAwsEc2NetworkInterface defines nested fields
+                        for Asset.AwsEc2.NetworkInterface.
+                      properties:
+                        association:
+                          description: AssetAwsEc2NetworkInterfaceAssociation defines
+                            nested fields for Asset.AwsEc2.NetworkInterface.Association.
+                          properties:
+                            carrierIp:
+                              description: The carrier IP address associated with
+                                the network interface.
+                              type: string
+                            customerOwnedIp:
+                              description: The customer-owned IP address associated
+                                with the network interface.
+                              type: string
+                            ipOwnerKey:
+                              description: The ID of the owner of the Elastic IP address.
+                              type: string
+                            publicDnsName:
+                              description: The public DNS name.
+                              type: string
+                            publicIp:
+                              description: The public IP address or Elastic IP address
+                                bound to the network interface.
+                              type: string
+                          type: object
+                        attachment:
+                          description: AssetAwsEc2NetworkInterfaceAttachment defines
+                            nested fields for Asset.AwsEc2.NetworkInterface.Attachment.
+                          properties:
+                            attachmentKey:
+                              description: The ID of the network interface attachment.
+                              type: string
+                            deviceIndex:
+                              description: The index of the device on the instance
+                                for the network interface attachment.
+                              type: integer
+                            isDeleteOnTermination:
+                              description: Indicates whether the network interface
+                                is deleted when the instance is terminated.
+                              type: boolean
+                            networkCardIndex:
+                              description: The index of the network card.
+                              type: integer
+                            status:
+                              description: The attachment state.
+                              type: string
+                            timeAttach:
+                              description: The timestamp when the attachment initiated.
+                              type: string
+                          type: object
+                        description:
+                          description: The description.
+                          type: string
+                        interfaceType:
+                          description: The type of network interface.
+                          type: string
+                        ipv4Prefixes:
+                          description: The IPv4 delegated prefixes that are assigned
+                            to the network interface.
+                          items:
+                            type: string
+                          type: array
+                        ipv6Addresses:
+                          description: The IPv6 addresses associated with the network
+                            interface.
+                          items:
+                            type: string
+                          type: array
+                        ipv6Prefixes:
+                          description: The IPv6 delegated prefixes that are assigned
+                            to the network interface.
+                          items:
+                            type: string
+                          type: array
+                        isSourceDestCheck:
+                          description: Indicates whether source/destination checking
+                            is enabled.
+                          type: boolean
+                        macAddress:
+                          description: The MAC address.
+                          type: string
+                        networkInterfaceKey:
+                          description: The ID of the network interface.
+                          type: string
+                        ownerKey:
+                          description: The ID of the AWS account that created the
+                            network interface.
+                          type: string
+                        privateIpAddresses:
+                          description: The private IPv4 addresses associated with
+                            the network interface.
+                          items:
+                            description: AssetAwsEc2NetworkInterfacePrivateIpAddress
+                              defines nested fields for Asset.AwsEc2.NetworkInterface.PrivateIpAddress.
+                            properties:
+                              association:
+                                description: AssetAwsEc2NetworkInterfacePrivateIpAddressAssociation
+                                  defines nested fields for Asset.AwsEc2.NetworkInterface.PrivateIpAddress.Association.
+                                properties:
+                                  carrierIp:
+                                    description: The carrier IP address associated
+                                      with the network interface.
+                                    type: string
+                                  customerOwnedIp:
+                                    description: The customer-owned IP address associated
+                                      with the network interface.
+                                    type: string
+                                  ipOwnerKey:
+                                    description: The ID of the owner of the Elastic
+                                      IP address.
+                                    type: string
+                                  publicDnsName:
+                                    description: The public DNS name.
+                                    type: string
+                                  publicIp:
+                                    description: The public IP address or Elastic
+                                      IP address bound to the network interface.
+                                    type: string
+                                type: object
+                              isPrimary:
+                                description: Indicates whether this IPv4 address is
+                                  the primary private IP address of the network interface.
+                                type: boolean
+                              privateDnsName:
+                                description: The private IPv4 DNS name.
+                                type: string
+                              privateIpAddress:
+                                description: The private IPv4 address of the network
+                                  interface.
+                                type: string
+                            type: object
+                          type: array
+                        securityGroups:
+                          description: The security groups.
+                          items:
+                            description: AssetAwsEc2NetworkInterfaceSecurityGroup
+                              defines nested fields for Asset.AwsEc2.NetworkInterface.SecurityGroup.
+                            properties:
+                              groupKey:
+                                description: The ID of the security group.
+                                type: string
+                              groupName:
+                                description: The name of the security group.
+                                type: string
+                            type: object
+                          type: array
+                        status:
+                          description: The status of the network interface.
+                          type: string
+                        subnetKey:
+                          description: The ID of the subnet.
+                          type: string
+                      type: object
+                    type: array
+                  placement:
+                    description: AssetAwsEc2Placement defines nested fields for Asset.AwsEc2.Placement.
+                    properties:
+                      affinity:
+                        description: The affinity setting for the instance on the
+                          Dedicated Host.
+                        type: string
+                      availabilityZone:
+                        description: The Availability Zone of the instance.
+                        type: string
+                      groupName:
+                        description: The name of the placement group the instance
+                          is in.
+                        type: string
+                      hostKey:
+                        description: The ID of the Dedicated Host on which the instance
+                          resides.
+                        type: string
+                      hostResourceGroupArn:
+                        description: The ARN of the host resource group in which to
+                          launch the instances.
+                        type: string
+                      partitionNumber:
+                        description: The number of the partition that the instance
+                          is in.
+                        type: integer
+                      spreadDomain:
+                        description: Reserved for future use.
+                        type: string
+                      tenancy:
+                        description: The tenancy of the instance (if the instance
+                          is running in a VPC).
+                        type: string
+                    type: object
+                  privateDnsName:
+                    description: (IPv4 only) The private DNS hostname name assigned
+                      to the instance.
+                    type: string
+                  privateIpAddress:
+                    description: The private IPv4 address assigned to the instance.
+                    type: string
+                  rootDeviceName:
+                    description: The device name of the root device volume.
+                    type: string
+                  rootDeviceType:
+                    description: The root device type used by the AMI. The AMI can
+                      use an EBS volume or an instance store volume.
+                    type: string
+                  securityGroups:
+                    description: The security groups for the instance.
+                    items:
+                      description: AssetAwsEc2SecurityGroup defines nested fields
+                        for Asset.AwsEc2.SecurityGroup.
+                      properties:
+                        groupKey:
+                          description: The ID of the security group.
+                          type: string
+                        groupName:
+                          description: The name of the security group.
+                          type: string
+                      type: object
+                    type: array
+                  sriovNetSupport:
+                    description: Specifies whether enhanced networking with the Intel
+                      82599 Virtual Function interface is enabled.
+                    type: string
+                  state:
+                    description: AssetAwsEc2State defines nested fields for Asset.AwsEc2.State.
+                    properties:
+                      code:
+                        description: The state of the instance as a 16-bit unsigned
+                          integer.
+                        type: integer
+                      name:
+                        description: The current state of the instance.
+                        type: string
+                    type: object
+                  subnetKey:
+                    description: EC2-VPC The ID of the subnet in which the instance
+                      is running.
+                    type: string
+                  tags:
+                    description: Any tags assigned to the instance.
+                    items:
+                      description: AssetAwsEc2Tag defines nested fields for Asset.AwsEc2.Tag.
+                      properties:
+                        key:
+                          description: The key of the tag.
+                          type: string
+                        value:
+                          description: The value of the tag.
+                          type: string
+                      type: object
+                    type: array
+                  timeLaunch:
+                    description: The time the instance was launched.
+                    type: string
+                  tpmSupport:
+                    description: If the instance is configured for NitroTPM support,
+                      the value is v2.0.
+                    type: string
+                  virtualizationType:
+                    description: The virtualization type of the instance.
+                    type: string
+                  vpcKey:
+                    description: EC2-VPC The ID of the VPC in which the instance is
+                      running.
+                    type: string
+                required:
+                - architecture
+                - instanceKey
+                - instanceType
+                - rootDeviceName
+                - state
+                type: object
+              awsEc2Cost:
+                description: AssetAwsEc2Cost defines nested fields for Asset.AwsEc2Cost.
+                properties:
+                  amount:
+                    description: Monthly costs for maintenance of this asset.
+                    type: number
+                  currencyCode:
+                    description: Currency code
+                    type: string
+                required:
+                - amount
+                - currencyCode
+                type: object
+              compartmentId:
+                description: The OCID of the compartment to which an asset belongs
+                  to.
+                type: string
+              compute:
+                description: AssetCompute defines nested fields for Asset.Compute.
+                properties:
+                  connectedNetworks:
+                    description: Number of connected networks.
+                    type: integer
+                  coresCount:
+                    description: Number of CPUs.
+                    type: integer
+                  cpuModel:
+                    description: CPU model name.
+                    type: string
+                  description:
+                    description: Information about the asset.
+                    type: string
+                  disks:
+                    description: Lists the set of disks belonging to the virtual machine.
+                      This list is unordered.
+                    items:
+                      description: AssetComputeDisk defines nested fields for Asset.Compute.Disk.
+                      properties:
+                        bootOrder:
+                          description: Order of boot volumes.
+                          type: integer
+                        isCbtEnabled:
+                          description: Indicates that CBT (change disk tracking) is
+                            enabled for this virtual disk.
+                          type: boolean
+                        location:
+                          description: Location of the boot/data volume.
+                          type: string
+                        name:
+                          description: Disk name.
+                          type: string
+                        persistentMode:
+                          description: The disk persistent mode.
+                          type: string
+                        sizeInMBs:
+                          description: The size of the volume in MBs.
+                          format: int64
+                          type: integer
+                        uuid:
+                          description: Disk UUID for the virtual disk, if available.
+                          type: string
+                        uuidLun:
+                          description: Disk UUID LUN for the virtual disk, if available.
+                          type: string
+                      type: object
+                    type: array
+                  disksCount:
+                    description: Number of disks.
+                    type: integer
+                  dnsName:
+                    description: Fully Qualified DNS Name.
+                    type: string
+                  firmware:
+                    description: Information about firmware type for this virtual
+                      machine.
+                    type: string
+                  gpuDevices:
+                    description: List of GPU devices attached to a virtual machine.
+                    items:
+                      description: AssetComputeGpuDevice defines nested fields for
+                        Asset.Compute.GpuDevice.
+                      properties:
+                        coresCount:
+                          description: Number of GPU cores.
+                          type: integer
+                        description:
+                          description: GPU device description.
+                          type: string
+                        manufacturer:
+                          description: The manufacturer of GPU.
+                          type: string
+                        memoryInMBs:
+                          description: GPU memory size in MBs.
+                          format: int64
+                          type: integer
+                        name:
+                          description: GPU device name.
+                          type: string
+                      type: object
+                    type: array
+                  gpuDevicesCount:
+                    description: Number of GPU devices.
+                    type: integer
+                  guestState:
+                    description: Guest state.
+                    type: string
+                  hardwareVersion:
+                    description: Hardware version.
+                    type: string
+                  hostName:
+                    description: Host name of the VM.
+                    type: string
+                  isPmemEnabled:
+                    description: Whether Pmem is enabled. Decides if NVDIMMs are used
+                      as a permanent memory.
+                    type: boolean
+                  isTpmEnabled:
+                    description: Whether Trusted Platform Module (TPM) is enabled.
+                    type: boolean
+                  latencySensitivity:
+                    description: Latency sensitivity.
+                    type: string
+                  memoryInMBs:
+                    description: Memory size in MBs.
+                    format: int64
+                    type: integer
+                  nics:
+                    description: List of network ethernet cards attached to a virtual
+                      machine.
+                    items:
+                      description: AssetComputeNic defines nested fields for Asset.Compute.Nic.
+                      properties:
+                        ipAddresses:
+                          description: List of IP addresses.
+                          items:
+                            type: string
+                          type: array
+                        label:
+                          description: Provides a label and summary information for
+                            the device.
+                          type: string
+                        macAddress:
+                          description: Mac address of the VM.
+                          type: string
+                        macAddressType:
+                          description: Mac address type.
+                          type: string
+                        networkName:
+                          description: Network name.
+                          type: string
+                        switchName:
+                          description: Switch name.
+                          type: string
+                      type: object
+                    type: array
+                  nicsCount:
+                    description: Number of network ethernet cards.
+                    type: integer
+                  nvdimmController:
+                    description: AssetComputeNvdimmController defines nested fields
+                      for Asset.Compute.NvdimmController.
+                    properties:
+                      busNumber:
+                        description: Bus number.
+                        type: integer
+                      label:
+                        description: Provides a label and summary information for
+                          the device.
+                        type: string
+                    type: object
+                  nvdimms:
+                    description: The properties of the NVDIMMs attached to a virtual
+                      machine.
+                    items:
+                      description: AssetComputeNvdimm defines nested fields for Asset.Compute.Nvdimm.
+                      properties:
+                        controllerKey:
+                          description: Controller key.
+                          type: integer
+                        label:
+                          description: Provides a label and summary information for
+                            the device.
+                          type: string
+                        unitNumber:
+                          description: The unit number of NVDIMM.
+                          type: integer
+                      type: object
+                    type: array
+                  operatingSystem:
+                    description: Operating system.
+                    type: string
+                  operatingSystemVersion:
+                    description: Operating system version.
+                    type: string
+                  pmemInMBs:
+                    description: Pmem size in MBs.
+                    format: int64
+                    type: integer
+                  powerState:
+                    description: The current power state of the virtual machine.
+                    type: string
+                  primaryIp:
+                    description: Primary IP address of the compute instance.
+                    type: string
+                  scsiController:
+                    description: AssetComputeScsiController defines nested fields
+                      for Asset.Compute.ScsiController.
+                    properties:
+                      label:
+                        description: Provides a label and summary information for
+                          the device.
+                        type: string
+                      sharedBus:
+                        description: Shared bus.
+                        type: string
+                      unitNumber:
+                        description: The unit number of the SCSI controller.
+                        type: integer
+                    type: object
+                  storageProvisionedInMBs:
+                    description: Provision storage size in MBs.
+                    format: int64
+                    type: integer
+                  threadsPerCoreCount:
+                    description: Number of threads per core.
+                    type: integer
+                type: object
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  The defined tags associated with this resource, if any. Each key is predefined and scoped to namespaces.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              displayName:
+                description: Asset display name.
+                type: string
+              externalAssetKey:
+                description: The key of the asset from the external environment.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  The freeform tags associated with this resource, if any. Each tag is a simple key-value pair with no
+                  predefined name, type, or namespace/scope. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              id:
+                description: Asset OCID that is immutable on creation.
+                type: string
+              inventoryId:
+                description: Inventory ID to which an asset belongs to.
+                type: string
+              jsonData:
+                type: string
+              lifecycleState:
+                description: The current state of the asset.
+                type: string
+              sourceKey:
+                description: The source key that the asset belongs to.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  The system tags associated with this resource, if any. The system tags are set by Oracle cloud infrastructure services. Each key is predefined and scoped to namespaces.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{orcl-cloud: {free-tier-retain: true}}`
+                type: object
+              timeCreated:
+                description: The time when the asset was created. An RFC3339 formatted
+                  datetime string.
+                type: string
+              timeUpdated:
+                description: The time when the asset was updated. An RFC3339 formatted
+                  datetime string.
+                type: string
+              vm:
+                description: AssetVm defines nested fields for Asset.Vm.
+                properties:
+                  hypervisorHost:
+                    description: Host name/IP address of VM on which the host is running.
+                    type: string
+                  hypervisorVendor:
+                    description: Hypervisor vendor.
+                    type: string
+                  hypervisorVersion:
+                    description: Hypervisor version.
+                    type: string
+                type: object
+              vmwareVCenter:
+                description: AssetVmwareVCenter defines nested fields for Asset.VmwareVCenter.
+                properties:
+                  dataCenter:
+                    description: Data center name.
+                    type: string
+                  vcenterKey:
+                    description: vCenter unique key.
+                    type: string
+                  vcenterVersion:
+                    description: Dot-separated version string.
+                    type: string
+                type: object
+              vmwareVm:
+                description: AssetVmwareVm defines nested fields for Asset.VmwareVm.
+                properties:
+                  cluster:
+                    description: Cluster name.
+                    type: string
+                  customerFields:
+                    description: Customer fields.
+                    items:
+                      type: string
+                    type: array
+                  customerTags:
+                    description: Customer defined tags.
+                    items:
+                      description: AssetVmwareVmCustomerTag defines nested fields
+                        for Asset.VmwareVm.CustomerTag.
+                      properties:
+                        description:
+                          description: The tag description.
+                          type: string
+                        name:
+                          description: The tag name.
+                          type: string
+                      type: object
+                    type: array
+                  faultToleranceBandwidth:
+                    description: Fault tolerance bandwidth.
+                    type: integer
+                  faultToleranceSecondaryLatency:
+                    description: Fault tolerance to secondary latency.
+                    type: integer
+                  faultToleranceState:
+                    description: Fault tolerance state.
+                    type: string
+                  instanceUuid:
+                    description: vCenter-specific identifier of the virtual machine.
+                    type: string
+                  isDisksCbtEnabled:
+                    description: |-
+                      Indicates that change tracking is supported for virtual disks of this virtual machine.
+                      However, even if change tracking is supported, it might not be available for all disks of the virtual machine.
+                    type: boolean
+                  isDisksUuidEnabled:
+                    description: Whether changed block tracking for this VM's disk
+                      is active.
+                    type: boolean
+                  path:
+                    description: Path directory of the asset.
+                    type: string
+                  vmwareToolsStatus:
+                    description: VMware tools status.
+                    type: string
+                type: object
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

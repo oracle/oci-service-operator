@@ -1132,114 +1132,140 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	wantActiveServices := []string{
 		"accessgovernancecp",
 		"adm",
+		"aidataplatform",
 		"aidocument",
 		"ailanguage",
 		"aispeech",
 		"aivision",
 		"analytics",
+		"announcementsservice",
 		"apiaccesscontrol",
 		"apiplatform",
-		"apmcontrolplane",
 		"apmconfig",
-		"appmgmtcontrol",
-		"apmtraces",
+		"apmcontrolplane",
 		"apmsynthetics",
+		"apmtraces",
+		"appmgmtcontrol",
 		"artifacts",
+		"autoscaling",
 		"bastion",
+		"batch",
 		"bds",
+		"blockchain",
 		"budget",
 		"capacitymanagement",
 		"certificatesmanagement",
+		"cloudbridge",
+		"cloudguard",
+		"cloudmigrations",
 		"clusterplacementgroups",
+		"computecloudatcustomer",
 		"computeinstanceagent",
 		"containerengine",
 		"containerinstances",
 		"core",
-		"dataflow",
-		"database",
-		"databasetools",
-		"databasemigration",
-		"datalabelingservice",
-		"datascience",
 		"dashboardservice",
+		"database",
+		"databasemigration",
+		"databasetools",
+		"datacatalog",
+		"dataflow",
+		"dataintegration",
+		"datalabelingservice",
+		"datalabelingservicedataplane",
+		"datasafe",
+		"datascience",
+		"dbmulticloud",
 		"delegateaccesscontrol",
-		"disasterrecovery",
+		"demandsignal",
+		"desktops",
 		"devops",
+		"dif",
+		"disasterrecovery",
 		"distributeddatabase",
 		"dns",
 		"email",
+		"emwarehouse",
 		"events",
+		"filestorage",
+		"fleetappsmanagement",
+		"fleetsoftwareupdate",
 		"functions",
+		"fusionapps",
 		"gdp",
 		"generativeai",
-		"generativeaidata",
 		"generativeaiagent",
 		"generativeaiagentruntime",
+		"generativeaidata",
+		"goldengate",
+		"governancerulescontrolplane",
 		"healthchecks",
 		"identity",
 		"integration",
+		"iot",
+		"jms",
+		"jmsjavadownloads",
 		"keymanagement",
+		"licensemanager",
 		"limits",
+		"limitsincrease",
 		"loadbalancer",
+		"lockbox",
+		"loganalytics",
 		"logging",
-		"managedkafka",
 		"lustrefilestorage",
-		"monitoring",
+		"managedkafka",
+		"managementagent",
+		"managementdashboard",
 		"marketplace",
-		"mngdmac",
+		"marketplaceprivateoffer",
+		"marketplacepublisher",
 		"mediaservices",
+		"mngdmac",
+		"monitoring",
 		"mysql",
+		"networkfirewall",
 		"networkloadbalancer",
 		"nosql",
 		"objectstorage",
 		"oce",
 		"ocvp",
 		"oda",
-		"opensearch",
-		"ons",
 		"onesubscription",
+		"ons",
 		"opa",
-		"osubsubscription",
-		"psa",
-		"psql",
-		"queue",
-		"redis",
-		"sch",
-		"self",
-		"servicecatalog",
-		"servicemanagerproxy",
-		"streaming",
-		"tenantmanagercontrolplane",
-		"usageapi",
-		"vbsinst",
-		"governancerulescontrolplane",
-		"iot",
-		"jms",
-		"jmsjavadownloads",
-		"licensemanager",
-		"limitsincrease",
-		"lockbox",
-		"loganalytics",
-		"managementagent",
-		"managementdashboard",
-		"marketplaceprivateoffer",
-		"marketplacepublisher",
+		"opensearch",
 		"operatoraccesscontrol",
 		"opsi",
 		"optimizer",
 		"osmanagementhub",
+		"osubsubscription",
+		"psa",
+		"psql",
+		"queue",
 		"recovery",
+		"redis",
 		"resourceanalytics",
+		"resourcemanager",
 		"resourcescheduler",
 		"rover",
+		"sch",
 		"securityattribute",
+		"self",
+		"servicecatalog",
+		"servicemanagerproxy",
 		"stackmonitoring",
+		"streaming",
+		"tenantmanagercontrolplane",
+		"usageapi",
+		"vbsinst",
+		"visualbuilder",
+		"vnmonitoring",
+		"vulnerabilityscanning",
 		"waa",
 		"waas",
 		"waf",
 		"wlms",
-		"visualbuilder",
-		"vnmonitoring",
 		"zpr",
 	}
 	if !slices.Equal(activeServices, wantActiveServices) {
@@ -1251,226 +1277,281 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		cfg,
 		"accessgovernancecp",
 		"adm",
+		"aidataplatform",
 		"aidocument",
 		"ailanguage",
 		"aispeech",
 		"aivision",
 		"analytics",
+		"announcementsservice",
 		"apiaccesscontrol",
 		"apiplatform",
-		"apmcontrolplane",
 		"apmconfig",
-		"appmgmtcontrol",
-		"apmtraces",
+		"apmcontrolplane",
 		"apmsynthetics",
+		"apmtraces",
+		"appmgmtcontrol",
 		"artifacts",
+		"autoscaling",
 		"bastion",
+		"batch",
 		"bds",
+		"blockchain",
 		"budget",
 		"capacitymanagement",
 		"certificatesmanagement",
+		"cloudbridge",
+		"cloudguard",
+		"cloudmigrations",
 		"clusterplacementgroups",
+		"computecloudatcustomer",
 		"computeinstanceagent",
 		"containerengine",
 		"containerinstances",
 		"core",
-		"dataflow",
-		"database",
-		"databasetools",
-		"databasemigration",
-		"datalabelingservice",
-		"datascience",
 		"dashboardservice",
+		"database",
+		"databasemigration",
+		"databasetools",
+		"datacatalog",
+		"dataflow",
+		"dataintegration",
+		"datalabelingservice",
+		"datalabelingservicedataplane",
+		"datasafe",
+		"datascience",
+		"dbmulticloud",
 		"delegateaccesscontrol",
-		"disasterrecovery",
+		"demandsignal",
+		"desktops",
 		"devops",
+		"dif",
+		"disasterrecovery",
 		"distributeddatabase",
 		"dns",
 		"email",
+		"emwarehouse",
 		"events",
+		"filestorage",
+		"fleetappsmanagement",
+		"fleetsoftwareupdate",
 		"functions",
+		"fusionapps",
+		"gdp",
 		"generativeai",
-		"generativeaidata",
 		"generativeaiagent",
 		"generativeaiagentruntime",
+		"generativeaidata",
+		"goldengate",
+		"governancerulescontrolplane",
 		"healthchecks",
 		"identity",
 		"integration",
+		"iot",
+		"jms",
+		"jmsjavadownloads",
 		"keymanagement",
+		"licensemanager",
 		"limits",
+		"limitsincrease",
 		"loadbalancer",
+		"lockbox",
+		"loganalytics",
 		"logging",
-		"managedkafka",
 		"lustrefilestorage",
-		"monitoring",
+		"managedkafka",
+		"managementagent",
+		"managementdashboard",
 		"marketplace",
+		"marketplaceprivateoffer",
+		"marketplacepublisher",
+		"mediaservices",
 		"mngdmac",
+		"monitoring",
 		"mysql",
+		"networkfirewall",
 		"networkloadbalancer",
 		"nosql",
 		"objectstorage",
 		"oce",
 		"ocvp",
 		"oda",
-		"opensearch",
-		"ons",
 		"onesubscription",
+		"ons",
 		"opa",
-		"osubsubscription",
-		"psa",
-		"psql",
-		"queue",
-		"redis",
-		"sch",
-		"self",
-		"servicecatalog",
-		"servicemanagerproxy",
-		"streaming",
-		"tenantmanagercontrolplane",
-		"usageapi",
-		"vbsinst",
-		"governancerulescontrolplane",
-		"iot",
-		"jms",
-		"jmsjavadownloads",
-		"licensemanager",
-		"limitsincrease",
-		"lockbox",
-		"loganalytics",
-		"managementagent",
-		"managementdashboard",
-		"marketplaceprivateoffer",
-		"marketplacepublisher",
-		"mediaservices",
+		"opensearch",
 		"operatoraccesscontrol",
 		"opsi",
 		"optimizer",
 		"osmanagementhub",
+		"osubsubscription",
+		"psa",
+		"psql",
+		"queue",
 		"recovery",
+		"redis",
 		"resourceanalytics",
+		"resourcemanager",
 		"resourcescheduler",
 		"rover",
+		"sch",
 		"securityattribute",
+		"self",
+		"servicecatalog",
+		"servicemanagerproxy",
 		"stackmonitoring",
+		"streaming",
+		"tenantmanagercontrolplane",
+		"usageapi",
+		"vault",
+		"vbsinst",
+		"visualbuilder",
+		"vnmonitoring",
+		"vulnerabilityscanning",
 		"waa",
 		"waas",
 		"waf",
 		"wlms",
-		"visualbuilder",
-		"vnmonitoring",
 		"zpr",
-		"vault",
 	)
 	assertServiceSelection(t, services["accessgovernancecp"], true, SelectionModeExplicit, []string{"GovernanceInstance"})
 	assertServiceSelection(t, services["adm"], true, SelectionModeExplicit, []string{"KnowledgeBase"})
+	assertServiceSelection(t, services["aidataplatform"], true, SelectionModeExplicit, []string{"AiDataPlatform"})
 	assertServiceSelection(t, services["aidocument"], true, SelectionModeExplicit, []string{"Project"})
 	assertServiceSelection(t, services["ailanguage"], true, SelectionModeExplicit, []string{"Project"})
 	assertServiceSelection(t, services["aispeech"], true, SelectionModeExplicit, []string{"TranscriptionJob"})
 	assertServiceSelection(t, services["aivision"], true, SelectionModeExplicit, []string{"Project"})
 	assertServiceSelection(t, services["analytics"], true, SelectionModeExplicit, []string{"AnalyticsInstance"})
+	assertServiceSelection(t, services["announcementsservice"], true, SelectionModeExplicit, []string{"AnnouncementSubscription"})
 	assertServiceSelection(t, services["apiaccesscontrol"], true, SelectionModeExplicit, []string{"PrivilegedApiControl"})
 	assertServiceSelection(t, services["apiplatform"], true, SelectionModeExplicit, []string{"ApiPlatformInstance"})
-	assertServiceSelection(t, services["apmcontrolplane"], true, SelectionModeExplicit, []string{"ApmDomain"})
 	assertServiceSelection(t, services["apmconfig"], true, SelectionModeExplicit, []string{"Config"})
-	assertServiceSelection(t, services["appmgmtcontrol"], true, SelectionModeExplicit, []string{"MonitoredInstance"})
-	assertServiceSelection(t, services["apmtraces"], true, SelectionModeExplicit, []string{"ScheduledQuery"})
+	assertServiceSelection(t, services["apmcontrolplane"], true, SelectionModeExplicit, []string{"ApmDomain"})
 	assertServiceSelection(t, services["apmsynthetics"], true, SelectionModeExplicit, []string{"Script"})
+	assertServiceSelection(t, services["apmtraces"], true, SelectionModeExplicit, []string{"ScheduledQuery"})
+	assertServiceSelection(t, services["appmgmtcontrol"], true, SelectionModeExplicit, []string{"MonitoredInstance"})
 	assertServiceSelection(t, services["artifacts"], true, SelectionModeExplicit, []string{"ContainerImageSignature", "ContainerRepository", "Repository"})
+	assertServiceSelection(t, services["autoscaling"], true, SelectionModeExplicit, []string{"AutoScalingConfiguration", "AutoScalingPolicy"})
 	assertServiceSelection(t, services["bastion"], true, SelectionModeExplicit, []string{"Bastion", "Session"})
+	assertServiceSelection(t, services["batch"], true, SelectionModeExplicit, []string{"BatchContext", "BatchJobPool", "BatchTaskEnvironment", "BatchTaskProfile"})
 	assertServiceSelection(t, services["bds"], true, SelectionModeExplicit, []string{"BdsInstance"})
+	assertServiceSelection(t, services["blockchain"], true, SelectionModeExplicit, []string{"BlockchainPlatform", "Osn", "Peer"})
 	assertServiceSelection(t, services["budget"], true, SelectionModeExplicit, []string{"Budget"})
 	assertServiceSelection(t, services["capacitymanagement"], true, SelectionModeExplicit, []string{"OccCapacityRequest"})
 	assertServiceSelection(t, services["certificatesmanagement"], true, SelectionModeExplicit, []string{"CaBundle"})
+	assertServiceSelection(t, services["cloudbridge"], true, SelectionModeExplicit, []string{"Agent", "AgentDependency", "Asset", "AssetSource", "DiscoverySchedule", "Environment", "Inventory"})
+	assertServiceSelection(t, services["cloudguard"], true, SelectionModeExplicit, []string{"AdhocQuery", "DataMaskRule", "DataSource", "DetectorRecipe", "DetectorRecipeDetectorRule", "ManagedList", "ResponderRecipe", "SavedQuery", "SecurityRecipe", "SecurityZone", "Target", "TargetDetectorRecipe", "TargetResponderRecipe", "WlpAgent"})
+	assertServiceSelection(t, services["cloudmigrations"], true, SelectionModeExplicit, []string{"Migration", "MigrationAsset", "MigrationPlan", "ReplicationSchedule", "TargetAsset"})
 	assertServiceSelection(t, services["clusterplacementgroups"], true, SelectionModeExplicit, []string{"ClusterPlacementGroup"})
+	assertServiceSelection(t, services["computecloudatcustomer"], true, SelectionModeExplicit, []string{"CccInfrastructure", "CccUpgradeSchedule"})
 	assertServiceSelection(t, services["computeinstanceagent"], true, SelectionModeExplicit, []string{"InstanceAgentPlugin"})
 	assertServiceSelection(t, services["containerengine"], true, SelectionModeExplicit, []string{"Cluster", "NodePool"})
 	assertServiceSelection(t, services["containerinstances"], true, SelectionModeExplicit, []string{"ContainerInstance"})
 	assertServiceSelection(t, services["core"], true, SelectionModeExplicit, []string{"Instance"})
-	assertServiceSelection(t, services["dataflow"], true, SelectionModeExplicit, []string{"Application"})
-	assertServiceSelection(t, services["database"], true, SelectionModeExplicit, []string{"AutonomousDatabase"})
-	assertServiceSelection(t, services["databasetools"], true, SelectionModeExplicit, []string{"DatabaseToolsConnection"})
-	assertServiceSelection(t, services["databasemigration"], true, SelectionModeExplicit, []string{"Connection", "Assessment"})
-	assertServiceSelection(t, services["datalabelingservice"], true, SelectionModeExplicit, []string{"Dataset"})
-	assertServiceSelection(t, services["datascience"], true, SelectionModeExplicit, []string{"Project"})
 	assertServiceSelection(t, services["dashboardservice"], true, SelectionModeExplicit, []string{"DashboardGroup", "Dashboard"})
+	assertServiceSelection(t, services["database"], true, SelectionModeExplicit, []string{"AutonomousDatabase"})
+	assertServiceSelection(t, services["databasemigration"], true, SelectionModeExplicit, []string{"Connection", "Assessment"})
+	assertServiceSelection(t, services["databasetools"], true, SelectionModeExplicit, []string{"DatabaseToolsConnection"})
+	assertServiceSelection(t, services["datacatalog"], true, SelectionModeExplicit, []string{"Attribute", "AttributeTag", "Catalog", "CatalogPrivateEndpoint", "Connection", "CustomProperty", "DataAsset", "DataAssetTag", "Entity", "EntityTag", "Folder", "FolderTag", "Glossary", "Job", "JobDefinition", "Metastore", "Namespace", "Pattern", "Term", "TermRelationship"})
+	assertServiceSelection(t, services["dataflow"], true, SelectionModeExplicit, []string{"Application"})
+	assertServiceSelection(t, services["dataintegration"], true, SelectionModeExplicit, []string{"Application", "ApplicationDetailedDescription", "Connection", "ConnectionValidation", "CopyObjectRequest", "DataAsset", "DataFlow", "DataFlowValidation", "DisApplication", "DisApplicationDetailedDescription", "ExportRequest", "ExternalPublication", "ExternalPublicationValidation", "Folder", "FunctionLibrary", "ImportRequest", "Patch", "Pipeline", "PipelineValidation", "Project", "Schedule", "Task", "TaskRun", "TaskSchedule", "TaskValidation", "UserDefinedFunction", "UserDefinedFunctionValidation", "Workspace"})
+	assertServiceSelection(t, services["datalabelingservice"], true, SelectionModeExplicit, []string{"Dataset"})
+	assertServiceSelection(t, services["datalabelingservicedataplane"], true, SelectionModeExplicit, []string{"Annotation", "Record"})
+	assertServiceSelection(t, services["datasafe"], true, SelectionModeExplicit, []string{"AlertPolicy", "AlertPolicyRule", "AttributeSet", "AuditArchiveRetrieval", "AuditProfile", "DataSafePrivateEndpoint", "DiscoveryJob", "LibraryMaskingFormat", "MaskingColumn", "MaskingPolicy", "OnPremConnector", "PeerTargetDatabase", "ReferentialRelation", "ReportDefinition", "SdmMaskingPolicyDifference", "SecurityAssessment", "SecurityPolicy", "SecurityPolicyConfig", "SecurityPolicyDeployment", "SensitiveColumn", "SensitiveDataModel", "SensitiveType", "SensitiveTypeGroup", "SensitiveTypesExport", "SqlCollection", "TargetAlertPolicyAssociation", "TargetDatabase", "TargetDatabaseGroup", "UnifiedAuditPolicy", "UserAssessment"})
+	assertServiceSelection(t, services["datascience"], true, SelectionModeExplicit, []string{"Project"})
+	assertServiceSelection(t, services["dbmulticloud"], true, SelectionModeExplicit, []string{"MultiCloudResourceDiscovery", "OracleDbAwsIdentityConnector", "OracleDbAwsKey", "OracleDbAzureBlobContainer", "OracleDbAzureBlobMount", "OracleDbAzureConnector", "OracleDbAzureVault", "OracleDbAzureVaultAssociation", "OracleDbGcpIdentityConnector", "OracleDbGcpKeyRing"})
 	assertServiceSelection(t, services["delegateaccesscontrol"], true, SelectionModeExplicit, []string{"DelegationControl"})
+	assertServiceSelection(t, services["demandsignal"], true, SelectionModeExplicit, []string{"OccDemandSignal"})
+	assertServiceSelection(t, services["desktops"], true, SelectionModeExplicit, []string{"DesktopPool"})
 	assertServiceSelection(t, services["devops"], true, SelectionModeExplicit, []string{"Project", "Repository", "BuildPipeline", "DeployPipeline", "DeployArtifact", "Trigger"})
+	assertServiceSelection(t, services["dif"], true, SelectionModeExplicit, []string{"Stack"})
+	assertServiceSelection(t, services["disasterrecovery"], true, SelectionModeExplicit, []string{"DrProtectionGroup"})
 	assertServiceSelection(t, services["distributeddatabase"], true, SelectionModeExplicit, []string{"DistributedDatabasePrivateEndpoint"})
 	assertServiceSelection(t, services["dns"], true, SelectionModeExplicit, []string{"Zone", "View", "TsigKey", "SteeringPolicy", "SteeringPolicyAttachment"})
 	assertServiceSelection(t, services["email"], true, SelectionModeExplicit, []string{"Dkim", "EmailDomain", "Sender", "Suppression"})
+	assertServiceSelection(t, services["emwarehouse"], true, SelectionModeExplicit, []string{"EmWarehouse"})
 	assertServiceSelection(t, services["events"], true, SelectionModeExplicit, []string{"Rule"})
+	assertServiceSelection(t, services["filestorage"], true, SelectionModeExplicit, []string{"Export", "FileSystem", "FilesystemSnapshotPolicy", "MountTarget", "OutboundConnector", "QuotaRule", "Replication", "Snapshot"})
+	assertServiceSelection(t, services["fleetappsmanagement"], true, SelectionModeExplicit, []string{"CatalogItem", "CompliancePolicyRule", "Fleet", "FleetCredential", "FleetProperty", "FleetResource", "MaintenanceWindow", "Onboarding", "Patch", "PlatformConfiguration", "Property", "Provision", "Runbook", "RunbookVersion", "SchedulerDefinition", "TaskRecord"})
+	assertServiceSelection(t, services["fleetsoftwareupdate"], true, SelectionModeExplicit, []string{"FsuAction", "FsuCollection", "FsuCycle", "FsuDiscovery", "FsuReadinessCheck"})
 	assertServiceSelection(t, services["functions"], true, SelectionModeExplicit, []string{"Application", "Function"})
+	assertServiceSelection(t, services["fusionapps"], true, SelectionModeExplicit, []string{"FusionEnvironment", "FusionEnvironmentFamily", "RefreshActivity", "ServiceAttachment"})
+	assertServiceSelection(t, services["gdp"], true, SelectionModeExplicit, []string{"GdpPipeline"})
 	assertServiceSelection(t, services["generativeai"], true, SelectionModeExplicit, []string{"DedicatedAiCluster", "Endpoint", "Model"})
-	assertServiceSelection(t, services["generativeaidata"], true, SelectionModeExplicit, []string{"EnrichmentJob"})
 	assertServiceSelection(t, services["generativeaiagent"], true, SelectionModeExplicit, []string{"KnowledgeBase", "Agent"})
 	assertServiceSelection(t, services["generativeaiagentruntime"], true, SelectionModeExplicit, []string{"Session"})
+	assertServiceSelection(t, services["generativeaidata"], true, SelectionModeExplicit, []string{"EnrichmentJob"})
+	assertServiceSelection(t, services["goldengate"], true, SelectionModeExplicit, []string{"Certificate", "Connection", "ConnectionAssignment", "DatabaseRegistration", "Deployment", "DeploymentBackup", "Pipeline"})
+	assertServiceSelection(t, services["governancerulescontrolplane"], true, SelectionModeExplicit, []string{"GovernanceRule", "InclusionCriterion"})
 	assertServiceSelection(t, services["healthchecks"], true, SelectionModeExplicit, []string{"HttpMonitor", "PingMonitor"})
 	assertServiceSelection(t, services["identity"], true, SelectionModeExplicit, []string{"Compartment"})
 	assertServiceSelection(t, services["integration"], true, SelectionModeExplicit, []string{"IntegrationInstance"})
+	assertServiceSelection(t, services["iot"], true, SelectionModeExplicit, []string{"DigitalTwinAdapter", "DigitalTwinInstance", "DigitalTwinModel", "DigitalTwinRelationship", "IotDomain", "IotDomainGroup"})
+	assertServiceSelection(t, services["jms"], true, SelectionModeExplicit, []string{"Fleet"})
+	assertServiceSelection(t, services["jmsjavadownloads"], true, SelectionModeExplicit, []string{"JavaDownloadToken"})
 	assertServiceSelection(t, services["keymanagement"], true, SelectionModeExplicit, []string{"EkmsPrivateEndpoint", "Vault"})
+	assertServiceSelection(t, services["licensemanager"], true, SelectionModeExplicit, []string{"LicenseRecord", "ProductLicense"})
 	assertServiceSelection(t, services["limits"], true, SelectionModeExplicit, []string{"Quota"})
+	assertServiceSelection(t, services["limitsincrease"], true, SelectionModeExplicit, []string{"LimitsIncreaseRequest"})
 	assertServiceSelection(t, services["loadbalancer"], true, SelectionModeExplicit, []string{"Backend", "BackendSet", "Certificate", "Hostname", "Listener", "LoadBalancer", "PathRouteSet", "RoutingPolicy", "RuleSet", "SSLCipherSuite"})
+	assertServiceSelection(t, services["lockbox"], true, SelectionModeExplicit, []string{"ApprovalTemplate", "Lockbox"})
+	assertServiceSelection(t, services["loganalytics"], true, SelectionModeExplicit, []string{"IngestTimeRule", "LogAnalyticsEmBridge", "LogAnalyticsEntity", "LogAnalyticsEntityType", "LogAnalyticsLogGroup", "LogAnalyticsObjectCollectionRule", "ScheduledTask"})
 	assertServiceSelection(t, services["logging"], true, SelectionModeExplicit, []string{"Log", "LogGroup", "LogSavedSearch", "UnifiedAgentConfiguration"})
-	assertServiceSelection(t, services["managedkafka"], true, SelectionModeExplicit, []string{"KafkaCluster", "KafkaClusterConfig"})
 	assertServiceSelection(t, services["lustrefilestorage"], true, SelectionModeExplicit, []string{"LustreFileSystem", "ObjectStorageLink"})
-	assertServiceSelection(t, services["monitoring"], true, SelectionModeExplicit, []string{"Alarm", "AlarmSuppression"})
+	assertServiceSelection(t, services["managedkafka"], true, SelectionModeExplicit, []string{"KafkaCluster", "KafkaClusterConfig"})
+	assertServiceSelection(t, services["managementagent"], true, SelectionModeExplicit, []string{"DataSource", "ManagementAgentInstallKey", "NamedCredential"})
+	assertServiceSelection(t, services["managementdashboard"], true, SelectionModeExplicit, []string{"ManagementDashboard", "ManagementSavedSearch"})
 	assertServiceSelection(t, services["marketplace"], true, SelectionModeExplicit, []string{"AcceptedAgreement", "Publication"})
+	assertServiceSelection(t, services["marketplaceprivateoffer"], true, SelectionModeExplicit, []string{"Attachment", "Offer"})
+	assertServiceSelection(t, services["marketplacepublisher"], true, SelectionModeExplicit, []string{"Artifact", "Listing", "ListingRevision", "ListingRevisionAttachment", "ListingRevisionNote", "ListingRevisionPackage", "Term", "TermVersion"})
+	assertServiceSelection(t, services["mediaservices"], true, SelectionModeExplicit, []string{"MediaAsset", "MediaWorkflow"})
 	assertServiceSelection(t, services["mngdmac"], true, SelectionModeExplicit, []string{"MacOrder", "MacDevice"})
+	assertServiceSelection(t, services["monitoring"], true, SelectionModeExplicit, []string{"Alarm", "AlarmSuppression"})
 	assertServiceSelection(t, services["mysql"], true, SelectionModeExplicit, []string{"DbSystem"})
+	assertServiceSelection(t, services["networkfirewall"], true, SelectionModeExplicit, []string{"AddressList", "Application", "ApplicationGroup", "DecryptionProfile", "DecryptionRule", "MappedSecret", "NatRule", "NetworkFirewall", "NetworkFirewallPolicy", "SecurityRule", "Service", "ServiceList", "TunnelInspectionRule", "UrlList"})
 	assertServiceSelection(t, services["networkloadbalancer"], true, SelectionModeExplicit, []string{"Backend", "BackendSet", "Listener", "NetworkLoadBalancer"})
 	assertServiceSelection(t, services["nosql"], true, SelectionModeExplicit, []string{"Table"})
 	assertServiceSelection(t, services["objectstorage"], true, SelectionModeExplicit, []string{"Bucket"})
 	assertServiceSelection(t, services["oce"], true, SelectionModeExplicit, []string{"OceInstance"})
 	assertServiceSelection(t, services["ocvp"], true, SelectionModeExplicit, []string{"Cluster", "EsxiHost", "Sddc"})
 	assertServiceSelection(t, services["oda"], true, SelectionModeExplicit, []string{"AuthenticationProvider", "Channel", "DigitalAssistant", "ImportedPackage", "OdaInstance", "OdaInstanceAttachment", "OdaPrivateEndpoint", "OdaPrivateEndpointAttachment", "OdaPrivateEndpointScanProxy", "Skill", "SkillParameter", "Translator"})
-	assertServiceSelection(t, services["opensearch"], true, SelectionModeExplicit, []string{"OpensearchCluster"})
-	assertServiceSelection(t, services["ons"], true, SelectionModeExplicit, []string{"Subscription", "Topic"})
 	assertServiceSelection(t, services["onesubscription"], true, SelectionModeExplicit, []string{"Subscription"})
+	assertServiceSelection(t, services["ons"], true, SelectionModeExplicit, []string{"Subscription", "Topic"})
 	assertServiceSelection(t, services["opa"], true, SelectionModeExplicit, []string{"OpaInstance"})
-	assertServiceSelection(t, services["osubsubscription"], true, SelectionModeExplicit, []string{"Subscription"})
-	assertServiceSelection(t, services["psa"], true, SelectionModeExplicit, []string{"PrivateServiceAccess"})
-	assertServiceSelection(t, services["psql"], true, SelectionModeExplicit, []string{"DbSystem"})
-	assertServiceSelection(t, services["queue"], true, SelectionModeExplicit, []string{"Queue"})
-	assertServiceSelection(t, services["redis"], true, SelectionModeExplicit, []string{"RedisCluster"})
-	assertServiceSelection(t, services["sch"], true, SelectionModeExplicit, []string{"ServiceConnector"})
-	assertServiceSelection(t, services["self"], true, SelectionModeExplicit, []string{"Subscription"})
-	assertServiceSelection(t, services["servicecatalog"], true, SelectionModeExplicit, []string{"PrivateApplication", "ServiceCatalog"})
-	assertServiceSelection(t, services["streaming"], true, SelectionModeExplicit, []string{"Stream"})
-	assertServiceSelection(t, services["tenantmanagercontrolplane"], true, SelectionModeExplicit, []string{"Domain", "Organization"})
-	assertServiceSelection(t, services["usageapi"], true, SelectionModeExplicit, []string{"CustomTable", "Query", "Schedule", "UsageCarbonEmissionsQuery"})
-	assertServiceSelection(t, services["vbsinst"], true, SelectionModeExplicit, []string{"VbsInstance"})
-	assertServiceSelection(t, services["governancerulescontrolplane"], true, SelectionModeExplicit, []string{"GovernanceRule", "InclusionCriterion"})
-	assertServiceSelection(t, services["iot"], true, SelectionModeExplicit, []string{"DigitalTwinAdapter", "DigitalTwinInstance", "DigitalTwinModel", "DigitalTwinRelationship", "IotDomain", "IotDomainGroup"})
-	assertServiceSelection(t, services["jms"], true, SelectionModeExplicit, []string{"Fleet"})
-	assertServiceSelection(t, services["jmsjavadownloads"], true, SelectionModeExplicit, []string{"JavaDownloadToken"})
-	assertServiceSelection(t, services["licensemanager"], true, SelectionModeExplicit, []string{"LicenseRecord", "ProductLicense"})
-	assertServiceSelection(t, services["limitsincrease"], true, SelectionModeExplicit, []string{"LimitsIncreaseRequest"})
-	assertServiceSelection(t, services["lockbox"], true, SelectionModeExplicit, []string{"ApprovalTemplate", "Lockbox"})
-	assertServiceSelection(t, services["loganalytics"], true, SelectionModeExplicit, []string{"IngestTimeRule", "LogAnalyticsEmBridge", "LogAnalyticsEntity", "LogAnalyticsEntityType", "LogAnalyticsLogGroup", "LogAnalyticsObjectCollectionRule", "ScheduledTask"})
-	assertServiceSelection(t, services["managementagent"], true, SelectionModeExplicit, []string{"DataSource", "ManagementAgentInstallKey", "NamedCredential"})
-	assertServiceSelection(t, services["managementdashboard"], true, SelectionModeExplicit, []string{"ManagementDashboard", "ManagementSavedSearch"})
-	assertServiceSelection(t, services["marketplaceprivateoffer"], true, SelectionModeExplicit, []string{"Attachment", "Offer"})
-	assertServiceSelection(t, services["marketplacepublisher"], true, SelectionModeExplicit, []string{"Artifact", "Listing", "ListingRevision", "ListingRevisionAttachment", "ListingRevisionNote", "ListingRevisionPackage", "Term", "TermVersion"})
-	assertServiceSelection(t, services["mediaservices"], true, SelectionModeExplicit, []string{"MediaAsset", "MediaWorkflow"})
-	assertServiceSelection(t, services["mngdmac"], true, SelectionModeExplicit, []string{"MacOrder", "MacDevice"})
+	assertServiceSelection(t, services["opensearch"], true, SelectionModeExplicit, []string{"OpensearchCluster"})
 	assertServiceSelection(t, services["operatoraccesscontrol"], true, SelectionModeExplicit, []string{"OperatorControl", "OperatorControlAssignment"})
 	assertServiceSelection(t, services["opsi"], true, SelectionModeExplicit, []string{"AwrHub", "AwrHubSource", "ChargebackPlan", "ChargebackPlanReport", "DatabaseInsight", "EnterpriseManagerBridge", "ExadataInsight", "HostInsight", "NewsReport", "OperationsInsightsPrivateEndpoint", "OperationsInsightsWarehouse", "OperationsInsightsWarehouseUser", "OpsiConfiguration"})
 	assertServiceSelection(t, services["optimizer"], true, SelectionModeExplicit, []string{"Profile"})
 	assertServiceSelection(t, services["osmanagementhub"], true, SelectionModeExplicit, []string{"LifecycleEnvironment", "ManagedInstanceGroup", "ManagementStation", "Profile", "ScheduledJob", "SoftwareSource"})
+	assertServiceSelection(t, services["osubsubscription"], true, SelectionModeExplicit, []string{"Subscription"})
+	assertServiceSelection(t, services["psa"], true, SelectionModeExplicit, []string{"PrivateServiceAccess"})
+	assertServiceSelection(t, services["psql"], true, SelectionModeExplicit, []string{"DbSystem"})
+	assertServiceSelection(t, services["queue"], true, SelectionModeExplicit, []string{"Queue"})
 	assertServiceSelection(t, services["recovery"], true, SelectionModeExplicit, []string{"ProtectedDatabase", "ProtectionPolicy", "RecoveryServiceSubnet"})
+	assertServiceSelection(t, services["redis"], true, SelectionModeExplicit, []string{"RedisCluster"})
 	assertServiceSelection(t, services["resourceanalytics"], true, SelectionModeExplicit, []string{"MonitoredRegion", "ResourceAnalyticsInstance", "TenancyAttachment"})
+	assertServiceSelection(t, services["resourcemanager"], true, SelectionModeExplicit, []string{"ConfigurationSourceProvider", "PrivateEndpoint", "Stack", "Template"})
 	assertServiceSelection(t, services["resourcescheduler"], true, SelectionModeExplicit, []string{"Schedule"})
 	assertServiceSelection(t, services["rover"], true, SelectionModeExplicit, []string{"RoverCluster", "RoverNode"})
+	assertServiceSelection(t, services["sch"], true, SelectionModeExplicit, []string{"ServiceConnector"})
 	assertServiceSelection(t, services["securityattribute"], true, SelectionModeExplicit, []string{"SecurityAttribute", "SecurityAttributeNamespace"})
+	assertServiceSelection(t, services["self"], true, SelectionModeExplicit, []string{"Subscription"})
+	assertServiceSelection(t, services["servicecatalog"], true, SelectionModeExplicit, []string{"PrivateApplication", "ServiceCatalog"})
+	assertServiceSelection(t, services["servicemanagerproxy"], true, SelectionModeExplicit, []string{"ServiceEnvironment"})
 	assertServiceSelection(t, services["stackmonitoring"], true, SelectionModeExplicit, []string{"AlarmCondition", "BaselineableMetric", "Config", "DiscoveryJob", "MaintenanceWindow", "MetricExtension", "MonitoredResource", "MonitoredResourceType", "MonitoringTemplate", "ProcessSet"})
+	assertServiceSelection(t, services["streaming"], true, SelectionModeExplicit, []string{"Stream"})
+	assertServiceSelection(t, services["tenantmanagercontrolplane"], true, SelectionModeExplicit, []string{"Domain", "Organization"})
+	assertServiceSelection(t, services["usageapi"], true, SelectionModeExplicit, []string{"CustomTable", "Query", "Schedule", "UsageCarbonEmissionsQuery"})
+	assertServiceSelection(t, services["vault"], false, SelectionModeAll, nil)
+	assertServiceSelection(t, services["vbsinst"], true, SelectionModeExplicit, []string{"VbsInstance"})
+	assertServiceSelection(t, services["visualbuilder"], true, SelectionModeExplicit, []string{"VbInstance"})
+	assertServiceSelection(t, services["vnmonitoring"], true, SelectionModeExplicit, []string{"PathAnalyzerTest"})
+	assertServiceSelection(t, services["vulnerabilityscanning"], true, SelectionModeExplicit, []string{"ContainerScanRecipe", "ContainerScanTarget", "HostScanRecipe", "HostScanTarget"})
 	assertServiceSelection(t, services["waa"], true, SelectionModeExplicit, []string{"WebAppAcceleration", "WebAppAccelerationPolicy"})
 	assertServiceSelection(t, services["waas"], true, SelectionModeExplicit, []string{"AddressList", "Certificate", "CustomProtectionRule", "HttpRedirect", "WaasPolicy"})
 	assertServiceSelection(t, services["waf"], true, SelectionModeExplicit, []string{"NetworkAddressList", "WebAppFirewall", "WebAppFirewallPolicy"})
 	assertServiceSelection(t, services["wlms"], true, SelectionModeExplicit, []string{"WlsDomain", "ManagedInstance"})
-	assertServiceSelection(t, services["visualbuilder"], true, SelectionModeExplicit, []string{"VbInstance"})
-	assertServiceSelection(t, services["vnmonitoring"], true, SelectionModeExplicit, []string{"PathAnalyzerTest"})
 	assertServiceSelection(t, services["zpr"], true, SelectionModeExplicit, []string{"Configuration", "ZprPolicy"})
-	assertServiceSelection(t, services["vault"], false, SelectionModeAll, nil)
 }
 
 func TestCheckedInConfigIncludesRuntimeRolloutMetadata(t *testing.T) {
@@ -2166,118 +2247,145 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 		strategy string
 		runtime  string
 	}{
-		"accessgovernancecp":          {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"adm":                         {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
-		"aidocument":                  {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"ailanguage":                  {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
-		"aispeech":                    {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"aivision":                    {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"analytics":                   {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"apiaccesscontrol":            {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
-		"apiplatform":                 {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"apmcontrolplane":             {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
-		"apmconfig":                   {strategy: AsyncStrategyNone, runtime: AsyncRuntimeGeneratedRuntime},
-		"appmgmtcontrol":              {strategy: AsyncStrategyNone, runtime: AsyncRuntimeGeneratedRuntime},
-		"apmtraces":                   {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"apmsynthetics":               {strategy: AsyncStrategyNone, runtime: AsyncRuntimeGeneratedRuntime},
-		"artifacts":                   {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"bastion":                     {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"bds":                         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"budget":                      {strategy: AsyncStrategyNone, runtime: AsyncRuntimeGeneratedRuntime},
-		"capacitymanagement":          {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"certificatesmanagement":      {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"clusterplacementgroups":      {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
-		"computeinstanceagent":        {strategy: AsyncStrategyNone, runtime: AsyncRuntimeGeneratedRuntime},
-		"containerengine":             {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"containerinstances":          {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeHandwritten},
-		"core":                        {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"dataflow":                    {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"database":                    {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"databasetools":               {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"databasemigration":           {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
-		"datalabelingservice":         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"datascience":                 {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"dashboardservice":            {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"delegateaccesscontrol":       {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
-		"disasterrecovery":            {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
-		"devops":                      {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"distributeddatabase":         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"dns":                         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"email":                       {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"events":                      {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"functions":                   {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeHandwritten},
-		"gdp":                         {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
-		"generativeai":                {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"generativeaidata":            {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"generativeaiagent":           {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
-		"generativeaiagentruntime":    {strategy: AsyncStrategyNone, runtime: AsyncRuntimeGeneratedRuntime},
-		"healthchecks":                {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"identity":                    {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"integration":                 {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"keymanagement":               {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"limits":                      {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"loadbalancer":                {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"logging":                     {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"lustrefilestorage":           {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
-		"managedkafka":                {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"monitoring":                  {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"marketplace":                 {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"mngdmac":                     {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
-		"mysql":                       {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"networkloadbalancer":         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"nosql":                       {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"objectstorage":               {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"oce":                         {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
-		"ocvp":                        {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"oda":                         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"opensearch":                  {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"ons":                         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"onesubscription":             {strategy: AsyncStrategyNone, runtime: AsyncRuntimeGeneratedRuntime},
-		"opa":                         {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
-		"psa":                         {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
-		"psql":                        {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeHandwritten},
-		"queue":                       {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
-		"redis":                       {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
-		"sch":                         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"servicecatalog":              {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"servicemanagerproxy":         {strategy: AsyncStrategyNone, runtime: AsyncRuntimeGeneratedRuntime},
-		"streaming":                   {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"tenantmanagercontrolplane":   {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
-		"usageapi":                    {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"governancerulescontrolplane": {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"iot":                         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"jms":                         {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
-		"jmsjavadownloads":            {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
-		"licensemanager":              {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"limitsincrease":              {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"lockbox":                     {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"loganalytics":                {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"managementagent":             {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"managementdashboard":         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"marketplaceprivateoffer":     {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"marketplacepublisher":        {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"mediaservices":               {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"operatoraccesscontrol":       {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"opsi":                        {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"optimizer":                   {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"osmanagementhub":             {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"osubsubscription":            {strategy: AsyncStrategyNone, runtime: AsyncRuntimeGeneratedRuntime},
-		"recovery":                    {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"resourceanalytics":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"resourcescheduler":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"rover":                       {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"securityattribute":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"self":                        {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
-		"stackmonitoring":             {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"vbsinst":                     {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
-		"visualbuilder":               {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
-		"vnmonitoring":                {strategy: AsyncStrategyNone, runtime: AsyncRuntimeGeneratedRuntime},
-		"waa":                         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"waas":                        {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"waf":                         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"wlms":                        {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"zpr":                         {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"accessgovernancecp":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"adm":                          {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"aidataplatform":               {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"aidocument":                   {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"ailanguage":                   {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"aispeech":                     {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"aivision":                     {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"analytics":                    {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"announcementsservice":         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"apiaccesscontrol":             {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"apiplatform":                  {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"apmconfig":                    {strategy: AsyncStrategyNone, runtime: AsyncRuntimeGeneratedRuntime},
+		"apmcontrolplane":              {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"apmsynthetics":                {strategy: AsyncStrategyNone, runtime: AsyncRuntimeGeneratedRuntime},
+		"apmtraces":                    {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"appmgmtcontrol":               {strategy: AsyncStrategyNone, runtime: AsyncRuntimeGeneratedRuntime},
+		"artifacts":                    {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"autoscaling":                  {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"bastion":                      {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"batch":                        {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"bds":                          {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"blockchain":                   {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"budget":                       {strategy: AsyncStrategyNone, runtime: AsyncRuntimeGeneratedRuntime},
+		"capacitymanagement":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"certificatesmanagement":       {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"cloudbridge":                  {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"cloudguard":                   {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"cloudmigrations":              {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"clusterplacementgroups":       {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"computecloudatcustomer":       {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"computeinstanceagent":         {strategy: AsyncStrategyNone, runtime: AsyncRuntimeGeneratedRuntime},
+		"containerengine":              {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"containerinstances":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeHandwritten},
+		"core":                         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"dashboardservice":             {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"database":                     {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"databasemigration":            {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"databasetools":                {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"datacatalog":                  {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"dataflow":                     {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"dataintegration":              {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"datalabelingservice":          {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"datalabelingservicedataplane": {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"datasafe":                     {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"datascience":                  {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"dbmulticloud":                 {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"delegateaccesscontrol":        {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"demandsignal":                 {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"desktops":                     {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"devops":                       {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"dif":                          {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"disasterrecovery":             {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"distributeddatabase":          {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"dns":                          {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"email":                        {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"emwarehouse":                  {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"events":                       {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"filestorage":                  {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"fleetappsmanagement":          {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"fleetsoftwareupdate":          {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"functions":                    {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeHandwritten},
+		"fusionapps":                   {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"gdp":                          {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"generativeai":                 {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"generativeaiagent":            {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"generativeaiagentruntime":     {strategy: AsyncStrategyNone, runtime: AsyncRuntimeGeneratedRuntime},
+		"generativeaidata":             {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"goldengate":                   {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"governancerulescontrolplane":  {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"healthchecks":                 {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"identity":                     {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"integration":                  {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"iot":                          {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"jms":                          {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"jmsjavadownloads":             {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"keymanagement":                {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"licensemanager":               {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"limits":                       {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"limitsincrease":               {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"loadbalancer":                 {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"lockbox":                      {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"loganalytics":                 {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"logging":                      {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"lustrefilestorage":            {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"managedkafka":                 {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"managementagent":              {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"managementdashboard":          {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"marketplace":                  {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"marketplaceprivateoffer":      {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"marketplacepublisher":         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"mediaservices":                {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"mngdmac":                      {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"monitoring":                   {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"mysql":                        {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"networkfirewall":              {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"networkloadbalancer":          {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"nosql":                        {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"objectstorage":                {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"oce":                          {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"ocvp":                         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"oda":                          {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"onesubscription":              {strategy: AsyncStrategyNone, runtime: AsyncRuntimeGeneratedRuntime},
+		"ons":                          {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"opa":                          {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"opensearch":                   {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"operatoraccesscontrol":        {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"opsi":                         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"optimizer":                    {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"osmanagementhub":              {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"osubsubscription":             {strategy: AsyncStrategyNone, runtime: AsyncRuntimeGeneratedRuntime},
+		"psa":                          {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"psql":                         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeHandwritten},
+		"queue":                        {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"recovery":                     {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"redis":                        {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"resourceanalytics":            {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"resourcemanager":              {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"resourcescheduler":            {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"rover":                        {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"sch":                          {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"securityattribute":            {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"self":                         {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"servicecatalog":               {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"servicemanagerproxy":          {strategy: AsyncStrategyNone, runtime: AsyncRuntimeGeneratedRuntime},
+		"stackmonitoring":              {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"streaming":                    {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"tenantmanagercontrolplane":    {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"usageapi":                     {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"vbsinst":                      {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"visualbuilder":                {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"vnmonitoring":                 {strategy: AsyncStrategyNone, runtime: AsyncRuntimeGeneratedRuntime},
+		"vulnerabilityscanning":        {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"waa":                          {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"waas":                         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"waf":                          {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"wlms":                         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"zpr":                          {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
 	}
+
 	expectedByTarget := map[string]struct {
 		strategy string
 		runtime  string

@@ -1,0 +1,585 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: taskrecords.fleetappsmanagement.oracle.com
+spec:
+  group: fleetappsmanagement.oracle.com
+  names:
+    kind: TaskRecord
+    listKind: TaskRecordList
+    plural: taskrecords
+    singular: taskrecord
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the TaskRecord
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the TaskRecord
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: TaskRecord is the Schema for the taskrecords API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: TaskRecordSpec defines the desired state of TaskRecord.
+            properties:
+              compartmentId:
+                description: OCID of the compartment to which the resource belongs
+                  to.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: |-
+                  A user-friendly description. To provide some insight about the resource.
+                  Avoid entering confidential information.
+                type: string
+              details:
+                description: TaskRecordDetails defines nested fields for TaskRecord.Details.
+                properties:
+                  executionDetails:
+                    description: TaskRecordDetailsExecutionDetails defines nested
+                      fields for TaskRecord.Details.ExecutionDetails.
+                    properties:
+                      catalogId:
+                        description: Catalog Id having terraform package.
+                        type: string
+                      command:
+                        description: |-
+                          Optional command to execute the content.
+                          You can provide any commands/arguments that can't be part of the script.
+                        type: string
+                      configFile:
+                        description: Catalog Id having config file.
+                        type: string
+                      content:
+                        description: TaskRecordDetailsExecutionDetailsContent defines
+                          nested fields for TaskRecord.Details.ExecutionDetails.Content.
+                        properties:
+                          bucketName:
+                            description: Bucket Name.
+                            type: string
+                          catalogId:
+                            description: Catalog Id having terraform package.
+                            type: string
+                          checksum:
+                            description: md5 checksum of the artifact.
+                            type: string
+                          jsonData:
+                            type: string
+                          namespaceName:
+                            description: Namespace.
+                            type: string
+                          objectName:
+                            description: Object Name.
+                            type: string
+                          sourceType:
+                            type: string
+                        type: object
+                      credentials:
+                        description: Credentials required for executing the task.
+                        items:
+                          description: TaskRecordDetailsExecutionDetailsCredential
+                            defines nested fields for TaskRecord.Details.ExecutionDetails.Credential.
+                          properties:
+                            displayName:
+                              description: |-
+                                A user-friendly name. Does not have to be unique, and it's changeable.
+                                Avoid entering confidential information.
+                                Example: `My new resource`
+                              type: string
+                            id:
+                              description: The OCID of the resource.
+                              type: string
+                          required:
+                          - id
+                          type: object
+                        type: array
+                      endpoint:
+                        description: Endpoint to be invoked.
+                        type: string
+                      executionType:
+                        type: string
+                      isExecutableContent:
+                        description: Is the Content an executable file?
+                        type: boolean
+                      isLocked:
+                        description: Is the script locked to prevent changes directly
+                          in Object Storage?
+                        type: boolean
+                      isReadOutputVariableEnabled:
+                        description: Is read output variable enabled
+                        type: boolean
+                      jsonData:
+                        type: string
+                      systemVariables:
+                        description: The list of system variables.
+                        items:
+                          type: string
+                        type: array
+                      targetCompartmentId:
+                        description: OCID of the compartment to which the resource
+                          belongs to.
+                        type: string
+                      variables:
+                        description: TaskRecordDetailsExecutionDetailsVariables defines
+                          nested fields for TaskRecord.Details.ExecutionDetails.Variables.
+                        properties:
+                          inputVariables:
+                            description: The input variables for the task.
+                            items:
+                              description: TaskRecordDetailsExecutionDetailsVariablesInputVariable
+                                defines nested fields for TaskRecord.Details.ExecutionDetails.Variables.InputVariable.
+                              properties:
+                                description:
+                                  description: The description of the argument.
+                                  type: string
+                                jsonData:
+                                  type: string
+                                name:
+                                  description: The name of the argument.
+                                  type: string
+                                type:
+                                  type: string
+                              required:
+                              - name
+                              type: object
+                            type: array
+                          outputVariables:
+                            description: The list of output variables.
+                            items:
+                              type: string
+                            type: array
+                        type: object
+                    type: object
+                  isApplySubjectTask:
+                    description: |-
+                      Is this an Apply Subject Task?
+                      Set this to true for a Patch Execution Task which applies patches(subjects) on a target.
+                    type: boolean
+                  isDiscoveryOutputTask:
+                    description: Is this a discovery output task?
+                    type: boolean
+                  operation:
+                    description: The lifecycle operation performed by the runbook.
+                    type: string
+                  osType:
+                    description: The OS for the task
+                    type: string
+                  platform:
+                    description: The platform of the runbook.
+                    type: string
+                  properties:
+                    description: TaskRecordDetailsProperties defines nested fields
+                      for TaskRecord.Details.Properties.
+                    properties:
+                      numRetries:
+                        description: The number of retries allowed.
+                        type: integer
+                      timeoutInSeconds:
+                        description: The timeout in seconds for the task.
+                        type: integer
+                    required:
+                    - numRetries
+                    - timeoutInSeconds
+                    type: object
+                  scope:
+                    description: The scope of the task
+                    type: string
+                required:
+                - executionDetails
+                - scope
+                type: object
+              displayName:
+                description: |-
+                  A user-friendly name. Does not have to be unique, and it's changeable.
+                  Avoid entering confidential information.
+                  Example: `My new resource`
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+            required:
+            - compartmentId
+            - details
+            - displayName
+            type: object
+          status:
+            description: TaskRecordStatus defines the observed state of TaskRecord.
+            properties:
+              compartmentId:
+                description: OCID of the compartment to which the resource belongs
+                  to.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: |-
+                  A user-friendly description. To provide some insight about the resource.
+                  Avoid entering confidential information.
+                type: string
+              details:
+                description: TaskRecordDetails defines nested fields for TaskRecord.Details.
+                properties:
+                  executionDetails:
+                    description: TaskRecordDetailsExecutionDetails defines nested
+                      fields for TaskRecord.Details.ExecutionDetails.
+                    properties:
+                      catalogId:
+                        description: Catalog Id having terraform package.
+                        type: string
+                      command:
+                        description: |-
+                          Optional command to execute the content.
+                          You can provide any commands/arguments that can't be part of the script.
+                        type: string
+                      configFile:
+                        description: Catalog Id having config file.
+                        type: string
+                      content:
+                        description: TaskRecordDetailsExecutionDetailsContent defines
+                          nested fields for TaskRecord.Details.ExecutionDetails.Content.
+                        properties:
+                          bucketName:
+                            description: Bucket Name.
+                            type: string
+                          catalogId:
+                            description: Catalog Id having terraform package.
+                            type: string
+                          checksum:
+                            description: md5 checksum of the artifact.
+                            type: string
+                          jsonData:
+                            type: string
+                          namespaceName:
+                            description: Namespace.
+                            type: string
+                          objectName:
+                            description: Object Name.
+                            type: string
+                          sourceType:
+                            type: string
+                        type: object
+                      credentials:
+                        description: Credentials required for executing the task.
+                        items:
+                          description: TaskRecordDetailsExecutionDetailsCredential
+                            defines nested fields for TaskRecord.Details.ExecutionDetails.Credential.
+                          properties:
+                            displayName:
+                              description: |-
+                                A user-friendly name. Does not have to be unique, and it's changeable.
+                                Avoid entering confidential information.
+                                Example: `My new resource`
+                              type: string
+                            id:
+                              description: The OCID of the resource.
+                              type: string
+                          required:
+                          - id
+                          type: object
+                        type: array
+                      endpoint:
+                        description: Endpoint to be invoked.
+                        type: string
+                      executionType:
+                        type: string
+                      isExecutableContent:
+                        description: Is the Content an executable file?
+                        type: boolean
+                      isLocked:
+                        description: Is the script locked to prevent changes directly
+                          in Object Storage?
+                        type: boolean
+                      isReadOutputVariableEnabled:
+                        description: Is read output variable enabled
+                        type: boolean
+                      jsonData:
+                        type: string
+                      systemVariables:
+                        description: The list of system variables.
+                        items:
+                          type: string
+                        type: array
+                      targetCompartmentId:
+                        description: OCID of the compartment to which the resource
+                          belongs to.
+                        type: string
+                      variables:
+                        description: TaskRecordDetailsExecutionDetailsVariables defines
+                          nested fields for TaskRecord.Details.ExecutionDetails.Variables.
+                        properties:
+                          inputVariables:
+                            description: The input variables for the task.
+                            items:
+                              description: TaskRecordDetailsExecutionDetailsVariablesInputVariable
+                                defines nested fields for TaskRecord.Details.ExecutionDetails.Variables.InputVariable.
+                              properties:
+                                description:
+                                  description: The description of the argument.
+                                  type: string
+                                jsonData:
+                                  type: string
+                                name:
+                                  description: The name of the argument.
+                                  type: string
+                                type:
+                                  type: string
+                              required:
+                              - name
+                              type: object
+                            type: array
+                          outputVariables:
+                            description: The list of output variables.
+                            items:
+                              type: string
+                            type: array
+                        type: object
+                    type: object
+                  isApplySubjectTask:
+                    description: |-
+                      Is this an Apply Subject Task?
+                      Set this to true for a Patch Execution Task which applies patches(subjects) on a target.
+                    type: boolean
+                  isDiscoveryOutputTask:
+                    description: Is this a discovery output task?
+                    type: boolean
+                  operation:
+                    description: The lifecycle operation performed by the runbook.
+                    type: string
+                  osType:
+                    description: The OS for the task
+                    type: string
+                  platform:
+                    description: The platform of the runbook.
+                    type: string
+                  properties:
+                    description: TaskRecordDetailsProperties defines nested fields
+                      for TaskRecord.Details.Properties.
+                    properties:
+                      numRetries:
+                        description: The number of retries allowed.
+                        type: integer
+                      timeoutInSeconds:
+                        description: The timeout in seconds for the task.
+                        type: integer
+                    required:
+                    - numRetries
+                    - timeoutInSeconds
+                    type: object
+                  scope:
+                    description: The scope of the task
+                    type: string
+                required:
+                - executionDetails
+                - scope
+                type: object
+              displayName:
+                description: |-
+                  A user-friendly name. Does not have to be unique, and it's changeable.
+                  Avoid entering confidential information.
+                  Example: `My new resource`
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              id:
+                description: The OCID of the resource.
+                type: string
+              lifecycleDetails:
+                description: A message describing the current state in more detail.
+                  For example, can be used to provide actionable information for a
+                  resource in Failed state.
+                type: string
+              lifecycleState:
+                description: The current state of the task record.
+                type: string
+              resourceRegion:
+                description: Associated region
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  System tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              timeCreated:
+                description: The time this resource was created. An RFC3339 formatted
+                  datetime string.
+                type: string
+              timeUpdated:
+                description: The time this resource was last updated. An RFC3339 formatted
+                  datetime string.
+                type: string
+              type:
+                description: Task type.
+                type: string
+              version:
+                description: The version of the task record.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

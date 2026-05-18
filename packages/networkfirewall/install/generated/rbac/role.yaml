@@ -1,0 +1,78 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
+  - networkfirewall.oracle.com
+  resources:
+  - addresslists
+  - applicationgroups
+  - applications
+  - decryptionprofiles
+  - decryptionrules
+  - mappedsecrets
+  - natrules
+  - networkfirewallpolicies
+  - networkfirewalls
+  - securityrules
+  - servicelists
+  - services
+  - tunnelinspectionrules
+  - urllists
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - networkfirewall.oracle.com
+  resources:
+  - addresslists/finalizers
+  - applicationgroups/finalizers
+  - applications/finalizers
+  - decryptionprofiles/finalizers
+  - decryptionrules/finalizers
+  - mappedsecrets/finalizers
+  - natrules/finalizers
+  - networkfirewallpolicies/finalizers
+  - networkfirewalls/finalizers
+  - securityrules/finalizers
+  - servicelists/finalizers
+  - services/finalizers
+  - tunnelinspectionrules/finalizers
+  - urllists/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - networkfirewall.oracle.com
+  resources:
+  - addresslists/status
+  - applicationgroups/status
+  - applications/status
+  - decryptionprofiles/status
+  - decryptionrules/status
+  - mappedsecrets/status
+  - natrules/status
+  - networkfirewallpolicies/status
+  - networkfirewalls/status
+  - securityrules/status
+  - servicelists/status
+  - services/status
+  - tunnelinspectionrules/status
+  - urllists/status
+  verbs:
+  - get
+  - patch
+  - update

@@ -1,0 +1,434 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: blockchainplatforms.blockchain.oracle.com
+spec:
+  group: blockchain.oracle.com
+  names:
+    kind: BlockchainPlatform
+    listKind: BlockchainPlatformList
+    plural: blockchainplatforms
+    singular: blockchainplatform
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the BlockchainPlatform
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the BlockchainPlatform
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: BlockchainPlatform is the Schema for the blockchainplatforms
+          API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: BlockchainPlatformSpec defines the desired state of BlockchainPlatform.
+            properties:
+              caCertArchiveText:
+                description: |-
+                  Base64 encoded text in ASCII character set of a Thirdparty CA Certificates archive file.
+                  The Archive file is a zip file containing third part CA Certificates,
+                  the ca key and certificate files used when issuing enrollment certificates
+                  (ECerts) and transaction certificates (TCerts). The chainfile (if it exists)
+                  contains the certificate chain which should be trusted for this CA, where
+                  the 1st in the chain is always the root CA certificate.
+                  File list in zip file [ca-cert.pem,ca-key.pem,ca-chain.pem(optional)].
+                type: string
+              compartmentId:
+                description: Compartment Identifier
+                type: string
+              computeShape:
+                description: Compute shape - STANDARD or ENTERPRISE_SMALL or ENTERPRISE_MEDIUM
+                  or ENTERPRISE_LARGE or ENTERPRISE_EXTRA_LARGE
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: Platform Instance Description
+                type: string
+              displayName:
+                description: Platform Instance Display name, can be renamed
+                type: string
+              federatedUserId:
+                description: Identifier for a federated user
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              idcsAccessToken:
+                description: IDCS access token with Identity Domain Administrator
+                  role
+                type: string
+              isByol:
+                description: Bring your own license
+                type: boolean
+              loadBalancerShape:
+                description: Type of Load Balancer shape - LB_100_MBPS or LB_400_MBPS.
+                  Default is LB_100_MBPS.
+                type: string
+              platformRole:
+                description: Role of platform - founder or participant
+                type: string
+              platformVersion:
+                description: Platform version
+                type: string
+              replicas:
+                description: BlockchainPlatformReplicas defines nested fields for
+                  BlockchainPlatform.Replicas.
+                properties:
+                  caCount:
+                    description: Number of CA replicas
+                    type: integer
+                  consoleCount:
+                    description: Number of console replicas
+                    type: integer
+                  proxyCount:
+                    description: Number of REST proxy replicas
+                    type: integer
+                type: object
+              storageSizeInTBs:
+                description: Storage size in TBs
+                type: number
+              totalOcpuCapacity:
+                description: Number of total OCPUs to allocate
+                type: integer
+            required:
+            - compartmentId
+            - computeShape
+            - displayName
+            - idcsAccessToken
+            - platformRole
+            type: object
+          status:
+            description: BlockchainPlatformStatus defines the observed state of BlockchainPlatform.
+            properties:
+              compartmentId:
+                description: Compartment Identifier
+                type: string
+              componentDetails:
+                description: BlockchainPlatformComponentDetails defines nested fields
+                  for BlockchainPlatform.ComponentDetails.
+                properties:
+                  osns:
+                    description: List of OSNs
+                    items:
+                      description: BlockchainPlatformComponentDetailsOsn defines nested
+                        fields for BlockchainPlatform.ComponentDetails.Osn.
+                      properties:
+                        ad:
+                          description: Availability Domain of OSN
+                          type: string
+                        lifecycleState:
+                          description: The current state of the OSN.
+                          type: string
+                        ocpuAllocationParam:
+                          description: BlockchainPlatformComponentDetailsOsnOcpuAllocationParam
+                            defines nested fields for BlockchainPlatform.ComponentDetails.Osn.OcpuAllocationParam.
+                          properties:
+                            ocpuAllocationNumber:
+                              description: Number of OCPU allocation
+                              type: number
+                          type: object
+                        osnKey:
+                          description: OSN identifier
+                          type: string
+                      type: object
+                    type: array
+                  peers:
+                    description: List of Peers
+                    items:
+                      description: BlockchainPlatformComponentDetailsPeer defines
+                        nested fields for BlockchainPlatform.ComponentDetails.Peer.
+                      properties:
+                        ad:
+                          description: Availability Domain of peer
+                          type: string
+                        alias:
+                          description: peer alias
+                          type: string
+                        host:
+                          description: Host on which the Peer exists
+                          type: string
+                        lifecycleState:
+                          description: The current state of the peer.
+                          type: string
+                        ocpuAllocationParam:
+                          description: BlockchainPlatformComponentDetailsPeerOcpuAllocationParam
+                            defines nested fields for BlockchainPlatform.ComponentDetails.Peer.OcpuAllocationParam.
+                          properties:
+                            ocpuAllocationNumber:
+                              description: Number of OCPU allocation
+                              type: number
+                          type: object
+                        peerKey:
+                          description: peer identifier
+                          type: string
+                        role:
+                          description: Peer role
+                          type: string
+                      type: object
+                    type: array
+                type: object
+              computeShape:
+                description: Compute shape - STANDARD or ENTERPRISE_SMALL or ENTERPRISE_MEDIUM
+                  or ENTERPRISE_LARGE or ENTERPRISE_EXTRA_LARGE or ENTERPRISE_CUSTOM
+                  or DIGITAL_ASSETS_MEDIUM or DIGITAL_ASSETS_LARGE or DIGITAL_ASSETS_EXTRA_LARGE
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: Platform Instance Description
+                type: string
+              displayName:
+                description: Platform Instance Display name, can be renamed
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              hostOcpuUtilizationInfo:
+                description: List of OcpuUtilization for all hosts
+                items:
+                  description: BlockchainPlatformHostOcpuUtilizationInfo defines nested
+                    fields for BlockchainPlatform.HostOcpuUtilizationInfo.
+                  properties:
+                    host:
+                      description: Host name of VM
+                      type: string
+                    ocpuCapacityNumber:
+                      description: Number of total OCPU capacity on the host
+                      type: number
+                    ocpuUtilizationNumber:
+                      description: Number of OCPU utilized
+                      type: number
+                  type: object
+                type: array
+              id:
+                description: unique identifier that is immutable on creation
+                type: string
+              isByol:
+                description: Bring your own license
+                type: boolean
+              isMultiAD:
+                description: True for multi-AD blockchain plaforms, false for single-AD
+                type: boolean
+              lifecycleDetails:
+                description: An message describing the current state in more detail.
+                  For example, can be used to provide actionable information for a
+                  resource in Failed state.
+                type: string
+              lifecycleState:
+                description: The current state of the Platform Instance.
+                type: string
+              loadBalancerShape:
+                description: Type of Load Balancer shape - LB_100_MBPS or LB_400_MBPS.
+                  Default is LB_100_MBPS.
+                type: string
+              platformRole:
+                description: Role of platform - FOUNDER or PARTICIPANT
+                type: string
+              platformShapeType:
+                description: Type of Platform shape - DEFAULT or CUSTOM
+                type: string
+              platformVersion:
+                description: Platform Version
+                type: string
+              replicas:
+                description: BlockchainPlatformReplicas defines nested fields for
+                  BlockchainPlatform.Replicas.
+                properties:
+                  caCount:
+                    description: Number of CA replicas
+                    type: integer
+                  consoleCount:
+                    description: Number of console replicas
+                    type: integer
+                  proxyCount:
+                    description: Number of REST proxy replicas
+                    type: integer
+                type: object
+              serviceEndpoint:
+                description: Service endpoint URL, valid post-provisioning
+                type: string
+              serviceVersion:
+                description: The version of the Platform Instance.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              storageSizeInTBs:
+                description: Storage size in TBs
+                type: number
+              storageUsedInTBs:
+                description: Storage used in TBs
+                type: number
+              timeCreated:
+                description: The time the the Platform Instance was created. An RFC3339
+                  formatted datetime string
+                type: string
+              timeUpdated:
+                description: The time the Platform Instance was updated. An RFC3339
+                  formatted datetime string
+                type: string
+              totalOcpuCapacity:
+                description: Number of total OCPUs allocated to the platform cluster
+                type: integer
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

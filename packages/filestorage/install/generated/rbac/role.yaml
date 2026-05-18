@@ -1,0 +1,60 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
+  - filestorage.oracle.com
+  resources:
+  - exports
+  - filesystems
+  - filesystemsnapshotpolicies
+  - mounttargets
+  - outboundconnectors
+  - quotarules
+  - replications
+  - snapshots
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - filestorage.oracle.com
+  resources:
+  - exports/finalizers
+  - filesystems/finalizers
+  - filesystemsnapshotpolicies/finalizers
+  - mounttargets/finalizers
+  - outboundconnectors/finalizers
+  - quotarules/finalizers
+  - replications/finalizers
+  - snapshots/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - filestorage.oracle.com
+  resources:
+  - exports/status
+  - filesystems/status
+  - filesystemsnapshotpolicies/status
+  - mounttargets/status
+  - outboundconnectors/status
+  - quotarules/status
+  - replications/status
+  - snapshots/status
+  verbs:
+  - get
+  - patch
+  - update

@@ -1,0 +1,51 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
+  - cloudmigrations.oracle.com
+  resources:
+  - migrationassets
+  - migrationplans
+  - migrations
+  - replicationschedules
+  - targetassets
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - cloudmigrations.oracle.com
+  resources:
+  - migrationassets/finalizers
+  - migrationplans/finalizers
+  - migrations/finalizers
+  - replicationschedules/finalizers
+  - targetassets/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - cloudmigrations.oracle.com
+  resources:
+  - migrationassets/status
+  - migrationplans/status
+  - migrations/status
+  - replicationschedules/status
+  - targetassets/status
+  verbs:
+  - get
+  - patch
+  - update

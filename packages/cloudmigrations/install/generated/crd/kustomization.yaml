@@ -1,0 +1,8 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- bases/cloudmigrations.oracle.com_migrationassets.yaml
+- bases/cloudmigrations.oracle.com_migrationplans.yaml
+- bases/cloudmigrations.oracle.com_migrations.yaml
+- bases/cloudmigrations.oracle.com_replicationschedules.yaml
+- bases/cloudmigrations.oracle.com_targetassets.yaml

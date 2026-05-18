@@ -150,6 +150,161 @@ func TestMergeInterfaceFamilyFieldsKeepsImplementationOnlyFieldsOptional(t *test
 	}
 }
 
+func TestRecursiveNestedStructFallsBackToSharedJSONValue(t *testing.T) {
+	t.Parallel()
+
+	synthesizer := &fieldSynthesizer{
+		resourceKind:        "Thing",
+		helperIndex:         make(map[string]int),
+		normalizedTypeNames: make(map[string]string),
+	}
+
+	field, ok := synthesizer.buildGeneratedField(
+		ocisdk.Field{
+			Name:     "Root",
+			Type:     "ThingRootDetails",
+			JSONName: "root",
+			Kind:     ocisdk.FieldKindStruct,
+			NestedFields: []ocisdk.Field{
+				{
+					Name:     "Children",
+					Type:     "[]ThingRootDetails",
+					JSONName: "children",
+					Kind:     ocisdk.FieldKindStruct,
+					NestedFields: []ocisdk.Field{
+						{
+							Name:           "Name",
+							Type:           "string",
+							JSONName:       "name",
+							RenderableType: "string",
+						},
+					},
+				},
+			},
+		},
+		fieldRenderingOptions{scope: fieldScopeSpec},
+		[]string{"Root"},
+		[]string{"Root"},
+		[]string{"CreateThingDetails"},
+	)
+	if !ok {
+		t.Fatal("buildGeneratedField() ok = false")
+	}
+	if field.Type != "ThingRoot" {
+		t.Fatalf("field.Type = %q, want %q", field.Type, "ThingRoot")
+	}
+	if len(synthesizer.helperTypes) != 1 {
+		t.Fatalf("helperTypes length = %d, want 1", len(synthesizer.helperTypes))
+	}
+
+	helper := synthesizer.helperTypes[0]
+	if helper.Name != "ThingRoot" {
+		t.Fatalf("helper.Name = %q, want %q", helper.Name, "ThingRoot")
+	}
+	if len(helper.Fields) != 1 {
+		t.Fatalf("helper.Fields length = %d, want 1", len(helper.Fields))
+	}
+	if helper.Fields[0].Name != "Children" {
+		t.Fatalf("helper field name = %q, want %q", helper.Fields[0].Name, "Children")
+	}
+	if helper.Fields[0].Type != "[]shared.JSONValue" {
+		t.Fatalf("recursive helper field type = %q, want %q", helper.Fields[0].Type, "[]shared.JSONValue")
+	}
+}
+
+func TestSensitiveObservedStateFieldsAreExcluded(t *testing.T) {
+	t.Parallel()
+
+	synthesizer := &fieldSynthesizer{
+		resourceKind:        "Thing",
+		helperIndex:         make(map[string]int),
+		normalizedTypeNames: make(map[string]string),
+	}
+
+	if _, ok := synthesizer.buildGeneratedField(
+		ocisdk.Field{
+			Name:           "Password",
+			Type:           "string",
+			JSONName:       "password",
+			RenderableType: "string",
+		},
+		fieldRenderingOptions{scope: fieldScopeStatus},
+		[]string{"Password"},
+		[]string{"Password"},
+		[]string{"Thing"},
+	); ok {
+		t.Fatal("buildGeneratedField() included a sensitive observed-state field")
+	}
+
+	credentialsField := ocisdk.Field{
+		Name:     "Credentials",
+		Type:     "ThingCredentials",
+		JSONName: "credentials",
+		Kind:     ocisdk.FieldKindStruct,
+		NestedFields: []ocisdk.Field{
+			{
+				Name:           "Username",
+				Type:           "string",
+				JSONName:       "username",
+				RenderableType: "string",
+			},
+			{
+				Name:           "Password",
+				Type:           "string",
+				JSONName:       "password",
+				RenderableType: "string",
+			},
+		},
+	}
+	if _, ok := synthesizer.buildGeneratedField(
+		credentialsField,
+		fieldRenderingOptions{scope: fieldScopeSpec},
+		[]string{"Credentials"},
+		[]string{"Credentials"},
+		[]string{"Thing"},
+	); !ok {
+		t.Fatal("buildGeneratedField() ok = false for spec wrapper")
+	}
+	specHelper := findHelperType(t, synthesizer.helperTypes, "ThingCredentials")
+	assertFieldNamesPresent(t, specHelper.Name+" fields", specHelper.Fields, "Username", "Password")
+
+	renderedHelperField, ok := synthesizer.buildGeneratedField(
+		ocisdk.Field{
+			Name:           "Credentials",
+			Type:           "ThingCredentials",
+			JSONName:       "credentials",
+			RenderableType: "ThingCredentials",
+		},
+		fieldRenderingOptions{scope: fieldScopeStatus},
+		[]string{"Credentials"},
+		[]string{"Credentials"},
+		[]string{"Thing"},
+	)
+	if !ok {
+		t.Fatal("buildGeneratedField() ok = false for rendered helper reference")
+	}
+	if renderedHelperField.Type != "shared.JSONValue" {
+		t.Fatalf("rendered helper status field type = %q, want %q", renderedHelperField.Type, "shared.JSONValue")
+	}
+
+	field, ok := synthesizer.buildGeneratedField(
+		credentialsField,
+		fieldRenderingOptions{scope: fieldScopeStatus},
+		[]string{"Credentials"},
+		[]string{"Credentials"},
+		[]string{"Thing"},
+	)
+	if !ok {
+		t.Fatal("buildGeneratedField() ok = false for non-sensitive wrapper")
+	}
+	if field.Type != "ThingCredentialsObservedState" {
+		t.Fatalf("field.Type = %q, want %q", field.Type, "ThingCredentialsObservedState")
+	}
+	helper := findHelperType(t, synthesizer.helperTypes, "ThingCredentialsObservedState")
+	assertFieldNamesPresent(t, helper.Name+" fields", helper.Fields, "Username")
+	assertFieldNamesAbsent(t, helper.Name+" fields", helper.Fields, "Password")
+}
+
 func findMergedInterfaceField(t *testing.T, fields []ocisdk.Field, name string) ocisdk.Field {
 	t.Helper()
 

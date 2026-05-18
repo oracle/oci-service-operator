@@ -1,0 +1,455 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: responderrecipes.cloudguard.oracle.com
+spec:
+  group: cloudguard.oracle.com
+  names:
+    kind: ResponderRecipe
+    listKind: ResponderRecipeList
+    plural: responderrecipes
+    singular: responderrecipe
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the ResponderRecipe
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the ResponderRecipe
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: ResponderRecipe is the Schema for the responderrecipes API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ResponderRecipeSpec defines the desired state of ResponderRecipe.
+            properties:
+              compartmentId:
+                description: Compartment OCID
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: |-
+                  Responder recipe description.
+                  Avoid entering confidential information.
+                type: string
+              displayName:
+                description: |-
+                  Responder recipe display name.
+                  Avoid entering confidential information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                  Avoid entering confidential information.
+                type: object
+              responderRules:
+                description: List of responder rules to override from source responder
+                  recipe
+                items:
+                  description: ResponderRecipeResponderRule defines nested fields
+                    for ResponderRecipe.ResponderRule.
+                  properties:
+                    details:
+                      description: ResponderRecipeResponderRuleDetails defines nested
+                        fields for ResponderRecipe.ResponderRule.Details.
+                      properties:
+                        isEnabled:
+                          description: Enablement state for the responder rule
+                          type: boolean
+                      required:
+                      - isEnabled
+                      type: object
+                    responderRuleId:
+                      description: Unique identifier for the responder rule
+                      type: string
+                  required:
+                  - details
+                  - responderRuleId
+                  type: object
+                type: array
+              sourceResponderRecipeId:
+                description: The unique identifier of the source responder recipe
+                type: string
+            required:
+            - compartmentId
+            - displayName
+            - sourceResponderRecipeId
+            type: object
+          status:
+            description: ResponderRecipeStatus defines the observed state of ResponderRecipe.
+            properties:
+              compartmentId:
+                description: Compartment OCID
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: Responder recipe description
+                type: string
+              displayName:
+                description: Responder recipe display name
+                type: string
+              effectiveResponderRules:
+                description: List of currently enabled responder rules for the responder
+                  type, for recipe after applying defaults
+                items:
+                  description: ResponderRecipeEffectiveResponderRule defines nested
+                    fields for ResponderRecipe.EffectiveResponderRule.
+                  properties:
+                    compartmentId:
+                      description: Compartment OCID
+                      type: string
+                    description:
+                      description: Responder rule description
+                      type: string
+                    details:
+                      description: ResponderRecipeEffectiveResponderRuleDetails defines
+                        nested fields for ResponderRecipe.EffectiveResponderRule.Details.
+                      properties:
+                        condition:
+                          description: ResponderRecipeEffectiveResponderRuleDetailsCondition
+                            defines nested fields for ResponderRecipe.EffectiveResponderRule.Details.Condition.
+                          properties:
+                            compositeOperator:
+                              description: Composite condition operator
+                              type: string
+                            jsonData:
+                              type: string
+                            kind:
+                              type: string
+                            leftOperand:
+                              description: JSONValue preserves arbitrary JSON values
+                                inside generated CRD fields.
+                              type: object
+                              x-kubernetes-preserve-unknown-fields: true
+                            operator:
+                              description: Type of operator
+                              type: string
+                            parameter:
+                              description: Parameter key
+                              type: string
+                            rightOperand:
+                              description: JSONValue preserves arbitrary JSON values
+                                inside generated CRD fields.
+                              type: object
+                              x-kubernetes-preserve-unknown-fields: true
+                            value:
+                              description: Value of operator in condition
+                              type: string
+                            valueType:
+                              description: Type of value in condition
+                              type: string
+                          type: object
+                        configurations:
+                          description: List of responder rule configurations
+                          items:
+                            description: ResponderRecipeEffectiveResponderRuleDetailsConfiguration
+                              defines nested fields for ResponderRecipe.EffectiveResponderRule.Details.Configuration.
+                            properties:
+                              configKey:
+                                description: Unique identifier of the configuration
+                                type: string
+                              name:
+                                description: Configuration name
+                                type: string
+                              value:
+                                description: Configuration value
+                                type: string
+                            type: object
+                          type: array
+                        isEnabled:
+                          description: Enabled state for the responder rule
+                          type: boolean
+                        mode:
+                          description: Execution mode for the responder rule
+                          type: string
+                      type: object
+                    displayName:
+                      description: Responder rule display name
+                      type: string
+                    lifecycleDetails:
+                      description: A message describing the current state in more
+                        detail. For example, can be used to provide actionable information
+                        for a resource in Failed state.
+                      type: string
+                    lifecycleState:
+                      description: The current lifecycle state of the responder rule
+                      type: string
+                    locks:
+                      description: Locks associated with this resource.
+                      items:
+                        description: ResponderRecipeEffectiveResponderRuleLock defines
+                          nested fields for ResponderRecipe.EffectiveResponderRule.Lock.
+                        properties:
+                          message:
+                            description: |-
+                              A message added by the creator of the lock. This is typically used to give an
+                              indication of why the resource is locked.
+                            type: string
+                          relatedResourceId:
+                            description: The ID of the resource that is locking this
+                              resource. Indicates that deleting this resource will
+                              remove the lock.
+                            type: string
+                          timeCreated:
+                            description: When the lock was created, in the format
+                              defined by RFC 3339.
+                            type: string
+                          type:
+                            description: Type of the lock.
+                            type: string
+                        type: object
+                      type: array
+                    policies:
+                      description: List of policies
+                      items:
+                        type: string
+                      type: array
+                    responderRuleId:
+                      description: Unique identifier for the responder rule
+                      type: string
+                    supportedModes:
+                      description: Supported execution modes for the responder rule
+                      items:
+                        type: string
+                      type: array
+                    timeCreated:
+                      description: The date and time the responder recipe rule was
+                        created. Format defined by RFC3339.
+                      type: string
+                    timeUpdated:
+                      description: The date and time the responder recipe rule was
+                        last updated. Format defined by RFC3339.
+                      type: string
+                    type:
+                      description: Type of responder
+                      type: string
+                  type: object
+                type: array
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                  Avoid entering confidential information.
+                type: object
+              id:
+                description: Unique identifier for the responder recip
+                type: string
+              lifecycleDetails:
+                description: A message describing the current state in more detail.
+                  For example, can be used to provide actionable information for a
+                  resource in Failed state.
+                type: string
+              lifecycleState:
+                description: The current lifecycle state of the example
+                type: string
+              owner:
+                description: Owner of responder recipe
+                type: string
+              responderRules:
+                description: List of responder rules associated with the recipe
+                items:
+                  description: ResponderRecipeResponderRule defines nested fields
+                    for ResponderRecipe.ResponderRule.
+                  properties:
+                    details:
+                      description: ResponderRecipeResponderRuleDetails defines nested
+                        fields for ResponderRecipe.ResponderRule.Details.
+                      properties:
+                        isEnabled:
+                          description: Enablement state for the responder rule
+                          type: boolean
+                      required:
+                      - isEnabled
+                      type: object
+                    responderRuleId:
+                      description: Unique identifier for the responder rule
+                      type: string
+                  required:
+                  - details
+                  - responderRuleId
+                  type: object
+                type: array
+              sourceResponderRecipeId:
+                description: The unique identifier of the source responder recipe
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  System tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  System tags can be viewed by users, but can only be created by the system.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              timeCreated:
+                description: The date and time the responder recipe was created. Format
+                  defined by RFC3339.
+                type: string
+              timeUpdated:
+                description: The date and time the responder recipe was last updated.
+                  Format defined by RFC3339.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

@@ -1,0 +1,478 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: fusionenvironments.fusionapps.oracle.com
+spec:
+  group: fusionapps.oracle.com
+  names:
+    kind: FusionEnvironment
+    listKind: FusionEnvironmentList
+    plural: fusionenvironments
+    singular: fusionenvironment
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the FusionEnvironment
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the FusionEnvironment
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: FusionEnvironment is the Schema for the fusionenvironments API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: FusionEnvironmentSpec defines the desired state of FusionEnvironment.
+            properties:
+              additionalLanguagePacks:
+                description: Language packs.
+                items:
+                  type: string
+                type: array
+              compartmentId:
+                description: The unique identifier (OCID) of the compartment where
+                  the Fusion Environment is located.
+                type: string
+              createFusionEnvironmentAdminUserDetails:
+                description: FusionEnvironmentCreateFusionEnvironmentAdminUserDetails
+                  defines nested fields for FusionEnvironment.CreateFusionEnvironmentAdminUserDetails.
+                properties:
+                  emailAddress:
+                    description: The email address for the administrator.
+                    type: string
+                  firstName:
+                    description: The administrator's first name.
+                    type: string
+                  lastName:
+                    description: The administrator's last name.
+                    type: string
+                  username:
+                    description: The username for the administrator.
+                    type: string
+                required:
+                - emailAddress
+                - firstName
+                - lastName
+                - username
+                type: object
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              displayName:
+                description: FusionEnvironment Identifier can be renamed.
+                type: string
+              dnsPrefix:
+                description: DNS prefix.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              fusionEnvironmentFamilyId:
+                description: The unique identifier (OCID) of the Fusion Environment
+                  Family that the Fusion Environment belongs to.
+                type: string
+              fusionEnvironmentType:
+                description: The type of environment. Valid values are Production,
+                  Test, or Development.
+                type: string
+              isIPv6DualStackEnabled:
+                description: Enable IPv4/IPv6 dual stack support for the environment.  Setting
+                  to true will assign an IPv6 address to the environment in addition
+                  to an IPv4 address. Default value will be false if not set
+                type: boolean
+              kmsKeyId:
+                description: byok kms keyId
+                type: string
+              maintenancePolicy:
+                description: FusionEnvironmentMaintenancePolicy defines nested fields
+                  for FusionEnvironment.MaintenancePolicy.
+                properties:
+                  environmentMaintenanceOverride:
+                    description: User choice to upgrade both test and prod pods at
+                      the same time. Overrides fusion environment families'.
+                    type: string
+                  monthlyPatchingOverride:
+                    description: When "ENABLED", the Fusion environment is patched
+                      monthly. When "DISABLED", the Fusion environment is not patched
+                      monthly. This setting overrides the environment family setting.
+                      When not set, the environment follows the environment family
+                      policy.
+                    type: string
+                type: object
+              rules:
+                description: Rules.
+                items:
+                  description: FusionEnvironmentRule defines nested fields for FusionEnvironment.Rule.
+                  properties:
+                    action:
+                      type: string
+                    conditions:
+                      items:
+                        description: FusionEnvironmentRuleCondition defines nested
+                          fields for FusionEnvironment.Rule.Condition.
+                        properties:
+                          attributeName:
+                            type: string
+                          attributeValue:
+                            description: |-
+                              The OCID of the originating VCN that an incoming packet must match.
+                              You can use this condition in conjunction with `SourceVcnIpAddressCondition`.
+                              **NOTE:** If you define this condition for a rule without a `SourceVcnIpAddressCondition`, this condition
+                              matches all incoming traffic in the specified VCN.
+                            type: string
+                          jsonData:
+                            type: string
+                        type: object
+                      type: array
+                    description:
+                      description: |-
+                        A brief description of the access control rule. Avoid entering confidential information.
+                        example: `192.168.0.0/16 and 2001:db8::/32 are trusted clients. Whitelist them.`
+                      type: string
+                    jsonData:
+                      type: string
+                  type: object
+                type: array
+            required:
+            - compartmentId
+            - createFusionEnvironmentAdminUserDetails
+            - displayName
+            - fusionEnvironmentFamilyId
+            - fusionEnvironmentType
+            type: object
+          status:
+            description: FusionEnvironmentStatus defines the observed state of FusionEnvironment.
+            properties:
+              additionalLanguagePacks:
+                description: Language packs
+                items:
+                  type: string
+                type: array
+              appliedPatchBundles:
+                description: Patch bundle names
+                items:
+                  type: string
+                type: array
+              compartmentId:
+                description: Compartment Identifier
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              displayName:
+                description: FusionEnvironment Identifier, can be renamed
+                type: string
+              dnsPrefix:
+                description: DNS prefix
+                type: string
+              domainId:
+                description: The IDCS domain created for the fusion instance
+                type: string
+              environmentRole:
+                description: FusionEnvironmentEnvironmentRole defines nested fields
+                  for FusionEnvironment.EnvironmentRole.
+                properties:
+                  currentRole:
+                    description: The current role of the environment
+                    type: string
+                  standbyEnvironmentId:
+                    description: Fusion Environment ID of the standby environment
+                    type: string
+                  standbyEnvironmentRegion:
+                    description: Region the standby environment is in
+                    type: string
+                type: object
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              fusionEnvironmentFamilyId:
+                description: FusionEnvironmentFamily Identifier
+                type: string
+              fusionEnvironmentType:
+                description: Type of the FusionEnvironment.
+                type: string
+              id:
+                description: Unique identifier that is immutable on creation
+                type: string
+              idcsDomainUrl:
+                description: The IDCS Domain URL
+                type: string
+              isBreakGlassEnabled:
+                description: If it's true, then the Break Glass feature is enabled
+                type: boolean
+              isIPv6DualStackEnabled:
+                description: Enable IPv4/IPv6 dual stack support for the environment.  Setting
+                  to true will assign an IPv6 address to the environment in addition
+                  to an IPv4 address.
+                type: boolean
+              isSuspended:
+                description: Environment suspended status
+                type: boolean
+              kmsKeyId:
+                description: BYOK key id
+                type: string
+              kmsKeyInfo:
+                description: BYOK key info
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              lifecycleDetails:
+                description: A message describing the current state in more detail.
+                  For example, can be used to provide actionable information for a
+                  resource in Failed state.
+                type: string
+              lifecycleState:
+                description: The current state of the ServiceInstance.
+                type: string
+              lockboxId:
+                description: The lockbox Id of this fusion environment. If there's
+                  no lockbox id, this field will be null
+                type: string
+              maintenancePolicy:
+                description: FusionEnvironmentMaintenancePolicy defines nested fields
+                  for FusionEnvironment.MaintenancePolicy.
+                properties:
+                  environmentMaintenanceOverride:
+                    description: User choice to upgrade both test and prod pods at
+                      the same time. Overrides fusion environment families'.
+                    type: string
+                  monthlyPatchingOverride:
+                    description: When "ENABLED", the Fusion environment is patched
+                      monthly. When "DISABLED", the Fusion environment is not patched
+                      monthly. This setting overrides the environment family setting.
+                      When not set, the environment follows the environment family
+                      policy.
+                    type: string
+                type: object
+              publicUrl:
+                description: Public URL
+                type: string
+              refresh:
+                description: FusionEnvironmentRefresh defines nested fields for FusionEnvironment.Refresh.
+                properties:
+                  sourceFusionEnvironmentId:
+                    description: The source environment id for the last refresh
+                    type: string
+                  timeFinished:
+                    description: The time of when the last refresh finish
+                    type: string
+                  timeOfRestorationPoint:
+                    description: The point of time of the latest DB backup for the
+                      last refresh
+                    type: string
+                type: object
+              rules:
+                description: Network Access Control Rules
+                items:
+                  description: FusionEnvironmentRule defines nested fields for FusionEnvironment.Rule.
+                  properties:
+                    action:
+                      type: string
+                    conditions:
+                      items:
+                        description: FusionEnvironmentRuleCondition defines nested
+                          fields for FusionEnvironment.Rule.Condition.
+                        properties:
+                          attributeName:
+                            type: string
+                          attributeValue:
+                            description: |-
+                              The OCID of the originating VCN that an incoming packet must match.
+                              You can use this condition in conjunction with `SourceVcnIpAddressCondition`.
+                              **NOTE:** If you define this condition for a rule without a `SourceVcnIpAddressCondition`, this condition
+                              matches all incoming traffic in the specified VCN.
+                            type: string
+                          jsonData:
+                            type: string
+                        type: object
+                      type: array
+                    description:
+                      description: |-
+                        A brief description of the access control rule. Avoid entering confidential information.
+                        example: `192.168.0.0/16 and 2001:db8::/32 are trusted clients. Whitelist them.`
+                      type: string
+                    jsonData:
+                      type: string
+                  type: object
+                type: array
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              subscriptionIds:
+                description: List of subscription IDs.
+                items:
+                  type: string
+                type: array
+              systemName:
+                description: Environment Specific Guid/ System Name
+                type: string
+              timeCreated:
+                description: The time the the FusionEnvironment was created. An RFC3339
+                  formatted datetime string
+                type: string
+              timeUpcomingMaintenance:
+                description: The next maintenance for this environment
+                type: string
+              timeUpdated:
+                description: The time the FusionEnvironment was updated. An RFC3339
+                  formatted datetime string
+                type: string
+              version:
+                description: Version of Fusion Apps used by this environment
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

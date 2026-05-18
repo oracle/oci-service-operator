@@ -1,0 +1,564 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: migrationplans.cloudmigrations.oracle.com
+spec:
+  group: cloudmigrations.oracle.com
+  names:
+    kind: MigrationPlan
+    listKind: MigrationPlanList
+    plural: migrationplans
+    singular: migrationplan
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the MigrationPlan
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the MigrationPlan
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: MigrationPlan is the Schema for the migrationplans API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: MigrationPlanSpec defines the desired state of MigrationPlan.
+            properties:
+              compartmentId:
+                description: Compartment identifier
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              displayName:
+                description: Migration plan identifier
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. It exists only for cross-compatibility.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              migrationId:
+                description: The OCID of the associated migration.
+                type: string
+              sourceMigrationPlanId:
+                description: Source migraiton plan ID to be cloned.
+                type: string
+              strategies:
+                description: List of strategies for the resources to be migrated.
+                items:
+                  description: MigrationPlanStrategy defines nested fields for MigrationPlan.Strategy.
+                  properties:
+                    adjustmentMultiplier:
+                      description: The real resource usage is multiplied to this number
+                        before making any recommendation.
+                      type: number
+                    jsonData:
+                      type: string
+                    metricTimeWindow:
+                      description: The current state of the migration plan.
+                      type: string
+                    metricType:
+                      description: The current state of the migration plan.
+                      type: string
+                    percentile:
+                      description: Percentile value
+                      type: string
+                    resourceType:
+                      description: The type of resource.
+                      type: string
+                    strategyType:
+                      type: string
+                  required:
+                  - resourceType
+                  type: object
+                type: array
+              targetEnvironments:
+                description: List of target environments.
+                items:
+                  description: MigrationPlanTargetEnvironment defines nested fields
+                    for MigrationPlan.TargetEnvironment.
+                  properties:
+                    availabilityDomain:
+                      description: Availability Domain of the VM configuration.
+                      type: string
+                    clusterAssetId:
+                      description: Inventory asset id of the olvm cluster
+                      type: string
+                    dedicatedVmHost:
+                      description: OCID of the dedicated VM configuration host.
+                      type: string
+                    faultDomain:
+                      description: Fault domain of the VM configuration.
+                      type: string
+                    jsonData:
+                      type: string
+                    msLicense:
+                      description: Microsoft license for the VM configuration.
+                      type: string
+                    olvmTemplates:
+                      additionalProperties:
+                        type: string
+                      description: OLVM OS type to inventory asset id of the template
+                      type: object
+                    preferredShapeType:
+                      description: Preferred VM shape type provided by the customer.
+                      type: string
+                    subnet:
+                      description: OCID of the VM configuration subnet.
+                      type: string
+                    targetCompartmentId:
+                      description: Target compartment identifier
+                      type: string
+                    targetEnvironmentType:
+                      type: string
+                    vcn:
+                      description: OCID of the VM configuration VCN.
+                      type: string
+                    vnicProfileAssetId:
+                      description: Inventory asset Id of the vnic profile
+                      type: string
+                  type: object
+                type: array
+            required:
+            - compartmentId
+            - displayName
+            - migrationId
+            type: object
+          status:
+            description: MigrationPlanStatus defines the observed state of MigrationPlan.
+            properties:
+              calculatedLimits:
+                additionalProperties:
+                  type: integer
+                description: 'Limits of the resources that are needed for migration.
+                  Example: {"BlockVolume": 2, "VCN": 1}'
+                type: object
+              compartmentId:
+                description: The OCID of the compartment containing the migration
+                  plan.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              displayName:
+                description: A user-friendly name. Does not have to be unique, and
+                  it's changeable. Avoid entering confidential information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. It exists only for cross-compatibility.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              id:
+                description: The unique Oracle ID (OCID) that is immutable on creation.
+                type: string
+              lifecycleDetails:
+                description: A message describing the current state in more detail.
+                  For example, it can be used to provide actionable information for
+                  a resource in Failed state.
+                type: string
+              lifecycleState:
+                description: The current state of the migration plan.
+                type: string
+              migrationId:
+                description: The OCID of the associated migration.
+                type: string
+              migrationPlanStats:
+                description: MigrationPlanStats defines nested fields for MigrationPlan.MigrationPlanStats.
+                properties:
+                  costToMigrate:
+                    description: MigrationPlanStatsCostToMigrate defines nested fields
+                      for MigrationPlan.MigrationPlanStats.CostToMigrate.
+                    properties:
+                      assetCount:
+                        description: Number of assets used in this calculation.
+                        type: integer
+                      currencyCode:
+                        description: Currency code as defined by ISO-4217.
+                        type: string
+                      ociDataTransferCosts:
+                        description: Data transfer costs from OCI.
+                        type: number
+                      sourceDataTransferCosts:
+                        description: Data transfer costs from source cloud provider.
+                        type: number
+                    type: object
+                  currentMonthlyCost:
+                    description: MigrationPlanStatsCurrentMonthlyCost defines nested
+                      fields for MigrationPlan.MigrationPlanStats.CurrentMonthlyCost.
+                    properties:
+                      assetCount:
+                        description: Number of assets used in this calculation.
+                        type: integer
+                      computeAmount:
+                        description: Current monthly compute costs.
+                        type: number
+                      currencyCode:
+                        description: Currency code as defined by ISO-4217.
+                        type: string
+                      storageAmount:
+                        description: Current monthly storage costs.
+                        type: number
+                    type: object
+                  timeUpdated:
+                    description: The time when the migration plan was calculated.
+                      An RFC3339 formatted datetime string.
+                    type: string
+                  totalEstimatedCost:
+                    description: MigrationPlanStatsTotalEstimatedCost defines nested
+                      fields for MigrationPlan.MigrationPlanStats.TotalEstimatedCost.
+                    properties:
+                      compute:
+                        description: MigrationPlanStatsTotalEstimatedCostCompute defines
+                          nested fields for MigrationPlan.MigrationPlanStats.TotalEstimatedCost.Compute.
+                        properties:
+                          gpuCount:
+                            description: Total number of GPU
+                            type: number
+                          gpuPerHour:
+                            description: GPU per hour
+                            type: number
+                          gpuPerHourBySubscription:
+                            description: GPU per hour by subscription
+                            type: number
+                          memoryAmountGb:
+                            description: Total usage of memory
+                            type: number
+                          memoryGbPerHour:
+                            description: Gigabyte per hour
+                            type: number
+                          memoryGbPerHourBySubscription:
+                            description: Gigabyte per hour by subscription
+                            type: number
+                          ocpuCount:
+                            description: Total number of OCPUs
+                            type: number
+                          ocpuPerHour:
+                            description: OCPU per hour
+                            type: number
+                          ocpuPerHourBySubscription:
+                            description: OCPU per hour by subscription
+                            type: number
+                          totalPerHour:
+                            description: Total per hour
+                            type: number
+                          totalPerHourBySubscription:
+                            description: Total usage per hour by subscription
+                            type: number
+                        type: object
+                      currencyCode:
+                        description: Currency code in the ISO format.
+                        type: string
+                      osImage:
+                        description: MigrationPlanStatsTotalEstimatedCostOsImage defines
+                          nested fields for MigrationPlan.MigrationPlanStats.TotalEstimatedCost.OsImage.
+                        properties:
+                          totalPerHour:
+                            description: Total price per hour
+                            type: number
+                          totalPerHourBySubscription:
+                            description: Total price per hour by subscription
+                            type: number
+                        type: object
+                      storage:
+                        description: MigrationPlanStatsTotalEstimatedCostStorage defines
+                          nested fields for MigrationPlan.MigrationPlanStats.TotalEstimatedCost.Storage.
+                        properties:
+                          totalGbPerMonth:
+                            description: Gigabyte storage capacity per month.
+                            type: number
+                          totalGbPerMonthBySubscription:
+                            description: Gigabyte storage capacity per month by subscription.
+                            type: number
+                          volumes:
+                            description: Volume estimation
+                            items:
+                              description: MigrationPlanStatsTotalEstimatedCostStorageVolume
+                                defines nested fields for MigrationPlan.MigrationPlanStats.TotalEstimatedCost.Storage.Volume.
+                              properties:
+                                capacityGb:
+                                  description: Gigabyte storage capacity
+                                  type: number
+                                description:
+                                  description: Volume description
+                                  type: string
+                                totalGbPerMonth:
+                                  description: Gigabyte storage capacity per month.
+                                  type: number
+                                totalGbPerMonthBySubscription:
+                                  description: Gigabyte storage capacity per month
+                                    by subscription
+                                  type: number
+                              type: object
+                            type: array
+                        type: object
+                      subscriptionId:
+                        description: Subscription ID
+                        type: string
+                      totalEstimationPerMonth:
+                        description: Total estimation per month
+                        type: number
+                      totalEstimationPerMonthBySubscription:
+                        description: Total estimation per month by subscription.
+                        type: number
+                    type: object
+                  vmCount:
+                    description: The total count of VMs in migration
+                    type: integer
+                type: object
+              referenceToRmsStack:
+                description: OCID of the referenced ORM job.
+                type: string
+              sourceMigrationPlanId:
+                description: Source migraiton plan ID to be cloned.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              strategies:
+                description: List of strategies for the resources to be migrated.
+                items:
+                  description: MigrationPlanStrategy defines nested fields for MigrationPlan.Strategy.
+                  properties:
+                    adjustmentMultiplier:
+                      description: The real resource usage is multiplied to this number
+                        before making any recommendation.
+                      type: number
+                    jsonData:
+                      type: string
+                    metricTimeWindow:
+                      description: The current state of the migration plan.
+                      type: string
+                    metricType:
+                      description: The current state of the migration plan.
+                      type: string
+                    percentile:
+                      description: Percentile value
+                      type: string
+                    resourceType:
+                      description: The type of resource.
+                      type: string
+                    strategyType:
+                      type: string
+                  required:
+                  - resourceType
+                  type: object
+                type: array
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of system tag keys. These predefined keys are scoped to namespaces.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              targetEnvironments:
+                description: List of target environments.
+                items:
+                  description: MigrationPlanTargetEnvironment defines nested fields
+                    for MigrationPlan.TargetEnvironment.
+                  properties:
+                    availabilityDomain:
+                      description: Availability Domain of the VM configuration.
+                      type: string
+                    clusterAssetId:
+                      description: Inventory asset id of the olvm cluster
+                      type: string
+                    dedicatedVmHost:
+                      description: OCID of the dedicated VM configuration host.
+                      type: string
+                    faultDomain:
+                      description: Fault domain of the VM configuration.
+                      type: string
+                    jsonData:
+                      type: string
+                    msLicense:
+                      description: Microsoft license for the VM configuration.
+                      type: string
+                    olvmTemplates:
+                      additionalProperties:
+                        type: string
+                      description: OLVM OS type to inventory asset id of the template
+                      type: object
+                    preferredShapeType:
+                      description: Preferred VM shape type provided by the customer.
+                      type: string
+                    subnet:
+                      description: OCID of the VM configuration subnet.
+                      type: string
+                    targetCompartmentId:
+                      description: Target compartment identifier
+                      type: string
+                    targetEnvironmentType:
+                      type: string
+                    vcn:
+                      description: OCID of the VM configuration VCN.
+                      type: string
+                    vnicProfileAssetId:
+                      description: Inventory asset Id of the vnic profile
+                      type: string
+                  type: object
+                type: array
+              timeCreated:
+                description: The time when the migration plan was created. An RFC3339
+                  formatted datetime string.
+                type: string
+              timeUpdated:
+                description: The time when the migration plan was updated. An RFC3339
+                  formatted datetime string.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

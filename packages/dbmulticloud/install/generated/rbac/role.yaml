@@ -1,0 +1,66 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
+  - dbmulticloud.oracle.com
+  resources:
+  - multicloudresourcediscoveries
+  - oracledbawsidentityconnectors
+  - oracledbawskeys
+  - oracledbazureblobcontainers
+  - oracledbazureblobmounts
+  - oracledbazureconnectors
+  - oracledbazurevaultassociations
+  - oracledbazurevaults
+  - oracledbgcpidentityconnectors
+  - oracledbgcpkeyrings
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - dbmulticloud.oracle.com
+  resources:
+  - multicloudresourcediscoveries/finalizers
+  - oracledbawsidentityconnectors/finalizers
+  - oracledbawskeys/finalizers
+  - oracledbazureblobcontainers/finalizers
+  - oracledbazureblobmounts/finalizers
+  - oracledbazureconnectors/finalizers
+  - oracledbazurevaultassociations/finalizers
+  - oracledbazurevaults/finalizers
+  - oracledbgcpidentityconnectors/finalizers
+  - oracledbgcpkeyrings/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - dbmulticloud.oracle.com
+  resources:
+  - multicloudresourcediscoveries/status
+  - oracledbawsidentityconnectors/status
+  - oracledbawskeys/status
+  - oracledbazureblobcontainers/status
+  - oracledbazureblobmounts/status
+  - oracledbazureconnectors/status
+  - oracledbazurevaultassociations/status
+  - oracledbazurevaults/status
+  - oracledbgcpidentityconnectors/status
+  - oracledbgcpkeyrings/status
+  verbs:
+  - get
+  - patch
+  - update
