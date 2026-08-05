@@ -55,7 +55,6 @@ endif
 :Return success for the ACTIVE success state;
 :Project required status and finalizer policy\nnone;
 :Requeue on provisioning, updating;
-:Keep promotion blocked on list-lookup;
 }
 endif
 stop
@@ -94,7 +93,7 @@ conflicts: buyer_email -> plan_number,
 subscription_id, plan_number -> subscription_id,
 buyer_email, subscription_id -> plan_number,
 buyer_email
-open gaps: list-lookup
+open gaps: none
 The published Subscription contract is
 query-backed and observe-only. Reconcile issues
 ListSubscriptions with compartmentId plus

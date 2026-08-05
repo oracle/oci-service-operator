@@ -95,6 +95,7 @@ func newApiPlatformInstanceRuntimeHooksWithOCIClient(client apiPlatformInstanceO
 
 func reviewedApiPlatformInstanceRuntimeSemantics() *generatedruntime.Semantics {
 	semantics := newApiPlatformInstanceRuntimeSemantics()
+	semantics.Lifecycle.FailedStates = []string{string(apiplatformsdk.ApiPlatformInstanceLifecycleStateFailed)}
 	semantics.List = &generatedruntime.ListSemantics{
 		ResponseItemsField: "Items",
 		MatchFields:        []string{"compartmentId", "name"},

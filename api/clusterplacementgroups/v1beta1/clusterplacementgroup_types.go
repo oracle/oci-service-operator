@@ -30,9 +30,9 @@ type ClusterPlacementGroupSpec struct {
 	// +kubebuilder:validation:Required
 	CompartmentId string `json:"compartmentId"`
 	// +kubebuilder:validation:Optional
-	PlacementInstruction ClusterPlacementGroupPlacementInstruction `json:"placementInstruction,omitempty"`
+	PlacementInstruction ClusterPlacementGroupPlacementInstruction `json:"placementInstruction,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	Capabilities ClusterPlacementGroupCapabilities `json:"capabilities,omitempty"`
+	Capabilities ClusterPlacementGroupCapabilities `json:"capabilities,omitempty,omitzero"`
 	// Simple key-value pair that is applied without any predefined name, type, or scope. Exists for cross-compatibility only.
 	// Example: `{"bar-key": "value"}`
 	// +kubebuilder:validation:Optional
@@ -99,8 +99,8 @@ type ClusterPlacementGroupStatus struct {
 	TimeUpdated string `json:"timeUpdated,omitempty"`
 	// A message describing the current state in more detail. For example, lifecycle details for a resource in a Failed state might include information to act on.
 	LifecycleDetails     string                                    `json:"lifecycleDetails,omitempty"`
-	PlacementInstruction ClusterPlacementGroupPlacementInstruction `json:"placementInstruction,omitempty"`
-	Capabilities         ClusterPlacementGroupCapabilities         `json:"capabilities,omitempty"`
+	PlacementInstruction ClusterPlacementGroupPlacementInstruction `json:"placementInstruction,omitempty,omitzero"`
+	Capabilities         ClusterPlacementGroupCapabilities         `json:"capabilities,omitempty,omitzero"`
 	// System tags for this resource. Each key is predefined and scoped to a namespace.
 	// Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
 	SystemTags map[string]shared.MapValue `json:"systemTags,omitempty"`

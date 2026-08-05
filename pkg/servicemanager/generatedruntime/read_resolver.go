@@ -715,6 +715,8 @@ func (c ServiceClient[T]) formalLifecycleCategory(state string) (lifecycleCatego
 		return lifecycleCategoryUpdating, true
 	case containsString(c.config.Semantics.Lifecycle.ActiveStates, state):
 		return lifecycleCategoryActive, true
+	case containsString(c.config.Semantics.Lifecycle.FailedStates, state):
+		return lifecycleCategoryFailed, true
 	case containsString(c.config.Semantics.Delete.PendingStates, state):
 		return lifecycleCategoryDeleting, true
 	case containsString(c.config.Semantics.Delete.TerminalStates, state):

@@ -191,6 +191,7 @@ type LifecycleSemantics struct {
 	ProvisioningStates []string
 	UpdatingStates     []string
 	ActiveStates       []string
+	FailedStates       []string
 }
 
 type DeleteSemantics struct {

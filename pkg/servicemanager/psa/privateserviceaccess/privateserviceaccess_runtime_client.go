@@ -199,12 +199,6 @@ func privateServiceAccessListFields() []generatedruntime.RequestField {
 			Contribution: "query",
 			LookupPaths:  []string{"status.displayName", "spec.displayName", "displayName"},
 		},
-		{
-			FieldName:    "ServiceId",
-			RequestName:  "serviceId",
-			Contribution: "query",
-			LookupPaths:  []string{"status.serviceId", "spec.serviceId", "serviceId"},
-		},
 		{FieldName: "Id", RequestName: "id", Contribution: "query", PreferResourceID: true},
 	}
 }

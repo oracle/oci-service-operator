@@ -40,6 +40,9 @@ func TestApplyDistributedDatabasePrivateEndpointRuntimeHooksOverridesGeneratedDe
 	if got, want := hooks.Semantics.List.MatchFields, []string{"compartmentId", "displayName", "lifecycleState"}; !reflect.DeepEqual(got, want) {
 		t.Fatalf("hooks.Semantics.List.MatchFields = %#v, want %#v", got, want)
 	}
+	if got, want := hooks.Semantics.Lifecycle.FailedStates, []string{"FAILED"}; !reflect.DeepEqual(got, want) {
+		t.Fatalf("hooks.Semantics.Lifecycle.FailedStates = %#v, want %#v", got, want)
+	}
 	if got, want := hooks.List.Fields, reviewedDistributedDatabasePrivateEndpointListFields(); !reflect.DeepEqual(got, want) {
 		t.Fatalf("hooks.List.Fields = %#v, want %#v", got, want)
 	}
@@ -106,6 +109,37 @@ func TestBuildDistributedDatabasePrivateEndpointUpdateBodySupportsClearingOption
 		if !strings.Contains(body, want) {
 			t.Fatalf("request body %s does not contain %s", body, want)
 		}
+	}
+}
+
+func TestBuildDistributedDatabasePrivateEndpointUpdateBodyIgnoresOmittedOptionalCollections(t *testing.T) {
+	t.Parallel()
+
+	resource := newTestDistributedDatabasePrivateEndpointResource()
+	resource.Spec.NsgIds = nil
+	resource.Spec.FreeformTags = nil
+	resource.Spec.DefinedTags = nil
+
+	current := observedDistributedDatabasePrivateEndpointFromSpec(
+		"ocid1.distributeddatabaseprivateendpoint.oc1..existing",
+		resource.Spec,
+		distributeddatabasesdk.DistributedDatabasePrivateEndpointLifecycleStateActive,
+	)
+	current.NsgIds = []string{"ocid1.networksecuritygroup.oc1..managed"}
+	current.FreeformTags = map[string]string{"service": "preserved"}
+	current.DefinedTags = map[string]map[string]interface{}{
+		"Oracle-Tags": {
+			"CreatedBy": "osok",
+			"CreatedOn": "2026-05-27T00:00:00Z",
+		},
+	}
+
+	_, updateNeeded, err := buildDistributedDatabasePrivateEndpointUpdateBody(resource, current)
+	if err != nil {
+		t.Fatalf("buildDistributedDatabasePrivateEndpointUpdateBody() error = %v", err)
+	}
+	if updateNeeded {
+		t.Fatal("buildDistributedDatabasePrivateEndpointUpdateBody() updateNeeded = true, want omitted optional collections preserved")
 	}
 }
 

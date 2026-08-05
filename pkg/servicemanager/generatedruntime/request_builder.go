@@ -50,6 +50,9 @@ func (c ServiceClient[T]) invokeWithValues(ctx context.Context, op *Operation, r
 	if request == nil {
 		return nil, fmt.Errorf("%s generated runtime did not create an OCI request value", c.config.Kind)
 	}
+	if options.RetryTokenScope == "" {
+		options.RetryTokenScope = c.retryTokenScope(op)
+	}
 	bodyOverride, hasBodyOverride, err := c.requestBodyOverride(op, resource, options)
 	if err != nil {
 		return nil, err
@@ -63,6 +66,17 @@ func (c ServiceClient[T]) invokeWithValues(ctx context.Context, op *Operation, r
 		return nil, normalizeOCIError(err)
 	}
 	return response, nil
+}
+
+func (c ServiceClient[T]) retryTokenScope(op *Operation) string {
+	switch op {
+	case c.config.Update:
+		return "update"
+	case c.config.Delete:
+		return "delete"
+	default:
+		return ""
+	}
 }
 
 func (c ServiceClient[T]) requestBodyOverride(op *Operation, resource T, options requestBuildOptions) (any, bool, error) {
@@ -100,6 +114,7 @@ type requestBuildOptions struct {
 	CredentialClient credhelper.CredentialClient
 	Namespace        string
 	CurrentResponse  any
+	RetryTokenScope  string
 }
 
 func buildRequest(
@@ -139,14 +154,14 @@ func buildRequest(
 		if err := buildExplicitRequest(requestStruct, values, preferredID, fields, resolvedSpec); err != nil {
 			return err
 		}
-		assignDeterministicRetryToken(requestStruct, resource)
+		assignDeterministicRetryToken(requestStruct, resource, options.RetryTokenScope)
 		return nil
 	}
 
 	if err := buildHeuristicRequest(requestStruct, requestStruct.Type(), values, preferredID, idAliases, resolvedSpec); err != nil {
 		return err
 	}
-	assignDeterministicRetryToken(requestStruct, resource)
+	assignDeterministicRetryToken(requestStruct, resource, options.RetryTokenScope)
 	return nil
 }
 
@@ -961,7 +976,8 @@ func jsonFieldString(payload []byte, field string) (string, error) {
 	return value, nil
 }
 
-func assignDeterministicRetryToken(requestStruct reflect.Value, resource any) {
+func assignDeterministicRetryToken(requestStruct reflect.Value, resource any, scope string) {
+	scope = retryTokenScopeName(scope)
 	field, ok := fieldValue(requestStruct, "OpcRetryToken")
 	if !ok || !field.IsValid() || !field.CanSet() {
 		return
@@ -984,7 +1000,7 @@ func assignDeterministicRetryToken(requestStruct reflect.Value, resource any) {
 	if token == "" {
 		return
 	}
-	_ = assignField(field, token)
+	_ = assignField(field, scopedRetryToken(token, scope, requestStruct))
 }
 
 func resourceRetryToken(resource any) string {
@@ -1004,6 +1020,101 @@ func resourceRetryToken(resource any) string {
 
 	sum := sha256.Sum256([]byte(namespace + "/" + name))
 	return fmt.Sprintf("%x", sum[:16])
+}
+
+func scopedRetryToken(base string, scope string, requestStruct reflect.Value) string {
+	scope = retryTokenScopeName(scope)
+	if scope == "" {
+		return base
+	}
+	if hash := requestRetryTokenHash(requestStruct); hash != "" {
+		return fmt.Sprintf("%s-%s-%s", base, scope, hash)
+	}
+	return fmt.Sprintf("%s-%s", base, scope)
+}
+
+func retryTokenScopeName(scope string) string {
+	scope = strings.ToLower(strings.TrimSpace(scope))
+	if scope == "" {
+		return ""
+	}
+	var b strings.Builder
+	lastDash := false
+	for _, r := range scope {
+		valid := (r >= 'a' && r <= 'z') || (r >= '0' && r <= '9')
+		switch {
+		case valid:
+			b.WriteRune(r)
+			lastDash = false
+		case !lastDash:
+			b.WriteByte('-')
+			lastDash = true
+		}
+	}
+	return strings.Trim(b.String(), "-")
+}
+
+func requestRetryTokenHash(requestStruct reflect.Value) string {
+	if !requestStruct.IsValid() {
+		return ""
+	}
+	if requestStruct.Kind() == reflect.Pointer {
+		if requestStruct.IsNil() {
+			return ""
+		}
+		requestStruct = requestStruct.Elem()
+	}
+	if requestStruct.Kind() != reflect.Struct {
+		return ""
+	}
+
+	type retryTokenPart struct {
+		Field        string          `json:"field"`
+		Contribution string          `json:"contribution"`
+		Value        json.RawMessage `json:"value"`
+	}
+
+	parts := make([]retryTokenPart, 0, requestStruct.NumField())
+	requestType := requestStruct.Type()
+	for i := 0; i < requestStruct.NumField(); i++ {
+		fieldType := requestType.Field(i)
+		if fieldType.PkgPath != "" || fieldType.Name == "OpcRetryToken" {
+			continue
+		}
+		contribution := fieldType.Tag.Get("contributesTo")
+		switch contribution {
+		case "body", "path", "query":
+		default:
+			continue
+		}
+
+		field := requestStruct.Field(i)
+		if !field.CanInterface() {
+			continue
+		}
+		value, err := json.Marshal(field.Interface())
+		if err != nil {
+			value, err = json.Marshal(fmt.Sprintf("%#v", field.Interface()))
+			if err != nil {
+				return ""
+			}
+		}
+		parts = append(parts, retryTokenPart{
+			Field:        fieldType.Name,
+			Contribution: contribution,
+			Value:        value,
+		})
+	}
+	if len(parts) == 0 {
+		return ""
+	}
+
+	payload, err := json.Marshal(parts)
+	if err != nil {
+		return ""
+	}
+	sum := sha256.Sum256(payload)
+	return fmt.Sprintf("%x", sum[:8])
 }
 
 func resourceNamespace(resource any, fallback string) string {

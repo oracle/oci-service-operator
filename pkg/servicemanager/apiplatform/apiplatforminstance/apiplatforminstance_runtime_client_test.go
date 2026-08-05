@@ -167,6 +167,9 @@ func TestApiPlatformInstanceRuntimeHooksUseReviewedSemantics(t *testing.T) {
 	} else if !reflect.DeepEqual(got.MatchFields, []string{"compartmentId", "name"}) {
 		t.Fatalf("semantics.list.matchFields = %#v, want %#v", got.MatchFields, []string{"compartmentId", "name"})
 	}
+	if got, want := hooks.Semantics.Lifecycle.FailedStates, []string{"FAILED"}; !reflect.DeepEqual(got, want) {
+		t.Fatalf("semantics.lifecycle.failedStates = %#v, want %#v", got, want)
+	}
 	if len(hooks.Semantics.AuxiliaryOperations) != 0 {
 		t.Fatalf("semantics.auxiliaryOperations = %#v, want reviewed omission of ChangeApiPlatformInstanceCompartment", hooks.Semantics.AuxiliaryOperations)
 	}

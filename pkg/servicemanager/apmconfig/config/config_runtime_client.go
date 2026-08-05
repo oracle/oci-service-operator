@@ -793,12 +793,63 @@ func configMapSubsetEqual(desired map[string]any, current map[string]any) bool {
 }
 
 func configValuesEqual(left any, right any) bool {
+	if configEmptyCollectionEquivalent(left, right) {
+		return true
+	}
 	leftPayload, leftErr := json.Marshal(left)
 	rightPayload, rightErr := json.Marshal(right)
 	if leftErr != nil || rightErr != nil {
 		return fmt.Sprint(left) == fmt.Sprint(right)
 	}
 	return string(leftPayload) == string(rightPayload)
+}
+
+func configEmptyCollectionEquivalent(left any, right any) bool {
+	return configIsNilOrEmptyCollection(left) && configIsNilOrEmptyCollection(right)
+}
+
+func configIsNilOrEmptyCollection(value any) bool {
+	if value == nil {
+		return true
+	}
+	switch concrete := value.(type) {
+	case map[string]any:
+		if len(concrete) == 0 {
+			return true
+		}
+		for _, child := range concrete {
+			if !configIsNilOrEmptyCollection(child) {
+				return false
+			}
+		}
+		return true
+	case map[string]string:
+		return len(concrete) == 0
+	case map[string]map[string]interface{}:
+		if len(concrete) == 0 {
+			return true
+		}
+		for _, child := range concrete {
+			if !configIsNilOrEmptyCollection(child) {
+				return false
+			}
+		}
+		return true
+	case []any:
+		if len(concrete) == 0 {
+			return true
+		}
+		for _, child := range concrete {
+			if !configIsNilOrEmptyCollection(child) {
+				return false
+			}
+		}
+		return true
+	case []string:
+		return len(concrete) == 0
+	default:
+		return false
+	}
 }
 
 func patchConfigExplicitCollectionIntent(resource *apmconfigv1beta1.Config, raw any) {

@@ -351,6 +351,8 @@ func classifyLifecycleAsyncSemantics(response any, status *shared.OSOKStatus, fa
 		return newLifecycleAsyncEvaluation(status, message, lifecycleState, shared.OSOKAsyncPhaseUpdate, shared.OSOKAsyncClassPending)
 	case containsString(semantics.Delete.PendingStates, lifecycleState):
 		return newLifecycleAsyncEvaluation(status, message, lifecycleState, shared.OSOKAsyncPhaseDelete, shared.OSOKAsyncClassPending)
+	case containsString(semantics.Lifecycle.FailedStates, lifecycleState):
+		return lifecycleFailureEvaluation(status, fallback, lifecycleState, message, shared.OSOKAsyncClassFailed)
 	case containsString(semantics.Delete.TerminalStates, lifecycleState):
 		return newLifecycleAsyncEvaluation(status, message, lifecycleState, shared.OSOKAsyncPhaseDelete, shared.OSOKAsyncClassSucceeded)
 	case containsString(semantics.Lifecycle.ActiveStates, lifecycleState):

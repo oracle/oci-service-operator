@@ -1429,6 +1429,20 @@ services:
                 - delete
           serviceManager:
             packagePath: clusterplacementgroups/clusterplacementgroup
+          specFields:
+            - name: Capabilities
+              type: ClusterPlacementGroupCapabilities
+              tag: 'json:"capabilities,omitempty,omitzero"'
+            - name: PlacementInstruction
+              type: ClusterPlacementGroupPlacementInstruction
+              tag: 'json:"placementInstruction,omitempty,omitzero"'
+          statusFields:
+            - name: Capabilities
+              type: ClusterPlacementGroupCapabilities
+              tag: 'json:"capabilities,omitempty,omitzero"'
+            - name: PlacementInstruction
+              type: ClusterPlacementGroupPlacementInstruction
+              tag: 'json:"placementInstruction,omitempty,omitzero"'
         - kind: WorkRequest
           controller:
             strategy: none
@@ -2718,7 +2732,17 @@ services:
               tag: 'json:"datasetFormatDetails"'
             - name: InitialImportDatasetConfiguration
               type: DatasetCreateInitialImportDatasetConfiguration
-              tag: 'json:"initialImportDatasetConfiguration,omitempty"'
+              tag: 'json:"initialImportDatasetConfiguration,omitempty,omitzero"'
+            - name: InitialRecordGenerationConfiguration
+              type: DatasetInitialRecordGenerationConfiguration
+              tag: 'json:"initialRecordGenerationConfiguration,omitempty,omitzero"'
+          statusFields:
+            - name: InitialImportDatasetConfiguration
+              type: DatasetInitialImportDatasetConfiguration
+              tag: 'json:"initialImportDatasetConfiguration,omitempty,omitzero"'
+            - name: InitialRecordGenerationConfiguration
+              type: DatasetInitialRecordGenerationConfiguration
+              tag: 'json:"initialRecordGenerationConfiguration,omitempty,omitzero"'
           sample:
             body: |-
               apiVersion: datalabelingservice.oracle.com/v1beta1

@@ -2,6 +2,7 @@ package lustrefilesystem
 
 import (
 	"context"
+	"slices"
 	"testing"
 	"time"
 
@@ -13,6 +14,94 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
+
+func TestLustreFileSystemRuntimeHooksConfigureWorkRequest(t *testing.T) {
+	t.Parallel()
+
+	const (
+		workRequestID = "wr-create-1"
+		createdID     = "ocid1.lustrefilesystem.oc1..created"
+	)
+
+	fake := &fakeLustreFileSystemWorkRequestClient{
+		getWorkRequestFn: func(_ context.Context, request lustrefilestoragesdk.GetWorkRequestRequest) (lustrefilestoragesdk.GetWorkRequestResponse, error) {
+			requireLustreFileSystemStringPtr(t, "GetWorkRequestRequest.WorkRequestId", request.WorkRequestId, workRequestID)
+			return lustrefilestoragesdk.GetWorkRequestResponse{
+				WorkRequest: makeLustreFileSystemWorkRequest(
+					workRequestID,
+					createdID,
+					lustrefilestoragesdk.OperationStatusSucceeded,
+					lustrefilestoragesdk.OperationTypeCreateLustreFileSystem,
+					lustrefilestoragesdk.ActionTypeCreated,
+				),
+			}, nil
+		},
+	}
+
+	hooks := newLustreFileSystemRuntimeHooksWithWorkRequestClient(fake)
+	if hooks.Semantics == nil || hooks.Semantics.Async == nil || hooks.Semantics.Async.WorkRequest == nil {
+		t.Fatal("LustreFileSystem async semantics are incomplete, want workrequest metadata")
+	}
+	if !slices.Equal(hooks.Semantics.Async.WorkRequest.Phases, []string{"create", "update", "delete"}) {
+		t.Fatalf("Async.WorkRequest.Phases = %v, want [create update delete]", hooks.Semantics.Async.WorkRequest.Phases)
+	}
+	if hooks.Async.GetWorkRequest == nil {
+		t.Fatal("hooks.Async.GetWorkRequest = nil, want Lustre work-request fetcher")
+	}
+	if hooks.Async.ResolveAction == nil {
+		t.Fatal("hooks.Async.ResolveAction = nil, want operation-type action resolver")
+	}
+	if hooks.Async.ResolvePhase == nil {
+		t.Fatal("hooks.Async.ResolvePhase = nil, want operation-type phase resolver")
+	}
+	if hooks.Async.RecoverResourceID == nil {
+		t.Fatal("hooks.Async.RecoverResourceID = nil, want resource-id recovery")
+	}
+	if !slices.Contains(hooks.Async.Adapter.PendingStatusTokens, string(lustrefilestoragesdk.OperationStatusInProgress)) {
+		t.Fatalf("PendingStatusTokens = %v, want IN_PROGRESS", hooks.Async.Adapter.PendingStatusTokens)
+	}
+	if !slices.Contains(hooks.Async.Adapter.CreateActionTokens, string(lustrefilestoragesdk.OperationTypeCreateLustreFileSystem)) {
+		t.Fatalf("CreateActionTokens = %v, want CREATE_LUSTRE_FILE_SYSTEM", hooks.Async.Adapter.CreateActionTokens)
+	}
+
+	workRequest, err := hooks.Async.GetWorkRequest(context.Background(), workRequestID)
+	if err != nil {
+		t.Fatalf("hooks.Async.GetWorkRequest() error = %v", err)
+	}
+	got, ok := workRequest.(lustrefilestoragesdk.WorkRequest)
+	if !ok {
+		t.Fatalf("hooks.Async.GetWorkRequest() type = %T, want lustrefilestorage.WorkRequest", workRequest)
+	}
+	requireLustreFileSystemStringPtr(t, "WorkRequest.Id", got.Id, workRequestID)
+	if len(fake.requests) != 1 {
+		t.Fatalf("GetWorkRequest() calls = %d, want 1", len(fake.requests))
+	}
+
+	action, err := hooks.Async.ResolveAction(got)
+	if err != nil {
+		t.Fatalf("hooks.Async.ResolveAction() error = %v", err)
+	}
+	if action != string(lustrefilestoragesdk.OperationTypeCreateLustreFileSystem) {
+		t.Fatalf("hooks.Async.ResolveAction() = %q, want CREATE_LUSTRE_FILE_SYSTEM", action)
+	}
+	phase, ok, err := hooks.Async.ResolvePhase(got)
+	if err != nil {
+		t.Fatalf("hooks.Async.ResolvePhase() error = %v", err)
+	}
+	if !ok || phase != shared.OSOKAsyncPhaseCreate {
+		t.Fatalf("hooks.Async.ResolvePhase() = %q, %t; want create, true", phase, ok)
+	}
+	recoveredID, err := hooks.Async.RecoverResourceID(newLustreFileSystemTestResource(), got, shared.OSOKAsyncPhaseCreate)
+	if err != nil {
+		t.Fatalf("hooks.Async.RecoverResourceID() error = %v", err)
+	}
+	if recoveredID != createdID {
+		t.Fatalf("hooks.Async.RecoverResourceID() = %q, want %q", recoveredID, createdID)
+	}
+	if gotMessage := hooks.Async.Message(shared.OSOKAsyncPhaseCreate, got); gotMessage != "LustreFileSystem create work request wr-create-1 is SUCCEEDED" {
+		t.Fatalf("hooks.Async.Message() = %q", gotMessage)
+	}
+}
 
 func TestLustreFileSystemCreateRequestOmitsUnsetOptionalMaintenanceWindow(t *testing.T) {
 	t.Parallel()
@@ -343,6 +432,22 @@ func (f fakeLustreFileSystemServiceError) GetOpcRequestID() string {
 	return ""
 }
 
+type fakeLustreFileSystemWorkRequestClient struct {
+	getWorkRequestFn func(context.Context, lustrefilestoragesdk.GetWorkRequestRequest) (lustrefilestoragesdk.GetWorkRequestResponse, error)
+	requests         []lustrefilestoragesdk.GetWorkRequestRequest
+}
+
+func (f *fakeLustreFileSystemWorkRequestClient) GetWorkRequest(
+	ctx context.Context,
+	request lustrefilestoragesdk.GetWorkRequestRequest,
+) (lustrefilestoragesdk.GetWorkRequestResponse, error) {
+	f.requests = append(f.requests, request)
+	if f.getWorkRequestFn == nil {
+		return lustrefilestoragesdk.GetWorkRequestResponse{}, nil
+	}
+	return f.getWorkRequestFn(ctx, request)
+}
+
 func newLustreFileSystemRuntimeTestManager(
 	cfg generatedruntime.Config[*lustrefilestoragev1beta1.LustreFileSystem],
 ) *LustreFileSystemServiceManager {
@@ -547,6 +652,40 @@ func defaultSDKMaintenanceWindow() *lustrefilestoragesdk.MaintenanceWindow {
 	return &lustrefilestoragesdk.MaintenanceWindow{
 		DayOfWeek: lustrefilestoragesdk.MaintenanceWindowDayOfWeekMonday,
 		TimeStart: &timeStart,
+	}
+}
+
+func makeLustreFileSystemWorkRequest(
+	workRequestID string,
+	resourceID string,
+	status lustrefilestoragesdk.OperationStatusEnum,
+	operationType lustrefilestoragesdk.OperationTypeEnum,
+	actionType lustrefilestoragesdk.ActionTypeEnum,
+) lustrefilestoragesdk.WorkRequest {
+	percentComplete := float32(100)
+	return lustrefilestoragesdk.WorkRequest{
+		Id:              common.String(workRequestID),
+		Status:          status,
+		OperationType:   operationType,
+		PercentComplete: &percentComplete,
+		Resources: []lustrefilestoragesdk.WorkRequestResource{
+			{
+				EntityType: common.String("lustreFileSystem"),
+				ActionType: actionType,
+				Identifier: common.String(resourceID),
+				EntityUri:  common.String("/20240901/lustreFileSystems/" + resourceID),
+			},
+		},
+	}
+}
+
+func requireLustreFileSystemStringPtr(t *testing.T, field string, got *string, want string) {
+	t.Helper()
+	if got == nil {
+		t.Fatalf("%s = nil, want %q", field, want)
+	}
+	if *got != want {
+		t.Fatalf("%s = %q, want %q", field, *got, want)
 	}
 }
 

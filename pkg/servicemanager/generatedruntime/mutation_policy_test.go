@@ -210,6 +210,75 @@ func TestServiceClientCreateOrUpdateSkipsUpdateWhileLifecycleProvisioning(t *tes
 	}
 }
 
+func TestServiceClientCreateOrUpdateSkipsUpdateWhenLifecycleFailedStateIsModeled(t *testing.T) {
+	t.Parallel()
+	updateCalled := false
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{Kind: "Thing", SDKName: "Thing", Semantics: &Semantics{Lifecycle: LifecycleSemantics{ProvisioningStates: []string{"CREATING"}, ActiveStates: []string{"ACTIVE"}, FailedStates: []string{"FAILED"}}, Mutation: MutationSemantics{Mutable: []string{"displayName"}}}, Get: &Operation{NewRequest: func() any {
+		return &fakeGetThingRequest{}
+	}, Call: func(_ context.Context, request any) (any, error) {
+		if request.(*fakeGetThingRequest).ThingId == nil || *request.(*fakeGetThingRequest).ThingId != "ocid1.thing.oc1..failed" {
+			t.Fatalf("get request thingId = %v, want failed OCID", request.(*fakeGetThingRequest).ThingId)
+		}
+		return fakeGetThingResponse{Thing: fakeThing{Id: "ocid1.thing.oc1..failed", DisplayName: "failed-name", LifecycleState: "FAILED"}}, nil
+	}, Fields: []RequestField{{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true}}}, Update: &Operation{NewRequest: func() any {
+		return &fakeUpdateThingRequest{}
+	}, Call: func(_ context.Context, _ any) (any, error) {
+		updateCalled = true
+		return fakeUpdateThingResponse{}, nil
+	}}})
+	resource := &fakeResource{Spec: fakeSpec{DisplayName: "desired-name"}, Status: fakeStatus{OsokStatus: shared.OSOKStatus{Ocid: "ocid1.thing.oc1..failed"}, Id: "ocid1.thing.oc1..failed"}}
+
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if response.IsSuccessful {
+		t.Fatal("CreateOrUpdate() should report failure for failed lifecycle")
+	}
+	if response.ShouldRequeue {
+		t.Fatal("CreateOrUpdate() should not requeue for failed lifecycle")
+	}
+	if updateCalled {
+		t.Fatal("Update() should not be called when current lifecycle is failed")
+	}
+	if resource.Status.LifecycleState != "FAILED" {
+		t.Fatalf("status.lifecycleState = %q, want FAILED", resource.Status.LifecycleState)
+	}
+	if resource.Status.OsokStatus.Reason != string(shared.Failed) {
+		t.Fatalf("status.reason = %q, want Failed", resource.Status.OsokStatus.Reason)
+	}
+}
+
+func TestServiceClientCreateOrUpdateDoesNotSpecialCaseUnmodeledFailedLifecycle(t *testing.T) {
+	t.Parallel()
+	updateCalled := false
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{Kind: "Thing", SDKName: "Thing", Semantics: &Semantics{Lifecycle: LifecycleSemantics{ProvisioningStates: []string{"CREATING"}, ActiveStates: []string{"ACTIVE"}}, Mutation: MutationSemantics{Mutable: []string{"displayName"}}}, Get: &Operation{NewRequest: func() any {
+		return &fakeGetThingRequest{}
+	}, Call: func(_ context.Context, request any) (any, error) {
+		if request.(*fakeGetThingRequest).ThingId == nil || *request.(*fakeGetThingRequest).ThingId != "ocid1.thing.oc1..failed" {
+			t.Fatalf("get request thingId = %v, want failed OCID", request.(*fakeGetThingRequest).ThingId)
+		}
+		return fakeGetThingResponse{Thing: fakeThing{Id: "ocid1.thing.oc1..failed", DisplayName: "failed-name", LifecycleState: "FAILED"}}, nil
+	}, Fields: []RequestField{{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true}}}, Update: &Operation{NewRequest: func() any {
+		return &fakeUpdateThingRequest{}
+	}, Call: func(_ context.Context, _ any) (any, error) {
+		updateCalled = true
+		return fakeUpdateThingResponse{Thing: fakeThing{Id: "ocid1.thing.oc1..failed", DisplayName: "desired-name", LifecycleState: "ACTIVE"}}, nil
+	}}})
+	resource := &fakeResource{Spec: fakeSpec{DisplayName: "desired-name"}, Status: fakeStatus{OsokStatus: shared.OSOKStatus{Ocid: "ocid1.thing.oc1..failed"}, Id: "ocid1.thing.oc1..failed"}}
+
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful {
+		t.Fatal("CreateOrUpdate() should retain default update behavior for unmodeled lifecycle states")
+	}
+	if !updateCalled {
+		t.Fatal("Update() should be called when FAILED is not explicitly modeled")
+	}
+}
+
 func TestServiceClientCreateOrUpdateSkipsUpdateWhenMutableFieldIsNotReturnedByService(t *testing.T) {
 	t.Parallel()
 	getCalled := false

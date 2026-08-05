@@ -154,6 +154,58 @@ func TestReviewedGovernanceInstanceRuntimeSemanticsEncodesLifecycleContract(t *t
 	}
 }
 
+func TestNormalizeGovernanceInstanceEndpointUsesCertificateHost(t *testing.T) {
+	t.Parallel()
+
+	client := &accessgovernancecpsdk.AccessGovernanceCPClient{}
+	client.Host = "https://cp-prod.access-governance.us-ashburn-1.oci.oraclecloud.com"
+
+	normalizeGovernanceInstanceEndpoint(client)
+
+	if client.Host != "https://cp-prod.access-governance.us-ashburn-1.oci.oracleiaas.com" {
+		t.Fatalf("Host = %q, want oracleiaas certificate host", client.Host)
+	}
+}
+
+func TestNormalizeGovernanceInstanceEndpointLeavesOtherRealms(t *testing.T) {
+	t.Parallel()
+
+	client := &accessgovernancecpsdk.AccessGovernanceCPClient{}
+	client.Host = "https://cp-prod.access-governance.us-gov-ashburn-1.oci.oraclegovcloud.com"
+
+	normalizeGovernanceInstanceEndpoint(client)
+
+	if client.Host != "https://cp-prod.access-governance.us-gov-ashburn-1.oci.oraclegovcloud.com" {
+		t.Fatalf("Host = %q, want non-OC1 realm unchanged", client.Host)
+	}
+}
+
+func TestNormalizeGovernanceInstanceEndpointLeavesAlreadyNormalizedHost(t *testing.T) {
+	t.Parallel()
+
+	client := &accessgovernancecpsdk.AccessGovernanceCPClient{}
+	client.Host = "https://cp-prod.access-governance.us-ashburn-1.oci.oracleiaas.com"
+
+	normalizeGovernanceInstanceEndpoint(client)
+
+	if client.Host != "https://cp-prod.access-governance.us-ashburn-1.oci.oracleiaas.com" {
+		t.Fatalf("Host = %q, want already-normalized host unchanged", client.Host)
+	}
+}
+
+func TestNormalizeGovernanceInstanceEndpointLeavesNonAccessGovernanceOC1Host(t *testing.T) {
+	t.Parallel()
+
+	client := &accessgovernancecpsdk.AccessGovernanceCPClient{}
+	client.Host = "https://objectstorage.us-ashburn-1.oci.oraclecloud.com"
+
+	normalizeGovernanceInstanceEndpoint(client)
+
+	if client.Host != "https://objectstorage.us-ashburn-1.oci.oraclecloud.com" {
+		t.Fatalf("Host = %q, want non-access-governance host unchanged", client.Host)
+	}
+}
+
 func TestGuardGovernanceInstanceExistingBeforeCreate(t *testing.T) {
 	t.Parallel()
 

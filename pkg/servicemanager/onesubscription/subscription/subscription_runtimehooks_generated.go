@@ -95,7 +95,7 @@ func newSubscriptionRuntimeSemantics() *generatedruntime.Semantics {
 			Hooks:    []generatedruntime.Hook{},
 		},
 		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
-		Unsupported:         []generatedruntime.UnsupportedSemantic{{Category: "list-lookup", StopCondition: "Close when the pinned OneSubscription SDK or verified provider facts expose a stable top-level Subscription identity or reread path so the runtime can persist a truthful tracked identifier instead of reissuing the list query every reconcile."}},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
 	}
 }
 func newSubscriptionDefaultRuntimeHooks(sdkClient onesubscriptionsdk.SubscriptionClient) SubscriptionRuntimeHooks {

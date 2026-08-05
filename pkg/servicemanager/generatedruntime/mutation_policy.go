@@ -42,7 +42,8 @@ func (c ServiceClient[T]) shouldObserveCurrentLifecycle(currentResponse any) boo
 
 	return containsString(c.config.Semantics.Lifecycle.ProvisioningStates, lifecycleState) ||
 		containsString(c.config.Semantics.Lifecycle.UpdatingStates, lifecycleState) ||
-		containsString(c.config.Semantics.Delete.PendingStates, lifecycleState)
+		containsString(c.config.Semantics.Delete.PendingStates, lifecycleState) ||
+		containsString(c.config.Semantics.Lifecycle.FailedStates, lifecycleState)
 }
 
 func (c ServiceClient[T]) validateMutationPolicy(resource T, existing bool, currentResponse any) error {

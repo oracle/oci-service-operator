@@ -150,6 +150,185 @@ func TestBuildConfigUpdateDetailsSpanFilterDetectsDrift(t *testing.T) {
 	}
 }
 
+func TestBuildConfigUpdateDetailsSpanFilterNoopIgnoresServerEmptyTags(t *testing.T) {
+	t.Parallel()
+
+	resource := &apmconfigv1beta1.Config{
+		Spec: apmconfigv1beta1.ConfigSpec{
+			ApmDomainId: "ocid1.apmdomain.oc1..example",
+			ConfigType:  "SPAN_FILTER",
+			DisplayName: "span-filter",
+			FilterText:  `service.name = "checkout"`,
+			Description: "span filter",
+			FreeformTags: map[string]string{
+				"managed-by": "osok-e2e",
+			},
+		},
+	}
+	current := apmconfigsdk.GetConfigResponse{
+		Config: apmconfigsdk.SpanFilter{
+			DisplayName: common.String("span-filter"),
+			FilterText:  common.String(`service.name = "checkout"`),
+			Description: common.String("span filter"),
+			FreeformTags: map[string]string{
+				"managed-by": "osok-e2e",
+			},
+			DefinedTags: map[string]map[string]interface{}{},
+		},
+	}
+
+	_, updateNeeded, err := buildConfigUpdateDetails(context.Background(), resource, "default", current)
+	if err != nil {
+		t.Fatalf("buildConfigUpdateDetails() error = %v", err)
+	}
+	if updateNeeded {
+		t.Fatal("buildConfigUpdateDetails() updateNeeded = true, want false when OCI returns empty definedTags for omitted desired tags")
+	}
+}
+
+func TestBuildConfigUpdateDetailsSpanFilterPreservesExplicitEmptyTagDrift(t *testing.T) {
+	t.Parallel()
+
+	resource := &apmconfigv1beta1.Config{
+		Spec: apmconfigv1beta1.ConfigSpec{
+			ApmDomainId:  "ocid1.apmdomain.oc1..example",
+			ConfigType:   "SPAN_FILTER",
+			DisplayName:  "span-filter",
+			FilterText:   `service.name = "checkout"`,
+			Description:  "span filter",
+			FreeformTags: map[string]string{},
+		},
+	}
+	current := apmconfigsdk.GetConfigResponse{
+		Config: apmconfigsdk.SpanFilter{
+			DisplayName: common.String("span-filter"),
+			FilterText:  common.String(`service.name = "checkout"`),
+			Description: common.String("span filter"),
+			FreeformTags: map[string]string{
+				"remove": "me",
+			},
+		},
+	}
+
+	_, updateNeeded, err := buildConfigUpdateDetails(context.Background(), resource, "default", current)
+	if err != nil {
+		t.Fatalf("buildConfigUpdateDetails() error = %v", err)
+	}
+	if !updateNeeded {
+		t.Fatal("buildConfigUpdateDetails() updateNeeded = false, want true when explicit empty tags should clear current tags")
+	}
+}
+
+func TestBuildConfigUpdateDetailsAgentNoopIgnoresServerEmptyNestedCollections(t *testing.T) {
+	t.Parallel()
+
+	resource := &apmconfigv1beta1.Config{
+		Spec: apmconfigv1beta1.ConfigSpec{
+			ApmDomainId:                   "ocid1.apmdomain.oc1..example",
+			ConfigType:                    "AGENT",
+			MatchAgentsWithAttributeValue: "checkout",
+		},
+	}
+	current := apmconfigsdk.GetConfigResponse{
+		Config: apmconfigsdk.AgentConfig{
+			MatchAgentsWithAttributeValue: common.String("checkout"),
+			Config:                        &apmconfigsdk.AgentConfigMap{ConfigMap: map[string]apmconfigsdk.AgentConfigFile{}},
+			Overrides:                     &apmconfigsdk.AgentConfigOverrides{OverrideList: []apmconfigsdk.AgentConfigOverride{}},
+		},
+	}
+
+	_, updateNeeded, err := buildConfigUpdateDetails(context.Background(), resource, "default", current)
+	if err != nil {
+		t.Fatalf("buildConfigUpdateDetails() error = %v", err)
+	}
+	if updateNeeded {
+		t.Fatal("buildConfigUpdateDetails() updateNeeded = true, want false when desired omits collections and OCI returns empty nested collections")
+	}
+}
+
+func TestBuildConfigUpdateDetailsAgentPreservesExplicitEmptyNestedCollectionDrift(t *testing.T) {
+	t.Parallel()
+
+	resource := &apmconfigv1beta1.Config{
+		Spec: apmconfigv1beta1.ConfigSpec{
+			ApmDomainId:                   "ocid1.apmdomain.oc1..example",
+			ConfigType:                    "AGENT",
+			MatchAgentsWithAttributeValue: "checkout",
+			Config: apmconfigv1beta1.ConfigFields{
+				ConfigMap: map[string]apmconfigv1beta1.ConfigConfigMap{},
+			},
+			Overrides: apmconfigv1beta1.ConfigOverrides{
+				OverrideList: []apmconfigv1beta1.ConfigOverridesOverrideList{
+					{
+						AgentFilter: "service.name = 'checkout'",
+						OverrideMap: map[string]string{},
+					},
+				},
+			},
+		},
+	}
+	current := apmconfigsdk.GetConfigResponse{
+		Config: apmconfigsdk.AgentConfig{
+			MatchAgentsWithAttributeValue: common.String("checkout"),
+			Config: &apmconfigsdk.AgentConfigMap{
+				ConfigMap: map[string]apmconfigsdk.AgentConfigFile{
+					"agent.yaml": {Body: common.String("legacy")},
+				},
+			},
+			Overrides: &apmconfigsdk.AgentConfigOverrides{
+				OverrideList: []apmconfigsdk.AgentConfigOverride{
+					{
+						AgentFilter: common.String("service.name = 'checkout'"),
+						OverrideMap: map[string]string{"isJfrEnabled": "true"},
+					},
+				},
+			},
+		},
+	}
+
+	_, updateNeeded, err := buildConfigUpdateDetails(context.Background(), resource, "default", current)
+	if err != nil {
+		t.Fatalf("buildConfigUpdateDetails() error = %v", err)
+	}
+	if !updateNeeded {
+		t.Fatal("buildConfigUpdateDetails() updateNeeded = false, want true when explicit empty nested collections should clear current values")
+	}
+}
+
+func TestBuildConfigUpdateDetailsMacsApmExtensionPreservesExplicitEmptyListDrift(t *testing.T) {
+	t.Parallel()
+
+	resource := &apmconfigv1beta1.Config{
+		Spec: apmconfigv1beta1.ConfigSpec{
+			ApmDomainId:       "ocid1.apmdomain.oc1..example",
+			ConfigType:        "MACS_APM_EXTENSION",
+			ProcessFilter:     []string{},
+			RunAsUser:         "opc",
+			ServiceName:       "checkout",
+			AgentVersion:      "1.0.0",
+			AttachInstallDir:  "/opt/apm",
+			ManagementAgentId: "ocid1.managementagent.oc1..example",
+		},
+	}
+	current := apmconfigsdk.GetConfigResponse{
+		Config: apmconfigsdk.MacsApmExtension{
+			ProcessFilter:    []string{"java"},
+			RunAsUser:        common.String("opc"),
+			ServiceName:      common.String("checkout"),
+			AgentVersion:     common.String("1.0.0"),
+			AttachInstallDir: common.String("/opt/apm"),
+		},
+	}
+
+	_, updateNeeded, err := buildConfigUpdateDetails(context.Background(), resource, "default", current)
+	if err != nil {
+		t.Fatalf("buildConfigUpdateDetails() error = %v", err)
+	}
+	if !updateNeeded {
+		t.Fatal("buildConfigUpdateDetails() updateNeeded = false, want true when explicit empty list should clear current values")
+	}
+}
+
 func TestGuardConfigExistingBeforeCreate(t *testing.T) {
 	t.Parallel()
 

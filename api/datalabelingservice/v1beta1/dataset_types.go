@@ -33,9 +33,9 @@ type DatasetSpec struct {
 	// +kubebuilder:validation:Optional
 	Description string `json:"description,omitempty"`
 	// +kubebuilder:validation:Optional
-	InitialRecordGenerationConfiguration DatasetInitialRecordGenerationConfiguration `json:"initialRecordGenerationConfiguration,omitempty"`
+	InitialRecordGenerationConfiguration DatasetInitialRecordGenerationConfiguration `json:"initialRecordGenerationConfiguration,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	InitialImportDatasetConfiguration DatasetCreateInitialImportDatasetConfiguration `json:"initialImportDatasetConfiguration,omitempty"`
+	InitialImportDatasetConfiguration DatasetCreateInitialImportDatasetConfiguration `json:"initialImportDatasetConfiguration,omitempty,omitzero"`
 	// The labeling instructions for human labelers in rich text format
 	// +kubebuilder:validation:Optional
 	LabelingInstructions string `json:"labelingInstructions,omitempty"`
@@ -189,8 +189,8 @@ type DatasetStatus struct {
 	// The sub-state of the dataset.
 	// IMPORT_DATASET - The dataset is being imported.
 	LifecycleSubstate                    string                                      `json:"lifecycleSubstate,omitempty"`
-	InitialRecordGenerationConfiguration DatasetInitialRecordGenerationConfiguration `json:"initialRecordGenerationConfiguration,omitempty"`
-	InitialImportDatasetConfiguration    DatasetInitialImportDatasetConfiguration    `json:"initialImportDatasetConfiguration,omitempty"`
+	InitialRecordGenerationConfiguration DatasetInitialRecordGenerationConfiguration `json:"initialRecordGenerationConfiguration,omitempty,omitzero"`
+	InitialImportDatasetConfiguration    DatasetInitialImportDatasetConfiguration    `json:"initialImportDatasetConfiguration,omitempty,omitzero"`
 	// The labeling instructions for human labelers in rich text format
 	LabelingInstructions string `json:"labelingInstructions,omitempty"`
 	// A simple key-value pair that is applied without any predefined name, type, or scope. It exists for cross-compatibility only.

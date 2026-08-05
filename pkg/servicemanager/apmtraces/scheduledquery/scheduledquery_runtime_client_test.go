@@ -103,6 +103,128 @@ func TestGuardScheduledQueryExistingBeforeCreate(t *testing.T) {
 	}
 }
 
+func TestScheduledQueryBuildCreateBodyOmitsEmptyProcessingConfiguration(t *testing.T) {
+	t.Parallel()
+
+	body, err := scheduledQueryBuildCreateBody(context.Background(), &apmtracesv1beta1.ScheduledQuery{
+		Spec: apmtracesv1beta1.ScheduledQuerySpec{
+			ScheduledQueryName:                    "scheduled-query",
+			ScheduledQueryProcessingType:          "QUERY",
+			ScheduledQueryText:                    "SHOW SPANS * BETWEEN now() - 2 HOURS AND now()",
+			ScheduledQuerySchedule:                "SCHEDULE STARTING AFTER 2026-05-28T22:00:00Z EVERY 60 MINUTES",
+			ScheduledQueryMaximumRuntimeInSeconds: 60,
+			ScheduledQueryRetentionPeriodInMs:     60000,
+			ScheduledQueryRetentionCriteria:       "UPDATE",
+		},
+	}, "default")
+	if err != nil {
+		t.Fatalf("scheduledQueryBuildCreateBody() error = %v", err)
+	}
+	details, ok := body.(apmtracessdk.CreateScheduledQueryDetails)
+	if !ok {
+		t.Fatalf("scheduledQueryBuildCreateBody() = %T, want CreateScheduledQueryDetails", body)
+	}
+	if details.ScheduledQueryProcessingConfiguration != nil {
+		t.Fatalf("ScheduledQueryProcessingConfiguration = %#v, want nil for empty generated nested spec", details.ScheduledQueryProcessingConfiguration)
+	}
+	if details.ScheduledQueryRetentionCriteria != apmtracessdk.ScheduledQueryRetentionCriteriaUpdate {
+		t.Fatalf("ScheduledQueryRetentionCriteria = %q, want UPDATE", details.ScheduledQueryRetentionCriteria)
+	}
+	if details.ScheduledQueryMaximumRuntimeInSeconds == nil || *details.ScheduledQueryMaximumRuntimeInSeconds != 60 {
+		t.Fatalf("ScheduledQueryMaximumRuntimeInSeconds = %#v, want 60", details.ScheduledQueryMaximumRuntimeInSeconds)
+	}
+	if details.ScheduledQueryRetentionPeriodInMs != nil {
+		t.Fatalf("ScheduledQueryRetentionPeriodInMs = %#v, want nil when retention criteria is UPDATE", details.ScheduledQueryRetentionPeriodInMs)
+	}
+}
+
+func TestScheduledQueryBuildUpdateBodyIgnoresEmptyProcessingConfigurationWhenCurrentMatches(t *testing.T) {
+	t.Parallel()
+
+	resource := &apmtracesv1beta1.ScheduledQuery{
+		Spec: apmtracesv1beta1.ScheduledQuerySpec{
+			ScheduledQueryName:                    "scheduled-query",
+			ScheduledQueryProcessingType:          "QUERY",
+			ScheduledQueryText:                    "SHOW SPANS * BETWEEN now() - 2 HOURS AND now()",
+			ScheduledQuerySchedule:                "SCHEDULE STARTING AFTER 2026-05-28T22:00:00Z EVERY 60 MINUTES",
+			ScheduledQueryMaximumRuntimeInSeconds: 60,
+			ScheduledQueryRetentionPeriodInMs:     60000,
+			ScheduledQueryRetentionCriteria:       "UPDATE",
+		},
+	}
+	current := apmtracessdk.GetScheduledQueryResponse{
+		ScheduledQuery: apmtracessdk.ScheduledQuery{
+			ScheduledQueryName:                    common.String(resource.Spec.ScheduledQueryName),
+			ScheduledQueryProcessingType:          apmtracessdk.ScheduledQueryProcessingTypeQuery,
+			ScheduledQueryText:                    common.String(resource.Spec.ScheduledQueryText),
+			ScheduledQuerySchedule:                common.String(resource.Spec.ScheduledQuerySchedule),
+			ScheduledQueryMaximumRuntimeInSeconds: common.Int64(resource.Spec.ScheduledQueryMaximumRuntimeInSeconds),
+			ScheduledQueryRetentionPeriodInMs:     common.Int64(resource.Spec.ScheduledQueryRetentionPeriodInMs),
+			ScheduledQueryProcessingSubType:       apmtracessdk.ScheduledQueryProcessingSubTypeNone,
+			ScheduledQueryProcessingConfiguration: nil,
+			ScheduledQueryRetentionCriteria:       apmtracessdk.ScheduledQueryRetentionCriteriaUpdate,
+		},
+	}
+
+	body, ok, err := scheduledQueryBuildUpdateBody(context.Background(), resource, "default", current)
+	if err != nil {
+		t.Fatalf("scheduledQueryBuildUpdateBody() error = %v", err)
+	}
+	if ok {
+		t.Fatalf("scheduledQueryBuildUpdateBody() ok = true, body = %#v; want no update", body)
+	}
+}
+
+func TestScheduledQueryBuildUpdateBodyDetectsMutableDrift(t *testing.T) {
+	t.Parallel()
+
+	resource := &apmtracesv1beta1.ScheduledQuery{
+		Spec: apmtracesv1beta1.ScheduledQuerySpec{
+			ScheduledQueryName:                    "scheduled-query",
+			ScheduledQueryProcessingType:          "QUERY",
+			ScheduledQueryText:                    "SHOW SPANS * BETWEEN now() - 2 HOURS AND now()",
+			ScheduledQuerySchedule:                "SCHEDULE STARTING AFTER 2026-05-28T22:00:00Z EVERY 60 MINUTES",
+			ScheduledQueryDescription:             "updated description",
+			ScheduledQueryMaximumRuntimeInSeconds: 60,
+			ScheduledQueryRetentionPeriodInMs:     60000,
+			ScheduledQueryRetentionCriteria:       "UPDATE",
+		},
+	}
+	current := apmtracessdk.GetScheduledQueryResponse{
+		ScheduledQuery: apmtracessdk.ScheduledQuery{
+			ScheduledQueryName:                    common.String(resource.Spec.ScheduledQueryName),
+			ScheduledQueryProcessingType:          apmtracessdk.ScheduledQueryProcessingTypeQuery,
+			ScheduledQueryText:                    common.String(resource.Spec.ScheduledQueryText),
+			ScheduledQuerySchedule:                common.String(resource.Spec.ScheduledQuerySchedule),
+			ScheduledQueryDescription:             common.String("old description"),
+			ScheduledQueryMaximumRuntimeInSeconds: common.Int64(resource.Spec.ScheduledQueryMaximumRuntimeInSeconds),
+			ScheduledQueryRetentionPeriodInMs:     common.Int64(resource.Spec.ScheduledQueryRetentionPeriodInMs),
+			ScheduledQueryRetentionCriteria:       apmtracessdk.ScheduledQueryRetentionCriteriaUpdate,
+		},
+	}
+
+	body, ok, err := scheduledQueryBuildUpdateBody(context.Background(), resource, "default", current)
+	if err != nil {
+		t.Fatalf("scheduledQueryBuildUpdateBody() error = %v", err)
+	}
+	if !ok {
+		t.Fatal("scheduledQueryBuildUpdateBody() ok = false, want mutable update")
+	}
+	details, ok := body.(apmtracessdk.UpdateScheduledQueryDetails)
+	if !ok {
+		t.Fatalf("scheduledQueryBuildUpdateBody() body = %T, want UpdateScheduledQueryDetails", body)
+	}
+	if details.ScheduledQueryProcessingConfiguration != nil {
+		t.Fatalf("ScheduledQueryProcessingConfiguration = %#v, want nil for empty generated nested spec", details.ScheduledQueryProcessingConfiguration)
+	}
+	if details.ScheduledQueryDescription == nil || *details.ScheduledQueryDescription != resource.Spec.ScheduledQueryDescription {
+		t.Fatalf("ScheduledQueryDescription = %#v, want updated description", details.ScheduledQueryDescription)
+	}
+	if details.ScheduledQueryText != nil || details.ScheduledQuerySchedule != nil || details.ScheduledQueryMaximumRuntimeInSeconds != nil {
+		t.Fatalf("update body included unchanged fields: text=%#v schedule=%#v maximumRuntime=%#v", details.ScheduledQueryText, details.ScheduledQuerySchedule, details.ScheduledQueryMaximumRuntimeInSeconds)
+	}
+}
+
 func TestNewScheduledQueryServiceClientWithOCIClientUsesNameFilteredLookupAndMirrorsDomain(t *testing.T) {
 	t.Parallel()
 
@@ -185,6 +307,92 @@ func TestNewScheduledQueryServiceClientWithOCIClientUsesNameFilteredLookupAndMir
 	}
 	if resource.Status.ScheduledQueryName != resource.Spec.ScheduledQueryName {
 		t.Fatalf("Status.ScheduledQueryName = %q, want %q", resource.Status.ScheduledQueryName, resource.Spec.ScheduledQueryName)
+	}
+}
+
+func TestScheduledQueryDeleteWithoutTrackedIdentitySkipsOCI(t *testing.T) {
+	t.Parallel()
+
+	ociCalled := false
+	client := newScheduledQueryServiceClientWithOCIClient(
+		loggerutil.OSOKLogger{},
+		stubScheduledQueryOCIClient{
+			get: func(context.Context, apmtracessdk.GetScheduledQueryRequest) (apmtracessdk.GetScheduledQueryResponse, error) {
+				ociCalled = true
+				return apmtracessdk.GetScheduledQueryResponse{}, nil
+			},
+			list: func(context.Context, apmtracessdk.ListScheduledQueriesRequest) (apmtracessdk.ListScheduledQueriesResponse, error) {
+				ociCalled = true
+				return apmtracessdk.ListScheduledQueriesResponse{}, nil
+			},
+			delete: func(context.Context, apmtracessdk.DeleteScheduledQueryRequest) (apmtracessdk.DeleteScheduledQueryResponse, error) {
+				ociCalled = true
+				return apmtracessdk.DeleteScheduledQueryResponse{}, nil
+			},
+		},
+	)
+
+	deleted, err := client.Delete(context.Background(), &apmtracesv1beta1.ScheduledQuery{
+		Spec: apmtracesv1beta1.ScheduledQuerySpec{
+			ApmDomainId:        "ocid1.apmdomain.oc1..example",
+			ScheduledQueryName: "scheduled-query",
+		},
+	})
+	if err != nil {
+		t.Fatalf("Delete() error = %v", err)
+	}
+	if !deleted {
+		t.Fatal("Delete() deleted = false, want true for an untracked ScheduledQuery")
+	}
+	if ociCalled {
+		t.Fatal("Delete() called OCI despite no tracked ScheduledQuery identity")
+	}
+}
+
+func TestScheduledQueryDeleteWithTrackedIdentityDelegates(t *testing.T) {
+	t.Parallel()
+
+	deleteCalled := false
+	getCalls := 0
+	client := newScheduledQueryServiceClientWithOCIClient(
+		loggerutil.OSOKLogger{},
+		stubScheduledQueryOCIClient{
+			get: func(context.Context, apmtracessdk.GetScheduledQueryRequest) (apmtracessdk.GetScheduledQueryResponse, error) {
+				getCalls++
+				lifecycleState := apmtracessdk.LifecycleStatesActive
+				if getCalls > 1 {
+					lifecycleState = apmtracessdk.LifecycleStatesDeleted
+				}
+				return apmtracessdk.GetScheduledQueryResponse{
+					ScheduledQuery: apmtracessdk.ScheduledQuery{
+						Id:             common.String("ocid1.scheduledquery.oc1..tracked"),
+						LifecycleState: lifecycleState,
+					},
+				}, nil
+			},
+			delete: func(context.Context, apmtracessdk.DeleteScheduledQueryRequest) (apmtracessdk.DeleteScheduledQueryResponse, error) {
+				deleteCalled = true
+				return apmtracessdk.DeleteScheduledQueryResponse{}, nil
+			},
+		},
+	)
+
+	deleted, err := client.Delete(context.Background(), &apmtracesv1beta1.ScheduledQuery{
+		Status: apmtracesv1beta1.ScheduledQueryStatus{
+			Id: "ocid1.scheduledquery.oc1..tracked",
+		},
+	})
+	if err != nil {
+		t.Fatalf("Delete() error = %v", err)
+	}
+	if !deleted {
+		t.Fatal("Delete() deleted = false, want true after generatedruntime confirms delete")
+	}
+	if !deleteCalled {
+		t.Fatal("Delete() did not delegate OCI delete for a tracked ScheduledQuery")
+	}
+	if getCalls != 2 {
+		t.Fatalf("GetScheduledQuery() calls = %d, want pre-delete and post-delete confirmation reads", getCalls)
 	}
 }
 

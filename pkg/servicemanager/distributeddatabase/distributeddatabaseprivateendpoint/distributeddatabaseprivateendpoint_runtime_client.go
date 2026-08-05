@@ -44,6 +44,7 @@ func applyDistributedDatabasePrivateEndpointRuntimeHooks(hooks *DistributedDatab
 
 func reviewedDistributedDatabasePrivateEndpointRuntimeSemantics() *generatedruntime.Semantics {
 	semantics := newDistributedDatabasePrivateEndpointRuntimeSemantics()
+	semantics.Lifecycle.FailedStates = []string{"FAILED"}
 	semantics.List = &generatedruntime.ListSemantics{
 		ResponseItemsField: "Items",
 		MatchFields:        []string{"compartmentId", "displayName", "lifecycleState"},
@@ -206,20 +207,14 @@ func desiredDistributedDatabasePrivateEndpointNsgIDsForUpdate(spec []string, cur
 	if spec != nil {
 		return append([]string{}, spec...)
 	}
-	if current != nil {
-		return []string{}
-	}
-	return nil
+	return current
 }
 
 func desiredDistributedDatabasePrivateEndpointFreeformTagsForUpdate(spec map[string]string, current map[string]string) map[string]string {
 	if spec != nil {
 		return cloneDistributedDatabasePrivateEndpointStringMap(spec)
 	}
-	if current != nil {
-		return map[string]string{}
-	}
-	return nil
+	return current
 }
 
 func desiredDistributedDatabasePrivateEndpointDefinedTagsForUpdate(
@@ -229,10 +224,7 @@ func desiredDistributedDatabasePrivateEndpointDefinedTagsForUpdate(
 	if spec != nil {
 		return *util.ConvertToOciDefinedTags(&spec)
 	}
-	if current != nil {
-		return map[string]map[string]interface{}{}
-	}
-	return nil
+	return current
 }
 
 func cloneDistributedDatabasePrivateEndpointStringMap(spec map[string]string) map[string]string {

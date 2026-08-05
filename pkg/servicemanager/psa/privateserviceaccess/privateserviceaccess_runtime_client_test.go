@@ -280,7 +280,9 @@ func TestPrivateServiceAccessCreateOrUpdateBindsUniqueExactMatch(t *testing.T) {
 			listCalls++
 			requirePrivateServiceAccessStringPtr(t, "list compartmentId", req.CompartmentId, resource.Spec.CompartmentId)
 			requirePrivateServiceAccessStringPtr(t, "list displayName", req.DisplayName, resource.Spec.DisplayName)
-			requirePrivateServiceAccessStringPtr(t, "list serviceId", req.ServiceId, resource.Spec.ServiceId)
+			if req.ServiceId != nil {
+				t.Fatalf("list serviceId = %#v, want nil because PSA rejects serviceId with displayName", req.ServiceId)
+			}
 			if req.VcnId != nil {
 				t.Fatalf("list vcnId = %#v, want nil because pre-create reuse should not require a VCN lookup", req.VcnId)
 			}

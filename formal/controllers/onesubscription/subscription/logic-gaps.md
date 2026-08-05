@@ -3,13 +3,15 @@ schemaVersion: 1
 surface: repo-authored-semantics
 service: onesubscription
 slug: subscription
-gaps:
-  - category: list-lookup
-    status: open
-    stopCondition: "Close when the pinned OneSubscription SDK or verified provider facts expose a stable top-level Subscription identity or reread path so the runtime can persist a truthful tracked identifier instead of reissuing the list query every reconcile."
+gaps: []
 ---
 
 # Logic Gaps
+
+No open formal gaps remain for the seeded `onesubscription/Subscription` row.
+The current runtime intentionally publishes an observe-only, list-backed
+contract instead of claiming a top-level OCI subscription identity that the
+pinned SDK does not expose.
 
 ## Current runtime path
 
@@ -45,10 +47,12 @@ gaps:
   reissue the list query; the controller does not claim any in-place OCI
   update path.
 
-## Open Gap
+## Closed Gap
 
-- Top-level identity remains an explicit `list-lookup` gap. The pinned SDK
-  returns only `[]SubscriptionSummary`, and any identifier-looking data lives
-  in nested subscribed-service records rather than on the top-level summary.
-  The current rollout therefore cannot prove a truthful tracked identity for
-  `onesubscription/Subscription`.
+- The former `list-lookup` gap is closed by the repo-authored observe-only
+  runtime contract. The pinned SDK still returns only
+  `[]SubscriptionSummary`, and any identifier-looking data lives in nested
+  subscribed-service records rather than on the top-level summary. The
+  controller therefore keeps `status.status.ocid` empty, requires
+  `compartmentId` plus exactly one query filter, accepts only one returned
+  summary, and reissues the list query on each reconcile.
