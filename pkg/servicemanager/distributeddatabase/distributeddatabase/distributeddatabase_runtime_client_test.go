@@ -17,6 +17,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/common"
 	distributeddatabasesdk "github.com/oracle/oci-go-sdk/v65/distributeddatabase"
 	distributeddatabasev1beta1 "github.com/oracle/oci-service-operator/api/distributeddatabase/v1beta1"
+	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 )
 
@@ -47,7 +48,21 @@ func TestApplyDistributedDatabaseRuntimeHooksOverridesGeneratedDefaults(t *testi
 	if got, want := hooks.Semantics.List.MatchFields, []string{"compartmentId", "displayName", "prefix", "dbDeploymentType", "lifecycleState"}; !reflect.DeepEqual(got, want) {
 		t.Fatalf("hooks.Semantics.List.MatchFields = %#v, want %#v", got, want)
 	}
-	if got, want := hooks.List.Fields, reviewedDistributedDatabaseListFields(); !reflect.DeepEqual(got, want) {
+	if got, want := hooks.Get.Fields, []generatedruntime.RequestField{
+		{FieldName: "DistributedDatabaseId", RequestName: "distributedDatabaseId", Contribution: "path", PreferResourceID: true},
+	}; !reflect.DeepEqual(got, want) {
+		t.Fatalf("hooks.Get.Fields = %#v, want %#v", got, want)
+	}
+	if got, want := hooks.List.Fields, []generatedruntime.RequestField{
+		{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
+		{FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query"},
+		{FieldName: "Limit", RequestName: "limit", Contribution: "query"},
+		{FieldName: "Page", RequestName: "page", Contribution: "query"},
+		{FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query"},
+		{FieldName: "SortBy", RequestName: "sortBy", Contribution: "query"},
+		{FieldName: "DisplayName", RequestName: "displayName", Contribution: "query"},
+		{FieldName: "DbDeploymentType", RequestName: "dbDeploymentType", Contribution: "query"},
+	}; !reflect.DeepEqual(got, want) {
 		t.Fatalf("hooks.List.Fields = %#v, want %#v", got, want)
 	}
 	if hooks.BuildCreateBody == nil {

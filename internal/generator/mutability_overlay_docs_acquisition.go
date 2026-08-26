@@ -632,10 +632,13 @@ func tryAcquireMutabilityOverlayDocsInputFromProviderMarkdown(
 
 func mutabilityOverlayProviderMarkdownRawURL(target mutabilityOverlayRegistryPageTarget) (string, bool) {
 	sourcePath := strings.TrimSpace(target.ProviderSourcePath)
-	revision := strings.TrimSpace(target.ProviderSourceRevision)
+	revision := strings.TrimSpace(target.TerraformDocsVersion)
 	providerResource := strings.TrimSpace(target.ProviderResource)
-	if sourcePath == "" || revision == "" || providerResource == "" {
+	if sourcePath == "" || strings.TrimSpace(target.ProviderSourceRevision) == "" || revision == "" || providerResource == "" {
 		return "", false
+	}
+	if !strings.HasPrefix(revision, "v") {
+		revision = "v" + revision
 	}
 
 	sourcePath = strings.TrimPrefix(sourcePath, "https://")

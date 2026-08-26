@@ -88,9 +88,9 @@ func (g *Generator) buildMutabilityOverlayArtifacts(
 
 	fixtureRoot := g.mutabilityOverlayDocsFixtureRoot(cfg)
 	var (
-		artifacts       []mutabilityOverlayGeneratedArtifact
-		sourceRevisions map[string]string
-		errs            []error
+		artifacts     []mutabilityOverlayGeneratedArtifact
+		sourceEntries map[string]mutabilityOverlaySourceLockEntry
+		errs          []error
 	)
 	for _, pkg := range packages {
 		if pkg == nil {
@@ -102,11 +102,16 @@ func (g *Generator) buildMutabilityOverlayArtifacts(
 				continue
 			}
 
-			if sourceRevisions == nil {
-				sourceRevisions, err = loadMutabilityOverlaySourceRevisions(cfg.FormalRoot())
+			if sourceEntries == nil {
+				sourceEntries, err = loadMutabilityOverlaySourceEntries(cfg.FormalRoot())
 				if err != nil {
 					return nil, err
 				}
+			}
+			sourceEntry, err := mutabilityOverlaySourceEntryForResource(sourceEntries, resource)
+			if err != nil {
+				errs = append(errs, err)
+				continue
 			}
 
 			target, err := resolveMutabilityOverlayRegistryPageTarget(pkg.Service.Service, resource, contract, nil)
@@ -114,6 +119,8 @@ func (g *Generator) buildMutabilityOverlayArtifacts(
 				errs = append(errs, err)
 				continue
 			}
+			target.ProviderSourcePath = sourceEntry.Path
+			target.ProviderSourceRevision = sourceEntry.Revision
 
 			var parsedDocs *mutabilityOverlayDocsParseResult
 			if mutabilityOverlayNeedsDocs(astFields) {
@@ -130,13 +137,7 @@ func (g *Generator) buildMutabilityOverlayArtifacts(
 				parsedDocs = &parsedResult
 			}
 
-			providerRevision, err := mutabilityOverlaySourceRevisionForResource(sourceRevisions, resource)
-			if err != nil {
-				errs = append(errs, err)
-				continue
-			}
-
-			doc, err := buildMutabilityOverlayDocument(pkg.Service.Service, resource, target, providerRevision, parsedDocs, astFields)
+			doc, err := buildMutabilityOverlayDocument(pkg.Service.Service, resource, target, sourceEntry.Revision, parsedDocs, astFields)
 			if err != nil {
 				errs = append(errs, err)
 				continue
@@ -284,23 +285,6 @@ func mutabilityOverlayNeedsDocs(fields []mutabilityOverlayASTFieldInput) bool {
 	return false
 }
 
-func loadMutabilityOverlaySourceRevisions(formalRoot string) (map[string]string, error) {
-	entries, err := loadMutabilityOverlaySourceEntries(formalRoot)
-	if err != nil {
-		return nil, err
-	}
-
-	revisions := make(map[string]string, len(entries))
-	for name, entry := range entries {
-		revision := strings.TrimSpace(entry.Revision)
-		if revision == "" {
-			continue
-		}
-		revisions[name] = revision
-	}
-	return revisions, nil
-}
-
 func loadMutabilityOverlaySourceEntries(formalRoot string) (map[string]mutabilityOverlaySourceLockEntry, error) {
 	formalRoot = strings.TrimSpace(formalRoot)
 	if formalRoot == "" {
@@ -331,21 +315,23 @@ func loadMutabilityOverlaySourceEntries(formalRoot string) (map[string]mutabilit
 	return entries, nil
 }
 
-func mutabilityOverlaySourceRevisionForResource(
-	revisions map[string]string,
+func mutabilityOverlaySourceEntryForResource(
+	entries map[string]mutabilityOverlaySourceLockEntry,
 	resource ResourceModel,
-) (string, error) {
+) (mutabilityOverlaySourceLockEntry, error) {
 	if resource.Formal == nil {
-		return "", errors.New("mutability overlay source revision requires a formal model")
+		return mutabilityOverlaySourceLockEntry{}, errors.New("mutability overlay source revision requires a formal model")
 	}
 
 	sourceRef := mutabilityOverlaySourceRefForResource(resource)
-	revision := strings.TrimSpace(revisions[sourceRef])
-	if revision != "" {
-		return revision, nil
+	entry, ok := entries[sourceRef]
+	entry.Path = strings.TrimSpace(entry.Path)
+	entry.Revision = strings.TrimSpace(entry.Revision)
+	if ok && entry.Revision != "" {
+		return entry, nil
 	}
 
-	return "", &mutabilityOverlayGenerationError{
+	return mutabilityOverlaySourceLockEntry{}, &mutabilityOverlayGenerationError{
 		Reason:           mutabilityOverlayGenerationErrorMissingSourceRevision,
 		Service:          resource.Formal.Reference.Service,
 		Kind:             resource.Kind,

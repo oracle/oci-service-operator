@@ -135,6 +135,106 @@ services:
 	}
 }
 
+func TestGenerateFallsBackToPinnedProviderMarkdown(t *testing.T) {
+	t.Parallel()
+
+	repo := t.TempDir()
+	configPath := filepath.Join(repo, "internal", "generator", "config", "services.yaml")
+	writeGeneratorTestFile(t, configPath, `schemaVersion: v1alpha1
+domain: oracle.com
+defaultVersion: v1beta1
+generatorEntrypoint: ./cmd/generator
+packageProfiles:
+  crd-only:
+    description: CRD-only groups
+services:
+  - service: mysql
+    sdkPackage: example.com/test/sdk
+    group: mysql
+    packageProfile: crd-only
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Widget
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+    generation:
+      resources:
+        - kind: Widget
+          formalSpec: widget
+`)
+	writeMutabilityOverlayWidgetFormalScaffold(t, repo)
+	target := mutabilityOverlayWidgetTarget()
+	target.ProviderSourcePath = "github.com/oracle/terraform-provider-oci"
+	target.ProviderSourceRevision = "test-provider-revision"
+	rawURL, ok := mutabilityOverlayProviderMarkdownRawURL(target)
+	if !ok {
+		t.Fatal("mutabilityOverlayProviderMarkdownRawURL() unexpectedly returned !ok")
+	}
+	if !strings.Contains(rawURL, "/v7.22.0/") {
+		t.Fatalf("raw URL = %q, want pinned Terraform docs version tag", rawURL)
+	}
+
+	cfg, err := LoadConfig(configPath)
+	if err != nil {
+		t.Fatalf("LoadConfig(%q) error = %v", configPath, err)
+	}
+	services, err := cfg.SelectServices("mysql", false)
+	if err != nil {
+		t.Fatalf("SelectServices(mysql) error = %v", err)
+	}
+
+	pipeline := New()
+	pipeline.discoverer = &Discoverer{
+		resolveDir: func(context.Context, string) (string, error) {
+			return sampleSDKDir(t), nil
+		},
+	}
+	pipeline.mutabilityOverlayDocsFetcher = stubMutabilityOverlayDocsFetcher{
+		responses: map[string]mutabilityOverlayDocsHTTPResponse{
+			target.RegistryURL: {
+				StatusCode:  200,
+				ContentType: "text/html; charset=utf-8",
+				Body:        []byte("<html><body>Please enable JavaScript to continue.</body></html>"),
+			},
+			rawURL: {
+				StatusCode:  200,
+				ContentType: "text/plain; charset=utf-8",
+				Body: []byte("## Argument Reference\n\nThe following arguments are supported:\n\n" +
+					"* `display_name` - (Required) (Updatable) Display name.\n" +
+					"* `compartment_id` - (Required) Compartment identifier.\n"),
+			},
+		},
+	}
+
+	outputRoot := t.TempDir()
+	if _, err := pipeline.Generate(context.Background(), cfg, services, Options{
+		OutputRoot:              outputRoot,
+		EnableMutabilityOverlay: true,
+	}); err != nil {
+		t.Fatalf("Generate() error = %v", err)
+	}
+
+	artifactPath := filepath.Join(
+		outputRoot,
+		filepath.FromSlash(mutabilityOverlayGeneratedRootRelativePath),
+		"mysql",
+		"widget.json",
+	)
+	var doc mutabilityOverlayDocument
+	if err := json.Unmarshal([]byte(readFile(t, artifactPath)), &doc); err != nil {
+		t.Fatalf("Unmarshal(%q) error = %v", artifactPath, err)
+	}
+	if doc.Metadata.ProviderRevision != "test-provider-revision" {
+		t.Fatalf("ProviderRevision = %q, want test-provider-revision", doc.Metadata.ProviderRevision)
+	}
+	if got := findMutabilityOverlayField(t, doc.Fields, "displayName").Merge.FinalPolicy; got != mutabilityOverlayPolicyAllowInPlaceUpdate {
+		t.Fatalf("displayName final policy = %q, want %q", got, mutabilityOverlayPolicyAllowInPlaceUpdate)
+	}
+}
+
 func TestGenerateMutabilityOverlayPrefersRepoAuthoredMutationSurface(t *testing.T) {
 	t.Parallel()
 

@@ -22,12 +22,14 @@ import (
 func TestManagerDeploymentTemplateSatisfiesRestrictedPodSecurity(t *testing.T) {
 	t.Parallel()
 
-	content, err := renderManagerDeploymentFile()
-	if err != nil {
-		t.Fatalf("renderManagerDeploymentFile() error = %v", err)
-	}
+	for _, dedicatedServiceAccount := range []bool{false, true} {
+		content, err := renderManagerDeploymentFile(dedicatedServiceAccount)
+		if err != nil {
+			t.Fatalf("renderManagerDeploymentFile(%t) error = %v", dedicatedServiceAccount, err)
+		}
 
-	assertRestrictedManagerDeployment(t, "manager deployment template", content)
+		assertRestrictedManagerDeployment(t, "manager deployment template", content)
+	}
 }
 
 func TestCheckedInManagerDeploymentsSatisfyRestrictedPodSecurity(t *testing.T) {

@@ -68,16 +68,20 @@ else live state requires field-aware\ndrift evaluation
 group Drift handling
 note over ServiceManager,OCI
 Supported update surface:
-compartment_id,
-content_moderation_config, defined_tags,
-description (+11 more)
-Reject before mutate: none
+contentModerationConfig, definedTags,
+description, displayName (+10 more)
+Reject before mutate: force-new fields
+agentId, compartmentId,
+shouldEnableSession
 Lookup filters: agent_id,
 compartment_id, display_name,
 lifecycle_state
 end note
+opt force-new or conflicting drift is detected
+ServiceManager --> BaseReconciler: reject before OCI mutation
+end
 opt supported mutable drift is detected
-ServiceManager -> OCI: Apply\nChangeAgentEndpointCompartment,\nUpdateAgentEndpoint only for mutable\nfields compartment_id,\ncontent_moderation_config,\ndefined_tags, description (+11 more)
+ServiceManager -> OCI: Apply UpdateAgentEndpoint only for\nmutable fields\ncontentModerationConfig,\ndefinedTags, description,\ndisplayName (+10 more)
 loop update pending UPDATING
 ServiceManager -> OCI: GetAgentEndpoint
 end
@@ -111,10 +115,10 @@ retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
 provider states: create CREATING; update
 UPDATING; delete DELETING
-supported drift: compartment_id,
-content_moderation_config, defined_tags,
-description (+11 more)
-reject before mutate: none
+supported drift: contentModerationConfig,
+definedTags, description, displayName (+10 more)
+reject before mutate: force-new fields agentId,
+compartmentId, shouldEnableSession
 create-only fields: none
 list lookup:
 oci_generative_ai_agent_agent_endpoints filters
@@ -122,8 +126,9 @@ agent_id, compartment_id, display_name,
 lifecycle_state
 conflicts: none
 open gaps: none
-Scaffold metadata only; replace with
-controller-specific runtime states before
-promotion.
+The reviewed handwritten runtime reconciles the
+mutable fields in place and rejects drift for
+agentId, compartmentId, and shouldEnableSession
+without invoking ChangeAgentEndpointCompartment.
 end note
 @enduml

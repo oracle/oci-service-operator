@@ -102,14 +102,14 @@ reject before mutate: force-new fields
 compartmentId
 create-only fields: none
 list lookup:
-oci_distributeddatabase_distributed_databases
+oci_globally_distributed_database_sharded_databases
 filters compartmentId, displayName,
 dbDeploymentType, lifecycleState; exact
-compartmentId plus displayName list filters,
-then narrow summary candidates in memory to a
-unique exact prefix plus dbDeploymentType match;
-when lifecycleState is already known the runtime
-preserves that filter on fallback list rereads
+compartmentId plus displayName list filters
+preserve dbDeploymentType and lifecycleState
+when already known, then narrow summary
+candidates in memory to a unique exact prefix
+plus dbDeploymentType match
 conflicts: none
 open gaps: none
 Create-body normalization keeps shard and

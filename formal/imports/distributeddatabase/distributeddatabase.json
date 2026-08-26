@@ -5,7 +5,7 @@
   "slug": "distributeddatabase",
   "kind": "DistributedDatabase",
   "sourceRef": "terraform-provider-oci",
-  "providerResource": "oci_distributeddatabase_distributed_database",
+  "providerResource": "oci_globally_distributed_database_sharded_database",
   "operations": {
     "create": [
       {
@@ -116,15 +116,12 @@
     ]
   },
   "listLookup": {
-    "datasource": "oci_distributeddatabase_distributed_databases",
-    "collectionField": "distributed_database_collection",
+    "datasource": "oci_globally_distributed_database_sharded_databases",
+    "collectionField": "sharded_database_collection",
     "responseItemsField": "Items",
     "filterFields": [
       "compartment_id",
-      "db_deployment_type",
       "display_name",
-      "metadata",
-      "private_endpoint_id",
       "state"
     ]
   },
@@ -143,7 +140,8 @@
   "notes": [
     "Pinned OCI SDK contract: CreateDistributedDatabase, GetDistributedDatabase, and UpdateDistributedDatabase return the resource body, ListDistributedDatabases returns DistributedDatabaseSummary items, and DeleteDistributedDatabase returns headers only.",
     "Pinned OCI SDK contract: lifecycle states include CREATING, UPDATING, ACTIVE, INACTIVE, NEEDS_ATTENTION, FAILED, DELETING, and DELETED.",
-    "Pinned provider docs expose the plural datasource `oci_distributeddatabase_distributed_databases` with `compartment_id`, `db_deployment_type`, `display_name`, `metadata`, `private_endpoint_id`, and `state` filters.",
+    "Terraform Provider OCI v7.22.0 publishes this surface as resource `oci_globally_distributed_database_sharded_database` and plural datasource `oci_globally_distributed_database_sharded_databases`; the datasource supports `compartment_id`, `display_name`, and `state` filters.",
+    "OSOK's runtime ListDistributedDatabases contract additionally preserves `db_deployment_type` and `lifecycle_state` SDK filters for exact pre-create reuse; these runtime filters are not claims about the Terraform datasource schema.",
     "Pinned provider docs mark a broader mutation surface as updatable, including compartment moves, patch operations, state transitions, and several trigger-driven actions. The current OSOK CRD intentionally narrows that surface and only publishes direct CRUD plus displayName and tag drift.",
     "Repo-authored runtime contract keeps in-place mutation aligned with UpdateDistributedDatabaseDetails for displayName, freeformTags, and definedTags. compartmentId remains replacement-only drift because the published CRD does not expose the separate change-compartment helper.",
     "Repo-authored bind-versus-create stays explicit: pre-create lookup lists by exact compartmentId plus displayName, preserves dbDeploymentType and lifecycleState when they are already available for rereads, then narrows summary candidates in memory to a unique exact prefix plus dbDeploymentType match before reuse.",

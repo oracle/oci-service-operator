@@ -937,6 +937,63 @@ func validateDiagramBinding(path string, diagram diagramSpec, binding *Controlle
 	if binding.Spec.DeleteConfirmation == "not-supported" && containsIgnoreCase(diagram.States, "terminating") {
 		problems = append(problems, fmt.Sprintf("%s: states must not include terminating when delete_confirmation is not-supported", filepath.ToSlash(path)))
 	}
+	problems = append(problems, validateRepoAuthoredUpdateOperations(path, diagram, binding.Import.Operations.Update)...)
 
 	return problems
+}
+
+func validateRepoAuthoredUpdateOperations(path string, diagram diagramSpec, imported []operationBinding) []string {
+	if diagram.RepoAuthored == nil || diagram.RepoAuthored.Operations == nil || diagram.RepoAuthored.Operations.Update == nil {
+		return nil
+	}
+
+	available := make(map[string]struct{}, len(imported))
+	for _, operation := range imported {
+		available[strings.TrimSpace(operation.Operation)] = struct{}{}
+	}
+
+	seen := make(map[string]struct{}, len(diagram.RepoAuthored.Operations.Update))
+	var problems []string
+	for index, rawName := range diagram.RepoAuthored.Operations.Update {
+		name := strings.TrimSpace(rawName)
+		switch {
+		case name == "":
+			problems = append(problems, fmt.Sprintf("%s: repoAuthored.operations.update[%d] must not be empty", filepath.ToSlash(path), index))
+		case hasStringKey(seen, name):
+			problems = append(problems, fmt.Sprintf("%s: repoAuthored.operations.update contains duplicate operation %q", filepath.ToSlash(path), name))
+		case !hasStringKey(available, name):
+			problems = append(problems, fmt.Sprintf("%s: repoAuthored.operations.update[%d]=%q is not present in imported update operations", filepath.ToSlash(path), index, name))
+		}
+		if name != "" {
+			seen[name] = struct{}{}
+		}
+	}
+	if primary := importedPrimaryUpdateOperation(diagram.Kind, imported); primary != "" && !containsTrimmedString(diagram.RepoAuthored.Operations.Update, primary) {
+		problems = append(problems, fmt.Sprintf("%s: repoAuthored.operations.update must include primary update operation %q", filepath.ToSlash(path), primary))
+	}
+	return problems
+}
+
+func importedPrimaryUpdateOperation(kind string, imported []operationBinding) string {
+	want := "Update" + strings.TrimSpace(kind)
+	for _, operation := range imported {
+		if strings.TrimSpace(operation.Operation) == want {
+			return want
+		}
+	}
+	return ""
+}
+
+func containsTrimmedString(values []string, want string) bool {
+	for _, value := range values {
+		if strings.TrimSpace(value) == want {
+			return true
+		}
+	}
+	return false
+}
+
+func hasStringKey(values map[string]struct{}, key string) bool {
+	_, ok := values[key]
+	return ok
 }

@@ -120,7 +120,7 @@ func Generate(opts Options) (Report, error) {
 	if err := writeManifestAndPrune(inputs.Root, rows, &report); err != nil {
 		return report, err
 	}
-	if err := writeDiscoveredScaffolds(inputs.Root, rows, discoveredKeys, inputs.Template, &report); err != nil {
+	if err := writeDiscoveredScaffolds(inputs.Root, rows, discoveredKeys, inputs.Catalog, inputs.Template, &report); err != nil {
 		return report, err
 	}
 	if err := renderAndVerifyScaffold(inputs, strings.TrimSpace(opts.ProviderPath), &report); err != nil {
@@ -291,9 +291,10 @@ func writeManifestAndPrune(root string, rows []formal.ManifestRow, report *Repor
 	return pruneStaleFormalArtifacts(root, rows)
 }
 
-func writeDiscoveredScaffolds(root string, rows []formal.ManifestRow, discoveredKeys map[string]inventoryEntry, template formal.ControllerBinding, report *Report) error {
+func writeDiscoveredScaffolds(root string, rows []formal.ManifestRow, discoveredKeys map[string]inventoryEntry, catalog *formal.Catalog, template formal.ControllerBinding, report *Report) error {
+	existingBindings := indexControllerBindings(catalog)
 	for _, row := range rows {
-		writes, err := writeDiscoveredScaffoldRow(root, row, discoveredKeys, template)
+		writes, err := writeDiscoveredScaffoldRow(root, row, discoveredKeys, existingBindings, template)
 		if err != nil {
 			return err
 		}
@@ -302,9 +303,23 @@ func writeDiscoveredScaffolds(root string, rows []formal.ManifestRow, discovered
 	return nil
 }
 
-func writeDiscoveredScaffoldRow(root string, row formal.ManifestRow, discoveredKeys map[string]inventoryEntry, template formal.ControllerBinding) (int, error) {
+func indexControllerBindings(catalog *formal.Catalog) map[string]formal.ControllerBinding {
+	if catalog == nil {
+		return nil
+	}
+	bindings := make(map[string]formal.ControllerBinding, len(catalog.Controllers))
+	for _, binding := range catalog.Controllers {
+		bindings[rowKey(binding.Manifest.Service, binding.Manifest.Slug)] = binding
+	}
+	return bindings
+}
+
+func writeDiscoveredScaffoldRow(root string, row formal.ManifestRow, discoveredKeys map[string]inventoryEntry, existingBindings map[string]formal.ControllerBinding, template formal.ControllerBinding) (int, error) {
 	entry, ok := discoveredKeys[rowKey(row.Service, row.Slug)]
 	if !ok || row.Stage != "scaffold" {
+		return 0, nil
+	}
+	if binding, ok := existingBindings[rowKey(row.Service, row.Slug)]; ok && !isGeneratedScaffoldPlaceholder(row, binding) {
 		return 0, nil
 	}
 
@@ -313,6 +328,19 @@ func writeDiscoveredScaffoldRow(root string, row formal.ManifestRow, discoveredK
 		return 0, err
 	}
 	return writeScaffoldArtifacts(root, row, artifacts)
+}
+
+func isGeneratedScaffoldPlaceholder(row formal.ManifestRow, binding formal.ControllerBinding) bool {
+	if strings.TrimSpace(binding.Import.ProviderResource) == scaffoldProviderResource(row) {
+		return true
+	}
+	prefix := fmt.Sprintf("Scaffold placeholder for %s/%s;", row.Service, row.Slug)
+	for _, note := range binding.Import.Notes {
+		if strings.HasPrefix(strings.TrimSpace(note), prefix) {
+			return true
+		}
+	}
+	return false
 }
 
 func renderAndVerifyScaffold(inputs generateInputs, providerPath string, report *Report) error {

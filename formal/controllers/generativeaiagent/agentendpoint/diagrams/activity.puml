@@ -55,9 +55,13 @@ stop
 endif
 }
 partition "Ready and Drift Handling" {
-:Compare live OCI state against the imported\nfield surface;
+:Compare live OCI state against the\nrepo-authored mutation surface;
+if ("Force-new or conflicting drift detected?") then (yes)
+:Reject drift before OCI mutation for force-new\nfields agentId, compartmentId,\nshouldEnableSession;
+stop
+endif
 if ("Supported mutable drift detected?") then (yes)
-:Apply ChangeAgentEndpointCompartment,\nUpdateAgentEndpoint only for mutable fields\ncompartment_id, content_moderation_config,\ndefined_tags, description (+11 more);
+:Apply UpdateAgentEndpoint only for mutable\nfields contentModerationConfig, definedTags,\ndescription, displayName (+10 more);
 else (no)
 :Skip the no-op mutation path;
 endif
@@ -89,10 +93,10 @@ retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
 provider states: create CREATING; update
 UPDATING; delete DELETING
-supported drift: compartment_id,
-content_moderation_config, defined_tags,
-description (+11 more)
-reject before mutate: none
+supported drift: contentModerationConfig,
+definedTags, description, displayName (+10 more)
+reject before mutate: force-new fields agentId,
+compartmentId, shouldEnableSession
 create-only fields: none
 list lookup:
 oci_generative_ai_agent_agent_endpoints filters
@@ -100,8 +104,9 @@ agent_id, compartment_id, display_name,
 lifecycle_state
 conflicts: none
 open gaps: none
-Scaffold metadata only; replace with
-controller-specific runtime states before
-promotion.
+The reviewed handwritten runtime reconciles the
+mutable fields in place and rejects drift for
+agentId, compartmentId, and shouldEnableSession
+without invoking ChangeAgentEndpointCompartment.
 end note
 @enduml

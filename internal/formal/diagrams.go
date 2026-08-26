@@ -71,6 +71,7 @@ type diagramRepoAuthoredSemantics struct {
 	ProviderLifecycle *diagramProviderLifecycle   `yaml:"providerLifecycle,omitempty"`
 	ListLookup        *diagramListLookupSemantics `yaml:"listLookup,omitempty"`
 	Mutation          *diagramMutationSemantics   `yaml:"mutation,omitempty"`
+	Operations        *diagramOperationSemantics  `yaml:"operations,omitempty"`
 	Hooks             *diagramHookSemantics       `yaml:"hooks,omitempty"`
 	FollowUp          *diagramFollowUpSemantics   `yaml:"followUp,omitempty"`
 }
@@ -90,6 +91,10 @@ type diagramMutationSemantics struct {
 	Mutable    []string `yaml:"mutable,omitempty"`
 	ForceNew   []string `yaml:"forceNew,omitempty"`
 	CreateOnly []string `yaml:"createOnly,omitempty"`
+}
+
+type diagramOperationSemantics struct {
+	Update []string `yaml:"update,omitempty"`
 }
 
 type diagramHookSemantics struct {
@@ -353,7 +358,7 @@ func renderActivityPUML(ctx diagramContext) []byte {
 			summarizeValues(ctx.ConflictSets, 3),
 		)))
 	}
-	if len(mutableSurface(ctx)) > 0 && len(binding.Import.Operations.Update) > 0 {
+	if len(mutableSurface(ctx)) > 0 && len(effectiveUpdateOperations(ctx)) > 0 {
 		lines = append(lines,
 			`if ("Supported mutable drift detected?") then (yes)`,
 			plantUMLAction(updateActivitySummary(ctx)),
@@ -361,10 +366,10 @@ func renderActivityPUML(ctx diagramContext) []byte {
 			plantUMLAction("Skip the no-op mutation path"),
 			"endif",
 		)
-	} else if len(binding.Import.Operations.Update) > 0 {
+	} else if len(effectiveUpdateOperations(ctx)) > 0 {
 		lines = append(lines, plantUMLAction(fmt.Sprintf(
 			"No imported mutable field surface opens %s",
-			summarizeOperations(binding.Import.Operations.Update, 3),
+			summarizeOperations(effectiveUpdateOperations(ctx), 3),
 		)))
 	}
 	if hooks := hookPhaseSummary(ctx); hooks != "none" {
@@ -459,7 +464,7 @@ func renderStateMachinePUML(ctx diagramContext) []byte {
 	if hasRejectableDrift(ctx) {
 		lines = append(lines, `state "RejectUnsupportedDrift" as reject_unsupported_drift`)
 	}
-	if len(mutableSurface(ctx)) > 0 && len(binding.Import.Operations.Update) > 0 {
+	if len(mutableSurface(ctx)) > 0 && len(effectiveUpdateOperations(ctx)) > 0 {
 		lines = append(lines, `state "ApplyUpdate" as apply_update`)
 	}
 	if includeSecretsParticipant(ctx) {
@@ -497,7 +502,7 @@ func renderStateMachinePUML(ctx diagramContext) []byte {
 			"reject_unsupported_drift --> ready : wait for spec or live state change",
 		)
 	}
-	if len(mutableSurface(ctx)) > 0 && len(binding.Import.Operations.Update) > 0 {
+	if len(mutableSurface(ctx)) > 0 && len(effectiveUpdateOperations(ctx)) > 0 {
 		lines = append(lines, fmt.Sprintf(
 			"evaluate_ready --> apply_update : %s",
 			wrapPlantUMLText(fmt.Sprintf("supported mutable drift for %s", summarizeValues(mutableSurface(ctx), 3)), 28),
@@ -882,7 +887,7 @@ func renderDriftHandlingSequence(ctx diagramContext) []string {
 			"end",
 		)
 	}
-	if len(mutableSurface(ctx)) > 0 && len(binding.Import.Operations.Update) > 0 {
+	if len(mutableSurface(ctx)) > 0 && len(effectiveUpdateOperations(ctx)) > 0 {
 		lines = append(lines,
 			"opt supported mutable drift is detected",
 			fmt.Sprintf("ServiceManager -> OCI: %s", wrapPlantUMLText(updateActivitySummary(ctx), 36)),
@@ -932,10 +937,9 @@ func hasRejectableDrift(ctx diagramContext) bool {
 }
 
 func updateActivitySummary(ctx diagramContext) string {
-	binding := ctx.Binding
 	return fmt.Sprintf(
 		"Apply %s only for mutable fields %s",
-		summarizeOperations(binding.Import.Operations.Update, 3),
+		summarizeOperations(effectiveUpdateOperations(ctx), 3),
 		summarizeValues(mutableSurface(ctx), 4),
 	)
 }
@@ -1257,6 +1261,10 @@ func createOnlySurface(ctx diagramContext) []string {
 		return ctx.Diagram.RepoAuthored.Mutation.CreateOnly
 	}
 	return nil
+}
+
+func effectiveUpdateOperations(ctx diagramContext) []operationBinding {
+	return EffectiveRuntimeLifecycleUpdateOperations(&ctx.Diagram, ctx.Binding.Import.Operations.Update)
 }
 
 func hasListLookup(ctx diagramContext) bool {

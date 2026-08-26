@@ -605,6 +605,9 @@ func attachResourceFormalModels(service ServiceConfig, pkg *PackageModel, catalo
 		}
 
 		pkg.Resources[index].Formal = model
+		if err := validateRuntimeUpdateOperationSubset(model, pkg.Resources[index].Runtime); err != nil {
+			return nil, fmt.Errorf("service %q kind %q: %w", service.Service, pkg.Resources[index].Kind, err)
+		}
 		if pkg.Resources[index].Runtime != nil {
 			pkg.Resources[index].Runtime.Semantics = buildRuntimeSemanticsModelWithAsync(
 				model,

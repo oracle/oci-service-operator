@@ -17,10 +17,35 @@
     "specPathPrefix": "spec"
   },
   "update": {
-    "allowInPlacePaths": null,
+    "allowInPlacePaths": [
+      "definedTags",
+      "displayName",
+      "freeformTags"
+    ],
     "denyRules": [
       {
-        "fieldPath": "compartmentId",
+        "fieldPath": "drProtectionGroupId",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      {
+        "fieldPath": "planGroups",
+        "decision": "unknown",
+        "mergeCase": "astOnlyCandidate",
+        "docsEvidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      },
+      {
+        "fieldPath": "sourcePlanId",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      {
+        "fieldPath": "type",
         "decision": "replacementRequired",
         "mergeCase": "replacementRequired",
         "docsEvidenceState": "notDocumented",

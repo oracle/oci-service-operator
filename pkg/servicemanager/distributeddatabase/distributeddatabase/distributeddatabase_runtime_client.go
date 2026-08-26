@@ -41,6 +41,7 @@ func applyDistributedDatabaseRuntimeHooks(
 	}
 
 	hooks.Semantics = reviewedDistributedDatabaseRuntimeSemantics()
+	hooks.Get.Fields = reviewedDistributedDatabaseGetFields()
 	hooks.List.Fields = reviewedDistributedDatabaseListFields()
 	hooks.BuildCreateBody = func(
 		ctx context.Context,
@@ -85,10 +86,15 @@ func reviewedDistributedDatabaseRuntimeSemantics() *generatedruntime.Semantics {
 	return semantics
 }
 
+func reviewedDistributedDatabaseGetFields() []generatedruntime.RequestField {
+	return []generatedruntime.RequestField{
+		{FieldName: "DistributedDatabaseId", RequestName: "distributedDatabaseId", Contribution: "path", PreferResourceID: true},
+	}
+}
+
 func reviewedDistributedDatabaseListFields() []generatedruntime.RequestField {
 	return []generatedruntime.RequestField{
 		{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
-		{FieldName: "PrivateEndpointId", RequestName: "privateEndpointId", Contribution: "query"},
 		{FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query"},
 		{FieldName: "Limit", RequestName: "limit", Contribution: "query"},
 		{FieldName: "Page", RequestName: "page", Contribution: "query"},
@@ -96,7 +102,6 @@ func reviewedDistributedDatabaseListFields() []generatedruntime.RequestField {
 		{FieldName: "SortBy", RequestName: "sortBy", Contribution: "query"},
 		{FieldName: "DisplayName", RequestName: "displayName", Contribution: "query"},
 		{FieldName: "DbDeploymentType", RequestName: "dbDeploymentType", Contribution: "query"},
-		{FieldName: "Metadata", RequestName: "metadata", Contribution: "query"},
 	}
 }
 
