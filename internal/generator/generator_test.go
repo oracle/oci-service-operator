@@ -755,6 +755,96 @@ func TestBuildPackageModelPreservesAliasedAPIKinds(t *testing.T) {
 	}
 }
 
+func TestCheckedInApiGatewayOptionalBooleansPreservePresence(t *testing.T) {
+	t.Parallel()
+
+	cfg := loadCheckedInConfig(t)
+	service := serviceConfigsByName(t, cfg, "apigateway")["apigateway"]
+	pkg, err := NewDiscoverer().BuildPackageModel(context.Background(), cfg, *service)
+	if err != nil {
+		t.Fatalf("BuildPackageModel() error = %v", err)
+	}
+
+	var violations []string
+	for _, kind := range []string{"ApiGateway", "ApiGatewayDeployment"} {
+		resource := findResource(t, pkg.Resources, kind)
+		for _, path := range optionalValueBoolPaths(resource) {
+			violations = append(violations, kind+"."+path)
+		}
+	}
+	if len(violations) != 0 {
+		t.Fatalf("API Gateway optional boolean fields lose absent-vs-false presence: %v", violations)
+	}
+}
+
+func TestOptionalBooleanPresencePolicyIsResourceScoped(t *testing.T) {
+	t.Parallel()
+
+	cfg := &Config{Domain: "oracle.com", DefaultVersion: "v1beta1"}
+	service := ServiceConfig{
+		Service:        "apigateway",
+		SDKPackage:     "github.com/oracle/oci-go-sdk/v65/apigateway",
+		Group:          "apigateway",
+		PackageProfile: PackageProfileCRDOnly,
+		Selection:      selectionExplicit(true, "Deployment", "Gateway"),
+		KindAliases: map[string]string{
+			"Deployment": "ApiGatewayDeployment",
+			"Gateway":    "ApiGateway",
+		},
+		Generation: GenerationConfig{Resources: []ResourceGenerationOverride{{
+			Kind:                            "ApiGateway",
+			PreserveOptionalBooleanPresence: true,
+		}}},
+	}.withSelectedKinds([]string{"Deployment", "Gateway"})
+
+	pkg, err := NewDiscoverer().BuildPackageModel(context.Background(), cfg, service)
+	if err != nil {
+		t.Fatalf("BuildPackageModel() error = %v", err)
+	}
+	if paths := optionalValueBoolPaths(findResource(t, pkg.Resources, "ApiGateway")); len(paths) != 0 {
+		t.Fatalf("opted-in ApiGateway optional boolean fields = %v, want presence-aware pointers", paths)
+	}
+	if paths := optionalValueBoolPaths(findResource(t, pkg.Resources, "ApiGatewayDeployment")); len(paths) == 0 {
+		t.Fatal("non-opted-in ApiGatewayDeployment unexpectedly changed optional boolean representation")
+	}
+}
+
+func optionalValueBoolPaths(resource ResourceModel) []string {
+	helperTypes := make(map[string]TypeModel, len(resource.HelperTypes))
+	for _, helperType := range resource.HelperTypes {
+		helperTypes[helperType.Name] = helperType
+	}
+
+	var paths []string
+	var walk func([]FieldModel, []string, map[string]struct{})
+	walk = func(fields []FieldModel, prefix []string, stack map[string]struct{}) {
+		for _, field := range fields {
+			path := append(append([]string(nil), prefix...), field.Name)
+			if field.Type == "bool" && slices.Contains(field.Markers, "+kubebuilder:validation:Optional") {
+				paths = append(paths, strings.Join(path, "."))
+			}
+
+			helperName := underlyingTypeName(field.Type)
+			helperType, ok := helperTypes[helperName]
+			if !ok {
+				continue
+			}
+			if _, recursive := stack[helperName]; recursive {
+				continue
+			}
+			nextStack := make(map[string]struct{}, len(stack)+1)
+			for name := range stack {
+				nextStack[name] = struct{}{}
+			}
+			nextStack[helperName] = struct{}{}
+			walk(helperType.Fields, path, nextStack)
+		}
+	}
+	walk(resource.SpecFields, nil, map[string]struct{}{})
+	slices.Sort(paths)
+	return paths
+}
+
 func TestBuildPackageModelSynthesizesWorkRequestsObservedStateAlias(t *testing.T) {
 	t.Parallel()
 

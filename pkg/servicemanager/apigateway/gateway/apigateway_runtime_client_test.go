@@ -133,6 +133,55 @@ func TestBuildApiGatewayUpdateBodyOmitsEmptyPolymorphicBlocks(t *testing.T) {
 	}
 }
 
+func TestBuildApiGatewayUpdateBodyPreservesExplicitFalseResponseCacheBoolean(t *testing.T) {
+	t.Parallel()
+
+	resource := &apigatewayv1beta1.ApiGateway{Spec: apigatewayv1beta1.ApiGatewaySpec{
+		CompartmentId: "ocid1.compartment.oc1..mock",
+		EndpointType:  "PRIVATE",
+		SubnetId:      "ocid1.subnet.oc1..mock",
+		ResponseCacheDetails: apigatewayv1beta1.ApiGatewayResponseCacheDetails{
+			Type: "EXTERNAL_RESP_CACHE",
+			Servers: []apigatewayv1beta1.ApiGatewayResponseCacheDetailsServer{{
+				Host: "cache.example.com",
+				Port: 6379,
+			}},
+			AuthenticationSecretId:            "ocid1.vaultsecret.oc1..mock",
+			AuthenticationSecretVersionNumber: 1,
+			IsSslEnabled:                      common.Bool(false),
+		},
+	}}
+	current := apigatewaysdk.GetGatewayResponse{Gateway: apigatewaysdk.Gateway{
+		ResponseCacheDetails: apigatewaysdk.ExternalRespCache{
+			Servers: []apigatewaysdk.ResponseCacheRespServer{{
+				Host: common.String("cache.example.com"),
+				Port: common.Int(6379),
+			}},
+			AuthenticationSecretId:            common.String("ocid1.vaultsecret.oc1..mock"),
+			AuthenticationSecretVersionNumber: common.Int64(1),
+			IsSslEnabled:                      common.Bool(true),
+		},
+	}}
+
+	details, needed, err := buildApiGatewayUpdateBody(context.Background(), &ApiGatewayServiceManager{}, resource, "default", current)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !needed {
+		t.Fatal("Gateway true-to-false response cache drift was not detected")
+	}
+	cache, ok := details.ResponseCacheDetails.(apigatewaysdk.ExternalRespCache)
+	if !ok {
+		t.Fatalf("responseCacheDetails = %T, want apigateway.ExternalRespCache", details.ResponseCacheDetails)
+	}
+	if cache.IsSslEnabled == nil || *cache.IsSslEnabled {
+		t.Fatalf("responseCacheDetails.isSslEnabled = %v, want explicit false", cache.IsSslEnabled)
+	}
+	if cache.IsSslVerifyDisabled != nil {
+		t.Fatalf("omitted responseCacheDetails.isSslVerifyDisabled = %v, want nil", cache.IsSslVerifyDisabled)
+	}
+}
+
 func TestApiGatewayEndpointSecretWaitsForReadyHostname(t *testing.T) {
 	t.Parallel()
 	credentials := &apiGatewayTestCredentialClient{}

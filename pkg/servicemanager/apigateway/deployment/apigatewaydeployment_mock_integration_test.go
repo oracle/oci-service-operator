@@ -28,6 +28,7 @@ func TestMockIntegrationApiGatewayDeploymentWorkRequestCRUD(t *testing.T) {
 	resource := apiGatewayDeploymentTestResource()
 	ocimock.InitializeResource(resource, "mock-api-gateway-deployment")
 	resource.Spec.GatewayId = gatewayID
+	resource.Spec.Specification.LoggingPolicies.AccessLog.IsEnabled = common.Bool(true)
 	createDetails, err := buildApiGatewayDeploymentCreateBody(context.Background(), &ApiGatewayDeploymentServiceManager{}, resource, "default")
 	if err != nil {
 		t.Fatal(err)
@@ -41,6 +42,7 @@ func TestMockIntegrationApiGatewayDeploymentWorkRequestCRUD(t *testing.T) {
 	resource.Spec.DisplayName = "mock-deployment-updated"
 	resource.Spec.Routes[0].Backend.Body = "updated"
 	resource.Spec.FreeformTags = map[string]string{"osok-mock": "update"}
+	resource.Spec.Specification.LoggingPolicies.AccessLog.IsEnabled = common.Bool(false)
 	updateDetails, _, err := buildApiGatewayDeploymentUpdateBody(context.Background(), &ApiGatewayDeploymentServiceManager{}, resource, "default", created)
 	if err != nil {
 		t.Fatal(err)
@@ -48,6 +50,7 @@ func TestMockIntegrationApiGatewayDeploymentWorkRequestCRUD(t *testing.T) {
 	resource.Spec.DisplayName = "mock-deployment"
 	resource.Spec.Routes[0].Backend.Body = "created"
 	resource.Spec.FreeformTags = map[string]string{"osok-mock": "create"}
+	resource.Spec.Specification.LoggingPolicies.AccessLog.IsEnabled = common.Bool(true)
 	updated := created
 	updated.DisplayName = updateDetails.DisplayName
 	updated.Specification = updateDetails.Specification
@@ -66,7 +69,7 @@ func TestMockIntegrationApiGatewayDeploymentWorkRequestCRUD(t *testing.T) {
 				got.FreeformTags["osok-mock"] != want.FreeformTags["osok-mock"] {
 				return fmt.Errorf("Deployment create details = %+v, want %+v", got, want)
 			}
-			return nil
+			return validateApiGatewayDeploymentAccessLog(got.Specification, true)
 		},
 		CompareUpdate: func(got, want apigatewaysdk.UpdateDeploymentDetails) error {
 			if got.DisplayName == nil || want.DisplayName == nil || *got.DisplayName != *want.DisplayName ||
@@ -74,7 +77,7 @@ func TestMockIntegrationApiGatewayDeploymentWorkRequestCRUD(t *testing.T) {
 				got.FreeformTags["osok-mock"] != want.FreeformTags["osok-mock"] {
 				return fmt.Errorf("Deployment update details = %+v, want %+v", got, want)
 			}
-			return nil
+			return validateApiGatewayDeploymentAccessLog(got.Specification, false)
 		},
 		ListShape:         ocimock.ListShapeItems,
 		RequireCreateRead: true, RequireUpdateRead: true, RequireDeleteRead: true, DeleteEndsNotFound: true,
@@ -113,7 +116,8 @@ func TestMockIntegrationApiGatewayDeploymentWorkRequestCRUD(t *testing.T) {
 		Resource: resource, Client: client, CreateContext: generatedruntime.WithSkipExistingBeforeCreate,
 		RequireAsyncPending: []ocimock.Operation{ocimock.OperationCreate, ocimock.OperationUpdate, ocimock.OperationDelete},
 		ValidateCreated: func(current *apigatewayv1beta1.ApiGatewayDeployment) error {
-			if current.Status.Id != deploymentID || current.Status.DisplayName != "mock-deployment" || len(current.Status.Specification.Routes) != 1 {
+			if current.Status.Id != deploymentID || current.Status.DisplayName != "mock-deployment" || len(current.Status.Specification.Routes) != 1 ||
+				current.Status.Specification.LoggingPolicies.AccessLog.IsEnabled == nil || !*current.Status.Specification.LoggingPolicies.AccessLog.IsEnabled {
 				return fmt.Errorf("created ApiGatewayDeployment status = %+v", current.Status)
 			}
 			return nil
@@ -122,9 +126,11 @@ func TestMockIntegrationApiGatewayDeploymentWorkRequestCRUD(t *testing.T) {
 			current.Spec.DisplayName = "mock-deployment-updated"
 			current.Spec.Routes[0].Backend.Body = "updated"
 			current.Spec.FreeformTags = map[string]string{"osok-mock": "update"}
+			current.Spec.Specification.LoggingPolicies.AccessLog.IsEnabled = common.Bool(false)
 		},
 		ValidateUpdated: func(current *apigatewayv1beta1.ApiGatewayDeployment) error {
-			if current.Status.DisplayName != "mock-deployment-updated" || current.Status.Specification.Routes[0].Backend.Body != "updated" {
+			if current.Status.DisplayName != "mock-deployment-updated" || current.Status.Specification.Routes[0].Backend.Body != "updated" ||
+				current.Status.Specification.LoggingPolicies.AccessLog.IsEnabled == nil || *current.Status.Specification.LoggingPolicies.AccessLog.IsEnabled {
 				return fmt.Errorf("updated ApiGatewayDeployment status = %+v", current.Status)
 			}
 			return nil
@@ -136,6 +142,14 @@ func TestMockIntegrationApiGatewayDeploymentWorkRequestCRUD(t *testing.T) {
 	if err := session.Close(); err != nil {
 		t.Fatal(err)
 	}
+}
+
+func validateApiGatewayDeploymentAccessLog(specification *apigatewaysdk.ApiSpecification, enabled bool) error {
+	if specification == nil || specification.LoggingPolicies == nil || specification.LoggingPolicies.AccessLog == nil ||
+		specification.LoggingPolicies.AccessLog.IsEnabled == nil || *specification.LoggingPolicies.AccessLog.IsEnabled != enabled {
+		return fmt.Errorf("Deployment accessLog.isEnabled = %+v, want %t", specification, enabled)
+	}
+	return nil
 }
 
 func apiGatewayDeploymentWorkRequestRoute(

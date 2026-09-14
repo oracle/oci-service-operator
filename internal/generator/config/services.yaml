@@ -602,6 +602,7 @@ services:
       resources:
         - kind: ApiGateway
           formalSpec: gateway
+          preserveOptionalBooleanPresence: true
           controller:
             extraRBACMarkers:
               - '+kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;create;update;delete'
@@ -645,6 +646,7 @@ services:
                 subnetId: ocid1.subnet.oc1..exampleuniqueID
         - kind: ApiGatewayDeployment
           formalSpec: deployment
+          preserveOptionalBooleanPresence: true
           serviceManager:
             packagePath: apigateway/deployment
           specFields:

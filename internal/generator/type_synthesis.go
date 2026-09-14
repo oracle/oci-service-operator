@@ -27,8 +27,15 @@ func synthesizeResourceFieldSet(
 	responseStatusCandidates []string,
 ) resourceFieldSet {
 	synthesizer := newFieldSynthesizer(index, resourceKind)
+	preserveOptionalBool := false
+	if override, ok := service.resourceGenerationOverride(resourceKind); ok {
+		preserveOptionalBool = override.PreserveOptionalBooleanPresence
+	}
 
-	specFields, _ := synthesizer.mergeStructFields(specCandidates, nil, fieldRenderingOptions{scope: fieldScopeSpec})
+	specFields, _ := synthesizer.mergeStructFields(specCandidates, nil, fieldRenderingOptions{
+		scope:                fieldScopeSpec,
+		preserveOptionalBool: preserveOptionalBool,
+	})
 
 	statusFields := defaultStatusFields()
 	statusJSONNames := fieldJSONNames(statusFields)
@@ -38,6 +45,7 @@ func synthesizeResourceFieldSet(
 		fieldRenderingOptions{
 			scope:                     fieldScopeStatus,
 			escapeStatusJSONCollision: true,
+			preserveOptionalBool:      preserveOptionalBool,
 			excludedFieldPaths:        service.ObservedStateExcludedFieldPaths(rawName),
 			requiredPointerFieldPaths: service.ObservedStateRequiredPointerFieldPaths(rawName),
 		},
@@ -49,6 +57,7 @@ func synthesizeResourceFieldSet(
 			fieldRenderingOptions{
 				scope:                     fieldScopeStatus,
 				escapeStatusJSONCollision: true,
+				preserveOptionalBool:      preserveOptionalBool,
 				excludedFieldPaths:        service.ObservedStateExcludedFieldPaths(rawName),
 				requiredPointerFieldPaths: service.ObservedStateRequiredPointerFieldPaths(rawName),
 			},
@@ -178,6 +187,9 @@ func (s *fieldSynthesizer) buildGeneratedField(
 
 	fieldModel := buildFieldModel(field, jsonName, options)
 	fieldModel.Type = renderedType
+	if shouldPreserveOptionalBooleanPointer(field, renderedType, options) {
+		fieldModel.Type = pointerRenderedType(renderedType)
+	}
 	if shouldOmitZeroGeneratedField(field, renderedType, options) {
 		fieldModel.Tag = jsonTagWithOmitZero(renderedFieldJSONName(jsonName, options))
 	}
@@ -186,6 +198,13 @@ func (s *fieldSynthesizer) buildGeneratedField(
 		fieldModel.Tag = jsonTag(renderedFieldJSONName(jsonName, options), false)
 	}
 	return fieldModel, true
+}
+
+func shouldPreserveOptionalBooleanPointer(field ocisdk.Field, renderedType string, options fieldRenderingOptions) bool {
+	return options.preserveOptionalBool &&
+		!field.Mandatory &&
+		strings.TrimSpace(renderedType) == "bool" &&
+		strings.TrimSpace(field.Type) == "*bool"
 }
 
 // shouldOmitZeroGeneratedField preserves the SDK's absent-vs-present contract

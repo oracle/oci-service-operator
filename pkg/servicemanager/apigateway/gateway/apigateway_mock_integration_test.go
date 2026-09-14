@@ -33,27 +33,43 @@ func TestMockIntegrationApiGatewayWorkRequestCRUDAndEndpointSecret(t *testing.T)
 		SubnetId:      "ocid1.subnet.oc1..mock",
 		DisplayName:   "mock-api-gateway",
 		FreeformTags:  map[string]string{"osok-mock": "create"},
+		ResponseCacheDetails: apigatewayv1beta1.ApiGatewayResponseCacheDetails{
+			Type: "EXTERNAL_RESP_CACHE",
+			Servers: []apigatewayv1beta1.ApiGatewayResponseCacheDetailsServer{{
+				Host: "cache.example.com",
+				Port: 6379,
+			}},
+			AuthenticationSecretId:            "ocid1.vaultsecret.oc1..mock",
+			AuthenticationSecretVersionNumber: 1,
+			IsSslEnabled:                      common.Bool(true),
+		},
 	}
+	createdCache := apiGatewayMockResponseCache(true)
+	updatedCache := apiGatewayMockResponseCache(false)
 	createDetails := apigatewaysdk.CreateGatewayDetails{
-		CompartmentId: common.String(resource.Spec.CompartmentId),
-		EndpointType:  apigatewaysdk.GatewayEndpointTypePrivate,
-		SubnetId:      common.String(resource.Spec.SubnetId),
-		DisplayName:   common.String(resource.Spec.DisplayName),
-		FreeformTags:  resource.Spec.FreeformTags,
+		CompartmentId:        common.String(resource.Spec.CompartmentId),
+		EndpointType:         apigatewaysdk.GatewayEndpointTypePrivate,
+		SubnetId:             common.String(resource.Spec.SubnetId),
+		DisplayName:          common.String(resource.Spec.DisplayName),
+		FreeformTags:         resource.Spec.FreeformTags,
+		ResponseCacheDetails: createdCache,
 	}
 	updateDetails := apigatewaysdk.UpdateGatewayDetails{
-		DisplayName:  common.String("mock-api-gateway-updated"),
-		FreeformTags: map[string]string{"osok-mock": "update"},
+		DisplayName:          common.String("mock-api-gateway-updated"),
+		FreeformTags:         map[string]string{"osok-mock": "update"},
+		ResponseCacheDetails: updatedCache,
 	}
 	created := apigatewaysdk.Gateway{
 		Id: common.String(gatewayID), CompartmentId: createDetails.CompartmentId,
 		EndpointType: createDetails.EndpointType, SubnetId: createDetails.SubnetId,
 		DisplayName: createDetails.DisplayName, FreeformTags: createDetails.FreeformTags,
-		Hostname: common.String("mock.example.com"), LifecycleState: apigatewaysdk.GatewayLifecycleStateActive,
+		ResponseCacheDetails: createdCache,
+		Hostname:             common.String("mock.example.com"), LifecycleState: apigatewaysdk.GatewayLifecycleStateActive,
 	}
 	updated := created
 	updated.DisplayName = updateDetails.DisplayName
 	updated.FreeformTags = updateDetails.FreeformTags
+	updated.ResponseCacheDetails = updatedCache
 
 	responder, err := ocimock.NewExplicitCRUDResponder(ocimock.ExplicitCRUDOptions[apigatewaysdk.Gateway, apigatewaysdk.CreateGatewayDetails, apigatewaysdk.UpdateGatewayDetails]{
 		CollectionPath: "/20190501/gateways",
@@ -67,18 +83,17 @@ func TestMockIntegrationApiGatewayWorkRequestCRUDAndEndpointSecret(t *testing.T)
 			if got.CompartmentId == nil || want.CompartmentId == nil || *got.CompartmentId != *want.CompartmentId ||
 				got.SubnetId == nil || want.SubnetId == nil || *got.SubnetId != *want.SubnetId ||
 				got.DisplayName == nil || want.DisplayName == nil || *got.DisplayName != *want.DisplayName ||
-				got.EndpointType != want.EndpointType || got.FreeformTags["osok-mock"] != want.FreeformTags["osok-mock"] ||
-				got.ResponseCacheDetails != nil {
+				got.EndpointType != want.EndpointType || got.FreeformTags["osok-mock"] != want.FreeformTags["osok-mock"] {
 				return fmt.Errorf("Gateway create details = %+v, want %+v", got, want)
 			}
-			return nil
+			return validateApiGatewayMockResponseCache(got.ResponseCacheDetails, true)
 		},
 		CompareUpdate: func(got, want apigatewaysdk.UpdateGatewayDetails) error {
 			if got.DisplayName == nil || want.DisplayName == nil || *got.DisplayName != *want.DisplayName ||
-				got.FreeformTags["osok-mock"] != want.FreeformTags["osok-mock"] || got.ResponseCacheDetails != nil {
+				got.FreeformTags["osok-mock"] != want.FreeformTags["osok-mock"] {
 				return fmt.Errorf("Gateway update details = %+v, want %+v", got, want)
 			}
-			return nil
+			return validateApiGatewayMockResponseCache(got.ResponseCacheDetails, false)
 		},
 		ListShape:         ocimock.ListShapeItems,
 		RequireCreateRead: true, RequireUpdateRead: true, RequireDeleteRead: true, DeleteEndsNotFound: true,
@@ -120,7 +135,8 @@ func TestMockIntegrationApiGatewayWorkRequestCRUDAndEndpointSecret(t *testing.T)
 		Resource: resource, Client: client, CreateContext: generatedruntime.WithSkipExistingBeforeCreate,
 		RequireAsyncPending: []ocimock.Operation{ocimock.OperationCreate, ocimock.OperationUpdate, ocimock.OperationDelete},
 		ValidateCreated: func(current *apigatewayv1beta1.ApiGateway) error {
-			if current.Status.Id != gatewayID || current.Status.Hostname != "mock.example.com" || credentials.createCall == 0 {
+			if current.Status.Id != gatewayID || current.Status.Hostname != "mock.example.com" || credentials.createCall == 0 ||
+				current.Status.ResponseCacheDetails.IsSslEnabled == nil || !*current.Status.ResponseCacheDetails.IsSslEnabled {
 				return fmt.Errorf("created ApiGateway status = %+v, secret creates = %d", current.Status, credentials.createCall)
 			}
 			return nil
@@ -128,9 +144,11 @@ func TestMockIntegrationApiGatewayWorkRequestCRUDAndEndpointSecret(t *testing.T)
 		Mutate: func(current *apigatewayv1beta1.ApiGateway) {
 			current.Spec.DisplayName = "mock-api-gateway-updated"
 			current.Spec.FreeformTags = map[string]string{"osok-mock": "update"}
+			current.Spec.ResponseCacheDetails.IsSslEnabled = common.Bool(false)
 		},
 		ValidateUpdated: func(current *apigatewayv1beta1.ApiGateway) error {
-			if current.Status.DisplayName != "mock-api-gateway-updated" || current.Status.FreeformTags["osok-mock"] != "update" {
+			if current.Status.DisplayName != "mock-api-gateway-updated" || current.Status.FreeformTags["osok-mock"] != "update" ||
+				current.Status.ResponseCacheDetails.IsSslEnabled == nil || *current.Status.ResponseCacheDetails.IsSslEnabled {
 				return fmt.Errorf("updated ApiGateway status = %+v", current.Status)
 			}
 			return nil
@@ -145,6 +163,32 @@ func TestMockIntegrationApiGatewayWorkRequestCRUDAndEndpointSecret(t *testing.T)
 	if err := session.Close(); err != nil {
 		t.Fatal(err)
 	}
+}
+
+func apiGatewayMockResponseCache(enabled bool) apigatewaysdk.ExternalRespCache {
+	return apigatewaysdk.ExternalRespCache{
+		Servers: []apigatewaysdk.ResponseCacheRespServer{{
+			Host: common.String("cache.example.com"),
+			Port: common.Int(6379),
+		}},
+		AuthenticationSecretId:            common.String("ocid1.vaultsecret.oc1..mock"),
+		AuthenticationSecretVersionNumber: common.Int64(1),
+		IsSslEnabled:                      common.Bool(enabled),
+	}
+}
+
+func validateApiGatewayMockResponseCache(value apigatewaysdk.ResponseCacheDetails, enabled bool) error {
+	cache, ok := value.(apigatewaysdk.ExternalRespCache)
+	if !ok {
+		return fmt.Errorf("Gateway responseCacheDetails = %T, want apigateway.ExternalRespCache", value)
+	}
+	if cache.IsSslEnabled == nil || *cache.IsSslEnabled != enabled {
+		return fmt.Errorf("Gateway responseCacheDetails.isSslEnabled = %v, want %t", cache.IsSslEnabled, enabled)
+	}
+	if cache.IsSslVerifyDisabled != nil {
+		return fmt.Errorf("Gateway omitted responseCacheDetails.isSslVerifyDisabled = %v, want nil", cache.IsSslVerifyDisabled)
+	}
+	return nil
 }
 
 func apiGatewayWorkRequestRoute(

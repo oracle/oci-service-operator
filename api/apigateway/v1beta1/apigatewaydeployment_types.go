@@ -72,7 +72,7 @@ type ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationPol
 	// to "false", the claim values will be matched only if the claim is
 	// present in the JWT.
 	// +kubebuilder:validation:Optional
-	IsRequired bool `json:"isRequired,omitempty"`
+	IsRequired *bool `json:"isRequired,omitempty"`
 }
 
 // ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationPolicyAdditionalValidationPolicy defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationPolicy.AdditionalValidationPolicy.
@@ -165,7 +165,7 @@ type ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationPol
 	Uri string `json:"uri,omitempty"`
 	// Defines whether or not to uphold SSL verification.
 	// +kubebuilder:validation:Optional
-	IsSslVerifyDisabled bool `json:"isSslVerifyDisabled,omitempty"`
+	IsSslVerifyDisabled *bool `json:"isSslVerifyDisabled,omitempty"`
 	// The duration for which the JWKS should be cached before it is
 	// fetched again.
 	// +kubebuilder:validation:Optional
@@ -301,13 +301,13 @@ type ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationFai
 	MaxExpiryDurationInHours int `json:"maxExpiryDurationInHours,omitempty"`
 	// Defines whether or not to use cookies for session maintenance.
 	// +kubebuilder:validation:Optional
-	UseCookiesForSession bool `json:"useCookiesForSession,omitempty"`
+	UseCookiesForSession *bool `json:"useCookiesForSession,omitempty"`
 	// Defines whether or not to use cookies for OAuth2 intermediate steps.
 	// +kubebuilder:validation:Optional
-	UseCookiesForIntermediateSteps bool `json:"useCookiesForIntermediateSteps,omitempty"`
+	UseCookiesForIntermediateSteps *bool `json:"useCookiesForIntermediateSteps,omitempty"`
 	// Defines whether or not to support PKCE.
 	// +kubebuilder:validation:Optional
-	UsePkce bool `json:"usePkce,omitempty"`
+	UsePkce *bool `json:"usePkce,omitempty"`
 	// The path to be used as fallback after OAuth2.
 	// +kubebuilder:validation:Optional
 	FallbackRedirectPath string `json:"fallbackRedirectPath,omitempty"`
@@ -369,7 +369,7 @@ type ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationPublicKeys st
 	Uri string `json:"uri,omitempty"`
 	// Defines whether or not to uphold SSL verification.
 	// +kubebuilder:validation:Optional
-	IsSslVerifyDisabled bool `json:"isSslVerifyDisabled,omitempty"`
+	IsSslVerifyDisabled *bool `json:"isSslVerifyDisabled,omitempty"`
 	// The duration for which the JWKS should be cached before it is
 	// fetched again.
 	// +kubebuilder:validation:Optional
@@ -390,7 +390,7 @@ type ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationVerifyClaim s
 	// to "false", the claim values will be matched only if the claim is
 	// present in the JWT.
 	// +kubebuilder:validation:Optional
-	IsRequired bool `json:"isRequired,omitempty"`
+	IsRequired *bool `json:"isRequired,omitempty"`
 }
 
 // ApiGatewayDeploymentSpecificationRequestPoliciesAuthentication defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.
@@ -400,7 +400,7 @@ type ApiGatewayDeploymentSpecificationRequestPoliciesAuthentication struct {
 	// Whether an unauthenticated user may access the API. Must be "true" to enable ANONYMOUS
 	// route authorization.
 	// +kubebuilder:validation:Optional
-	IsAnonymousAccessAllowed bool `json:"isAnonymousAccessAllowed,omitempty"`
+	IsAnonymousAccessAllowed *bool `json:"isAnonymousAccessAllowed,omitempty"`
 	// +kubebuilder:validation:Optional
 	Type string `json:"type,omitempty"`
 	// +kubebuilder:validation:Optional
@@ -476,7 +476,7 @@ type ApiGatewayDeploymentSpecificationRequestPoliciesCors struct {
 	ExposedHeaders []string `json:"exposedHeaders,omitempty"`
 	// Whether to send the Access-Control-Allow-Credentials header to allow CORS requests with cookies.
 	// +kubebuilder:validation:Optional
-	IsAllowCredentialsEnabled bool `json:"isAllowCredentialsEnabled,omitempty"`
+	IsAllowCredentialsEnabled *bool `json:"isAllowCredentialsEnabled,omitempty"`
 	// The time in seconds for the client to cache preflight responses. This is sent as the Access-Control-Max-Age
 	// if greater than 0.
 	// +kubebuilder:validation:Optional
@@ -487,7 +487,7 @@ type ApiGatewayDeploymentSpecificationRequestPoliciesCors struct {
 type ApiGatewayDeploymentSpecificationRequestPoliciesMutualTls struct {
 	// Determines whether to enable client verification when API Consumer makes connection to the gateway.
 	// +kubebuilder:validation:Optional
-	IsVerifiedCertificateRequired bool `json:"isVerifiedCertificateRequired,omitempty"`
+	IsVerifiedCertificateRequired *bool `json:"isVerifiedCertificateRequired,omitempty"`
 	// Allowed list of CN or SAN which will be used for verification of certificate.
 	// +kubebuilder:validation:Optional
 	AllowedSans []string `json:"allowedSans,omitempty"`
@@ -522,7 +522,7 @@ type ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthen
 	JsonData string `json:"jsonData,omitempty"`
 	// Specifies whether to use the route or authentication server associated with this selection key as the default. The default is used if the value of a context variable in an incoming request does not match any of the other selection key values when dynamically routing and dynamically authenticating requests.
 	// +kubebuilder:validation:Optional
-	IsDefault bool `json:"isDefault,omitempty"`
+	IsDefault *bool `json:"isDefault,omitempty"`
 	// Name assigned to the branch.
 	// +kubebuilder:validation:Required
 	Name string `json:"name"`
@@ -550,7 +550,7 @@ type ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthen
 	// to "false", the claim values will be matched only if the claim is
 	// present in the JWT.
 	// +kubebuilder:validation:Optional
-	IsRequired bool `json:"isRequired,omitempty"`
+	IsRequired *bool `json:"isRequired,omitempty"`
 }
 
 // ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationPolicyAdditionalValidationPolicy defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationPolicy.AdditionalValidationPolicy.
@@ -643,7 +643,7 @@ type ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthen
 	Uri string `json:"uri,omitempty"`
 	// Defines whether or not to uphold SSL verification.
 	// +kubebuilder:validation:Optional
-	IsSslVerifyDisabled bool `json:"isSslVerifyDisabled,omitempty"`
+	IsSslVerifyDisabled *bool `json:"isSslVerifyDisabled,omitempty"`
 	// The duration for which the JWKS should be cached before it is
 	// fetched again.
 	// +kubebuilder:validation:Optional
@@ -779,13 +779,13 @@ type ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthen
 	MaxExpiryDurationInHours int `json:"maxExpiryDurationInHours,omitempty"`
 	// Defines whether or not to use cookies for session maintenance.
 	// +kubebuilder:validation:Optional
-	UseCookiesForSession bool `json:"useCookiesForSession,omitempty"`
+	UseCookiesForSession *bool `json:"useCookiesForSession,omitempty"`
 	// Defines whether or not to use cookies for OAuth2 intermediate steps.
 	// +kubebuilder:validation:Optional
-	UseCookiesForIntermediateSteps bool `json:"useCookiesForIntermediateSteps,omitempty"`
+	UseCookiesForIntermediateSteps *bool `json:"useCookiesForIntermediateSteps,omitempty"`
 	// Defines whether or not to support PKCE.
 	// +kubebuilder:validation:Optional
-	UsePkce bool `json:"usePkce,omitempty"`
+	UsePkce *bool `json:"usePkce,omitempty"`
 	// The path to be used as fallback after OAuth2.
 	// +kubebuilder:validation:Optional
 	FallbackRedirectPath string `json:"fallbackRedirectPath,omitempty"`
@@ -847,7 +847,7 @@ type ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthen
 	Uri string `json:"uri,omitempty"`
 	// Defines whether or not to uphold SSL verification.
 	// +kubebuilder:validation:Optional
-	IsSslVerifyDisabled bool `json:"isSslVerifyDisabled,omitempty"`
+	IsSslVerifyDisabled *bool `json:"isSslVerifyDisabled,omitempty"`
 	// The duration for which the JWKS should be cached before it is
 	// fetched again.
 	// +kubebuilder:validation:Optional
@@ -868,7 +868,7 @@ type ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthen
 	// to "false", the claim values will be matched only if the claim is
 	// present in the JWT.
 	// +kubebuilder:validation:Optional
-	IsRequired bool `json:"isRequired,omitempty"`
+	IsRequired *bool `json:"isRequired,omitempty"`
 }
 
 // ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetail defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.
@@ -878,7 +878,7 @@ type ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthen
 	// Whether an unauthenticated user may access the API. Must be "true" to enable ANONYMOUS
 	// route authorization.
 	// +kubebuilder:validation:Optional
-	IsAnonymousAccessAllowed bool `json:"isAnonymousAccessAllowed,omitempty"`
+	IsAnonymousAccessAllowed *bool `json:"isAnonymousAccessAllowed,omitempty"`
 	// +kubebuilder:validation:Optional
 	Type string `json:"type,omitempty"`
 	// +kubebuilder:validation:Optional
@@ -965,7 +965,7 @@ type ApiGatewayDeploymentSpecificationLoggingPoliciesAccessLog struct {
 	// Please note that the functionality to push to the legacy OCI Object Storage log
 	// archival bucket has been deprecated and will be removed in the future.
 	// +kubebuilder:validation:Optional
-	IsEnabled bool `json:"isEnabled,omitempty"`
+	IsEnabled *bool `json:"isEnabled,omitempty"`
 }
 
 // ApiGatewayDeploymentSpecificationLoggingPoliciesExecutionLog defines nested fields for ApiGatewayDeployment.Specification.LoggingPolicies.ExecutionLog.
@@ -978,7 +978,7 @@ type ApiGatewayDeploymentSpecificationLoggingPoliciesExecutionLog struct {
 	// Please note that the functionality to push to the legacy OCI Object Storage log
 	// archival bucket has been deprecated and will be removed in the future.
 	// +kubebuilder:validation:Optional
-	IsEnabled bool `json:"isEnabled,omitempty"`
+	IsEnabled *bool `json:"isEnabled,omitempty"`
 	// Specifies the log level used to control logging output of execution logs.
 	// Enabling logging at a given level also enables logging at all higher levels.
 	// +kubebuilder:validation:Optional
@@ -1020,7 +1020,7 @@ type ApiGatewayDeploymentSpecificationRouteBackendRoutingBackendKey struct {
 	JsonData string `json:"jsonData,omitempty"`
 	// Specifies whether to use the route or authentication server associated with this selection key as the default. The default is used if the value of a context variable in an incoming request does not match any of the other selection key values when dynamically routing and dynamically authenticating requests.
 	// +kubebuilder:validation:Optional
-	IsDefault bool `json:"isDefault,omitempty"`
+	IsDefault *bool `json:"isDefault,omitempty"`
 	// Name assigned to the branch.
 	// +kubebuilder:validation:Required
 	Name string `json:"name"`
@@ -1068,7 +1068,7 @@ type ApiGatewayDeploymentSpecificationRouteBackend struct {
 	SendTimeoutInSeconds float32 `json:"sendTimeoutInSeconds,omitempty"`
 	// Defines whether or not to uphold SSL verification.
 	// +kubebuilder:validation:Optional
-	IsSslVerifyDisabled bool `json:"isSslVerifyDisabled,omitempty"`
+	IsSslVerifyDisabled *bool `json:"isSslVerifyDisabled,omitempty"`
 	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Oracle Functions function resource.
 	// +kubebuilder:validation:Optional
 	FunctionId string `json:"functionId,omitempty"`
@@ -1122,7 +1122,7 @@ type ApiGatewayDeploymentSpecificationRouteRequestPoliciesCors struct {
 	ExposedHeaders []string `json:"exposedHeaders,omitempty"`
 	// Whether to send the Access-Control-Allow-Credentials header to allow CORS requests with cookies.
 	// +kubebuilder:validation:Optional
-	IsAllowCredentialsEnabled bool `json:"isAllowCredentialsEnabled,omitempty"`
+	IsAllowCredentialsEnabled *bool `json:"isAllowCredentialsEnabled,omitempty"`
 	// The time in seconds for the client to cache preflight responses. This is sent as the Access-Control-Max-Age
 	// if greater than 0.
 	// +kubebuilder:validation:Optional
@@ -1136,7 +1136,7 @@ type ApiGatewayDeploymentSpecificationRouteRequestPoliciesQueryParameterValidati
 	Name string `json:"name"`
 	// Determines if the parameter is required in the request.
 	// +kubebuilder:validation:Optional
-	Required bool `json:"required,omitempty"`
+	Required *bool `json:"required,omitempty"`
 }
 
 // ApiGatewayDeploymentSpecificationRouteRequestPoliciesQueryParameterValidations defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.QueryParameterValidations.
@@ -1161,7 +1161,7 @@ type ApiGatewayDeploymentSpecificationRouteRequestPoliciesHeaderValidationsHeade
 	Name string `json:"name"`
 	// Determines if the header is required in the request.
 	// +kubebuilder:validation:Optional
-	Required bool `json:"required,omitempty"`
+	Required *bool `json:"required,omitempty"`
 }
 
 // ApiGatewayDeploymentSpecificationRouteRequestPoliciesHeaderValidations defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.HeaderValidations.
@@ -1210,7 +1210,7 @@ type ApiGatewayDeploymentSpecificationRouteRequestPoliciesBodyValidation struct 
 	ValidationMode string `json:"validationMode,omitempty"`
 	// Determines if the request body is required in the request.
 	// +kubebuilder:validation:Optional
-	Required bool `json:"required,omitempty"`
+	Required *bool `json:"required,omitempty"`
 }
 
 // ApiGatewayDeploymentSpecificationRouteRequestPoliciesHeaderTransformationsSetHeadersItem defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.HeaderTransformations.SetHeaders.Item.
@@ -1354,13 +1354,13 @@ type ApiGatewayDeploymentSpecificationRouteRequestPoliciesResponseCacheLookup st
 	JsonData string `json:"jsonData,omitempty"`
 	// Whether this policy is currently enabled.
 	// +kubebuilder:validation:Optional
-	IsEnabled bool `json:"isEnabled,omitempty"`
+	IsEnabled *bool `json:"isEnabled,omitempty"`
 	// Set true to allow caching responses where the request has an Authorization header. Ensure you have configured your
 	// cache key additions to get the level of isolation across authenticated requests that you require.
 	// When false, any request with an Authorization header will not be stored in the Response Cache.
 	// If using the CustomAuthenticationPolicy then the tokenHeader/tokenQueryParam are also subject to this check.
 	// +kubebuilder:validation:Optional
-	IsPrivateCachingEnabled bool `json:"isPrivateCachingEnabled,omitempty"`
+	IsPrivateCachingEnabled *bool `json:"isPrivateCachingEnabled,omitempty"`
 	// +kubebuilder:validation:Optional
 	Type string `json:"type,omitempty"`
 	// A list of context expressions whose values will be added to the base cache key. Values should contain an expression enclosed within
@@ -1485,7 +1485,7 @@ type ApiGatewayDeploymentSpecificationRouteLoggingPoliciesAccessLog struct {
 	// Please note that the functionality to push to the legacy OCI Object Storage log
 	// archival bucket has been deprecated and will be removed in the future.
 	// +kubebuilder:validation:Optional
-	IsEnabled bool `json:"isEnabled,omitempty"`
+	IsEnabled *bool `json:"isEnabled,omitempty"`
 }
 
 // ApiGatewayDeploymentSpecificationRouteLoggingPoliciesExecutionLog defines nested fields for ApiGatewayDeployment.Specification.Route.LoggingPolicies.ExecutionLog.
@@ -1498,7 +1498,7 @@ type ApiGatewayDeploymentSpecificationRouteLoggingPoliciesExecutionLog struct {
 	// Please note that the functionality to push to the legacy OCI Object Storage log
 	// archival bucket has been deprecated and will be removed in the future.
 	// +kubebuilder:validation:Optional
-	IsEnabled bool `json:"isEnabled,omitempty"`
+	IsEnabled *bool `json:"isEnabled,omitempty"`
 	// Specifies the log level used to control logging output of execution logs.
 	// Enabling logging at a given level also enables logging at all higher levels.
 	// +kubebuilder:validation:Optional

@@ -40,6 +40,7 @@ Each service record defines:
 | `generation.webhooks.strategy` | Webhook ownership seam: `manual` or `none`. |
 | `generation.resources[]` | Per-kind overrides keyed by the current OSOK kind from the v2 contract. |
 | `generation.resources[].formalSpec` | Optional per-kind controller slug from `formal/controller_manifest.tsv` when only selected resources are formally promoted. |
+| `generation.resources[].preserveOptionalBooleanPresence` | Optional per-kind compatibility policy that renders optional OCI SDK `*bool` fields as `*bool` in generated API helpers, preserving omitted versus explicit `false` values without changing other resources. |
 | `generation.resources[].async.strategy` | Optional per-kind async override when the selected kind's published behavior differs from the service default. |
 | `generation.resources[].async.runtime` | Optional per-kind runtime owner classification, typically `generatedruntime` or `handwritten`. For work-request-backed kinds, `generatedruntime` opts into the bounded `Async` hook seam instead of the handwritten reference path. |
 | `generation.resources[].async.formalClassification` | Optional per-kind formal async classification for the matching controller row. |
@@ -365,6 +366,13 @@ OCI SDK's absent-vs-present contract: an omitted object stays absent rather
 than being serialized as `{}` and accidentally triggering validation on its
 nested required fields. Required objects, collections, scalar fields, and
 status fields keep their existing JSON tags.
+
+Resources that must distinguish an omitted boolean from an explicit `false`
+may opt into `generation.resources[].preserveOptionalBooleanPresence`. The
+policy applies only to optional OCI SDK fields represented as `*bool`; required
+booleans and every resource without the opt-in retain their existing generated
+types. This lets the standard runtime resolver preserve `nil` versus `&false`
+without treating every omitted value-shaped boolean as false.
 
 ### Structured field and sample overrides
 

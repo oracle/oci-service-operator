@@ -105,10 +105,10 @@ type ApiGatewayResponseCacheDetails struct {
 	AuthenticationSecretVersionNumber int64 `json:"authenticationSecretVersionNumber,omitempty"`
 	// Defines if the connection should be over SSL.
 	// +kubebuilder:validation:Optional
-	IsSslEnabled bool `json:"isSslEnabled,omitempty"`
+	IsSslEnabled *bool `json:"isSslEnabled,omitempty"`
 	// Defines whether or not to uphold SSL verification.
 	// +kubebuilder:validation:Optional
-	IsSslVerifyDisabled bool `json:"isSslVerifyDisabled,omitempty"`
+	IsSslVerifyDisabled *bool `json:"isSslVerifyDisabled,omitempty"`
 	// Defines the timeout for establishing a connection with the Response Cache.
 	// +kubebuilder:validation:Optional
 	ConnectTimeoutInMs int `json:"connectTimeoutInMs,omitempty"`

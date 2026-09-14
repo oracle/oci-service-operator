@@ -810,6 +810,7 @@ const (
 type fieldRenderingOptions struct {
 	scope                     fieldScope
 	escapeStatusJSONCollision bool
+	preserveOptionalBool      bool
 	excludedFieldPaths        map[string]struct{}
 	requiredPointerFieldPaths map[string]struct{}
 }

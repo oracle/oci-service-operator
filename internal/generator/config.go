@@ -93,15 +93,16 @@ type GenerationSurfaceConfig struct {
 
 // ResourceGenerationOverride captures per-kind rollout and override metadata.
 type ResourceGenerationOverride struct {
-	Kind           string                           `yaml:"kind"`
-	FormalSpec     string                           `yaml:"formalSpec,omitempty"`
-	Async          AsyncConfig                      `yaml:"async,omitempty"`
-	Controller     ControllerGenerationOverride     `yaml:"controller,omitempty"`
-	ServiceManager ServiceManagerGenerationOverride `yaml:"serviceManager,omitempty"`
-	Webhooks       GenerationSurfaceConfig          `yaml:"webhooks,omitempty"`
-	SpecFields     []FieldOverride                  `yaml:"specFields,omitempty"`
-	StatusFields   []FieldOverride                  `yaml:"statusFields,omitempty"`
-	Sample         SampleOverride                   `yaml:"sample,omitempty"`
+	Kind                            string                           `yaml:"kind"`
+	FormalSpec                      string                           `yaml:"formalSpec,omitempty"`
+	PreserveOptionalBooleanPresence bool                             `yaml:"preserveOptionalBooleanPresence,omitempty"`
+	Async                           AsyncConfig                      `yaml:"async,omitempty"`
+	Controller                      ControllerGenerationOverride     `yaml:"controller,omitempty"`
+	ServiceManager                  ServiceManagerGenerationOverride `yaml:"serviceManager,omitempty"`
+	Webhooks                        GenerationSurfaceConfig          `yaml:"webhooks,omitempty"`
+	SpecFields                      []FieldOverride                  `yaml:"specFields,omitempty"`
+	StatusFields                    []FieldOverride                  `yaml:"statusFields,omitempty"`
+	Sample                          SampleOverride                   `yaml:"sample,omitempty"`
 }
 
 // ControllerGenerationOverride captures per-kind controller-specific settings.
@@ -920,6 +921,7 @@ func validateEffectiveAsyncConfig(field string, async AsyncConfig) error {
 
 func (r ResourceGenerationOverride) hasOverrides() bool {
 	return strings.TrimSpace(r.FormalSpec) != "" ||
+		r.PreserveOptionalBooleanPresence ||
 		r.Async.hasOverride() ||
 		r.Controller.hasOverrides() ||
 		r.ServiceManager.hasOverrides() ||

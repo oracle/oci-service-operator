@@ -13,6 +13,7 @@ import (
 func TestBuildApiGatewayDeploymentCreateBodyNormalizesCompatibilityRoutes(t *testing.T) {
 	t.Parallel()
 	resource := apiGatewayDeploymentTestResource()
+	resource.Spec.Specification.LoggingPolicies.AccessLog.IsEnabled = common.Bool(false)
 	details, err := buildApiGatewayDeploymentCreateBody(
 		context.Background(),
 		&ApiGatewayDeploymentServiceManager{},
@@ -31,6 +32,10 @@ func TestBuildApiGatewayDeploymentCreateBodyNormalizesCompatibilityRoutes(t *tes
 	}
 	if backend.Status == nil || *backend.Status != 200 || backend.Body == nil || *backend.Body != "created" {
 		t.Fatalf("stock response backend = %+v", backend)
+	}
+	if details.Specification.LoggingPolicies == nil || details.Specification.LoggingPolicies.AccessLog == nil ||
+		details.Specification.LoggingPolicies.AccessLog.IsEnabled == nil || *details.Specification.LoggingPolicies.AccessLog.IsEnabled {
+		t.Fatalf("create accessLog.isEnabled = %+v, want explicit false", details.Specification.LoggingPolicies)
 	}
 }
 
@@ -78,6 +83,36 @@ func TestBuildApiGatewayDeploymentUpdateBodyDetectsRouteDrift(t *testing.T) {
 	}
 	if !needed || details.Specification == nil {
 		t.Fatalf("update = %+v, needed = %t", details, needed)
+	}
+}
+
+func TestBuildApiGatewayDeploymentUpdateBodyPreservesTrueToFalseBoolean(t *testing.T) {
+	t.Parallel()
+
+	currentResource := apiGatewayDeploymentTestResource()
+	currentResource.Spec.Specification.LoggingPolicies.AccessLog.IsEnabled = common.Bool(true)
+	currentDetails, err := buildApiGatewayDeploymentCreateBody(context.Background(), &ApiGatewayDeploymentServiceManager{}, currentResource, "default")
+	if err != nil {
+		t.Fatal(err)
+	}
+	desired := apiGatewayDeploymentTestResource()
+	desired.Spec.Specification.LoggingPolicies.AccessLog.IsEnabled = common.Bool(false)
+	current := apigatewaysdk.GetDeploymentResponse{Deployment: apigatewaysdk.Deployment{
+		DisplayName:   common.String(desired.Spec.DisplayName),
+		Specification: currentDetails.Specification,
+		FreeformTags:  desired.Spec.FreeformTags,
+	}}
+
+	details, needed, err := buildApiGatewayDeploymentUpdateBody(context.Background(), &ApiGatewayDeploymentServiceManager{}, desired, "default", current)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !needed {
+		t.Fatal("Deployment true-to-false access log drift was not detected")
+	}
+	if details.Specification == nil || details.Specification.LoggingPolicies == nil || details.Specification.LoggingPolicies.AccessLog == nil ||
+		details.Specification.LoggingPolicies.AccessLog.IsEnabled == nil || *details.Specification.LoggingPolicies.AccessLog.IsEnabled {
+		t.Fatalf("update accessLog.isEnabled = %+v, want explicit false", details.Specification)
 	}
 }
 
