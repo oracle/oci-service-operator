@@ -14,6 +14,7 @@ import (
 	"strings"
 	"sync"
 	"testing"
+	"time"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
@@ -278,12 +279,100 @@ func TestRunRejectsUnsetVariablesAndServiceMismatch(t *testing.T) {
 	}); err == nil || !strings.Contains(err.Error(), "does not match") {
 		t.Fatalf("Run(service mismatch) error = %v", err)
 	}
+	missingVariable := unusedEnvironmentVariable()
+	writeTestFile(t, root, "create.yaml", strings.ReplaceAll(
+		testBudgetManifest("initial"),
+		"${OCI_COMPARTMENT_ID}",
+		"${"+missingVariable+"}",
+	))
+	fake := &fakeCommandRunner{t: t}
 	if _, err := Run(context.Background(), RunOptions{
-		ScenarioPath: filepath.Join(root, "scenario.yaml"),
-		ArtifactsDir: filepath.Join(root, "missing"),
-		Variables:    map[string]string{"OSOK_E2E_SUFFIX": "fixed"},
-	}); err == nil || !strings.Contains(err.Error(), "OCI_COMPARTMENT_ID") {
+		ScenarioPath:  filepath.Join(root, "scenario.yaml"),
+		ArtifactsDir:  filepath.Join(root, "missing"),
+		CommandRunner: fake,
+		Variables:     map[string]string{"OSOK_E2E_SUFFIX": "fixed"},
+	}); err == nil || !strings.Contains(err.Error(), missingVariable) {
 		t.Fatalf("Run(missing variable) error = %v", err)
+	}
+	if len(fake.calls) != 0 {
+		t.Fatalf("missing-variable validation executed commands: %v", fake.calls)
+	}
+}
+
+func TestPrepareRunOptionsCreatesCollisionResistantDefaults(t *testing.T) {
+	t.Parallel()
+
+	const runs = 16
+	root := t.TempDir()
+	fixedNow := time.Date(2026, time.September, 17, 12, 34, 56, 0, time.UTC)
+	type preparedResult struct {
+		options RunOptions
+		err     error
+	}
+	results := make(chan preparedResult, runs)
+	var group sync.WaitGroup
+	for range runs {
+		group.Add(1)
+		go func() {
+			defer group.Done()
+			options, err := prepareRunOptions(RunOptions{
+				Now:       func() time.Time { return fixedNow },
+				Variables: map[string]string{"OSOK_E2E_SUFFIX": ""},
+			}, "same-scenario", root)
+			results <- preparedResult{options: options, err: err}
+		}()
+	}
+	group.Wait()
+	close(results)
+
+	artifactRoot := filepath.Join(root, "osok-e2e", "same-scenario")
+	artifactDirectories := map[string]struct{}{}
+	resourceSuffixes := map[string]struct{}{}
+	for prepared := range results {
+		if prepared.err != nil {
+			t.Fatal(prepared.err)
+		}
+		if !strings.HasPrefix(prepared.options.ArtifactsDir, artifactRoot+string(filepath.Separator)) {
+			t.Fatalf("default artifacts directory = %q, want child of %q", prepared.options.ArtifactsDir, artifactRoot)
+		}
+		if _, exists := artifactDirectories[prepared.options.ArtifactsDir]; exists {
+			t.Fatalf("duplicate artifacts directory: %s", prepared.options.ArtifactsDir)
+		}
+		artifactDirectories[prepared.options.ArtifactsDir] = struct{}{}
+
+		suffix := prepared.options.Variables["OSOK_E2E_SUFFIX"]
+		if !strings.HasPrefix(suffix, "20260917-123456-") {
+			t.Fatalf("generated suffix = %q", suffix)
+		}
+		if len(suffix) != len("20260917-123456-")+12 {
+			t.Fatalf("generated suffix length = %d, want %d", len(suffix), len("20260917-123456-")+12)
+		}
+		if _, exists := resourceSuffixes[suffix]; exists {
+			t.Fatalf("duplicate resource suffix: %s", suffix)
+		}
+		resourceSuffixes[suffix] = struct{}{}
+	}
+	if len(artifactDirectories) != runs || len(resourceSuffixes) != runs {
+		t.Fatalf("unique defaults = artifacts:%d suffixes:%d, want %d", len(artifactDirectories), len(resourceSuffixes), runs)
+	}
+}
+
+func TestPrepareRunOptionsPreservesExplicitOverrides(t *testing.T) {
+	t.Parallel()
+
+	artifactsDir := filepath.Join(t.TempDir(), "operator-artifacts")
+	prepared, err := prepareRunOptions(RunOptions{
+		ArtifactsDir: artifactsDir,
+		Variables:    map[string]string{"OSOK_E2E_SUFFIX": "operator-suffix"},
+	}, "scenario", t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if prepared.ArtifactsDir != artifactsDir {
+		t.Fatalf("artifacts directory = %q, want %q", prepared.ArtifactsDir, artifactsDir)
+	}
+	if prepared.Variables["OSOK_E2E_SUFFIX"] != "operator-suffix" {
+		t.Fatalf("suffix = %q, want operator-suffix", prepared.Variables["OSOK_E2E_SUFFIX"])
 	}
 }
 
@@ -366,7 +455,7 @@ func TestCheckedInLifecycleScenariosRenderAndKeepResourceIdentity(t *testing.T) 
 				"OCI_REGION":                     "us-ashburn-1",
 				"OCI_SUBNET_ID":                  "ocid1.subnet.oc1..scenario",
 				"OCI_VCN_ID":                     "ocid1.vcn.oc1..scenario",
-				"OSOK_E2E_SUFFIX":                "scenario",
+				"OSOK_E2E_SUFFIX":                "20260917-123456-0123456789ab",
 			})
 			if err != nil {
 				t.Fatal(err)
@@ -452,6 +541,15 @@ func writeTestFile(t *testing.T, root, name, content string) {
 	t.Helper()
 	if err := os.WriteFile(filepath.Join(root, name), []byte(content), 0o600); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func unusedEnvironmentVariable() string {
+	for index := 0; ; index++ {
+		name := fmt.Sprintf("OSOK_E2E_TEST_REQUIRED_UNSET_%d", index)
+		if _, exists := os.LookupEnv(name); !exists {
+			return name
+		}
 	}
 }
 

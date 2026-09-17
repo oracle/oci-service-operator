@@ -8,6 +8,8 @@ package lifecycle
 import (
 	"bufio"
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -89,11 +91,9 @@ func Run(ctx context.Context, options RunOptions) (Result, error) {
 	if options.Now == nil {
 		options.Now = time.Now
 	}
-	if options.ArtifactsDir == "" {
-		options.ArtifactsDir = filepath.Join(os.TempDir(), "osok-e2e", scenario.Name)
-	}
-	if err := os.MkdirAll(options.ArtifactsDir, 0o755); err != nil {
-		return Result{}, fmt.Errorf("create lifecycle artifact directory: %w", err)
+	options, err = prepareRunOptions(options, scenario.Name, os.TempDir())
+	if err != nil {
+		return Result{}, err
 	}
 
 	r := &runner{
@@ -493,6 +493,67 @@ func (r *runner) writeResult() error {
 	return nil
 }
 
+func prepareRunOptions(options RunOptions, scenarioName, temporaryRoot string) (RunOptions, error) {
+	if options.Now == nil {
+		options.Now = time.Now
+	}
+
+	effectiveSuffix := os.Getenv("OSOK_E2E_SUFFIX")
+	if value, ok := options.Variables["OSOK_E2E_SUFFIX"]; ok {
+		effectiveSuffix = value
+	}
+	needsGeneratedIdentity := options.ArtifactsDir == "" || effectiveSuffix == ""
+	generatedSuffix := ""
+	if needsGeneratedIdentity {
+		var err error
+		generatedSuffix, err = newRunSuffix(options.Now())
+		if err != nil {
+			return RunOptions{}, err
+		}
+	}
+	if effectiveSuffix == "" {
+		variables := make(map[string]string, len(options.Variables)+1)
+		for key, value := range options.Variables {
+			variables[key] = value
+		}
+		variables["OSOK_E2E_SUFFIX"] = generatedSuffix
+		options.Variables = variables
+	}
+
+	if options.ArtifactsDir == "" {
+		artifactsDir, err := createDefaultArtifactsDir(temporaryRoot, scenarioName, generatedSuffix)
+		if err != nil {
+			return RunOptions{}, err
+		}
+		options.ArtifactsDir = artifactsDir
+		return options, nil
+	}
+	if err := os.MkdirAll(options.ArtifactsDir, 0o755); err != nil {
+		return RunOptions{}, fmt.Errorf("create lifecycle artifact directory: %w", err)
+	}
+	return options, nil
+}
+
+func newRunSuffix(now time.Time) (string, error) {
+	entropy := make([]byte, 6)
+	if _, err := rand.Read(entropy); err != nil {
+		return "", fmt.Errorf("generate lifecycle run suffix: %w", err)
+	}
+	return now.UTC().Format("20060102-150405") + "-" + hex.EncodeToString(entropy), nil
+}
+
+func createDefaultArtifactsDir(temporaryRoot, scenarioName, runSuffix string) (string, error) {
+	root := filepath.Join(temporaryRoot, "osok-e2e", scenarioName)
+	if err := os.MkdirAll(root, 0o755); err != nil {
+		return "", fmt.Errorf("create lifecycle artifact root: %w", err)
+	}
+	artifactsDir, err := os.MkdirTemp(root, runSuffix+"-")
+	if err != nil {
+		return "", fmt.Errorf("create lifecycle artifact directory: %w", err)
+	}
+	return artifactsDir, nil
+}
+
 func renderScenario(scenario *loadedScenario, destination string, variables map[string]string) (renderedPaths, error) {
 	if err := os.MkdirAll(destination, 0o755); err != nil {
 		return renderedPaths{}, fmt.Errorf("create rendered manifest directory: %w", err)
@@ -508,7 +569,11 @@ func renderScenario(scenario *loadedScenario, destination string, variables map[
 		values[key] = value
 	}
 	if values["OSOK_E2E_SUFFIX"] == "" {
-		values["OSOK_E2E_SUFFIX"] = time.Now().UTC().Format("20060102-150405")
+		suffix, err := newRunSuffix(time.Now())
+		if err != nil {
+			return renderedPaths{}, err
+		}
+		values["OSOK_E2E_SUFFIX"] = suffix
 	}
 	if values["OSOK_E2E_ID"] == "" {
 		var identifier strings.Builder
