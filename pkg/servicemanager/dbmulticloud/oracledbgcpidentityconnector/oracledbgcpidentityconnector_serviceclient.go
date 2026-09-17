@@ -32,8 +32,28 @@ type defaultOracleDbGcpIdentityConnectorServiceClient struct {
 
 var _ OracleDbGcpIdentityConnectorServiceClient = defaultOracleDbGcpIdentityConnectorServiceClient{}
 
+type OracleDbGcpIdentityConnectorSDKClients struct {
+	dbMulticloudGcpProviderClient dbmulticloudsdk.DbMulticloudGCPProviderClient
+	workRequestClient             dbmulticloudsdk.WorkRequestClient
+}
+
+func newOracleDbGcpIdentityConnectorSDKClients(manager *OracleDbGcpIdentityConnectorServiceManager) (OracleDbGcpIdentityConnectorSDKClients, error) {
+	var clients OracleDbGcpIdentityConnectorSDKClients
+	dbMulticloudGcpProviderClientClient, err := dbmulticloudsdk.NewDbMulticloudGCPProviderClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize OracleDbGcpIdentityConnector OCI client DbMulticloudGCPProviderClient: %w", err)
+	}
+	clients.dbMulticloudGcpProviderClient = dbMulticloudGcpProviderClientClient
+	workRequestClientClient, err := dbmulticloudsdk.NewWorkRequestClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize OracleDbGcpIdentityConnector OCI client WorkRequestClient: %w", err)
+	}
+	clients.workRequestClient = workRequestClientClient
+	return clients, nil
+}
+
 var newOracleDbGcpIdentityConnectorServiceClient = func(manager *OracleDbGcpIdentityConnectorServiceManager) OracleDbGcpIdentityConnectorServiceClient {
-	sdkClient, err := dbmulticloudsdk.NewDbMulticloudGCPProviderClientWithConfigurationProvider(manager.Provider)
+	sdkClient, err := newOracleDbGcpIdentityConnectorSDKClients(manager)
 	hooks := newOracleDbGcpIdentityConnectorRuntimeHooks(manager, sdkClient)
 	config := buildOracleDbGcpIdentityConnectorGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {

@@ -42,6 +42,7 @@ SecurityAttributeSpec defines the desired state of SecurityAttribute.
 | `description` | The description you assign to the security attribute during creation. | `string` | Yes | - | - |
 | `isRetired` | Whether the security attribute is retired. See Managing Security Attributes (https://docs.oracle.com/iaas/Content/zero-trust-packet-routing/managing-security-attributes.htm). | `boolean` | No | - | - |
 | `name` | The name you assign to the security attribute during creation. This is the security attribute key. The name must be unique within the namespace and cannot be changed. | `string` | Yes | - | - |
+| `securityAttributeNamespaceId` | The OCID of the security attribute namespace that owns this security attribute. | `string` | Yes | - | - |
 | [`validator`](#kind-securityattribute-spec-validator) | SecurityAttributeValidator defines nested fields for SecurityAttribute.Validator. | `object` | No | - | - |
 
 <a id="kind-securityattribute-spec-validator"></a>

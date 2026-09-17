@@ -851,7 +851,7 @@ func applyRepositoryRuntimeTestDefaults(cfg *generatedruntime.Config[*devopsv1be
 		cfg.SDKName = "Repository"
 	}
 	if cfg.Semantics == nil {
-		cfg.Semantics = newRepositoryRuntimeSemantics()
+		cfg.Semantics = reviewedRepositoryRuntimeSemantics()
 	}
 	applyRepositoryRuntimeTestAsyncDefaults(cfg)
 	applyRepositoryRuntimeTestMutationDefaults(cfg)

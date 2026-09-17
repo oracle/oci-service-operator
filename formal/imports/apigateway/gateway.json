@@ -1,0 +1,148 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "apigateway",
+  "slug": "gateway",
+  "kind": "ApiGateway",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_apigateway_gateway",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateGateway",
+        "requestType": "apigateway.CreateGatewayRequest",
+        "responseType": "apigateway.CreateGatewayResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetGateway",
+        "requestType": "apigateway.GetGatewayRequest",
+        "responseType": "apigateway.GetGatewayResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListGateways",
+        "requestType": "apigateway.ListGatewaysRequest",
+        "responseType": "apigateway.ListGatewaysResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeGatewayCompartment",
+        "requestType": "apigateway.ChangeGatewayCompartmentRequest",
+        "responseType": "apigateway.ChangeGatewayCompartmentResponse"
+      },
+      {
+        "operation": "UpdateGateway",
+        "requestType": "apigateway.UpdateGatewayRequest",
+        "responseType": "apigateway.UpdateGatewayResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteGateway",
+        "requestType": "apigateway.DeleteGatewayRequest",
+        "responseType": "apigateway.DeleteGatewayResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "ca_bundles.ca_bundle_id",
+      "ca_bundles.certificate_authority_id",
+      "ca_bundles.type",
+      "certificate_id",
+      "compartment_id",
+      "defined_tags",
+      "display_name",
+      "freeform_tags",
+      "is_lock_override",
+      "locks.message",
+      "locks.type",
+      "network_security_group_ids",
+      "response_cache_details.authentication_secret_id",
+      "response_cache_details.authentication_secret_version_number",
+      "response_cache_details.connect_timeout_in_ms",
+      "response_cache_details.is_ssl_enabled",
+      "response_cache_details.is_ssl_verify_disabled",
+      "response_cache_details.read_timeout_in_ms",
+      "response_cache_details.send_timeout_in_ms",
+      "response_cache_details.servers.host",
+      "response_cache_details.servers.port",
+      "response_cache_details.type"
+    ],
+    "forceNew": [
+      "endpoint_type",
+      "ip_mode",
+      "ipv4address_configuration",
+      "ipv4address_configuration.reserved_ip_ids",
+      "ipv6address_configuration",
+      "ipv6address_configuration.addresses",
+      "ipv6address_configuration.subnet_cidrs",
+      "subnet_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_apigateway_gateways",
+    "collectionField": "gateway_collection",
+    "responseItemsField": "Res",
+    "filterFields": [
+      "certificate_id",
+      "compartment_id",
+      "display_name",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/apigateway/gateway/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/apigateway/gateway/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for apigateway/apigateway; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

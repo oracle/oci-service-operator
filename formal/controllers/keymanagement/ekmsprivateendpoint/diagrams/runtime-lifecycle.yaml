@@ -1,0 +1,28 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: keymanagement
+slug: ekmsprivateendpoint
+kind: EkmsPrivateEndpoint
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending: ["CREATING"]
+    updatePending: []
+    deletePending: ["DELETING"]
+  listLookup:
+    filters: ["compartmentId","displayName","subnetId"]
+    matchRule: exact resource identity match; duplicate matches fail
+  mutation:
+    mutable: ["definedTags","displayName","freeformTags"]
+    forceNew: ["caBundle","compartmentId","externalKeyManagerIp","port","subnetId"]
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - "The runtime uses its declared lifecycle-state contract for EkmsPrivateEndpoint reconciliation."
+  - "The credential-free mock exercises SDK request serialization, response projection, mutation when supported, and confirmed deletion."

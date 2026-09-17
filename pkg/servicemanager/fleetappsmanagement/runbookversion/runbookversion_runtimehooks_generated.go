@@ -50,50 +50,119 @@ func registerRunbookVersionRuntimeHooksMutator(mutator RunbookVersionRuntimeHook
 	}
 	runbookversionRuntimeHooksMutators = append(runbookversionRuntimeHooksMutators, mutator)
 }
-func newRunbookVersionDefaultRuntimeHooks(sdkClient fleetappsmanagementsdk.FleetAppsManagementRunbooksClient) RunbookVersionRuntimeHooks {
+func newRunbookVersionRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "fleetappsmanagement",
+		FormalSlug:    "runbookversion",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE", "INACTIVE", "NEEDS_ATTENTION"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "id", "name", "runbookId", "state"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"executionWorkflowDetails.workflow.groupName", "executionWorkflowDetails.workflow.steps.groupName", "executionWorkflowDetails.workflow.steps.stepName", "executionWorkflowDetails.workflow.steps.steps", "executionWorkflowDetails.workflow.steps.type", "executionWorkflowDetails.workflow.type", "groups.name", "groups.properties.actionOnFailure", "groups.properties.notificationPreferences.shouldNotifyOnPause", "groups.properties.notificationPreferences.shouldNotifyOnTaskFailure", "groups.properties.notificationPreferences.shouldNotifyOnTaskSuccess", "groups.properties.pauseDetails.durationInMinutes", "groups.properties.pauseDetails.kind", "groups.properties.preCondition", "groups.properties.runOn.condition", "groups.properties.runOn.host", "groups.properties.runOn.kind", "groups.properties.runOn.previousTaskInstanceDetails.outputVariableDetails.outputVariableName", "groups.properties.runOn.previousTaskInstanceDetails.outputVariableDetails.stepName", "groups.properties.runOn.previousTaskInstanceDetails.resourceId", "groups.properties.runOn.previousTaskInstanceDetails.resourceType", "groups.type", "rollbackWorkflowDetails.scope", "rollbackWorkflowDetails.workflow.groupName", "rollbackWorkflowDetails.workflow.steps.groupName", "rollbackWorkflowDetails.workflow.steps.stepName", "rollbackWorkflowDetails.workflow.steps.steps", "rollbackWorkflowDetails.workflow.steps.type", "rollbackWorkflowDetails.workflow.type", "tasks.outputVariableMappings.name", "tasks.outputVariableMappings.outputVariableDetails.outputVariableName", "tasks.outputVariableMappings.outputVariableDetails.stepName", "tasks.stepName", "tasks.stepProperties.actionOnFailure", "tasks.stepProperties.notificationPreferences.shouldNotifyOnPause", "tasks.stepProperties.notificationPreferences.shouldNotifyOnTaskFailure", "tasks.stepProperties.notificationPreferences.shouldNotifyOnTaskSuccess", "tasks.stepProperties.pauseDetails.durationInMinutes", "tasks.stepProperties.pauseDetails.kind", "tasks.stepProperties.preCondition", "tasks.stepProperties.runOn.condition", "tasks.stepProperties.runOn.host", "tasks.stepProperties.runOn.kind", "tasks.stepProperties.runOn.previousTaskInstanceDetails.outputVariableDetails.outputVariableName", "tasks.stepProperties.runOn.previousTaskInstanceDetails.outputVariableDetails.stepName", "tasks.stepProperties.runOn.previousTaskInstanceDetails.resourceId", "tasks.stepProperties.runOn.previousTaskInstanceDetails.resourceType", "tasks.taskRecordDetails.description", "tasks.taskRecordDetails.executionDetails.catalogId", "tasks.taskRecordDetails.executionDetails.command", "tasks.taskRecordDetails.executionDetails.configFile", "tasks.taskRecordDetails.executionDetails.content.bucket", "tasks.taskRecordDetails.executionDetails.content.catalogId", "tasks.taskRecordDetails.executionDetails.content.checksum", "tasks.taskRecordDetails.executionDetails.content.namespace", "tasks.taskRecordDetails.executionDetails.content.object", "tasks.taskRecordDetails.executionDetails.content.sourceType", "tasks.taskRecordDetails.executionDetails.credentials.displayName", "tasks.taskRecordDetails.executionDetails.credentials.id", "tasks.taskRecordDetails.executionDetails.endpoint", "tasks.taskRecordDetails.executionDetails.executionType", "tasks.taskRecordDetails.executionDetails.isExecutableContent", "tasks.taskRecordDetails.executionDetails.isLocked", "tasks.taskRecordDetails.executionDetails.isReadOutputVariableEnabled", "tasks.taskRecordDetails.executionDetails.targetCompartmentId", "tasks.taskRecordDetails.executionDetails.variables.inputVariables.description", "tasks.taskRecordDetails.executionDetails.variables.inputVariables.name", "tasks.taskRecordDetails.executionDetails.variables.inputVariables.type", "tasks.taskRecordDetails.executionDetails.variables.outputVariables", "tasks.taskRecordDetails.isApplySubjectTask", "tasks.taskRecordDetails.isCopyToLibraryEnabled", "tasks.taskRecordDetails.isDiscoveryOutputTask", "tasks.taskRecordDetails.name", "tasks.taskRecordDetails.osType", "tasks.taskRecordDetails.platform", "tasks.taskRecordDetails.properties.numRetries", "tasks.taskRecordDetails.properties.timeoutInSeconds", "tasks.taskRecordDetails.scope", "tasks.taskRecordDetails.taskRecordId"},
+			ForceNew:      []string{"definedTags", "freeformTags", "runbookId"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
+func newRunbookVersionDefaultRuntimeHooks(sdkClient RunbookVersionSDKClients) RunbookVersionRuntimeHooks {
 	return RunbookVersionRuntimeHooks{
+		Semantics:       newRunbookVersionRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*fleetappsmanagementv1beta1.RunbookVersion]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*fleetappsmanagementv1beta1.RunbookVersion]{},
 		StatusHooks:     generatedruntime.StatusHooks[*fleetappsmanagementv1beta1.RunbookVersion]{},
 		ParityHooks:     generatedruntime.ParityHooks[*fleetappsmanagementv1beta1.RunbookVersion]{},
-		Async:           generatedruntime.AsyncHooks[*fleetappsmanagementv1beta1.RunbookVersion]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*fleetappsmanagementv1beta1.RunbookVersion]{},
+		Async: generatedruntime.AsyncHooks[*fleetappsmanagementv1beta1.RunbookVersion]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := fleetappsmanagementsdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.fleetAppsManagementWorkRequestClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*fleetappsmanagementv1beta1.RunbookVersion]{},
 		Create: runtimeOperationHooks[fleetappsmanagementsdk.CreateRunbookVersionRequest, fleetappsmanagementsdk.CreateRunbookVersionResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateRunbookVersionDetails", RequestName: "CreateRunbookVersionDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.CreateRunbookVersionRequest) (fleetappsmanagementsdk.CreateRunbookVersionResponse, error) {
-				return sdkClient.CreateRunbookVersion(ctx, request)
+				return sdkClient.fleetAppsManagementRunbooksClient.CreateRunbookVersion(ctx, request)
 			},
 		},
 		Get: runtimeOperationHooks[fleetappsmanagementsdk.GetRunbookVersionRequest, fleetappsmanagementsdk.GetRunbookVersionResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "RunbookVersionId", RequestName: "runbookVersionId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.GetRunbookVersionRequest) (fleetappsmanagementsdk.GetRunbookVersionResponse, error) {
-				return sdkClient.GetRunbookVersion(ctx, request)
+				return sdkClient.fleetAppsManagementRunbooksClient.GetRunbookVersion(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[fleetappsmanagementsdk.ListRunbookVersionsRequest, fleetappsmanagementsdk.ListRunbookVersionsResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "RunbookId", RequestName: "runbookId", Contribution: "query", PreferResourceID: false}, {FieldName: "Id", RequestName: "id", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "Name", RequestName: "name", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.ListRunbookVersionsRequest) (fleetappsmanagementsdk.ListRunbookVersionsResponse, error) {
-				return sdkClient.ListRunbookVersions(ctx, request)
+				return sdkClient.fleetAppsManagementRunbooksClient.ListRunbookVersions(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[fleetappsmanagementsdk.UpdateRunbookVersionRequest, fleetappsmanagementsdk.UpdateRunbookVersionResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "RunbookVersionId", RequestName: "runbookVersionId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateRunbookVersionDetails", RequestName: "UpdateRunbookVersionDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.UpdateRunbookVersionRequest) (fleetappsmanagementsdk.UpdateRunbookVersionResponse, error) {
-				return sdkClient.UpdateRunbookVersion(ctx, request)
+				return sdkClient.fleetAppsManagementRunbooksClient.UpdateRunbookVersion(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[fleetappsmanagementsdk.DeleteRunbookVersionRequest, fleetappsmanagementsdk.DeleteRunbookVersionResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "RunbookVersionId", RequestName: "runbookVersionId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.DeleteRunbookVersionRequest) (fleetappsmanagementsdk.DeleteRunbookVersionResponse, error) {
-				return sdkClient.DeleteRunbookVersion(ctx, request)
+				return sdkClient.fleetAppsManagementRunbooksClient.DeleteRunbookVersion(ctx, request)
 			},
 		},
 		WrapGeneratedClient: []func(RunbookVersionServiceClient) RunbookVersionServiceClient{},
 	}
 }
 
-func newRunbookVersionRuntimeHooks(manager *RunbookVersionServiceManager, sdkClient fleetappsmanagementsdk.FleetAppsManagementRunbooksClient) RunbookVersionRuntimeHooks {
+func newRunbookVersionRuntimeHooks(manager *RunbookVersionServiceManager, sdkClient RunbookVersionSDKClients) RunbookVersionRuntimeHooks {
 	hooks := newRunbookVersionDefaultRuntimeHooks(sdkClient)
 	for _, mutator := range runbookversionRuntimeHooksMutators {
 		mutator(manager, &hooks)
@@ -106,10 +175,19 @@ func buildRunbookVersionGeneratedRuntimeConfig(
 	hooks RunbookVersionRuntimeHooks,
 ) generatedruntime.Config[*fleetappsmanagementv1beta1.RunbookVersion] {
 	return generatedruntime.Config[*fleetappsmanagementv1beta1.RunbookVersion]{
-		Kind:            "RunbookVersion",
-		SDKName:         "RunbookVersion",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "RunbookVersion",
+		SDKName:   "RunbookVersion",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

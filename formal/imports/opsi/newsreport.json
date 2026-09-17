@@ -1,0 +1,140 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "opsi",
+  "slug": "newsreport",
+  "kind": "NewsReport",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_opsi_news_report",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateNewsReport",
+        "requestType": "opsi.CreateNewsReportRequest",
+        "responseType": "opsi.CreateNewsReportResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetNewsReport",
+        "requestType": "opsi.GetNewsReportRequest",
+        "responseType": "opsi.GetNewsReportResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListNewsReports",
+        "requestType": "opsi.ListNewsReportsRequest",
+        "responseType": "opsi.ListNewsReportsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeNewsReportCompartment",
+        "requestType": "opsi.ChangeNewsReportCompartmentRequest",
+        "responseType": "opsi.ChangeNewsReportCompartmentResponse"
+      },
+      {
+        "operation": "UpdateNewsReport",
+        "requestType": "opsi.UpdateNewsReportRequest",
+        "responseType": "opsi.UpdateNewsReportResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteNewsReport",
+        "requestType": "opsi.DeleteNewsReportRequest",
+        "responseType": "opsi.DeleteNewsReportResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "NEEDS_ATTENTION"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "are_child_compartments_included",
+      "compartment_id",
+      "content_types.actionable_insights_resources",
+      "content_types.capacity_planning_resources",
+      "content_types.sql_insights_fleet_analysis_resources",
+      "content_types.sql_insights_performance_degradation_resources",
+      "content_types.sql_insights_plan_changes_resources",
+      "content_types.sql_insights_top_databases_resources",
+      "content_types.sql_insights_top_sql_by_insights_resources",
+      "content_types.sql_insights_top_sql_resources",
+      "day_of_week",
+      "defined_tags",
+      "description",
+      "freeform_tags",
+      "locale",
+      "match_rule",
+      "name",
+      "news_frequency",
+      "ons_topic_id",
+      "status",
+      "tag_filters"
+    ],
+    "forceNew": null,
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_opsi_news_reports",
+    "collectionField": "news_report_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "compartment_id_in_subtree",
+      "news_report_id",
+      "state",
+      "status"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/opsi/newsreport/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/opsi/newsreport/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from terraform-provider-oci for opsi/newsreport."
+  ]
+}

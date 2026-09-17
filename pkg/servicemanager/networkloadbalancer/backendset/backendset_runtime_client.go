@@ -8,6 +8,7 @@ package backendset
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"reflect"
 	"strings"
@@ -16,9 +17,13 @@ import (
 	networkloadbalancersdk "github.com/oracle/oci-go-sdk/v65/networkloadbalancer"
 	networkloadbalancerv1beta1 "github.com/oracle/oci-service-operator/api/networkloadbalancer/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/errorutil"
+	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
+	"github.com/oracle/oci-service-operator/pkg/util"
+	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
@@ -104,7 +109,7 @@ func applyBackendSetRuntimeHooks(
 	paginatedListCall := func(ctx context.Context, request networkloadbalancersdk.ListBackendSetsRequest) (networkloadbalancersdk.ListBackendSetsResponse, error) {
 		return listBackendSetPages(ctx, request, listCall)
 	}
-	hooks.Semantics = newBackendSetRuntimeSemantics()
+	hooks.Semantics = reviewedBackendSetRuntimeSemantics()
 	hooks.Async.Adapter = backendSetWorkRequestAsyncAdapter
 	hooks.Async.GetWorkRequest = func(ctx context.Context, workRequestID string) (any, error) {
 		return getBackendSetWorkRequest(ctx, workRequestClient, initErr, workRequestID)
@@ -127,6 +132,7 @@ func applyBackendSetRuntimeHooks(
 		return buildBackendSetUpdateBody(ctx, resource, namespace, currentResponse)
 	}
 	hooks.Identity = generatedruntime.IdentityHooks[*networkloadbalancerv1beta1.BackendSet]{
+		RecordBeforeCreateFollowUp: true,
 		Resolve: func(resource *networkloadbalancerv1beta1.BackendSet) (any, error) {
 			return resolveBackendSetIdentity(resource)
 		},
@@ -135,6 +141,9 @@ func applyBackendSetRuntimeHooks(
 		},
 		RecordTracked: func(resource *networkloadbalancerv1beta1.BackendSet, identity any, _ string) {
 			recordBackendSetTrackedIdentity(resource, identity.(backendSetIdentity))
+		},
+		SeedSyntheticTrackedID: func(resource *networkloadbalancerv1beta1.BackendSet, identity any) func() {
+			return seedSyntheticBackendSetID(resource, identity.(backendSetIdentity).backendSetName)
 		},
 	}
 	hooks.DeleteHooks.HandleError = handleBackendSetDeleteError
@@ -157,7 +166,7 @@ func applyBackendSetRuntimeHooks(
 
 func newBackendSetRuntimeHooksWithOCIClient(client backendSetRuntimeOCIClient) BackendSetRuntimeHooks {
 	return BackendSetRuntimeHooks{
-		Semantics: newBackendSetRuntimeSemantics(),
+		Semantics: reviewedBackendSetRuntimeSemantics(),
 		Identity:  generatedruntime.IdentityHooks[*networkloadbalancerv1beta1.BackendSet]{},
 		Read:      generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[networkloadbalancersdk.CreateBackendSetRequest, networkloadbalancersdk.CreateBackendSetResponse]{
@@ -194,7 +203,7 @@ func newBackendSetRuntimeHooksWithOCIClient(client backendSetRuntimeOCIClient) B
 	}
 }
 
-func newBackendSetRuntimeSemantics() *generatedruntime.Semantics {
+func reviewedBackendSetRuntimeSemantics() *generatedruntime.Semantics {
 	return &generatedruntime.Semantics{
 		FormalService: "networkloadbalancer",
 		FormalSlug:    "backendset",
@@ -344,20 +353,20 @@ func listBackendSetPages(
 
 func backendSetNetworkLoadBalancerIDField() generatedruntime.RequestField {
 	return generatedruntime.RequestField{
-		FieldName:        "NetworkLoadBalancerId",
-		RequestName:      "networkLoadBalancerId",
-		Contribution:     "path",
-		PreferResourceID: true,
-		LookupPaths:      []string{"status.status.ocid"},
+		FieldName:    "NetworkLoadBalancerId",
+		RequestName:  "networkLoadBalancerId",
+		Contribution: "path",
+		LookupPaths:  []string{"status.networkLoadBalancerId", "spec.networkLoadBalancerId"},
 	}
 }
 
 func backendSetNameField() generatedruntime.RequestField {
 	return generatedruntime.RequestField{
-		FieldName:    "BackendSetName",
-		RequestName:  "backendSetName",
-		Contribution: "path",
-		LookupPaths:  []string{"status.name", "spec.name", "name"},
+		FieldName:        "BackendSetName",
+		RequestName:      "backendSetName",
+		Contribution:     "path",
+		PreferResourceID: true,
+		LookupPaths:      []string{"status.name", "spec.name", "name"},
 	}
 }
 
@@ -604,6 +613,10 @@ func normalizeBackendSetDefaultedReadback(
 	if desired.IpVersion == "" && current.IpVersion == networkloadbalancersdk.IpVersionIpv4 {
 		current.IpVersion = ""
 	}
+	if len(desired.Backends) == 0 && len(current.Backends) == 0 {
+		desired.Backends = nil
+		current.Backends = nil
+	}
 	normalizeBackendSetHealthCheckerDefaults(desired.HealthChecker, current.HealthChecker)
 	normalizeBackendSetBackendDefaults(desired.Backends, current.Backends)
 }
@@ -622,6 +635,23 @@ func normalizeBackendSetHealthCheckerDefaults(desired, current *networkloadbalan
 	normalizeBackendSetDefaultInt(desired.Retries, &current.Retries, 3)
 	normalizeBackendSetDefaultInt(desired.TimeoutInMillis, &current.TimeoutInMillis, 3000)
 	normalizeBackendSetDefaultInt(desired.IntervalInMillis, &current.IntervalInMillis, 10000)
+	normalizeBackendSetDefaultString(desired.UrlPath, &current.UrlPath, "")
+	normalizeBackendSetDefaultString(desired.ResponseBodyRegex, &current.ResponseBodyRegex, "")
+	if len(desired.RequestData) == 0 && len(current.RequestData) == 0 {
+		desired.RequestData = nil
+		current.RequestData = nil
+	}
+	if len(desired.ResponseData) == 0 && len(current.ResponseData) == 0 {
+		desired.ResponseData = nil
+		current.ResponseData = nil
+	}
+}
+
+func normalizeBackendSetDefaultString(desired *string, current **string, defaultValue string) {
+	if desired != nil || current == nil || *current == nil || **current != defaultValue {
+		return
+	}
+	*current = nil
 }
 
 func normalizeBackendSetBackendDefaults(desired, current []networkloadbalancersdk.BackendDetails) {
@@ -677,14 +707,18 @@ func resolveBackendSetIdentity(resource *networkloadbalancerv1beta1.BackendSet) 
 		return backendSetIdentity{}, fmt.Errorf("resolve BackendSet identity: resource is nil")
 	}
 
-	statusNetworkLoadBalancerID := strings.TrimSpace(string(resource.Status.OsokStatus.Ocid))
+	statusNetworkLoadBalancerID := strings.TrimSpace(resource.Status.NetworkLoadBalancerId)
+	specNetworkLoadBalancerID := strings.TrimSpace(resource.Spec.NetworkLoadBalancerId)
 	annotationNetworkLoadBalancerID := strings.TrimSpace(resource.Annotations[backendSetNetworkLoadBalancerIDAnnotation])
-	if statusNetworkLoadBalancerID != "" && annotationNetworkLoadBalancerID != "" && statusNetworkLoadBalancerID != annotationNetworkLoadBalancerID {
+	if specNetworkLoadBalancerID != "" && annotationNetworkLoadBalancerID != "" && specNetworkLoadBalancerID != annotationNetworkLoadBalancerID {
+		return backendSetIdentity{}, fmt.Errorf("resolve BackendSet identity: spec.networkLoadBalancerId %q conflicts with %s annotation %q", specNetworkLoadBalancerID, backendSetNetworkLoadBalancerIDAnnotation, annotationNetworkLoadBalancerID)
+	}
+	desiredNetworkLoadBalancerID := firstNonEmptyTrim(specNetworkLoadBalancerID, annotationNetworkLoadBalancerID)
+	if statusNetworkLoadBalancerID != "" && desiredNetworkLoadBalancerID != "" && statusNetworkLoadBalancerID != desiredNetworkLoadBalancerID {
 		return backendSetIdentity{}, fmt.Errorf(
-			"resolve BackendSet identity: %s changed from recorded networkLoadBalancerId %q to %q",
-			backendSetNetworkLoadBalancerIDAnnotation,
+			"resolve BackendSet identity: networkLoadBalancerId changed from recorded value %q to %q",
 			statusNetworkLoadBalancerID,
-			annotationNetworkLoadBalancerID,
+			desiredNetworkLoadBalancerID,
 		)
 	}
 
@@ -695,11 +729,11 @@ func resolveBackendSetIdentity(resource *networkloadbalancerv1beta1.BackendSet) 
 	}
 
 	identity := backendSetIdentity{
-		networkLoadBalancerID: firstNonEmptyTrim(statusNetworkLoadBalancerID, annotationNetworkLoadBalancerID),
+		networkLoadBalancerID: firstNonEmptyTrim(statusNetworkLoadBalancerID, desiredNetworkLoadBalancerID),
 		backendSetName:        firstNonEmptyTrim(statusBackendSetName, specBackendSetName, resource.Name),
 	}
 	if identity.networkLoadBalancerID == "" {
-		return backendSetIdentity{}, fmt.Errorf("resolve BackendSet identity: %s annotation is required", backendSetNetworkLoadBalancerIDAnnotation)
+		return backendSetIdentity{}, fmt.Errorf("resolve BackendSet identity: spec.networkLoadBalancerId or %s annotation is required", backendSetNetworkLoadBalancerIDAnnotation)
 	}
 	if identity.backendSetName == "" {
 		return backendSetIdentity{}, fmt.Errorf("resolve BackendSet identity: backend set name is empty")
@@ -711,14 +745,19 @@ func recordBackendSetPathIdentity(resource *networkloadbalancerv1beta1.BackendSe
 	if resource == nil {
 		return
 	}
+	resource.Status.NetworkLoadBalancerId = identity.networkLoadBalancerID
 	resource.Status.Name = identity.backendSetName
-	// BackendSet has no child OCID in the Network Load Balancer API, so the runtime records
-	// the parent networkLoadBalancerId as the stable path identity used for Get/Update/Delete.
-	resource.Status.OsokStatus.Ocid = shared.OCID(identity.networkLoadBalancerID)
 }
 
 func recordBackendSetTrackedIdentity(resource *networkloadbalancerv1beta1.BackendSet, identity backendSetIdentity) {
 	recordBackendSetPathIdentity(resource, identity)
+	resource.Status.OsokStatus.Ocid = shared.OCID(identity.backendSetName)
+}
+
+func seedSyntheticBackendSetID(resource *networkloadbalancerv1beta1.BackendSet, name string) func() {
+	previous := resource.Status.OsokStatus.Ocid
+	resource.Status.OsokStatus.Ocid = shared.OCID(name)
+	return func() { resource.Status.OsokStatus.Ocid = previous }
 }
 
 func handleBackendSetDeleteError(resource *networkloadbalancerv1beta1.BackendSet, err error) error {
@@ -757,9 +796,68 @@ func (c backendSetPendingWorkRequestDeleteClient) Delete(
 		}
 	}
 	if err := c.rejectAmbiguousSucceededDeleteWorkRequestConfirmation(ctx, resource); err != nil {
+		if isBackendSetAuthShapedNotFound(err) {
+			return c.confirmBackendSetAbsenceByList(ctx, resource, err)
+		}
 		return false, err
 	}
-	return c.delegate.Delete(ctx, resource)
+	deleted, err := c.delegate.Delete(ctx, resource)
+	if isBackendSetAuthShapedNotFound(err) {
+		return c.confirmBackendSetAbsenceByList(ctx, resource, err)
+	}
+	return deleted, err
+}
+
+func isBackendSetAuthShapedNotFound(err error) bool {
+	if err == nil {
+		return false
+	}
+	var serviceErr common.ServiceError
+	return errors.As(err, &serviceErr) &&
+		serviceErr.GetHTTPStatusCode() == 404 &&
+		strings.EqualFold(strings.TrimSpace(serviceErr.GetCode()), errorutil.NotAuthorizedOrNotFound)
+}
+
+func (c backendSetPendingWorkRequestDeleteClient) confirmBackendSetAbsenceByList(
+	ctx context.Context,
+	resource *networkloadbalancerv1beta1.BackendSet,
+	ambiguousErr error,
+) (bool, error) {
+	if c.listBackendSets == nil {
+		return false, ambiguousErr
+	}
+	identity, err := resolveBackendSetIdentity(resource)
+	if err != nil {
+		return false, err
+	}
+	response, err := c.listBackendSets(ctx, networkloadbalancersdk.ListBackendSetsRequest{NetworkLoadBalancerId: common.String(identity.networkLoadBalancerID)})
+	if err != nil {
+		if isBackendSetAuthShapedNotFound(err) {
+			return false, fmt.Errorf("BackendSet delete confirmation returned ambiguous 404 NotAuthorizedOrNotFound from scoped list: %w", err)
+		}
+		return false, fmt.Errorf("confirm BackendSet deletion by scoped list: %w", err)
+	}
+	for _, item := range response.Items {
+		if item.Name != nil && strings.TrimSpace(*item.Name) == identity.backendSetName {
+			return false, ambiguousErr
+		}
+	}
+	markBackendSetDeleted(resource, "OCI backend set no longer exists")
+	return true, nil
+}
+
+func markBackendSetDeleted(resource *networkloadbalancerv1beta1.BackendSet, message string) {
+	if resource == nil {
+		return
+	}
+	now := metav1.Now()
+	status := &resource.Status.OsokStatus
+	status.DeletedAt = &now
+	status.UpdatedAt = &now
+	status.Message = message
+	status.Reason = string(shared.Terminating)
+	status.Async.Current = nil
+	*status = util.UpdateOSOKStatusCondition(*status, shared.Terminating, v1.ConditionTrue, "", message, loggerutil.OSOKLogger{})
 }
 
 func (c backendSetPendingWorkRequestDeleteClient) rejectAmbiguousSucceededDeleteWorkRequestConfirmation(

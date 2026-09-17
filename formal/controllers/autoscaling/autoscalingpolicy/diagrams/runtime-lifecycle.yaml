@@ -1,0 +1,34 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: autoscaling
+slug: autoscalingpolicy
+kind: AutoScalingPolicy
+archetype: generated-service-manager
+states:
+  - active
+  - terminating
+repoAuthored:
+  listLookup:
+    filters:
+      - "displayName"
+      - "policyType"
+    matchRule: exact unique match on fields exposed by the scoped OCI list response
+  mutation:
+    mutable:
+      - "capacity"
+      - "displayName"
+      - "isEnabled"
+      - "executionSchedule"
+      - "resourceAction"
+      - "rules"
+    forceNew:
+      - "autoScalingConfigurationId"
+      - "policyType"
+  followUp:
+    create: "response-body"
+    update: "response-body"
+    delete: "confirm-delete"
+notes:
+  - "The vendored SDK response has no lifecycle state or required work-request flow; successful writes settle from the response and configured follow-up."
+  - "Parent identifiers scope composite OCI request paths and remain replacement-only unless the SDK update details explicitly expose them."
+  - "Create, get, list where available, update, and delete request shapes are exercised by the package-local typed OCI mock integration test."

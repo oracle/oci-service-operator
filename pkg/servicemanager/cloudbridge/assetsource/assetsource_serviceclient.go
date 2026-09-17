@@ -32,8 +32,28 @@ type defaultAssetSourceServiceClient struct {
 
 var _ AssetSourceServiceClient = defaultAssetSourceServiceClient{}
 
+type AssetSourceSDKClients struct {
+	discoveryClient cloudbridgesdk.DiscoveryClient
+	commonClient    cloudbridgesdk.CommonClient
+}
+
+func newAssetSourceSDKClients(manager *AssetSourceServiceManager) (AssetSourceSDKClients, error) {
+	var clients AssetSourceSDKClients
+	discoveryClientClient, err := cloudbridgesdk.NewDiscoveryClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize AssetSource OCI client DiscoveryClient: %w", err)
+	}
+	clients.discoveryClient = discoveryClientClient
+	commonClientClient, err := cloudbridgesdk.NewCommonClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize AssetSource OCI client CommonClient: %w", err)
+	}
+	clients.commonClient = commonClientClient
+	return clients, nil
+}
+
 var newAssetSourceServiceClient = func(manager *AssetSourceServiceManager) AssetSourceServiceClient {
-	sdkClient, err := cloudbridgesdk.NewDiscoveryClientWithConfigurationProvider(manager.Provider)
+	sdkClient, err := newAssetSourceSDKClients(manager)
 	hooks := newAssetSourceRuntimeHooks(manager, sdkClient)
 	config := buildAssetSourceGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {

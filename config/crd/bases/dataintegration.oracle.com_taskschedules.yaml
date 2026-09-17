@@ -56,6 +56,9 @@ spec:
           spec:
             description: TaskScheduleSpec defines the desired state of TaskSchedule.
             properties:
+              applicationKey:
+                description: The key of the application containing this resource.
+                type: string
               authMode:
                 description: The authorization mode for the task.
                 type: string
@@ -379,9 +382,15 @@ spec:
                 description: The start time in milliseconds.
                 format: int64
                 type: integer
+              workspaceId:
+                description: The OCID of the Data Integration workspace containing
+                  this resource.
+                type: string
             required:
+            - applicationKey
             - identifier
             - name
+            - workspaceId
             type: object
           status:
             description: TaskScheduleStatus defines the observed state of TaskSchedule.

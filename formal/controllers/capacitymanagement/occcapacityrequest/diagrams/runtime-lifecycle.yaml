@@ -9,5 +9,18 @@ states:
   - active
   - updating
   - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending: ["CREATING"]
+    updatePending: ["UPDATING"]
+    deletePending: ["DELETING"]
+  mutation:
+    mutable: ["definedTags","displayName","freeformTags","requestState"]
+    forceNew: ["availabilityDomain","compartmentId","dateExpectedCapacityHandover","description","details","namespace","occAvailabilityCatalogId","region","requestType"]
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
 notes:
-  - Scaffold metadata only; replace with controller-specific runtime states before promotion.
+  - "The runtime intentionally disables list-before-create because a capacity request cannot be safely reused from a broad search."
+  - "requestState supports the SUBMITTED and CANCELLED update values exposed by the OCI SDK; terminal server-managed request states are normalized out of desired state."

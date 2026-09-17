@@ -136,7 +136,7 @@ type AlarmSpec struct {
 	RepeatNotificationDuration string `json:"repeatNotificationDuration,omitempty"`
 	// The configuration details for suppressing an alarm.
 	// +kubebuilder:validation:Optional
-	Suppression AlarmSuppressionFields `json:"suppression,omitempty"`
+	Suppression AlarmSuppressionFields `json:"suppression,omitempty,omitzero"`
 	// Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
 	// Example: `{"Department": "Finance"}`
 	// +kubebuilder:validation:Optional

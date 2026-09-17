@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "devops",
+  "slug": "deployartifact",
+  "kind": "DeployArtifact",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_devops_deploy_artifact",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDeployArtifact",
+        "requestType": "devops.CreateDeployArtifactRequest",
+        "responseType": "devops.CreateDeployArtifactResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDeployArtifact",
+        "requestType": "devops.GetDeployArtifactRequest",
+        "responseType": "devops.GetDeployArtifactResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDeployArtifacts",
+        "requestType": "devops.ListDeployArtifactsRequest",
+        "responseType": "devops.ListDeployArtifactsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDeployArtifact",
+        "requestType": "devops.UpdateDeployArtifactRequest",
+        "responseType": "devops.UpdateDeployArtifactResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDeployArtifact",
+        "requestType": "devops.DeleteDeployArtifactRequest",
+        "responseType": "devops.DeleteDeployArtifactResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "argument_substitution_mode",
+      "defined_tags",
+      "deploy_artifact_source.base64encoded_content",
+      "deploy_artifact_source.chart_url",
+      "deploy_artifact_source.deploy_artifact_path",
+      "deploy_artifact_source.deploy_artifact_source_type",
+      "deploy_artifact_source.deploy_artifact_version",
+      "deploy_artifact_source.helm_artifact_source_type",
+      "deploy_artifact_source.helm_verification_key_source.current_public_key",
+      "deploy_artifact_source.helm_verification_key_source.previous_public_key",
+      "deploy_artifact_source.helm_verification_key_source.vault_secret_id",
+      "deploy_artifact_source.helm_verification_key_source.verification_key_source_type",
+      "deploy_artifact_source.image_digest",
+      "deploy_artifact_source.image_uri",
+      "deploy_artifact_source.repository_id",
+      "deploy_artifact_type",
+      "description",
+      "display_name",
+      "freeform_tags"
+    ],
+    "forceNew": [
+      "project_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_devops_deploy_artifacts",
+    "collectionField": "deploy_artifact_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "id",
+      "project_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/devops/deployartifact/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/devops/deployartifact/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from terraform-provider-oci for devops/deployartifact."
+  ]
+}

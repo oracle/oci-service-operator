@@ -24,7 +24,7 @@ type FusionEnvironmentFamilySpec struct {
 	// +kubebuilder:validation:Required
 	SubscriptionIds []string `json:"subscriptionIds"`
 	// +kubebuilder:validation:Optional
-	FamilyMaintenancePolicy FusionEnvironmentFamilyFamilyMaintenancePolicy `json:"familyMaintenancePolicy,omitempty"`
+	FamilyMaintenancePolicy FusionEnvironmentFamilyFamilyMaintenancePolicy `json:"familyMaintenancePolicy,omitempty,omitzero"`
 	// Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
 	// Example: `{"bar-key": "value"}`
 	// +kubebuilder:validation:Optional

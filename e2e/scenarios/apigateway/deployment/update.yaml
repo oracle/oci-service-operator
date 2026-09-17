@@ -1,0 +1,23 @@
+#
+# Copyright (c) 2026, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+#
+
+apiVersion: apigateway.oracle.com/v1beta1
+kind: ApiGatewayDeployment
+metadata:
+  name: osok-api-deploy-${OSOK_E2E_SUFFIX}
+spec:
+  gatewayId: ${OCI_APIGATEWAY_ID}
+  compartmentId: ${OCI_COMPARTMENT_ID}
+  displayName: osok-api-deploy-u-${OSOK_E2E_SUFFIX}
+  pathPrefix: /osok-${OSOK_E2E_ID}
+  routes:
+    - path: /hello
+      methods: [GET]
+      backend:
+        type: STOCK_RESPONSE_BACKEND
+        status: 200
+        body: OSOK live lifecycle update
+  freeformTags:
+    osok-e2e-phase: update

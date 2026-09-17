@@ -50,50 +50,119 @@ func registerCatalogItemRuntimeHooksMutator(mutator CatalogItemRuntimeHooksMutat
 	}
 	catalogitemRuntimeHooksMutators = append(catalogitemRuntimeHooksMutators, mutator)
 }
-func newCatalogItemDefaultRuntimeHooks(sdkClient fleetappsmanagementsdk.FleetAppsManagementCatalogClient) CatalogItemRuntimeHooks {
+func newCatalogItemRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "fleetappsmanagement",
+		FormalSlug:    "catalogitem",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"catalogListingId", "catalogListingVersionCriteria", "compartmentId", "configSourceType", "displayName", "packageType", "shouldListPublicItems", "state"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"cloneCatalogItemTrigger", "compartmentId", "definedTags", "description", "displayName", "freeformTags", "shortDescription", "versionDescription"},
+			ForceNew:      []string{"catalogSourcePayload", "catalogSourcePayload.accessUri", "catalogSourcePayload.branchName", "catalogSourcePayload.bucket", "catalogSourcePayload.configSourceType", "catalogSourcePayload.configurationSourceProviderId", "catalogSourcePayload.description", "catalogSourcePayload.listingId", "catalogSourcePayload.longDescription", "catalogSourcePayload.namespace", "catalogSourcePayload.object", "catalogSourcePayload.repositoryUrl", "catalogSourcePayload.templateDisplayName", "catalogSourcePayload.timeExpires", "catalogSourcePayload.version", "catalogSourcePayload.workingDirectory", "catalogSourcePayload.zipFileBase64encoded", "configSourceType", "listingId", "listingVersion", "packageType", "timeReleased"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.WaitForUpdatedState", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.WaitForUpdatedState", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
+func newCatalogItemDefaultRuntimeHooks(sdkClient CatalogItemSDKClients) CatalogItemRuntimeHooks {
 	return CatalogItemRuntimeHooks{
+		Semantics:       newCatalogItemRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*fleetappsmanagementv1beta1.CatalogItem]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*fleetappsmanagementv1beta1.CatalogItem]{},
 		StatusHooks:     generatedruntime.StatusHooks[*fleetappsmanagementv1beta1.CatalogItem]{},
 		ParityHooks:     generatedruntime.ParityHooks[*fleetappsmanagementv1beta1.CatalogItem]{},
-		Async:           generatedruntime.AsyncHooks[*fleetappsmanagementv1beta1.CatalogItem]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*fleetappsmanagementv1beta1.CatalogItem]{},
+		Async: generatedruntime.AsyncHooks[*fleetappsmanagementv1beta1.CatalogItem]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := fleetappsmanagementsdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.fleetAppsManagementWorkRequestClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*fleetappsmanagementv1beta1.CatalogItem]{},
 		Create: runtimeOperationHooks[fleetappsmanagementsdk.CreateCatalogItemRequest, fleetappsmanagementsdk.CreateCatalogItemResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateCatalogItemDetails", RequestName: "CreateCatalogItemDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.CreateCatalogItemRequest) (fleetappsmanagementsdk.CreateCatalogItemResponse, error) {
-				return sdkClient.CreateCatalogItem(ctx, request)
+				return sdkClient.fleetAppsManagementCatalogClient.CreateCatalogItem(ctx, request)
 			},
 		},
 		Get: runtimeOperationHooks[fleetappsmanagementsdk.GetCatalogItemRequest, fleetappsmanagementsdk.GetCatalogItemResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CatalogItemId", RequestName: "catalogItemId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.GetCatalogItemRequest) (fleetappsmanagementsdk.GetCatalogItemResponse, error) {
-				return sdkClient.GetCatalogItem(ctx, request)
+				return sdkClient.fleetAppsManagementCatalogClient.GetCatalogItem(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[fleetappsmanagementsdk.ListCatalogItemsRequest, fleetappsmanagementsdk.ListCatalogItemsResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "ConfigSourceType", RequestName: "configSourceType", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "CatalogListingId", RequestName: "catalogListingId", Contribution: "query", PreferResourceID: false}, {FieldName: "CatalogListingVersionCriteria", RequestName: "catalogListingVersionCriteria", Contribution: "query", PreferResourceID: false}, {FieldName: "PackageType", RequestName: "packageType", Contribution: "query", PreferResourceID: false}, {FieldName: "ShouldListPublicItems", RequestName: "shouldListPublicItems", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.ListCatalogItemsRequest) (fleetappsmanagementsdk.ListCatalogItemsResponse, error) {
-				return sdkClient.ListCatalogItems(ctx, request)
+				return sdkClient.fleetAppsManagementCatalogClient.ListCatalogItems(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[fleetappsmanagementsdk.UpdateCatalogItemRequest, fleetappsmanagementsdk.UpdateCatalogItemResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CatalogItemId", RequestName: "catalogItemId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateCatalogItemDetails", RequestName: "UpdateCatalogItemDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.UpdateCatalogItemRequest) (fleetappsmanagementsdk.UpdateCatalogItemResponse, error) {
-				return sdkClient.UpdateCatalogItem(ctx, request)
+				return sdkClient.fleetAppsManagementCatalogClient.UpdateCatalogItem(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[fleetappsmanagementsdk.DeleteCatalogItemRequest, fleetappsmanagementsdk.DeleteCatalogItemResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CatalogItemId", RequestName: "catalogItemId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.DeleteCatalogItemRequest) (fleetappsmanagementsdk.DeleteCatalogItemResponse, error) {
-				return sdkClient.DeleteCatalogItem(ctx, request)
+				return sdkClient.fleetAppsManagementCatalogClient.DeleteCatalogItem(ctx, request)
 			},
 		},
 		WrapGeneratedClient: []func(CatalogItemServiceClient) CatalogItemServiceClient{},
 	}
 }
 
-func newCatalogItemRuntimeHooks(manager *CatalogItemServiceManager, sdkClient fleetappsmanagementsdk.FleetAppsManagementCatalogClient) CatalogItemRuntimeHooks {
+func newCatalogItemRuntimeHooks(manager *CatalogItemServiceManager, sdkClient CatalogItemSDKClients) CatalogItemRuntimeHooks {
 	hooks := newCatalogItemDefaultRuntimeHooks(sdkClient)
 	for _, mutator := range catalogitemRuntimeHooksMutators {
 		mutator(manager, &hooks)
@@ -106,10 +175,19 @@ func buildCatalogItemGeneratedRuntimeConfig(
 	hooks CatalogItemRuntimeHooks,
 ) generatedruntime.Config[*fleetappsmanagementv1beta1.CatalogItem] {
 	return generatedruntime.Config[*fleetappsmanagementv1beta1.CatalogItem]{
-		Kind:            "CatalogItem",
-		SDKName:         "CatalogItem",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "CatalogItem",
+		SDKName:   "CatalogItem",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

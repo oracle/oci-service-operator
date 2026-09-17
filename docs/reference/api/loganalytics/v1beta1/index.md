@@ -51,7 +51,7 @@ IngestTimeRuleSpec defines the desired state of IngestTimeRule.
 | `description` | Description for this resource. | `string` | No | - | - |
 | `displayName` | The ingest time rule display name. | `string` | Yes | - | - |
 | `freeformTags` | Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only. Example: `{"bar-key": "value"}` | `map[string, string]` | No | - | - |
-| `id` | The log analytics entity OCID. This ID is a reference used by log analytics features and it represents a resource that is provisioned and managed by the customer on their premises or on the cloud. | `string` | Yes | - | - |
+| `id` | Optional existing ingest-time-rule identifier. Leave empty when creating a new rule. | `string` | No | - | - |
 | `isEnabled` | A flag indicating whether or not the ingest time rule is enabled. | `boolean` | No | - | - |
 | `lifecycleState` | The current state of the ingest time rule. | `string` | No | - | - |
 | `timeCreated` | The date and time the resource was created, in the format defined by RFC3339. | `string` | No | - | - |

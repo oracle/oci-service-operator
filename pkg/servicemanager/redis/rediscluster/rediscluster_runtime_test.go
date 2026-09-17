@@ -7,6 +7,8 @@ package rediscluster
 
 import (
 	"context"
+	"io"
+	"net/http"
 	"testing"
 	"time"
 
@@ -195,6 +197,69 @@ func makeSpecRedisCluster() *redisv1beta1.RedisCluster {
 			FreeformTags:    map[string]string{"env": "dev"},
 			DefinedTags:     map[string]shared.MapValue{"Operations": {"CostCenter": "42"}},
 		},
+	}
+}
+
+func TestRedisDisplayNameUpdateOmitsNullFieldsFromSDKRequest(t *testing.T) {
+	t.Parallel()
+
+	resource := makeSpecRedisCluster()
+	resource.Spec.DisplayName = "redis-updated"
+	resource.Spec.FreeformTags = nil
+	resource.Spec.DefinedTags = nil
+	current := makeSDKRedisCluster(
+		"ocid1.rediscluster.oc1..example",
+		"redis-original",
+		redissdk.RedisClusterLifecycleStateActive,
+	)
+	details, updateNeeded, err := buildRedisUpdateBody(resource, current)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !updateNeeded {
+		t.Fatal("buildRedisUpdateBody() updateNeeded = false, want display-name update")
+	}
+
+	request := redissdk.UpdateRedisClusterRequest{
+		RedisClusterId:            current.Id,
+		UpdateRedisClusterDetails: details,
+	}
+	httpRequest, err := request.HTTPRequest(http.MethodPut, "/20220315/redisClusters/example", nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	payload, err := io.ReadAll(httpRequest.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got, want := string(payload), `{"displayName":"redis-updated"}`; got != want {
+		t.Fatalf("encoded Redis update = %s, want %s", got, want)
+	}
+}
+
+func TestRedisUpdatePreservesExplicitEmptyTagClears(t *testing.T) {
+	t.Parallel()
+
+	resource := makeSpecRedisCluster()
+	resource.Spec.FreeformTags = map[string]string{}
+	resource.Spec.DefinedTags = map[string]shared.MapValue{}
+	current := makeSDKRedisCluster(
+		"ocid1.rediscluster.oc1..example",
+		resource.Spec.DisplayName,
+		redissdk.RedisClusterLifecycleStateActive,
+	)
+	details, updateNeeded, err := buildRedisUpdateBody(resource, current)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !updateNeeded {
+		t.Fatal("buildRedisUpdateBody() updateNeeded = false, want explicit tag clears")
+	}
+	if details.FreeformTags == nil || len(details.FreeformTags) != 0 {
+		t.Fatalf("FreeformTags = %#v, want explicit empty map", details.FreeformTags)
+	}
+	if details.DefinedTags == nil || len(details.DefinedTags) != 0 {
+		t.Fatalf("DefinedTags = %#v, want explicit empty map", details.DefinedTags)
 	}
 }
 

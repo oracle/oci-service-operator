@@ -53,7 +53,7 @@ type IntegrationInstanceSpec struct {
 	// +kubebuilder:validation:Optional
 	IsVisualBuilderEnabled bool `json:"isVisualBuilderEnabled,omitempty"`
 	// +kubebuilder:validation:Optional
-	CustomEndpoint IntegrationInstanceCustomEndpoint `json:"customEndpoint,omitempty"`
+	CustomEndpoint IntegrationInstanceCustomEndpoint `json:"customEndpoint,omitempty,omitzero"`
 	// A list of alternate custom endpoints to be used for the integration instance URL
 	// (contact Oracle for alternateCustomEndpoints availability for a specific instance).
 	// +kubebuilder:validation:Optional
@@ -68,7 +68,7 @@ type IntegrationInstanceSpec struct {
 	// +kubebuilder:validation:Optional
 	IsDisasterRecoveryEnabled bool `json:"isDisasterRecoveryEnabled,omitempty"`
 	// +kubebuilder:validation:Optional
-	NetworkEndpointDetails IntegrationInstanceNetworkEndpointDetails `json:"networkEndpointDetails,omitempty"`
+	NetworkEndpointDetails IntegrationInstanceNetworkEndpointDetails `json:"networkEndpointDetails,omitempty,omitzero"`
 	// Shape
 	// +kubebuilder:validation:Optional
 	Shape string `json:"shape,omitempty"`
@@ -173,9 +173,9 @@ type IntegrationInstanceNetworkEndpointDetails struct {
 	// +kubebuilder:validation:Optional
 	AllowlistedHttpVcns []IntegrationInstanceNetworkEndpointDetailsAllowlistedHttpVcn `json:"allowlistedHttpVcns,omitempty"`
 	// +kubebuilder:validation:Optional
-	Runtime IntegrationInstanceNetworkEndpointDetailsRuntime `json:"runtime,omitempty"`
+	Runtime IntegrationInstanceNetworkEndpointDetailsRuntime `json:"runtime,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	DesignTime IntegrationInstanceNetworkEndpointDetailsDesignTime `json:"designTime,omitempty"`
+	DesignTime IntegrationInstanceNetworkEndpointDetailsDesignTime `json:"designTime,omitempty,omitzero"`
 	// The Integration service's VCN is allow-listed to allow integrations to call back into other integrations
 	// +kubebuilder:validation:Optional
 	IsIntegrationVcnAllowlisted bool `json:"isIntegrationVcnAllowlisted,omitempty"`

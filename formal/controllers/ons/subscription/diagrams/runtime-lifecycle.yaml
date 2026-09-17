@@ -1,0 +1,38 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: ons
+slug: subscription
+kind: Subscription
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - terminating
+  - deleted
+repoAuthored:
+  listLookup:
+    filters:
+      - compartmentId
+      - topicId
+      - id
+    matchRule: Adopt only a unique subscription matching topic, protocol, and endpoint.
+  mutation:
+    mutable:
+      - deliveryPolicy
+      - freeformTags
+      - definedTags
+    forceNew:
+      - topicId
+      - compartmentId
+      - protocol
+      - endpoint
+      - metadata
+  followUp:
+    create: read-after-write
+    update: response
+    delete: confirm-delete
+notes:
+  - PENDING requeues and ACTIVE succeeds; ORACLE_FUNCTIONS subscriptions can settle immediately when no confirmation is required.
+  - UpdateSubscription returns the update body, and the next read projects the full active subscription state.
+  - Delete retains the finalizer until Get plus scoped List confirms absence.
+  - Delivery policy and tags update in place; identity and endpoint fields require replacement, with no Kubernetes Secret side effects.

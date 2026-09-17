@@ -502,6 +502,47 @@ func TestTopicDeleteTreatsAuthShapedNotFoundConservatively(t *testing.T) {
 	}
 }
 
+func TestTopicDeleteTreatsTrackedAuthShapedNotFoundAsDeleted(t *testing.T) {
+	t.Parallel()
+
+	resource := makeTopicResource()
+	resource.Status.OsokStatus.Ocid = shared.OCID(testTopicID)
+	resource.Status.OsokStatus.Async.Current = &shared.OSOKAsyncOperation{
+		Source:          shared.OSOKAsyncSourceLifecycle,
+		Phase:           shared.OSOKAsyncPhaseDelete,
+		NormalizedClass: shared.OSOKAsyncClassPending,
+	}
+	deleteCalled := false
+
+	client := newTestTopicClient(&fakeTopicOCIClient{
+		getFn: func(_ context.Context, req onssdk.GetTopicRequest) (onssdk.GetTopicResponse, error) {
+			requireStringPtr(t, "GetTopicRequest.TopicId", req.TopicId, testTopicID)
+			return onssdk.GetTopicResponse{}, errortest.NewServiceError(404, errorutil.NotAuthorizedOrNotFound, "topic is gone after tracked delete")
+		},
+		deleteFn: func(context.Context, onssdk.DeleteTopicRequest) (onssdk.DeleteTopicResponse, error) {
+			deleteCalled = true
+			return onssdk.DeleteTopicResponse{}, nil
+		},
+	})
+
+	deleted, err := client.Delete(context.Background(), resource)
+	if err != nil {
+		t.Fatalf("Delete() error = %v", err)
+	}
+	if !deleted {
+		t.Fatal("Delete() deleted = false, want true after tracked delete reaches auth-shaped 404")
+	}
+	if deleteCalled {
+		t.Fatal("DeleteTopic() called after deletion was already pending")
+	}
+	if resource.Status.OsokStatus.DeletedAt == nil {
+		t.Fatal("status.status.deletedAt = nil, want deletion timestamp")
+	}
+	if got := resource.Status.OsokStatus.OpcRequestID; got != "opc-request-id" {
+		t.Fatalf("status.status.opcRequestId = %q, want opc-request-id", got)
+	}
+}
+
 func TestTopicCreateOrUpdateRecordsOCIErrorRequestID(t *testing.T) {
 	t.Parallel()
 

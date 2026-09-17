@@ -50,15 +50,84 @@ func registerDataSafePrivateEndpointRuntimeHooksMutator(mutator DataSafePrivateE
 	}
 	datasafeprivateendpointRuntimeHooksMutators = append(datasafeprivateendpointRuntimeHooksMutators, mutator)
 }
+func newDataSafePrivateEndpointRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "datasafe",
+		FormalSlug:    "datasafeprivateendpoint",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{"UPDATING"},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "displayName", "subnetId", "vcnId"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"definedTags", "description", "displayName", "freeformTags", "nsgIds"},
+			ForceNew:      []string{"compartmentId", "privateEndpointIp", "subnetId", "vcnId"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "generatedruntime.Create", EntityType: "DataSafePrivateEndpoint", Action: "CREATE_PRIVATE_ENDPOINT"}},
+			Update: []generatedruntime.Hook{{Helper: "generatedruntime.Update", EntityType: "DataSafePrivateEndpoint", Action: "UPDATE_PRIVATE_ENDPOINT"}},
+			Delete: []generatedruntime.Hook{{Helper: "generatedruntime.Delete", EntityType: "DataSafePrivateEndpoint", Action: "DELETE_PRIVATE_ENDPOINT"}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> GetDataSafePrivateEndpoint",
+			Hooks:    []generatedruntime.Hook{{Helper: "generatedruntime.Create", EntityType: "DataSafePrivateEndpoint", Action: "CREATE_PRIVATE_ENDPOINT"}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> GetDataSafePrivateEndpoint",
+			Hooks:    []generatedruntime.Hook{{Helper: "generatedruntime.Update", EntityType: "DataSafePrivateEndpoint", Action: "UPDATE_PRIVATE_ENDPOINT"}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "generatedruntime.Delete", EntityType: "DataSafePrivateEndpoint", Action: "DELETE_PRIVATE_ENDPOINT"}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newDataSafePrivateEndpointDefaultRuntimeHooks(sdkClient datasafesdk.DataSafeClient) DataSafePrivateEndpointRuntimeHooks {
 	return DataSafePrivateEndpointRuntimeHooks{
+		Semantics:       newDataSafePrivateEndpointRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*datasafev1beta1.DataSafePrivateEndpoint]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*datasafev1beta1.DataSafePrivateEndpoint]{},
 		StatusHooks:     generatedruntime.StatusHooks[*datasafev1beta1.DataSafePrivateEndpoint]{},
 		ParityHooks:     generatedruntime.ParityHooks[*datasafev1beta1.DataSafePrivateEndpoint]{},
-		Async:           generatedruntime.AsyncHooks[*datasafev1beta1.DataSafePrivateEndpoint]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*datasafev1beta1.DataSafePrivateEndpoint]{},
+		Async: generatedruntime.AsyncHooks[*datasafev1beta1.DataSafePrivateEndpoint]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := datasafesdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*datasafev1beta1.DataSafePrivateEndpoint]{},
 		Create: runtimeOperationHooks[datasafesdk.CreateDataSafePrivateEndpointRequest, datasafesdk.CreateDataSafePrivateEndpointResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateDataSafePrivateEndpointDetails", RequestName: "CreateDataSafePrivateEndpointDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request datasafesdk.CreateDataSafePrivateEndpointRequest) (datasafesdk.CreateDataSafePrivateEndpointResponse, error) {
@@ -106,10 +175,19 @@ func buildDataSafePrivateEndpointGeneratedRuntimeConfig(
 	hooks DataSafePrivateEndpointRuntimeHooks,
 ) generatedruntime.Config[*datasafev1beta1.DataSafePrivateEndpoint] {
 	return generatedruntime.Config[*datasafev1beta1.DataSafePrivateEndpoint]{
-		Kind:            "DataSafePrivateEndpoint",
-		SDKName:         "DataSafePrivateEndpoint",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "DataSafePrivateEndpoint",
+		SDKName:   "DataSafePrivateEndpoint",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

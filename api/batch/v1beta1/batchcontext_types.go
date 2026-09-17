@@ -46,7 +46,7 @@ type BatchContextSpec struct {
 	// +kubebuilder:validation:Optional
 	Entitlements map[string]int `json:"entitlements,omitempty"`
 	// +kubebuilder:validation:Optional
-	LoggingConfiguration BatchContextLoggingConfiguration `json:"loggingConfiguration,omitempty"`
+	LoggingConfiguration BatchContextLoggingConfiguration `json:"loggingConfiguration,omitempty,omitzero"`
 }
 
 // BatchContextNetwork defines nested fields for BatchContext.Network.
@@ -82,7 +82,7 @@ type BatchContextFleet struct {
 	// +kubebuilder:validation:Optional
 	Name string `json:"name,omitempty"`
 	// +kubebuilder:validation:Optional
-	Shape BatchContextFleetShape `json:"shape,omitempty"`
+	Shape BatchContextFleetShape `json:"shape,omitempty,omitzero"`
 	// Maximum number of concurrent tasks for the service managed fleet.
 	// +kubebuilder:validation:Optional
 	MaxConcurrentTasks int `json:"maxConcurrentTasks,omitempty"`

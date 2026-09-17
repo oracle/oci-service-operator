@@ -52,7 +52,49 @@ ExternalLocationDetailsMetadataStatus defines the observed state of ExternalLoca
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| `clusterPlacementGroupId` | Cluster Placement Group OCID | `string` | No | - | - |
+| `cpgId` | Cluster Placement Group OCID (deprecated representation) | `string` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| [`externalLocation`](#kind-externallocationdetailsmetadata-status-externallocation) | ExternalLocationDetailsMetadataExternalLocation defines nested fields for ExternalLocationDetailsMetadata.ExternalLocation. | `object` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `ociLogicalAd` | OCI logical ad name | `string` | No | - | - |
+| `ociPhysicalAd` | OCI physical ad name | `string` | No | - | - |
+| `ociRegion` | OCI region identifier https://docs.oracle.com/en-us/iaas/Content/General/Concepts/regions.htm | `string` | No | - | - |
+| `partnerCloudAccountName` | User friendly name of account name for customer's subscription | `string` | No | - | - |
+| `partnerCloudAccountUrl` | Direct URL to partner cloud for customer's account | `string` | No | - | - |
+| `partnerCloudName` | Partner Cloud Name based on service name | `string` | No | - | - |
 | [`status`](#kind-externallocationdetailsmetadata-status-status) | - | `object` | Yes | - | - |
+| `systemTags` | System tags for this resource. Each key is predefined and scoped to a namespace. Example: `{"orcl-cloud": {"free-tier-retained": "true"}}` | `map[string, map[string, string]]` | No | - | - |
+
+<a id="kind-externallocationdetailsmetadata-status-externallocation"></a>
+#### Status.externalLocation
+
+[Back to ExternalLocationDetailsMetadata status](#kind-externallocationdetailsmetadata-status)
+
+ExternalLocationDetailsMetadataExternalLocation defines nested fields for ExternalLocationDetailsMetadata.ExternalLocation.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `cspLogicalAz` | A mapping of CSP physical availability zone to CSP logical availability zone. | `string` | No | - | - |
+| `cspLogicalAzDisplayName` | User friendly display name for cspLogicalAZ | `string` | No | - | - |
+| `cspPhysicalAz` | A mapping of OCI site group name to CSP physical availability zone name | `string` | No | - | - |
+| `cspPhysicalAzDisplayName` | User friendly display name for cspPhysicalAZ | `string` | No | - | - |
+| `cspRegion` | CSP region corresponding to the given OCI region | `string` | No | - | - |
+| `cspRegionDisplayName` | CSP region display Name corresponding to the given OCI region | `string` | No | - | - |
+| [`cspZoneKeyReferenceId`](#kind-externallocationdetailsmetadata-status-externallocation-cspzonekeyreferenceid) | ExternalLocationDetailsMetadataExternalLocationCspZoneKeyReferenceId defines nested fields for ExternalLocationDetailsMetadata.ExternalLocation.CspZoneKeyReferenceId. | `object` | No | - | - |
+| `serviceName` | The serviceName that externalLocation map object belongs to. | `string` | No | - | - |
+
+<a id="kind-externallocationdetailsmetadata-status-externallocation-cspzonekeyreferenceid"></a>
+##### Status.externalLocation.cspZoneKeyReferenceId
+
+[Back to ExternalLocationDetailsMetadata status](#kind-externallocationdetailsmetadata-status)
+
+ExternalLocationDetailsMetadataExternalLocationCspZoneKeyReferenceId defines nested fields for ExternalLocationDetailsMetadata.ExternalLocation.CspZoneKeyReferenceId.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `keyName` | KeyName for Azure=AzureSubscriptionId Aws=AwsAccountId GCP=GcpProjectName | `string` | No | - | - |
+| `keyValue` | Value of keyName GcpProjectName: A human-readable name for your project. The project name isn't used by any Google APIs. You can edit the project name at any time during or after project creation. Project names do not need to be unique. AzureSubscriptionId: A unique alphanumeric string that identifies your Azure subscription. AwsAccountId: a unique 12-digit number that identifies an Amazon Web Services (AWS) account | `string` | No | - | - |
 
 <a id="kind-externallocationdetailsmetadata-status-status"></a>
 #### Status.status
@@ -138,7 +180,29 @@ ExternalLocationMappingMetadataStatus defines the observed state of ExternalLoca
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| [`externalLocation`](#kind-externallocationmappingmetadata-status-externallocation) | ExternalLocationMappingMetadataExternalLocation defines nested fields for ExternalLocationMappingMetadata.ExternalLocation. | `object` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `ociLogicalAd` | OCI logical ad name | `string` | No | - | - |
+| `ociPhysicalAd` | OCI physical ad name | `string` | No | - | - |
+| `ociRegion` | OCI region identifier https://docs.oracle.com/en-us/iaas/Content/General/Concepts/regions.htm | `string` | No | - | - |
 | [`status`](#kind-externallocationmappingmetadata-status-status) | - | `object` | Yes | - | - |
+| `systemTags` | System tags for this resource. Each key is predefined and scoped to a namespace. Example: `{"orcl-cloud": {"free-tier-retained": "true"}}` | `map[string, map[string, string]]` | No | - | - |
+
+<a id="kind-externallocationmappingmetadata-status-externallocation"></a>
+#### Status.externalLocation
+
+[Back to ExternalLocationMappingMetadata status](#kind-externallocationmappingmetadata-status)
+
+ExternalLocationMappingMetadataExternalLocation defines nested fields for ExternalLocationMappingMetadata.ExternalLocation.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `cspPhysicalAz` | A mapping of OCI site group name to CSP physical availability zone name | `string` | No | - | - |
+| `cspPhysicalAzDisplayName` | User friendly display name for cspPhysicalAZ | `string` | No | - | - |
+| `cspRegion` | CSP region corresponding to the given OCI region | `string` | No | - | - |
+| `cspRegionDisplayName` | CSP region display Name corresponding to the given OCI region | `string` | No | - | - |
+| `serviceName` | The serviceName that externalLocation map object belongs to | `string` | No | - | - |
 
 <a id="kind-externallocationmappingmetadata-status-status"></a>
 #### Status.status
@@ -224,7 +288,35 @@ ExternalLocationSummariesMetadataStatus defines the observed state of ExternalLo
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| [`items`](#kind-externallocationsummariesmetadata-status-items) | List of ExternalLocationSummariesMetadatumSummary | `list[object]` | No | - | - |
 | [`status`](#kind-externallocationsummariesmetadata-status-status) | - | `object` | Yes | - | - |
+
+<a id="kind-externallocationsummariesmetadata-status-items"></a>
+#### Status.items[]
+
+[Back to ExternalLocationSummariesMetadata status](#kind-externallocationsummariesmetadata-status)
+
+ExternalLocationSummariesMetadataItem defines nested fields for ExternalLocationSummariesMetadata.Item.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| [`externalLocation`](#kind-externallocationsummariesmetadata-status-items-externallocation) | ExternalLocationSummariesMetadataItemExternalLocation defines nested fields for ExternalLocationSummariesMetadata.Item.ExternalLocation. | `object` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `ociRegion` | OCI region identifier https://docs.oracle.com/en-us/iaas/Content/General/Concepts/regions.htm | `string` | No | - | - |
+| `systemTags` | System tags for this resource. Each key is predefined and scoped to a namespace. Example: `{"orcl-cloud": {"free-tier-retained": "true"}}` | `map[string, map[string, string]]` | No | - | - |
+
+<a id="kind-externallocationsummariesmetadata-status-items-externallocation"></a>
+##### Status.items[].externalLocation
+
+[Back to ExternalLocationSummariesMetadata status](#kind-externallocationsummariesmetadata-status)
+
+ExternalLocationSummariesMetadataItemExternalLocation defines nested fields for ExternalLocationSummariesMetadata.Item.ExternalLocation.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `cspRegion` | CSP region corresponding to the given OCI region | `string` | No | - | - |
+| `cspRegionDisplayName` | CSP region display Name corresponding to the given OCI region | `string` | No | - | - |
 
 <a id="kind-externallocationsummariesmetadata-status-status"></a>
 #### Status.status

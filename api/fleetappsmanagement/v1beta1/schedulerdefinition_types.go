@@ -125,7 +125,7 @@ type SchedulerDefinitionRunBookInputParameterArgument struct {
 	// +kubebuilder:validation:Optional
 	Value string `json:"value,omitempty"`
 	// +kubebuilder:validation:Optional
-	Content SchedulerDefinitionRunBookInputParameterArgumentContent `json:"content,omitempty"`
+	Content SchedulerDefinitionRunBookInputParameterArgumentContent `json:"content,omitempty,omitzero"`
 }
 
 // SchedulerDefinitionRunBookInputParameter defines nested fields for SchedulerDefinition.RunBook.InputParameter.

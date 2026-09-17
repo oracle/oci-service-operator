@@ -67,6 +67,12 @@ type EntitySpec struct {
 	// Example: `{"properties": { "default": { "key1": "value1"}}}`
 	// +kubebuilder:validation:Optional
 	Properties map[string]map[string]string `json:"properties,omitempty"`
+	// The OCID of the catalog containing this resource.
+	// +kubebuilder:validation:Required
+	CatalogId string `json:"catalogId"`
+	// The key of the data asset containing this resource.
+	// +kubebuilder:validation:Required
+	DataAssetKey string `json:"dataAssetKey"`
 }
 
 // EntityCustomPropertyMember defines nested fields for Entity.CustomPropertyMember.

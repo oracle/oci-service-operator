@@ -1,0 +1,29 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: marketplacepublisher
+slug: listingrevision
+kind: ListingRevision
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending: ["CREATING"]
+    updatePending: ["UPDATING"]
+    deletePending: ["DELETING"]
+  listLookup:
+    filters: ["displayName","id","listingId","listingType"]
+    matchRule: exact resource identity match; duplicate matches fail
+  mutation:
+    mutable: ["jsonData","displayName","headline","tagline","keywords","shortDescription","usageInformation","longDescription","contentLanguage","supportedlanguages","supportContacts","supportLinks","status","freeformTags","definedTags","products","versionDetails","systemRequirements","pricingPlans","vanityUrl","recommendedServiceProviderListingIds","availabilityAndPricingPolicy","isRoverExportable","pricingType","productCodes","industries","contactUs","trainedProfessionals","geoLocations","demoUrl","selfPacedTrainingUrl","downloadInfo"]
+    forceNew: ["listingId","listingType"]
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - "The runtime selects the concrete SERVICE, OCI, or LEAD_GENERATION update payload and applies only fields supported by that listing subtype."
+  - "listingId and listingType define immutable identity; subtype-inapplicable fields do not trigger an update."

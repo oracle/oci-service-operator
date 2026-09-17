@@ -268,7 +268,7 @@ func hostInsightWorkRequest(
 func TestHostInsightRuntimeSemanticsEncodesWorkRequestAndDeleteContracts(t *testing.T) {
 	t.Parallel()
 
-	got := newHostInsightRuntimeSemantics()
+	got := reviewedHostInsightRuntimeSemantics()
 	if got.FormalService != "opsi" || got.FormalSlug != "hostinsight" {
 		t.Fatalf("formal identity = %s/%s, want opsi/hostinsight", got.FormalService, got.FormalSlug)
 	}
@@ -354,6 +354,15 @@ func TestHostInsightCreateUsesPolymorphicBodyAndWorkRequest(t *testing.T) {
 	}
 	requireHostInsightCondition(t, resource, shared.Active)
 	requireHostInsightNoCurrentAsync(t, resource)
+}
+
+func TestHostInsightListFieldsExcludeRepeatedObservedID(t *testing.T) {
+	t.Parallel()
+	for _, field := range hostInsightListFields() {
+		if field.FieldName == "Id" {
+			t.Fatal("list fields map scalar observed id into the repeated OCI id filter")
+		}
+	}
 }
 
 func TestHostInsightCreateRejectsJsonDataBeforeOCI(t *testing.T) {

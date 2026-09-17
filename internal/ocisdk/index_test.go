@@ -304,6 +304,21 @@ func TestIndexLoadsPolymorphicInterfaceFamilies(t *testing.T) {
 				}
 			},
 		},
+		{
+			name:       "fleetsoftwareupdate.FsuGoalVersionDetails",
+			importPath: "github.com/oracle/oci-go-sdk/v65/fleetsoftwareupdate",
+			typeName:   "FsuGoalVersionDetails",
+			assert: func(t *testing.T, family InterfaceFamily) {
+				version := findStruct(t, family.Implementations, "VersionFsuTargetDetails")
+				if field := findField(t, version.Fields, "Version"); !field.Mandatory {
+					t.Fatal("VersionFsuTargetDetails.Version should be mandatory")
+				}
+				exadb := findStruct(t, family.Implementations, "ExadbStackFsuGoalVersionDetails")
+				if field := findField(t, exadb.Fields, "Components"); !field.Mandatory {
+					t.Fatal("ExadbStackFsuGoalVersionDetails.Components should be mandatory")
+				}
+			},
+		},
 	}
 
 	for _, tt := range tests {
@@ -449,6 +464,68 @@ func TestPackageRequestBodyPayloads(t *testing.T) {
 	}
 }
 
+func TestPackageResponseBodyPayloads(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name       string
+		importPath string
+		response   string
+		want       []string
+	}{
+		{
+			name:       "sample embedded get body",
+			importPath: "example.com/test/sdk",
+			response:   "GetWidgetResponse",
+			want:       []string{"Widget"},
+		},
+		{
+			name:       "sample list item body",
+			importPath: "example.com/test/sdk",
+			response:   "ListWidgetsResponse",
+			want:       []string{"WidgetSummary"},
+		},
+		{
+			name:       "ONS renamed topic body",
+			importPath: "github.com/oracle/oci-go-sdk/v65/ons",
+			response:   "GetTopicResponse",
+			want:       []string{"NotificationTopic"},
+		},
+		{
+			name:       "organization subscription list item body",
+			importPath: "github.com/oracle/oci-go-sdk/v65/osuborganizationsubscription",
+			response:   "ListOrganizationSubscriptionsResponse",
+			want:       []string{"SubscriptionSummary"},
+		},
+		{
+			name:       "binary artifact body excluded",
+			importPath: "github.com/oracle/oci-go-sdk/v65/genericartifactscontent",
+			response:   "GetGenericArtifactContentResponse",
+			want:       nil,
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			resolver := vendorResolver(t)
+			if strings.HasPrefix(tt.importPath, "example.com/") {
+				resolver = func(context.Context, string) (string, error) {
+					return filepath.Join(moduleRoot(t), "internal", "generator", "testdata", "sdk", "sample"), nil
+				}
+			}
+			pkg, err := NewIndex(resolver).Package(context.Background(), tt.importPath)
+			if err != nil {
+				t.Fatalf("Package(%s) error = %v", tt.importPath, err)
+			}
+			if got := pkg.ResponseBodyPayloads(tt.response); !slices.Equal(got, tt.want) {
+				t.Fatalf("ResponseBodyPayloads(%s) = %v, want %v", tt.response, got, tt.want)
+			}
+		})
+	}
+}
+
 func TestPackageResourceOperations(t *testing.T) {
 	t.Parallel()
 
@@ -506,6 +583,9 @@ func TestPackageResourceOperations(t *testing.T) {
 				}
 				if create.MethodName != "CreateRepository" {
 					t.Fatalf("Repository create method = %q, want CreateRepository", create.MethodName)
+				}
+				if create.Path != "/repositories" {
+					t.Fatalf("Repository create path = %q, want /repositories", create.Path)
 				}
 				update := operations["Update"]
 				if update.MethodName != "UpdateRepository" {

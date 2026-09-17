@@ -1,0 +1,101 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: stackmonitoring
+slug: monitoredresource
+kind: MonitoredResource
+archetype: generated-service-manager
+states:
+- provisioning
+- active
+- updating
+- terminating
+repoAuthored:
+  operations:
+    create:
+    - CreateMonitoredResource
+    update:
+    - UpdateMonitoredResource
+    delete:
+    - DeleteMonitoredResource
+  providerLifecycle:
+    createPending:
+    - CREATING
+    updatePending: []
+    deletePending:
+    - DELETING
+  listLookup:
+    filters:
+    - compartmentId
+    - name
+    - status
+    - workRequestId
+    matchRule: exact declared filters match within the resource scope; duplicate matches
+      fail
+  mutation:
+    mutable:
+    - additionalAliases.credential.name
+    - additionalAliases.credential.service
+    - additionalAliases.credential.source
+    - additionalAliases.name
+    - additionalAliases.source
+    - additionalCredentials.credentialType
+    - additionalCredentials.description
+    - additionalCredentials.keyId
+    - additionalCredentials.name
+    - additionalCredentials.properties.name
+    - additionalCredentials.properties.value
+    - additionalCredentials.source
+    - additionalCredentials.type
+    - aliases.credential.name
+    - aliases.credential.service
+    - aliases.credential.source
+    - aliases.name
+    - aliases.source
+    - compartmentId
+    - credentials.credentialType
+    - credentials.description
+    - credentials.keyId
+    - credentials.name
+    - credentials.properties.name
+    - credentials.properties.value
+    - credentials.source
+    - credentials.type
+    - databaseConnectionDetails.connectorId
+    - databaseConnectionDetails.dbId
+    - databaseConnectionDetails.dbUniqueName
+    - databaseConnectionDetails.port
+    - databaseConnectionDetails.protocol
+    - databaseConnectionDetails.serviceName
+    - databaseConnectionDetails.sslSecretId
+    - definedTags
+    - displayName
+    - freeformTags
+    - hostName
+    - license
+    - properties.name
+    - properties.value
+    - resourceTimeZone
+    forceNew:
+    - externalId
+    - externalResourceId
+    - managementAgentId
+    - name
+    - type
+  hooks:
+    create:
+    - helper: tfresource.CreateResource
+    update:
+    - helper: tfresource.UpdateResource
+    - helper: tfresource.WaitForUpdatedState
+    delete:
+    - helper: tfresource.DeleteResource
+  followUp:
+    create: GetWorkRequest -> read-after-write
+    update: GetWorkRequest -> read-after-write
+    delete: GetWorkRequest -> confirm-delete
+notes:
+- The generated service manager uses the reviewed CRUD request, response, lifecycle,
+  and status projection contract.
+- Work-request phases are declared per operation from the vendored SDK response surface.
+- Secret side effects are none and finalizer ownership is retained until confirmed
+  deletion.

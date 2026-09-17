@@ -73,10 +73,15 @@ spec:
               name:
                 description: Name of the application
                 type: string
+              networkFirewallPolicyId:
+                description: The OCID of the Network Firewall policy that owns this
+                  resource.
+                type: string
               type:
                 type: string
             required:
             - name
+            - networkFirewallPolicyId
             type: object
           status:
             description: ApplicationStatus defines the observed state of Application.

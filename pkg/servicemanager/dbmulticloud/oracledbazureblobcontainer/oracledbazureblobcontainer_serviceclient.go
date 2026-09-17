@@ -32,8 +32,28 @@ type defaultOracleDbAzureBlobContainerServiceClient struct {
 
 var _ OracleDbAzureBlobContainerServiceClient = defaultOracleDbAzureBlobContainerServiceClient{}
 
+type OracleDbAzureBlobContainerSDKClients struct {
+	oracleDbAzureBlobContainerClient dbmulticloudsdk.OracleDBAzureBlobContainerClient
+	workRequestClient                dbmulticloudsdk.WorkRequestClient
+}
+
+func newOracleDbAzureBlobContainerSDKClients(manager *OracleDbAzureBlobContainerServiceManager) (OracleDbAzureBlobContainerSDKClients, error) {
+	var clients OracleDbAzureBlobContainerSDKClients
+	oracleDbAzureBlobContainerClientClient, err := dbmulticloudsdk.NewOracleDBAzureBlobContainerClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize OracleDbAzureBlobContainer OCI client OracleDBAzureBlobContainerClient: %w", err)
+	}
+	clients.oracleDbAzureBlobContainerClient = oracleDbAzureBlobContainerClientClient
+	workRequestClientClient, err := dbmulticloudsdk.NewWorkRequestClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize OracleDbAzureBlobContainer OCI client WorkRequestClient: %w", err)
+	}
+	clients.workRequestClient = workRequestClientClient
+	return clients, nil
+}
+
 var newOracleDbAzureBlobContainerServiceClient = func(manager *OracleDbAzureBlobContainerServiceManager) OracleDbAzureBlobContainerServiceClient {
-	sdkClient, err := dbmulticloudsdk.NewOracleDBAzureBlobContainerClientWithConfigurationProvider(manager.Provider)
+	sdkClient, err := newOracleDbAzureBlobContainerSDKClients(manager)
 	hooks := newOracleDbAzureBlobContainerRuntimeHooks(manager, sdkClient)
 	config := buildOracleDbAzureBlobContainerGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {

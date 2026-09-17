@@ -66,25 +66,25 @@ func newSSLCipherSuiteDefaultRuntimeHooks(sdkClient loadbalancersdk.LoadBalancer
 			},
 		},
 		Get: runtimeOperationHooks[loadbalancersdk.GetSSLCipherSuiteRequest, loadbalancersdk.GetSSLCipherSuiteResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "Name", RequestName: "name", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "Name", RequestName: "name", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request loadbalancersdk.GetSSLCipherSuiteRequest) (loadbalancersdk.GetSSLCipherSuiteResponse, error) {
 				return sdkClient.GetSSLCipherSuite(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[loadbalancersdk.ListSSLCipherSuitesRequest, loadbalancersdk.ListSSLCipherSuitesResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: true}},
+			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loadbalancersdk.ListSSLCipherSuitesRequest) (loadbalancersdk.ListSSLCipherSuitesResponse, error) {
 				return sdkClient.ListSSLCipherSuites(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[loadbalancersdk.UpdateSSLCipherSuiteRequest, loadbalancersdk.UpdateSSLCipherSuiteResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "Name", RequestName: "name", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdateSslCipherSuiteDetails", RequestName: "UpdateSslCipherSuiteDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "Name", RequestName: "name", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateSslCipherSuiteDetails", RequestName: "UpdateSslCipherSuiteDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loadbalancersdk.UpdateSSLCipherSuiteRequest) (loadbalancersdk.UpdateSSLCipherSuiteResponse, error) {
 				return sdkClient.UpdateSSLCipherSuite(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[loadbalancersdk.DeleteSSLCipherSuiteRequest, loadbalancersdk.DeleteSSLCipherSuiteResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "Name", RequestName: "name", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "Name", RequestName: "name", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request loadbalancersdk.DeleteSSLCipherSuiteRequest) (loadbalancersdk.DeleteSSLCipherSuiteResponse, error) {
 				return sdkClient.DeleteSSLCipherSuite(ctx, request)
 			},

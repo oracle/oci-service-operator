@@ -1,0 +1,33 @@
+#
+# Copyright (c) 2026, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+#
+
+apiVersion: certificatesmanagement.oracle.com/v1beta1
+kind: CaBundle
+metadata:
+  name: osok-ca-bundle-${OSOK_E2E_SUFFIX}
+spec:
+  name: osok-ca-bundle-${OSOK_E2E_SUFFIX}
+  compartmentId: ${OCI_COMPARTMENT_ID}
+  description: OSOK lifecycle test CA bundle
+  caBundlePem: |
+    -----BEGIN CERTIFICATE-----
+    MIICuDCCAaACCQCswlehgd76VjANBgkqhkiG9w0BAQsFADAeMRwwGgYDVQQDDBNv
+    c29rLXJlcGxheS5pbnZhbGlkMB4XDTI2MDkwMTA1NDgyNVoXDTM2MDgyOTA1NDgy
+    NVowHjEcMBoGA1UEAwwTb3Nvay1yZXBsYXkuaW52YWxpZDCCASIwDQYJKoZIhvcN
+    AQEBBQADggEPADCCAQoCggEBALzZjMNUR5SvwVaOFTw8eDJSMcdapOu7D+MQw2MS
+    A+1YAF5OQ3gwoMPmTLrGBte9hxWv2N/gYyM5tyDhoBsRKbHPrDz03Z5AEz/riGWp
+    YwpoTP/zcQ1SQzbV5p/+O2MvbyzuVZ5kixuFZh78PrjBDkcMGNH0uA0NmdH9lKii
+    ROOFd0aKMCA5L/dn8ESLzUekNghcKuUAu2Gc61J0v+0/3LOe7aPH0v28ossf2ACu
+    TmLoIGirLaOJynksSpQIG0SVA93oc2CyltFxLinx6Ec0NKb/7qUyqwRYJatSpQcK
+    GUFPBDs0+reOI4n7tuyhvBBiXrrqbkMJc8WyPs8ClXJlzb0CAwEAATANBgkqhkiG
+    9w0BAQsFAAOCAQEALCaJLZARLaB9PpH4JURzQV9Xe/3r+2aWjuneSILxxUTvyJ61
+    j0i59UVbmCaA8hZXt7QhU3D3K8mJoTBMGAdvYSjLm+scYB8V6MbvJ5kHA7bGIvZL
+    T+qcCWe0ElyYnvoLpqbki9JJI/zgcXYDY5BwypLhpNykxPQeGjqg88TszrRi7o1C
+    SXIaSw21TuZVNm42tZPkWBqKWPECONg1i9pkoIDZVNaUt3z4nP6LpRAMrNWHoJQW
+    fovQtpvBhD2r6F7PHqfkymKTMs+76niaMQV13iQKEFLgaaYbkVYk52eUmjMGAGoL
+    3TftBbW3NhwflEB5+PAD/jpg5EvXLoQINFdW+w==
+    -----END CERTIFICATE-----
+  freeformTags:
+    osok-e2e-phase: create

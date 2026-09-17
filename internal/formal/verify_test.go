@@ -162,6 +162,27 @@ const testImport = `{
 }
 `
 
+func testImportWithAuxiliaryUpdateOperation() string {
+	return strings.Replace(testImport, `    "update": [
+      {
+        "operation": "UpdateTemplate",
+        "requestType": "UpdateTemplateRequest",
+        "responseType": "UpdateTemplateResponse"
+      }
+    ],`, `    "update": [
+      {
+        "operation": "ChangeTemplateCompartment",
+        "requestType": "ChangeTemplateCompartmentRequest",
+        "responseType": "ChangeTemplateCompartmentResponse"
+      },
+      {
+        "operation": "UpdateTemplate",
+        "requestType": "UpdateTemplateRequest",
+        "responseType": "UpdateTemplateResponse"
+      }
+    ],`, 1)
+}
+
 const testSourcesLock = `{
   "schemaVersion": 1,
   "sources": [
@@ -281,6 +302,142 @@ func TestVerifyRejectsOperationBindingTypeMismatch(t *testing.T) {
 	if err == nil || !strings.Contains(err.Error(), `UpdateTemplate binding requestType="DeleteTemplateRequest", want "UpdateTemplateRequest"`) || !strings.Contains(err.Error(), `UpdateTemplate binding responseType="DeleteTemplateResponse", want "UpdateTemplateResponse"`) {
 		t.Fatalf("Verify(%q) error = %v, want operation binding type mismatch failure", root, err)
 	}
+}
+
+func TestVerifyRejectsUnknownRepoAuthoredUpdateOperation(t *testing.T) {
+	root := writeScaffold(t)
+	writeFile(t, filepath.Join(root, "imports", "template", "template.json"), testImportWithAuxiliaryUpdateOperation())
+	writeFile(t, filepath.Join(root, "controllers", "template", "diagrams", "runtime-lifecycle.yaml"), `schemaVersion: 1
+surface: repo-authored-semantics
+service: template
+slug: template
+kind: Template
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  operations:
+    update:
+      - MoveTemplateCompartment
+notes:
+  - Unknown repo-authored operations must be rejected.
+`)
+
+	_, err := Verify(root)
+	if err == nil || !strings.Contains(err.Error(), `repoAuthored.operations.update[0]="MoveTemplateCompartment" is not present in imported update operations`) {
+		t.Fatalf("Verify(%q) error = %v, want unknown repo-authored update operation failure", root, err)
+	}
+}
+
+func TestVerifyRejectsRepoAuthoredUpdateSubsetWithoutPrimary(t *testing.T) {
+	for _, tc := range []struct {
+		name       string
+		operations string
+	}{
+		{
+			name: "auxiliary only",
+			operations: `    update:
+      - ChangeTemplateCompartment`,
+		},
+		{
+			name:       "explicit empty",
+			operations: `    update: []`,
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			root := writeScaffold(t)
+			writeFile(t, filepath.Join(root, "imports", "template", "template.json"), testImportWithAuxiliaryUpdateOperation())
+			writeFile(t, filepath.Join(root, "controllers", "template", "diagrams", "runtime-lifecycle.yaml"), `schemaVersion: 1
+surface: repo-authored-semantics
+service: template
+slug: template
+kind: Template
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  operations:
+`+tc.operations+`
+notes:
+  - The effective subset must retain the primary update operation.
+`)
+
+			_, err := Verify(root)
+			if err == nil || !strings.Contains(err.Error(), `repoAuthored.operations.update must include primary update operation "UpdateTemplate"`) {
+				t.Fatalf("Verify(%q) error = %v, want excluded-primary failure", root, err)
+			}
+		})
+	}
+}
+
+func TestValidateRepoAuthoredOperationsRejectsUnknownOrMissingPrimaryByPhase(t *testing.T) {
+	t.Parallel()
+
+	imported := []operationBinding{
+		{Operation: "CreateTemplate"},
+		{Operation: "ImportTemplate"},
+	}
+	for _, tc := range []struct {
+		name   string
+		subset []string
+		want   string
+	}{
+		{
+			name:   "unknown",
+			subset: []string{"CreateTemplate", "LaunchTemplate"},
+			want:   `repoAuthored.operations.create[1]="LaunchTemplate" is not present in imported create operations`,
+		},
+		{
+			name:   "missing primary",
+			subset: []string{"ImportTemplate"},
+			want:   `repoAuthored.operations.create must include primary create operation "CreateTemplate"`,
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			diagram := diagramSpec{
+				Kind: "Template",
+				RepoAuthored: &diagramRepoAuthoredSemantics{
+					Operations: &diagramOperationSemantics{Create: tc.subset},
+				},
+			}
+			problems := validateRepoAuthoredOperations("runtime-lifecycle.yaml", diagram, "create", imported)
+			if !containsProblem(problems, tc.want) {
+				t.Fatalf("problems = %#v, want %q", problems, tc.want)
+			}
+		})
+	}
+}
+
+func TestValidateRepoAuthoredOperationsAllowsEmptySubsetWithoutImportedPrimary(t *testing.T) {
+	t.Parallel()
+
+	diagram := diagramSpec{
+		Kind: "Template",
+		RepoAuthored: &diagramRepoAuthoredSemantics{
+			Operations: &diagramOperationSemantics{Delete: []string{}},
+		},
+	}
+	imported := []operationBinding{{Operation: "ScheduleTemplateDeletion"}}
+	if problems := validateRepoAuthoredOperations("runtime-lifecycle.yaml", diagram, "delete", imported); len(problems) != 0 {
+		t.Fatalf("problems = %#v, want explicit provider-only delete exclusion to be valid", problems)
+	}
+}
+
+func containsProblem(problems []string, want string) bool {
+	for _, problem := range problems {
+		if strings.Contains(problem, want) {
+			return true
+		}
+	}
+	return false
 }
 
 func TestVerifyRejectsMissingRenderedDiagramArtifacts(t *testing.T) {

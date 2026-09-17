@@ -519,7 +519,7 @@ func assertTsigKeyDeleteInProgress(t *testing.T, resource *dnsv1beta1.TsigKey, d
 	}
 }
 
-func TestTsigKeyServiceClientDeleteTreatsAuthShapedNotFoundAsError(t *testing.T) {
+func TestTsigKeyServiceClientDeleteConfirmsAuthShapedNotFoundByScopedList(t *testing.T) {
 	resource := makeTsigKeyResource()
 	resource.Status.Id = testTsigKeyID
 	resource.Status.OsokStatus.Ocid = shared.OCID(testTsigKeyID)
@@ -533,23 +533,29 @@ func TestTsigKeyServiceClientDeleteTreatsAuthShapedNotFoundAsError(t *testing.T)
 			deleteCalls++
 			return dnssdk.DeleteTsigKeyResponse{}, nil
 		},
+		listTsigKeysFn: func(_ context.Context, request dnssdk.ListTsigKeysRequest) (dnssdk.ListTsigKeysResponse, error) {
+			requireStringPtr(t, "list compartmentId", request.CompartmentId, resource.Spec.CompartmentId)
+			requireStringPtr(t, "list id", request.Id, testTsigKeyID)
+			requireStringPtr(t, "list name", request.Name, resource.Spec.Name)
+			return dnssdk.ListTsigKeysResponse{}, nil
+		},
 	})
 
 	deleted, err := client.Delete(context.Background(), resource)
-	if err == nil {
-		t.Fatal("Delete() error = nil, want auth-shaped not-found error")
+	if err != nil {
+		t.Fatalf("Delete() error = %v", err)
 	}
-	if deleted {
-		t.Fatal("Delete() deleted = true, want false")
+	if !deleted {
+		t.Fatal("Delete() deleted = false, want scoped list absence confirmation")
 	}
-	if !strings.Contains(err.Error(), "ambiguous 404 NotAuthorizedOrNotFound") {
-		t.Fatalf("Delete() error = %q, want ambiguous auth-shaped 404", err.Error())
+	if resource.Status.Id != "" || resource.Status.OsokStatus.Ocid != "" {
+		t.Fatalf("tracked identity = %q/%q, want cleared", resource.Status.Id, resource.Status.OsokStatus.Ocid)
 	}
 	if got := resource.Status.OsokStatus.OpcRequestID; got != "opc-request-id" {
 		t.Fatalf("status.status.opcRequestId = %q, want opc-request-id", got)
 	}
 	if deleteCalls != 0 {
-		t.Fatalf("delete calls = %d, want 0", deleteCalls)
+		t.Fatalf("delete calls = %d, want 0 after confirmed absence", deleteCalls)
 	}
 }
 

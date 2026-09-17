@@ -335,6 +335,8 @@ func protectedDatabaseRuntimeSemantics() *generatedruntime.Semantics {
 			},
 			Update: []generatedruntime.Hook{
 				{Helper: "tfresource.UpdateResource"},
+				{Helper: "ChangeProtectedDatabaseCompartment"},
+				{Helper: "ChangeProtectedDatabaseSubscription"},
 				{Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "protectedDatabase", Action: "UPDATED"},
 			},
 			Delete: []generatedruntime.Hook{

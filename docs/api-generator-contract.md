@@ -26,6 +26,7 @@ Each service record defines:
 | `selection.enabled` | Whether the service participates in the default active generator surface. |
 | `selection.mode` | Default selection contract for the service: `all` or `explicit`. |
 | `selection.includeKinds` | Optional non-empty kind list used only when `selection.mode=explicit`. |
+| `kindAliases` | Optional mapping from discovered SDK resource-family names to stable OSOK API kind names. SDK names still drive operation and model discovery. |
 | `async.strategy` | Optional service-level default for published async behavior: `none`, `lifecycle`, or `workrequest`. |
 | `async.runtime` | Optional service-level default naming whether the active runtime owner is `generatedruntime` or a handwritten service package. For `async.strategy=workrequest`, `generatedruntime` means the runtime uses the bounded `Async` hook seam described below rather than a package-local state machine. |
 | `async.formalClassification` | Optional service-level default that keeps `formal/` classification aligned with the checked-in async posture. |
@@ -39,6 +40,7 @@ Each service record defines:
 | `generation.webhooks.strategy` | Webhook ownership seam: `manual` or `none`. |
 | `generation.resources[]` | Per-kind overrides keyed by the current OSOK kind from the v2 contract. |
 | `generation.resources[].formalSpec` | Optional per-kind controller slug from `formal/controller_manifest.tsv` when only selected resources are formally promoted. |
+| `generation.resources[].preserveOptionalBooleanPresence` | Optional per-kind compatibility policy that renders optional OCI SDK `*bool` fields as `*bool` in generated API helpers, preserving omitted versus explicit `false` values without changing other resources. |
 | `generation.resources[].async.strategy` | Optional per-kind async override when the selected kind's published behavior differs from the service default. |
 | `generation.resources[].async.runtime` | Optional per-kind runtime owner classification, typically `generatedruntime` or `handwritten`. For work-request-backed kinds, `generatedruntime` opts into the bounded `Async` hook seam instead of the handwritten reference path. |
 | `generation.resources[].async.formalClassification` | Optional per-kind formal async classification for the matching controller row. |
@@ -50,7 +52,7 @@ Each service record defines:
 | `generation.resources[].serviceManager.packagePath` | Optional existing package path relative to `pkg/servicemanager/` when a manual layout must be preserved. |
 | `generation.resources[].serviceManager.needsCredentialClient` | Optional flag that threads credential-client plumbing into a generated service-manager seam when repo-authored secret-backed fields need it. |
 | `generation.resources[].webhooks.strategy` | Optional per-kind webhook ownership seam: `manual` or `none`. When omitted, the kind inherits the service-level webhook strategy. |
-| `generation.resources[].specFields` | Optional per-kind spec field overrides keyed by generated Go field name. Overrides may replace field type, tag, comments, or markers when the repo-authored v2 contract intentionally differs from the imported SDK surface. |
+| `generation.resources[].specFields` | Optional per-kind spec field overrides keyed by generated Go field name. Dot-separated names target fields in generated nested helper types. Overrides may replace or add a field's type, tag, comments, or markers when the repo-authored v2 contract intentionally differs from the imported SDK surface. |
 | `generation.resources[].statusFields` | Optional per-kind status field overrides keyed by generated Go field name. Overrides may replace or add repo-authored observed-state or status-mirror fields. |
 | `generation.resources[].sample` | Optional per-kind sample override. `body` replaces the rendered sample wholesale, while `metadataName` and `spec` refine the generated defaults. |
 
@@ -64,7 +66,17 @@ Rules:
   selectors such as `--service`.
 - `selection.mode=all` requires an empty `selection.includeKinds`.
 - `selection.mode=explicit` requires a non-empty `selection.includeKinds` list
-  of current OSOK kinds.
+  of discovered SDK resource-family names (the names are also OSOK kinds when
+  no `kindAliases` entry applies).
+- `kindAliases` keys use discovered SDK resource-family names and values use
+  stable OSOK API kind names. Alias values must be unique within a service;
+  selection continues to use the SDK names.
+- Status synthesis first uses `<SDKKind>` and `<SDKKind>Summary`. If neither
+  model contributes a field, the generator falls back to the typed body of the
+  selected get/create/update response, or to the collection body of a
+  list-only response. Binary response bodies are never exposed in status.
+- `observedState.sdkAliases` remains the explicit source of truth when a
+  list-backed runtime selects one item rather than publishing the collection.
 - Enabled selected kinds must resolve to explicit async metadata either from
   service-level `async.*` defaults or resource-level
   `generation.resources[].async.*` overrides.
@@ -81,23 +93,27 @@ Rules:
 - Legacy overlay files and kind-remap layers are not part of the current
   generator contract.
 
-## Async Strategy Closeout
+## Async Strategy Contract
 
-The checked-in async contract is now explicit on the selected surface:
+The authoritative resource-by-resource async selection lives in
+`internal/generator/config/services.yaml`; formal lifecycle metadata records
+the reviewed runtime intent. Do not maintain a second resource inventory in
+this document.
 
-- Selected kinds with lifecycle async metadata are
-  `containerengine/Cluster`, `containerinstances/ContainerInstance`,
-  `core/Instance`, `database/AutonomousDatabase`,
-  `functions/Application`, `functions/Function`, `identity/Compartment`,
-  `keymanagement/Vault`, `mysql/DbSystem`, `nosql/Table`,
-  `objectstorage/Bucket`, `opensearch/OpensearchCluster`,
-  `psql/DbSystem`, and `streaming/Stream`.
-- Selected kinds with workrequest async metadata are `queue/Queue` and
-  `redis/RedisCluster`.
+- `async.strategy=lifecycle` models resources whose OCI object lifecycle is
+  polled until it reaches a terminal state.
+- `async.strategy=workrequest` models resources whose mutating operations are
+  tracked through OCI Work Requests.
+- `async.runtime=generatedruntime` activates the corresponding shared runtime
+  contract. Work-request resources use the bounded `Async` hook seam for
+  fetching and classifying requests, recovering resource IDs, and projecting
+  shared status.
+- `async.runtime=handwritten` leaves those responsibilities with the
+  resource-owned service manager while requiring the same shared status
+  contract.
 - `status.async.current` is the canonical in-flight tracker for the shared
-  async contract and for the reference migrations that already project it in
-  runtime today. Within the embedded shared OSOK status object, the canonical
-  field is `status.async.current.workRequestId`; on the CR it is exposed at
+  async contract. Within the embedded shared OSOK status object, the canonical
+  field is `status.async.current.workRequestId`; on a CR it is exposed at
   `.status.status.async.current.workRequestId`.
 - `status.opcRequestId` is the canonical shared OCI request-correlation field
   for controller-backed resources. On the CR it is exposed at
@@ -110,35 +126,20 @@ The checked-in async contract is now explicit on the selected surface:
   Handwritten runtimes must publish the same field explicitly from mutating
   OCI response headers and surfaced OCI service errors; they must not invent
   resource-local replacements.
-- The generator contract now also allows `async.strategy=workrequest` with
-  `async.runtime=generatedruntime`. That posture requires the generated-runtime
-  `Async` seam to supply work-request fetch, status/action classification,
-  resource-ID recovery, and any temporary legacy bridge mirrors without
-  widening generatedruntime into a generic provider contract.
-- `nosql/Table` is the lifecycle-only reference migration. `queue/Queue` and
-  `redis/RedisCluster` are the workrequest-backed reference migrations.
-- `queue/Queue` keeps its legacy work-request ID mirrors only for the current
-  compatibility window; new selected resources should not add Queue-style
-  compatibility fields by default.
-- The checked-in selected workrequest resources remain handwritten until the
-  later scaffold-refresh and package-migration stories consume the new bounded
-  `Async` seam. Recording `generatedruntime` in async metadata now means the
-  contract is available, not that every existing checked-in package has
-  already switched to it.
-- Remaining lifecycle/manual selected kinds that still expose OCI
-  work-request APIs, including `psql/DbSystem`, are re-audited separately
-  under `oci-service-operator-0kb`; the metadata classification does not, by
-  itself, claim that those handwritten runtimes already project the Table
-  reference semantics or the shared tracker identically.
+- Compatibility mirrors retained by an existing handwritten resource are
+  resource-local migration details; new resources should use the shared
+  tracker directly.
 - The disabled top-level `service: workrequests` row in
   `internal/generator/config/services.yaml` is a separate rollout decision.
   Setting `async.strategy=workrequest` on a published kind does not implicitly
   enable or publish a standalone `workrequests` API group.
 - Scaffolded per-service `WorkRequest`, `WorkRequestError`, and
   `WorkRequestLog` rows in `formal/controller_manifest.tsv` remain catalog-only
-  `stage=scaffold` entries until `oci-service-operator-9s2` resolves their
-  prune-or-promote path. They do not authorize `formalSpec`,
+  `stage=scaffold` entries. They do not authorize `formalSpec`,
   controller-backed runtime ownership, or package publication by themselves.
+
+Use `make mock-integration-inventory` to inspect the current generated CRUD
+runtime classifications and coverage instead of relying on a copied list.
 
 ## Output Ownership
 
@@ -359,11 +360,28 @@ from the OCI schema model when the generator can infer them. Any exception
 should be expressed as a structured override in generator inputs, not as a
 one-off file edit under `api/`.
 
+Optional single nested objects in generated specs remain value-shaped for API
+compatibility and use `json:"<field>,omitempty,omitzero"`. This preserves the
+OCI SDK's absent-vs-present contract: an omitted object stays absent rather
+than being serialized as `{}` and accidentally triggering validation on its
+nested required fields. Required objects, collections, scalar fields, and
+status fields keep their existing JSON tags.
+
+Resources that must distinguish an omitted boolean from an explicit `false`
+may opt into `generation.resources[].preserveOptionalBooleanPresence`. The
+policy applies only to optional OCI SDK fields represented as `*bool`; required
+booleans and every resource without the opt-in retain their existing generated
+types. This lets the standard runtime resolver preserve `nil` versus `&false`
+without treating every omitted value-shaped boolean as false.
+
 ### Structured field and sample overrides
 
 - `generation.resources[].specFields` and `generation.resources[].statusFields`
   match fields by generated Go name, with JSON tag fallback for anonymous or
   embedded cases.
+- Dot-separated `specFields[].name` paths resolve from a top-level spec field
+  through generated helper types. Every intermediate segment must already
+  exist; an invalid path fails package-model construction.
 - Field overrides may set `type`, `tag`, `comments`, and `markers`.
 - Omitted comments and markers inherit from the discovered field model; explicit
   values should be supplied when the repo-authored v2 contract intentionally

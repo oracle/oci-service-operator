@@ -56,6 +56,9 @@ spec:
           spec:
             description: JobSpec defines the desired state of Job.
             properties:
+              catalogId:
+                description: The OCID of the catalog containing this resource.
+                type: string
               connectionKey:
                 description: |-
                   The key of the connection used by the job. This connection will override the default connection specified in
@@ -89,6 +92,7 @@ spec:
                   string.
                 type: string
             required:
+            - catalogId
             - displayName
             - jobDefinitionKey
             type: object

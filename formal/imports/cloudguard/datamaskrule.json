@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "cloudguard",
+  "slug": "datamaskrule",
+  "kind": "DataMaskRule",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_cloud_guard_data_mask_rule",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDataMaskRule",
+        "requestType": "cloudguard.CreateDataMaskRuleRequest",
+        "responseType": "cloudguard.CreateDataMaskRuleResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDataMaskRule",
+        "requestType": "cloudguard.GetDataMaskRuleRequest",
+        "responseType": "cloudguard.GetDataMaskRuleResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDataMaskRules",
+        "requestType": "cloudguard.ListDataMaskRulesRequest",
+        "responseType": "cloudguard.ListDataMaskRulesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDataMaskRule",
+        "requestType": "cloudguard.UpdateDataMaskRuleRequest",
+        "responseType": "cloudguard.UpdateDataMaskRuleResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDataMaskRule",
+        "requestType": "cloudguard.DeleteDataMaskRuleRequest",
+        "responseType": "cloudguard.DeleteDataMaskRuleResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "displayName",
+      "compartmentId",
+      "iamGroupId",
+      "targetSelected",
+      "dataMaskCategories",
+      "dataMaskRuleStatus",
+      "freeformTags",
+      "definedTags"
+    ],
+    "forceNew": [
+      "description",
+      "lifecycleState"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "unavailable",
+    "collectionField": "Items",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartmentId",
+      "displayName",
+      "lifecycleState",
+      "accessLevel",
+      "opc-request-id",
+      "dataMaskRuleStatus",
+      "targetId",
+      "iamGroupId"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/cloudguard/datamaskrule/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/cloudguard/datamaskrule/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Terraform provider formal-import could not resolve oci_cloud_guard_data_mask_rule; the vendored SDK, generated runtime, and package-owned typed OCI fixtures define this reviewed contract."
+  ]
+}

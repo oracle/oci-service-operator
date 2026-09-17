@@ -13,6 +13,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/common"
 	objectstoragesdk "github.com/oracle/oci-go-sdk/v65/objectstorage"
 	objectstoragev1beta1 "github.com/oracle/oci-service-operator/api/objectstorage/v1beta1"
+	"github.com/oracle/oci-service-operator/pkg/errorutil"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -47,6 +48,20 @@ func applyBucketRuntimeHooks(hooks *BucketRuntimeHooks) {
 	hooks.List.Fields = bucketListFields()
 	hooks.Update.Fields = bucketUpdateFields()
 	hooks.Delete.Fields = bucketDeleteFields()
+	hooks.DeleteHooks.HandleError = handleBucketDeleteError
+}
+
+func handleBucketDeleteError(_ *objectstoragev1beta1.Bucket, err error) error {
+	classification := errorutil.ClassifyDeleteError(err)
+	if classification.HTTPStatusCode != 404 || classification.ErrorCode != "BucketNotFound" {
+		return err
+	}
+	return errorutil.NotFoundOciError(errorutil.OciErrors{
+		HTTPStatusCode: classification.HTTPStatusCode,
+		ErrorCode:      errorutil.NotFound,
+		OpcRequestID:   errorutil.OpcRequestID(err),
+		Description:    "Object Storage bucket does not exist",
+	})
 }
 
 func appendBucketNamespaceRuntimeWrapper(manager *BucketServiceManager, hooks *BucketRuntimeHooks) {

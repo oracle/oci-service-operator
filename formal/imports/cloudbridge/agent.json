@@ -1,0 +1,127 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "cloudbridge",
+  "slug": "agent",
+  "kind": "Agent",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_cloud_bridge_agent",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateAgent",
+        "requestType": "cloudbridge.CreateAgentRequest",
+        "responseType": "cloudbridge.CreateAgentResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetAgent",
+        "requestType": "cloudbridge.GetAgentRequest",
+        "responseType": "cloudbridge.GetAgentResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListAgents",
+        "requestType": "cloudbridge.ListAgentsRequest",
+        "responseType": "cloudbridge.ListAgentsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeAgentCompartment",
+        "requestType": "cloudbridge.ChangeAgentCompartmentRequest",
+        "responseType": "cloudbridge.ChangeAgentCompartmentResponse"
+      },
+      {
+        "operation": "UpdateAgent",
+        "requestType": "cloudbridge.UpdateAgentRequest",
+        "responseType": "cloudbridge.UpdateAgentResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteAgent",
+        "requestType": "cloudbridge.DeleteAgentRequest",
+        "responseType": "cloudbridge.DeleteAgentResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "display_name",
+      "freeform_tags"
+    ],
+    "forceNew": [
+      "agent_type",
+      "agent_version",
+      "environment_id",
+      "os_version"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_cloud_bridge_agents",
+    "collectionField": "agent_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "agent_id",
+      "compartment_id",
+      "display_name",
+      "environment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/cloudbridge/agent/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/cloudbridge/agent/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from the pinned terraform-provider-oci source revision."
+  ]
+}

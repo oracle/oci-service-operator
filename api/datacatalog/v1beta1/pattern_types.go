@@ -51,6 +51,9 @@ type PatternSpec struct {
 	// Example: `{"properties": { "default": { "tbd"}}}`
 	// +kubebuilder:validation:Optional
 	Properties map[string]map[string]string `json:"properties,omitempty"`
+	// The OCID of the catalog containing the pattern.
+	// +kubebuilder:validation:Required
+	CatalogId string `json:"catalogId"`
 }
 
 // PatternStatus defines the observed state of Pattern.

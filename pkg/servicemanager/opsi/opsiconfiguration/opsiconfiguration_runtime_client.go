@@ -135,7 +135,7 @@ func applyOpsiConfigurationRuntimeHooks(
 		return
 	}
 
-	hooks.Semantics = newOpsiConfigurationRuntimeSemantics()
+	hooks.Semantics = reviewedOpsiConfigurationRuntimeSemantics()
 	hooks.BuildCreateBody = buildOpsiConfigurationCreateBody
 	hooks.BuildUpdateBody = buildOpsiConfigurationUpdateBody
 	hooks.Identity.GuardExistingBeforeCreate = guardOpsiConfigurationExistingBeforeCreate
@@ -189,7 +189,7 @@ func applyOpsiConfigurationRuntimeHooks(
 	}
 }
 
-func newOpsiConfigurationRuntimeSemantics() *generatedruntime.Semantics {
+func reviewedOpsiConfigurationRuntimeSemantics() *generatedruntime.Semantics {
 	return &generatedruntime.Semantics{
 		FormalService: "opsi",
 		FormalSlug:    "opsiconfiguration",

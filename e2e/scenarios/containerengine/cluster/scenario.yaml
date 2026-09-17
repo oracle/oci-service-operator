@@ -1,0 +1,31 @@
+version: 1
+name: containerengine-cluster-basic-crud
+service: containerengine
+namespace: default
+timeout: 60m
+pollInterval: 20s
+create: create.yaml
+update: update.yaml
+ready:
+  conditionTypes: [Active]
+  lifecycleStates: [ACTIVE]
+  requireOCID: true
+  fieldsEqual:
+    - desired: spec.name
+      observed: status.name
+    - desired: spec.vcnId
+      observed: status.vcnId
+    - desired: spec.kubernetesVersion
+      observed: status.kubernetesVersion
+    - desired: spec.endpointConfig.subnetId
+      observed: status.endpointConfig.subnetId
+    - desired: spec.type
+      observed: status.type
+    - desired: spec.freeformTags
+      observed: status.freeformTags
+failureConditionTypes: [Failed]
+delete:
+  enabled: true
+  timeout: 60m
+  cleanupDependencies: true
+cleanupOnFailure: true

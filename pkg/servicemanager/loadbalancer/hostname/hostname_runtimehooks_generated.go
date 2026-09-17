@@ -66,25 +66,25 @@ func newHostnameDefaultRuntimeHooks(sdkClient loadbalancersdk.LoadBalancerClient
 			},
 		},
 		Get: runtimeOperationHooks[loadbalancersdk.GetHostnameRequest, loadbalancersdk.GetHostnameResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "Name", RequestName: "name", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "Name", RequestName: "name", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request loadbalancersdk.GetHostnameRequest) (loadbalancersdk.GetHostnameResponse, error) {
 				return sdkClient.GetHostname(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[loadbalancersdk.ListHostnamesRequest, loadbalancersdk.ListHostnamesResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: true}},
+			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loadbalancersdk.ListHostnamesRequest) (loadbalancersdk.ListHostnamesResponse, error) {
 				return sdkClient.ListHostnames(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[loadbalancersdk.UpdateHostnameRequest, loadbalancersdk.UpdateHostnameResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "Name", RequestName: "name", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdateHostnameDetails", RequestName: "UpdateHostnameDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "Name", RequestName: "name", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateHostnameDetails", RequestName: "UpdateHostnameDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loadbalancersdk.UpdateHostnameRequest) (loadbalancersdk.UpdateHostnameResponse, error) {
 				return sdkClient.UpdateHostname(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[loadbalancersdk.DeleteHostnameRequest, loadbalancersdk.DeleteHostnameResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "Name", RequestName: "name", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "Name", RequestName: "name", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request loadbalancersdk.DeleteHostnameRequest) (loadbalancersdk.DeleteHostnameResponse, error) {
 				return sdkClient.DeleteHostname(ctx, request)
 			},

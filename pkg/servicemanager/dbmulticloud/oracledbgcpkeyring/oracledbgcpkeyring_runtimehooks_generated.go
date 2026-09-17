@@ -50,50 +50,119 @@ func registerOracleDbGcpKeyRingRuntimeHooksMutator(mutator OracleDbGcpKeyRingRun
 	}
 	oracledbgcpkeyringRuntimeHooksMutators = append(oracledbgcpkeyringRuntimeHooksMutators, mutator)
 }
-func newOracleDbGcpKeyRingDefaultRuntimeHooks(sdkClient dbmulticloudsdk.DbMulticloudGCPProviderClient) OracleDbGcpKeyRingRuntimeHooks {
+func newOracleDbGcpKeyRingRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "dbmulticloud",
+		FormalSlug:    "oracledbgcpkeyring",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "displayName", "oracleDbGcpConnectorId", "oracleDbGcpKeyRingId", "state"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"compartmentId", "definedTags", "displayName", "freeformTags"},
+			ForceNew:      []string{"gcpKeyRingId", "location", "oracleDbConnectorId", "properties", "type"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
+func newOracleDbGcpKeyRingDefaultRuntimeHooks(sdkClient OracleDbGcpKeyRingSDKClients) OracleDbGcpKeyRingRuntimeHooks {
 	return OracleDbGcpKeyRingRuntimeHooks{
+		Semantics:       newOracleDbGcpKeyRingRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*dbmulticloudv1beta1.OracleDbGcpKeyRing]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*dbmulticloudv1beta1.OracleDbGcpKeyRing]{},
 		StatusHooks:     generatedruntime.StatusHooks[*dbmulticloudv1beta1.OracleDbGcpKeyRing]{},
 		ParityHooks:     generatedruntime.ParityHooks[*dbmulticloudv1beta1.OracleDbGcpKeyRing]{},
-		Async:           generatedruntime.AsyncHooks[*dbmulticloudv1beta1.OracleDbGcpKeyRing]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*dbmulticloudv1beta1.OracleDbGcpKeyRing]{},
+		Async: generatedruntime.AsyncHooks[*dbmulticloudv1beta1.OracleDbGcpKeyRing]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := dbmulticloudsdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.workRequestClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*dbmulticloudv1beta1.OracleDbGcpKeyRing]{},
 		Create: runtimeOperationHooks[dbmulticloudsdk.CreateOracleDbGcpKeyRingRequest, dbmulticloudsdk.CreateOracleDbGcpKeyRingResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateOracleDbGcpKeyRingDetails", RequestName: "CreateOracleDbGcpKeyRingDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dbmulticloudsdk.CreateOracleDbGcpKeyRingRequest) (dbmulticloudsdk.CreateOracleDbGcpKeyRingResponse, error) {
-				return sdkClient.CreateOracleDbGcpKeyRing(ctx, request)
+				return sdkClient.dbMulticloudGcpProviderClient.CreateOracleDbGcpKeyRing(ctx, request)
 			},
 		},
 		Get: runtimeOperationHooks[dbmulticloudsdk.GetOracleDbGcpKeyRingRequest, dbmulticloudsdk.GetOracleDbGcpKeyRingResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OracleDbGcpKeyRingId", RequestName: "oracleDbGcpKeyRingId", Contribution: "path", PreferResourceID: true}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dbmulticloudsdk.GetOracleDbGcpKeyRingRequest) (dbmulticloudsdk.GetOracleDbGcpKeyRingResponse, error) {
-				return sdkClient.GetOracleDbGcpKeyRing(ctx, request)
+				return sdkClient.dbMulticloudGcpProviderClient.GetOracleDbGcpKeyRing(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[dbmulticloudsdk.ListOracleDbGcpKeyRingsRequest, dbmulticloudsdk.ListOracleDbGcpKeyRingsResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "OracleDbGcpKeyRingId", RequestName: "oracleDbGcpKeyRingId", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "OracleDbGcpConnectorId", RequestName: "oracleDbGcpConnectorId", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dbmulticloudsdk.ListOracleDbGcpKeyRingsRequest) (dbmulticloudsdk.ListOracleDbGcpKeyRingsResponse, error) {
-				return sdkClient.ListOracleDbGcpKeyRings(ctx, request)
+				return sdkClient.dbMulticloudGcpProviderClient.ListOracleDbGcpKeyRings(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[dbmulticloudsdk.UpdateOracleDbGcpKeyRingRequest, dbmulticloudsdk.UpdateOracleDbGcpKeyRingResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OracleDbGcpKeyRingId", RequestName: "oracleDbGcpKeyRingId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateOracleDbGcpKeyRingDetails", RequestName: "UpdateOracleDbGcpKeyRingDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dbmulticloudsdk.UpdateOracleDbGcpKeyRingRequest) (dbmulticloudsdk.UpdateOracleDbGcpKeyRingResponse, error) {
-				return sdkClient.UpdateOracleDbGcpKeyRing(ctx, request)
+				return sdkClient.dbMulticloudGcpProviderClient.UpdateOracleDbGcpKeyRing(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[dbmulticloudsdk.DeleteOracleDbGcpKeyRingRequest, dbmulticloudsdk.DeleteOracleDbGcpKeyRingResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OracleDbGcpKeyRingId", RequestName: "oracleDbGcpKeyRingId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request dbmulticloudsdk.DeleteOracleDbGcpKeyRingRequest) (dbmulticloudsdk.DeleteOracleDbGcpKeyRingResponse, error) {
-				return sdkClient.DeleteOracleDbGcpKeyRing(ctx, request)
+				return sdkClient.dbMulticloudGcpProviderClient.DeleteOracleDbGcpKeyRing(ctx, request)
 			},
 		},
 		WrapGeneratedClient: []func(OracleDbGcpKeyRingServiceClient) OracleDbGcpKeyRingServiceClient{},
 	}
 }
 
-func newOracleDbGcpKeyRingRuntimeHooks(manager *OracleDbGcpKeyRingServiceManager, sdkClient dbmulticloudsdk.DbMulticloudGCPProviderClient) OracleDbGcpKeyRingRuntimeHooks {
+func newOracleDbGcpKeyRingRuntimeHooks(manager *OracleDbGcpKeyRingServiceManager, sdkClient OracleDbGcpKeyRingSDKClients) OracleDbGcpKeyRingRuntimeHooks {
 	hooks := newOracleDbGcpKeyRingDefaultRuntimeHooks(sdkClient)
 	for _, mutator := range oracledbgcpkeyringRuntimeHooksMutators {
 		mutator(manager, &hooks)
@@ -106,10 +175,19 @@ func buildOracleDbGcpKeyRingGeneratedRuntimeConfig(
 	hooks OracleDbGcpKeyRingRuntimeHooks,
 ) generatedruntime.Config[*dbmulticloudv1beta1.OracleDbGcpKeyRing] {
 	return generatedruntime.Config[*dbmulticloudv1beta1.OracleDbGcpKeyRing]{
-		Kind:            "OracleDbGcpKeyRing",
-		SDKName:         "OracleDbGcpKeyRing",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "OracleDbGcpKeyRing",
+		SDKName:   "OracleDbGcpKeyRing",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

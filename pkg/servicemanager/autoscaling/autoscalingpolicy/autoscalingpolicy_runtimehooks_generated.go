@@ -72,7 +72,7 @@ func newAutoScalingPolicyDefaultRuntimeHooks(sdkClient autoscalingsdk.AutoScalin
 			},
 		},
 		List: runtimeOperationHooks[autoscalingsdk.ListAutoScalingPoliciesRequest, autoscalingsdk.ListAutoScalingPoliciesResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "AutoScalingConfigurationId", RequestName: "autoScalingConfigurationId", Contribution: "path", PreferResourceID: true}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "AutoScalingConfigurationId", RequestName: "autoScalingConfigurationId", Contribution: "path", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request autoscalingsdk.ListAutoScalingPoliciesRequest) (autoscalingsdk.ListAutoScalingPoliciesResponse, error) {
 				return sdkClient.ListAutoScalingPolicies(ctx, request)
 			},

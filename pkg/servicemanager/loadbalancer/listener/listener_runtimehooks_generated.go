@@ -53,9 +53,13 @@ func newListenerRuntimeSemantics() *generatedruntime.Semantics {
 		FormalService: "loadbalancer",
 		FormalSlug:    "listener",
 		Async: &generatedruntime.AsyncSemantics{
-			Strategy:             "lifecycle",
+			Strategy:             "workrequest",
 			Runtime:              "generatedruntime",
-			FormalClassification: "lifecycle",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
 		},
 		StatusProjection:  "required",
 		SecretSideEffects: "none",
@@ -104,8 +108,20 @@ func newListenerDefaultRuntimeHooks(sdkClient loadbalancersdk.LoadBalancerClient
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*loadbalancerv1beta1.Listener]{},
 		StatusHooks:     generatedruntime.StatusHooks[*loadbalancerv1beta1.Listener]{},
 		ParityHooks:     generatedruntime.ParityHooks[*loadbalancerv1beta1.Listener]{},
-		Async:           generatedruntime.AsyncHooks[*loadbalancerv1beta1.Listener]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*loadbalancerv1beta1.Listener]{},
+		Async: generatedruntime.AsyncHooks[*loadbalancerv1beta1.Listener]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := loadbalancersdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*loadbalancerv1beta1.Listener]{},
 		Create: runtimeOperationHooks[loadbalancersdk.CreateListenerRequest, loadbalancersdk.CreateListenerResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "CreateListenerDetails", RequestName: "CreateListenerDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loadbalancersdk.CreateListenerRequest) (loadbalancersdk.CreateListenerResponse, error) {
@@ -113,13 +129,13 @@ func newListenerDefaultRuntimeHooks(sdkClient loadbalancersdk.LoadBalancerClient
 			},
 		},
 		Update: runtimeOperationHooks[loadbalancersdk.UpdateListenerRequest, loadbalancersdk.UpdateListenerResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "ListenerName", RequestName: "listenerName", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdateListenerDetails", RequestName: "UpdateListenerDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "ListenerName", RequestName: "listenerName", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateListenerDetails", RequestName: "UpdateListenerDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loadbalancersdk.UpdateListenerRequest) (loadbalancersdk.UpdateListenerResponse, error) {
 				return sdkClient.UpdateListener(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[loadbalancersdk.DeleteListenerRequest, loadbalancersdk.DeleteListenerResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "ListenerName", RequestName: "listenerName", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "ListenerName", RequestName: "listenerName", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request loadbalancersdk.DeleteListenerRequest) (loadbalancersdk.DeleteListenerResponse, error) {
 				return sdkClient.DeleteListener(ctx, request)
 			},
@@ -141,10 +157,19 @@ func buildListenerGeneratedRuntimeConfig(
 	hooks ListenerRuntimeHooks,
 ) generatedruntime.Config[*loadbalancerv1beta1.Listener] {
 	return generatedruntime.Config[*loadbalancerv1beta1.Listener]{
-		Kind:            "Listener",
-		SDKName:         "Listener",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "Listener",
+		SDKName:   "Listener",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

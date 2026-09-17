@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "cloudguard",
+  "slug": "target",
+  "kind": "Target",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_cloud_guard_target",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateTarget",
+        "requestType": "cloudguard.CreateTargetRequest",
+        "responseType": "cloudguard.CreateTargetResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetTarget",
+        "requestType": "cloudguard.GetTargetRequest",
+        "responseType": "cloudguard.GetTargetResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListTargets",
+        "requestType": "cloudguard.ListTargetsRequest",
+        "responseType": "cloudguard.ListTargetsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateTarget",
+        "requestType": "cloudguard.UpdateTargetRequest",
+        "responseType": "cloudguard.UpdateTargetResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteTarget",
+        "requestType": "cloudguard.DeleteTargetRequest",
+        "responseType": "cloudguard.DeleteTargetResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "displayName",
+      "targetDetectorRecipes",
+      "targetResponderRecipes",
+      "lifecycleState",
+      "freeformTags",
+      "definedTags"
+    ],
+    "forceNew": [
+      "compartmentId",
+      "targetResourceType",
+      "targetResourceId",
+      "description"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "unavailable",
+    "collectionField": "Items",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartmentId",
+      "displayName",
+      "isNonSecurityZoneTargetsOnlyQuery",
+      "lifecycleState",
+      "compartmentIdInSubtree",
+      "accessLevel",
+      "opc-request-id"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/cloudguard/target/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/cloudguard/target/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Terraform provider formal-import could not resolve oci_cloud_guard_target; the vendored SDK, generated runtime, and package-owned typed OCI fixtures define this reviewed contract."
+  ]
+}

@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "securityassessment",
+  "kind": "SecurityAssessment",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_security_assessment",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateSecurityAssessment",
+        "requestType": "datasafe.CreateSecurityAssessmentRequest",
+        "responseType": "datasafe.CreateSecurityAssessmentResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetSecurityAssessment",
+        "requestType": "datasafe.GetSecurityAssessmentRequest",
+        "responseType": "datasafe.GetSecurityAssessmentResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListSecurityAssessments",
+        "requestType": "datasafe.ListSecurityAssessmentsRequest",
+        "responseType": "datasafe.ListSecurityAssessmentsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeSecurityAssessmentCompartment",
+        "requestType": "datasafe.ChangeSecurityAssessmentCompartmentRequest",
+        "responseType": "datasafe.ChangeSecurityAssessmentCompartmentResponse"
+      },
+      {
+        "operation": "UpdateSecurityAssessment",
+        "requestType": "datasafe.UpdateSecurityAssessmentRequest",
+        "responseType": "datasafe.UpdateSecurityAssessmentResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteSecurityAssessment",
+        "requestType": "datasafe.DeleteSecurityAssessmentRequest",
+        "responseType": "datasafe.DeleteSecurityAssessmentResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "SUCCEEDED"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "apply_template_trigger",
+      "compare_to_template_baseline_trigger",
+      "compartment_id",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags",
+      "is_assessment_scheduled",
+      "remove_template_trigger",
+      "schedule"
+    ],
+    "forceNew": [
+      "base_security_assessment_id",
+      "target_id",
+      "target_type",
+      "template_assessment_id",
+      "type"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_data_safe_security_assessments",
+    "collectionField": "security_assessments",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "access_level",
+      "compartment_id",
+      "compartment_id_in_subtree",
+      "display_name",
+      "is_baseline",
+      "is_schedule_assessment",
+      "schedule_assessment_id",
+      "state",
+      "target_database_group_id",
+      "target_id",
+      "target_type",
+      "template_assessment_id",
+      "time_created_greater_than_or_equal_to",
+      "time_created_less_than",
+      "triggered_by",
+      "type"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/securityassessment/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/securityassessment/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from the pinned terraform-provider-oci source revision."
+  ]
+}

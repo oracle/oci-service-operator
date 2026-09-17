@@ -1,0 +1,16 @@
+#
+# Copyright (c) 2026, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+#
+
+apiVersion: core.oracle.com/v1beta1
+kind: InternetGateway
+metadata:
+  name: osok-ig-${OSOK_E2E_SUFFIX}
+spec:
+  compartmentId: ${OCI_COMPARTMENT_ID}
+  isEnabled: true
+  vcnId: ${OCI_VCN_ID}
+  displayName: osok-ig-updated-${OSOK_E2E_SUFFIX}
+  freeformTags:
+    osok-e2e-phase: update

@@ -10,4 +10,6 @@ states:
   - updating
   - terminating
 notes:
-  - Scaffold metadata only; replace with controller-specific runtime states before promotion.
+  - Ready state maps to OCI ACTIVE. Requeue continues while OCI reports CREATING or UPDATING.
+  - Create, update, and delete retain OCI work-request identifiers as status breadcrumbs while lifecycle reads drive convergence.
+  - Delete completes only after GetCluster reports DELETED or no longer finds the tracked cluster.

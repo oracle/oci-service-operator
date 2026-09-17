@@ -1,0 +1,38 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: dns
+slug: tsigkey
+kind: TsigKey
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+  - deleted
+  - failed
+repoAuthored:
+  listLookup:
+    filters:
+      - compartmentId
+      - name
+      - id
+    matchRule: Adopt only a unique TSIG key match in the requested compartment.
+  mutation:
+    mutable:
+      - freeformTags
+      - definedTags
+    forceNew:
+      - algorithm
+      - name
+      - compartmentId
+      - secret
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - CREATING and UPDATING requeue, ACTIVE succeeds, and FAILED is terminal.
+  - Delete retains the finalizer through DELETING; an auth-shaped 404 is confirmed by an empty compartment/name/id list before completion.
+  - Only tags update in place. Algorithm, name, compartmentId, and the write-only secret require replacement; secret is never projected to status.
+  - The runtime has no Kubernetes Secret side effects.

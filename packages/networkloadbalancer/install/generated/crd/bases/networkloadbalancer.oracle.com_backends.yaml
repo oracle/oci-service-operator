@@ -56,6 +56,11 @@ spec:
           spec:
             description: BackendSpec defines the desired state of Backend.
             properties:
+              backendSetName:
+                description: |-
+                  The name of the backend set associated with the backend server.
+                  Example: `example_backend_set`
+                type: string
               ipAddress:
                 description: |-
                   The IP address of the backend server.
@@ -84,6 +89,11 @@ spec:
                   Optional unique name identifying the backend within the backend set. If not specified, then one will be generated.
                   Example: `webServer1`
                 type: string
+              networkLoadBalancerId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the network load balancer associated with the backend set and
+                  server.
+                type: string
               port:
                 description: |-
                   The communication port for the backend server.
@@ -104,11 +114,16 @@ spec:
                   Example: `3`
                 type: integer
             required:
+            - backendSetName
+            - networkLoadBalancerId
             - port
             type: object
           status:
             description: BackendStatus defines the observed state of Backend.
             properties:
+              backendSetName:
+                description: The bound backend set name used to address this backend.
+                type: string
               ipAddress:
                 description: |-
                   The IP address of the backend server.
@@ -136,6 +151,10 @@ spec:
                 description: |-
                   A read-only field showing the IP address/IP OCID and port that uniquely identify this backend server in the backend set.
                   Example: `10.0.0.3:8080`, or `ocid1.privateip..oc1.<var>&lt;unique_ID&gt;</var>:443` or `10.0.0.3:0`
+                type: string
+              networkLoadBalancerId:
+                description: The bound network load balancer OCID used to address
+                  this backend.
                 type: string
               port:
                 description: |-

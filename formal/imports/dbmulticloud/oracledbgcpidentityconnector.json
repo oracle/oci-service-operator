@@ -1,0 +1,128 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "dbmulticloud",
+  "slug": "oracledbgcpidentityconnector",
+  "kind": "OracleDbGcpIdentityConnector",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_dbmulticloud_oracle_db_gcp_identity_connector",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOracleDbGcpIdentityConnector",
+        "requestType": "dbmulticloud.CreateOracleDbGcpIdentityConnectorRequest",
+        "responseType": "dbmulticloud.CreateOracleDbGcpIdentityConnectorResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOracleDbGcpIdentityConnector",
+        "requestType": "dbmulticloud.GetOracleDbGcpIdentityConnectorRequest",
+        "responseType": "dbmulticloud.GetOracleDbGcpIdentityConnectorResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOracleDbGcpIdentityConnectors",
+        "requestType": "dbmulticloud.ListOracleDbGcpIdentityConnectorsRequest",
+        "responseType": "dbmulticloud.ListOracleDbGcpIdentityConnectorsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeOracleDbGcpIdentityConnectorCompartment",
+        "requestType": "dbmulticloud.ChangeOracleDbGcpIdentityConnectorCompartmentRequest",
+        "responseType": "dbmulticloud.ChangeOracleDbGcpIdentityConnectorCompartmentResponse"
+      },
+      {
+        "operation": "UpdateOracleDbGcpIdentityConnector",
+        "requestType": "dbmulticloud.UpdateOracleDbGcpIdentityConnectorRequest",
+        "responseType": "dbmulticloud.UpdateOracleDbGcpIdentityConnectorResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOracleDbGcpIdentityConnector",
+        "requestType": "dbmulticloud.DeleteOracleDbGcpIdentityConnectorRequest",
+        "responseType": "dbmulticloud.DeleteOracleDbGcpIdentityConnectorResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "display_name",
+      "freeform_tags",
+      "gcp_location",
+      "gcp_resource_service_agent_id",
+      "gcp_workload_identity_pool_id",
+      "gcp_workload_identity_provider_id",
+      "issuer_url",
+      "project_id",
+      "resource_id"
+    ],
+    "forceNew": null,
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_dbmulticloud_oracle_db_gcp_identity_connectors",
+    "collectionField": "oracle_db_gcp_identity_connector_summary_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "resource_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/dbmulticloud/oracledbgcpidentityconnector/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/dbmulticloud/oracledbgcpidentityconnector/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from the pinned terraform-provider-oci source revision."
+  ]
+}

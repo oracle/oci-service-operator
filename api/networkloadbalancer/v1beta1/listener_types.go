@@ -51,6 +51,9 @@ type ListenerSpec struct {
 	// Example: `200`
 	// +kubebuilder:validation:Optional
 	L3IpIdleTimeout int `json:"l3IpIdleTimeout,omitempty"`
+	// The OCID of the network load balancer that owns this listener.
+	// +kubebuilder:validation:Optional
+	NetworkLoadBalancerId string `json:"networkLoadBalancerId,omitempty"`
 }
 
 // ListenerStatus defines the observed state of Listener.
@@ -84,6 +87,8 @@ type ListenerStatus struct {
 	// The duration for L3IP idle timeout in seconds.
 	// Example: `200`
 	L3IpIdleTimeout int `json:"l3IpIdleTimeout,omitempty"`
+	// The bound network load balancer OCID used to address this listener.
+	NetworkLoadBalancerId string `json:"networkLoadBalancerId,omitempty"`
 }
 
 // +kubebuilder:object:root=true

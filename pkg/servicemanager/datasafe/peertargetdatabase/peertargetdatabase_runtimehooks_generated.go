@@ -72,7 +72,7 @@ func newPeerTargetDatabaseDefaultRuntimeHooks(sdkClient datasafesdk.DataSafeClie
 			},
 		},
 		List: runtimeOperationHooks[datasafesdk.ListPeerTargetDatabasesRequest, datasafesdk.ListPeerTargetDatabasesResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "TargetDatabaseId", RequestName: "targetDatabaseId", Contribution: "path", PreferResourceID: true}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "TargetDatabaseId", RequestName: "targetDatabaseId", Contribution: "path", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request datasafesdk.ListPeerTargetDatabasesRequest) (datasafesdk.ListPeerTargetDatabasesResponse, error) {
 				return sdkClient.ListPeerTargetDatabases(ctx, request)
 			},

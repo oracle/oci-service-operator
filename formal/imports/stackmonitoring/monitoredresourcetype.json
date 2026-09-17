@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "stackmonitoring",
+  "slug": "monitoredresourcetype",
+  "kind": "MonitoredResourceType",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_stack_monitoring_monitored_resource_type",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateMonitoredResourceType",
+        "requestType": "stackmonitoring.CreateMonitoredResourceTypeRequest",
+        "responseType": "stackmonitoring.CreateMonitoredResourceTypeResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetMonitoredResourceType",
+        "requestType": "stackmonitoring.GetMonitoredResourceTypeRequest",
+        "responseType": "stackmonitoring.GetMonitoredResourceTypeResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListMonitoredResourceTypes",
+        "requestType": "stackmonitoring.ListMonitoredResourceTypesRequest",
+        "responseType": "stackmonitoring.ListMonitoredResourceTypesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateMonitoredResourceType",
+        "requestType": "stackmonitoring.UpdateMonitoredResourceTypeRequest",
+        "responseType": "stackmonitoring.UpdateMonitoredResourceTypeResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteMonitoredResourceType",
+        "requestType": "stackmonitoring.DeleteMonitoredResourceTypeRequest",
+        "responseType": "stackmonitoring.DeleteMonitoredResourceTypeResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags",
+      "metadata.agent_properties",
+      "metadata.format",
+      "metadata.required_properties",
+      "metadata.unique_property_sets.properties",
+      "metadata.valid_properties_for_create",
+      "metadata.valid_properties_for_update",
+      "metadata.valid_property_values",
+      "metadata.valid_sub_resource_types",
+      "metric_namespace",
+      "resource_category",
+      "source_type"
+    ],
+    "forceNew": [
+      "compartment_id",
+      "name"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_stack_monitoring_monitored_resource_types",
+    "collectionField": "monitored_resource_types_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "exclude_fields",
+      "fields",
+      "is_exclude_system_types",
+      "metric_namespace",
+      "name",
+      "resource_category",
+      "source_type",
+      "status"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/stackmonitoring/monitoredresourcetype/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/stackmonitoring/monitoredresourcetype/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts refreshed from the pinned Terraform provider; repository-authored resource-type semantics are reviewed separately."
+  ]
+}

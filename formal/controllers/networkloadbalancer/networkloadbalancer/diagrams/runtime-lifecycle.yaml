@@ -1,0 +1,65 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: networkloadbalancer
+slug: networkloadbalancer
+kind: NetworkLoadBalancer
+archetype: generated-service-manager
+states:
+    - provisioning
+    - active
+    - updating
+    - terminating
+repoAuthored:
+    operations:
+        update:
+            - UpdateNetworkLoadBalancer
+    providerLifecycle:
+        createPending:
+            - CREATING
+        updatePending:
+            - UPDATING
+        deletePending:
+            - DELETING
+    listLookup:
+        filters:
+            - displayName
+            - compartmentId
+        matchRule: exact displayName, compartmentId match within the resource scope; duplicate matches fail
+    mutation:
+        mutable:
+            - assignedIpv6
+            - definedTags
+            - displayName
+            - freeformTags
+            - isPreserveSourceDestination
+            - isSymmetricHashEnabled
+            - networkSecurityGroupIds
+            - nlbIpVersion
+            - reservedIpv6Id
+            - securityAttributes
+            - subnetIpv6Cidr
+        forceNew:
+            - assignedPrivateIpv4
+            - backendSets
+            - compartmentId
+            - isPrivate
+            - listeners
+            - reservedIps
+            - subnetId
+    hooks:
+        create:
+            - helper: tfresource.CreateResource
+        update:
+            - helper: tfresource.UpdateResource
+            - helper: UpdateNetworkSecurityGroups
+        delete:
+            - helper: tfresource.DeleteResource
+    followUp:
+        create: GetWorkRequest -> read-after-write
+        update: GetWorkRequest -> read-after-write
+        delete: GetWorkRequest -> confirm-delete
+notes:
+    - The production runtime uses generatedruntime/workrequest async handling for create, update, delete work-request phases.
+    - Lifecycle success states are ACTIVE; pending create, update, and delete states requeue until the corresponding follow-up converges.
+    - Status projection is required, Secret side effects are none, and the finalizer policy is retain-until-confirmed-delete.
+    - Delete policy required retains ownership until DELETED or confirmed absence.

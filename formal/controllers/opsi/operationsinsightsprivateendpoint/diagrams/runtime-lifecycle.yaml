@@ -1,0 +1,68 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: opsi
+slug: operationsinsightsprivateendpoint
+kind: OperationsInsightsPrivateEndpoint
+archetype: generated-service-manager
+states:
+- provisioning
+- active
+- updating
+- terminating
+repoAuthored:
+  operations:
+    update:
+    - UpdateOperationsInsightsPrivateEndpoint
+  providerLifecycle:
+    createPending:
+    - CREATING
+    updatePending:
+    - UPDATING
+    deletePending:
+    - DELETING
+  listLookup:
+    filters:
+    - id
+    - displayName
+    - compartmentId
+    - vcnId
+    - subnetId
+    - isUsedForRacDbs
+    matchRule: exact id, displayName, compartmentId, vcnId, subnetId, isUsedForRacDbs
+      match within the resource scope; duplicate matches fail
+  mutation:
+    mutable:
+    - displayName
+    - description
+    - nsgIds
+    - freeformTags
+    - definedTags
+    forceNew:
+    - compartmentId
+    - vcnId
+    - subnetId
+    - isUsedForRacDbs
+  hooks:
+    create:
+    - helper: generatedruntime.Create
+      entityType: OperationsInsightsPrivateEndpoint
+      action: CREATE_PRIVATE_ENDPOINT
+    update:
+    - helper: generatedruntime.Update
+      entityType: OperationsInsightsPrivateEndpoint
+      action: UPDATE_PRIVATE_ENDPOINT
+    delete:
+    - helper: generatedruntime.Delete
+      entityType: OperationsInsightsPrivateEndpoint
+      action: DELETE_PRIVATE_ENDPOINT
+  followUp:
+    create: GetWorkRequest -> GetOperationsInsightsPrivateEndpoint
+    update: GetWorkRequest -> GetOperationsInsightsPrivateEndpoint
+    delete: confirm-delete
+notes:
+- The production runtime uses the declared work-request phases and service-local async
+  adapter.
+- Lifecycle success and pending states mirror the production service-manager semantics.
+- Status projection is required, Secret side effects are none, and the finalizer policy
+  is retain-until-confirmed-delete.
+- Delete ownership is retained until a terminal lifecycle state or confirmed absence.

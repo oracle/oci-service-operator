@@ -114,8 +114,20 @@ func newLustreFileSystemDefaultRuntimeHooks(sdkClient lustrefilestoragesdk.Lustr
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*lustrefilestoragev1beta1.LustreFileSystem]{},
 		StatusHooks:     generatedruntime.StatusHooks[*lustrefilestoragev1beta1.LustreFileSystem]{},
 		ParityHooks:     generatedruntime.ParityHooks[*lustrefilestoragev1beta1.LustreFileSystem]{},
-		Async:           generatedruntime.AsyncHooks[*lustrefilestoragev1beta1.LustreFileSystem]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*lustrefilestoragev1beta1.LustreFileSystem]{},
+		Async: generatedruntime.AsyncHooks[*lustrefilestoragev1beta1.LustreFileSystem]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := lustrefilestoragesdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*lustrefilestoragev1beta1.LustreFileSystem]{},
 		Create: runtimeOperationHooks[lustrefilestoragesdk.CreateLustreFileSystemRequest, lustrefilestoragesdk.CreateLustreFileSystemResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateLustreFileSystemDetails", RequestName: "CreateLustreFileSystemDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request lustrefilestoragesdk.CreateLustreFileSystemRequest) (lustrefilestoragesdk.CreateLustreFileSystemResponse, error) {
@@ -163,10 +175,19 @@ func buildLustreFileSystemGeneratedRuntimeConfig(
 	hooks LustreFileSystemRuntimeHooks,
 ) generatedruntime.Config[*lustrefilestoragev1beta1.LustreFileSystem] {
 	return generatedruntime.Config[*lustrefilestoragev1beta1.LustreFileSystem]{
-		Kind:            "LustreFileSystem",
-		SDKName:         "LustreFileSystem",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "LustreFileSystem",
+		SDKName:   "LustreFileSystem",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

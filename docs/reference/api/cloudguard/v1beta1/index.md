@@ -1293,7 +1293,9 @@ DetectorRecipeDetectorRuleSpec defines the desired state of DetectorRecipeDetect
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| `compartmentId` | The OCID of the compartment used to confirm the detector rule through its recipe collection. | `string` | Yes | - | - |
 | [`details`](#kind-detectorrecipedetectorrule-spec-details) | DetectorRecipeDetectorRuleDetailsFields defines nested fields for DetectorRecipeDetectorRule.Details. | `object` | No | - | - |
+| `detectorRecipeId` | The OCID of the detector recipe containing the detector rule. | `string` | Yes | - | - |
 
 <a id="kind-detectorrecipedetectorrule-spec-details"></a>
 #### Spec.details
@@ -2906,9 +2908,11 @@ TargetDetectorRecipeSpec defines the desired state of TargetDetectorRecipe.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| `compartmentId` | The OCID of the compartment used to confirm the target detector recipe through its collection endpoint. | `string` | Yes | - | - |
 | `detectorRecipeId` | Unique identifier for the target detector recipe | `string` | Yes | - | - |
 | [`detectorRules`](#kind-targetdetectorrecipe-spec-detectorrules) | List of overrides to be applied to detector rules associated with the target | `list[object]` | No | - | - |
 | `isValidationOnlyQuery` | Is validation to be performed for attaching the detector recipe? | `boolean` | No | - | - |
+| `targetId` | The OCID of the Cloud Guard target receiving the detector recipe. | `string` | Yes | - | - |
 
 <a id="kind-targetdetectorrecipe-spec-detectorrules"></a>
 #### Spec.detectorRules[]
@@ -3323,8 +3327,10 @@ TargetResponderRecipeSpec defines the desired state of TargetResponderRecipe.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| `compartmentId` | The OCID of the compartment used to confirm the target responder recipe through its collection endpoint. | `string` | Yes | - | - |
 | `responderRecipeId` | Unique identifier for responder recipe | `string` | Yes | - | - |
 | [`responderRules`](#kind-targetresponderrecipe-spec-responderrules) | List of overrides to be applied to responder rules associated with the target | `list[object]` | No | - | - |
+| `targetId` | The OCID of the Cloud Guard target receiving the responder recipe. | `string` | Yes | - | - |
 
 <a id="kind-targetresponderrecipe-spec-responderrules"></a>
 #### Spec.responderRules[]

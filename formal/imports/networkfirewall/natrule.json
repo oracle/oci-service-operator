@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "networkfirewall",
+  "slug": "natrule",
+  "kind": "NatRule",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_network_firewall_network_firewall_policy_nat_rule",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateNatRule",
+        "requestType": "networkfirewall.CreateNatRuleRequest",
+        "responseType": "networkfirewall.CreateNatRuleResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetNatRule",
+        "requestType": "networkfirewall.GetNatRuleRequest",
+        "responseType": "networkfirewall.GetNatRuleResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateNatRule",
+        "requestType": "networkfirewall.UpdateNatRuleRequest",
+        "responseType": "networkfirewall.UpdateNatRuleResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteNatRule",
+        "requestType": "networkfirewall.DeleteNatRuleRequest",
+        "responseType": "networkfirewall.DeleteNatRuleResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "position",
+      "type",
+      "condition",
+      "action"
+    ],
+    "forceNew": [
+      "network_firewall_policy_id",
+      "name"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/networkfirewall/natrule/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/networkfirewall/natrule/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "delete-confirmation",
+      "lifecycle-classification",
+      "list-lookup",
+      "mutation-policy",
+      "secret-output"
+    ]
+  },
+  "notes": [
+    "Pinned provider operations are combined with reviewed composite parent/name identity and NatRule runtime semantics."
+  ]
+}

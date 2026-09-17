@@ -1,0 +1,117 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "osmanagementhub",
+  "slug": "lifecycleenvironment",
+  "kind": "LifecycleEnvironment",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_os_management_hub_lifecycle_environment",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateLifecycleEnvironment",
+        "requestType": "osmanagementhub.CreateLifecycleEnvironmentRequest",
+        "responseType": "osmanagementhub.CreateLifecycleEnvironmentResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetLifecycleEnvironment",
+        "requestType": "osmanagementhub.GetLifecycleEnvironmentRequest",
+        "responseType": "osmanagementhub.GetLifecycleEnvironmentResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeLifecycleEnvironmentCompartment",
+        "requestType": "osmanagementhub.ChangeLifecycleEnvironmentCompartmentRequest",
+        "responseType": "osmanagementhub.ChangeLifecycleEnvironmentCompartmentResponse"
+      },
+      {
+        "operation": "UpdateLifecycleEnvironment",
+        "requestType": "osmanagementhub.UpdateLifecycleEnvironmentRequest",
+        "responseType": "osmanagementhub.UpdateLifecycleEnvironmentResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteLifecycleEnvironment",
+        "requestType": "osmanagementhub.DeleteLifecycleEnvironmentRequest",
+        "responseType": "osmanagementhub.DeleteLifecycleEnvironmentResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags",
+      "stages.compartment_id",
+      "stages.defined_tags",
+      "stages.display_name",
+      "stages.freeform_tags"
+    ],
+    "forceNew": [
+      "arch_type",
+      "location",
+      "os_family",
+      "stages.rank",
+      "vendor_name"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/osmanagementhub/lifecycleenvironment/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/osmanagementhub/lifecycleenvironment/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts refreshed from the pinned Terraform provider; repository-authored lifecycle semantics are reviewed separately."
+  ]
+}

@@ -50,15 +50,84 @@ func registerWorkspaceRuntimeHooksMutator(mutator WorkspaceRuntimeHooksMutator) 
 	}
 	workspaceRuntimeHooksMutators = append(workspaceRuntimeHooksMutators, mutator)
 }
+func newWorkspaceRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "dataintegration",
+		FormalSlug:    "workspace",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING", "STARTING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "name", "state"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"compartmentId", "definedTags", "description", "displayName", "freeformTags", "isForceOperation"},
+			ForceNew:      []string{"dnsServerIp", "dnsServerZone", "endpointCompartmentId", "endpointId", "endpointName", "isPrivateNetworkEnabled", "quiesceTimeout", "registryCompartmentId", "registryId", "registryName", "subnetId", "vcnId"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newWorkspaceDefaultRuntimeHooks(sdkClient dataintegrationsdk.DataIntegrationClient) WorkspaceRuntimeHooks {
 	return WorkspaceRuntimeHooks{
+		Semantics:       newWorkspaceRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*dataintegrationv1beta1.Workspace]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*dataintegrationv1beta1.Workspace]{},
 		StatusHooks:     generatedruntime.StatusHooks[*dataintegrationv1beta1.Workspace]{},
 		ParityHooks:     generatedruntime.ParityHooks[*dataintegrationv1beta1.Workspace]{},
-		Async:           generatedruntime.AsyncHooks[*dataintegrationv1beta1.Workspace]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*dataintegrationv1beta1.Workspace]{},
+		Async: generatedruntime.AsyncHooks[*dataintegrationv1beta1.Workspace]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := dataintegrationsdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*dataintegrationv1beta1.Workspace]{},
 		Create: runtimeOperationHooks[dataintegrationsdk.CreateWorkspaceRequest, dataintegrationsdk.CreateWorkspaceResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateWorkspaceDetails", RequestName: "CreateWorkspaceDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dataintegrationsdk.CreateWorkspaceRequest) (dataintegrationsdk.CreateWorkspaceResponse, error) {
@@ -106,10 +175,19 @@ func buildWorkspaceGeneratedRuntimeConfig(
 	hooks WorkspaceRuntimeHooks,
 ) generatedruntime.Config[*dataintegrationv1beta1.Workspace] {
 	return generatedruntime.Config[*dataintegrationv1beta1.Workspace]{
-		Kind:            "Workspace",
-		SDKName:         "Workspace",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "Workspace",
+		SDKName:   "Workspace",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

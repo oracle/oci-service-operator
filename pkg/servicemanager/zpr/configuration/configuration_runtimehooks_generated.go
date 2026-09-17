@@ -138,10 +138,19 @@ func buildConfigurationGeneratedRuntimeConfig(
 	hooks ConfigurationRuntimeHooks,
 ) generatedruntime.Config[*zprv1beta1.Configuration] {
 	return generatedruntime.Config[*zprv1beta1.Configuration]{
-		Kind:            "Configuration",
-		SDKName:         "Configuration",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "Configuration",
+		SDKName:   "Configuration",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

@@ -30,7 +30,7 @@ type MigrationSpec struct {
 	// +kubebuilder:validation:Optional
 	IsCompleted bool `json:"isCompleted,omitempty"`
 	// +kubebuilder:validation:Optional
-	MigrationConfig MigrationConfig `json:"migrationConfig,omitempty"`
+	MigrationConfig MigrationConfig `json:"migrationConfig,omitempty,omitzero"`
 	// Simple key-value pair that is applied without any predefined name, type or scope. It exists only for cross-compatibility.
 	// Example: `{"bar-key": "value"}`
 	// +kubebuilder:validation:Optional

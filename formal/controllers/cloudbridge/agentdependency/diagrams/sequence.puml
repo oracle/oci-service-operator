@@ -1,0 +1,135 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Sequence - cloudbridge/AgentDependency
+hide footbox
+skinparam sequence {
+  actorBorderColor #0f172a
+  actorBackgroundColor #e2e8f0
+  participantBorderColor #0f172a
+  participantBackgroundColor #e2e8f0
+  participantFontColor #0f172a
+  lifeLineBorderColor #94a3b8
+  groupBorderColor #cbd5e1
+  groupBackgroundColor #f8fafc
+}
+actor Kubernetes
+participant Controller
+participant BaseReconciler
+participant "OSOKServiceManager" as ServiceManager
+participant OCI
+note over BaseReconciler,ServiceManager
+shared resolution:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete:
+shared/diagrams/shared-delete-sequence.svg
+end note
+Kubernetes -> Controller: enqueue AgentDependency reconcile
+Controller -> BaseReconciler: Reconcile(request)
+BaseReconciler -> ServiceManager: reconcile desired AgentDependency
+group Lookup and bind
+alt tracked or explicit OCI identity already exists
+ServiceManager -> OCI: GetAgentDependency
+else tracked identity is missing
+ServiceManager -> OCI: ListAgentDependencies(filters:\nagentId, compartmentId, displayName,\nenvironmentId (+1 more))
+alt reusable OCI resource is not found
+ServiceManager -> OCI: CreateAgentDependency
+loop create pending CREATING
+ServiceManager -> OCI: GetAgentDependency
+end
+else reusable OCI resource already exists
+ServiceManager -> OCI: GetAgentDependency
+end
+ServiceManager --> BaseReconciler: persist resolved OCI identity in status
+end
+alt delete requested
+group Delete
+ServiceManager -> OCI: DeleteAgentDependency
+ServiceManager -> OCI: confirm delete via\nGetAgentDependency or\nListAgentDependencies
+loop delete pending DELETING
+ServiceManager -> OCI: GetAgentDependency or\nListAgentDependencies
+end
+alt cleanup or finalizer release is blocked
+ServiceManager --> BaseReconciler: retain delete state and retry
+else delete completion observed
+ServiceManager --> BaseReconciler: release finalizer after delete completion
+end
+end
+else OCI state is retryable
+ServiceManager --> BaseReconciler: requeue while OCI remains in\nCREATING, DELETING
+else live state requires field-aware\ndrift evaluation
+group Drift handling
+note over ServiceManager,OCI
+Supported update surface: bucket,
+compartmentId, definedTags,
+dependencyName (+7 more)
+Reject before mutate: none
+Lookup filters: agentId, compartmentId,
+displayName, environmentId (+1 more)
+Lookup matching: exact declared filters
+match within the resource scope;
+duplicate matches fail
+end note
+opt supported mutable drift is detected
+ServiceManager -> OCI: Apply UpdateAgentDependency only for\nmutable fields bucket,\ncompartmentId, definedTags,\ndependencyName (+7 more)
+end
+ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource,\ntfresource.WaitForUpdatedState;\ndelete=tfresource.DeleteResource
+ServiceManager -> OCI: apply follow-up strategy\ncreate=GetWorkRequest ->\nread-after-write;\nupdate=GetWorkRequest ->\nread-after-write;\ndelete=confirm-delete
+end
+ServiceManager --> BaseReconciler: status=required,\nfinalizer=retain-until-confirmed-delete
+end
+BaseReconciler --> Controller: requeue on provisioning, updating,\nterminating
+note right of ServiceManager
+shared diagram:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete diagram:
+shared/diagrams/shared-delete-sequence.svg
+Start from the shared resolution sequence for
+OCID binding, datasource pagination, and
+create-or-update dispatch.
+Layer the shared delete sequence when finalizer
+retention, delete confirmation, work-request
+polling, or Secret cleanup apply.
+archetype batch: Generated service-manager
+controllers follow the shared resolution and
+delete sequences with imported waits and
+controller-local policy.
+service: cloudbridge
+slug: agentdependency
+kind: AgentDependency
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: provisioning, updating, terminating
+provider states: create CREATING; update none;
+delete DELETING
+follow-up: create=GetWorkRequest ->
+read-after-write; update=GetWorkRequest ->
+read-after-write; delete=confirm-delete
+supported drift: bucket, compartmentId,
+definedTags, dependencyName (+7 more)
+reject before mutate: none
+create-only fields: none
+list lookup: oci_cloud_bridge_agent_dependencies
+filters agentId, compartmentId, displayName,
+environmentId (+1 more); exact declared filters
+match within the resource scope; duplicate
+matches fail
+conflicts: none
+open gaps: none
+The generated service manager uses the reviewed
+CRUD request, response, lifecycle, and status
+projection contract.
+Work-request phases are declared per operation
+from the vendored SDK response surface.
+Secret side effects are none and finalizer
+ownership is retained until confirmed deletion.
+end note
+@enduml

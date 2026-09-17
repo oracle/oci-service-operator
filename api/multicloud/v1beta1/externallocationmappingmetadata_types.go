@@ -16,9 +16,41 @@ import (
 type ExternalLocationMappingMetadataSpec struct {
 }
 
+// ExternalLocationMappingMetadataExternalLocation defines nested fields for ExternalLocationMappingMetadata.ExternalLocation.
+type ExternalLocationMappingMetadataExternalLocation struct {
+	// CSP region corresponding to the given OCI region
+	CspRegion string `json:"cspRegion,omitempty"`
+	// CSP region display Name corresponding to the given OCI region
+	CspRegionDisplayName string `json:"cspRegionDisplayName,omitempty"`
+	// A mapping of OCI site group name to CSP physical availability zone name
+	CspPhysicalAz string `json:"cspPhysicalAz,omitempty"`
+	// User friendly display name for cspPhysicalAZ
+	CspPhysicalAzDisplayName string `json:"cspPhysicalAzDisplayName,omitempty"`
+	// The serviceName that externalLocation map object belongs to
+	ServiceName string `json:"serviceName,omitempty"`
+}
+
 // ExternalLocationMappingMetadataStatus defines the observed state of ExternalLocationMappingMetadata.
 type ExternalLocationMappingMetadataStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags      map[string]shared.MapValue                      `json:"definedTags,omitempty"`
+	ExternalLocation ExternalLocationMappingMetadataExternalLocation `json:"externalLocation,omitempty"`
+	// OCI physical ad name
+	OciPhysicalAd string `json:"ociPhysicalAd,omitempty"`
+	// OCI logical ad name
+	OciLogicalAd string `json:"ociLogicalAd,omitempty"`
+	// OCI region identifier https://docs.oracle.com/en-us/iaas/Content/General/Concepts/regions.htm
+	OciRegion string `json:"ociRegion,omitempty"`
+	// System tags for this resource. Each key is predefined and scoped to a namespace.
+	// Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+	SystemTags map[string]shared.MapValue `json:"systemTags,omitempty"`
 }
 
 // +kubebuilder:object:root=true

@@ -290,7 +290,22 @@ func buildMetricExtensionUpdateBody(
 	if len(body) == 0 {
 		return nil, false, nil
 	}
-	return body, true, nil
+	return metricExtensionFullMutableUpdateBody(specValues), true, nil
+}
+
+func metricExtensionFullMutableUpdateBody(specValues map[string]any) map[string]any {
+	body := make(map[string]any)
+	for _, field := range metricExtensionMutableFields() {
+		value, ok := specValues[field]
+		if !ok {
+			continue
+		}
+		value, meaningful := metricExtensionComparableValue(value)
+		if meaningful {
+			body[field] = value
+		}
+	}
+	return body
 }
 
 func metricExtensionMutableUpdateBody(specValues map[string]any, currentValues map[string]any) map[string]any {

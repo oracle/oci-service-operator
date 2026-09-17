@@ -41,7 +41,7 @@ type NetworkFirewallSpec struct {
 	// +kubebuilder:validation:Optional
 	NetworkSecurityGroupIds []string `json:"networkSecurityGroupIds,omitempty"`
 	// +kubebuilder:validation:Optional
-	NatConfiguration NetworkFirewallNatConfiguration `json:"natConfiguration,omitempty"`
+	NatConfiguration *NetworkFirewallNatConfiguration `json:"natConfiguration,omitempty"`
 	// The shape of a firewall to determine the bandwidth that the firewall allows.
 	// +kubebuilder:validation:Optional
 	Shape string `json:"shape,omitempty"`
@@ -101,8 +101,8 @@ type NetworkFirewallStatus struct {
 	// Availability Domain where Network Firewall instance is created.
 	// To get a list of availability domains for a tenancy, use the ListAvailabilityDomains operation.
 	// Example: `kIdk:PHX-AD-1`
-	AvailabilityDomain string                          `json:"availabilityDomain,omitempty"`
-	NatConfiguration   NetworkFirewallNatConfiguration `json:"natConfiguration,omitempty"`
+	AvailabilityDomain string                           `json:"availabilityDomain,omitempty"`
+	NatConfiguration   *NetworkFirewallNatConfiguration `json:"natConfiguration,omitempty"`
 	// The shape of a firewall to determine the bandwidth that the firewall allows.
 	Shape string `json:"shape,omitempty"`
 	// An array of network security groups OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) associated with the Network Firewall.

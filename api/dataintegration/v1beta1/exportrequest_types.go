@@ -41,6 +41,9 @@ type ExportRequestSpec struct {
 	// The status of the object.
 	// +kubebuilder:validation:Optional
 	Status string `json:"status,omitempty"`
+	// The OCID of the Data Integration workspace containing this resource.
+	// +kubebuilder:validation:Required
+	WorkspaceId string `json:"workspaceId"`
 }
 
 // ExportRequestExportedItem defines nested fields for ExportRequest.ExportedItem.

@@ -1,0 +1,128 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "waas",
+  "slug": "customprotectionrule",
+  "kind": "CustomProtectionRule",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_waas_custom_protection_rule",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateCustomProtectionRule",
+        "requestType": "waas.CreateCustomProtectionRuleRequest",
+        "responseType": "waas.CreateCustomProtectionRuleResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetCustomProtectionRule",
+        "requestType": "waas.GetCustomProtectionRuleRequest",
+        "responseType": "waas.GetCustomProtectionRuleResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListCustomProtectionRules",
+        "requestType": "waas.ListCustomProtectionRulesRequest",
+        "responseType": "waas.ListCustomProtectionRulesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeCustomProtectionRuleCompartment",
+        "requestType": "waas.ChangeCustomProtectionRuleCompartmentRequest",
+        "responseType": "waas.ChangeCustomProtectionRuleCompartmentResponse"
+      },
+      {
+        "operation": "UpdateCustomProtectionRule",
+        "requestType": "waas.UpdateCustomProtectionRuleRequest",
+        "responseType": "waas.UpdateCustomProtectionRuleResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteCustomProtectionRule",
+        "requestType": "waas.DeleteCustomProtectionRuleRequest",
+        "responseType": "waas.DeleteCustomProtectionRuleResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "S_CREATING"
+      ],
+      "target": [
+        "S_ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags",
+      "template"
+    ],
+    "forceNew": null,
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_waas_custom_protection_rules",
+    "collectionField": "custom_protection_rules",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_names",
+      "ids",
+      "states",
+      "time_created_greater_than_or_equal_to",
+      "time_created_less_than"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/waas/customprotectionrule/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/waas/customprotectionrule/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Pinned provider facts are paired with reviewed CustomProtectionRule service-manager semantics and sanitized live CRUD evidence."
+  ]
+}

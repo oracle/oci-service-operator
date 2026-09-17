@@ -105,7 +105,38 @@ func applySteeringPolicyAttachmentRuntimeHooks(
 		return response, conservativeSteeringPolicyAttachmentNotFoundError(err, "delete")
 	}
 	hooks.ParityHooks.NormalizeDesiredState = normalizeSteeringPolicyAttachmentDesiredState
+	hooks.DeleteHooks.ConfirmRead = steeringPolicyAttachmentDeleteConfirmRead(client, initErr)
 	hooks.DeleteHooks.HandleError = handleSteeringPolicyAttachmentDeleteError
+}
+
+func steeringPolicyAttachmentDeleteConfirmRead(
+	client steeringPolicyAttachmentOCIClient,
+	initErr error,
+) func(context.Context, *dnsv1beta1.SteeringPolicyAttachment, string) (any, error) {
+	return func(ctx context.Context, resource *dnsv1beta1.SteeringPolicyAttachment, currentID string) (any, error) {
+		if err := ensureSteeringPolicyAttachmentOCIClient(client, initErr); err != nil {
+			return nil, err
+		}
+		response, err := client.GetSteeringPolicyAttachment(ctx, dnssdk.GetSteeringPolicyAttachmentRequest{SteeringPolicyAttachmentId: common.String(currentID), Scope: dnssdk.GetSteeringPolicyAttachmentScopeGlobal})
+		if err == nil || !errorutil.ClassifyDeleteError(err).IsAuthShapedNotFound() {
+			return response, err
+		}
+		if resource == nil {
+			return nil, err
+		}
+		matches, listErr := listSteeringPolicyAttachmentsAllPages(ctx, client, initErr, dnssdk.ListSteeringPolicyAttachmentsRequest{
+			SteeringPolicyId: common.String(strings.TrimSpace(resource.Spec.SteeringPolicyId)),
+			ZoneId:           common.String(strings.TrimSpace(resource.Spec.ZoneId)),
+			Domain:           common.String(strings.TrimSpace(resource.Spec.DomainName)),
+		})
+		if listErr != nil {
+			return nil, listErr
+		}
+		if len(matches.Items) != 0 {
+			return nil, err
+		}
+		return dnssdk.GetSteeringPolicyAttachmentResponse{SteeringPolicyAttachment: dnssdk.SteeringPolicyAttachment{Id: common.String(currentID), LifecycleState: dnssdk.SteeringPolicyAttachmentLifecycleStateEnum("DELETED")}}, nil
+	}
 }
 
 func steeringPolicyAttachmentRuntimeSemantics() *generatedruntime.Semantics {

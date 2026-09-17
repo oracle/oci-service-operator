@@ -23,7 +23,7 @@ type TaskSpec struct {
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskParentRef `json:"parentRef,omitempty,omitzero"`
 	// Detailed description for the object.
 	// +kubebuilder:validation:Optional
 	Description string `json:"description,omitempty"`
@@ -117,6 +117,9 @@ type TaskSpec struct {
 	// Header value.
 	// +kubebuilder:validation:Optional
 	AdditionalProperties string `json:"additionalProperties,omitempty"`
+	// The OCID of the Data Integration workspace containing this resource.
+	// +kubebuilder:validation:Required
+	WorkspaceId string `json:"workspaceId"`
 }
 
 // TaskParentRef defines nested fields for Task.ParentRef.

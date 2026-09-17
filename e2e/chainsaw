@@ -1,0 +1,95 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
+BIN_DIR="${BIN_DIR:-${REPO_ROOT}/bin}"
+CHAINSAW_VERSION="${CHAINSAW_VERSION:-v0.2.15}"
+CHAINSAW_BIN="${CHAINSAW_BIN:-${BIN_DIR}/chainsaw}"
+
+die() {
+  printf '[chainsaw] ERROR: %s\n' "$*" >&2
+  exit 1
+}
+
+detect_asset() {
+  local host_os
+  local host_arch
+
+  case "$(uname -s)" in
+    Darwin) host_os="darwin" ;;
+    Linux) host_os="linux" ;;
+    *) die "unsupported host OS: $(uname -s)" ;;
+  esac
+  case "$(uname -m)" in
+    x86_64|amd64) host_arch="amd64" ;;
+    arm64|aarch64) host_arch="arm64" ;;
+    *) die "unsupported host architecture: $(uname -m)" ;;
+  esac
+  printf 'chainsaw_%s_%s.tar.gz\n' "${host_os}" "${host_arch}"
+}
+
+checksum() {
+  if command -v sha256sum >/dev/null 2>&1; then
+    sha256sum "$1" | awk '{print $1}'
+    return
+  fi
+  if command -v shasum >/dev/null 2>&1; then
+    shasum -a 256 "$1" | awk '{print $1}'
+    return
+  fi
+  die "sha256sum or shasum is required to verify the Chainsaw download"
+}
+
+install_chainsaw() {
+  local expected_version="${CHAINSAW_VERSION#v}"
+  local installed_version
+  local asset
+  local release_url
+  local temporary_dir
+  local archive
+  local checksums
+  local expected_checksum
+  local actual_checksum
+
+  if [ -x "${CHAINSAW_BIN}" ]; then
+    installed_version="$("${CHAINSAW_BIN}" version 2>/dev/null || true)"
+    case "${installed_version}" in
+      *"Version: ${expected_version}"*) return ;;
+    esac
+  fi
+
+  command -v curl >/dev/null 2>&1 || die "curl is required to install Chainsaw"
+  command -v tar >/dev/null 2>&1 || die "tar is required to install Chainsaw"
+  asset="$(detect_asset)"
+  release_url="https://github.com/kyverno/chainsaw/releases/download/${CHAINSAW_VERSION}"
+  temporary_dir="$(mktemp -d)"
+  archive="${temporary_dir}/${asset}"
+  checksums="${temporary_dir}/checksums.txt"
+  trap 'rm -rf "${temporary_dir}"' EXIT
+
+  printf '[chainsaw] Installing Chainsaw %s into %s\n' "${CHAINSAW_VERSION}" "${CHAINSAW_BIN}" >&2
+  curl -fsSL --retry 3 --retry-delay 2 -o "${archive}" "${release_url}/${asset}"
+  curl -fsSL --retry 3 --retry-delay 2 -o "${checksums}" "${release_url}/checksums.txt"
+  expected_checksum="$(awk -v asset="${asset}" '$2 == asset { print $1 }' "${checksums}")"
+  [ -n "${expected_checksum}" ] || die "release checksum is missing for ${asset}"
+  actual_checksum="$(checksum "${archive}")"
+  [ "${actual_checksum}" = "${expected_checksum}" ] || die "checksum verification failed for ${asset}"
+
+  mkdir -p "$(dirname -- "${CHAINSAW_BIN}")"
+  tar -xzf "${archive}" -C "${temporary_dir}" chainsaw
+  mv "${temporary_dir}/chainsaw" "${CHAINSAW_BIN}"
+  chmod +x "${CHAINSAW_BIN}"
+  installed_version="$("${CHAINSAW_BIN}" version 2>/dev/null || true)"
+  case "${installed_version}" in
+    *"Version: ${expected_version}"*) ;;
+    *) die "installed Chainsaw version is not ${expected_version}" ;;
+  esac
+  rm -rf "${temporary_dir}"
+  trap - EXIT
+}
+
+[ $# -gt 0 ] || die "usage: e2e/chainsaw <chainsaw arguments>"
+install_chainsaw
+exec "${CHAINSAW_BIN}" "$@"

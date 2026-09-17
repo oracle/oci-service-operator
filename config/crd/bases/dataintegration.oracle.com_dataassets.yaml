@@ -2893,10 +2893,15 @@ spec:
                     description: Attribute to provide sensitive content.
                     type: string
                 type: object
+              workspaceId:
+                description: The OCID of the Data Integration workspace containing
+                  this resource.
+                type: string
             required:
             - identifier
             - name
             - objectVersion
+            - workspaceId
             type: object
           status:
             description: DataAssetStatus defines the observed state of DataAsset.

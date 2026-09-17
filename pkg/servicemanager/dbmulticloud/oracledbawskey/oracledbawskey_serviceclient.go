@@ -32,8 +32,28 @@ type defaultOracleDbAwsKeyServiceClient struct {
 
 var _ OracleDbAwsKeyServiceClient = defaultOracleDbAwsKeyServiceClient{}
 
+type OracleDbAwsKeySDKClients struct {
+	dbMulticloudAwsProviderClient dbmulticloudsdk.DbMulticloudAwsProviderClient
+	workRequestClient             dbmulticloudsdk.WorkRequestClient
+}
+
+func newOracleDbAwsKeySDKClients(manager *OracleDbAwsKeyServiceManager) (OracleDbAwsKeySDKClients, error) {
+	var clients OracleDbAwsKeySDKClients
+	dbMulticloudAwsProviderClientClient, err := dbmulticloudsdk.NewDbMulticloudAwsProviderClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize OracleDbAwsKey OCI client DbMulticloudAwsProviderClient: %w", err)
+	}
+	clients.dbMulticloudAwsProviderClient = dbMulticloudAwsProviderClientClient
+	workRequestClientClient, err := dbmulticloudsdk.NewWorkRequestClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize OracleDbAwsKey OCI client WorkRequestClient: %w", err)
+	}
+	clients.workRequestClient = workRequestClientClient
+	return clients, nil
+}
+
 var newOracleDbAwsKeyServiceClient = func(manager *OracleDbAwsKeyServiceManager) OracleDbAwsKeyServiceClient {
-	sdkClient, err := dbmulticloudsdk.NewDbMulticloudAwsProviderClientWithConfigurationProvider(manager.Provider)
+	sdkClient, err := newOracleDbAwsKeySDKClients(manager)
 	hooks := newOracleDbAwsKeyRuntimeHooks(manager, sdkClient)
 	config := buildOracleDbAwsKeyGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {

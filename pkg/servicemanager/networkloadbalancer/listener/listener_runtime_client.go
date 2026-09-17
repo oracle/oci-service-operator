@@ -109,6 +109,7 @@ func applyListenerBodyHooks(hooks *ListenerRuntimeHooks) {
 
 func applyListenerIdentityHooks(hooks *ListenerRuntimeHooks) {
 	hooks.Identity = generatedruntime.IdentityHooks[*networkloadbalancerv1beta1.Listener]{
+		RecordBeforeCreateFollowUp: true,
 		Resolve: func(resource *networkloadbalancerv1beta1.Listener) (any, error) {
 			return resolveListenerIdentity(resource)
 		},
@@ -120,6 +121,9 @@ func applyListenerIdentityHooks(hooks *ListenerRuntimeHooks) {
 		},
 		LookupExisting: func(context.Context, *networkloadbalancerv1beta1.Listener, any) (any, error) {
 			return nil, nil
+		},
+		SeedSyntheticTrackedID: func(resource *networkloadbalancerv1beta1.Listener, identity any) func() {
+			return seedSyntheticListenerID(resource, identity.(listenerIdentity).listenerName)
 		},
 	}
 }
@@ -310,7 +314,12 @@ func (c listenerDeleteGuardClient) Delete(
 	if handled, deleted, err := c.rejectAuthShapedPreDeleteRead(ctx, resource); handled {
 		return deleted, err
 	}
-	return c.delegate.Delete(ctx, resource)
+	deleted, err := c.delegate.Delete(ctx, resource)
+	var ambiguous listenerAuthShapedNotFoundError
+	if errors.As(err, &ambiguous) {
+		return c.confirmAuthShapedAbsenceByList(ctx, resource, err)
+	}
+	return deleted, err
 }
 
 func (c listenerDeleteGuardClient) handlePendingWriteWorkRequestForDelete(
@@ -380,10 +389,43 @@ func (c listenerDeleteGuardClient) rejectAuthShapedPreDeleteRead(
 		return false, false, nil
 	}
 
-	fatalErr := listenerFatalAuthShapedNotFoundError(err)
-	servicemanager.RecordErrorOpcRequestID(&resource.Status.OsokStatus, fatalErr)
-	markListenerFailed(resource, fatalErr)
-	return true, false, fatalErr
+	deleted, confirmErr := c.confirmAuthShapedAbsenceByList(ctx, resource, listenerFatalAuthShapedNotFoundError(err))
+	return true, deleted, confirmErr
+}
+
+func (c listenerDeleteGuardClient) confirmAuthShapedAbsenceByList(
+	ctx context.Context,
+	resource *networkloadbalancerv1beta1.Listener,
+	ambiguousErr error,
+) (bool, error) {
+	if resource != nil && ambiguousErr != nil {
+		servicemanager.RecordErrorOpcRequestID(&resource.Status.OsokStatus, ambiguousErr)
+	}
+	identity, err := resolveListenerIdentity(resource)
+	if err != nil {
+		return false, err
+	}
+	if c.initErr != nil {
+		return false, c.initErr
+	}
+	if c.client == nil {
+		return false, errors.New("listener OCI client is nil")
+	}
+	result, err := listListenerRuntimeViews(ctx, c.client, networkloadbalancersdk.ListListenersRequest{NetworkLoadBalancerId: common.String(identity.networkLoadBalancerID)})
+	if err != nil {
+		servicemanager.RecordErrorOpcRequestID(&resource.Status.OsokStatus, err)
+		markListenerFailed(resource, err)
+		return false, fmt.Errorf("confirm Listener deletion by scoped list: %w", err)
+	}
+	for _, item := range result.Items {
+		if strings.TrimSpace(stringValue(item.Name)) == identity.listenerName {
+			message := "Listener delete readback is eventually consistent; waiting for scoped-list absence"
+			markListenerTerminating(resource, message)
+			return false, nil
+		}
+	}
+	markListenerDeleted(resource, "OCI listener no longer exists")
+	return true, nil
 }
 
 func (c listenerDeleteGuardClient) fetchWorkRequest(
@@ -410,7 +452,7 @@ func confirmListenerDeleteRead(
 	client listenerRuntimeOCIClient,
 	initErr error,
 	resource *networkloadbalancerv1beta1.Listener,
-	currentID string,
+	_ string,
 ) (any, error) {
 	if initErr != nil {
 		return nil, initErr
@@ -422,7 +464,7 @@ func confirmListenerDeleteRead(
 	if err != nil {
 		return nil, err
 	}
-	networkLoadBalancerID := firstNonEmptyTrim(currentID, identity.networkLoadBalancerID)
+	networkLoadBalancerID := identity.networkLoadBalancerID
 	response, err := client.GetListener(ctx, networkloadbalancersdk.GetListenerRequest{
 		NetworkLoadBalancerId: common.String(networkLoadBalancerID),
 		ListenerName:          common.String(identity.listenerName),
@@ -546,6 +588,32 @@ func markListenerFailed(resource *networkloadbalancerv1beta1.Listener, err error
 	*status = util.UpdateOSOKStatusCondition(*status, shared.Failed, v1.ConditionFalse, "", err.Error(), loggerutil.OSOKLogger{})
 }
 
+func markListenerTerminating(resource *networkloadbalancerv1beta1.Listener, message string) {
+	if resource == nil {
+		return
+	}
+	now := metav1.Now()
+	status := &resource.Status.OsokStatus
+	status.UpdatedAt = &now
+	status.Message = message
+	status.Reason = string(shared.Terminating)
+	*status = util.UpdateOSOKStatusCondition(*status, shared.Terminating, v1.ConditionTrue, "", message, loggerutil.OSOKLogger{})
+}
+
+func markListenerDeleted(resource *networkloadbalancerv1beta1.Listener, message string) {
+	if resource == nil {
+		return
+	}
+	now := metav1.Now()
+	status := &resource.Status.OsokStatus
+	status.DeletedAt = &now
+	status.UpdatedAt = &now
+	status.Message = message
+	status.Reason = string(shared.Terminating)
+	status.Async.Current = nil
+	*status = util.UpdateOSOKStatusCondition(*status, shared.Terminating, v1.ConditionTrue, "", message, loggerutil.OSOKLogger{})
+}
+
 func listenerRuntimeSemantics() *generatedruntime.Semantics {
 	workRequestPendingStates := []string{
 		string(networkloadbalancersdk.OperationStatusAccepted),
@@ -662,20 +730,20 @@ func listenerDeleteFields() []generatedruntime.RequestField {
 
 func listenerNetworkLoadBalancerIDField() generatedruntime.RequestField {
 	return generatedruntime.RequestField{
-		FieldName:        "NetworkLoadBalancerId",
-		RequestName:      "networkLoadBalancerId",
-		Contribution:     "path",
-		PreferResourceID: true,
-		LookupPaths:      []string{"status.status.ocid"},
+		FieldName:    "NetworkLoadBalancerId",
+		RequestName:  "networkLoadBalancerId",
+		Contribution: "path",
+		LookupPaths:  []string{"status.networkLoadBalancerId", "spec.networkLoadBalancerId"},
 	}
 }
 
 func listenerNameField() generatedruntime.RequestField {
 	return generatedruntime.RequestField{
-		FieldName:    "ListenerName",
-		RequestName:  "listenerName",
-		Contribution: "path",
-		LookupPaths:  []string{"status.name", "spec.name", "name"},
+		FieldName:        "ListenerName",
+		RequestName:      "listenerName",
+		Contribution:     "path",
+		PreferResourceID: true,
+		LookupPaths:      []string{"status.name", "spec.name", "name"},
 	}
 }
 
@@ -778,14 +846,18 @@ func resolveListenerIdentity(resource *networkloadbalancerv1beta1.Listener) (lis
 		return listenerIdentity{}, fmt.Errorf("resolve Listener identity: resource is nil")
 	}
 
-	statusNetworkLoadBalancerID := strings.TrimSpace(string(resource.Status.OsokStatus.Ocid))
+	statusNetworkLoadBalancerID := strings.TrimSpace(resource.Status.NetworkLoadBalancerId)
+	specNetworkLoadBalancerID := strings.TrimSpace(resource.Spec.NetworkLoadBalancerId)
 	annotationNetworkLoadBalancerID := strings.TrimSpace(resource.Annotations[listenerNetworkLoadBalancerIDAnnotation])
-	if statusNetworkLoadBalancerID != "" && annotationNetworkLoadBalancerID != "" && statusNetworkLoadBalancerID != annotationNetworkLoadBalancerID {
+	if specNetworkLoadBalancerID != "" && annotationNetworkLoadBalancerID != "" && specNetworkLoadBalancerID != annotationNetworkLoadBalancerID {
+		return listenerIdentity{}, fmt.Errorf("resolve Listener identity: spec.networkLoadBalancerId %q conflicts with %s annotation %q", specNetworkLoadBalancerID, listenerNetworkLoadBalancerIDAnnotation, annotationNetworkLoadBalancerID)
+	}
+	desiredNetworkLoadBalancerID := firstNonEmptyTrim(specNetworkLoadBalancerID, annotationNetworkLoadBalancerID)
+	if statusNetworkLoadBalancerID != "" && desiredNetworkLoadBalancerID != "" && statusNetworkLoadBalancerID != desiredNetworkLoadBalancerID {
 		return listenerIdentity{}, fmt.Errorf(
-			"resolve Listener identity: %s changed from recorded networkLoadBalancerId %q to %q",
-			listenerNetworkLoadBalancerIDAnnotation,
+			"resolve Listener identity: networkLoadBalancerId changed from recorded value %q to %q",
 			statusNetworkLoadBalancerID,
-			annotationNetworkLoadBalancerID,
+			desiredNetworkLoadBalancerID,
 		)
 	}
 
@@ -800,11 +872,11 @@ func resolveListenerIdentity(resource *networkloadbalancerv1beta1.Listener) (lis
 	}
 
 	identity := listenerIdentity{
-		networkLoadBalancerID: firstNonEmptyTrim(statusNetworkLoadBalancerID, annotationNetworkLoadBalancerID),
+		networkLoadBalancerID: firstNonEmptyTrim(statusNetworkLoadBalancerID, desiredNetworkLoadBalancerID),
 		listenerName:          firstNonEmptyTrim(statusListenerName, specListenerName),
 	}
 	if identity.networkLoadBalancerID == "" {
-		return listenerIdentity{}, fmt.Errorf("resolve Listener identity: %s annotation is required", listenerNetworkLoadBalancerIDAnnotation)
+		return listenerIdentity{}, fmt.Errorf("resolve Listener identity: spec.networkLoadBalancerId or %s annotation is required", listenerNetworkLoadBalancerIDAnnotation)
 	}
 	if identity.listenerName == "" {
 		return listenerIdentity{}, fmt.Errorf("resolve Listener identity: listener name is empty")
@@ -816,14 +888,19 @@ func recordListenerPathIdentity(resource *networkloadbalancerv1beta1.Listener, i
 	if resource == nil {
 		return
 	}
+	resource.Status.NetworkLoadBalancerId = identity.networkLoadBalancerID
 	resource.Status.Name = identity.listenerName
-	// Listener has no child OCID in the Network Load Balancer API, so the
-	// parent networkLoadBalancerId is the stable path identity for requests.
-	resource.Status.OsokStatus.Ocid = shared.OCID(identity.networkLoadBalancerID)
 }
 
 func recordListenerTrackedIdentity(resource *networkloadbalancerv1beta1.Listener, identity listenerIdentity) {
 	recordListenerPathIdentity(resource, identity)
+	resource.Status.OsokStatus.Ocid = shared.OCID(identity.listenerName)
+}
+
+func seedSyntheticListenerID(resource *networkloadbalancerv1beta1.Listener, name string) func() {
+	previous := resource.Status.OsokStatus.Ocid
+	resource.Status.OsokStatus.Ocid = shared.OCID(name)
+	return func() { resource.Status.OsokStatus.Ocid = previous }
 }
 
 func recoverListenerNetworkLoadBalancerID(resource *networkloadbalancerv1beta1.Listener) string {
@@ -831,7 +908,8 @@ func recoverListenerNetworkLoadBalancerID(resource *networkloadbalancerv1beta1.L
 		return ""
 	}
 	return firstNonEmptyTrim(
-		string(resource.Status.OsokStatus.Ocid),
+		resource.Status.NetworkLoadBalancerId,
+		resource.Spec.NetworkLoadBalancerId,
 		resource.Annotations[listenerNetworkLoadBalancerIDAnnotation],
 	)
 }

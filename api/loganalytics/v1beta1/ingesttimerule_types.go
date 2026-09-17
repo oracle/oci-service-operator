@@ -36,10 +36,9 @@ type IngestTimeRuleSpec struct {
 	// Example: `{"foo-namespace": {"bar-key": "value"}}`
 	// +kubebuilder:validation:Optional
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
-	// The log analytics entity OCID. This ID is a reference used by log analytics features and it represents
-	// a resource that is provisioned and managed by the customer on their premises or on the cloud.
-	// +kubebuilder:validation:Required
-	Id string `json:"id"`
+	// Optional existing ingest-time-rule identifier. Leave empty when creating a new rule.
+	// +kubebuilder:validation:Optional
+	Id string `json:"id,omitempty"`
 	// The date and time the resource was created, in the format defined by RFC3339.
 	// +kubebuilder:validation:Optional
 	TimeCreated string `json:"timeCreated,omitempty"`

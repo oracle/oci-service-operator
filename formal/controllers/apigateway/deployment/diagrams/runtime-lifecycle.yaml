@@ -1,0 +1,59 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: apigateway
+slug: deployment
+kind: ApiGatewayDeployment
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+  - deleted
+  - failed
+repoAuthored:
+  operations:
+    update:
+      - UpdateDeployment
+  providerLifecycle:
+    createPending:
+      - CREATING
+    updatePending:
+      - UPDATING
+    deletePending:
+      - DELETING
+  listLookup:
+    filters:
+      - compartmentId
+      - gatewayId
+      - displayName
+      - lifecycleState
+    matchRule: exact gatewayId, compartmentId, and displayName identify a reusable Deployment; lifecycleState narrows candidates when present
+  mutation:
+    mutable:
+      - definedTags
+      - displayName
+      - freeformTags
+      - routes
+      - specification
+    forceNew:
+      - compartmentId
+      - gatewayId
+      - pathPrefix
+    createOnly:
+      - locks
+  hooks:
+    create:
+      - helper: tfresource.CreateResource
+    update:
+      - helper: tfresource.UpdateResource
+    delete:
+      - helper: tfresource.DeleteResource
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - The generated runtime tracks create, update, and delete through API Gateway work requests and rereads the Deployment before declaring convergence.
+  - Existing Deployments are reused only through exact gateway, compartment, and display-name lookup or an explicitly supplied spec.id.
+  - The compatibility spec.routes shorthand is normalized to the SDK specification.routes request and observed status remains the complete SDK specification.

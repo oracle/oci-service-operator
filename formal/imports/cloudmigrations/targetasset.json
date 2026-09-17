@@ -1,0 +1,160 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "cloudmigrations",
+  "slug": "targetasset",
+  "kind": "TargetAsset",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_cloud_migrations_target_asset",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateTargetAsset",
+        "requestType": "cloudmigrations.CreateTargetAssetRequest",
+        "responseType": "cloudmigrations.CreateTargetAssetResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetTargetAsset",
+        "requestType": "cloudmigrations.GetTargetAssetRequest",
+        "responseType": "cloudmigrations.GetTargetAssetResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListTargetAssets",
+        "requestType": "cloudmigrations.ListTargetAssetsRequest",
+        "responseType": "cloudmigrations.ListTargetAssetsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateTargetAsset",
+        "requestType": "cloudmigrations.UpdateTargetAssetRequest",
+        "responseType": "cloudmigrations.UpdateTargetAssetResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteTargetAsset",
+        "requestType": "cloudmigrations.DeleteTargetAssetRequest",
+        "responseType": "cloudmigrations.DeleteTargetAssetResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "NEEDS_ATTENTION"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "block_volumes_performance",
+      "is_excluded_from_execution",
+      "ms_license",
+      "preferred_shape_type",
+      "type",
+      "user_spec.agent_config.are_all_plugins_disabled",
+      "user_spec.agent_config.is_management_disabled",
+      "user_spec.agent_config.is_monitoring_disabled",
+      "user_spec.agent_config.plugins_config.desired_state",
+      "user_spec.agent_config.plugins_config.name",
+      "user_spec.availability_domain",
+      "user_spec.capacity_reservation_id",
+      "user_spec.compartment_id",
+      "user_spec.create_vnic_details.assign_private_dns_record",
+      "user_spec.create_vnic_details.assign_public_ip",
+      "user_spec.create_vnic_details.defined_tags",
+      "user_spec.create_vnic_details.display_name",
+      "user_spec.create_vnic_details.freeform_tags",
+      "user_spec.create_vnic_details.hostname_label",
+      "user_spec.create_vnic_details.nsg_ids",
+      "user_spec.create_vnic_details.private_ip",
+      "user_spec.create_vnic_details.skip_source_dest_check",
+      "user_spec.create_vnic_details.subnet_id",
+      "user_spec.create_vnic_details.vlan_id",
+      "user_spec.dedicated_vm_host_id",
+      "user_spec.defined_tags",
+      "user_spec.display_name",
+      "user_spec.fault_domain",
+      "user_spec.freeform_tags",
+      "user_spec.hostname_label",
+      "user_spec.instance_options.are_legacy_imds_endpoints_disabled",
+      "user_spec.ipxe_script",
+      "user_spec.is_pv_encryption_in_transit_enabled",
+      "user_spec.preemptible_instance_config.preemption_action.preserve_boot_volume",
+      "user_spec.preemptible_instance_config.preemption_action.type",
+      "user_spec.shape",
+      "user_spec.shape_config.baseline_ocpu_utilization",
+      "user_spec.shape_config.memory_in_gbs",
+      "user_spec.shape_config.ocpus",
+      "user_spec.source_details.boot_volume_id",
+      "user_spec.source_details.boot_volume_size_in_gbs",
+      "user_spec.source_details.boot_volume_vpus_per_gb",
+      "user_spec.source_details.image_id",
+      "user_spec.source_details.kms_key_id",
+      "user_spec.source_details.source_type"
+    ],
+    "forceNew": [
+      "migration_plan_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_cloud_migrations_target_assets",
+    "collectionField": "target_asset_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "display_name",
+      "migration_plan_id",
+      "state",
+      "target_asset_id"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/cloudmigrations/targetasset/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/cloudmigrations/targetasset/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from the pinned terraform-provider-oci source revision."
+  ]
+}

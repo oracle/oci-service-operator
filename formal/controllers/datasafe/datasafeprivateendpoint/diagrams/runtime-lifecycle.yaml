@@ -1,0 +1,66 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: datasafe
+slug: datasafeprivateendpoint
+kind: DataSafePrivateEndpoint
+archetype: generated-service-manager
+states:
+- provisioning
+- active
+- updating
+- terminating
+repoAuthored:
+  operations:
+    update:
+    - UpdateDataSafePrivateEndpoint
+  providerLifecycle:
+    createPending:
+    - CREATING
+    updatePending:
+    - UPDATING
+    deletePending:
+    - DELETING
+  listLookup:
+    filters:
+    - displayName
+    - compartmentId
+    - vcnId
+    - subnetId
+    matchRule: exact displayName, compartmentId, vcnId, subnetId match within the
+      resource scope; duplicate matches fail
+  mutation:
+    mutable:
+    - displayName
+    - description
+    - nsgIds
+    - freeformTags
+    - definedTags
+    forceNew:
+    - compartmentId
+    - vcnId
+    - subnetId
+    - privateEndpointIp
+  hooks:
+    create:
+    - helper: generatedruntime.Create
+      entityType: DataSafePrivateEndpoint
+      action: CREATE_PRIVATE_ENDPOINT
+    update:
+    - helper: generatedruntime.Update
+      entityType: DataSafePrivateEndpoint
+      action: UPDATE_PRIVATE_ENDPOINT
+    delete:
+    - helper: generatedruntime.Delete
+      entityType: DataSafePrivateEndpoint
+      action: DELETE_PRIVATE_ENDPOINT
+  followUp:
+    create: GetWorkRequest -> GetDataSafePrivateEndpoint
+    update: GetWorkRequest -> GetDataSafePrivateEndpoint
+    delete: confirm-delete
+notes:
+- The production runtime uses the declared work-request phases and service-local async
+  adapter.
+- Lifecycle success and pending states mirror the production service-manager semantics.
+- Status projection is required, Secret side effects are none, and the finalizer policy
+  is retain-until-confirmed-delete.
+- Delete ownership is retained until a terminal lifecycle state or confirmed absence.

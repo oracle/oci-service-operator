@@ -1,0 +1,138 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "recovery",
+  "slug": "protecteddatabase",
+  "kind": "ProtectedDatabase",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_recovery_protected_database",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateProtectedDatabase",
+        "requestType": "recovery.CreateProtectedDatabaseRequest",
+        "responseType": "recovery.CreateProtectedDatabaseResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetProtectedDatabase",
+        "requestType": "recovery.GetProtectedDatabaseRequest",
+        "responseType": "recovery.GetProtectedDatabaseResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListProtectedDatabases",
+        "requestType": "recovery.ListProtectedDatabasesRequest",
+        "responseType": "recovery.ListProtectedDatabasesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeProtectedDatabaseCompartment",
+        "requestType": "recovery.ChangeProtectedDatabaseCompartmentRequest",
+        "responseType": "recovery.ChangeProtectedDatabaseCompartmentResponse"
+      },
+      {
+        "operation": "ChangeProtectedDatabaseSubscription",
+        "requestType": "recovery.ChangeProtectedDatabaseSubscriptionRequest",
+        "responseType": "recovery.ChangeProtectedDatabaseSubscriptionResponse"
+      },
+      {
+        "operation": "UpdateProtectedDatabase",
+        "requestType": "recovery.UpdateProtectedDatabaseRequest",
+        "responseType": "recovery.UpdateProtectedDatabaseResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "ScheduleProtectedDatabaseDeletion",
+        "requestType": "recovery.ScheduleProtectedDatabaseDeletionRequest",
+        "responseType": "recovery.ScheduleProtectedDatabaseDeletionResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "database_size",
+      "defined_tags",
+      "deletion_schedule",
+      "display_name",
+      "freeform_tags",
+      "is_redo_logs_shipped",
+      "password",
+      "protection_policy_id",
+      "recovery_service_subnets.recovery_service_subnet_id",
+      "subscription_id"
+    ],
+    "forceNew": [
+      "database_id",
+      "db_unique_name"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_recovery_protected_databases",
+    "collectionField": "protected_database_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "id",
+      "protection_policy_id",
+      "recovery_service_subnet_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/recovery/protecteddatabase/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/recovery/protecteddatabase/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from terraform-provider-oci for recovery/protecteddatabase."
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "waf",
+  "slug": "webappfirewall",
+  "kind": "WebAppFirewall",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_waf_web_app_firewall",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateWebAppFirewall",
+        "requestType": "waf.CreateWebAppFirewallRequest",
+        "responseType": "waf.CreateWebAppFirewallResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetWebAppFirewall",
+        "requestType": "waf.GetWebAppFirewallRequest",
+        "responseType": "waf.GetWebAppFirewallResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListWebAppFirewalls",
+        "requestType": "waf.ListWebAppFirewallsRequest",
+        "responseType": "waf.ListWebAppFirewallsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeWebAppFirewallCompartment",
+        "requestType": "waf.ChangeWebAppFirewallCompartmentRequest",
+        "responseType": "waf.ChangeWebAppFirewallCompartmentResponse"
+      },
+      {
+        "operation": "UpdateWebAppFirewall",
+        "requestType": "waf.UpdateWebAppFirewallRequest",
+        "responseType": "waf.UpdateWebAppFirewallResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteWebAppFirewall",
+        "requestType": "waf.DeleteWebAppFirewallRequest",
+        "responseType": "waf.DeleteWebAppFirewallResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "display_name",
+      "freeform_tags",
+      "system_tags",
+      "web_app_firewall_policy_id"
+    ],
+    "forceNew": [
+      "backend_type",
+      "load_balancer_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_waf_web_app_firewalls",
+    "collectionField": "web_app_firewall_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "id",
+      "state",
+      "web_app_firewall_policy_id"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/waf/webappfirewall/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/waf/webappfirewall/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Pinned provider facts are paired with reviewed WebAppFirewall service-manager semantics and sanitized live CRUD evidence."
+  ]
+}

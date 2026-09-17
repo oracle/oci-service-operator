@@ -9,5 +9,69 @@ states:
   - active
   - updating
   - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending:
+      - CREATING
+      - IN_PROGRESS
+    updatePending:
+      - UPDATING
+    deletePending:
+      - DELETING
+  listLookup:
+    filters:
+      - compartmentId
+      - displayName
+    matchRule: exact compartmentId, displayName, databaseCombination, connection identity, network, downtime, data-size, DDL, and creation-type match; duplicate matches fail
+  mutation:
+    mutable:
+      - acceptableDowntime
+      - creationType
+      - databaseDataSize
+      - ddlExpectation
+      - definedTags
+      - description
+      - displayName
+      - freeformTags
+      - networkSpeedMegabitPerSecond
+      - sourceDatabaseConnection
+      - targetDatabaseConnection
+    forceNew:
+      - bulkIncludeExcludeData
+      - compartmentId
+      - databaseCombination
+      - excludeObjects
+      - includeObjects
+  hooks:
+    create:
+      - helper: tfresource.CreateResource
+      - helper: tfresource.WaitForWorkRequestWithErrorHandling
+        entityType: assessment
+        action: CREATED
+    update:
+      - helper: tfresource.UpdateResource
+      - helper: tfresource.WaitForWorkRequestWithErrorHandling
+        entityType: assessment
+        action: UPDATED
+    delete:
+      - helper: tfresource.DeleteResource
+      - helper: tfresource.WaitForWorkRequestWithErrorHandling
+        entityType: assessment
+        action: DELETED
+  followUp:
+    create: GetWorkRequest -> GetAssessment
+    update: GetWorkRequest -> GetAssessment
+    delete: GetWorkRequest -> GetAssessment/ListAssessments confirm-delete
 notes:
-  - Scaffold metadata only; replace with controller-specific runtime states before promotion.
+  - The reviewed runtime selects the concrete MYSQL or ORACLE request type from
+    databaseCombination before calling OCI; unsupported object-helper fields
+    are rejected rather than partially published.
+  - CREATING and IN_PROGRESS requeue as provisioning, UPDATING requeues as
+    updating, ACTIVE and SUCCEEDED settle success, and DELETING retains the
+    finalizer until DELETED or confirmed absence.
+  - Create, update, and delete persist and poll the Database Migration work
+    request, recover the Assessment identifier, and reread the concrete
+    Assessment subtype before projecting status.
+  - Pre-create reuse is bounded to the complete reviewed identity. Only the
+    published update-detail fields reconcile in place; compartment,
+    discriminator, and object-helper drift require replacement.

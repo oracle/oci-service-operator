@@ -128,6 +128,73 @@ func TestCompartmentOrphanDeleteRetriesOnConflictWhenDeleteNotYetAccepted(t *tes
 	}
 }
 
+func TestCompartmentOrphanDeleteDoesNotTreatAuthShapedGetAsDeletedWhenScopedListFindsIt(t *testing.T) {
+	t.Parallel()
+
+	resource := &identityv1beta1.Compartment{Spec: identityv1beta1.CompartmentSpec{
+		CompartmentId: "ocid1.compartment.oc1..parent",
+		Name:          "eventually-visible-child",
+	}}
+	resource.Status.Id = "ocid1.compartment.oc1..child"
+	deleteCalled := false
+	client := compartmentOrphanDeleteClient{
+		delegate: noopCompartmentServiceClient{},
+		loadCompartment: func(context.Context, shared.OCID) (*identitysdk.Compartment, error) {
+			return nil, stubServiceError{statusCode: 404, code: "NotAuthorizedOrNotFound"}
+		},
+		listCompartments: func(context.Context, shared.OCID, string) ([]identitysdk.Compartment, error) {
+			return []identitysdk.Compartment{{
+				Id:             common.String("ocid1.compartment.oc1..child"),
+				LifecycleState: identitysdk.CompartmentLifecycleStateActive,
+			}}, nil
+		},
+		deleteCompartment: func(context.Context, shared.OCID) error {
+			deleteCalled = true
+			return nil
+		},
+	}
+
+	deleted, err := client.Delete(context.Background(), resource)
+	if err != nil {
+		t.Fatalf("Delete returned error: %v", err)
+	}
+	if !deleted || !deleteCalled {
+		t.Fatalf("Delete returned deleted=%v deleteCalled=%v, want accepted delete", deleted, deleteCalled)
+	}
+}
+
+func TestCompartmentOrphanDeleteStillCallsDeleteWhenGetAndListAreEventuallyConsistent(t *testing.T) {
+	t.Parallel()
+
+	resource := &identityv1beta1.Compartment{Spec: identityv1beta1.CompartmentSpec{
+		CompartmentId: "ocid1.compartment.oc1..parent",
+		Name:          "absent-child",
+	}}
+	resource.Status.Id = "ocid1.compartment.oc1..child"
+	deleteCalled := false
+	client := compartmentOrphanDeleteClient{
+		delegate: noopCompartmentServiceClient{},
+		loadCompartment: func(context.Context, shared.OCID) (*identitysdk.Compartment, error) {
+			return nil, stubServiceError{statusCode: 404, code: "NotAuthorizedOrNotFound"}
+		},
+		listCompartments: func(context.Context, shared.OCID, string) ([]identitysdk.Compartment, error) {
+			return nil, nil
+		},
+		deleteCompartment: func(context.Context, shared.OCID) error {
+			deleteCalled = true
+			return nil
+		},
+	}
+
+	deleted, err := client.Delete(context.Background(), resource)
+	if err != nil {
+		t.Fatalf("Delete returned error: %v", err)
+	}
+	if !deleted || !deleteCalled {
+		t.Fatalf("Delete returned deleted=%v deleteCalled=%v, want accepted delete", deleted, deleteCalled)
+	}
+}
+
 func TestCompartmentOrphanDeleteDelegatesWhenNoTrackedIDExists(t *testing.T) {
 	t.Parallel()
 

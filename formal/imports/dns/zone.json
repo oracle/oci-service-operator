@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "dns",
+  "slug": "zone",
+  "kind": "Zone",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_dns_zone",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateZone",
+        "requestType": "dns.CreateZoneRequest",
+        "responseType": "dns.CreateZoneResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetZone",
+        "requestType": "dns.GetZoneRequest",
+        "responseType": "dns.GetZoneResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListZones",
+        "requestType": "dns.ListZonesRequest",
+        "responseType": "dns.ListZonesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeZoneCompartment",
+        "requestType": "dns.ChangeZoneCompartmentRequest",
+        "responseType": "dns.ChangeZoneCompartmentResponse"
+      },
+      {
+        "operation": "UpdateZone",
+        "requestType": "dns.UpdateZoneRequest",
+        "responseType": "dns.UpdateZoneResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteZone",
+        "requestType": "dns.DeleteZoneRequest",
+        "responseType": "dns.DeleteZoneResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "dnssec_state",
+      "external_downstreams.address",
+      "external_downstreams.port",
+      "external_downstreams.tsig_key_id",
+      "external_masters.address",
+      "external_masters.port",
+      "external_masters.tsig_key_id",
+      "freeform_tags",
+      "resolution_mode"
+    ],
+    "forceNew": [
+      "name",
+      "scope",
+      "view_id",
+      "zone_type"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_dns_zones",
+    "collectionField": "zones",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "dnssec_state",
+      "name",
+      "name_contains",
+      "scope",
+      "sort_by",
+      "sort_order",
+      "state",
+      "time_created_greater_than_or_equal_to",
+      "time_created_less_than",
+      "tsig_key_id",
+      "view_id",
+      "zone_type"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/dns/zone/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/dns/zone/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Refreshed from the pinned terraform-provider-oci DNS Zone resource; scope-aware binding and lifecycle behavior remain repo-authored."
+  ]
+}

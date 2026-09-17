@@ -56,6 +56,9 @@ spec:
           spec:
             description: ConnectionSpec defines the desired state of Connection.
             properties:
+              catalogId:
+                description: The OCID of the catalog containing this resource.
+                type: string
               customPropertyMembers:
                 description: The list of customized properties along with the values
                   for this object
@@ -77,6 +80,9 @@ spec:
                       type: string
                   type: object
                 type: array
+              dataAssetKey:
+                description: The key of the data asset containing this resource.
+                type: string
               description:
                 description: A description of the connection.
                 type: string
@@ -127,6 +133,8 @@ spec:
                   the '/types' endpoint.
                 type: string
             required:
+            - catalogId
+            - dataAssetKey
             - displayName
             - properties
             - typeKey

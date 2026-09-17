@@ -50,8 +50,61 @@ func registerFileSystemRuntimeHooksMutator(mutator FileSystemRuntimeHooksMutator
 	}
 	filesystemRuntimeHooksMutators = append(filesystemRuntimeHooksMutators, mutator)
 }
+func newFileSystemRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "filestorage",
+		FormalSlug:    "filesystem",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "lifecycle",
+			Runtime:              "generatedruntime",
+			FormalClassification: "lifecycle",
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{"UPDATING"},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"availabilityDomain", "compartmentId", "displayName"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"definedTags", "displayName", "filesystemSnapshotPolicyId", "freeformTags", "kmsKeyId"},
+			ForceNew:      []string{"availabilityDomain", "cloneAttachStatus", "compartmentId", "locks", "sourceSnapshotId"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.WaitForUpdatedState", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.WaitForUpdatedState", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newFileSystemDefaultRuntimeHooks(sdkClient filestoragesdk.FileStorageClient) FileSystemRuntimeHooks {
 	return FileSystemRuntimeHooks{
+		Semantics:       newFileSystemRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*filestoragev1beta1.FileSystem]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*filestoragev1beta1.FileSystem]{},

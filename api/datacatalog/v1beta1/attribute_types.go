@@ -78,6 +78,15 @@ type AttributeSpec struct {
 	// Example: `{"properties": { "default": { "key1": "value1"}}}`
 	// +kubebuilder:validation:Optional
 	Properties map[string]map[string]string `json:"properties,omitempty"`
+	// The OCID of the catalog containing this resource.
+	// +kubebuilder:validation:Required
+	CatalogId string `json:"catalogId"`
+	// The key of the data asset containing this resource.
+	// +kubebuilder:validation:Required
+	DataAssetKey string `json:"dataAssetKey"`
+	// The key of the entity containing this resource.
+	// +kubebuilder:validation:Required
+	EntityKey string `json:"entityKey"`
 }
 
 // AttributeCustomPropertyMember defines nested fields for Attribute.CustomPropertyMember.

@@ -34,7 +34,10 @@ type DecryptionRuleSpec struct {
 	// +kubebuilder:validation:Optional
 	Secret string `json:"secret,omitempty"`
 	// +kubebuilder:validation:Optional
-	Position DecryptionRulePosition `json:"position,omitempty"`
+	Position DecryptionRulePosition `json:"position,omitempty,omitzero"`
+	// The OCID of the Network Firewall policy that owns this resource.
+	// +kubebuilder:validation:Required
+	NetworkFirewallPolicyId string `json:"networkFirewallPolicyId"`
 }
 
 // DecryptionRuleCondition defines nested fields for DecryptionRule.Condition.

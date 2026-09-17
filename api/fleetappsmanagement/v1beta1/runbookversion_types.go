@@ -26,7 +26,7 @@ type RunbookVersionSpec struct {
 	// +kubebuilder:validation:Required
 	ExecutionWorkflowDetails RunbookVersionExecutionWorkflowDetailsFields `json:"executionWorkflowDetails"`
 	// +kubebuilder:validation:Optional
-	RollbackWorkflowDetails RunbookVersionRollbackWorkflowDetailsFields `json:"rollbackWorkflowDetails,omitempty"`
+	RollbackWorkflowDetails RunbookVersionRollbackWorkflowDetailsFields `json:"rollbackWorkflowDetails,omitempty,omitzero"`
 	// Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
 	// Example: `{"bar-key": "value"}`
 	// +kubebuilder:validation:Optional
@@ -103,9 +103,9 @@ type RunbookVersionTaskTaskRecordDetailsExecutionDetailsFields struct {
 	// +kubebuilder:validation:Optional
 	ExecutionType string `json:"executionType,omitempty"`
 	// +kubebuilder:validation:Optional
-	Variables RunbookVersionTaskTaskRecordDetailsExecutionDetailsVariablesFields `json:"variables,omitempty"`
+	Variables RunbookVersionTaskTaskRecordDetailsExecutionDetailsVariablesFields `json:"variables,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	Content RunbookVersionTaskTaskRecordDetailsExecutionDetailsContentFields `json:"content,omitempty"`
+	Content RunbookVersionTaskTaskRecordDetailsExecutionDetailsContentFields `json:"content,omitempty,omitzero"`
 	// Optional command to execute the content.
 	// You can provide any commands/arguments that can't be part of the script.
 	// +kubebuilder:validation:Optional
@@ -156,7 +156,7 @@ type RunbookVersionTaskTaskRecordDetailsFields struct {
 	// +kubebuilder:validation:Optional
 	Scope string `json:"scope,omitempty"`
 	// +kubebuilder:validation:Optional
-	ExecutionDetails RunbookVersionTaskTaskRecordDetailsExecutionDetailsFields `json:"executionDetails,omitempty"`
+	ExecutionDetails RunbookVersionTaskTaskRecordDetailsExecutionDetailsFields `json:"executionDetails,omitempty,omitzero"`
 	// The description of the task.
 	// +kubebuilder:validation:Optional
 	Description string `json:"description,omitempty"`
@@ -167,7 +167,7 @@ type RunbookVersionTaskTaskRecordDetailsFields struct {
 	// +kubebuilder:validation:Optional
 	IsCopyToLibraryEnabled bool `json:"isCopyToLibraryEnabled,omitempty"`
 	// +kubebuilder:validation:Optional
-	Properties RunbookVersionTaskTaskRecordDetailsPropertiesFields `json:"properties,omitempty"`
+	Properties RunbookVersionTaskTaskRecordDetailsPropertiesFields `json:"properties,omitempty,omitzero"`
 	// Is this a discovery output task?
 	// +kubebuilder:validation:Optional
 	IsDiscoveryOutputTask bool `json:"isDiscoveryOutputTask,omitempty"`
@@ -254,14 +254,14 @@ type RunbookVersionTaskStepPropertiesFields struct {
 	// +kubebuilder:validation:Required
 	ActionOnFailure string `json:"actionOnFailure"`
 	// +kubebuilder:validation:Optional
-	RunOn RunbookVersionTaskStepPropertiesRunOnFields `json:"runOn,omitempty"`
+	RunOn RunbookVersionTaskStepPropertiesRunOnFields `json:"runOn,omitempty,omitzero"`
 	// Build control flow conditions that determine the relevance of the task execution.
 	// +kubebuilder:validation:Optional
 	PreCondition string `json:"preCondition,omitempty"`
 	// +kubebuilder:validation:Optional
-	PauseDetails RunbookVersionTaskStepPropertiesPauseDetailsFields `json:"pauseDetails,omitempty"`
+	PauseDetails RunbookVersionTaskStepPropertiesPauseDetailsFields `json:"pauseDetails,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	NotificationPreferences RunbookVersionTaskStepPropertiesNotificationPreferencesFields `json:"notificationPreferences,omitempty"`
+	NotificationPreferences RunbookVersionTaskStepPropertiesNotificationPreferencesFields `json:"notificationPreferences,omitempty,omitzero"`
 }
 
 // RunbookVersionTaskOutputVariableMappingOutputVariableDetailsFields defines nested fields for RunbookVersion.Task.OutputVariableMapping.OutputVariableDetails.
@@ -291,7 +291,7 @@ type RunbookVersionTaskFields struct {
 	// +kubebuilder:validation:Required
 	TaskRecordDetails RunbookVersionTaskTaskRecordDetailsFields `json:"taskRecordDetails"`
 	// +kubebuilder:validation:Optional
-	StepProperties RunbookVersionTaskStepPropertiesFields `json:"stepProperties,omitempty"`
+	StepProperties RunbookVersionTaskStepPropertiesFields `json:"stepProperties,omitempty,omitzero"`
 	// Mapping output variables of previous tasks to the input variables of the current task.
 	// +kubebuilder:validation:Optional
 	OutputVariableMappings []RunbookVersionTaskOutputVariableMappingFields `json:"outputVariableMappings,omitempty"`
@@ -366,14 +366,14 @@ type RunbookVersionGroupPropertiesFields struct {
 	// +kubebuilder:validation:Required
 	ActionOnFailure string `json:"actionOnFailure"`
 	// +kubebuilder:validation:Optional
-	RunOn RunbookVersionGroupPropertiesRunOnFields `json:"runOn,omitempty"`
+	RunOn RunbookVersionGroupPropertiesRunOnFields `json:"runOn,omitempty,omitzero"`
 	// Build control flow conditions that determine the relevance of the task execution.
 	// +kubebuilder:validation:Optional
 	PreCondition string `json:"preCondition,omitempty"`
 	// +kubebuilder:validation:Optional
-	PauseDetails RunbookVersionGroupPropertiesPauseDetailsFields `json:"pauseDetails,omitempty"`
+	PauseDetails RunbookVersionGroupPropertiesPauseDetailsFields `json:"pauseDetails,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	NotificationPreferences RunbookVersionGroupPropertiesNotificationPreferencesFields `json:"notificationPreferences,omitempty"`
+	NotificationPreferences RunbookVersionGroupPropertiesNotificationPreferencesFields `json:"notificationPreferences,omitempty,omitzero"`
 }
 
 // RunbookVersionGroupFields defines nested fields for RunbookVersion.Group.
@@ -388,7 +388,7 @@ type RunbookVersionGroupFields struct {
 	// +kubebuilder:validation:Required
 	Name string `json:"name"`
 	// +kubebuilder:validation:Optional
-	Properties RunbookVersionGroupPropertiesFields `json:"properties,omitempty"`
+	Properties RunbookVersionGroupPropertiesFields `json:"properties,omitempty,omitzero"`
 }
 
 // RunbookVersionExecutionWorkflowDetailsWorkflowStepFields defines nested fields for RunbookVersion.ExecutionWorkflowDetails.Workflow.Step.

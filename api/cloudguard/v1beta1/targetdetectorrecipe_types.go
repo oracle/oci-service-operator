@@ -23,6 +23,12 @@ type TargetDetectorRecipeSpec struct {
 	// Is validation to be performed for attaching the detector recipe?
 	// +kubebuilder:validation:Optional
 	IsValidationOnlyQuery bool `json:"isValidationOnlyQuery,omitempty"`
+	// The OCID of the Cloud Guard target receiving the detector recipe.
+	// +kubebuilder:validation:Required
+	TargetId string `json:"targetId"`
+	// The OCID of the compartment used to confirm the target detector recipe through its collection endpoint.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
 }
 
 // TargetDetectorRecipeDetectorRuleDetailsConditionGroupConditionFields defines nested fields for TargetDetectorRecipe.DetectorRule.Details.ConditionGroup.Condition.
@@ -44,9 +50,9 @@ type TargetDetectorRecipeDetectorRuleDetailsConditionGroupConditionFields struct
 	// +kubebuilder:validation:Optional
 	ValueType string `json:"valueType,omitempty"`
 	// +kubebuilder:validation:Optional
-	LeftOperand shared.JSONValue `json:"leftOperand,omitempty"`
+	LeftOperand shared.JSONValue `json:"leftOperand,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	RightOperand shared.JSONValue `json:"rightOperand,omitempty"`
+	RightOperand shared.JSONValue `json:"rightOperand,omitempty,omitzero"`
 	// Composite condition operator
 	// +kubebuilder:validation:Optional
 	CompositeOperator string `json:"compositeOperator,omitempty"`
@@ -75,101 +81,6 @@ type TargetDetectorRecipeDetectorRuleFields struct {
 	DetectorRuleId string `json:"detectorRuleId"`
 	// +kubebuilder:validation:Required
 	Details TargetDetectorRecipeDetectorRuleDetailsFields `json:"details"`
-}
-
-// TargetDetectorRecipeDetectorRuleRuleTypeFields defines nested fields for TargetDetectorRecipe.DetectorRule.RuleType.
-type TargetDetectorRecipeDetectorRuleRuleTypeFields struct {
-	// The unique identifier of the detector rule type
-	Key string `json:"key,omitempty"`
-	// Detector rule type value
-	Value []string `json:"value,omitempty"`
-}
-
-// TargetDetectorRecipeDetectorRuleDetailsConfigurationValueFields defines nested fields for TargetDetectorRecipe.DetectorRule.Details.Configuration.Value.
-type TargetDetectorRecipeDetectorRuleDetailsConfigurationValueFields struct {
-	// Configuration list item type (CUSTOM or MANAGED)
-	ListType string `json:"listType,omitempty"`
-	// Type of content in the managed list
-	ManagedListType string `json:"managedListType,omitempty"`
-	// Configuration value
-	Value string `json:"value,omitempty"`
-}
-
-// TargetDetectorRecipeDetectorRuleDetailsConfigurationAllowedValueFields defines nested fields for TargetDetectorRecipe.DetectorRule.Details.Configuration.AllowedValue.
-type TargetDetectorRecipeDetectorRuleDetailsConfigurationAllowedValueFields struct {
-	// key
-	Key string `json:"key,omitempty"`
-	// value
-	Value string `json:"value,omitempty"`
-}
-
-// TargetDetectorRecipeDetectorRuleDetailsConfigurationAdditionalPropertyFields defines nested fields for TargetDetectorRecipe.DetectorRule.Details.Configuration.AdditionalProperty.
-type TargetDetectorRecipeDetectorRuleDetailsConfigurationAdditionalPropertyFields struct {
-	// Property Type
-	PropertyType string `json:"propertyType,omitempty"`
-	// Name for Additional Property, for example, "interpreter", "router"
-	Key string `json:"key,omitempty"`
-	// Value for Property Name, for example, "generic", "cloudguard"
-	Value string `json:"value,omitempty"`
-}
-
-// TargetDetectorRecipeDetectorRuleDetailsConfigurationFields defines nested fields for TargetDetectorRecipe.DetectorRule.Details.Configuration.
-type TargetDetectorRecipeDetectorRuleDetailsConfigurationFields struct {
-	// Unique identifier of the configuration
-	ConfigKey string `json:"configKey,omitempty"`
-	// Configuration name
-	Name string `json:"name,omitempty"`
-	// Configuration value
-	Value string `json:"value,omitempty"`
-	// Configuration data type
-	DataType string `json:"dataType,omitempty"`
-	// List of configuration values
-	Values []TargetDetectorRecipeDetectorRuleDetailsConfigurationValueFields `json:"values,omitempty"`
-	// Map property Value data type
-	AllowedValuesDataType string `json:"allowedValuesDataType,omitempty"`
-	// Map of possible values for configuration
-	AllowedValues []TargetDetectorRecipeDetectorRuleDetailsConfigurationAllowedValueFields `json:"allowedValues,omitempty"`
-	// Map of additional property values for configuration
-	AdditionalProperties []TargetDetectorRecipeDetectorRuleDetailsConfigurationAdditionalPropertyFields `json:"additionalProperties,omitempty"`
-}
-
-// TargetDetectorRecipeDetectorRuleDetailsSightingTypeFields defines nested fields for TargetDetectorRecipe.DetectorRule.Details.SightingType.
-type TargetDetectorRecipeDetectorRuleDetailsSightingTypeFields struct {
-	// The unique identifier of the sighting type
-	Id string `json:"id,omitempty"`
-	// Display name of the sighting type
-	DisplayName string `json:"displayName,omitempty"`
-	// Description of the sighting type
-	Description string `json:"description,omitempty"`
-	// MITRE ATT@CK framework link for the sighting type
-	MitreLink string `json:"mitreLink,omitempty"`
-	// MITRE ATT@CK framework tactic for the sighting type
-	Tactic string `json:"tactic,omitempty"`
-	// List of MITRE ATT@CK framework techniques for the sighting type
-	Techniques []string `json:"techniques,omitempty"`
-}
-
-// TargetDetectorRecipeDetectorRuleEntitiesMappingFields defines nested fields for TargetDetectorRecipe.DetectorRule.EntitiesMapping.
-type TargetDetectorRecipeDetectorRuleEntitiesMappingFields struct {
-	// The entity value mapped to a data source query
-	QueryField string `json:"queryField,omitempty"`
-	// Display name of the entity
-	DisplayName string `json:"displayName,omitempty"`
-	// Type of entity
-	EntityType string `json:"entityType,omitempty"`
-}
-
-// TargetDetectorRecipeDetectorRuleLockFields defines nested fields for TargetDetectorRecipe.DetectorRule.Lock.
-type TargetDetectorRecipeDetectorRuleLockFields struct {
-	// Type of the lock.
-	Type string `json:"type,omitempty"`
-	// The ID of the resource that is locking this resource. Indicates that deleting this resource will remove the lock.
-	RelatedResourceId string `json:"relatedResourceId,omitempty"`
-	// A message added by the creator of the lock. This is typically used to give an
-	// indication of why the resource is locked.
-	Message string `json:"message,omitempty"`
-	// When the lock was created, in the format defined by RFC 3339.
-	TimeCreated string `json:"timeCreated,omitempty"`
 }
 
 // TargetDetectorRecipeEffectiveDetectorRuleRuleTypeFields defines nested fields for TargetDetectorRecipe.EffectiveDetectorRule.RuleType.

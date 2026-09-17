@@ -1,0 +1,29 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: datasafe
+slug: librarymaskingformat
+kind: LibraryMaskingFormat
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending: ["CREATING"]
+    updatePending: []
+    deletePending: ["DELETING"]
+  listLookup:
+    filters: ["accessLevel","compartmentId","compartmentIdInSubtree","displayName","libraryMaskingFormatId","libraryMaskingFormatSource","state","timeCreatedGreaterThanOrEqualTo","timeCreatedLessThan"]
+    matchRule: exact resource identity match; duplicate matches fail
+  mutation:
+    mutable: ["compartmentId","definedTags","description","displayName","formatEntries.columnName","formatEntries.description","formatEntries.endDate","formatEntries.endLength","formatEntries.endValue","formatEntries.fixedNumber","formatEntries.fixedString","formatEntries.groupingColumns","formatEntries.length","formatEntries.libraryMaskingFormatId","formatEntries.pattern","formatEntries.postProcessingFunction","formatEntries.randomList","formatEntries.regularExpression","formatEntries.replaceWith","formatEntries.schemaName","formatEntries.sqlExpression","formatEntries.startDate","formatEntries.startLength","formatEntries.startPosition","formatEntries.startValue","formatEntries.tableName","formatEntries.type","formatEntries.userDefinedFunction","freeformTags","sensitiveTypeIds"]
+    forceNew: []
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - "The LibraryMaskingFormat runtime retains package-local lifecycle, identity, mutation, and delete handling."
+  - "The credential-free evidence mock verifies the recorded create/update payloads, SDK response decoding, status projection, and delete confirmation."

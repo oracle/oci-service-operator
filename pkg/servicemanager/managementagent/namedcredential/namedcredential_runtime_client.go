@@ -99,7 +99,7 @@ func applyNamedCredentialRuntimeHooks(
 		return
 	}
 
-	hooks.Semantics = newNamedCredentialRuntimeSemantics()
+	hooks.Semantics = reviewedNamedCredentialRuntimeSemantics()
 	hooks.BuildCreateBody = buildNamedCredentialCreateBody
 	hooks.BuildUpdateBody = buildNamedCredentialUpdateBody
 	hooks.List.Fields = namedCredentialListFields()
@@ -118,7 +118,7 @@ func applyNamedCredentialRuntimeHooks(
 	}
 }
 
-func newNamedCredentialRuntimeSemantics() *generatedruntime.Semantics {
+func reviewedNamedCredentialRuntimeSemantics() *generatedruntime.Semantics {
 	return &generatedruntime.Semantics{
 		FormalService: "managementagent",
 		FormalSlug:    "namedcredential",

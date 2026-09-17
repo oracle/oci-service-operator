@@ -49,6 +49,9 @@ type JobDefinitionSpec struct {
 	// Example: `{"properties": { "default": { "host": "host1", "port": "1521", "database": "orcl"}}}`
 	// +kubebuilder:validation:Optional
 	Properties map[string]map[string]string `json:"properties,omitempty"`
+	// The OCID of the catalog containing this resource.
+	// +kubebuilder:validation:Required
+	CatalogId string `json:"catalogId"`
 }
 
 // JobDefinitionStatus defines the observed state of JobDefinition.

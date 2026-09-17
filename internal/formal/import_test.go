@@ -2,11 +2,49 @@ package formal
 
 import (
 	"fmt"
+	"go/ast"
+	"go/parser"
+	"go/token"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 )
+
+func TestCollectOperationBindingsResolvesShadowedRequestVariablesAtEachCall(t *testing.T) {
+	parsed, err := parser.ParseFile(token.NewFileSet(), "provider.go", `package provider
+func (s *Resource) Create() error {
+	request := sdkwidget.CreateWidgetRequest{}
+	s.Client.CreateWidget(ctx, request)
+	if disable {
+		request := sdkwidget.DisableWidgetRequest{}
+		s.Client.DisableWidget(ctx, request)
+	}
+	if remove {
+		request := sdkwidget.DeleteWidgetRequest{}
+		s.Client.DeleteWidget(ctx, request)
+	}
+	return nil
+}`, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var decl *ast.FuncDecl
+	for _, candidate := range parsed.Decls {
+		if fn, ok := candidate.(*ast.FuncDecl); ok && fn.Name.Name == "Create" {
+			decl = fn
+			break
+		}
+	}
+	bindings := collectOperationBindings([]*providerFuncContext{{
+		Decl: decl, Imports: map[string]string{"sdkwidget": "example.com/provider/sdk/widget"}, ReceiverName: "s",
+	}})
+	assertBindings(t, bindings, []operationBinding{
+		{Operation: "CreateWidget", RequestType: "widget.CreateWidgetRequest", ResponseType: "widget.CreateWidgetResponse"},
+		{Operation: "DeleteWidget", RequestType: "widget.DeleteWidgetRequest", ResponseType: "widget.DeleteWidgetResponse"},
+		{Operation: "DisableWidget", RequestType: "widget.DisableWidgetRequest", ResponseType: "widget.DisableWidgetResponse"},
+	})
+}
 
 const importTestManifest = "service\tslug\tkind\tstage\tsurface\timport\tspec\tlogic_gaps\tdiagram_dir\n" +
 	"widget\twidget\tWidget\t%s\trepo-authored-semantics\timports/widget/widget.json\tcontrollers/widget/spec.cfg\tcontrollers/widget/logic-gaps.md\tcontrollers/widget/diagrams\n"

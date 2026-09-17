@@ -1,0 +1,123 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "dns",
+  "slug": "steeringpolicyattachment",
+  "kind": "SteeringPolicyAttachment",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_dns_steering_policy_attachment",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateSteeringPolicyAttachment",
+        "requestType": "dns.CreateSteeringPolicyAttachmentRequest",
+        "responseType": "dns.CreateSteeringPolicyAttachmentResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetSteeringPolicyAttachment",
+        "requestType": "dns.GetSteeringPolicyAttachmentRequest",
+        "responseType": "dns.GetSteeringPolicyAttachmentResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListSteeringPolicyAttachments",
+        "requestType": "dns.ListSteeringPolicyAttachmentsRequest",
+        "responseType": "dns.ListSteeringPolicyAttachmentsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateSteeringPolicyAttachment",
+        "requestType": "dns.UpdateSteeringPolicyAttachmentRequest",
+        "responseType": "dns.UpdateSteeringPolicyAttachmentResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteSteeringPolicyAttachment",
+        "requestType": "dns.DeleteSteeringPolicyAttachmentRequest",
+        "responseType": "dns.DeleteSteeringPolicyAttachmentResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "domain_name",
+      "steering_policy_id",
+      "zone_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_dns_steering_policy_attachments",
+    "collectionField": "steering_policy_attachments",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "domain",
+      "domain_contains",
+      "id",
+      "state",
+      "steering_policy_id",
+      "time_created_greater_than_or_equal_to",
+      "time_created_less_than",
+      "zone_id"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/dns/steeringpolicyattachment/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/dns/steeringpolicyattachment/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Refreshed from the pinned terraform-provider-oci DNS Steering Policy Attachment resource; parent-aware delete confirmation remains repo-authored."
+  ]
+}

@@ -50,15 +50,84 @@ func registerSecurityPolicyConfigRuntimeHooksMutator(mutator SecurityPolicyConfi
 	}
 	securitypolicyconfigRuntimeHooksMutators = append(securitypolicyconfigRuntimeHooksMutators, mutator)
 }
+func newSecurityPolicyConfigRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "datasafe",
+		FormalSlug:    "securitypolicyconfig",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE", "NEEDS_ATTENTION"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"accessLevel", "compartmentId", "compartmentIdInSubtree", "displayName", "securityPolicyConfigId", "securityPolicyId", "state", "timeCreatedGreaterThanOrEqualTo", "timeCreatedLessThan"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"compartmentId", "definedTags", "description", "displayName", "firewallConfig", "freeformTags", "unifiedAuditPolicyConfig"},
+			ForceNew:      []string{"securityPolicyId"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{},
+			Update: []generatedruntime.Hook{{Helper: "ChangeSecurityPolicyConfigCompartment", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "ChangeSecurityPolicyConfigCompartment", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newSecurityPolicyConfigDefaultRuntimeHooks(sdkClient datasafesdk.DataSafeClient) SecurityPolicyConfigRuntimeHooks {
 	return SecurityPolicyConfigRuntimeHooks{
+		Semantics:       newSecurityPolicyConfigRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*datasafev1beta1.SecurityPolicyConfig]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*datasafev1beta1.SecurityPolicyConfig]{},
 		StatusHooks:     generatedruntime.StatusHooks[*datasafev1beta1.SecurityPolicyConfig]{},
 		ParityHooks:     generatedruntime.ParityHooks[*datasafev1beta1.SecurityPolicyConfig]{},
-		Async:           generatedruntime.AsyncHooks[*datasafev1beta1.SecurityPolicyConfig]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*datasafev1beta1.SecurityPolicyConfig]{},
+		Async: generatedruntime.AsyncHooks[*datasafev1beta1.SecurityPolicyConfig]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := datasafesdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*datasafev1beta1.SecurityPolicyConfig]{},
 		Create: runtimeOperationHooks[datasafesdk.CreateSecurityPolicyConfigRequest, datasafesdk.CreateSecurityPolicyConfigResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateSecurityPolicyConfigDetails", RequestName: "CreateSecurityPolicyConfigDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request datasafesdk.CreateSecurityPolicyConfigRequest) (datasafesdk.CreateSecurityPolicyConfigResponse, error) {
@@ -106,10 +175,19 @@ func buildSecurityPolicyConfigGeneratedRuntimeConfig(
 	hooks SecurityPolicyConfigRuntimeHooks,
 ) generatedruntime.Config[*datasafev1beta1.SecurityPolicyConfig] {
 	return generatedruntime.Config[*datasafev1beta1.SecurityPolicyConfig]{
-		Kind:            "SecurityPolicyConfig",
-		SDKName:         "SecurityPolicyConfig",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "SecurityPolicyConfig",
+		SDKName:   "SecurityPolicyConfig",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

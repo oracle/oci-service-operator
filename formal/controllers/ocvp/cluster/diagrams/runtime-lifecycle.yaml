@@ -10,6 +10,16 @@ states:
   - updating
   - terminating
 repoAuthored:
+  providerLifecycle:
+    createPending: ["CREATING","UPDATING"]
+    updatePending: ["UPDATING"]
+    deletePending: ["DELETING"]
+  listLookup:
+    filters: ["compartmentId","displayName","lifecycleState","sddcId"]
+    matchRule: exact SDDC and display-name identity match; duplicate matches fail
+  mutation:
+    mutable: ["definedTags","displayName","esxiSoftwareVersion","freeformTags","networkConfiguration","vmwareSoftwareVersion"]
+    forceNew: ["capacityReservationId","computeAvailabilityDomain","datastores","esxiHostsCount","initialCommitment","initialHostOcpuCount","initialHostShapeName","instanceDisplayNamePrefix","isShieldedInstanceEnabled","sddcId","workloadNetworkCidr"]
   hooks:
     create:
       - helper: tfresource.CreateResource

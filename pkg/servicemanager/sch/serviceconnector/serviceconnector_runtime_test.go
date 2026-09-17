@@ -209,6 +209,24 @@ func newFakeServiceConnectorPendingCreateClient(t *testing.T, resource *schv1bet
 	return fake
 }
 
+func TestServiceConnectorPendingWorkRequestAcceptsInProgressResourceAction(t *testing.T) {
+	workRequest := makeServiceConnectorWorkRequest(
+		"wr-create",
+		schsdk.OperationTypeCreateServiceConnector,
+		schsdk.OperationStatusInProgress,
+		schsdk.ActionTypeEnum("IN_PROGRESS"),
+		"",
+	)
+
+	action, err := resolveServiceConnectorWorkRequestAction(workRequest)
+	if err != nil {
+		t.Fatalf("resolveServiceConnectorWorkRequestAction() error = %v", err)
+	}
+	if action != string(schsdk.ActionTypeCreated) {
+		t.Fatalf("action = %q, want %q", action, schsdk.ActionTypeCreated)
+	}
+}
+
 func assertServiceConnectorPendingCreateRequest(
 	t *testing.T,
 	request schsdk.CreateServiceConnectorRequest,
@@ -361,6 +379,22 @@ func TestServiceConnectorCreateOrUpdateBindsExistingFromLaterListPage(t *testing
 		t.Fatalf("status.id = %q, want %q", got, testServiceConnectorID)
 	}
 	assertServiceConnectorTrailingCondition(t, resource, shared.Active)
+}
+
+func TestServiceConnectorListFiltersTerminalResources(t *testing.T) {
+	deleted := makeSDKServiceConnectorSummary(testServiceConnectorOtherID, testServiceConnectorCompartmentID, testServiceConnectorDisplayName)
+	deleted.LifecycleState = schsdk.LifecycleStateDeleted
+	active := makeSDKServiceConnectorSummary(testServiceConnectorID, testServiceConnectorCompartmentID, testServiceConnectorDisplayName)
+
+	response, err := listServiceConnectorPages(context.Background(), func(context.Context, schsdk.ListServiceConnectorsRequest) (schsdk.ListServiceConnectorsResponse, error) {
+		return schsdk.ListServiceConnectorsResponse{ServiceConnectorCollection: schsdk.ServiceConnectorCollection{Items: []schsdk.ServiceConnectorSummary{deleted, active}}}, nil
+	}, schsdk.ListServiceConnectorsRequest{})
+	if err != nil {
+		t.Fatalf("listServiceConnectorPages() error = %v", err)
+	}
+	if len(response.Items) != 1 || stringValue(response.Items[0].Id) != testServiceConnectorID {
+		t.Fatalf("filtered items = %#v, want only active ServiceConnector", response.Items)
+	}
 }
 
 func TestServiceConnectorNoopDoesNotUpdateWhenReadbackMatches(t *testing.T) {

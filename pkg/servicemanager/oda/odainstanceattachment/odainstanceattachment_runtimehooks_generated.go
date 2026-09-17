@@ -66,25 +66,25 @@ func newOdaInstanceAttachmentDefaultRuntimeHooks(sdkClient odasdk.OdaClient) Oda
 			},
 		},
 		Get: runtimeOperationHooks[odasdk.GetOdaInstanceAttachmentRequest, odasdk.GetOdaInstanceAttachmentResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "OdaInstanceId", RequestName: "odaInstanceId", Contribution: "path", PreferResourceID: false}, {FieldName: "AttachmentId", RequestName: "attachmentId", Contribution: "path", PreferResourceID: false}, {FieldName: "IncludeOwnerMetadata", RequestName: "includeOwnerMetadata", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "OdaInstanceId", RequestName: "odaInstanceId", Contribution: "path", PreferResourceID: false}, {FieldName: "AttachmentId", RequestName: "attachmentId", Contribution: "path", PreferResourceID: true}, {FieldName: "IncludeOwnerMetadata", RequestName: "includeOwnerMetadata", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request odasdk.GetOdaInstanceAttachmentRequest) (odasdk.GetOdaInstanceAttachmentResponse, error) {
 				return sdkClient.GetOdaInstanceAttachment(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[odasdk.ListOdaInstanceAttachmentsRequest, odasdk.ListOdaInstanceAttachmentsResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "OdaInstanceId", RequestName: "odaInstanceId", Contribution: "path", PreferResourceID: true}, {FieldName: "IncludeOwnerMetadata", RequestName: "includeOwnerMetadata", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "OdaInstanceId", RequestName: "odaInstanceId", Contribution: "path", PreferResourceID: false}, {FieldName: "IncludeOwnerMetadata", RequestName: "includeOwnerMetadata", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request odasdk.ListOdaInstanceAttachmentsRequest) (odasdk.ListOdaInstanceAttachmentsResponse, error) {
 				return sdkClient.ListOdaInstanceAttachments(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[odasdk.UpdateOdaInstanceAttachmentRequest, odasdk.UpdateOdaInstanceAttachmentResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "OdaInstanceId", RequestName: "odaInstanceId", Contribution: "path", PreferResourceID: false}, {FieldName: "AttachmentId", RequestName: "attachmentId", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdateOdaInstanceAttachmentDetails", RequestName: "UpdateOdaInstanceAttachmentDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "OdaInstanceId", RequestName: "odaInstanceId", Contribution: "path", PreferResourceID: false}, {FieldName: "AttachmentId", RequestName: "attachmentId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateOdaInstanceAttachmentDetails", RequestName: "UpdateOdaInstanceAttachmentDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request odasdk.UpdateOdaInstanceAttachmentRequest) (odasdk.UpdateOdaInstanceAttachmentResponse, error) {
 				return sdkClient.UpdateOdaInstanceAttachment(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[odasdk.DeleteOdaInstanceAttachmentRequest, odasdk.DeleteOdaInstanceAttachmentResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "OdaInstanceId", RequestName: "odaInstanceId", Contribution: "path", PreferResourceID: false}, {FieldName: "AttachmentId", RequestName: "attachmentId", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "OdaInstanceId", RequestName: "odaInstanceId", Contribution: "path", PreferResourceID: false}, {FieldName: "AttachmentId", RequestName: "attachmentId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request odasdk.DeleteOdaInstanceAttachmentRequest) (odasdk.DeleteOdaInstanceAttachmentResponse, error) {
 				return sdkClient.DeleteOdaInstanceAttachment(ctx, request)
 			},

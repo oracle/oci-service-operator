@@ -50,8 +50,61 @@ func registerAutoScalingConfigurationRuntimeHooksMutator(mutator AutoScalingConf
 	}
 	autoscalingconfigurationRuntimeHooksMutators = append(autoscalingconfigurationRuntimeHooksMutators, mutator)
 }
+func newAutoScalingConfigurationRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "autoscaling",
+		FormalSlug:    "autoscalingconfiguration",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "none",
+			Runtime:              "generatedruntime",
+			FormalClassification: "none",
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{},
+			TerminalStates: []string{"NOT_FOUND"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "displayName"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"coolDownInSeconds", "definedTags", "displayName", "freeformTags", "isEnabled"},
+			ForceNew:      []string{"compartmentId", "policies", "resource"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newAutoScalingConfigurationDefaultRuntimeHooks(sdkClient autoscalingsdk.AutoScalingClient) AutoScalingConfigurationRuntimeHooks {
 	return AutoScalingConfigurationRuntimeHooks{
+		Semantics:       newAutoScalingConfigurationRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*autoscalingv1beta1.AutoScalingConfiguration]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*autoscalingv1beta1.AutoScalingConfiguration]{},

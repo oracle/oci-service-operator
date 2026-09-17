@@ -40,7 +40,7 @@ observe --> retryable : OCI state in CREATING,\nUPDATING, DELETING
 observe --> failed : unresolved OCI error or non-success state
 evaluate_ready --> reject_unsupported_drift : force-new or conflicting\ndrift detected
 reject_unsupported_drift --> ready : wait for spec or live state change
-evaluate_ready --> apply_update : supported mutable drift for\nadd_on_features,\ncompartment_id, defined_tags\n(+7 more)
+evaluate_ready --> apply_update : supported mutable drift for\naddOnFeatures, definedTags,\ndescription (+5 more)
 apply_update --> ready : update path completes
 evaluate_ready --> ready : no supported drift remains
 ready --> ready : no supported drift remains
@@ -71,21 +71,42 @@ retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
 provider states: create CREATING; update
 UPDATING; delete DELETING
-supported drift: add_on_features,
-compartment_id, defined_tags, description (+6
-more)
+follow-up: create=GetWorkRequest ->
+GetOceInstance; update=GetWorkRequest ->
+GetOceInstance; delete=GetWorkRequest ->
+GetOceInstance/ListOceInstances confirm-delete
+supported drift: addOnFeatures, definedTags,
+description, drRegion (+4 more)
 reject before mutate: force-new fields
-admin_email, idcs_access_token,
-identity_stripe.service_name,
-identity_stripe.tenancy (+6 more)
+adminEmail, compartmentId,
+identityStripe.serviceName,
+identityStripe.tenancy (+6 more)
 create-only fields: none
 list lookup: oci_oce_oce_instances filters
-compartment_id, display_name, state, tenancy_id
+compartmentId, tenancyId, displayName; exact
+compartmentId, tenancyId, and name unique match
+outside FAILED, DELETING, and DELETED; duplicate
+matches fail
 conflicts: none
 open gaps: none
-Scaffold metadata only; replace with
-controller-specific runtime states before
-promotion.
+CREATING requeues as provisioning, UPDATING
+requeues as updating, ACTIVE settles success,
+and DELETING retains the finalizer until DELETED
+or confirmed absence.
+Create, update, and delete persist and poll the
+OCE work request, recover the OceInstance
+identifier, and reread the instance before
+projecting status.
+Pre-create reuse requires compartmentId,
+tenancyId, and name and adopts only one exact
+eligible match. Failed or deleting instances are
+never reused.
+IdcsAccessToken is a create-time secret that OCI
+does not echo, so post-create parity normalizes
+it away. Only the reviewed update-detail fields
+reconcile in place; the remaining identity and
+shape fields require replacement, and
+ChangeOceInstanceCompartment stays out of scope.
 end note
 note right of delete_pending
 delete policy: required

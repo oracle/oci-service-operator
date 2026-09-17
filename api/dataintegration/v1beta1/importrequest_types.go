@@ -33,10 +33,13 @@ type ImportRequestSpec struct {
 	// +kubebuilder:validation:Optional
 	AreDataAssetReferencesIncluded bool `json:"areDataAssetReferencesIncluded,omitempty"`
 	// +kubebuilder:validation:Optional
-	ImportConflictResolution ImportRequestImportConflictResolution `json:"importConflictResolution,omitempty"`
+	ImportConflictResolution ImportRequestImportConflictResolution `json:"importConflictResolution,omitempty,omitzero"`
 	// The status of the object.
 	// +kubebuilder:validation:Optional
 	Status string `json:"status,omitempty"`
+	// The OCID of the Data Integration workspace containing this resource.
+	// +kubebuilder:validation:Required
+	WorkspaceId string `json:"workspaceId"`
 }
 
 // ImportRequestImportConflictResolution defines nested fields for ImportRequest.ImportConflictResolution.

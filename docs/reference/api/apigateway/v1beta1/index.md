@@ -20,8 +20,8 @@ This content is generated from the checked-in CRD schemas in `config/crd/bases/`
 
 | Kind | Scope | Sample | Packages |
 | --- | --- | --- | --- |
-| [ApiGateway](#kind-apigateway) | Namespaced | - | API Gateway (`v2.1.0-alpha`) |
-| [ApiGatewayDeployment](#kind-apigatewaydeployment) | Namespaced | - | API Gateway (`v2.1.0-alpha`) |
+| [ApiGateway](#kind-apigateway) | Namespaced | [Sample](../../../samples/apigateway/v1beta1/apigateway.md) | API Gateway (`v2.1.0-alpha`) |
+| [ApiGatewayDeployment](#kind-apigatewaydeployment) | Namespaced | [Sample](../../../samples/apigateway/v1beta1/apigatewaydeployment.md) | API Gateway (`v2.1.0-alpha`) |
 
 <a id="kind-apigateway"></a>
 ## ApiGateway
@@ -31,7 +31,7 @@ Manage OCI API Gateway gateway resources.
 - `Plural`: `apigateways`
 - `Scope`: `Namespaced`
 - `APIVersion`: `apigateway.oracle.com/v1beta1`
-- `Sample`: No checked-in sample manifest currently exists.
+- `Sample`: [Sample](../../../samples/apigateway/v1beta1/apigateway.md) (`config/samples/apigateway_v1beta1_apigateway.yaml`)
 - `Packages`: API Gateway (`v2.1.0-alpha`)
 
 <a id="kind-apigateway-spec"></a>
@@ -41,15 +41,102 @@ ApiGatewaySpec defines the desired state of ApiGateway.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `certificateId` | CertificateId is the OCID of a certificate resource to use for HTTPS. | `string` | No | - | - |
-| `compartmentId` | CompartmentId is the OCID of the compartment in which to create the gateway. | `string` | Yes | - | - |
-| `definedTags` | - | `map[string, map[string, string]]` | No | - | - |
-| `displayName` | DisplayName is a user-friendly name for the gateway. | `string` | No | - | - |
-| `endpointType` | EndpointType is the gateway endpoint type. Validation: endpointType is immutable. | `string` | Yes | - | `PRIVATE`, `PUBLIC` |
-| `freeformTags` | - | `map[string, string]` | No | - | - |
-| `id` | The OCID of an existing ApiGateway to bind to. | `string` | No | - | - |
-| `networkSecurityGroupIds` | NetworkSecurityGroupIds is an optional list of NSG OCIDs associated with the gateway. | `list[string]` | No | - | - |
-| `subnetId` | SubnetId is the OCID of the subnet in which the gateway is created. Validation: subnetId is immutable. | `string` | Yes | - | - |
+| [`caBundles`](#kind-apigateway-spec-cabundles) | An array of CA bundles that should be used on the Gateway for TLS validation. | `list[object]` | No | - | - |
+| `certificateId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the resource which can be empty string. | `string` | No | - | - |
+| `compartmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment in which the resource is created. | `string` | Yes | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `displayName` | A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information. Example: `My new resource` | `string` | No | - | - |
+| `endpointType` | Gateway endpoint type. `PUBLIC` will have a public ip address assigned to it, while `PRIVATE` will only be accessible on a private IP address on the subnet. Example: `PUBLIC` or `PRIVATE` Validation: endpointType is immutable. | `string` | Yes | - | `PRIVATE`, `PUBLIC` |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `id` | The OCID of an existing API Gateway to bind to. | `string` | No | - | - |
+| `ipMode` | Determines whether the gateway has an IPv4 or IPv6 address assigned to it, or both. `IPV4` means the gateway will only have an IPv4 address assigned to it, and `IPV6` means the gateway will only have an `IPv6` address assigned to it. `DUAL_STACK` means the gateway will have both an IPv4 and IPv6 address assigned to it. Example: `IPV4` or `IPV6` or `DUAL_STACK` | `string` | No | - | - |
+| [`ipv4AddressConfiguration`](#kind-apigateway-spec-ipv4addressconfiguration) | ApiGatewayIpv4AddressConfiguration defines nested fields for ApiGateway.Ipv4AddressConfiguration. | `object` | No | - | - |
+| [`ipv6AddressConfiguration`](#kind-apigateway-spec-ipv6addressconfiguration) | ApiGatewayIpv6AddressConfiguration defines nested fields for ApiGateway.Ipv6AddressConfiguration. | `object` | No | - | - |
+| [`locks`](#kind-apigateway-spec-locks) | Locks associated with this resource. | `list[object]` | No | - | - |
+| `networkSecurityGroupIds` | An array of Network Security Groups OCIDs associated with this API Gateway. | `list[string]` | No | - | - |
+| [`responseCacheDetails`](#kind-apigateway-spec-responsecachedetails) | ApiGatewayResponseCacheDetails defines nested fields for ApiGateway.ResponseCacheDetails. | `object` | No | - | - |
+| `subnetId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the subnet in which related resources are created. Validation: subnetId is immutable. | `string` | Yes | - | - |
+
+<a id="kind-apigateway-spec-cabundles"></a>
+#### Spec.caBundles[]
+
+[Back to ApiGateway spec](#kind-apigateway-spec)
+
+ApiGatewayCaBundle defines nested fields for ApiGateway.CaBundle.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `caBundleId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the resource. | `string` | No | - | - |
+| `certificateAuthorityId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the resource. | `string` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `type` | - | `string` | No | - | - |
+
+<a id="kind-apigateway-spec-ipv4addressconfiguration"></a>
+#### Spec.ipv4AddressConfiguration
+
+[Back to ApiGateway spec](#kind-apigateway-spec)
+
+ApiGatewayIpv4AddressConfiguration defines nested fields for ApiGateway.Ipv4AddressConfiguration.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `reservedIpIds` | List of Reserved IP OCIDs created in VCN service. | `list[string]` | No | - | - |
+
+<a id="kind-apigateway-spec-ipv6addressconfiguration"></a>
+#### Spec.ipv6AddressConfiguration
+
+[Back to ApiGateway spec](#kind-apigateway-spec)
+
+ApiGatewayIpv6AddressConfiguration defines nested fields for ApiGateway.Ipv6AddressConfiguration.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `addresses` | List of IPv6 addresses that will be assigned to the gateway during creation. | `list[string]` | No | - | - |
+| `subnetCidrs` | List of IPv6 prefixes from which to provision IPv6 addresses from. This is required if more than one prefix exists on the subnet. | `list[string]` | No | - | - |
+
+<a id="kind-apigateway-spec-locks"></a>
+#### Spec.locks[]
+
+[Back to ApiGateway spec](#kind-apigateway-spec)
+
+ApiGatewayLock defines nested fields for ApiGateway.Lock.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `message` | A message added by the creator of the lock. This is typically used to give an indication of why the resource is locked. | `string` | No | - | - |
+| `type` | Type of the lock. | `string` | Yes | - | - |
+
+<a id="kind-apigateway-spec-responsecachedetails"></a>
+#### Spec.responseCacheDetails
+
+[Back to ApiGateway spec](#kind-apigateway-spec)
+
+ApiGatewayResponseCacheDetails defines nested fields for ApiGateway.ResponseCacheDetails.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `authenticationSecretId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Oracle Vault Service secret resource. | `string` | No | - | - |
+| `authenticationSecretVersionNumber` | The version number of the authentication secret to use. | `integer (int64)` | No | - | - |
+| `connectTimeoutInMs` | Defines the timeout for establishing a connection with the Response Cache. | `integer` | No | - | - |
+| `isSslEnabled` | Defines if the connection should be over SSL. | `boolean` | No | - | - |
+| `isSslVerifyDisabled` | Defines whether or not to uphold SSL verification. | `boolean` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `readTimeoutInMs` | Defines the timeout for reading data from the Response Cache. | `integer` | No | - | - |
+| `sendTimeoutInMs` | Defines the timeout for transmitting data to the Response Cache. | `integer` | No | - | - |
+| [`servers`](#kind-apigateway-spec-responsecachedetails-servers) | The set of cache store members to connect to. At present only a single server is supported. | `list[object]` | No | - | - |
+| `type` | - | `string` | No | - | - |
+
+<a id="kind-apigateway-spec-responsecachedetails-servers"></a>
+##### Spec.responseCacheDetails.servers[]
+
+[Back to ApiGateway spec](#kind-apigateway-spec)
+
+ApiGatewayResponseCacheDetailsServer defines nested fields for ApiGateway.ResponseCacheDetails.Server.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `host` | Hostname or IP address (IPv4 only) where the cache store is running. | `string` | Yes | - | - |
+| `port` | The port the cache store is exposed on. | `integer` | Yes | - | - |
 
 <a id="kind-apigateway-status"></a>
 ### Status
@@ -58,7 +145,121 @@ ApiGatewayStatus defines the observed state of ApiGateway.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| [`caBundles`](#kind-apigateway-status-cabundles) | An array of CA bundles that should be used on the Gateway for TLS validation. | `list[object]` | No | - | - |
+| `certificateId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the resource. | `string` | No | - | - |
+| `compartmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment in which the resource is created. | `string` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `displayName` | A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information. Example: `My new resource` | `string` | No | - | - |
+| `endpointType` | Gateway endpoint type. `PUBLIC` will have a public ip address assigned to it, while `PRIVATE` will only be accessible on a private IP address on the subnet. Example: `PUBLIC` or `PRIVATE` | `string` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `hostname` | The hostname for APIs deployed on the gateway. | `string` | No | - | - |
+| `id` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the resource. | `string` | No | - | - |
+| [`ipAddresses`](#kind-apigateway-status-ipaddresses) | An array of IP addresses associated with the gateway. | `list[object]` | No | - | - |
+| `ipMode` | Determines whether the gateway has an IPv4 or IPv6 address assigned to it, or both. `IPV4` means the gateway will only have an IPv4 address assigned to it, and `IPV6` means the gateway will only have an `IPv6` address assigned to it. `DUAL_STACK` means the gateway will have both an IPv4 and IPv6 address assigned to it. Example: `IPV4` or `IPV6` or `DUAL_STACK` | `string` | No | - | - |
+| [`ipv4AddressConfiguration`](#kind-apigateway-status-ipv4addressconfiguration) | ApiGatewayIpv4AddressConfiguration defines nested fields for ApiGateway.Ipv4AddressConfiguration. | `object` | No | - | - |
+| [`ipv6AddressConfiguration`](#kind-apigateway-status-ipv6addressconfiguration) | ApiGatewayIpv6AddressConfiguration defines nested fields for ApiGateway.Ipv6AddressConfiguration. | `object` | No | - | - |
+| `lifecycleDetails` | A message describing the current state in more detail. For example, can be used to provide actionable information for a resource in a Failed state. | `string` | No | - | - |
+| `lifecycleState` | The current state of the gateway. | `string` | No | - | - |
+| [`locks`](#kind-apigateway-status-locks) | Locks associated with this resource. | `list[object]` | No | - | - |
+| `networkSecurityGroupIds` | An array of Network Security Groups OCIDs associated with this API Gateway. | `list[string]` | No | - | - |
+| [`responseCacheDetails`](#kind-apigateway-status-responsecachedetails) | ApiGatewayResponseCacheDetails defines nested fields for ApiGateway.ResponseCacheDetails. | `object` | No | - | - |
 | [`status`](#kind-apigateway-status-status) | - | `object` | Yes | - | - |
+| `subnetId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the subnet in which related resources are created. | `string` | No | - | - |
+| `systemTags` | System tags for this resource. Each key is predefined and scoped to a namespace. Example: `{"orcl-cloud": {"free-tier-retained": "true"}}` | `map[string, map[string, string]]` | No | - | - |
+| `timeCreated` | The time this resource was created. An RFC3339 formatted datetime string. | `string` | No | - | - |
+| `timeUpdated` | The time this resource was last updated. An RFC3339 formatted datetime string. | `string` | No | - | - |
+
+<a id="kind-apigateway-status-cabundles"></a>
+#### Status.caBundles[]
+
+[Back to ApiGateway status](#kind-apigateway-status)
+
+ApiGatewayCaBundle defines nested fields for ApiGateway.CaBundle.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `caBundleId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the resource. | `string` | No | - | - |
+| `certificateAuthorityId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the resource. | `string` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `type` | - | `string` | No | - | - |
+
+<a id="kind-apigateway-status-ipaddresses"></a>
+#### Status.ipAddresses[]
+
+[Back to ApiGateway status](#kind-apigateway-status)
+
+ApiGatewayIpAddress defines nested fields for ApiGateway.IpAddress.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `ipAddress` | An IP address. | `string` | No | - | - |
+
+<a id="kind-apigateway-status-ipv4addressconfiguration"></a>
+#### Status.ipv4AddressConfiguration
+
+[Back to ApiGateway status](#kind-apigateway-status)
+
+ApiGatewayIpv4AddressConfiguration defines nested fields for ApiGateway.Ipv4AddressConfiguration.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `reservedIpIds` | List of Reserved IP OCIDs created in VCN service. | `list[string]` | No | - | - |
+
+<a id="kind-apigateway-status-ipv6addressconfiguration"></a>
+#### Status.ipv6AddressConfiguration
+
+[Back to ApiGateway status](#kind-apigateway-status)
+
+ApiGatewayIpv6AddressConfiguration defines nested fields for ApiGateway.Ipv6AddressConfiguration.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `addresses` | List of IPv6 addresses that will be assigned to the gateway during creation. | `list[string]` | No | - | - |
+| `subnetCidrs` | List of IPv6 prefixes from which to provision IPv6 addresses from. This is required if more than one prefix exists on the subnet. | `list[string]` | No | - | - |
+
+<a id="kind-apigateway-status-locks"></a>
+#### Status.locks[]
+
+[Back to ApiGateway status](#kind-apigateway-status)
+
+ApiGatewayLock defines nested fields for ApiGateway.Lock.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `message` | A message added by the creator of the lock. This is typically used to give an indication of why the resource is locked. | `string` | No | - | - |
+| `type` | Type of the lock. | `string` | Yes | - | - |
+
+<a id="kind-apigateway-status-responsecachedetails"></a>
+#### Status.responseCacheDetails
+
+[Back to ApiGateway status](#kind-apigateway-status)
+
+ApiGatewayResponseCacheDetails defines nested fields for ApiGateway.ResponseCacheDetails.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `authenticationSecretId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Oracle Vault Service secret resource. | `string` | No | - | - |
+| `authenticationSecretVersionNumber` | The version number of the authentication secret to use. | `integer (int64)` | No | - | - |
+| `connectTimeoutInMs` | Defines the timeout for establishing a connection with the Response Cache. | `integer` | No | - | - |
+| `isSslEnabled` | Defines if the connection should be over SSL. | `boolean` | No | - | - |
+| `isSslVerifyDisabled` | Defines whether or not to uphold SSL verification. | `boolean` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `readTimeoutInMs` | Defines the timeout for reading data from the Response Cache. | `integer` | No | - | - |
+| `sendTimeoutInMs` | Defines the timeout for transmitting data to the Response Cache. | `integer` | No | - | - |
+| [`servers`](#kind-apigateway-status-responsecachedetails-servers) | The set of cache store members to connect to. At present only a single server is supported. | `list[object]` | No | - | - |
+| `type` | - | `string` | No | - | - |
+
+<a id="kind-apigateway-status-responsecachedetails-servers"></a>
+##### Status.responseCacheDetails.servers[]
+
+[Back to ApiGateway status](#kind-apigateway-status)
+
+ApiGatewayResponseCacheDetailsServer defines nested fields for ApiGateway.ResponseCacheDetails.Server.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `host` | Hostname or IP address (IPv4 only) where the cache store is running. | `string` | Yes | - | - |
+| `port` | The port the cache store is exposed on. | `integer` | Yes | - | - |
 
 <a id="kind-apigateway-status-status"></a>
 #### Status.status
@@ -127,7 +328,7 @@ Manage OCI API Gateway deployment routes and backend bindings.
 - `Plural`: `apigatewaydeployments`
 - `Scope`: `Namespaced`
 - `APIVersion`: `apigateway.oracle.com/v1beta1`
-- `Sample`: No checked-in sample manifest currently exists.
+- `Sample`: [Sample](../../../samples/apigateway/v1beta1/apigatewaydeployment.md) (`config/samples/apigateway_v1beta1_apigatewaydeployment.yaml`)
 - `Packages`: API Gateway (`v2.1.0-alpha`)
 
 <a id="kind-apigatewaydeployment-spec"></a>
@@ -137,42 +338,1880 @@ ApiGatewayDeploymentSpec defines the desired state of ApiGatewayDeployment.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `compartmentId` | CompartmentId is the OCID of the compartment in which to create the deployment. | `string` | Yes | - | - |
-| `definedTags` | - | `map[string, map[string, string]]` | No | - | - |
-| `displayName` | DisplayName is a user-friendly name for the deployment. | `string` | No | - | - |
-| `freeformTags` | - | `map[string, string]` | No | - | - |
-| `gatewayId` | GatewayId is the OCID of the API Gateway to deploy to. Validation: gatewayId is immutable. | `string` | Yes | - | - |
-| `id` | The OCID of an existing Deployment to bind to. | `string` | No | - | - |
-| `pathPrefix` | PathPrefix is the path prefix for all routes in this deployment. Validation: pathPrefix is immutable. | `string` | Yes | - | - |
-| [`routes`](#kind-apigatewaydeployment-spec-routes) | Routes is the list of API routes in this deployment. | `list[object]` | No | - | - |
+| `compartmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment in which the resource is created. | `string` | Yes | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `displayName` | A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information. Example: `My new resource` | `string` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `gatewayId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the resource. | `string` | Yes | - | - |
+| `id` | The OCID of an existing API Gateway Deployment to bind to. | `string` | No | - | - |
+| [`locks`](#kind-apigatewaydeployment-spec-locks) | Locks associated with this resource. | `list[object]` | No | - | - |
+| `pathPrefix` | A path on which to deploy all routes contained in the API deployment specification. For more information, see Deploying an API on an API Gateway by Creating an API Deployment (https://docs.oracle.com/iaas/Content/APIGateway/Tasks/apigatewaycreatingdeployment.htm). | `string` | Yes | - | - |
+| [`routes`](#kind-apigatewaydeployment-spec-routes) | Routes is the compatibility shorthand for specification.routes. Set either routes or specification.routes; the runtime rejects conflicting values. | `list[object]` | No | - | - |
+| [`specification`](#kind-apigatewaydeployment-spec-specification) | ApiGatewayDeploymentSpecification defines nested fields for ApiGatewayDeployment.Specification. | `object` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-locks"></a>
+#### Spec.locks[]
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentLock defines nested fields for ApiGatewayDeployment.Lock.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `message` | A message added by the creator of the lock. This is typically used to give an indication of why the resource is locked. | `string` | No | - | - |
+| `type` | Type of the lock. | `string` | Yes | - | - |
 
 <a id="kind-apigatewaydeployment-spec-routes"></a>
 #### Spec.routes[]
 
 [Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
 
-ApiGatewayRoute defines a single route in a deployment specification.
+ApiGatewayDeploymentSpecificationRoute defines nested fields for ApiGatewayDeployment.Specification.Route.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| [`backend`](#kind-apigatewaydeployment-spec-routes-backend) | Backend defines where the route sends traffic. | `object` | Yes | - | - |
-| `methods` | Methods is the list of HTTP methods. | `list[string]` | No | - | - |
-| `path` | Path is the route path. | `string` | Yes | - | - |
+| [`backend`](#kind-apigatewaydeployment-spec-routes-backend) | ApiGatewayDeploymentSpecificationRouteBackend defines nested fields for ApiGatewayDeployment.Specification.Route.Backend. | `object` | Yes | - | - |
+| [`loggingPolicies`](#kind-apigatewaydeployment-spec-routes-loggingpolicies) | ApiGatewayDeploymentSpecificationRouteLoggingPolicies defines nested fields for ApiGatewayDeployment.Specification.Route.LoggingPolicies. | `object` | No | - | - |
+| `methods` | A list of allowed methods on this route. | `list[string]` | No | - | - |
+| `path` | A URL path pattern that must be matched on this route. The path pattern may contain a subset of RFC 6570 identifiers to allow wildcard and parameterized matching. | `string` | Yes | - | - |
+| [`requestPolicies`](#kind-apigatewaydeployment-spec-routes-requestpolicies) | ApiGatewayDeploymentSpecificationRouteRequestPolicies defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies. | `object` | No | - | - |
+| [`responsePolicies`](#kind-apigatewaydeployment-spec-routes-responsepolicies) | ApiGatewayDeploymentSpecificationRouteResponsePolicies defines nested fields for ApiGatewayDeployment.Specification.Route.ResponsePolicies. | `object` | No | - | - |
 
 <a id="kind-apigatewaydeployment-spec-routes-backend"></a>
 ##### Spec.routes[].backend
 
 [Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
 
-Backend defines where the route sends traffic.
+ApiGatewayDeploymentSpecificationRouteBackend defines nested fields for ApiGatewayDeployment.Specification.Route.Backend.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `body` | Body is the response body for STOCK_RESPONSE_BACKEND. | `string` | No | - | - |
-| `functionId` | FunctionId is the OCID of the Oracle Function for ORACLE_FUNCTIONS_BACKEND. | `string` | No | - | - |
-| `status` | Status is the HTTP status code for STOCK_RESPONSE_BACKEND. | `integer` | No | - | - |
-| `type` | Type is the backend type. | `string` | Yes | - | `HTTP_BACKEND`, `ORACLE_FUNCTIONS_BACKEND`, `STOCK_RESPONSE_BACKEND` |
-| `url` | Url is the backend URL for HTTP_BACKEND. | `string` | No | - | - |
+| `allowedPostLogoutUris` | A list of allowed post-logout URLs to which a request can be redirected after revoke access | `list[string]` | No | - | - |
+| `body` | The body of the stock response from the mock backend. | `string` | No | - | - |
+| `connectTimeoutInSeconds` | Defines a timeout for establishing a connection with a proxied server. | `number` | No | - | - |
+| `functionId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Oracle Functions function resource. | `string` | No | - | - |
+| [`headers`](#kind-apigatewaydeployment-spec-routes-backend-headers) | The headers of the stock response from the mock backend. | `list[object]` | No | - | - |
+| `isSslVerifyDisabled` | Defines whether or not to uphold SSL verification. | `boolean` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `postLogoutState` | Defines a state that should be shared on redirecting to postLogout URL. | `string` | No | - | - |
+| `readTimeoutInSeconds` | Defines a timeout for reading a response from the proxied server. | `number` | No | - | - |
+| [`routingBackends`](#kind-apigatewaydeployment-spec-routes-backend-routingbackends) | List of backends to chose from for Dynamic Routing. | `list[object]` | No | - | - |
+| [`selectionSource`](#kind-apigatewaydeployment-spec-routes-backend-selectionsource) | ApiGatewayDeploymentSpecificationRouteBackendSelectionSource defines nested fields for ApiGatewayDeployment.Specification.Route.Backend.SelectionSource. | `object` | No | - | - |
+| `sendTimeoutInSeconds` | Defines a timeout for transmitting a request to the proxied server. | `number` | No | - | - |
+| `status` | The status code of the stock response from the mock backend. | `integer` | No | - | - |
+| `type` | - | `string` | No | - | - |
+| `url` | The url of the HTTP Backend | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-routes-backend-headers"></a>
+###### Spec.routes[].backend.headers[]
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteBackendHeader defines nested fields for ApiGatewayDeployment.Specification.Route.Backend.Header.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `name` | Name of the header. | `string` | No | - | - |
+| `value` | Value of the header. | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-routes-backend-routingbackends"></a>
+###### Spec.routes[].backend.routingBackends[]
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteBackendRoutingBackend defines nested fields for ApiGatewayDeployment.Specification.Route.Backend.RoutingBackend.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `backend` | JSONValue preserves arbitrary JSON values inside generated CRD fields. Unknown nested fields are preserved. | `object (preserves unknown fields)` | Yes | - | - |
+| [`key`](#kind-apigatewaydeployment-spec-routes-backend-routingbackends-key) | ApiGatewayDeploymentSpecificationRouteBackendRoutingBackendKey defines nested fields for ApiGatewayDeployment.Specification.Route.Backend.RoutingBackend.Key. | `object` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-routes-backend-routingbackends-key"></a>
+###### Spec.routes[].backend.routingBackends[].key
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteBackendRoutingBackendKey defines nested fields for ApiGatewayDeployment.Specification.Route.Backend.RoutingBackend.Key.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `expression` | A selection key string containing a wildcard to match with the context variable in an incoming request. If the context variable matches the string, the request is sent to the route or authentication server associated with the selection key. Valid wildcards are '*' (zero or more characters) and '+' (one or more characters). The string can only contain one wildcard, and the wildcard must be at the start or the end of the string. | `string` | No | - | - |
+| `isDefault` | Specifies whether to use the route or authentication server associated with this selection key as the default. The default is used if the value of a context variable in an incoming request does not match any of the other selection key values when dynamically routing and dynamically authenticating requests. | `boolean` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `name` | Name assigned to the branch. | `string` | Yes | - | - |
+| `type` | - | `string` | No | - | - |
+| `values` | The set of selection keys to match with the context variable in an incoming request. If the context variable exactly matches one of the keys in the set, the request is sent to the route or authentication server associated with the set. | `list[string]` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-routes-backend-selectionsource"></a>
+###### Spec.routes[].backend.selectionSource
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteBackendSelectionSource defines nested fields for ApiGatewayDeployment.Specification.Route.Backend.SelectionSource.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `jsonData` | - | `string` | No | - | - |
+| `selector` | String describing the context variable used as selector. | `string` | No | - | - |
+| `type` | - | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-routes-loggingpolicies"></a>
+##### Spec.routes[].loggingPolicies
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteLoggingPolicies defines nested fields for ApiGatewayDeployment.Specification.Route.LoggingPolicies.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`accessLog`](#kind-apigatewaydeployment-spec-routes-loggingpolicies-accesslog) | ApiGatewayDeploymentSpecificationRouteLoggingPoliciesAccessLog defines nested fields for ApiGatewayDeployment.Specification.Route.LoggingPolicies.AccessLog. | `object` | No | - | - |
+| [`executionLog`](#kind-apigatewaydeployment-spec-routes-loggingpolicies-executionlog) | ApiGatewayDeploymentSpecificationRouteLoggingPoliciesExecutionLog defines nested fields for ApiGatewayDeployment.Specification.Route.LoggingPolicies.ExecutionLog. | `object` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-routes-loggingpolicies-accesslog"></a>
+###### Spec.routes[].loggingPolicies.accessLog
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteLoggingPoliciesAccessLog defines nested fields for ApiGatewayDeployment.Specification.Route.LoggingPolicies.AccessLog.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `isEnabled` | Enables pushing of access logs to the legacy OCI Object Storage log archival bucket. Oracle recommends using the OCI Logging service to enable, retrieve, and query access logs for an API Deployment. If there is an active log object for the API Deployment and its category is set to 'access' in OCI Logging service, the logs will not be uploaded to the legacy OCI Object Storage log archival bucket. Please note that the functionality to push to the legacy OCI Object Storage log archival bucket has been deprecated and will be removed in the future. | `boolean` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-routes-loggingpolicies-executionlog"></a>
+###### Spec.routes[].loggingPolicies.executionLog
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteLoggingPoliciesExecutionLog defines nested fields for ApiGatewayDeployment.Specification.Route.LoggingPolicies.ExecutionLog.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `isEnabled` | Enables pushing of execution logs to the legacy OCI Object Storage log archival bucket. Oracle recommends using the OCI Logging service to enable, retrieve, and query execution logs for an API Deployment. If there is an active log object for the API Deployment and its category is set to 'execution' in OCI Logging service, the logs will not be uploaded to the legacy OCI Object Storage log archival bucket. Please note that the functionality to push to the legacy OCI Object Storage log archival bucket has been deprecated and will be removed in the future. | `boolean` | No | - | - |
+| `logLevel` | Specifies the log level used to control logging output of execution logs. Enabling logging at a given level also enables logging at all higher levels. | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-routes-requestpolicies"></a>
+##### Spec.routes[].requestPolicies
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteRequestPolicies defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`authorization`](#kind-apigatewaydeployment-spec-routes-requestpolicies-authorization) | ApiGatewayDeploymentSpecificationRouteRequestPoliciesAuthorization defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.Authorization. | `object` | No | - | - |
+| [`bodyValidation`](#kind-apigatewaydeployment-spec-routes-requestpolicies-bodyvalidation) | ApiGatewayDeploymentSpecificationRouteRequestPoliciesBodyValidation defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.BodyValidation. | `object` | No | - | - |
+| [`cors`](#kind-apigatewaydeployment-spec-routes-requestpolicies-cors) | ApiGatewayDeploymentSpecificationRouteRequestPoliciesCors defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.Cors. | `object` | No | - | - |
+| [`headerTransformations`](#kind-apigatewaydeployment-spec-routes-requestpolicies-headertransformations) | ApiGatewayDeploymentSpecificationRouteRequestPoliciesHeaderTransformations defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.HeaderTransformations. | `object` | No | - | - |
+| [`headerValidations`](#kind-apigatewaydeployment-spec-routes-requestpolicies-headervalidations) | ApiGatewayDeploymentSpecificationRouteRequestPoliciesHeaderValidations defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.HeaderValidations. | `object` | No | - | - |
+| [`queryParameterTransformations`](#kind-apigatewaydeployment-spec-routes-requestpolicies-queryparametertransformations) | ApiGatewayDeploymentSpecificationRouteRequestPoliciesQueryParameterTransformations defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.QueryParameterTransformations. | `object` | No | - | - |
+| [`queryParameterValidations`](#kind-apigatewaydeployment-spec-routes-requestpolicies-queryparametervalidations) | ApiGatewayDeploymentSpecificationRouteRequestPoliciesQueryParameterValidations defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.QueryParameterValidations. | `object` | No | - | - |
+| [`responseCacheLookup`](#kind-apigatewaydeployment-spec-routes-requestpolicies-responsecachelookup) | ApiGatewayDeploymentSpecificationRouteRequestPoliciesResponseCacheLookup defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.ResponseCacheLookup. | `object` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-routes-requestpolicies-authorization"></a>
+###### Spec.routes[].requestPolicies.authorization
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesAuthorization defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.Authorization.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `allowedScope` | A user whose scope includes any of these access ranges is allowed on this route. Access ranges are case-sensitive. | `list[string]` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `type` | - | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-routes-requestpolicies-bodyvalidation"></a>
+###### Spec.routes[].requestPolicies.bodyValidation
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesBodyValidation defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.BodyValidation.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`content`](#kind-apigatewaydeployment-spec-routes-requestpolicies-bodyvalidation-content) | The content of the request body. The key is a media type range (https://tools.ietf.org/html/rfc7231#appendix-D) subset restricted to the following schema key ::= ( / ( "*" "/" "*" ) / ( type "/" "*" ) / ( type "/" subtype ) ) For requests that match multiple keys, only the most specific key is applicable. e.g. `text/plain` overrides `text/*` | `map[string, object]` | Yes | - | - |
+| `required` | Determines if the request body is required in the request. | `boolean` | No | - | - |
+| `validationMode` | Validation behavior mode. In `ENFORCING` mode, upon a validation failure, the request will be rejected with a 4xx response and not sent to the backend. In `PERMISSIVE` mode, the result of the validation will be exposed as metrics while the request will follow the normal path. `DISABLED` type turns the validation off. | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-routes-requestpolicies-bodyvalidation-content"></a>
+###### Spec.routes[].requestPolicies.bodyValidation.content{}
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesBodyValidationContent defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.BodyValidation.Content.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `jsonData` | - | `string` | No | - | - |
+| `validationType` | - | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-routes-requestpolicies-cors"></a>
+###### Spec.routes[].requestPolicies.cors
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesCors defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.Cors.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `allowedHeaders` | The list of headers that will be allowed from the client via the Access-Control-Allow-Headers header. '*' will allow all headers. | `list[string]` | No | - | - |
+| `allowedMethods` | The list of allowed HTTP methods that will be returned for the preflight OPTIONS request in the Access-Control-Allow-Methods header. '*' will allow all methods. | `list[string]` | No | - | - |
+| `allowedOrigins` | The list of allowed origins that the CORS handler will use to respond to CORS requests. The gateway will send the Access-Control-Allow-Origin header with the best origin match for the circumstances. '*' will match any origins, and 'null' will match queries from 'file:' origins. All other origins must be qualified with the scheme, full hostname, and port if necessary. | `list[string]` | Yes | - | - |
+| `exposedHeaders` | The list of headers that the client will be allowed to see from the response as indicated by the Access-Control-Expose-Headers header. '*' will expose all headers. | `list[string]` | No | - | - |
+| `isAllowCredentialsEnabled` | Whether to send the Access-Control-Allow-Credentials header to allow CORS requests with cookies. | `boolean` | No | - | - |
+| `maxAgeInSeconds` | The time in seconds for the client to cache preflight responses. This is sent as the Access-Control-Max-Age if greater than 0. | `integer` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-routes-requestpolicies-headertransformations"></a>
+###### Spec.routes[].requestPolicies.headerTransformations
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesHeaderTransformations defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.HeaderTransformations.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`filterHeaders`](#kind-apigatewaydeployment-spec-routes-requestpolicies-headertransformations-filterheaders) | ApiGatewayDeploymentSpecificationRouteRequestPoliciesHeaderTransformationsFilterHeaders defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.HeaderTransformations.FilterHeaders. | `object` | No | - | - |
+| [`renameHeaders`](#kind-apigatewaydeployment-spec-routes-requestpolicies-headertransformations-renameheaders) | ApiGatewayDeploymentSpecificationRouteRequestPoliciesHeaderTransformationsRenameHeaders defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.HeaderTransformations.RenameHeaders. | `object` | No | - | - |
+| [`setHeaders`](#kind-apigatewaydeployment-spec-routes-requestpolicies-headertransformations-setheaders) | ApiGatewayDeploymentSpecificationRouteRequestPoliciesHeaderTransformationsSetHeaders defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.HeaderTransformations.SetHeaders. | `object` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-routes-requestpolicies-headertransformations-filterheaders"></a>
+###### Spec.routes[].requestPolicies.headerTransformations.filterHeaders
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesHeaderTransformationsFilterHeaders defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.HeaderTransformations.FilterHeaders.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`items`](#kind-apigatewaydeployment-spec-routes-requestpolicies-headertransformations-filterheaders-items) | The list of headers. | `list[object]` | Yes | - | - |
+| `type` | BLOCK drops any headers that are in the list of items, so it acts as an exclusion list. ALLOW permits only the headers in the list and removes all others, so it acts as an inclusion list. | `string` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-routes-requestpolicies-headertransformations-filterheaders-items"></a>
+###### Spec.routes[].requestPolicies.headerTransformations.filterHeaders.items[]
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesHeaderTransformationsFilterHeadersItem defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.HeaderTransformations.FilterHeaders.Item.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `name` | The case-insensitive name of the header. This name must be unique across transformation policies. | `string` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-routes-requestpolicies-headertransformations-renameheaders"></a>
+###### Spec.routes[].requestPolicies.headerTransformations.renameHeaders
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesHeaderTransformationsRenameHeaders defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.HeaderTransformations.RenameHeaders.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`items`](#kind-apigatewaydeployment-spec-routes-requestpolicies-headertransformations-renameheaders-items) | The list of headers. | `list[object]` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-routes-requestpolicies-headertransformations-renameheaders-items"></a>
+###### Spec.routes[].requestPolicies.headerTransformations.renameHeaders.items[]
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesHeaderTransformationsRenameHeadersItem defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.HeaderTransformations.RenameHeaders.Item.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `from` | The original case-insensitive name of the header. This name must be unique across transformation policies. | `string` | Yes | - | - |
+| `to` | The new name of the header. This name must be unique across transformation policies. | `string` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-routes-requestpolicies-headertransformations-setheaders"></a>
+###### Spec.routes[].requestPolicies.headerTransformations.setHeaders
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesHeaderTransformationsSetHeaders defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.HeaderTransformations.SetHeaders.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`items`](#kind-apigatewaydeployment-spec-routes-requestpolicies-headertransformations-setheaders-items) | The list of headers. | `list[object]` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-routes-requestpolicies-headertransformations-setheaders-items"></a>
+###### Spec.routes[].requestPolicies.headerTransformations.setHeaders.items[]
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesHeaderTransformationsSetHeadersItem defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.HeaderTransformations.SetHeaders.Item.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `ifExists` | If a header with the same name already exists in the request, OVERWRITE will overwrite the value, APPEND will append to the existing value, or SKIP will keep the existing value. | `string` | No | - | - |
+| `name` | The case-insensitive name of the header. This name must be unique across transformation policies. | `string` | Yes | - | - |
+| `values` | A list of new values. Each value can be a constant or may include one or more expressions enclosed within ${} delimiters. | `list[string]` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-routes-requestpolicies-headervalidations"></a>
+###### Spec.routes[].requestPolicies.headerValidations
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesHeaderValidations defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.HeaderValidations.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`headers`](#kind-apigatewaydeployment-spec-routes-requestpolicies-headervalidations-headers) | The List of Headers | `list[object]` | No | - | - |
+| `validationMode` | Validation behavior mode. In `ENFORCING` mode, upon a validation failure, the request will be rejected with a 4xx response and not sent to the backend. In `PERMISSIVE` mode, the result of the validation will be exposed as metrics while the request will follow the normal path. `DISABLED` type turns the validation off. | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-routes-requestpolicies-headervalidations-headers"></a>
+###### Spec.routes[].requestPolicies.headerValidations.headers[]
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesHeaderValidationsHeader defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.HeaderValidations.Header.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `name` | Parameter name. | `string` | Yes | - | - |
+| `required` | Determines if the header is required in the request. | `boolean` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-routes-requestpolicies-queryparametertransformations"></a>
+###### Spec.routes[].requestPolicies.queryParameterTransformations
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesQueryParameterTransformations defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.QueryParameterTransformations.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`filterQueryParameters`](#kind-apigatewaydeployment-spec-routes-requestpolicies-queryparametertransformations-filterqueryparameters) | ApiGatewayDeploymentSpecificationRouteRequestPoliciesQueryParameterTransformationsFilterQueryParameters defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.QueryParameterTransformations.FilterQueryParameters. | `object` | No | - | - |
+| [`renameQueryParameters`](#kind-apigatewaydeployment-spec-routes-requestpolicies-queryparametertransformations-renamequeryparameters) | ApiGatewayDeploymentSpecificationRouteRequestPoliciesQueryParameterTransformationsRenameQueryParameters defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.QueryParameterTransformations.RenameQueryParameters. | `object` | No | - | - |
+| [`setQueryParameters`](#kind-apigatewaydeployment-spec-routes-requestpolicies-queryparametertransformations-setqueryparameters) | ApiGatewayDeploymentSpecificationRouteRequestPoliciesQueryParameterTransformationsSetQueryParameters defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.QueryParameterTransformations.SetQueryParameters. | `object` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-routes-requestpolicies-queryparametertransformations-filterqueryparameters"></a>
+###### Spec.routes[].requestPolicies.queryParameterTransformations.filterQueryParameters
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesQueryParameterTransformationsFilterQueryParameters defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.QueryParameterTransformations.FilterQueryParameters.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`items`](#kind-apigatewaydeployment-spec-routes-requestpolicies-queryparametertransformations-filterqueryparameters-items) | The list of query parameters. | `list[object]` | Yes | - | - |
+| `type` | BLOCK drops any query parameters that are in the list of items, so it acts as an exclusion list. ALLOW permits only the parameters in the list and removes all others, so it acts as an inclusion list. | `string` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-routes-requestpolicies-queryparametertransformations-filterqueryparameters-items"></a>
+###### Spec.routes[].requestPolicies.queryParameterTransformations.filterQueryParameters.items[]
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesQueryParameterTransformationsFilterQueryParametersItem defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.QueryParameterTransformations.FilterQueryParameters.Item.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `name` | The case-sensitive name of the query parameter. | `string` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-routes-requestpolicies-queryparametertransformations-renamequeryparameters"></a>
+###### Spec.routes[].requestPolicies.queryParameterTransformations.renameQueryParameters
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesQueryParameterTransformationsRenameQueryParameters defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.QueryParameterTransformations.RenameQueryParameters.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`items`](#kind-apigatewaydeployment-spec-routes-requestpolicies-queryparametertransformations-renamequeryparameters-items) | The list of query parameters. | `list[object]` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-routes-requestpolicies-queryparametertransformations-renamequeryparameters-items"></a>
+###### Spec.routes[].requestPolicies.queryParameterTransformations.renameQueryParameters.items[]
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesQueryParameterTransformationsRenameQueryParametersItem defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.QueryParameterTransformations.RenameQueryParameters.Item.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `from` | The original case-sensitive name of the query parameter. This name must be unique across transformation policies. | `string` | Yes | - | - |
+| `to` | The new name of the query parameter. This name must be unique across transformation policies. | `string` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-routes-requestpolicies-queryparametertransformations-setqueryparameters"></a>
+###### Spec.routes[].requestPolicies.queryParameterTransformations.setQueryParameters
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesQueryParameterTransformationsSetQueryParameters defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.QueryParameterTransformations.SetQueryParameters.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`items`](#kind-apigatewaydeployment-spec-routes-requestpolicies-queryparametertransformations-setqueryparameters-items) | The list of query parameters. | `list[object]` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-routes-requestpolicies-queryparametertransformations-setqueryparameters-items"></a>
+###### Spec.routes[].requestPolicies.queryParameterTransformations.setQueryParameters.items[]
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesQueryParameterTransformationsSetQueryParametersItem defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.QueryParameterTransformations.SetQueryParameters.Item.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `ifExists` | If a query parameter with the same name already exists in the request, OVERWRITE will overwrite the value, APPEND will append to the existing value, or SKIP will keep the existing value. | `string` | No | - | - |
+| `name` | The case-sensitive name of the query parameter. This name must be unique across transformation policies. | `string` | Yes | - | - |
+| `values` | A list of new values. Each value can be a constant or may include one or more expressions enclosed within ${} delimiters. | `list[string]` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-routes-requestpolicies-queryparametervalidations"></a>
+###### Spec.routes[].requestPolicies.queryParameterValidations
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesQueryParameterValidations defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.QueryParameterValidations.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`parameters`](#kind-apigatewaydeployment-spec-routes-requestpolicies-queryparametervalidations-parameters) | The List of Query Parameters | `list[object]` | No | - | - |
+| `validationMode` | Validation behavior mode. In `ENFORCING` mode, upon a validation failure, the request will be rejected with a 4xx response and not sent to the backend. In `PERMISSIVE` mode, the result of the validation will be exposed as metrics while the request will follow the normal path. `DISABLED` type turns the validation off. | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-routes-requestpolicies-queryparametervalidations-parameters"></a>
+###### Spec.routes[].requestPolicies.queryParameterValidations.parameters[]
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesQueryParameterValidationsParameter defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.QueryParameterValidations.Parameter.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `name` | Parameter name. | `string` | Yes | - | - |
+| `required` | Determines if the parameter is required in the request. | `boolean` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-routes-requestpolicies-responsecachelookup"></a>
+###### Spec.routes[].requestPolicies.responseCacheLookup
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesResponseCacheLookup defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.ResponseCacheLookup.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `cacheKeyAdditions` | A list of context expressions whose values will be added to the base cache key. Values should contain an expression enclosed within ${} delimiters. Only the request context is available. | `list[string]` | No | - | - |
+| `isEnabled` | Whether this policy is currently enabled. | `boolean` | No | - | - |
+| `isPrivateCachingEnabled` | Set true to allow caching responses where the request has an Authorization header. Ensure you have configured your cache key additions to get the level of isolation across authenticated requests that you require. When false, any request with an Authorization header will not be stored in the Response Cache. If using the CustomAuthenticationPolicy then the tokenHeader/tokenQueryParam are also subject to this check. | `boolean` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `type` | - | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-routes-responsepolicies"></a>
+##### Spec.routes[].responsePolicies
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteResponsePolicies defines nested fields for ApiGatewayDeployment.Specification.Route.ResponsePolicies.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`headerTransformations`](#kind-apigatewaydeployment-spec-routes-responsepolicies-headertransformations) | ApiGatewayDeploymentSpecificationRouteResponsePoliciesHeaderTransformations defines nested fields for ApiGatewayDeployment.Specification.Route.ResponsePolicies.HeaderTransformations. | `object` | No | - | - |
+| [`responseCacheStore`](#kind-apigatewaydeployment-spec-routes-responsepolicies-responsecachestore) | ApiGatewayDeploymentSpecificationRouteResponsePoliciesResponseCacheStore defines nested fields for ApiGatewayDeployment.Specification.Route.ResponsePolicies.ResponseCacheStore. | `object` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-routes-responsepolicies-headertransformations"></a>
+###### Spec.routes[].responsePolicies.headerTransformations
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteResponsePoliciesHeaderTransformations defines nested fields for ApiGatewayDeployment.Specification.Route.ResponsePolicies.HeaderTransformations.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`filterHeaders`](#kind-apigatewaydeployment-spec-routes-responsepolicies-headertransformations-filterheaders) | ApiGatewayDeploymentSpecificationRouteResponsePoliciesHeaderTransformationsFilterHeaders defines nested fields for ApiGatewayDeployment.Specification.Route.ResponsePolicies.HeaderTransformations.FilterHeaders. | `object` | No | - | - |
+| [`renameHeaders`](#kind-apigatewaydeployment-spec-routes-responsepolicies-headertransformations-renameheaders) | ApiGatewayDeploymentSpecificationRouteResponsePoliciesHeaderTransformationsRenameHeaders defines nested fields for ApiGatewayDeployment.Specification.Route.ResponsePolicies.HeaderTransformations.RenameHeaders. | `object` | No | - | - |
+| [`setHeaders`](#kind-apigatewaydeployment-spec-routes-responsepolicies-headertransformations-setheaders) | ApiGatewayDeploymentSpecificationRouteResponsePoliciesHeaderTransformationsSetHeaders defines nested fields for ApiGatewayDeployment.Specification.Route.ResponsePolicies.HeaderTransformations.SetHeaders. | `object` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-routes-responsepolicies-headertransformations-filterheaders"></a>
+###### Spec.routes[].responsePolicies.headerTransformations.filterHeaders
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteResponsePoliciesHeaderTransformationsFilterHeaders defines nested fields for ApiGatewayDeployment.Specification.Route.ResponsePolicies.HeaderTransformations.FilterHeaders.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`items`](#kind-apigatewaydeployment-spec-routes-responsepolicies-headertransformations-filterheaders-items) | The list of headers. | `list[object]` | Yes | - | - |
+| `type` | BLOCK drops any headers that are in the list of items, so it acts as an exclusion list. ALLOW permits only the headers in the list and removes all others, so it acts as an inclusion list. | `string` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-routes-responsepolicies-headertransformations-filterheaders-items"></a>
+###### Spec.routes[].responsePolicies.headerTransformations.filterHeaders.items[]
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteResponsePoliciesHeaderTransformationsFilterHeadersItem defines nested fields for ApiGatewayDeployment.Specification.Route.ResponsePolicies.HeaderTransformations.FilterHeaders.Item.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `name` | The case-insensitive name of the header. This name must be unique across transformation policies. | `string` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-routes-responsepolicies-headertransformations-renameheaders"></a>
+###### Spec.routes[].responsePolicies.headerTransformations.renameHeaders
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteResponsePoliciesHeaderTransformationsRenameHeaders defines nested fields for ApiGatewayDeployment.Specification.Route.ResponsePolicies.HeaderTransformations.RenameHeaders.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`items`](#kind-apigatewaydeployment-spec-routes-responsepolicies-headertransformations-renameheaders-items) | The list of headers. | `list[object]` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-routes-responsepolicies-headertransformations-renameheaders-items"></a>
+###### Spec.routes[].responsePolicies.headerTransformations.renameHeaders.items[]
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteResponsePoliciesHeaderTransformationsRenameHeadersItem defines nested fields for ApiGatewayDeployment.Specification.Route.ResponsePolicies.HeaderTransformations.RenameHeaders.Item.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `from` | The original case-insensitive name of the header. This name must be unique across transformation policies. | `string` | Yes | - | - |
+| `to` | The new name of the header. This name must be unique across transformation policies. | `string` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-routes-responsepolicies-headertransformations-setheaders"></a>
+###### Spec.routes[].responsePolicies.headerTransformations.setHeaders
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteResponsePoliciesHeaderTransformationsSetHeaders defines nested fields for ApiGatewayDeployment.Specification.Route.ResponsePolicies.HeaderTransformations.SetHeaders.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`items`](#kind-apigatewaydeployment-spec-routes-responsepolicies-headertransformations-setheaders-items) | The list of headers. | `list[object]` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-routes-responsepolicies-headertransformations-setheaders-items"></a>
+###### Spec.routes[].responsePolicies.headerTransformations.setHeaders.items[]
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteResponsePoliciesHeaderTransformationsSetHeadersItem defines nested fields for ApiGatewayDeployment.Specification.Route.ResponsePolicies.HeaderTransformations.SetHeaders.Item.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `ifExists` | If a header with the same name already exists in the request, OVERWRITE will overwrite the value, APPEND will append to the existing value, or SKIP will keep the existing value. | `string` | No | - | - |
+| `name` | The case-insensitive name of the header. This name must be unique across transformation policies. | `string` | Yes | - | - |
+| `values` | A list of new values. Each value can be a constant or may include one or more expressions enclosed within ${} delimiters. | `list[string]` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-routes-responsepolicies-responsecachestore"></a>
+###### Spec.routes[].responsePolicies.responseCacheStore
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteResponsePoliciesResponseCacheStore defines nested fields for ApiGatewayDeployment.Specification.Route.ResponsePolicies.ResponseCacheStore.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `jsonData` | - | `string` | No | - | - |
+| `timeToLiveInSeconds` | Sets the number of seconds for a response from a backend being stored in the Response Cache before it expires. | `integer` | No | - | - |
+| `type` | - | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification"></a>
+#### Spec.specification
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecification defines nested fields for ApiGatewayDeployment.Specification.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`loggingPolicies`](#kind-apigatewaydeployment-spec-specification-loggingpolicies) | ApiGatewayDeploymentSpecificationLoggingPolicies defines nested fields for ApiGatewayDeployment.Specification.LoggingPolicies. | `object` | No | - | - |
+| [`requestPolicies`](#kind-apigatewaydeployment-spec-specification-requestpolicies) | ApiGatewayDeploymentSpecificationRequestPolicies defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies. | `object` | No | - | - |
+| [`routes`](#kind-apigatewaydeployment-spec-specification-routes) | A list of routes that this API exposes. | `list[object]` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-loggingpolicies"></a>
+##### Spec.specification.loggingPolicies
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationLoggingPolicies defines nested fields for ApiGatewayDeployment.Specification.LoggingPolicies.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`accessLog`](#kind-apigatewaydeployment-spec-specification-loggingpolicies-accesslog) | ApiGatewayDeploymentSpecificationLoggingPoliciesAccessLog defines nested fields for ApiGatewayDeployment.Specification.LoggingPolicies.AccessLog. | `object` | No | - | - |
+| [`executionLog`](#kind-apigatewaydeployment-spec-specification-loggingpolicies-executionlog) | ApiGatewayDeploymentSpecificationLoggingPoliciesExecutionLog defines nested fields for ApiGatewayDeployment.Specification.LoggingPolicies.ExecutionLog. | `object` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-loggingpolicies-accesslog"></a>
+###### Spec.specification.loggingPolicies.accessLog
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationLoggingPoliciesAccessLog defines nested fields for ApiGatewayDeployment.Specification.LoggingPolicies.AccessLog.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `isEnabled` | Enables pushing of access logs to the legacy OCI Object Storage log archival bucket. Oracle recommends using the OCI Logging service to enable, retrieve, and query access logs for an API Deployment. If there is an active log object for the API Deployment and its category is set to 'access' in OCI Logging service, the logs will not be uploaded to the legacy OCI Object Storage log archival bucket. Please note that the functionality to push to the legacy OCI Object Storage log archival bucket has been deprecated and will be removed in the future. | `boolean` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-loggingpolicies-executionlog"></a>
+###### Spec.specification.loggingPolicies.executionLog
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationLoggingPoliciesExecutionLog defines nested fields for ApiGatewayDeployment.Specification.LoggingPolicies.ExecutionLog.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `isEnabled` | Enables pushing of execution logs to the legacy OCI Object Storage log archival bucket. Oracle recommends using the OCI Logging service to enable, retrieve, and query execution logs for an API Deployment. If there is an active log object for the API Deployment and its category is set to 'execution' in OCI Logging service, the logs will not be uploaded to the legacy OCI Object Storage log archival bucket. Please note that the functionality to push to the legacy OCI Object Storage log archival bucket has been deprecated and will be removed in the future. | `boolean` | No | - | - |
+| `logLevel` | Specifies the log level used to control logging output of execution logs. Enabling logging at a given level also enables logging at all higher levels. | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-requestpolicies"></a>
+##### Spec.specification.requestPolicies
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRequestPolicies defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`authentication`](#kind-apigatewaydeployment-spec-specification-requestpolicies-authentication) | ApiGatewayDeploymentSpecificationRequestPoliciesAuthentication defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication. | `object` | No | - | - |
+| [`cors`](#kind-apigatewaydeployment-spec-specification-requestpolicies-cors) | ApiGatewayDeploymentSpecificationRequestPoliciesCors defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Cors. | `object` | No | - | - |
+| [`dynamicAuthentication`](#kind-apigatewaydeployment-spec-specification-requestpolicies-dynamicauthentication) | ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthentication defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication. | `object` | No | - | - |
+| [`mutualTls`](#kind-apigatewaydeployment-spec-specification-requestpolicies-mutualtls) | ApiGatewayDeploymentSpecificationRequestPoliciesMutualTls defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.MutualTls. | `object` | No | - | - |
+| [`rateLimiting`](#kind-apigatewaydeployment-spec-specification-requestpolicies-ratelimiting) | ApiGatewayDeploymentSpecificationRequestPoliciesRateLimiting defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.RateLimiting. | `object` | No | - | - |
+| [`usagePlans`](#kind-apigatewaydeployment-spec-specification-requestpolicies-usageplans) | ApiGatewayDeploymentSpecificationRequestPoliciesUsagePlans defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.UsagePlans. | `object` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-requestpolicies-authentication"></a>
+###### Spec.specification.requestPolicies.authentication
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesAuthentication defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `audiences` | The list of intended recipients for the token. | `list[string]` | No | - | - |
+| `cacheKey` | A list of keys from "parameters" attribute value whose values will be added to the cache key. | `list[string]` | No | - | - |
+| `functionId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Oracle Functions function resource. | `string` | No | - | - |
+| `isAnonymousAccessAllowed` | Whether an unauthenticated user may access the API. Must be "true" to enable ANONYMOUS route authorization. | `boolean` | No | - | - |
+| `issuers` | A list of parties that could have issued the token. | `list[string]` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `maxClockSkewInSeconds` | The maximum expected time difference between the system clocks of the token issuer and the API Gateway. | `number` | No | - | - |
+| `parameters` | A map where key is a user defined string and value is a context expressions whose values will be sent to the custom auth function. Values should contain an expression. Example: `{"foo": "request.header[abc]"}` | `map[string, string]` | No | - | - |
+| [`publicKeys`](#kind-apigatewaydeployment-spec-specification-requestpolicies-authentication-publickeys) | ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationPublicKeys defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.PublicKeys. | `object` | No | - | - |
+| `tokenAuthScheme` | The authentication scheme that is to be used when authenticating the token. This must to be provided if "tokenHeader" is specified. | `string` | No | - | - |
+| `tokenHeader` | The name of the header containing the authentication token. | `string` | No | - | - |
+| `tokenQueryParam` | The name of the query parameter containing the authentication token. | `string` | No | - | - |
+| `type` | - | `string` | No | - | - |
+| [`validationFailurePolicy`](#kind-apigatewaydeployment-spec-specification-requestpolicies-authentication-validationfailurepolicy) | ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationFailurePolicy defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationFailurePolicy. | `object` | No | - | - |
+| [`validationPolicy`](#kind-apigatewaydeployment-spec-specification-requestpolicies-authentication-validationpolicy) | ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationPolicy defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationPolicy. | `object` | No | - | - |
+| [`verifyClaims`](#kind-apigatewaydeployment-spec-specification-requestpolicies-authentication-verifyclaims) | A list of claims which should be validated to consider the token valid. | `list[object]` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-requestpolicies-authentication-publickeys"></a>
+###### Spec.specification.requestPolicies.authentication.publicKeys
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationPublicKeys defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.PublicKeys.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `isSslVerifyDisabled` | Defines whether or not to uphold SSL verification. | `boolean` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| [`keys`](#kind-apigatewaydeployment-spec-specification-requestpolicies-authentication-publickeys-keys) | The set of static public keys. | `list[object]` | No | - | - |
+| `maxCacheDurationInHours` | The duration for which the JWKS should be cached before it is fetched again. | `integer` | No | - | - |
+| `type` | - | `string` | No | - | - |
+| `uri` | The uri from which to retrieve the key. It must be accessible without authentication. | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-requestpolicies-authentication-publickeys-keys"></a>
+###### Spec.specification.requestPolicies.authentication.publicKeys.keys[]
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationPublicKeysKey defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.PublicKeys.Key.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `alg` | The algorithm intended for use with this key. | `string` | No | - | - |
+| `e` | The base64 url encoded exponent of the RSA public key represented by this key. | `string` | No | - | - |
+| `format` | - | `string` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `key` | The content of the PEM-encoded public key. | `string` | No | - | - |
+| `key_ops` | The operations for which this key is to be used. | `list[string]` | No | - | - |
+| `kid` | A unique key ID. This key will be used to verify the signature of a JWT with matching "kid". | `string` | Yes | - | - |
+| `kty` | The key type. | `string` | No | - | - |
+| `n` | The base64 url encoded modulus of the RSA public key represented by this key. | `string` | No | - | - |
+| `use` | The intended use of the public key. | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-requestpolicies-authentication-validationfailurepolicy"></a>
+###### Spec.specification.requestPolicies.authentication.validationFailurePolicy
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationFailurePolicy defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationFailurePolicy.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`clientDetails`](#kind-apigatewaydeployment-spec-specification-requestpolicies-authentication-validationfailurepolicy-clientdetails) | ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationFailurePolicyClientDetails defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationFailurePolicy.ClientDetails. | `object` | No | - | - |
+| `fallbackRedirectPath` | The path to be used as fallback after OAuth2. | `string` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `logoutPath` | The path to be used as logout. | `string` | No | - | - |
+| `maxExpiryDurationInHours` | The duration for which the OAuth2 success token should be cached before it is fetched again. | `integer` | No | - | - |
+| `responseCode` | HTTP response code, can include context variables. | `string` | No | - | - |
+| [`responseHeaderTransformations`](#kind-apigatewaydeployment-spec-specification-requestpolicies-authentication-validationfailurepolicy-responseheadertransformations) | ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationFailurePolicyResponseHeaderTransformations defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationFailurePolicy.ResponseHeaderTransformations. | `object` | No | - | - |
+| `responseMessage` | HTTP response message. | `string` | No | - | - |
+| `responseType` | Response Type. | `string` | No | - | - |
+| `scopes` | List of scopes. | `list[string]` | No | - | - |
+| [`sourceUriDetails`](#kind-apigatewaydeployment-spec-specification-requestpolicies-authentication-validationfailurepolicy-sourceuridetails) | ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationFailurePolicySourceUriDetails defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationFailurePolicy.SourceUriDetails. | `object` | No | - | - |
+| `type` | - | `string` | No | - | - |
+| `useCookiesForIntermediateSteps` | Defines whether or not to use cookies for OAuth2 intermediate steps. | `boolean` | No | - | - |
+| `useCookiesForSession` | Defines whether or not to use cookies for session maintenance. | `boolean` | No | - | - |
+| `usePkce` | Defines whether or not to support PKCE. | `boolean` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-requestpolicies-authentication-validationfailurepolicy-clientdetails"></a>
+###### Spec.specification.requestPolicies.authentication.validationFailurePolicy.clientDetails
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationFailurePolicyClientDetails defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationFailurePolicy.ClientDetails.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `clientId` | Client ID for the OAuth2/OIDC app. | `string` | No | - | - |
+| `clientSecretId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Oracle Vault Service secret resource. | `string` | No | - | - |
+| `clientSecretVersionNumber` | The version number of the client secret to use. | `integer (int64)` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `type` | - | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-requestpolicies-authentication-validationfailurepolicy-responseheadertransformations"></a>
+###### Spec.specification.requestPolicies.authentication.validationFailurePolicy.responseHeaderTransformations
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationFailurePolicyResponseHeaderTransformations defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationFailurePolicy.ResponseHeaderTransformations.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`filterHeaders`](#kind-apigatewaydeployment-spec-specification-requestpolicies-authentication-validationfailurepolicy-responseheadertransformations-filterheaders) | ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationFailurePolicyResponseHeaderTransformationsFilterHeaders defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationFailurePolicy.ResponseHeaderTransformations.FilterHeaders. | `object` | No | - | - |
+| [`renameHeaders`](#kind-apigatewaydeployment-spec-specification-requestpolicies-authentication-validationfailurepolicy-responseheadertransformations-renameheaders) | ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationFailurePolicyResponseHeaderTransformationsRenameHeaders defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationFailurePolicy.ResponseHeaderTransformations.RenameHeaders. | `object` | No | - | - |
+| [`setHeaders`](#kind-apigatewaydeployment-spec-specification-requestpolicies-authentication-validationfailurepolicy-responseheadertransformations-setheaders) | ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationFailurePolicyResponseHeaderTransformationsSetHeaders defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationFailurePolicy.ResponseHeaderTransformations.SetHeaders. | `object` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-requestpolicies-authentication-validationfailurepolicy-responseheadertransformations-filterheaders"></a>
+###### Spec.specification.requestPolicies.authentication.validationFailurePolicy.responseHeaderTransformations.filterHeaders
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationFailurePolicyResponseHeaderTransformationsFilterHeaders defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationFailurePolicy.ResponseHeaderTransformations.FilterHeaders.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`items`](#kind-apigatewaydeployment-spec-specification-requestpolicies-authentication-validationfailurepolicy-responseheadertransformations-filterheaders-items) | The list of headers. | `list[object]` | Yes | - | - |
+| `type` | BLOCK drops any headers that are in the list of items, so it acts as an exclusion list. ALLOW permits only the headers in the list and removes all others, so it acts as an inclusion list. | `string` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-requestpolicies-authentication-validationfailurepolicy-responseheadertransformations-filterheaders-items"></a>
+###### Spec.specification.requestPolicies.authentication.validationFailurePolicy.responseHeaderTransformations.filterHeaders.items[]
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationFailurePolicyResponseHeaderTransformationsFilterHeadersItem defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationFailurePolicy.ResponseHeaderTransformations.FilterHeaders.Item.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `name` | The case-insensitive name of the header. This name must be unique across transformation policies. | `string` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-requestpolicies-authentication-validationfailurepolicy-responseheadertransformations-renameheaders"></a>
+###### Spec.specification.requestPolicies.authentication.validationFailurePolicy.responseHeaderTransformations.renameHeaders
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationFailurePolicyResponseHeaderTransformationsRenameHeaders defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationFailurePolicy.ResponseHeaderTransformations.RenameHeaders.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`items`](#kind-apigatewaydeployment-spec-specification-requestpolicies-authentication-validationfailurepolicy-responseheadertransformations-renameheaders-items) | The list of headers. | `list[object]` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-requestpolicies-authentication-validationfailurepolicy-responseheadertransformations-renameheaders-items"></a>
+###### Spec.specification.requestPolicies.authentication.validationFailurePolicy.responseHeaderTransformations.renameHeaders.items[]
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationFailurePolicyResponseHeaderTransformationsRenameHeadersItem defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationFailurePolicy.ResponseHeaderTransformations.RenameHeaders.Item.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `from` | The original case-insensitive name of the header. This name must be unique across transformation policies. | `string` | Yes | - | - |
+| `to` | The new name of the header. This name must be unique across transformation policies. | `string` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-requestpolicies-authentication-validationfailurepolicy-responseheadertransformations-setheaders"></a>
+###### Spec.specification.requestPolicies.authentication.validationFailurePolicy.responseHeaderTransformations.setHeaders
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationFailurePolicyResponseHeaderTransformationsSetHeaders defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationFailurePolicy.ResponseHeaderTransformations.SetHeaders.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`items`](#kind-apigatewaydeployment-spec-specification-requestpolicies-authentication-validationfailurepolicy-responseheadertransformations-setheaders-items) | The list of headers. | `list[object]` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-requestpolicies-authentication-validationfailurepolicy-responseheadertransformations-setheaders-items"></a>
+###### Spec.specification.requestPolicies.authentication.validationFailurePolicy.responseHeaderTransformations.setHeaders.items[]
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationFailurePolicyResponseHeaderTransformationsSetHeadersItem defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationFailurePolicy.ResponseHeaderTransformations.SetHeaders.Item.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `ifExists` | If a header with the same name already exists in the request, OVERWRITE will overwrite the value, APPEND will append to the existing value, or SKIP will keep the existing value. | `string` | No | - | - |
+| `name` | The case-insensitive name of the header. This name must be unique across transformation policies. | `string` | Yes | - | - |
+| `values` | A list of new values. Each value can be a constant or may include one or more expressions enclosed within ${} delimiters. | `list[string]` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-requestpolicies-authentication-validationfailurepolicy-sourceuridetails"></a>
+###### Spec.specification.requestPolicies.authentication.validationFailurePolicy.sourceUriDetails
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationFailurePolicySourceUriDetails defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationFailurePolicy.SourceUriDetails.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `jsonData` | - | `string` | No | - | - |
+| `type` | - | `string` | No | - | - |
+| `uri` | The discovery URI for the auth server. | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-requestpolicies-authentication-validationpolicy"></a>
+###### Spec.specification.requestPolicies.authentication.validationPolicy
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationPolicy defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationPolicy.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`additionalValidationPolicy`](#kind-apigatewaydeployment-spec-specification-requestpolicies-authentication-validationpolicy-additionalvalidationpolicy) | ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationPolicyAdditionalValidationPolicy defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationPolicy.AdditionalValidationPolicy. | `object` | No | - | - |
+| [`clientDetails`](#kind-apigatewaydeployment-spec-specification-requestpolicies-authentication-validationpolicy-clientdetails) | ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationPolicyClientDetails defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationPolicy.ClientDetails. | `object` | No | - | - |
+| `isSslVerifyDisabled` | Defines whether or not to uphold SSL verification. | `boolean` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| [`keys`](#kind-apigatewaydeployment-spec-specification-requestpolicies-authentication-validationpolicy-keys) | The set of static public keys. | `list[object]` | No | - | - |
+| `maxCacheDurationInHours` | The duration for which the JWKS should be cached before it is fetched again. | `integer` | No | - | - |
+| [`sourceUriDetails`](#kind-apigatewaydeployment-spec-specification-requestpolicies-authentication-validationpolicy-sourceuridetails) | ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationPolicySourceUriDetails defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationPolicy.SourceUriDetails. | `object` | No | - | - |
+| `type` | - | `string` | No | - | - |
+| `uri` | The uri from which to retrieve the key. It must be accessible without authentication. | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-requestpolicies-authentication-validationpolicy-additionalvalidationpolicy"></a>
+###### Spec.specification.requestPolicies.authentication.validationPolicy.additionalValidationPolicy
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationPolicyAdditionalValidationPolicy defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationPolicy.AdditionalValidationPolicy.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `audiences` | The list of intended recipients for the token. | `list[string]` | No | - | - |
+| `issuers` | A list of parties that could have issued the token. | `list[string]` | No | - | - |
+| [`verifyClaims`](#kind-apigatewaydeployment-spec-specification-requestpolicies-authentication-validationpolicy-additionalvalidationpolicy-verifyclaims) | A list of claims which should be validated to consider the token valid. | `list[object]` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-requestpolicies-authentication-validationpolicy-additionalvalidationpolicy-verifyclaims"></a>
+###### Spec.specification.requestPolicies.authentication.validationPolicy.additionalValidationPolicy.verifyClaims[]
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationPolicyAdditionalValidationPolicyVerifyClaim defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationPolicy.AdditionalValidationPolicy.VerifyClaim.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `isRequired` | Whether the claim is required to be present in the JWT or not. If set to "false", the claim values will be matched only if the claim is present in the JWT. | `boolean` | No | - | - |
+| `key` | Name of the claim. | `string` | Yes | - | - |
+| `values` | The list of acceptable values for a given claim. If this value is "null" or empty and "isRequired" set to "true", then the presence of this claim in the JWT is validated. | `list[string]` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-requestpolicies-authentication-validationpolicy-clientdetails"></a>
+###### Spec.specification.requestPolicies.authentication.validationPolicy.clientDetails
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationPolicyClientDetails defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationPolicy.ClientDetails.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `clientId` | Client ID for the OAuth2/OIDC app. | `string` | No | - | - |
+| `clientSecretId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Oracle Vault Service secret resource. | `string` | No | - | - |
+| `clientSecretVersionNumber` | The version number of the client secret to use. | `integer (int64)` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `type` | - | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-requestpolicies-authentication-validationpolicy-keys"></a>
+###### Spec.specification.requestPolicies.authentication.validationPolicy.keys[]
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationPolicyKey defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationPolicy.Key.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `alg` | The algorithm intended for use with this key. | `string` | No | - | - |
+| `e` | The base64 url encoded exponent of the RSA public key represented by this key. | `string` | No | - | - |
+| `format` | - | `string` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `key` | The content of the PEM-encoded public key. | `string` | No | - | - |
+| `key_ops` | The operations for which this key is to be used. | `list[string]` | No | - | - |
+| `kid` | A unique key ID. This key will be used to verify the signature of a JWT with matching "kid". | `string` | Yes | - | - |
+| `kty` | The key type. | `string` | No | - | - |
+| `n` | The base64 url encoded modulus of the RSA public key represented by this key. | `string` | No | - | - |
+| `use` | The intended use of the public key. | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-requestpolicies-authentication-validationpolicy-sourceuridetails"></a>
+###### Spec.specification.requestPolicies.authentication.validationPolicy.sourceUriDetails
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationPolicySourceUriDetails defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationPolicy.SourceUriDetails.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `jsonData` | - | `string` | No | - | - |
+| `type` | - | `string` | No | - | - |
+| `uri` | The discovery URI for the auth server. | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-requestpolicies-authentication-verifyclaims"></a>
+###### Spec.specification.requestPolicies.authentication.verifyClaims[]
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationVerifyClaim defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.VerifyClaim.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `isRequired` | Whether the claim is required to be present in the JWT or not. If set to "false", the claim values will be matched only if the claim is present in the JWT. | `boolean` | No | - | - |
+| `key` | Name of the claim. | `string` | Yes | - | - |
+| `values` | The list of acceptable values for a given claim. If this value is "null" or empty and "isRequired" set to "true", then the presence of this claim in the JWT is validated. | `list[string]` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-requestpolicies-cors"></a>
+###### Spec.specification.requestPolicies.cors
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesCors defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Cors.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `allowedHeaders` | The list of headers that will be allowed from the client via the Access-Control-Allow-Headers header. '*' will allow all headers. | `list[string]` | No | - | - |
+| `allowedMethods` | The list of allowed HTTP methods that will be returned for the preflight OPTIONS request in the Access-Control-Allow-Methods header. '*' will allow all methods. | `list[string]` | No | - | - |
+| `allowedOrigins` | The list of allowed origins that the CORS handler will use to respond to CORS requests. The gateway will send the Access-Control-Allow-Origin header with the best origin match for the circumstances. '*' will match any origins, and 'null' will match queries from 'file:' origins. All other origins must be qualified with the scheme, full hostname, and port if necessary. | `list[string]` | Yes | - | - |
+| `exposedHeaders` | The list of headers that the client will be allowed to see from the response as indicated by the Access-Control-Expose-Headers header. '*' will expose all headers. | `list[string]` | No | - | - |
+| `isAllowCredentialsEnabled` | Whether to send the Access-Control-Allow-Credentials header to allow CORS requests with cookies. | `boolean` | No | - | - |
+| `maxAgeInSeconds` | The time in seconds for the client to cache preflight responses. This is sent as the Access-Control-Max-Age if greater than 0. | `integer` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-requestpolicies-dynamicauthentication"></a>
+###### Spec.specification.requestPolicies.dynamicAuthentication
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthentication defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`authenticationServers`](#kind-apigatewaydeployment-spec-specification-requestpolicies-dynamicauthentication-authenticationservers) | List of authentication servers to choose from during dynamic authentication. | `list[object]` | Yes | - | - |
+| [`selectionSource`](#kind-apigatewaydeployment-spec-specification-requestpolicies-dynamicauthentication-selectionsource) | ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationSelectionSource defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.SelectionSource. | `object` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-requestpolicies-dynamicauthentication-authenticationservers"></a>
+###### Spec.specification.requestPolicies.dynamicAuthentication.authenticationServers[]
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServer defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`authenticationServerDetail`](#kind-apigatewaydeployment-spec-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail) | ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetail defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail. | `object` | Yes | - | - |
+| [`key`](#kind-apigatewaydeployment-spec-specification-requestpolicies-dynamicauthentication-authenticationservers-key) | ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerKey defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.Key. | `object` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail"></a>
+###### Spec.specification.requestPolicies.dynamicAuthentication.authenticationServers[].authenticationServerDetail
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetail defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `audiences` | The list of intended recipients for the token. | `list[string]` | No | - | - |
+| `cacheKey` | A list of keys from "parameters" attribute value whose values will be added to the cache key. | `list[string]` | No | - | - |
+| `functionId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Oracle Functions function resource. | `string` | No | - | - |
+| `isAnonymousAccessAllowed` | Whether an unauthenticated user may access the API. Must be "true" to enable ANONYMOUS route authorization. | `boolean` | No | - | - |
+| `issuers` | A list of parties that could have issued the token. | `list[string]` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `maxClockSkewInSeconds` | The maximum expected time difference between the system clocks of the token issuer and the API Gateway. | `number` | No | - | - |
+| `parameters` | A map where key is a user defined string and value is a context expressions whose values will be sent to the custom auth function. Values should contain an expression. Example: `{"foo": "request.header[abc]"}` | `map[string, string]` | No | - | - |
+| [`publicKeys`](#kind-apigatewaydeployment-spec-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-publickeys) | ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailPublicKeys defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.PublicKeys. | `object` | No | - | - |
+| `tokenAuthScheme` | The authentication scheme that is to be used when authenticating the token. This must to be provided if "tokenHeader" is specified. | `string` | No | - | - |
+| `tokenHeader` | The name of the header containing the authentication token. | `string` | No | - | - |
+| `tokenQueryParam` | The name of the query parameter containing the authentication token. | `string` | No | - | - |
+| `type` | - | `string` | No | - | - |
+| [`validationFailurePolicy`](#kind-apigatewaydeployment-spec-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationfailurepolicy) | ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationFailurePolicy defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationFailurePolicy. | `object` | No | - | - |
+| [`validationPolicy`](#kind-apigatewaydeployment-spec-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationpolicy) | ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationPolicy defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationPolicy. | `object` | No | - | - |
+| [`verifyClaims`](#kind-apigatewaydeployment-spec-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-verifyclaims) | A list of claims which should be validated to consider the token valid. | `list[object]` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-publickeys"></a>
+###### Spec.specification.requestPolicies.dynamicAuthentication.authenticationServers[].authenticationServerDetail.publicKeys
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailPublicKeys defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.PublicKeys.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `isSslVerifyDisabled` | Defines whether or not to uphold SSL verification. | `boolean` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| [`keys`](#kind-apigatewaydeployment-spec-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-publickeys-keys) | The set of static public keys. | `list[object]` | No | - | - |
+| `maxCacheDurationInHours` | The duration for which the JWKS should be cached before it is fetched again. | `integer` | No | - | - |
+| `type` | - | `string` | No | - | - |
+| `uri` | The uri from which to retrieve the key. It must be accessible without authentication. | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-publickeys-keys"></a>
+###### Spec.specification.requestPolicies.dynamicAuthentication.authenticationServers[].authenticationServerDetail.publicKeys.keys[]
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailPublicKeysKey defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.PublicKeys.Key.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `alg` | The algorithm intended for use with this key. | `string` | No | - | - |
+| `e` | The base64 url encoded exponent of the RSA public key represented by this key. | `string` | No | - | - |
+| `format` | - | `string` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `key` | The content of the PEM-encoded public key. | `string` | No | - | - |
+| `key_ops` | The operations for which this key is to be used. | `list[string]` | No | - | - |
+| `kid` | A unique key ID. This key will be used to verify the signature of a JWT with matching "kid". | `string` | Yes | - | - |
+| `kty` | The key type. | `string` | No | - | - |
+| `n` | The base64 url encoded modulus of the RSA public key represented by this key. | `string` | No | - | - |
+| `use` | The intended use of the public key. | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationfailurepolicy"></a>
+###### Spec.specification.requestPolicies.dynamicAuthentication.authenticationServers[].authenticationServerDetail.validationFailurePolicy
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationFailurePolicy defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationFailurePolicy.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`clientDetails`](#kind-apigatewaydeployment-spec-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationfailurepolicy-clientdetails) | ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationFailurePolicyClientDetails defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationFailurePolicy.ClientDetails. | `object` | No | - | - |
+| `fallbackRedirectPath` | The path to be used as fallback after OAuth2. | `string` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `logoutPath` | The path to be used as logout. | `string` | No | - | - |
+| `maxExpiryDurationInHours` | The duration for which the OAuth2 success token should be cached before it is fetched again. | `integer` | No | - | - |
+| `responseCode` | HTTP response code, can include context variables. | `string` | No | - | - |
+| [`responseHeaderTransformations`](#kind-apigatewaydeployment-spec-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationfailurepolicy-responseheadertransformations) | ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationFailurePolicyResponseHeaderTransformations defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationFailurePolicy.ResponseHeaderTransformations. | `object` | No | - | - |
+| `responseMessage` | HTTP response message. | `string` | No | - | - |
+| `responseType` | Response Type. | `string` | No | - | - |
+| `scopes` | List of scopes. | `list[string]` | No | - | - |
+| [`sourceUriDetails`](#kind-apigatewaydeployment-spec-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationfailurepolicy-sourceuridetails) | ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationFailurePolicySourceUriDetails defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationFailurePolicy.SourceUriDetails. | `object` | No | - | - |
+| `type` | - | `string` | No | - | - |
+| `useCookiesForIntermediateSteps` | Defines whether or not to use cookies for OAuth2 intermediate steps. | `boolean` | No | - | - |
+| `useCookiesForSession` | Defines whether or not to use cookies for session maintenance. | `boolean` | No | - | - |
+| `usePkce` | Defines whether or not to support PKCE. | `boolean` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationfailurepolicy-clientdetails"></a>
+###### Spec.specification.requestPolicies.dynamicAuthentication.authenticationServers[].authenticationServerDetail.validationFailurePolicy.clientDetails
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationFailurePolicyClientDetails defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationFailurePolicy.ClientDetails.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `clientId` | Client ID for the OAuth2/OIDC app. | `string` | No | - | - |
+| `clientSecretId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Oracle Vault Service secret resource. | `string` | No | - | - |
+| `clientSecretVersionNumber` | The version number of the client secret to use. | `integer (int64)` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `type` | - | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationfailurepolicy-responseheadertransformations"></a>
+###### Spec.specification.requestPolicies.dynamicAuthentication.authenticationServers[].authenticationServerDetail.validationFailurePolicy.responseHeaderTransformations
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationFailurePolicyResponseHeaderTransformations defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationFailurePolicy.ResponseHeaderTransformations.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`filterHeaders`](#kind-apigatewaydeployment-spec-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationfailurepolicy-responseheadertransformations-filterheaders) | ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationFailurePolicyResponseHeaderTransformationsFilterHeaders defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationFailurePolicy.ResponseHeaderTransformations.FilterHeaders. | `object` | No | - | - |
+| [`renameHeaders`](#kind-apigatewaydeployment-spec-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationfailurepolicy-responseheadertransformations-renameheaders) | ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationFailurePolicyResponseHeaderTransformationsRenameHeaders defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationFailurePolicy.ResponseHeaderTransformations.RenameHeaders. | `object` | No | - | - |
+| [`setHeaders`](#kind-apigatewaydeployment-spec-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationfailurepolicy-responseheadertransformations-setheaders) | ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationFailurePolicyResponseHeaderTransformationsSetHeaders defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationFailurePolicy.ResponseHeaderTransformations.SetHeaders. | `object` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationfailurepolicy-responseheadertransformations-filterheaders"></a>
+###### Spec.specification.requestPolicies.dynamicAuthentication.authenticationServers[].authenticationServerDetail.validationFailurePolicy.responseHeaderTransformations.filterHeaders
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationFailurePolicyResponseHeaderTransformationsFilterHeaders defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationFailurePolicy.ResponseHeaderTransformations.FilterHeaders.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`items`](#kind-apigatewaydeployment-spec-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationfailurepolicy-responseheadertransformations-filterheaders-items) | The list of headers. | `list[object]` | Yes | - | - |
+| `type` | BLOCK drops any headers that are in the list of items, so it acts as an exclusion list. ALLOW permits only the headers in the list and removes all others, so it acts as an inclusion list. | `string` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationfailurepolicy-responseheadertransformations-filterheaders-items"></a>
+###### Spec.specification.requestPolicies.dynamicAuthentication.authenticationServers[].authenticationServerDetail.validationFailurePolicy.responseHeaderTransformations.filterHeaders.items[]
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationFailurePolicyResponseHeaderTransformationsFilterHeadersItem defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationFailurePolicy.ResponseHeaderTransformations.FilterHeaders.Item.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `name` | The case-insensitive name of the header. This name must be unique across transformation policies. | `string` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationfailurepolicy-responseheadertransformations-renameheaders"></a>
+###### Spec.specification.requestPolicies.dynamicAuthentication.authenticationServers[].authenticationServerDetail.validationFailurePolicy.responseHeaderTransformations.renameHeaders
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationFailurePolicyResponseHeaderTransformationsRenameHeaders defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationFailurePolicy.ResponseHeaderTransformations.RenameHeaders.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`items`](#kind-apigatewaydeployment-spec-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationfailurepolicy-responseheadertransformations-renameheaders-items) | The list of headers. | `list[object]` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationfailurepolicy-responseheadertransformations-renameheaders-items"></a>
+###### Spec.specification.requestPolicies.dynamicAuthentication.authenticationServers[].authenticationServerDetail.validationFailurePolicy.responseHeaderTransformations.renameHeaders.items[]
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationFailurePolicyResponseHeaderTransformationsRenameHeadersItem defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationFailurePolicy.ResponseHeaderTransformations.RenameHeaders.Item.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `from` | The original case-insensitive name of the header. This name must be unique across transformation policies. | `string` | Yes | - | - |
+| `to` | The new name of the header. This name must be unique across transformation policies. | `string` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationfailurepolicy-responseheadertransformations-setheaders"></a>
+###### Spec.specification.requestPolicies.dynamicAuthentication.authenticationServers[].authenticationServerDetail.validationFailurePolicy.responseHeaderTransformations.setHeaders
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationFailurePolicyResponseHeaderTransformationsSetHeaders defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationFailurePolicy.ResponseHeaderTransformations.SetHeaders.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`items`](#kind-apigatewaydeployment-spec-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationfailurepolicy-responseheadertransformations-setheaders-items) | The list of headers. | `list[object]` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationfailurepolicy-responseheadertransformations-setheaders-items"></a>
+###### Spec.specification.requestPolicies.dynamicAuthentication.authenticationServers[].authenticationServerDetail.validationFailurePolicy.responseHeaderTransformations.setHeaders.items[]
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationFailurePolicyResponseHeaderTransformationsSetHeadersItem defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationFailurePolicy.ResponseHeaderTransformations.SetHeaders.Item.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `ifExists` | If a header with the same name already exists in the request, OVERWRITE will overwrite the value, APPEND will append to the existing value, or SKIP will keep the existing value. | `string` | No | - | - |
+| `name` | The case-insensitive name of the header. This name must be unique across transformation policies. | `string` | Yes | - | - |
+| `values` | A list of new values. Each value can be a constant or may include one or more expressions enclosed within ${} delimiters. | `list[string]` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationfailurepolicy-sourceuridetails"></a>
+###### Spec.specification.requestPolicies.dynamicAuthentication.authenticationServers[].authenticationServerDetail.validationFailurePolicy.sourceUriDetails
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationFailurePolicySourceUriDetails defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationFailurePolicy.SourceUriDetails.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `jsonData` | - | `string` | No | - | - |
+| `type` | - | `string` | No | - | - |
+| `uri` | The discovery URI for the auth server. | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationpolicy"></a>
+###### Spec.specification.requestPolicies.dynamicAuthentication.authenticationServers[].authenticationServerDetail.validationPolicy
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationPolicy defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationPolicy.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`additionalValidationPolicy`](#kind-apigatewaydeployment-spec-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationpolicy-additionalvalidationpolicy) | ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationPolicyAdditionalValidationPolicy defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationPolicy.AdditionalValidationPolicy. | `object` | No | - | - |
+| [`clientDetails`](#kind-apigatewaydeployment-spec-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationpolicy-clientdetails) | ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationPolicyClientDetails defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationPolicy.ClientDetails. | `object` | No | - | - |
+| `isSslVerifyDisabled` | Defines whether or not to uphold SSL verification. | `boolean` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| [`keys`](#kind-apigatewaydeployment-spec-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationpolicy-keys) | The set of static public keys. | `list[object]` | No | - | - |
+| `maxCacheDurationInHours` | The duration for which the JWKS should be cached before it is fetched again. | `integer` | No | - | - |
+| [`sourceUriDetails`](#kind-apigatewaydeployment-spec-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationpolicy-sourceuridetails) | ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationPolicySourceUriDetails defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationPolicy.SourceUriDetails. | `object` | No | - | - |
+| `type` | - | `string` | No | - | - |
+| `uri` | The uri from which to retrieve the key. It must be accessible without authentication. | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationpolicy-additionalvalidationpolicy"></a>
+###### Spec.specification.requestPolicies.dynamicAuthentication.authenticationServers[].authenticationServerDetail.validationPolicy.additionalValidationPolicy
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationPolicyAdditionalValidationPolicy defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationPolicy.AdditionalValidationPolicy.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `audiences` | The list of intended recipients for the token. | `list[string]` | No | - | - |
+| `issuers` | A list of parties that could have issued the token. | `list[string]` | No | - | - |
+| [`verifyClaims`](#kind-apigatewaydeployment-spec-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationpolicy-additionalvalidationpolicy-verifyclaims) | A list of claims which should be validated to consider the token valid. | `list[object]` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationpolicy-additionalvalidationpolicy-verifyclaims"></a>
+###### Spec.specification.requestPolicies.dynamicAuthentication.authenticationServers[].authenticationServerDetail.validationPolicy.additionalValidationPolicy.verifyClaims[]
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationPolicyAdditionalValidationPolicyVerifyClaim defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationPolicy.AdditionalValidationPolicy.VerifyClaim.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `isRequired` | Whether the claim is required to be present in the JWT or not. If set to "false", the claim values will be matched only if the claim is present in the JWT. | `boolean` | No | - | - |
+| `key` | Name of the claim. | `string` | Yes | - | - |
+| `values` | The list of acceptable values for a given claim. If this value is "null" or empty and "isRequired" set to "true", then the presence of this claim in the JWT is validated. | `list[string]` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationpolicy-clientdetails"></a>
+###### Spec.specification.requestPolicies.dynamicAuthentication.authenticationServers[].authenticationServerDetail.validationPolicy.clientDetails
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationPolicyClientDetails defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationPolicy.ClientDetails.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `clientId` | Client ID for the OAuth2/OIDC app. | `string` | No | - | - |
+| `clientSecretId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Oracle Vault Service secret resource. | `string` | No | - | - |
+| `clientSecretVersionNumber` | The version number of the client secret to use. | `integer (int64)` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `type` | - | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationpolicy-keys"></a>
+###### Spec.specification.requestPolicies.dynamicAuthentication.authenticationServers[].authenticationServerDetail.validationPolicy.keys[]
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationPolicyKey defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationPolicy.Key.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `alg` | The algorithm intended for use with this key. | `string` | No | - | - |
+| `e` | The base64 url encoded exponent of the RSA public key represented by this key. | `string` | No | - | - |
+| `format` | - | `string` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `key` | The content of the PEM-encoded public key. | `string` | No | - | - |
+| `key_ops` | The operations for which this key is to be used. | `list[string]` | No | - | - |
+| `kid` | A unique key ID. This key will be used to verify the signature of a JWT with matching "kid". | `string` | Yes | - | - |
+| `kty` | The key type. | `string` | No | - | - |
+| `n` | The base64 url encoded modulus of the RSA public key represented by this key. | `string` | No | - | - |
+| `use` | The intended use of the public key. | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationpolicy-sourceuridetails"></a>
+###### Spec.specification.requestPolicies.dynamicAuthentication.authenticationServers[].authenticationServerDetail.validationPolicy.sourceUriDetails
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationPolicySourceUriDetails defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationPolicy.SourceUriDetails.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `jsonData` | - | `string` | No | - | - |
+| `type` | - | `string` | No | - | - |
+| `uri` | The discovery URI for the auth server. | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-verifyclaims"></a>
+###### Spec.specification.requestPolicies.dynamicAuthentication.authenticationServers[].authenticationServerDetail.verifyClaims[]
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailVerifyClaim defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.VerifyClaim.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `isRequired` | Whether the claim is required to be present in the JWT or not. If set to "false", the claim values will be matched only if the claim is present in the JWT. | `boolean` | No | - | - |
+| `key` | Name of the claim. | `string` | Yes | - | - |
+| `values` | The list of acceptable values for a given claim. If this value is "null" or empty and "isRequired" set to "true", then the presence of this claim in the JWT is validated. | `list[string]` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-requestpolicies-dynamicauthentication-authenticationservers-key"></a>
+###### Spec.specification.requestPolicies.dynamicAuthentication.authenticationServers[].key
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerKey defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.Key.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `expression` | A selection key string containing a wildcard to match with the context variable in an incoming request. If the context variable matches the string, the request is sent to the route or authentication server associated with the selection key. Valid wildcards are '*' (zero or more characters) and '+' (one or more characters). The string can only contain one wildcard, and the wildcard must be at the start or the end of the string. | `string` | No | - | - |
+| `isDefault` | Specifies whether to use the route or authentication server associated with this selection key as the default. The default is used if the value of a context variable in an incoming request does not match any of the other selection key values when dynamically routing and dynamically authenticating requests. | `boolean` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `name` | Name assigned to the branch. | `string` | Yes | - | - |
+| `type` | - | `string` | No | - | - |
+| `values` | The set of selection keys to match with the context variable in an incoming request. If the context variable exactly matches one of the keys in the set, the request is sent to the route or authentication server associated with the set. | `list[string]` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-requestpolicies-dynamicauthentication-selectionsource"></a>
+###### Spec.specification.requestPolicies.dynamicAuthentication.selectionSource
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationSelectionSource defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.SelectionSource.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `jsonData` | - | `string` | No | - | - |
+| `selector` | String describing the context variable used as selector. | `string` | No | - | - |
+| `type` | - | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-requestpolicies-mutualtls"></a>
+###### Spec.specification.requestPolicies.mutualTls
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesMutualTls defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.MutualTls.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `allowedSans` | Allowed list of CN or SAN which will be used for verification of certificate. | `list[string]` | No | - | - |
+| `isVerifiedCertificateRequired` | Determines whether to enable client verification when API Consumer makes connection to the gateway. | `boolean` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-requestpolicies-ratelimiting"></a>
+###### Spec.specification.requestPolicies.rateLimiting
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesRateLimiting defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.RateLimiting.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `rateInRequestsPerSecond` | The maximum number of requests per second to allow. | `integer` | Yes | - | - |
+| `rateKey` | The key used to group requests together. | `string` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-requestpolicies-usageplans"></a>
+###### Spec.specification.requestPolicies.usagePlans
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesUsagePlans defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.UsagePlans.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `tokenLocations` | A list of context variables specifying where API tokens may be located in a request. Example locations: - "request.headers[token]" - "request.query[token]" - "request.auth[Token]" - "request.path[TOKEN]" | `list[string]` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-routes"></a>
+##### Spec.specification.routes[]
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRoute defines nested fields for ApiGatewayDeployment.Specification.Route.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`backend`](#kind-apigatewaydeployment-spec-specification-routes-backend) | ApiGatewayDeploymentSpecificationRouteBackend defines nested fields for ApiGatewayDeployment.Specification.Route.Backend. | `object` | Yes | - | - |
+| [`loggingPolicies`](#kind-apigatewaydeployment-spec-specification-routes-loggingpolicies) | ApiGatewayDeploymentSpecificationRouteLoggingPolicies defines nested fields for ApiGatewayDeployment.Specification.Route.LoggingPolicies. | `object` | No | - | - |
+| `methods` | A list of allowed methods on this route. | `list[string]` | No | - | - |
+| `path` | A URL path pattern that must be matched on this route. The path pattern may contain a subset of RFC 6570 identifiers to allow wildcard and parameterized matching. | `string` | Yes | - | - |
+| [`requestPolicies`](#kind-apigatewaydeployment-spec-specification-routes-requestpolicies) | ApiGatewayDeploymentSpecificationRouteRequestPolicies defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies. | `object` | No | - | - |
+| [`responsePolicies`](#kind-apigatewaydeployment-spec-specification-routes-responsepolicies) | ApiGatewayDeploymentSpecificationRouteResponsePolicies defines nested fields for ApiGatewayDeployment.Specification.Route.ResponsePolicies. | `object` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-routes-backend"></a>
+###### Spec.specification.routes[].backend
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteBackend defines nested fields for ApiGatewayDeployment.Specification.Route.Backend.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `allowedPostLogoutUris` | A list of allowed post-logout URLs to which a request can be redirected after revoke access | `list[string]` | No | - | - |
+| `body` | The body of the stock response from the mock backend. | `string` | No | - | - |
+| `connectTimeoutInSeconds` | Defines a timeout for establishing a connection with a proxied server. | `number` | No | - | - |
+| `functionId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Oracle Functions function resource. | `string` | No | - | - |
+| [`headers`](#kind-apigatewaydeployment-spec-specification-routes-backend-headers) | The headers of the stock response from the mock backend. | `list[object]` | No | - | - |
+| `isSslVerifyDisabled` | Defines whether or not to uphold SSL verification. | `boolean` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `postLogoutState` | Defines a state that should be shared on redirecting to postLogout URL. | `string` | No | - | - |
+| `readTimeoutInSeconds` | Defines a timeout for reading a response from the proxied server. | `number` | No | - | - |
+| [`routingBackends`](#kind-apigatewaydeployment-spec-specification-routes-backend-routingbackends) | List of backends to chose from for Dynamic Routing. | `list[object]` | No | - | - |
+| [`selectionSource`](#kind-apigatewaydeployment-spec-specification-routes-backend-selectionsource) | ApiGatewayDeploymentSpecificationRouteBackendSelectionSource defines nested fields for ApiGatewayDeployment.Specification.Route.Backend.SelectionSource. | `object` | No | - | - |
+| `sendTimeoutInSeconds` | Defines a timeout for transmitting a request to the proxied server. | `number` | No | - | - |
+| `status` | The status code of the stock response from the mock backend. | `integer` | No | - | - |
+| `type` | - | `string` | No | - | - |
+| `url` | The url of the HTTP Backend | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-routes-backend-headers"></a>
+###### Spec.specification.routes[].backend.headers[]
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteBackendHeader defines nested fields for ApiGatewayDeployment.Specification.Route.Backend.Header.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `name` | Name of the header. | `string` | No | - | - |
+| `value` | Value of the header. | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-routes-backend-routingbackends"></a>
+###### Spec.specification.routes[].backend.routingBackends[]
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteBackendRoutingBackend defines nested fields for ApiGatewayDeployment.Specification.Route.Backend.RoutingBackend.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `backend` | JSONValue preserves arbitrary JSON values inside generated CRD fields. Unknown nested fields are preserved. | `object (preserves unknown fields)` | Yes | - | - |
+| [`key`](#kind-apigatewaydeployment-spec-specification-routes-backend-routingbackends-key) | ApiGatewayDeploymentSpecificationRouteBackendRoutingBackendKey defines nested fields for ApiGatewayDeployment.Specification.Route.Backend.RoutingBackend.Key. | `object` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-routes-backend-routingbackends-key"></a>
+###### Spec.specification.routes[].backend.routingBackends[].key
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteBackendRoutingBackendKey defines nested fields for ApiGatewayDeployment.Specification.Route.Backend.RoutingBackend.Key.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `expression` | A selection key string containing a wildcard to match with the context variable in an incoming request. If the context variable matches the string, the request is sent to the route or authentication server associated with the selection key. Valid wildcards are '*' (zero or more characters) and '+' (one or more characters). The string can only contain one wildcard, and the wildcard must be at the start or the end of the string. | `string` | No | - | - |
+| `isDefault` | Specifies whether to use the route or authentication server associated with this selection key as the default. The default is used if the value of a context variable in an incoming request does not match any of the other selection key values when dynamically routing and dynamically authenticating requests. | `boolean` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `name` | Name assigned to the branch. | `string` | Yes | - | - |
+| `type` | - | `string` | No | - | - |
+| `values` | The set of selection keys to match with the context variable in an incoming request. If the context variable exactly matches one of the keys in the set, the request is sent to the route or authentication server associated with the set. | `list[string]` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-routes-backend-selectionsource"></a>
+###### Spec.specification.routes[].backend.selectionSource
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteBackendSelectionSource defines nested fields for ApiGatewayDeployment.Specification.Route.Backend.SelectionSource.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `jsonData` | - | `string` | No | - | - |
+| `selector` | String describing the context variable used as selector. | `string` | No | - | - |
+| `type` | - | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-routes-loggingpolicies"></a>
+###### Spec.specification.routes[].loggingPolicies
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteLoggingPolicies defines nested fields for ApiGatewayDeployment.Specification.Route.LoggingPolicies.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`accessLog`](#kind-apigatewaydeployment-spec-specification-routes-loggingpolicies-accesslog) | ApiGatewayDeploymentSpecificationRouteLoggingPoliciesAccessLog defines nested fields for ApiGatewayDeployment.Specification.Route.LoggingPolicies.AccessLog. | `object` | No | - | - |
+| [`executionLog`](#kind-apigatewaydeployment-spec-specification-routes-loggingpolicies-executionlog) | ApiGatewayDeploymentSpecificationRouteLoggingPoliciesExecutionLog defines nested fields for ApiGatewayDeployment.Specification.Route.LoggingPolicies.ExecutionLog. | `object` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-routes-loggingpolicies-accesslog"></a>
+###### Spec.specification.routes[].loggingPolicies.accessLog
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteLoggingPoliciesAccessLog defines nested fields for ApiGatewayDeployment.Specification.Route.LoggingPolicies.AccessLog.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `isEnabled` | Enables pushing of access logs to the legacy OCI Object Storage log archival bucket. Oracle recommends using the OCI Logging service to enable, retrieve, and query access logs for an API Deployment. If there is an active log object for the API Deployment and its category is set to 'access' in OCI Logging service, the logs will not be uploaded to the legacy OCI Object Storage log archival bucket. Please note that the functionality to push to the legacy OCI Object Storage log archival bucket has been deprecated and will be removed in the future. | `boolean` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-routes-loggingpolicies-executionlog"></a>
+###### Spec.specification.routes[].loggingPolicies.executionLog
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteLoggingPoliciesExecutionLog defines nested fields for ApiGatewayDeployment.Specification.Route.LoggingPolicies.ExecutionLog.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `isEnabled` | Enables pushing of execution logs to the legacy OCI Object Storage log archival bucket. Oracle recommends using the OCI Logging service to enable, retrieve, and query execution logs for an API Deployment. If there is an active log object for the API Deployment and its category is set to 'execution' in OCI Logging service, the logs will not be uploaded to the legacy OCI Object Storage log archival bucket. Please note that the functionality to push to the legacy OCI Object Storage log archival bucket has been deprecated and will be removed in the future. | `boolean` | No | - | - |
+| `logLevel` | Specifies the log level used to control logging output of execution logs. Enabling logging at a given level also enables logging at all higher levels. | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-routes-requestpolicies"></a>
+###### Spec.specification.routes[].requestPolicies
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteRequestPolicies defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`authorization`](#kind-apigatewaydeployment-spec-specification-routes-requestpolicies-authorization) | ApiGatewayDeploymentSpecificationRouteRequestPoliciesAuthorization defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.Authorization. | `object` | No | - | - |
+| [`bodyValidation`](#kind-apigatewaydeployment-spec-specification-routes-requestpolicies-bodyvalidation) | ApiGatewayDeploymentSpecificationRouteRequestPoliciesBodyValidation defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.BodyValidation. | `object` | No | - | - |
+| [`cors`](#kind-apigatewaydeployment-spec-specification-routes-requestpolicies-cors) | ApiGatewayDeploymentSpecificationRouteRequestPoliciesCors defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.Cors. | `object` | No | - | - |
+| [`headerTransformations`](#kind-apigatewaydeployment-spec-specification-routes-requestpolicies-headertransformations) | ApiGatewayDeploymentSpecificationRouteRequestPoliciesHeaderTransformations defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.HeaderTransformations. | `object` | No | - | - |
+| [`headerValidations`](#kind-apigatewaydeployment-spec-specification-routes-requestpolicies-headervalidations) | ApiGatewayDeploymentSpecificationRouteRequestPoliciesHeaderValidations defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.HeaderValidations. | `object` | No | - | - |
+| [`queryParameterTransformations`](#kind-apigatewaydeployment-spec-specification-routes-requestpolicies-queryparametertransformations) | ApiGatewayDeploymentSpecificationRouteRequestPoliciesQueryParameterTransformations defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.QueryParameterTransformations. | `object` | No | - | - |
+| [`queryParameterValidations`](#kind-apigatewaydeployment-spec-specification-routes-requestpolicies-queryparametervalidations) | ApiGatewayDeploymentSpecificationRouteRequestPoliciesQueryParameterValidations defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.QueryParameterValidations. | `object` | No | - | - |
+| [`responseCacheLookup`](#kind-apigatewaydeployment-spec-specification-routes-requestpolicies-responsecachelookup) | ApiGatewayDeploymentSpecificationRouteRequestPoliciesResponseCacheLookup defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.ResponseCacheLookup. | `object` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-routes-requestpolicies-authorization"></a>
+###### Spec.specification.routes[].requestPolicies.authorization
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesAuthorization defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.Authorization.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `allowedScope` | A user whose scope includes any of these access ranges is allowed on this route. Access ranges are case-sensitive. | `list[string]` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `type` | - | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-routes-requestpolicies-bodyvalidation"></a>
+###### Spec.specification.routes[].requestPolicies.bodyValidation
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesBodyValidation defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.BodyValidation.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`content`](#kind-apigatewaydeployment-spec-specification-routes-requestpolicies-bodyvalidation-content) | The content of the request body. The key is a media type range (https://tools.ietf.org/html/rfc7231#appendix-D) subset restricted to the following schema key ::= ( / ( "*" "/" "*" ) / ( type "/" "*" ) / ( type "/" subtype ) ) For requests that match multiple keys, only the most specific key is applicable. e.g. `text/plain` overrides `text/*` | `map[string, object]` | Yes | - | - |
+| `required` | Determines if the request body is required in the request. | `boolean` | No | - | - |
+| `validationMode` | Validation behavior mode. In `ENFORCING` mode, upon a validation failure, the request will be rejected with a 4xx response and not sent to the backend. In `PERMISSIVE` mode, the result of the validation will be exposed as metrics while the request will follow the normal path. `DISABLED` type turns the validation off. | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-routes-requestpolicies-bodyvalidation-content"></a>
+###### Spec.specification.routes[].requestPolicies.bodyValidation.content{}
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesBodyValidationContent defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.BodyValidation.Content.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `jsonData` | - | `string` | No | - | - |
+| `validationType` | - | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-routes-requestpolicies-cors"></a>
+###### Spec.specification.routes[].requestPolicies.cors
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesCors defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.Cors.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `allowedHeaders` | The list of headers that will be allowed from the client via the Access-Control-Allow-Headers header. '*' will allow all headers. | `list[string]` | No | - | - |
+| `allowedMethods` | The list of allowed HTTP methods that will be returned for the preflight OPTIONS request in the Access-Control-Allow-Methods header. '*' will allow all methods. | `list[string]` | No | - | - |
+| `allowedOrigins` | The list of allowed origins that the CORS handler will use to respond to CORS requests. The gateway will send the Access-Control-Allow-Origin header with the best origin match for the circumstances. '*' will match any origins, and 'null' will match queries from 'file:' origins. All other origins must be qualified with the scheme, full hostname, and port if necessary. | `list[string]` | Yes | - | - |
+| `exposedHeaders` | The list of headers that the client will be allowed to see from the response as indicated by the Access-Control-Expose-Headers header. '*' will expose all headers. | `list[string]` | No | - | - |
+| `isAllowCredentialsEnabled` | Whether to send the Access-Control-Allow-Credentials header to allow CORS requests with cookies. | `boolean` | No | - | - |
+| `maxAgeInSeconds` | The time in seconds for the client to cache preflight responses. This is sent as the Access-Control-Max-Age if greater than 0. | `integer` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-routes-requestpolicies-headertransformations"></a>
+###### Spec.specification.routes[].requestPolicies.headerTransformations
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesHeaderTransformations defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.HeaderTransformations.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`filterHeaders`](#kind-apigatewaydeployment-spec-specification-routes-requestpolicies-headertransformations-filterheaders) | ApiGatewayDeploymentSpecificationRouteRequestPoliciesHeaderTransformationsFilterHeaders defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.HeaderTransformations.FilterHeaders. | `object` | No | - | - |
+| [`renameHeaders`](#kind-apigatewaydeployment-spec-specification-routes-requestpolicies-headertransformations-renameheaders) | ApiGatewayDeploymentSpecificationRouteRequestPoliciesHeaderTransformationsRenameHeaders defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.HeaderTransformations.RenameHeaders. | `object` | No | - | - |
+| [`setHeaders`](#kind-apigatewaydeployment-spec-specification-routes-requestpolicies-headertransformations-setheaders) | ApiGatewayDeploymentSpecificationRouteRequestPoliciesHeaderTransformationsSetHeaders defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.HeaderTransformations.SetHeaders. | `object` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-routes-requestpolicies-headertransformations-filterheaders"></a>
+###### Spec.specification.routes[].requestPolicies.headerTransformations.filterHeaders
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesHeaderTransformationsFilterHeaders defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.HeaderTransformations.FilterHeaders.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`items`](#kind-apigatewaydeployment-spec-specification-routes-requestpolicies-headertransformations-filterheaders-items) | The list of headers. | `list[object]` | Yes | - | - |
+| `type` | BLOCK drops any headers that are in the list of items, so it acts as an exclusion list. ALLOW permits only the headers in the list and removes all others, so it acts as an inclusion list. | `string` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-routes-requestpolicies-headertransformations-filterheaders-items"></a>
+###### Spec.specification.routes[].requestPolicies.headerTransformations.filterHeaders.items[]
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesHeaderTransformationsFilterHeadersItem defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.HeaderTransformations.FilterHeaders.Item.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `name` | The case-insensitive name of the header. This name must be unique across transformation policies. | `string` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-routes-requestpolicies-headertransformations-renameheaders"></a>
+###### Spec.specification.routes[].requestPolicies.headerTransformations.renameHeaders
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesHeaderTransformationsRenameHeaders defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.HeaderTransformations.RenameHeaders.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`items`](#kind-apigatewaydeployment-spec-specification-routes-requestpolicies-headertransformations-renameheaders-items) | The list of headers. | `list[object]` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-routes-requestpolicies-headertransformations-renameheaders-items"></a>
+###### Spec.specification.routes[].requestPolicies.headerTransformations.renameHeaders.items[]
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesHeaderTransformationsRenameHeadersItem defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.HeaderTransformations.RenameHeaders.Item.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `from` | The original case-insensitive name of the header. This name must be unique across transformation policies. | `string` | Yes | - | - |
+| `to` | The new name of the header. This name must be unique across transformation policies. | `string` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-routes-requestpolicies-headertransformations-setheaders"></a>
+###### Spec.specification.routes[].requestPolicies.headerTransformations.setHeaders
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesHeaderTransformationsSetHeaders defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.HeaderTransformations.SetHeaders.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`items`](#kind-apigatewaydeployment-spec-specification-routes-requestpolicies-headertransformations-setheaders-items) | The list of headers. | `list[object]` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-routes-requestpolicies-headertransformations-setheaders-items"></a>
+###### Spec.specification.routes[].requestPolicies.headerTransformations.setHeaders.items[]
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesHeaderTransformationsSetHeadersItem defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.HeaderTransformations.SetHeaders.Item.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `ifExists` | If a header with the same name already exists in the request, OVERWRITE will overwrite the value, APPEND will append to the existing value, or SKIP will keep the existing value. | `string` | No | - | - |
+| `name` | The case-insensitive name of the header. This name must be unique across transformation policies. | `string` | Yes | - | - |
+| `values` | A list of new values. Each value can be a constant or may include one or more expressions enclosed within ${} delimiters. | `list[string]` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-routes-requestpolicies-headervalidations"></a>
+###### Spec.specification.routes[].requestPolicies.headerValidations
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesHeaderValidations defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.HeaderValidations.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`headers`](#kind-apigatewaydeployment-spec-specification-routes-requestpolicies-headervalidations-headers) | The List of Headers | `list[object]` | No | - | - |
+| `validationMode` | Validation behavior mode. In `ENFORCING` mode, upon a validation failure, the request will be rejected with a 4xx response and not sent to the backend. In `PERMISSIVE` mode, the result of the validation will be exposed as metrics while the request will follow the normal path. `DISABLED` type turns the validation off. | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-routes-requestpolicies-headervalidations-headers"></a>
+###### Spec.specification.routes[].requestPolicies.headerValidations.headers[]
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesHeaderValidationsHeader defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.HeaderValidations.Header.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `name` | Parameter name. | `string` | Yes | - | - |
+| `required` | Determines if the header is required in the request. | `boolean` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-routes-requestpolicies-queryparametertransformations"></a>
+###### Spec.specification.routes[].requestPolicies.queryParameterTransformations
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesQueryParameterTransformations defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.QueryParameterTransformations.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`filterQueryParameters`](#kind-apigatewaydeployment-spec-specification-routes-requestpolicies-queryparametertransformations-filterqueryparameters) | ApiGatewayDeploymentSpecificationRouteRequestPoliciesQueryParameterTransformationsFilterQueryParameters defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.QueryParameterTransformations.FilterQueryParameters. | `object` | No | - | - |
+| [`renameQueryParameters`](#kind-apigatewaydeployment-spec-specification-routes-requestpolicies-queryparametertransformations-renamequeryparameters) | ApiGatewayDeploymentSpecificationRouteRequestPoliciesQueryParameterTransformationsRenameQueryParameters defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.QueryParameterTransformations.RenameQueryParameters. | `object` | No | - | - |
+| [`setQueryParameters`](#kind-apigatewaydeployment-spec-specification-routes-requestpolicies-queryparametertransformations-setqueryparameters) | ApiGatewayDeploymentSpecificationRouteRequestPoliciesQueryParameterTransformationsSetQueryParameters defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.QueryParameterTransformations.SetQueryParameters. | `object` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-routes-requestpolicies-queryparametertransformations-filterqueryparameters"></a>
+###### Spec.specification.routes[].requestPolicies.queryParameterTransformations.filterQueryParameters
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesQueryParameterTransformationsFilterQueryParameters defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.QueryParameterTransformations.FilterQueryParameters.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`items`](#kind-apigatewaydeployment-spec-specification-routes-requestpolicies-queryparametertransformations-filterqueryparameters-items) | The list of query parameters. | `list[object]` | Yes | - | - |
+| `type` | BLOCK drops any query parameters that are in the list of items, so it acts as an exclusion list. ALLOW permits only the parameters in the list and removes all others, so it acts as an inclusion list. | `string` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-routes-requestpolicies-queryparametertransformations-filterqueryparameters-items"></a>
+###### Spec.specification.routes[].requestPolicies.queryParameterTransformations.filterQueryParameters.items[]
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesQueryParameterTransformationsFilterQueryParametersItem defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.QueryParameterTransformations.FilterQueryParameters.Item.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `name` | The case-sensitive name of the query parameter. | `string` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-routes-requestpolicies-queryparametertransformations-renamequeryparameters"></a>
+###### Spec.specification.routes[].requestPolicies.queryParameterTransformations.renameQueryParameters
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesQueryParameterTransformationsRenameQueryParameters defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.QueryParameterTransformations.RenameQueryParameters.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`items`](#kind-apigatewaydeployment-spec-specification-routes-requestpolicies-queryparametertransformations-renamequeryparameters-items) | The list of query parameters. | `list[object]` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-routes-requestpolicies-queryparametertransformations-renamequeryparameters-items"></a>
+###### Spec.specification.routes[].requestPolicies.queryParameterTransformations.renameQueryParameters.items[]
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesQueryParameterTransformationsRenameQueryParametersItem defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.QueryParameterTransformations.RenameQueryParameters.Item.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `from` | The original case-sensitive name of the query parameter. This name must be unique across transformation policies. | `string` | Yes | - | - |
+| `to` | The new name of the query parameter. This name must be unique across transformation policies. | `string` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-routes-requestpolicies-queryparametertransformations-setqueryparameters"></a>
+###### Spec.specification.routes[].requestPolicies.queryParameterTransformations.setQueryParameters
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesQueryParameterTransformationsSetQueryParameters defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.QueryParameterTransformations.SetQueryParameters.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`items`](#kind-apigatewaydeployment-spec-specification-routes-requestpolicies-queryparametertransformations-setqueryparameters-items) | The list of query parameters. | `list[object]` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-routes-requestpolicies-queryparametertransformations-setqueryparameters-items"></a>
+###### Spec.specification.routes[].requestPolicies.queryParameterTransformations.setQueryParameters.items[]
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesQueryParameterTransformationsSetQueryParametersItem defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.QueryParameterTransformations.SetQueryParameters.Item.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `ifExists` | If a query parameter with the same name already exists in the request, OVERWRITE will overwrite the value, APPEND will append to the existing value, or SKIP will keep the existing value. | `string` | No | - | - |
+| `name` | The case-sensitive name of the query parameter. This name must be unique across transformation policies. | `string` | Yes | - | - |
+| `values` | A list of new values. Each value can be a constant or may include one or more expressions enclosed within ${} delimiters. | `list[string]` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-routes-requestpolicies-queryparametervalidations"></a>
+###### Spec.specification.routes[].requestPolicies.queryParameterValidations
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesQueryParameterValidations defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.QueryParameterValidations.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`parameters`](#kind-apigatewaydeployment-spec-specification-routes-requestpolicies-queryparametervalidations-parameters) | The List of Query Parameters | `list[object]` | No | - | - |
+| `validationMode` | Validation behavior mode. In `ENFORCING` mode, upon a validation failure, the request will be rejected with a 4xx response and not sent to the backend. In `PERMISSIVE` mode, the result of the validation will be exposed as metrics while the request will follow the normal path. `DISABLED` type turns the validation off. | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-routes-requestpolicies-queryparametervalidations-parameters"></a>
+###### Spec.specification.routes[].requestPolicies.queryParameterValidations.parameters[]
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesQueryParameterValidationsParameter defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.QueryParameterValidations.Parameter.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `name` | Parameter name. | `string` | Yes | - | - |
+| `required` | Determines if the parameter is required in the request. | `boolean` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-routes-requestpolicies-responsecachelookup"></a>
+###### Spec.specification.routes[].requestPolicies.responseCacheLookup
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesResponseCacheLookup defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.ResponseCacheLookup.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `cacheKeyAdditions` | A list of context expressions whose values will be added to the base cache key. Values should contain an expression enclosed within ${} delimiters. Only the request context is available. | `list[string]` | No | - | - |
+| `isEnabled` | Whether this policy is currently enabled. | `boolean` | No | - | - |
+| `isPrivateCachingEnabled` | Set true to allow caching responses where the request has an Authorization header. Ensure you have configured your cache key additions to get the level of isolation across authenticated requests that you require. When false, any request with an Authorization header will not be stored in the Response Cache. If using the CustomAuthenticationPolicy then the tokenHeader/tokenQueryParam are also subject to this check. | `boolean` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `type` | - | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-routes-responsepolicies"></a>
+###### Spec.specification.routes[].responsePolicies
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteResponsePolicies defines nested fields for ApiGatewayDeployment.Specification.Route.ResponsePolicies.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`headerTransformations`](#kind-apigatewaydeployment-spec-specification-routes-responsepolicies-headertransformations) | ApiGatewayDeploymentSpecificationRouteResponsePoliciesHeaderTransformations defines nested fields for ApiGatewayDeployment.Specification.Route.ResponsePolicies.HeaderTransformations. | `object` | No | - | - |
+| [`responseCacheStore`](#kind-apigatewaydeployment-spec-specification-routes-responsepolicies-responsecachestore) | ApiGatewayDeploymentSpecificationRouteResponsePoliciesResponseCacheStore defines nested fields for ApiGatewayDeployment.Specification.Route.ResponsePolicies.ResponseCacheStore. | `object` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-routes-responsepolicies-headertransformations"></a>
+###### Spec.specification.routes[].responsePolicies.headerTransformations
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteResponsePoliciesHeaderTransformations defines nested fields for ApiGatewayDeployment.Specification.Route.ResponsePolicies.HeaderTransformations.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`filterHeaders`](#kind-apigatewaydeployment-spec-specification-routes-responsepolicies-headertransformations-filterheaders) | ApiGatewayDeploymentSpecificationRouteResponsePoliciesHeaderTransformationsFilterHeaders defines nested fields for ApiGatewayDeployment.Specification.Route.ResponsePolicies.HeaderTransformations.FilterHeaders. | `object` | No | - | - |
+| [`renameHeaders`](#kind-apigatewaydeployment-spec-specification-routes-responsepolicies-headertransformations-renameheaders) | ApiGatewayDeploymentSpecificationRouteResponsePoliciesHeaderTransformationsRenameHeaders defines nested fields for ApiGatewayDeployment.Specification.Route.ResponsePolicies.HeaderTransformations.RenameHeaders. | `object` | No | - | - |
+| [`setHeaders`](#kind-apigatewaydeployment-spec-specification-routes-responsepolicies-headertransformations-setheaders) | ApiGatewayDeploymentSpecificationRouteResponsePoliciesHeaderTransformationsSetHeaders defines nested fields for ApiGatewayDeployment.Specification.Route.ResponsePolicies.HeaderTransformations.SetHeaders. | `object` | No | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-routes-responsepolicies-headertransformations-filterheaders"></a>
+###### Spec.specification.routes[].responsePolicies.headerTransformations.filterHeaders
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteResponsePoliciesHeaderTransformationsFilterHeaders defines nested fields for ApiGatewayDeployment.Specification.Route.ResponsePolicies.HeaderTransformations.FilterHeaders.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`items`](#kind-apigatewaydeployment-spec-specification-routes-responsepolicies-headertransformations-filterheaders-items) | The list of headers. | `list[object]` | Yes | - | - |
+| `type` | BLOCK drops any headers that are in the list of items, so it acts as an exclusion list. ALLOW permits only the headers in the list and removes all others, so it acts as an inclusion list. | `string` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-routes-responsepolicies-headertransformations-filterheaders-items"></a>
+###### Spec.specification.routes[].responsePolicies.headerTransformations.filterHeaders.items[]
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteResponsePoliciesHeaderTransformationsFilterHeadersItem defines nested fields for ApiGatewayDeployment.Specification.Route.ResponsePolicies.HeaderTransformations.FilterHeaders.Item.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `name` | The case-insensitive name of the header. This name must be unique across transformation policies. | `string` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-routes-responsepolicies-headertransformations-renameheaders"></a>
+###### Spec.specification.routes[].responsePolicies.headerTransformations.renameHeaders
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteResponsePoliciesHeaderTransformationsRenameHeaders defines nested fields for ApiGatewayDeployment.Specification.Route.ResponsePolicies.HeaderTransformations.RenameHeaders.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`items`](#kind-apigatewaydeployment-spec-specification-routes-responsepolicies-headertransformations-renameheaders-items) | The list of headers. | `list[object]` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-routes-responsepolicies-headertransformations-renameheaders-items"></a>
+###### Spec.specification.routes[].responsePolicies.headerTransformations.renameHeaders.items[]
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteResponsePoliciesHeaderTransformationsRenameHeadersItem defines nested fields for ApiGatewayDeployment.Specification.Route.ResponsePolicies.HeaderTransformations.RenameHeaders.Item.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `from` | The original case-insensitive name of the header. This name must be unique across transformation policies. | `string` | Yes | - | - |
+| `to` | The new name of the header. This name must be unique across transformation policies. | `string` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-routes-responsepolicies-headertransformations-setheaders"></a>
+###### Spec.specification.routes[].responsePolicies.headerTransformations.setHeaders
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteResponsePoliciesHeaderTransformationsSetHeaders defines nested fields for ApiGatewayDeployment.Specification.Route.ResponsePolicies.HeaderTransformations.SetHeaders.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`items`](#kind-apigatewaydeployment-spec-specification-routes-responsepolicies-headertransformations-setheaders-items) | The list of headers. | `list[object]` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-routes-responsepolicies-headertransformations-setheaders-items"></a>
+###### Spec.specification.routes[].responsePolicies.headerTransformations.setHeaders.items[]
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteResponsePoliciesHeaderTransformationsSetHeadersItem defines nested fields for ApiGatewayDeployment.Specification.Route.ResponsePolicies.HeaderTransformations.SetHeaders.Item.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `ifExists` | If a header with the same name already exists in the request, OVERWRITE will overwrite the value, APPEND will append to the existing value, or SKIP will keep the existing value. | `string` | No | - | - |
+| `name` | The case-insensitive name of the header. This name must be unique across transformation policies. | `string` | Yes | - | - |
+| `values` | A list of new values. Each value can be a constant or may include one or more expressions enclosed within ${} delimiters. | `list[string]` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-spec-specification-routes-responsepolicies-responsecachestore"></a>
+###### Spec.specification.routes[].responsePolicies.responseCacheStore
+
+[Back to ApiGatewayDeployment spec](#kind-apigatewaydeployment-spec)
+
+ApiGatewayDeploymentSpecificationRouteResponsePoliciesResponseCacheStore defines nested fields for ApiGatewayDeployment.Specification.Route.ResponsePolicies.ResponseCacheStore.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `jsonData` | - | `string` | No | - | - |
+| `timeToLiveInSeconds` | Sets the number of seconds for a response from a backend being stored in the Response Cache before it expires. | `integer` | No | - | - |
+| `type` | - | `string` | No | - | - |
 
 <a id="kind-apigatewaydeployment-status"></a>
 ### Status
@@ -181,7 +2220,1348 @@ ApiGatewayDeploymentStatus defines the observed state of ApiGatewayDeployment.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| `compartmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment in which the resource is created. | `string` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `displayName` | A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information. Example: `My new resource` | `string` | No | - | - |
+| `endpoint` | The endpoint to access this deployment on the gateway. | `string` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `gatewayId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the resource. | `string` | No | - | - |
+| `id` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the resource. | `string` | No | - | - |
+| `lifecycleDetails` | A message describing the current state in more detail. For example, can be used to provide actionable information for a resource in a Failed state. | `string` | No | - | - |
+| `lifecycleState` | The current state of the deployment. | `string` | No | - | - |
+| [`locks`](#kind-apigatewaydeployment-status-locks) | Locks associated with this resource. | `list[object]` | No | - | - |
+| `pathPrefix` | A path on which to deploy all routes contained in the API deployment specification. For more information, see Deploying an API on an API Gateway by Creating an API Deployment (https://docs.oracle.com/iaas/Content/APIGateway/Tasks/apigatewaycreatingdeployment.htm). | `string` | No | - | - |
+| [`specification`](#kind-apigatewaydeployment-status-specification) | ApiGatewayDeploymentSpecification defines nested fields for ApiGatewayDeployment.Specification. | `object` | No | - | - |
 | [`status`](#kind-apigatewaydeployment-status-status) | - | `object` | Yes | - | - |
+| `systemTags` | System tags for this resource. Each key is predefined and scoped to a namespace. Example: `{"orcl-cloud": {"free-tier-retained": "true"}}` | `map[string, map[string, string]]` | No | - | - |
+| `timeCreated` | The time this resource was created. An RFC3339 formatted datetime string. | `string` | No | - | - |
+| `timeUpdated` | The time this resource was last updated. An RFC3339 formatted datetime string. | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-locks"></a>
+#### Status.locks[]
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentLock defines nested fields for ApiGatewayDeployment.Lock.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `message` | A message added by the creator of the lock. This is typically used to give an indication of why the resource is locked. | `string` | No | - | - |
+| `type` | Type of the lock. | `string` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification"></a>
+#### Status.specification
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecification defines nested fields for ApiGatewayDeployment.Specification.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`loggingPolicies`](#kind-apigatewaydeployment-status-specification-loggingpolicies) | ApiGatewayDeploymentSpecificationLoggingPolicies defines nested fields for ApiGatewayDeployment.Specification.LoggingPolicies. | `object` | No | - | - |
+| [`requestPolicies`](#kind-apigatewaydeployment-status-specification-requestpolicies) | ApiGatewayDeploymentSpecificationRequestPolicies defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies. | `object` | No | - | - |
+| [`routes`](#kind-apigatewaydeployment-status-specification-routes) | A list of routes that this API exposes. | `list[object]` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-loggingpolicies"></a>
+##### Status.specification.loggingPolicies
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationLoggingPolicies defines nested fields for ApiGatewayDeployment.Specification.LoggingPolicies.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`accessLog`](#kind-apigatewaydeployment-status-specification-loggingpolicies-accesslog) | ApiGatewayDeploymentSpecificationLoggingPoliciesAccessLog defines nested fields for ApiGatewayDeployment.Specification.LoggingPolicies.AccessLog. | `object` | No | - | - |
+| [`executionLog`](#kind-apigatewaydeployment-status-specification-loggingpolicies-executionlog) | ApiGatewayDeploymentSpecificationLoggingPoliciesExecutionLog defines nested fields for ApiGatewayDeployment.Specification.LoggingPolicies.ExecutionLog. | `object` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-loggingpolicies-accesslog"></a>
+###### Status.specification.loggingPolicies.accessLog
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationLoggingPoliciesAccessLog defines nested fields for ApiGatewayDeployment.Specification.LoggingPolicies.AccessLog.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `isEnabled` | Enables pushing of access logs to the legacy OCI Object Storage log archival bucket. Oracle recommends using the OCI Logging service to enable, retrieve, and query access logs for an API Deployment. If there is an active log object for the API Deployment and its category is set to 'access' in OCI Logging service, the logs will not be uploaded to the legacy OCI Object Storage log archival bucket. Please note that the functionality to push to the legacy OCI Object Storage log archival bucket has been deprecated and will be removed in the future. | `boolean` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-loggingpolicies-executionlog"></a>
+###### Status.specification.loggingPolicies.executionLog
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationLoggingPoliciesExecutionLog defines nested fields for ApiGatewayDeployment.Specification.LoggingPolicies.ExecutionLog.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `isEnabled` | Enables pushing of execution logs to the legacy OCI Object Storage log archival bucket. Oracle recommends using the OCI Logging service to enable, retrieve, and query execution logs for an API Deployment. If there is an active log object for the API Deployment and its category is set to 'execution' in OCI Logging service, the logs will not be uploaded to the legacy OCI Object Storage log archival bucket. Please note that the functionality to push to the legacy OCI Object Storage log archival bucket has been deprecated and will be removed in the future. | `boolean` | No | - | - |
+| `logLevel` | Specifies the log level used to control logging output of execution logs. Enabling logging at a given level also enables logging at all higher levels. | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-requestpolicies"></a>
+##### Status.specification.requestPolicies
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRequestPolicies defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`authentication`](#kind-apigatewaydeployment-status-specification-requestpolicies-authentication) | ApiGatewayDeploymentSpecificationRequestPoliciesAuthentication defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication. | `object` | No | - | - |
+| [`cors`](#kind-apigatewaydeployment-status-specification-requestpolicies-cors) | ApiGatewayDeploymentSpecificationRequestPoliciesCors defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Cors. | `object` | No | - | - |
+| [`dynamicAuthentication`](#kind-apigatewaydeployment-status-specification-requestpolicies-dynamicauthentication) | ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthentication defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication. | `object` | No | - | - |
+| [`mutualTls`](#kind-apigatewaydeployment-status-specification-requestpolicies-mutualtls) | ApiGatewayDeploymentSpecificationRequestPoliciesMutualTls defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.MutualTls. | `object` | No | - | - |
+| [`rateLimiting`](#kind-apigatewaydeployment-status-specification-requestpolicies-ratelimiting) | ApiGatewayDeploymentSpecificationRequestPoliciesRateLimiting defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.RateLimiting. | `object` | No | - | - |
+| [`usagePlans`](#kind-apigatewaydeployment-status-specification-requestpolicies-usageplans) | ApiGatewayDeploymentSpecificationRequestPoliciesUsagePlans defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.UsagePlans. | `object` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-requestpolicies-authentication"></a>
+###### Status.specification.requestPolicies.authentication
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesAuthentication defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `audiences` | The list of intended recipients for the token. | `list[string]` | No | - | - |
+| `cacheKey` | A list of keys from "parameters" attribute value whose values will be added to the cache key. | `list[string]` | No | - | - |
+| `functionId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Oracle Functions function resource. | `string` | No | - | - |
+| `isAnonymousAccessAllowed` | Whether an unauthenticated user may access the API. Must be "true" to enable ANONYMOUS route authorization. | `boolean` | No | - | - |
+| `issuers` | A list of parties that could have issued the token. | `list[string]` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `maxClockSkewInSeconds` | The maximum expected time difference between the system clocks of the token issuer and the API Gateway. | `number` | No | - | - |
+| `parameters` | A map where key is a user defined string and value is a context expressions whose values will be sent to the custom auth function. Values should contain an expression. Example: `{"foo": "request.header[abc]"}` | `map[string, string]` | No | - | - |
+| [`publicKeys`](#kind-apigatewaydeployment-status-specification-requestpolicies-authentication-publickeys) | ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationPublicKeys defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.PublicKeys. | `object` | No | - | - |
+| `tokenAuthScheme` | The authentication scheme that is to be used when authenticating the token. This must to be provided if "tokenHeader" is specified. | `string` | No | - | - |
+| `tokenHeader` | The name of the header containing the authentication token. | `string` | No | - | - |
+| `tokenQueryParam` | The name of the query parameter containing the authentication token. | `string` | No | - | - |
+| `type` | - | `string` | No | - | - |
+| [`validationFailurePolicy`](#kind-apigatewaydeployment-status-specification-requestpolicies-authentication-validationfailurepolicy) | ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationFailurePolicy defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationFailurePolicy. | `object` | No | - | - |
+| [`validationPolicy`](#kind-apigatewaydeployment-status-specification-requestpolicies-authentication-validationpolicy) | ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationPolicy defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationPolicy. | `object` | No | - | - |
+| [`verifyClaims`](#kind-apigatewaydeployment-status-specification-requestpolicies-authentication-verifyclaims) | A list of claims which should be validated to consider the token valid. | `list[object]` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-requestpolicies-authentication-publickeys"></a>
+###### Status.specification.requestPolicies.authentication.publicKeys
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationPublicKeys defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.PublicKeys.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `isSslVerifyDisabled` | Defines whether or not to uphold SSL verification. | `boolean` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| [`keys`](#kind-apigatewaydeployment-status-specification-requestpolicies-authentication-publickeys-keys) | The set of static public keys. | `list[object]` | No | - | - |
+| `maxCacheDurationInHours` | The duration for which the JWKS should be cached before it is fetched again. | `integer` | No | - | - |
+| `type` | - | `string` | No | - | - |
+| `uri` | The uri from which to retrieve the key. It must be accessible without authentication. | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-requestpolicies-authentication-publickeys-keys"></a>
+###### Status.specification.requestPolicies.authentication.publicKeys.keys[]
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationPublicKeysKey defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.PublicKeys.Key.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `alg` | The algorithm intended for use with this key. | `string` | No | - | - |
+| `e` | The base64 url encoded exponent of the RSA public key represented by this key. | `string` | No | - | - |
+| `format` | - | `string` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `key` | The content of the PEM-encoded public key. | `string` | No | - | - |
+| `key_ops` | The operations for which this key is to be used. | `list[string]` | No | - | - |
+| `kid` | A unique key ID. This key will be used to verify the signature of a JWT with matching "kid". | `string` | Yes | - | - |
+| `kty` | The key type. | `string` | No | - | - |
+| `n` | The base64 url encoded modulus of the RSA public key represented by this key. | `string` | No | - | - |
+| `use` | The intended use of the public key. | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-requestpolicies-authentication-validationfailurepolicy"></a>
+###### Status.specification.requestPolicies.authentication.validationFailurePolicy
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationFailurePolicy defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationFailurePolicy.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`clientDetails`](#kind-apigatewaydeployment-status-specification-requestpolicies-authentication-validationfailurepolicy-clientdetails) | ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationFailurePolicyClientDetails defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationFailurePolicy.ClientDetails. | `object` | No | - | - |
+| `fallbackRedirectPath` | The path to be used as fallback after OAuth2. | `string` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `logoutPath` | The path to be used as logout. | `string` | No | - | - |
+| `maxExpiryDurationInHours` | The duration for which the OAuth2 success token should be cached before it is fetched again. | `integer` | No | - | - |
+| `responseCode` | HTTP response code, can include context variables. | `string` | No | - | - |
+| [`responseHeaderTransformations`](#kind-apigatewaydeployment-status-specification-requestpolicies-authentication-validationfailurepolicy-responseheadertransformations) | ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationFailurePolicyResponseHeaderTransformations defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationFailurePolicy.ResponseHeaderTransformations. | `object` | No | - | - |
+| `responseMessage` | HTTP response message. | `string` | No | - | - |
+| `responseType` | Response Type. | `string` | No | - | - |
+| `scopes` | List of scopes. | `list[string]` | No | - | - |
+| [`sourceUriDetails`](#kind-apigatewaydeployment-status-specification-requestpolicies-authentication-validationfailurepolicy-sourceuridetails) | ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationFailurePolicySourceUriDetails defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationFailurePolicy.SourceUriDetails. | `object` | No | - | - |
+| `type` | - | `string` | No | - | - |
+| `useCookiesForIntermediateSteps` | Defines whether or not to use cookies for OAuth2 intermediate steps. | `boolean` | No | - | - |
+| `useCookiesForSession` | Defines whether or not to use cookies for session maintenance. | `boolean` | No | - | - |
+| `usePkce` | Defines whether or not to support PKCE. | `boolean` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-requestpolicies-authentication-validationfailurepolicy-clientdetails"></a>
+###### Status.specification.requestPolicies.authentication.validationFailurePolicy.clientDetails
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationFailurePolicyClientDetails defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationFailurePolicy.ClientDetails.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `clientId` | Client ID for the OAuth2/OIDC app. | `string` | No | - | - |
+| `clientSecretId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Oracle Vault Service secret resource. | `string` | No | - | - |
+| `clientSecretVersionNumber` | The version number of the client secret to use. | `integer (int64)` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `type` | - | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-requestpolicies-authentication-validationfailurepolicy-responseheadertransformations"></a>
+###### Status.specification.requestPolicies.authentication.validationFailurePolicy.responseHeaderTransformations
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationFailurePolicyResponseHeaderTransformations defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationFailurePolicy.ResponseHeaderTransformations.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`filterHeaders`](#kind-apigatewaydeployment-status-specification-requestpolicies-authentication-validationfailurepolicy-responseheadertransformations-filterheaders) | ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationFailurePolicyResponseHeaderTransformationsFilterHeaders defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationFailurePolicy.ResponseHeaderTransformations.FilterHeaders. | `object` | No | - | - |
+| [`renameHeaders`](#kind-apigatewaydeployment-status-specification-requestpolicies-authentication-validationfailurepolicy-responseheadertransformations-renameheaders) | ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationFailurePolicyResponseHeaderTransformationsRenameHeaders defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationFailurePolicy.ResponseHeaderTransformations.RenameHeaders. | `object` | No | - | - |
+| [`setHeaders`](#kind-apigatewaydeployment-status-specification-requestpolicies-authentication-validationfailurepolicy-responseheadertransformations-setheaders) | ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationFailurePolicyResponseHeaderTransformationsSetHeaders defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationFailurePolicy.ResponseHeaderTransformations.SetHeaders. | `object` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-requestpolicies-authentication-validationfailurepolicy-responseheadertransformations-filterheaders"></a>
+###### Status.specification.requestPolicies.authentication.validationFailurePolicy.responseHeaderTransformations.filterHeaders
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationFailurePolicyResponseHeaderTransformationsFilterHeaders defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationFailurePolicy.ResponseHeaderTransformations.FilterHeaders.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`items`](#kind-apigatewaydeployment-status-specification-requestpolicies-authentication-validationfailurepolicy-responseheadertransformations-filterheaders-items) | The list of headers. | `list[object]` | Yes | - | - |
+| `type` | BLOCK drops any headers that are in the list of items, so it acts as an exclusion list. ALLOW permits only the headers in the list and removes all others, so it acts as an inclusion list. | `string` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-requestpolicies-authentication-validationfailurepolicy-responseheadertransformations-filterheaders-items"></a>
+###### Status.specification.requestPolicies.authentication.validationFailurePolicy.responseHeaderTransformations.filterHeaders.items[]
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationFailurePolicyResponseHeaderTransformationsFilterHeadersItem defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationFailurePolicy.ResponseHeaderTransformations.FilterHeaders.Item.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `name` | The case-insensitive name of the header. This name must be unique across transformation policies. | `string` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-requestpolicies-authentication-validationfailurepolicy-responseheadertransformations-renameheaders"></a>
+###### Status.specification.requestPolicies.authentication.validationFailurePolicy.responseHeaderTransformations.renameHeaders
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationFailurePolicyResponseHeaderTransformationsRenameHeaders defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationFailurePolicy.ResponseHeaderTransformations.RenameHeaders.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`items`](#kind-apigatewaydeployment-status-specification-requestpolicies-authentication-validationfailurepolicy-responseheadertransformations-renameheaders-items) | The list of headers. | `list[object]` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-requestpolicies-authentication-validationfailurepolicy-responseheadertransformations-renameheaders-items"></a>
+###### Status.specification.requestPolicies.authentication.validationFailurePolicy.responseHeaderTransformations.renameHeaders.items[]
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationFailurePolicyResponseHeaderTransformationsRenameHeadersItem defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationFailurePolicy.ResponseHeaderTransformations.RenameHeaders.Item.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `from` | The original case-insensitive name of the header. This name must be unique across transformation policies. | `string` | Yes | - | - |
+| `to` | The new name of the header. This name must be unique across transformation policies. | `string` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-requestpolicies-authentication-validationfailurepolicy-responseheadertransformations-setheaders"></a>
+###### Status.specification.requestPolicies.authentication.validationFailurePolicy.responseHeaderTransformations.setHeaders
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationFailurePolicyResponseHeaderTransformationsSetHeaders defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationFailurePolicy.ResponseHeaderTransformations.SetHeaders.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`items`](#kind-apigatewaydeployment-status-specification-requestpolicies-authentication-validationfailurepolicy-responseheadertransformations-setheaders-items) | The list of headers. | `list[object]` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-requestpolicies-authentication-validationfailurepolicy-responseheadertransformations-setheaders-items"></a>
+###### Status.specification.requestPolicies.authentication.validationFailurePolicy.responseHeaderTransformations.setHeaders.items[]
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationFailurePolicyResponseHeaderTransformationsSetHeadersItem defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationFailurePolicy.ResponseHeaderTransformations.SetHeaders.Item.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `ifExists` | If a header with the same name already exists in the request, OVERWRITE will overwrite the value, APPEND will append to the existing value, or SKIP will keep the existing value. | `string` | No | - | - |
+| `name` | The case-insensitive name of the header. This name must be unique across transformation policies. | `string` | Yes | - | - |
+| `values` | A list of new values. Each value can be a constant or may include one or more expressions enclosed within ${} delimiters. | `list[string]` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-requestpolicies-authentication-validationfailurepolicy-sourceuridetails"></a>
+###### Status.specification.requestPolicies.authentication.validationFailurePolicy.sourceUriDetails
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationFailurePolicySourceUriDetails defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationFailurePolicy.SourceUriDetails.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `jsonData` | - | `string` | No | - | - |
+| `type` | - | `string` | No | - | - |
+| `uri` | The discovery URI for the auth server. | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-requestpolicies-authentication-validationpolicy"></a>
+###### Status.specification.requestPolicies.authentication.validationPolicy
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationPolicy defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationPolicy.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`additionalValidationPolicy`](#kind-apigatewaydeployment-status-specification-requestpolicies-authentication-validationpolicy-additionalvalidationpolicy) | ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationPolicyAdditionalValidationPolicy defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationPolicy.AdditionalValidationPolicy. | `object` | No | - | - |
+| [`clientDetails`](#kind-apigatewaydeployment-status-specification-requestpolicies-authentication-validationpolicy-clientdetails) | ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationPolicyClientDetails defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationPolicy.ClientDetails. | `object` | No | - | - |
+| `isSslVerifyDisabled` | Defines whether or not to uphold SSL verification. | `boolean` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| [`keys`](#kind-apigatewaydeployment-status-specification-requestpolicies-authentication-validationpolicy-keys) | The set of static public keys. | `list[object]` | No | - | - |
+| `maxCacheDurationInHours` | The duration for which the JWKS should be cached before it is fetched again. | `integer` | No | - | - |
+| [`sourceUriDetails`](#kind-apigatewaydeployment-status-specification-requestpolicies-authentication-validationpolicy-sourceuridetails) | ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationPolicySourceUriDetails defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationPolicy.SourceUriDetails. | `object` | No | - | - |
+| `type` | - | `string` | No | - | - |
+| `uri` | The uri from which to retrieve the key. It must be accessible without authentication. | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-requestpolicies-authentication-validationpolicy-additionalvalidationpolicy"></a>
+###### Status.specification.requestPolicies.authentication.validationPolicy.additionalValidationPolicy
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationPolicyAdditionalValidationPolicy defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationPolicy.AdditionalValidationPolicy.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `audiences` | The list of intended recipients for the token. | `list[string]` | No | - | - |
+| `issuers` | A list of parties that could have issued the token. | `list[string]` | No | - | - |
+| [`verifyClaims`](#kind-apigatewaydeployment-status-specification-requestpolicies-authentication-validationpolicy-additionalvalidationpolicy-verifyclaims) | A list of claims which should be validated to consider the token valid. | `list[object]` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-requestpolicies-authentication-validationpolicy-additionalvalidationpolicy-verifyclaims"></a>
+###### Status.specification.requestPolicies.authentication.validationPolicy.additionalValidationPolicy.verifyClaims[]
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationPolicyAdditionalValidationPolicyVerifyClaim defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationPolicy.AdditionalValidationPolicy.VerifyClaim.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `isRequired` | Whether the claim is required to be present in the JWT or not. If set to "false", the claim values will be matched only if the claim is present in the JWT. | `boolean` | No | - | - |
+| `key` | Name of the claim. | `string` | Yes | - | - |
+| `values` | The list of acceptable values for a given claim. If this value is "null" or empty and "isRequired" set to "true", then the presence of this claim in the JWT is validated. | `list[string]` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-requestpolicies-authentication-validationpolicy-clientdetails"></a>
+###### Status.specification.requestPolicies.authentication.validationPolicy.clientDetails
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationPolicyClientDetails defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationPolicy.ClientDetails.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `clientId` | Client ID for the OAuth2/OIDC app. | `string` | No | - | - |
+| `clientSecretId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Oracle Vault Service secret resource. | `string` | No | - | - |
+| `clientSecretVersionNumber` | The version number of the client secret to use. | `integer (int64)` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `type` | - | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-requestpolicies-authentication-validationpolicy-keys"></a>
+###### Status.specification.requestPolicies.authentication.validationPolicy.keys[]
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationPolicyKey defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationPolicy.Key.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `alg` | The algorithm intended for use with this key. | `string` | No | - | - |
+| `e` | The base64 url encoded exponent of the RSA public key represented by this key. | `string` | No | - | - |
+| `format` | - | `string` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `key` | The content of the PEM-encoded public key. | `string` | No | - | - |
+| `key_ops` | The operations for which this key is to be used. | `list[string]` | No | - | - |
+| `kid` | A unique key ID. This key will be used to verify the signature of a JWT with matching "kid". | `string` | Yes | - | - |
+| `kty` | The key type. | `string` | No | - | - |
+| `n` | The base64 url encoded modulus of the RSA public key represented by this key. | `string` | No | - | - |
+| `use` | The intended use of the public key. | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-requestpolicies-authentication-validationpolicy-sourceuridetails"></a>
+###### Status.specification.requestPolicies.authentication.validationPolicy.sourceUriDetails
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationValidationPolicySourceUriDetails defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.ValidationPolicy.SourceUriDetails.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `jsonData` | - | `string` | No | - | - |
+| `type` | - | `string` | No | - | - |
+| `uri` | The discovery URI for the auth server. | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-requestpolicies-authentication-verifyclaims"></a>
+###### Status.specification.requestPolicies.authentication.verifyClaims[]
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesAuthenticationVerifyClaim defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Authentication.VerifyClaim.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `isRequired` | Whether the claim is required to be present in the JWT or not. If set to "false", the claim values will be matched only if the claim is present in the JWT. | `boolean` | No | - | - |
+| `key` | Name of the claim. | `string` | Yes | - | - |
+| `values` | The list of acceptable values for a given claim. If this value is "null" or empty and "isRequired" set to "true", then the presence of this claim in the JWT is validated. | `list[string]` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-requestpolicies-cors"></a>
+###### Status.specification.requestPolicies.cors
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesCors defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.Cors.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `allowedHeaders` | The list of headers that will be allowed from the client via the Access-Control-Allow-Headers header. '*' will allow all headers. | `list[string]` | No | - | - |
+| `allowedMethods` | The list of allowed HTTP methods that will be returned for the preflight OPTIONS request in the Access-Control-Allow-Methods header. '*' will allow all methods. | `list[string]` | No | - | - |
+| `allowedOrigins` | The list of allowed origins that the CORS handler will use to respond to CORS requests. The gateway will send the Access-Control-Allow-Origin header with the best origin match for the circumstances. '*' will match any origins, and 'null' will match queries from 'file:' origins. All other origins must be qualified with the scheme, full hostname, and port if necessary. | `list[string]` | Yes | - | - |
+| `exposedHeaders` | The list of headers that the client will be allowed to see from the response as indicated by the Access-Control-Expose-Headers header. '*' will expose all headers. | `list[string]` | No | - | - |
+| `isAllowCredentialsEnabled` | Whether to send the Access-Control-Allow-Credentials header to allow CORS requests with cookies. | `boolean` | No | - | - |
+| `maxAgeInSeconds` | The time in seconds for the client to cache preflight responses. This is sent as the Access-Control-Max-Age if greater than 0. | `integer` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-requestpolicies-dynamicauthentication"></a>
+###### Status.specification.requestPolicies.dynamicAuthentication
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthentication defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`authenticationServers`](#kind-apigatewaydeployment-status-specification-requestpolicies-dynamicauthentication-authenticationservers) | List of authentication servers to choose from during dynamic authentication. | `list[object]` | Yes | - | - |
+| [`selectionSource`](#kind-apigatewaydeployment-status-specification-requestpolicies-dynamicauthentication-selectionsource) | ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationSelectionSource defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.SelectionSource. | `object` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-requestpolicies-dynamicauthentication-authenticationservers"></a>
+###### Status.specification.requestPolicies.dynamicAuthentication.authenticationServers[]
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServer defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`authenticationServerDetail`](#kind-apigatewaydeployment-status-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail) | ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetail defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail. | `object` | Yes | - | - |
+| [`key`](#kind-apigatewaydeployment-status-specification-requestpolicies-dynamicauthentication-authenticationservers-key) | ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerKey defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.Key. | `object` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail"></a>
+###### Status.specification.requestPolicies.dynamicAuthentication.authenticationServers[].authenticationServerDetail
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetail defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `audiences` | The list of intended recipients for the token. | `list[string]` | No | - | - |
+| `cacheKey` | A list of keys from "parameters" attribute value whose values will be added to the cache key. | `list[string]` | No | - | - |
+| `functionId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Oracle Functions function resource. | `string` | No | - | - |
+| `isAnonymousAccessAllowed` | Whether an unauthenticated user may access the API. Must be "true" to enable ANONYMOUS route authorization. | `boolean` | No | - | - |
+| `issuers` | A list of parties that could have issued the token. | `list[string]` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `maxClockSkewInSeconds` | The maximum expected time difference between the system clocks of the token issuer and the API Gateway. | `number` | No | - | - |
+| `parameters` | A map where key is a user defined string and value is a context expressions whose values will be sent to the custom auth function. Values should contain an expression. Example: `{"foo": "request.header[abc]"}` | `map[string, string]` | No | - | - |
+| [`publicKeys`](#kind-apigatewaydeployment-status-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-publickeys) | ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailPublicKeys defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.PublicKeys. | `object` | No | - | - |
+| `tokenAuthScheme` | The authentication scheme that is to be used when authenticating the token. This must to be provided if "tokenHeader" is specified. | `string` | No | - | - |
+| `tokenHeader` | The name of the header containing the authentication token. | `string` | No | - | - |
+| `tokenQueryParam` | The name of the query parameter containing the authentication token. | `string` | No | - | - |
+| `type` | - | `string` | No | - | - |
+| [`validationFailurePolicy`](#kind-apigatewaydeployment-status-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationfailurepolicy) | ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationFailurePolicy defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationFailurePolicy. | `object` | No | - | - |
+| [`validationPolicy`](#kind-apigatewaydeployment-status-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationpolicy) | ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationPolicy defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationPolicy. | `object` | No | - | - |
+| [`verifyClaims`](#kind-apigatewaydeployment-status-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-verifyclaims) | A list of claims which should be validated to consider the token valid. | `list[object]` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-publickeys"></a>
+###### Status.specification.requestPolicies.dynamicAuthentication.authenticationServers[].authenticationServerDetail.publicKeys
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailPublicKeys defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.PublicKeys.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `isSslVerifyDisabled` | Defines whether or not to uphold SSL verification. | `boolean` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| [`keys`](#kind-apigatewaydeployment-status-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-publickeys-keys) | The set of static public keys. | `list[object]` | No | - | - |
+| `maxCacheDurationInHours` | The duration for which the JWKS should be cached before it is fetched again. | `integer` | No | - | - |
+| `type` | - | `string` | No | - | - |
+| `uri` | The uri from which to retrieve the key. It must be accessible without authentication. | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-publickeys-keys"></a>
+###### Status.specification.requestPolicies.dynamicAuthentication.authenticationServers[].authenticationServerDetail.publicKeys.keys[]
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailPublicKeysKey defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.PublicKeys.Key.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `alg` | The algorithm intended for use with this key. | `string` | No | - | - |
+| `e` | The base64 url encoded exponent of the RSA public key represented by this key. | `string` | No | - | - |
+| `format` | - | `string` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `key` | The content of the PEM-encoded public key. | `string` | No | - | - |
+| `key_ops` | The operations for which this key is to be used. | `list[string]` | No | - | - |
+| `kid` | A unique key ID. This key will be used to verify the signature of a JWT with matching "kid". | `string` | Yes | - | - |
+| `kty` | The key type. | `string` | No | - | - |
+| `n` | The base64 url encoded modulus of the RSA public key represented by this key. | `string` | No | - | - |
+| `use` | The intended use of the public key. | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationfailurepolicy"></a>
+###### Status.specification.requestPolicies.dynamicAuthentication.authenticationServers[].authenticationServerDetail.validationFailurePolicy
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationFailurePolicy defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationFailurePolicy.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`clientDetails`](#kind-apigatewaydeployment-status-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationfailurepolicy-clientdetails) | ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationFailurePolicyClientDetails defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationFailurePolicy.ClientDetails. | `object` | No | - | - |
+| `fallbackRedirectPath` | The path to be used as fallback after OAuth2. | `string` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `logoutPath` | The path to be used as logout. | `string` | No | - | - |
+| `maxExpiryDurationInHours` | The duration for which the OAuth2 success token should be cached before it is fetched again. | `integer` | No | - | - |
+| `responseCode` | HTTP response code, can include context variables. | `string` | No | - | - |
+| [`responseHeaderTransformations`](#kind-apigatewaydeployment-status-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationfailurepolicy-responseheadertransformations) | ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationFailurePolicyResponseHeaderTransformations defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationFailurePolicy.ResponseHeaderTransformations. | `object` | No | - | - |
+| `responseMessage` | HTTP response message. | `string` | No | - | - |
+| `responseType` | Response Type. | `string` | No | - | - |
+| `scopes` | List of scopes. | `list[string]` | No | - | - |
+| [`sourceUriDetails`](#kind-apigatewaydeployment-status-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationfailurepolicy-sourceuridetails) | ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationFailurePolicySourceUriDetails defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationFailurePolicy.SourceUriDetails. | `object` | No | - | - |
+| `type` | - | `string` | No | - | - |
+| `useCookiesForIntermediateSteps` | Defines whether or not to use cookies for OAuth2 intermediate steps. | `boolean` | No | - | - |
+| `useCookiesForSession` | Defines whether or not to use cookies for session maintenance. | `boolean` | No | - | - |
+| `usePkce` | Defines whether or not to support PKCE. | `boolean` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationfailurepolicy-clientdetails"></a>
+###### Status.specification.requestPolicies.dynamicAuthentication.authenticationServers[].authenticationServerDetail.validationFailurePolicy.clientDetails
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationFailurePolicyClientDetails defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationFailurePolicy.ClientDetails.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `clientId` | Client ID for the OAuth2/OIDC app. | `string` | No | - | - |
+| `clientSecretId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Oracle Vault Service secret resource. | `string` | No | - | - |
+| `clientSecretVersionNumber` | The version number of the client secret to use. | `integer (int64)` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `type` | - | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationfailurepolicy-responseheadertransformations"></a>
+###### Status.specification.requestPolicies.dynamicAuthentication.authenticationServers[].authenticationServerDetail.validationFailurePolicy.responseHeaderTransformations
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationFailurePolicyResponseHeaderTransformations defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationFailurePolicy.ResponseHeaderTransformations.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`filterHeaders`](#kind-apigatewaydeployment-status-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationfailurepolicy-responseheadertransformations-filterheaders) | ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationFailurePolicyResponseHeaderTransformationsFilterHeaders defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationFailurePolicy.ResponseHeaderTransformations.FilterHeaders. | `object` | No | - | - |
+| [`renameHeaders`](#kind-apigatewaydeployment-status-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationfailurepolicy-responseheadertransformations-renameheaders) | ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationFailurePolicyResponseHeaderTransformationsRenameHeaders defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationFailurePolicy.ResponseHeaderTransformations.RenameHeaders. | `object` | No | - | - |
+| [`setHeaders`](#kind-apigatewaydeployment-status-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationfailurepolicy-responseheadertransformations-setheaders) | ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationFailurePolicyResponseHeaderTransformationsSetHeaders defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationFailurePolicy.ResponseHeaderTransformations.SetHeaders. | `object` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationfailurepolicy-responseheadertransformations-filterheaders"></a>
+###### Status.specification.requestPolicies.dynamicAuthentication.authenticationServers[].authenticationServerDetail.validationFailurePolicy.responseHeaderTransformations.filterHeaders
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationFailurePolicyResponseHeaderTransformationsFilterHeaders defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationFailurePolicy.ResponseHeaderTransformations.FilterHeaders.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`items`](#kind-apigatewaydeployment-status-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationfailurepolicy-responseheadertransformations-filterheaders-items) | The list of headers. | `list[object]` | Yes | - | - |
+| `type` | BLOCK drops any headers that are in the list of items, so it acts as an exclusion list. ALLOW permits only the headers in the list and removes all others, so it acts as an inclusion list. | `string` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationfailurepolicy-responseheadertransformations-filterheaders-items"></a>
+###### Status.specification.requestPolicies.dynamicAuthentication.authenticationServers[].authenticationServerDetail.validationFailurePolicy.responseHeaderTransformations.filterHeaders.items[]
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationFailurePolicyResponseHeaderTransformationsFilterHeadersItem defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationFailurePolicy.ResponseHeaderTransformations.FilterHeaders.Item.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `name` | The case-insensitive name of the header. This name must be unique across transformation policies. | `string` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationfailurepolicy-responseheadertransformations-renameheaders"></a>
+###### Status.specification.requestPolicies.dynamicAuthentication.authenticationServers[].authenticationServerDetail.validationFailurePolicy.responseHeaderTransformations.renameHeaders
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationFailurePolicyResponseHeaderTransformationsRenameHeaders defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationFailurePolicy.ResponseHeaderTransformations.RenameHeaders.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`items`](#kind-apigatewaydeployment-status-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationfailurepolicy-responseheadertransformations-renameheaders-items) | The list of headers. | `list[object]` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationfailurepolicy-responseheadertransformations-renameheaders-items"></a>
+###### Status.specification.requestPolicies.dynamicAuthentication.authenticationServers[].authenticationServerDetail.validationFailurePolicy.responseHeaderTransformations.renameHeaders.items[]
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationFailurePolicyResponseHeaderTransformationsRenameHeadersItem defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationFailurePolicy.ResponseHeaderTransformations.RenameHeaders.Item.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `from` | The original case-insensitive name of the header. This name must be unique across transformation policies. | `string` | Yes | - | - |
+| `to` | The new name of the header. This name must be unique across transformation policies. | `string` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationfailurepolicy-responseheadertransformations-setheaders"></a>
+###### Status.specification.requestPolicies.dynamicAuthentication.authenticationServers[].authenticationServerDetail.validationFailurePolicy.responseHeaderTransformations.setHeaders
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationFailurePolicyResponseHeaderTransformationsSetHeaders defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationFailurePolicy.ResponseHeaderTransformations.SetHeaders.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`items`](#kind-apigatewaydeployment-status-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationfailurepolicy-responseheadertransformations-setheaders-items) | The list of headers. | `list[object]` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationfailurepolicy-responseheadertransformations-setheaders-items"></a>
+###### Status.specification.requestPolicies.dynamicAuthentication.authenticationServers[].authenticationServerDetail.validationFailurePolicy.responseHeaderTransformations.setHeaders.items[]
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationFailurePolicyResponseHeaderTransformationsSetHeadersItem defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationFailurePolicy.ResponseHeaderTransformations.SetHeaders.Item.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `ifExists` | If a header with the same name already exists in the request, OVERWRITE will overwrite the value, APPEND will append to the existing value, or SKIP will keep the existing value. | `string` | No | - | - |
+| `name` | The case-insensitive name of the header. This name must be unique across transformation policies. | `string` | Yes | - | - |
+| `values` | A list of new values. Each value can be a constant or may include one or more expressions enclosed within ${} delimiters. | `list[string]` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationfailurepolicy-sourceuridetails"></a>
+###### Status.specification.requestPolicies.dynamicAuthentication.authenticationServers[].authenticationServerDetail.validationFailurePolicy.sourceUriDetails
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationFailurePolicySourceUriDetails defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationFailurePolicy.SourceUriDetails.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `jsonData` | - | `string` | No | - | - |
+| `type` | - | `string` | No | - | - |
+| `uri` | The discovery URI for the auth server. | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationpolicy"></a>
+###### Status.specification.requestPolicies.dynamicAuthentication.authenticationServers[].authenticationServerDetail.validationPolicy
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationPolicy defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationPolicy.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`additionalValidationPolicy`](#kind-apigatewaydeployment-status-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationpolicy-additionalvalidationpolicy) | ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationPolicyAdditionalValidationPolicy defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationPolicy.AdditionalValidationPolicy. | `object` | No | - | - |
+| [`clientDetails`](#kind-apigatewaydeployment-status-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationpolicy-clientdetails) | ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationPolicyClientDetails defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationPolicy.ClientDetails. | `object` | No | - | - |
+| `isSslVerifyDisabled` | Defines whether or not to uphold SSL verification. | `boolean` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| [`keys`](#kind-apigatewaydeployment-status-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationpolicy-keys) | The set of static public keys. | `list[object]` | No | - | - |
+| `maxCacheDurationInHours` | The duration for which the JWKS should be cached before it is fetched again. | `integer` | No | - | - |
+| [`sourceUriDetails`](#kind-apigatewaydeployment-status-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationpolicy-sourceuridetails) | ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationPolicySourceUriDetails defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationPolicy.SourceUriDetails. | `object` | No | - | - |
+| `type` | - | `string` | No | - | - |
+| `uri` | The uri from which to retrieve the key. It must be accessible without authentication. | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationpolicy-additionalvalidationpolicy"></a>
+###### Status.specification.requestPolicies.dynamicAuthentication.authenticationServers[].authenticationServerDetail.validationPolicy.additionalValidationPolicy
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationPolicyAdditionalValidationPolicy defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationPolicy.AdditionalValidationPolicy.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `audiences` | The list of intended recipients for the token. | `list[string]` | No | - | - |
+| `issuers` | A list of parties that could have issued the token. | `list[string]` | No | - | - |
+| [`verifyClaims`](#kind-apigatewaydeployment-status-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationpolicy-additionalvalidationpolicy-verifyclaims) | A list of claims which should be validated to consider the token valid. | `list[object]` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationpolicy-additionalvalidationpolicy-verifyclaims"></a>
+###### Status.specification.requestPolicies.dynamicAuthentication.authenticationServers[].authenticationServerDetail.validationPolicy.additionalValidationPolicy.verifyClaims[]
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationPolicyAdditionalValidationPolicyVerifyClaim defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationPolicy.AdditionalValidationPolicy.VerifyClaim.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `isRequired` | Whether the claim is required to be present in the JWT or not. If set to "false", the claim values will be matched only if the claim is present in the JWT. | `boolean` | No | - | - |
+| `key` | Name of the claim. | `string` | Yes | - | - |
+| `values` | The list of acceptable values for a given claim. If this value is "null" or empty and "isRequired" set to "true", then the presence of this claim in the JWT is validated. | `list[string]` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationpolicy-clientdetails"></a>
+###### Status.specification.requestPolicies.dynamicAuthentication.authenticationServers[].authenticationServerDetail.validationPolicy.clientDetails
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationPolicyClientDetails defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationPolicy.ClientDetails.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `clientId` | Client ID for the OAuth2/OIDC app. | `string` | No | - | - |
+| `clientSecretId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Oracle Vault Service secret resource. | `string` | No | - | - |
+| `clientSecretVersionNumber` | The version number of the client secret to use. | `integer (int64)` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `type` | - | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationpolicy-keys"></a>
+###### Status.specification.requestPolicies.dynamicAuthentication.authenticationServers[].authenticationServerDetail.validationPolicy.keys[]
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationPolicyKey defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationPolicy.Key.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `alg` | The algorithm intended for use with this key. | `string` | No | - | - |
+| `e` | The base64 url encoded exponent of the RSA public key represented by this key. | `string` | No | - | - |
+| `format` | - | `string` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `key` | The content of the PEM-encoded public key. | `string` | No | - | - |
+| `key_ops` | The operations for which this key is to be used. | `list[string]` | No | - | - |
+| `kid` | A unique key ID. This key will be used to verify the signature of a JWT with matching "kid". | `string` | Yes | - | - |
+| `kty` | The key type. | `string` | No | - | - |
+| `n` | The base64 url encoded modulus of the RSA public key represented by this key. | `string` | No | - | - |
+| `use` | The intended use of the public key. | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-validationpolicy-sourceuridetails"></a>
+###### Status.specification.requestPolicies.dynamicAuthentication.authenticationServers[].authenticationServerDetail.validationPolicy.sourceUriDetails
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailValidationPolicySourceUriDetails defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.ValidationPolicy.SourceUriDetails.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `jsonData` | - | `string` | No | - | - |
+| `type` | - | `string` | No | - | - |
+| `uri` | The discovery URI for the auth server. | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-requestpolicies-dynamicauthentication-authenticationservers-authenticationserverdetail-verifyclaims"></a>
+###### Status.specification.requestPolicies.dynamicAuthentication.authenticationServers[].authenticationServerDetail.verifyClaims[]
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerAuthenticationServerDetailVerifyClaim defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.AuthenticationServerDetail.VerifyClaim.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `isRequired` | Whether the claim is required to be present in the JWT or not. If set to "false", the claim values will be matched only if the claim is present in the JWT. | `boolean` | No | - | - |
+| `key` | Name of the claim. | `string` | Yes | - | - |
+| `values` | The list of acceptable values for a given claim. If this value is "null" or empty and "isRequired" set to "true", then the presence of this claim in the JWT is validated. | `list[string]` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-requestpolicies-dynamicauthentication-authenticationservers-key"></a>
+###### Status.specification.requestPolicies.dynamicAuthentication.authenticationServers[].key
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationAuthenticationServerKey defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.AuthenticationServer.Key.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `expression` | A selection key string containing a wildcard to match with the context variable in an incoming request. If the context variable matches the string, the request is sent to the route or authentication server associated with the selection key. Valid wildcards are '*' (zero or more characters) and '+' (one or more characters). The string can only contain one wildcard, and the wildcard must be at the start or the end of the string. | `string` | No | - | - |
+| `isDefault` | Specifies whether to use the route or authentication server associated with this selection key as the default. The default is used if the value of a context variable in an incoming request does not match any of the other selection key values when dynamically routing and dynamically authenticating requests. | `boolean` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `name` | Name assigned to the branch. | `string` | Yes | - | - |
+| `type` | - | `string` | No | - | - |
+| `values` | The set of selection keys to match with the context variable in an incoming request. If the context variable exactly matches one of the keys in the set, the request is sent to the route or authentication server associated with the set. | `list[string]` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-requestpolicies-dynamicauthentication-selectionsource"></a>
+###### Status.specification.requestPolicies.dynamicAuthentication.selectionSource
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesDynamicAuthenticationSelectionSource defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.DynamicAuthentication.SelectionSource.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `jsonData` | - | `string` | No | - | - |
+| `selector` | String describing the context variable used as selector. | `string` | No | - | - |
+| `type` | - | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-requestpolicies-mutualtls"></a>
+###### Status.specification.requestPolicies.mutualTls
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesMutualTls defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.MutualTls.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `allowedSans` | Allowed list of CN or SAN which will be used for verification of certificate. | `list[string]` | No | - | - |
+| `isVerifiedCertificateRequired` | Determines whether to enable client verification when API Consumer makes connection to the gateway. | `boolean` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-requestpolicies-ratelimiting"></a>
+###### Status.specification.requestPolicies.rateLimiting
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesRateLimiting defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.RateLimiting.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `rateInRequestsPerSecond` | The maximum number of requests per second to allow. | `integer` | Yes | - | - |
+| `rateKey` | The key used to group requests together. | `string` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-requestpolicies-usageplans"></a>
+###### Status.specification.requestPolicies.usagePlans
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRequestPoliciesUsagePlans defines nested fields for ApiGatewayDeployment.Specification.RequestPolicies.UsagePlans.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `tokenLocations` | A list of context variables specifying where API tokens may be located in a request. Example locations: - "request.headers[token]" - "request.query[token]" - "request.auth[Token]" - "request.path[TOKEN]" | `list[string]` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-routes"></a>
+##### Status.specification.routes[]
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRoute defines nested fields for ApiGatewayDeployment.Specification.Route.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`backend`](#kind-apigatewaydeployment-status-specification-routes-backend) | ApiGatewayDeploymentSpecificationRouteBackend defines nested fields for ApiGatewayDeployment.Specification.Route.Backend. | `object` | Yes | - | - |
+| [`loggingPolicies`](#kind-apigatewaydeployment-status-specification-routes-loggingpolicies) | ApiGatewayDeploymentSpecificationRouteLoggingPolicies defines nested fields for ApiGatewayDeployment.Specification.Route.LoggingPolicies. | `object` | No | - | - |
+| `methods` | A list of allowed methods on this route. | `list[string]` | No | - | - |
+| `path` | A URL path pattern that must be matched on this route. The path pattern may contain a subset of RFC 6570 identifiers to allow wildcard and parameterized matching. | `string` | Yes | - | - |
+| [`requestPolicies`](#kind-apigatewaydeployment-status-specification-routes-requestpolicies) | ApiGatewayDeploymentSpecificationRouteRequestPolicies defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies. | `object` | No | - | - |
+| [`responsePolicies`](#kind-apigatewaydeployment-status-specification-routes-responsepolicies) | ApiGatewayDeploymentSpecificationRouteResponsePolicies defines nested fields for ApiGatewayDeployment.Specification.Route.ResponsePolicies. | `object` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-routes-backend"></a>
+###### Status.specification.routes[].backend
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRouteBackend defines nested fields for ApiGatewayDeployment.Specification.Route.Backend.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `allowedPostLogoutUris` | A list of allowed post-logout URLs to which a request can be redirected after revoke access | `list[string]` | No | - | - |
+| `body` | The body of the stock response from the mock backend. | `string` | No | - | - |
+| `connectTimeoutInSeconds` | Defines a timeout for establishing a connection with a proxied server. | `number` | No | - | - |
+| `functionId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Oracle Functions function resource. | `string` | No | - | - |
+| [`headers`](#kind-apigatewaydeployment-status-specification-routes-backend-headers) | The headers of the stock response from the mock backend. | `list[object]` | No | - | - |
+| `isSslVerifyDisabled` | Defines whether or not to uphold SSL verification. | `boolean` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `postLogoutState` | Defines a state that should be shared on redirecting to postLogout URL. | `string` | No | - | - |
+| `readTimeoutInSeconds` | Defines a timeout for reading a response from the proxied server. | `number` | No | - | - |
+| [`routingBackends`](#kind-apigatewaydeployment-status-specification-routes-backend-routingbackends) | List of backends to chose from for Dynamic Routing. | `list[object]` | No | - | - |
+| [`selectionSource`](#kind-apigatewaydeployment-status-specification-routes-backend-selectionsource) | ApiGatewayDeploymentSpecificationRouteBackendSelectionSource defines nested fields for ApiGatewayDeployment.Specification.Route.Backend.SelectionSource. | `object` | No | - | - |
+| `sendTimeoutInSeconds` | Defines a timeout for transmitting a request to the proxied server. | `number` | No | - | - |
+| `status` | The status code of the stock response from the mock backend. | `integer` | No | - | - |
+| `type` | - | `string` | No | - | - |
+| `url` | The url of the HTTP Backend | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-routes-backend-headers"></a>
+###### Status.specification.routes[].backend.headers[]
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRouteBackendHeader defines nested fields for ApiGatewayDeployment.Specification.Route.Backend.Header.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `name` | Name of the header. | `string` | No | - | - |
+| `value` | Value of the header. | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-routes-backend-routingbackends"></a>
+###### Status.specification.routes[].backend.routingBackends[]
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRouteBackendRoutingBackend defines nested fields for ApiGatewayDeployment.Specification.Route.Backend.RoutingBackend.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `backend` | JSONValue preserves arbitrary JSON values inside generated CRD fields. Unknown nested fields are preserved. | `object (preserves unknown fields)` | Yes | - | - |
+| [`key`](#kind-apigatewaydeployment-status-specification-routes-backend-routingbackends-key) | ApiGatewayDeploymentSpecificationRouteBackendRoutingBackendKey defines nested fields for ApiGatewayDeployment.Specification.Route.Backend.RoutingBackend.Key. | `object` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-routes-backend-routingbackends-key"></a>
+###### Status.specification.routes[].backend.routingBackends[].key
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRouteBackendRoutingBackendKey defines nested fields for ApiGatewayDeployment.Specification.Route.Backend.RoutingBackend.Key.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `expression` | A selection key string containing a wildcard to match with the context variable in an incoming request. If the context variable matches the string, the request is sent to the route or authentication server associated with the selection key. Valid wildcards are '*' (zero or more characters) and '+' (one or more characters). The string can only contain one wildcard, and the wildcard must be at the start or the end of the string. | `string` | No | - | - |
+| `isDefault` | Specifies whether to use the route or authentication server associated with this selection key as the default. The default is used if the value of a context variable in an incoming request does not match any of the other selection key values when dynamically routing and dynamically authenticating requests. | `boolean` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `name` | Name assigned to the branch. | `string` | Yes | - | - |
+| `type` | - | `string` | No | - | - |
+| `values` | The set of selection keys to match with the context variable in an incoming request. If the context variable exactly matches one of the keys in the set, the request is sent to the route or authentication server associated with the set. | `list[string]` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-routes-backend-selectionsource"></a>
+###### Status.specification.routes[].backend.selectionSource
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRouteBackendSelectionSource defines nested fields for ApiGatewayDeployment.Specification.Route.Backend.SelectionSource.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `jsonData` | - | `string` | No | - | - |
+| `selector` | String describing the context variable used as selector. | `string` | No | - | - |
+| `type` | - | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-routes-loggingpolicies"></a>
+###### Status.specification.routes[].loggingPolicies
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRouteLoggingPolicies defines nested fields for ApiGatewayDeployment.Specification.Route.LoggingPolicies.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`accessLog`](#kind-apigatewaydeployment-status-specification-routes-loggingpolicies-accesslog) | ApiGatewayDeploymentSpecificationRouteLoggingPoliciesAccessLog defines nested fields for ApiGatewayDeployment.Specification.Route.LoggingPolicies.AccessLog. | `object` | No | - | - |
+| [`executionLog`](#kind-apigatewaydeployment-status-specification-routes-loggingpolicies-executionlog) | ApiGatewayDeploymentSpecificationRouteLoggingPoliciesExecutionLog defines nested fields for ApiGatewayDeployment.Specification.Route.LoggingPolicies.ExecutionLog. | `object` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-routes-loggingpolicies-accesslog"></a>
+###### Status.specification.routes[].loggingPolicies.accessLog
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRouteLoggingPoliciesAccessLog defines nested fields for ApiGatewayDeployment.Specification.Route.LoggingPolicies.AccessLog.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `isEnabled` | Enables pushing of access logs to the legacy OCI Object Storage log archival bucket. Oracle recommends using the OCI Logging service to enable, retrieve, and query access logs for an API Deployment. If there is an active log object for the API Deployment and its category is set to 'access' in OCI Logging service, the logs will not be uploaded to the legacy OCI Object Storage log archival bucket. Please note that the functionality to push to the legacy OCI Object Storage log archival bucket has been deprecated and will be removed in the future. | `boolean` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-routes-loggingpolicies-executionlog"></a>
+###### Status.specification.routes[].loggingPolicies.executionLog
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRouteLoggingPoliciesExecutionLog defines nested fields for ApiGatewayDeployment.Specification.Route.LoggingPolicies.ExecutionLog.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `isEnabled` | Enables pushing of execution logs to the legacy OCI Object Storage log archival bucket. Oracle recommends using the OCI Logging service to enable, retrieve, and query execution logs for an API Deployment. If there is an active log object for the API Deployment and its category is set to 'execution' in OCI Logging service, the logs will not be uploaded to the legacy OCI Object Storage log archival bucket. Please note that the functionality to push to the legacy OCI Object Storage log archival bucket has been deprecated and will be removed in the future. | `boolean` | No | - | - |
+| `logLevel` | Specifies the log level used to control logging output of execution logs. Enabling logging at a given level also enables logging at all higher levels. | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-routes-requestpolicies"></a>
+###### Status.specification.routes[].requestPolicies
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRouteRequestPolicies defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`authorization`](#kind-apigatewaydeployment-status-specification-routes-requestpolicies-authorization) | ApiGatewayDeploymentSpecificationRouteRequestPoliciesAuthorization defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.Authorization. | `object` | No | - | - |
+| [`bodyValidation`](#kind-apigatewaydeployment-status-specification-routes-requestpolicies-bodyvalidation) | ApiGatewayDeploymentSpecificationRouteRequestPoliciesBodyValidation defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.BodyValidation. | `object` | No | - | - |
+| [`cors`](#kind-apigatewaydeployment-status-specification-routes-requestpolicies-cors) | ApiGatewayDeploymentSpecificationRouteRequestPoliciesCors defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.Cors. | `object` | No | - | - |
+| [`headerTransformations`](#kind-apigatewaydeployment-status-specification-routes-requestpolicies-headertransformations) | ApiGatewayDeploymentSpecificationRouteRequestPoliciesHeaderTransformations defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.HeaderTransformations. | `object` | No | - | - |
+| [`headerValidations`](#kind-apigatewaydeployment-status-specification-routes-requestpolicies-headervalidations) | ApiGatewayDeploymentSpecificationRouteRequestPoliciesHeaderValidations defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.HeaderValidations. | `object` | No | - | - |
+| [`queryParameterTransformations`](#kind-apigatewaydeployment-status-specification-routes-requestpolicies-queryparametertransformations) | ApiGatewayDeploymentSpecificationRouteRequestPoliciesQueryParameterTransformations defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.QueryParameterTransformations. | `object` | No | - | - |
+| [`queryParameterValidations`](#kind-apigatewaydeployment-status-specification-routes-requestpolicies-queryparametervalidations) | ApiGatewayDeploymentSpecificationRouteRequestPoliciesQueryParameterValidations defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.QueryParameterValidations. | `object` | No | - | - |
+| [`responseCacheLookup`](#kind-apigatewaydeployment-status-specification-routes-requestpolicies-responsecachelookup) | ApiGatewayDeploymentSpecificationRouteRequestPoliciesResponseCacheLookup defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.ResponseCacheLookup. | `object` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-routes-requestpolicies-authorization"></a>
+###### Status.specification.routes[].requestPolicies.authorization
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesAuthorization defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.Authorization.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `allowedScope` | A user whose scope includes any of these access ranges is allowed on this route. Access ranges are case-sensitive. | `list[string]` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `type` | - | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-routes-requestpolicies-bodyvalidation"></a>
+###### Status.specification.routes[].requestPolicies.bodyValidation
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesBodyValidation defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.BodyValidation.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`content`](#kind-apigatewaydeployment-status-specification-routes-requestpolicies-bodyvalidation-content) | The content of the request body. The key is a media type range (https://tools.ietf.org/html/rfc7231#appendix-D) subset restricted to the following schema key ::= ( / ( "*" "/" "*" ) / ( type "/" "*" ) / ( type "/" subtype ) ) For requests that match multiple keys, only the most specific key is applicable. e.g. `text/plain` overrides `text/*` | `map[string, object]` | Yes | - | - |
+| `required` | Determines if the request body is required in the request. | `boolean` | No | - | - |
+| `validationMode` | Validation behavior mode. In `ENFORCING` mode, upon a validation failure, the request will be rejected with a 4xx response and not sent to the backend. In `PERMISSIVE` mode, the result of the validation will be exposed as metrics while the request will follow the normal path. `DISABLED` type turns the validation off. | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-routes-requestpolicies-bodyvalidation-content"></a>
+###### Status.specification.routes[].requestPolicies.bodyValidation.content{}
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesBodyValidationContent defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.BodyValidation.Content.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `jsonData` | - | `string` | No | - | - |
+| `validationType` | - | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-routes-requestpolicies-cors"></a>
+###### Status.specification.routes[].requestPolicies.cors
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesCors defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.Cors.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `allowedHeaders` | The list of headers that will be allowed from the client via the Access-Control-Allow-Headers header. '*' will allow all headers. | `list[string]` | No | - | - |
+| `allowedMethods` | The list of allowed HTTP methods that will be returned for the preflight OPTIONS request in the Access-Control-Allow-Methods header. '*' will allow all methods. | `list[string]` | No | - | - |
+| `allowedOrigins` | The list of allowed origins that the CORS handler will use to respond to CORS requests. The gateway will send the Access-Control-Allow-Origin header with the best origin match for the circumstances. '*' will match any origins, and 'null' will match queries from 'file:' origins. All other origins must be qualified with the scheme, full hostname, and port if necessary. | `list[string]` | Yes | - | - |
+| `exposedHeaders` | The list of headers that the client will be allowed to see from the response as indicated by the Access-Control-Expose-Headers header. '*' will expose all headers. | `list[string]` | No | - | - |
+| `isAllowCredentialsEnabled` | Whether to send the Access-Control-Allow-Credentials header to allow CORS requests with cookies. | `boolean` | No | - | - |
+| `maxAgeInSeconds` | The time in seconds for the client to cache preflight responses. This is sent as the Access-Control-Max-Age if greater than 0. | `integer` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-routes-requestpolicies-headertransformations"></a>
+###### Status.specification.routes[].requestPolicies.headerTransformations
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesHeaderTransformations defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.HeaderTransformations.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`filterHeaders`](#kind-apigatewaydeployment-status-specification-routes-requestpolicies-headertransformations-filterheaders) | ApiGatewayDeploymentSpecificationRouteRequestPoliciesHeaderTransformationsFilterHeaders defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.HeaderTransformations.FilterHeaders. | `object` | No | - | - |
+| [`renameHeaders`](#kind-apigatewaydeployment-status-specification-routes-requestpolicies-headertransformations-renameheaders) | ApiGatewayDeploymentSpecificationRouteRequestPoliciesHeaderTransformationsRenameHeaders defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.HeaderTransformations.RenameHeaders. | `object` | No | - | - |
+| [`setHeaders`](#kind-apigatewaydeployment-status-specification-routes-requestpolicies-headertransformations-setheaders) | ApiGatewayDeploymentSpecificationRouteRequestPoliciesHeaderTransformationsSetHeaders defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.HeaderTransformations.SetHeaders. | `object` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-routes-requestpolicies-headertransformations-filterheaders"></a>
+###### Status.specification.routes[].requestPolicies.headerTransformations.filterHeaders
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesHeaderTransformationsFilterHeaders defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.HeaderTransformations.FilterHeaders.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`items`](#kind-apigatewaydeployment-status-specification-routes-requestpolicies-headertransformations-filterheaders-items) | The list of headers. | `list[object]` | Yes | - | - |
+| `type` | BLOCK drops any headers that are in the list of items, so it acts as an exclusion list. ALLOW permits only the headers in the list and removes all others, so it acts as an inclusion list. | `string` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-routes-requestpolicies-headertransformations-filterheaders-items"></a>
+###### Status.specification.routes[].requestPolicies.headerTransformations.filterHeaders.items[]
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesHeaderTransformationsFilterHeadersItem defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.HeaderTransformations.FilterHeaders.Item.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `name` | The case-insensitive name of the header. This name must be unique across transformation policies. | `string` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-routes-requestpolicies-headertransformations-renameheaders"></a>
+###### Status.specification.routes[].requestPolicies.headerTransformations.renameHeaders
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesHeaderTransformationsRenameHeaders defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.HeaderTransformations.RenameHeaders.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`items`](#kind-apigatewaydeployment-status-specification-routes-requestpolicies-headertransformations-renameheaders-items) | The list of headers. | `list[object]` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-routes-requestpolicies-headertransformations-renameheaders-items"></a>
+###### Status.specification.routes[].requestPolicies.headerTransformations.renameHeaders.items[]
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesHeaderTransformationsRenameHeadersItem defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.HeaderTransformations.RenameHeaders.Item.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `from` | The original case-insensitive name of the header. This name must be unique across transformation policies. | `string` | Yes | - | - |
+| `to` | The new name of the header. This name must be unique across transformation policies. | `string` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-routes-requestpolicies-headertransformations-setheaders"></a>
+###### Status.specification.routes[].requestPolicies.headerTransformations.setHeaders
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesHeaderTransformationsSetHeaders defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.HeaderTransformations.SetHeaders.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`items`](#kind-apigatewaydeployment-status-specification-routes-requestpolicies-headertransformations-setheaders-items) | The list of headers. | `list[object]` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-routes-requestpolicies-headertransformations-setheaders-items"></a>
+###### Status.specification.routes[].requestPolicies.headerTransformations.setHeaders.items[]
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesHeaderTransformationsSetHeadersItem defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.HeaderTransformations.SetHeaders.Item.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `ifExists` | If a header with the same name already exists in the request, OVERWRITE will overwrite the value, APPEND will append to the existing value, or SKIP will keep the existing value. | `string` | No | - | - |
+| `name` | The case-insensitive name of the header. This name must be unique across transformation policies. | `string` | Yes | - | - |
+| `values` | A list of new values. Each value can be a constant or may include one or more expressions enclosed within ${} delimiters. | `list[string]` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-routes-requestpolicies-headervalidations"></a>
+###### Status.specification.routes[].requestPolicies.headerValidations
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesHeaderValidations defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.HeaderValidations.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`headers`](#kind-apigatewaydeployment-status-specification-routes-requestpolicies-headervalidations-headers) | The List of Headers | `list[object]` | No | - | - |
+| `validationMode` | Validation behavior mode. In `ENFORCING` mode, upon a validation failure, the request will be rejected with a 4xx response and not sent to the backend. In `PERMISSIVE` mode, the result of the validation will be exposed as metrics while the request will follow the normal path. `DISABLED` type turns the validation off. | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-routes-requestpolicies-headervalidations-headers"></a>
+###### Status.specification.routes[].requestPolicies.headerValidations.headers[]
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesHeaderValidationsHeader defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.HeaderValidations.Header.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `name` | Parameter name. | `string` | Yes | - | - |
+| `required` | Determines if the header is required in the request. | `boolean` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-routes-requestpolicies-queryparametertransformations"></a>
+###### Status.specification.routes[].requestPolicies.queryParameterTransformations
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesQueryParameterTransformations defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.QueryParameterTransformations.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`filterQueryParameters`](#kind-apigatewaydeployment-status-specification-routes-requestpolicies-queryparametertransformations-filterqueryparameters) | ApiGatewayDeploymentSpecificationRouteRequestPoliciesQueryParameterTransformationsFilterQueryParameters defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.QueryParameterTransformations.FilterQueryParameters. | `object` | No | - | - |
+| [`renameQueryParameters`](#kind-apigatewaydeployment-status-specification-routes-requestpolicies-queryparametertransformations-renamequeryparameters) | ApiGatewayDeploymentSpecificationRouteRequestPoliciesQueryParameterTransformationsRenameQueryParameters defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.QueryParameterTransformations.RenameQueryParameters. | `object` | No | - | - |
+| [`setQueryParameters`](#kind-apigatewaydeployment-status-specification-routes-requestpolicies-queryparametertransformations-setqueryparameters) | ApiGatewayDeploymentSpecificationRouteRequestPoliciesQueryParameterTransformationsSetQueryParameters defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.QueryParameterTransformations.SetQueryParameters. | `object` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-routes-requestpolicies-queryparametertransformations-filterqueryparameters"></a>
+###### Status.specification.routes[].requestPolicies.queryParameterTransformations.filterQueryParameters
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesQueryParameterTransformationsFilterQueryParameters defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.QueryParameterTransformations.FilterQueryParameters.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`items`](#kind-apigatewaydeployment-status-specification-routes-requestpolicies-queryparametertransformations-filterqueryparameters-items) | The list of query parameters. | `list[object]` | Yes | - | - |
+| `type` | BLOCK drops any query parameters that are in the list of items, so it acts as an exclusion list. ALLOW permits only the parameters in the list and removes all others, so it acts as an inclusion list. | `string` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-routes-requestpolicies-queryparametertransformations-filterqueryparameters-items"></a>
+###### Status.specification.routes[].requestPolicies.queryParameterTransformations.filterQueryParameters.items[]
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesQueryParameterTransformationsFilterQueryParametersItem defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.QueryParameterTransformations.FilterQueryParameters.Item.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `name` | The case-sensitive name of the query parameter. | `string` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-routes-requestpolicies-queryparametertransformations-renamequeryparameters"></a>
+###### Status.specification.routes[].requestPolicies.queryParameterTransformations.renameQueryParameters
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesQueryParameterTransformationsRenameQueryParameters defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.QueryParameterTransformations.RenameQueryParameters.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`items`](#kind-apigatewaydeployment-status-specification-routes-requestpolicies-queryparametertransformations-renamequeryparameters-items) | The list of query parameters. | `list[object]` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-routes-requestpolicies-queryparametertransformations-renamequeryparameters-items"></a>
+###### Status.specification.routes[].requestPolicies.queryParameterTransformations.renameQueryParameters.items[]
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesQueryParameterTransformationsRenameQueryParametersItem defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.QueryParameterTransformations.RenameQueryParameters.Item.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `from` | The original case-sensitive name of the query parameter. This name must be unique across transformation policies. | `string` | Yes | - | - |
+| `to` | The new name of the query parameter. This name must be unique across transformation policies. | `string` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-routes-requestpolicies-queryparametertransformations-setqueryparameters"></a>
+###### Status.specification.routes[].requestPolicies.queryParameterTransformations.setQueryParameters
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesQueryParameterTransformationsSetQueryParameters defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.QueryParameterTransformations.SetQueryParameters.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`items`](#kind-apigatewaydeployment-status-specification-routes-requestpolicies-queryparametertransformations-setqueryparameters-items) | The list of query parameters. | `list[object]` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-routes-requestpolicies-queryparametertransformations-setqueryparameters-items"></a>
+###### Status.specification.routes[].requestPolicies.queryParameterTransformations.setQueryParameters.items[]
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesQueryParameterTransformationsSetQueryParametersItem defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.QueryParameterTransformations.SetQueryParameters.Item.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `ifExists` | If a query parameter with the same name already exists in the request, OVERWRITE will overwrite the value, APPEND will append to the existing value, or SKIP will keep the existing value. | `string` | No | - | - |
+| `name` | The case-sensitive name of the query parameter. This name must be unique across transformation policies. | `string` | Yes | - | - |
+| `values` | A list of new values. Each value can be a constant or may include one or more expressions enclosed within ${} delimiters. | `list[string]` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-routes-requestpolicies-queryparametervalidations"></a>
+###### Status.specification.routes[].requestPolicies.queryParameterValidations
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesQueryParameterValidations defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.QueryParameterValidations.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`parameters`](#kind-apigatewaydeployment-status-specification-routes-requestpolicies-queryparametervalidations-parameters) | The List of Query Parameters | `list[object]` | No | - | - |
+| `validationMode` | Validation behavior mode. In `ENFORCING` mode, upon a validation failure, the request will be rejected with a 4xx response and not sent to the backend. In `PERMISSIVE` mode, the result of the validation will be exposed as metrics while the request will follow the normal path. `DISABLED` type turns the validation off. | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-routes-requestpolicies-queryparametervalidations-parameters"></a>
+###### Status.specification.routes[].requestPolicies.queryParameterValidations.parameters[]
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesQueryParameterValidationsParameter defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.QueryParameterValidations.Parameter.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `name` | Parameter name. | `string` | Yes | - | - |
+| `required` | Determines if the parameter is required in the request. | `boolean` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-routes-requestpolicies-responsecachelookup"></a>
+###### Status.specification.routes[].requestPolicies.responseCacheLookup
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRouteRequestPoliciesResponseCacheLookup defines nested fields for ApiGatewayDeployment.Specification.Route.RequestPolicies.ResponseCacheLookup.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `cacheKeyAdditions` | A list of context expressions whose values will be added to the base cache key. Values should contain an expression enclosed within ${} delimiters. Only the request context is available. | `list[string]` | No | - | - |
+| `isEnabled` | Whether this policy is currently enabled. | `boolean` | No | - | - |
+| `isPrivateCachingEnabled` | Set true to allow caching responses where the request has an Authorization header. Ensure you have configured your cache key additions to get the level of isolation across authenticated requests that you require. When false, any request with an Authorization header will not be stored in the Response Cache. If using the CustomAuthenticationPolicy then the tokenHeader/tokenQueryParam are also subject to this check. | `boolean` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `type` | - | `string` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-routes-responsepolicies"></a>
+###### Status.specification.routes[].responsePolicies
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRouteResponsePolicies defines nested fields for ApiGatewayDeployment.Specification.Route.ResponsePolicies.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`headerTransformations`](#kind-apigatewaydeployment-status-specification-routes-responsepolicies-headertransformations) | ApiGatewayDeploymentSpecificationRouteResponsePoliciesHeaderTransformations defines nested fields for ApiGatewayDeployment.Specification.Route.ResponsePolicies.HeaderTransformations. | `object` | No | - | - |
+| [`responseCacheStore`](#kind-apigatewaydeployment-status-specification-routes-responsepolicies-responsecachestore) | ApiGatewayDeploymentSpecificationRouteResponsePoliciesResponseCacheStore defines nested fields for ApiGatewayDeployment.Specification.Route.ResponsePolicies.ResponseCacheStore. | `object` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-routes-responsepolicies-headertransformations"></a>
+###### Status.specification.routes[].responsePolicies.headerTransformations
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRouteResponsePoliciesHeaderTransformations defines nested fields for ApiGatewayDeployment.Specification.Route.ResponsePolicies.HeaderTransformations.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`filterHeaders`](#kind-apigatewaydeployment-status-specification-routes-responsepolicies-headertransformations-filterheaders) | ApiGatewayDeploymentSpecificationRouteResponsePoliciesHeaderTransformationsFilterHeaders defines nested fields for ApiGatewayDeployment.Specification.Route.ResponsePolicies.HeaderTransformations.FilterHeaders. | `object` | No | - | - |
+| [`renameHeaders`](#kind-apigatewaydeployment-status-specification-routes-responsepolicies-headertransformations-renameheaders) | ApiGatewayDeploymentSpecificationRouteResponsePoliciesHeaderTransformationsRenameHeaders defines nested fields for ApiGatewayDeployment.Specification.Route.ResponsePolicies.HeaderTransformations.RenameHeaders. | `object` | No | - | - |
+| [`setHeaders`](#kind-apigatewaydeployment-status-specification-routes-responsepolicies-headertransformations-setheaders) | ApiGatewayDeploymentSpecificationRouteResponsePoliciesHeaderTransformationsSetHeaders defines nested fields for ApiGatewayDeployment.Specification.Route.ResponsePolicies.HeaderTransformations.SetHeaders. | `object` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-routes-responsepolicies-headertransformations-filterheaders"></a>
+###### Status.specification.routes[].responsePolicies.headerTransformations.filterHeaders
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRouteResponsePoliciesHeaderTransformationsFilterHeaders defines nested fields for ApiGatewayDeployment.Specification.Route.ResponsePolicies.HeaderTransformations.FilterHeaders.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`items`](#kind-apigatewaydeployment-status-specification-routes-responsepolicies-headertransformations-filterheaders-items) | The list of headers. | `list[object]` | Yes | - | - |
+| `type` | BLOCK drops any headers that are in the list of items, so it acts as an exclusion list. ALLOW permits only the headers in the list and removes all others, so it acts as an inclusion list. | `string` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-routes-responsepolicies-headertransformations-filterheaders-items"></a>
+###### Status.specification.routes[].responsePolicies.headerTransformations.filterHeaders.items[]
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRouteResponsePoliciesHeaderTransformationsFilterHeadersItem defines nested fields for ApiGatewayDeployment.Specification.Route.ResponsePolicies.HeaderTransformations.FilterHeaders.Item.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `name` | The case-insensitive name of the header. This name must be unique across transformation policies. | `string` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-routes-responsepolicies-headertransformations-renameheaders"></a>
+###### Status.specification.routes[].responsePolicies.headerTransformations.renameHeaders
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRouteResponsePoliciesHeaderTransformationsRenameHeaders defines nested fields for ApiGatewayDeployment.Specification.Route.ResponsePolicies.HeaderTransformations.RenameHeaders.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`items`](#kind-apigatewaydeployment-status-specification-routes-responsepolicies-headertransformations-renameheaders-items) | The list of headers. | `list[object]` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-routes-responsepolicies-headertransformations-renameheaders-items"></a>
+###### Status.specification.routes[].responsePolicies.headerTransformations.renameHeaders.items[]
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRouteResponsePoliciesHeaderTransformationsRenameHeadersItem defines nested fields for ApiGatewayDeployment.Specification.Route.ResponsePolicies.HeaderTransformations.RenameHeaders.Item.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `from` | The original case-insensitive name of the header. This name must be unique across transformation policies. | `string` | Yes | - | - |
+| `to` | The new name of the header. This name must be unique across transformation policies. | `string` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-routes-responsepolicies-headertransformations-setheaders"></a>
+###### Status.specification.routes[].responsePolicies.headerTransformations.setHeaders
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRouteResponsePoliciesHeaderTransformationsSetHeaders defines nested fields for ApiGatewayDeployment.Specification.Route.ResponsePolicies.HeaderTransformations.SetHeaders.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`items`](#kind-apigatewaydeployment-status-specification-routes-responsepolicies-headertransformations-setheaders-items) | The list of headers. | `list[object]` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-routes-responsepolicies-headertransformations-setheaders-items"></a>
+###### Status.specification.routes[].responsePolicies.headerTransformations.setHeaders.items[]
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRouteResponsePoliciesHeaderTransformationsSetHeadersItem defines nested fields for ApiGatewayDeployment.Specification.Route.ResponsePolicies.HeaderTransformations.SetHeaders.Item.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `ifExists` | If a header with the same name already exists in the request, OVERWRITE will overwrite the value, APPEND will append to the existing value, or SKIP will keep the existing value. | `string` | No | - | - |
+| `name` | The case-insensitive name of the header. This name must be unique across transformation policies. | `string` | Yes | - | - |
+| `values` | A list of new values. Each value can be a constant or may include one or more expressions enclosed within ${} delimiters. | `list[string]` | Yes | - | - |
+
+<a id="kind-apigatewaydeployment-status-specification-routes-responsepolicies-responsecachestore"></a>
+###### Status.specification.routes[].responsePolicies.responseCacheStore
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+ApiGatewayDeploymentSpecificationRouteResponsePoliciesResponseCacheStore defines nested fields for ApiGatewayDeployment.Specification.Route.ResponsePolicies.ResponseCacheStore.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `jsonData` | - | `string` | No | - | - |
+| `timeToLiveInSeconds` | Sets the number of seconds for a response from a backend being stored in the Response Cache before it expires. | `integer` | No | - | - |
+| `type` | - | `string` | No | - | - |
 
 <a id="kind-apigatewaydeployment-status-status"></a>
 #### Status.status

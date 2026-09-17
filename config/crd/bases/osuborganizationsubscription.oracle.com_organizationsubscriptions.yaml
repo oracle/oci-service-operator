@@ -58,6 +58,32 @@ spec:
             description: OrganizationSubscriptionStatus defines the observed state
               of OrganizationSubscription.
             properties:
+              currency:
+                description: OrganizationSubscriptionCurrency defines nested fields
+                  for OrganizationSubscription.Currency.
+                properties:
+                  isoCode:
+                    description: Currency Code
+                    type: string
+                  name:
+                    description: Currency name
+                    type: string
+                  stdPrecision:
+                    description: Standard Precision of the Currency
+                    format: int64
+                    type: integer
+                type: object
+              id:
+                description: SPM internal Subscription ID
+                type: string
+              sdkStatus:
+                description: |-
+                  Status of the plan
+                  This uses a distinct JSON name so it can coexist with the OSOK status envelope.
+                type: string
+              serviceName:
+                description: Customer friendly service name provided by PRG
+                type: string
               status:
                 properties:
                   async:
@@ -158,6 +184,21 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              timeEnd:
+                description: Represents the date when the last service of the subscription
+                  ends
+                type: string
+              timeStart:
+                description: Represents the date when the first service of the subscription
+                  was activated
+                type: string
+              totalValue:
+                description: Total aggregate TCLV of all lines for the subscription
+                  including expired, active, and signed
+                type: string
+              type:
+                description: Subscription Type i.e. IAAS,SAAS,PAAS
+                type: string
             required:
             - status
             type: object

@@ -1,0 +1,29 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: stackmonitoring
+slug: monitoringtemplate
+kind: MonitoringTemplate
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending: ["S_CREATING"]
+    updatePending: ["S_UPDATING"]
+    deletePending: []
+  listLookup:
+    filters: ["compartmentId","displayName","id"]
+    matchRule: exact resource identity match; duplicate matches fail
+  mutation:
+    mutable: ["definedTags","description","destinations","displayName","freeformTags","isAlarmsEnabled","isSplitNotificationEnabled","members","messageFormat","repeatNotificationDuration"]
+    forceNew: ["compartmentId"]
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - "The runtime uses its declared lifecycle-state contract for MonitoringTemplate reconciliation."
+  - "The credential-free mock exercises SDK request serialization, response projection, mutation when supported, and confirmed deletion."

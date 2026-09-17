@@ -1,0 +1,178 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: goldengate
+slug: connection
+kind: Connection
+archetype: generated-service-manager
+states:
+- provisioning
+- active
+- updating
+- terminating
+repoAuthored:
+  operations:
+    create:
+    - CreateConnection
+    update:
+    - UpdateConnection
+    delete:
+    - DeleteConnection
+  providerLifecycle:
+    createPending:
+    - CREATING
+    updatePending:
+    - UPDATING
+    deletePending:
+    - DELETING
+  listLookup:
+    filters:
+    - compartmentId
+    - technologyType
+    - connectionType
+    - assignedDeploymentId
+    - assignableDeploymentId
+    - assignableDeploymentType
+    - lifecycleState
+    - displayName
+    matchRule: exact declared filters match within the resource scope; duplicate matches
+      fail
+  mutation:
+    mutable:
+    - description
+    - freeformTags
+    - definedTags
+    - vaultId
+    - keyId
+    - nsgIds
+    - subnetId
+    - routingMethod
+    - doesUseSecretIds
+    - securityAttributes
+    - displayName
+    - username
+    - password
+    - passwordSecretId
+    - securityProtocol
+    - authenticationType
+    - servers
+    - fingerprint
+    forceNew:
+    - jsonData
+    - locks
+    - subscriptionId
+    - clusterPlacementGroupId
+    - compartmentId
+    - connectionType
+    - databaseName
+    - host
+    - port
+    - additionalAttributes
+    - sslCa
+    - sslCrl
+    - sslCert
+    - sslKey
+    - sslKeySecretId
+    - privateIp
+    - dbSystemId
+    - technologyType
+    - sslMode
+    - url
+    - trustStore
+    - trustStoreSecretId
+    - trustStorePassword
+    - trustStorePasswordSecretId
+    - keyStore
+    - keyStoreSecretId
+    - keyStorePassword
+    - keyStorePasswordSecretId
+    - sslKeyPassword
+    - sslKeyPasswordSecretId
+    - shouldValidateServerCertificate
+    - accessKeyId
+    - secretAccessKey
+    - secretAccessKeySecretId
+    - endpoint
+    - region
+    - accountName
+    - accountKey
+    - accountKeySecretId
+    - sasToken
+    - sasTokenSecretId
+    - azureTenantId
+    - clientId
+    - clientSecret
+    - clientSecretSecretId
+    - azureAuthorityHost
+    - serviceAccountKeyFile
+    - serviceAccountKeyFileSecretId
+    - coreSiteXml
+    - tenancyId
+    - userId
+    - privateKeyFile
+    - privateKeyFileSecretId
+    - privateKeyPassphrase
+    - privateKeyPassphraseSecretId
+    - publicKeyFingerprint
+    - shouldUseResourcePrincipal
+    - redisClusterId
+    - tenantId
+    - streamPoolId
+    - clusterId
+    - bootstrapServers
+    - consumerProperties
+    - producerProperties
+    - shouldUseJndi
+    - jndiConnectionFactory
+    - jndiProviderUrl
+    - jndiInitialContextFactory
+    - jndiSecurityPrincipal
+    - jndiSecurityCredentials
+    - jndiSecurityCredentialsSecretId
+    - connectionUrl
+    - connectionFactory
+    - connectionString
+    - databaseId
+    - tlsCaFile
+    - tlsCertificateKeyFile
+    - tlsCertificateKeyFileSecretId
+    - tlsCertificateKeyFilePassword
+    - tlsCertificateKeyFilePasswordSecretId
+    - storageCredentialName
+    - sslClientKeystoredb
+    - sslClientKeystoredbSecretId
+    - sslClientKeystash
+    - sslClientKeystashSecretId
+    - sslServerCertificate
+    - catalog
+    - storage
+    - wallet
+    - walletSecretId
+    - authenticationMode
+    - sessionMode
+    - deploymentId
+  hooks:
+    create:
+    - helper: tfresource.CreateResource
+    - helper: tfresource.WaitForWorkRequestWithErrorHandling
+      entityType: Connection
+      action: CreateConnection
+    update:
+    - helper: tfresource.UpdateResource
+    - helper: tfresource.WaitForWorkRequestWithErrorHandling
+      entityType: Connection
+      action: UpdateConnection
+    delete:
+    - helper: tfresource.DeleteResource
+    - helper: tfresource.WaitForWorkRequestWithErrorHandling
+      entityType: Connection
+      action: DeleteConnection
+  followUp:
+    create: GetWorkRequest -> read-after-write
+    update: GetWorkRequest -> read-after-write
+    delete: GetWorkRequest -> confirm-delete
+notes:
+- The generated service manager uses the reviewed CRUD request, response, lifecycle,
+  and status projection contract.
+- Work-request phases are declared per operation from the vendored SDK response surface.
+- Secret side effects are none and finalizer ownership is retained until confirmed
+  deletion.

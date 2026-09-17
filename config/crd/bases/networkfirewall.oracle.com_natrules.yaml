@@ -90,6 +90,10 @@ spec:
               name:
                 description: Name for the NAT rule, must be unique within the policy.
                 type: string
+              networkFirewallPolicyId:
+                description: The OCID of the Network Firewall policy that owns this
+                  resource.
+                type: string
               position:
                 description: NatRulePosition defines nested fields for NatRule.Position.
                 properties:
@@ -104,6 +108,7 @@ spec:
                 type: string
             required:
             - name
+            - networkFirewallPolicyId
             type: object
           status:
             description: NatRuleStatus defines the observed state of NatRule.

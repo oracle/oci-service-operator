@@ -1,0 +1,147 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "fleetappsmanagement",
+  "slug": "catalogitem",
+  "kind": "CatalogItem",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_fleet_apps_management_catalog_item",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateCatalogItem",
+        "requestType": "fleetappsmanagement.CreateCatalogItemRequest",
+        "responseType": "fleetappsmanagement.CreateCatalogItemResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetCatalogItem",
+        "requestType": "fleetappsmanagement.GetCatalogItemRequest",
+        "responseType": "fleetappsmanagement.GetCatalogItemResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListCatalogItems",
+        "requestType": "fleetappsmanagement.ListCatalogItemsRequest",
+        "responseType": "fleetappsmanagement.ListCatalogItemsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeCatalogItemCompartment",
+        "requestType": "fleetappsmanagement.ChangeCatalogItemCompartmentRequest",
+        "responseType": "fleetappsmanagement.ChangeCatalogItemCompartmentResponse"
+      },
+      {
+        "operation": "UpdateCatalogItem",
+        "requestType": "fleetappsmanagement.UpdateCatalogItemRequest",
+        "responseType": "fleetappsmanagement.UpdateCatalogItemResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteCatalogItem",
+        "requestType": "fleetappsmanagement.DeleteCatalogItemRequest",
+        "responseType": "fleetappsmanagement.DeleteCatalogItemResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "clone_catalog_item_trigger",
+      "compartment_id",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags",
+      "short_description",
+      "version_description"
+    ],
+    "forceNew": [
+      "catalog_source_payload",
+      "catalog_source_payload.access_uri",
+      "catalog_source_payload.branch_name",
+      "catalog_source_payload.bucket",
+      "catalog_source_payload.config_source_type",
+      "catalog_source_payload.configuration_source_provider_id",
+      "catalog_source_payload.description",
+      "catalog_source_payload.listing_id",
+      "catalog_source_payload.long_description",
+      "catalog_source_payload.namespace",
+      "catalog_source_payload.object",
+      "catalog_source_payload.repository_url",
+      "catalog_source_payload.template_display_name",
+      "catalog_source_payload.time_expires",
+      "catalog_source_payload.version",
+      "catalog_source_payload.working_directory",
+      "catalog_source_payload.zip_file_base64encoded",
+      "config_source_type",
+      "listing_id",
+      "listing_version",
+      "package_type",
+      "time_released"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "update": [
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_fleet_apps_management_catalog_items",
+    "collectionField": "catalog_item_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "catalog_listing_id",
+      "catalog_listing_version_criteria",
+      "compartment_id",
+      "config_source_type",
+      "display_name",
+      "package_type",
+      "should_list_public_items",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/fleetappsmanagement/catalogitem/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/fleetappsmanagement/catalogitem/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from the pinned terraform-provider-oci source revision."
+  ]
+}

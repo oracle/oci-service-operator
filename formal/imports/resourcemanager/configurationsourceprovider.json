@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "resourcemanager",
+  "slug": "configurationsourceprovider",
+  "kind": "ConfigurationSourceProvider",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "unavailable",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateConfigurationSourceProvider",
+        "requestType": "resourcemanager.CreateConfigurationSourceProviderRequest",
+        "responseType": "resourcemanager.CreateConfigurationSourceProviderResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetConfigurationSourceProvider",
+        "requestType": "resourcemanager.GetConfigurationSourceProviderRequest",
+        "responseType": "resourcemanager.GetConfigurationSourceProviderResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListConfigurationSourceProviders",
+        "requestType": "resourcemanager.ListConfigurationSourceProvidersRequest",
+        "responseType": "resourcemanager.ListConfigurationSourceProvidersResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateConfigurationSourceProvider",
+        "requestType": "resourcemanager.UpdateConfigurationSourceProviderRequest",
+        "responseType": "resourcemanager.UpdateConfigurationSourceProviderResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteConfigurationSourceProvider",
+        "requestType": "resourcemanager.DeleteConfigurationSourceProviderRequest",
+        "responseType": "resourcemanager.DeleteConfigurationSourceProviderResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "displayName",
+      "description",
+      "privateServerConfigDetails",
+      "freeformTags",
+      "definedTags",
+      "apiEndpoint",
+      "username",
+      "secretId"
+    ],
+    "forceNew": [
+      "jsonData",
+      "compartmentId",
+      "configSourceProviderType",
+      "accessToken"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "unavailable",
+    "collectionField": "Items",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "opc-request-id",
+      "compartmentId",
+      "configurationSourceProviderId",
+      "displayName",
+      "configSourceProviderType"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/resourcemanager/configurationsourceprovider/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/resourcemanager/configurationsourceprovider/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Terraform provider formal-import could not resolve unavailable; the vendored SDK, generated runtime, and package-owned typed OCI fixtures define this reviewed contract."
+  ]
+}

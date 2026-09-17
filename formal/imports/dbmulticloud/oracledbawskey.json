@@ -1,0 +1,148 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "dbmulticloud",
+  "slug": "oracledbawskey",
+  "kind": "OracleDbAwsKey",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_dbmulticloud_oracle_db_aws_key",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOracleDbAwsKey",
+        "requestType": "dbmulticloud.CreateOracleDbAwsKeyRequest",
+        "responseType": "dbmulticloud.CreateOracleDbAwsKeyResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOracleDbAwsKey",
+        "requestType": "dbmulticloud.GetOracleDbAwsKeyRequest",
+        "responseType": "dbmulticloud.GetOracleDbAwsKeyResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOracleDbAwsKeys",
+        "requestType": "dbmulticloud.ListOracleDbAwsKeysRequest",
+        "responseType": "dbmulticloud.ListOracleDbAwsKeysResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOracleDbAwsKey",
+        "requestType": "dbmulticloud.UpdateOracleDbAwsKeyRequest",
+        "responseType": "dbmulticloud.UpdateOracleDbAwsKeyResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOracleDbAwsKey",
+        "requestType": "dbmulticloud.DeleteOracleDbAwsKeyRequest",
+        "responseType": "dbmulticloud.DeleteOracleDbAwsKeyResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "displayName",
+      "freeformTags",
+      "definedTags"
+    ],
+    "forceNew": [
+      "compartmentId",
+      "oracleDbConnectorId",
+      "awsKeyArn",
+      "awsAccountId",
+      "type",
+      "location",
+      "isAwsKeyEnabled",
+      "properties"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "OracleDbAwsKey",
+        "action": "CreateOracleDbAwsKey"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "OracleDbAwsKey",
+        "action": "UpdateOracleDbAwsKey"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "OracleDbAwsKey",
+        "action": "DeleteOracleDbAwsKey"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "unavailable",
+    "collectionField": "Items",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartmentId",
+      "displayName",
+      "oracleDbAwsKeyId",
+      "lifecycleState",
+      "oracleDbAwsConnectorId",
+      "opc-request-id"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/dbmulticloud/oracledbawskey/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/dbmulticloud/oracledbawskey/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Terraform provider formal-import could not resolve oci_dbmulticloud_oracle_db_aws_key; the vendored SDK, generated runtime, and package-owned typed OCI fixtures define this reviewed contract."
+  ]
+}

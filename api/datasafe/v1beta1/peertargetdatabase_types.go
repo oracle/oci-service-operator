@@ -26,7 +26,7 @@ type PeerTargetDatabaseSpec struct {
 	// +kubebuilder:validation:Optional
 	DataguardAssociationId string `json:"dataguardAssociationId,omitempty"`
 	// +kubebuilder:validation:Optional
-	TlsConfig PeerTargetDatabaseTlsConfig `json:"tlsConfig,omitempty"`
+	TlsConfig PeerTargetDatabaseTlsConfig `json:"tlsConfig,omitempty,omitzero"`
 }
 
 // PeerTargetDatabaseDatabaseDetails defines nested fields for PeerTargetDatabase.DatabaseDetails.

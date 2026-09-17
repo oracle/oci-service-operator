@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "targetdatabasegroup",
+  "kind": "TargetDatabaseGroup",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_target_database_group",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateTargetDatabaseGroup",
+        "requestType": "datasafe.CreateTargetDatabaseGroupRequest",
+        "responseType": "datasafe.CreateTargetDatabaseGroupResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetTargetDatabaseGroup",
+        "requestType": "datasafe.GetTargetDatabaseGroupRequest",
+        "responseType": "datasafe.GetTargetDatabaseGroupResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListTargetDatabaseGroups",
+        "requestType": "datasafe.ListTargetDatabaseGroupsRequest",
+        "responseType": "datasafe.ListTargetDatabaseGroupsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeTargetDatabaseGroupCompartment",
+        "requestType": "datasafe.ChangeTargetDatabaseGroupCompartmentRequest",
+        "responseType": "datasafe.ChangeTargetDatabaseGroupCompartmentResponse"
+      },
+      {
+        "operation": "UpdateTargetDatabaseGroup",
+        "requestType": "datasafe.UpdateTargetDatabaseGroupRequest",
+        "responseType": "datasafe.UpdateTargetDatabaseGroupResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteTargetDatabaseGroup",
+        "requestType": "datasafe.DeleteTargetDatabaseGroupRequest",
+        "responseType": "datasafe.DeleteTargetDatabaseGroupResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "NEEDS_ATTENTION"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags",
+      "matching_criteria.exclude.target_database_ids",
+      "matching_criteria.include.compartments.id",
+      "matching_criteria.include.compartments.is_include_subtree",
+      "matching_criteria.include.defined_tags",
+      "matching_criteria.include.freeform_tags",
+      "matching_criteria.include.target_database_ids"
+    ],
+    "forceNew": null,
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_data_safe_target_database_groups",
+    "collectionField": "target_database_group_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "access_level",
+      "compartment_id",
+      "compartment_id_in_subtree",
+      "display_name",
+      "state",
+      "target_database_group_filter",
+      "target_database_group_id",
+      "time_created_greater_than_or_equal_to",
+      "time_created_less_than"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/targetdatabasegroup/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/targetdatabasegroup/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from terraform-provider-oci for datasafe/targetdatabasegroup."
+  ]
+}

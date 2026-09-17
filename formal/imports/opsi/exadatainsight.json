@@ -1,0 +1,225 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "opsi",
+  "slug": "exadatainsight",
+  "kind": "ExadataInsight",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_opsi_exadata_insight",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateExadataInsight",
+        "requestType": "opsi.CreateExadataInsightRequest",
+        "responseType": "opsi.CreateExadataInsightResponse"
+      },
+      {
+        "operation": "DisableExadataInsight",
+        "requestType": "opsi.DisableExadataInsightRequest",
+        "responseType": "opsi.DisableExadataInsightResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetExadataInsight",
+        "requestType": "opsi.GetExadataInsightRequest",
+        "responseType": "opsi.GetExadataInsightResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListExadataInsights",
+        "requestType": "opsi.ListExadataInsightsRequest",
+        "responseType": "opsi.ListExadataInsightsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeExadataInsightCompartment",
+        "requestType": "opsi.ChangeExadataInsightCompartmentRequest",
+        "responseType": "opsi.ChangeExadataInsightCompartmentResponse"
+      },
+      {
+        "operation": "DisableExadataInsight",
+        "requestType": "opsi.DisableExadataInsightRequest",
+        "responseType": "opsi.DisableExadataInsightResponse"
+      },
+      {
+        "operation": "EnableExadataInsight",
+        "requestType": "opsi.EnableExadataInsightRequest",
+        "responseType": "opsi.EnableExadataInsightResponse"
+      },
+      {
+        "operation": "UpdateExadataInsight",
+        "requestType": "opsi.UpdateExadataInsightRequest",
+        "responseType": "opsi.UpdateExadataInsightResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteExadataInsight",
+        "requestType": "opsi.DeleteExadataInsightRequest",
+        "responseType": "opsi.DeleteExadataInsightResponse"
+      },
+      {
+        "operation": "DisableExadataInsight",
+        "requestType": "opsi.DisableExadataInsightRequest",
+        "responseType": "opsi.DisableExadataInsightResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "entity_source",
+      "freeform_tags",
+      "is_auto_sync_enabled",
+      "member_vm_cluster_details.compartment_id",
+      "member_vm_cluster_details.dbm_private_endpoint_id",
+      "member_vm_cluster_details.member_autonomous_details.compartment_id",
+      "member_vm_cluster_details.member_database_details.compartment_id",
+      "member_vm_cluster_details.member_database_details.connection_details.hosts.host_ip",
+      "member_vm_cluster_details.member_database_details.connection_details.hosts.port",
+      "member_vm_cluster_details.member_database_details.connection_details.protocol",
+      "member_vm_cluster_details.member_database_details.connection_details.service_name",
+      "status"
+    ],
+    "forceNew": [
+      "enterprise_manager_bridge_id",
+      "enterprise_manager_entity_identifier",
+      "enterprise_manager_identifier",
+      "exadata_infra_id",
+      "member_vm_cluster_details",
+      "member_vm_cluster_details.member_autonomous_details",
+      "member_vm_cluster_details.member_autonomous_details.connection_credential_details",
+      "member_vm_cluster_details.member_autonomous_details.connection_credential_details.credential_source_name",
+      "member_vm_cluster_details.member_autonomous_details.connection_credential_details.credential_type",
+      "member_vm_cluster_details.member_autonomous_details.connection_credential_details.named_credential_id",
+      "member_vm_cluster_details.member_autonomous_details.connection_credential_details.password_secret_id",
+      "member_vm_cluster_details.member_autonomous_details.connection_credential_details.role",
+      "member_vm_cluster_details.member_autonomous_details.connection_credential_details.user_name",
+      "member_vm_cluster_details.member_autonomous_details.connection_credential_details.wallet_secret_id",
+      "member_vm_cluster_details.member_autonomous_details.connection_details",
+      "member_vm_cluster_details.member_autonomous_details.connection_details.host_name",
+      "member_vm_cluster_details.member_autonomous_details.connection_details.port",
+      "member_vm_cluster_details.member_autonomous_details.connection_details.protocol",
+      "member_vm_cluster_details.member_autonomous_details.connection_details.service_name",
+      "member_vm_cluster_details.member_autonomous_details.credential_details",
+      "member_vm_cluster_details.member_autonomous_details.credential_details.credential_source_name",
+      "member_vm_cluster_details.member_autonomous_details.credential_details.credential_type",
+      "member_vm_cluster_details.member_autonomous_details.credential_details.named_credential_id",
+      "member_vm_cluster_details.member_autonomous_details.credential_details.password_secret_id",
+      "member_vm_cluster_details.member_autonomous_details.credential_details.role",
+      "member_vm_cluster_details.member_autonomous_details.credential_details.user_name",
+      "member_vm_cluster_details.member_autonomous_details.credential_details.wallet_secret_id",
+      "member_vm_cluster_details.member_autonomous_details.database_id",
+      "member_vm_cluster_details.member_autonomous_details.database_resource_type",
+      "member_vm_cluster_details.member_autonomous_details.defined_tags",
+      "member_vm_cluster_details.member_autonomous_details.deployment_type",
+      "member_vm_cluster_details.member_autonomous_details.entity_source",
+      "member_vm_cluster_details.member_autonomous_details.freeform_tags",
+      "member_vm_cluster_details.member_autonomous_details.is_advanced_features_enabled",
+      "member_vm_cluster_details.member_autonomous_details.management_agent_id",
+      "member_vm_cluster_details.member_autonomous_details.opsi_private_endpoint_id",
+      "member_vm_cluster_details.member_autonomous_details.system_tags",
+      "member_vm_cluster_details.member_database_details",
+      "member_vm_cluster_details.member_database_details.connection_credential_details",
+      "member_vm_cluster_details.member_database_details.connection_credential_details.credential_source_name",
+      "member_vm_cluster_details.member_database_details.connection_credential_details.credential_type",
+      "member_vm_cluster_details.member_database_details.connection_credential_details.named_credential_id",
+      "member_vm_cluster_details.member_database_details.connection_credential_details.password_secret_id",
+      "member_vm_cluster_details.member_database_details.connection_credential_details.role",
+      "member_vm_cluster_details.member_database_details.connection_credential_details.user_name",
+      "member_vm_cluster_details.member_database_details.connection_credential_details.wallet_secret_id",
+      "member_vm_cluster_details.member_database_details.connection_details.host_name",
+      "member_vm_cluster_details.member_database_details.connection_details.port",
+      "member_vm_cluster_details.member_database_details.credential_details",
+      "member_vm_cluster_details.member_database_details.credential_details.credential_source_name",
+      "member_vm_cluster_details.member_database_details.credential_details.credential_type",
+      "member_vm_cluster_details.member_database_details.credential_details.named_credential_id",
+      "member_vm_cluster_details.member_database_details.credential_details.password_secret_id",
+      "member_vm_cluster_details.member_database_details.credential_details.role",
+      "member_vm_cluster_details.member_database_details.credential_details.user_name",
+      "member_vm_cluster_details.member_database_details.credential_details.wallet_secret_id",
+      "member_vm_cluster_details.member_database_details.database_id",
+      "member_vm_cluster_details.member_database_details.database_resource_type",
+      "member_vm_cluster_details.member_database_details.dbm_private_endpoint_id",
+      "member_vm_cluster_details.member_database_details.defined_tags",
+      "member_vm_cluster_details.member_database_details.deployment_type",
+      "member_vm_cluster_details.member_database_details.entity_source",
+      "member_vm_cluster_details.member_database_details.freeform_tags",
+      "member_vm_cluster_details.member_database_details.management_agent_id",
+      "member_vm_cluster_details.member_database_details.opsi_private_endpoint_id",
+      "member_vm_cluster_details.member_database_details.service_name",
+      "member_vm_cluster_details.member_database_details.system_tags",
+      "member_vm_cluster_details.opsi_private_endpoint_id",
+      "member_vm_cluster_details.vm_cluster_type",
+      "member_vm_cluster_details.vmcluster_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_opsi_exadata_insights",
+    "collectionField": "exadata_insight_summary_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "compartment_id_in_subtree",
+      "enterprise_manager_bridge_id",
+      "exadata_type",
+      "id",
+      "state",
+      "status"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/opsi/exadatainsight/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/opsi/exadatainsight/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from terraform-provider-oci for opsi/exadatainsight."
+  ]
+}

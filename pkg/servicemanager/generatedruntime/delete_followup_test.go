@@ -13,6 +13,30 @@ import (
 	"testing"
 )
 
+func TestDeleteFollowUpRequiresConfirmationRecognizesReviewedStrategies(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		strategy string
+		want     bool
+	}{
+		{strategy: "confirm-delete", want: true},
+		{strategy: "GetDrPlan/ListDrPlans confirm-delete", want: true},
+		{strategy: "work-request-then-confirm-delete", want: true},
+		{strategy: "none", want: false},
+		{strategy: "read-after-write", want: false},
+	}
+	for _, test := range tests {
+		test := test
+		t.Run(test.strategy, func(t *testing.T) {
+			t.Parallel()
+			if got := deleteFollowUpRequiresConfirmation(test.strategy); got != test.want {
+				t.Fatalf("deleteFollowUpRequiresConfirmation(%q) = %t, want %t", test.strategy, got, test.want)
+			}
+		})
+	}
+}
+
 func TestServiceClientDeleteConfirmDeleteReadUsesMatrix(t *testing.T) {
 	t.Parallel()
 	registration := errortest.ReviewedRegistrationForFamily(t, "opensearch", "OpensearchCluster", errortest.APIErrorCoverageFamilyGeneratedRuntimeFollowUp)

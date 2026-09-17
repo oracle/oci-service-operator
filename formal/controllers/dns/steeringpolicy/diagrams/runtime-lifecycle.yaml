@@ -1,0 +1,39 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: dns
+slug: steeringpolicy
+kind: SteeringPolicy
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+  - deleted
+repoAuthored:
+  listLookup:
+    filters:
+      - compartmentId
+      - displayName
+    matchRule: Adopt only a unique steering-policy match in the requested compartment.
+  mutation:
+    mutable:
+      - displayName
+      - ttl
+      - healthCheckMonitorId
+      - template
+      - freeformTags
+      - definedTags
+      - answers
+      - rules
+    forceNew:
+      - compartmentId
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - CREATING and the live-observed UPDATING value requeue, ACTIVE succeeds, and DELETING retains the finalizer until DELETED or scoped absence.
+  - The service can return UPDATING even though that value is missing from the pinned SDK enum constants; runtime classification intentionally uses the observed string.
+  - Answers and polymorphic rules are replace-on-update request fields, not replacement-only Kubernetes drift.
+  - CompartmentId requires replacement and no Kubernetes Secret side effects are present.

@@ -1,0 +1,59 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: waas
+slug: httpredirect
+kind: HttpRedirect
+archetype: generated-service-manager
+states:
+    - provisioning
+    - active
+    - updating
+    - terminating
+repoAuthored:
+    operations:
+        update:
+            - UpdateHttpRedirect
+    providerLifecycle:
+        createPending:
+            - CREATING
+        updatePending:
+            - UPDATING
+        deletePending:
+            - DELETING
+    listLookup:
+        filters:
+            - compartmentId
+            - domain
+        matchRule: exact compartmentId, domain match within the resource scope; duplicate matches fail
+    mutation:
+        mutable:
+            - displayName
+            - target
+            - responseCode
+            - freeformTags
+            - definedTags
+        forceNew:
+            - compartmentId
+            - domain
+    hooks:
+        create:
+            - helper: tfresource.CreateResource
+              entityType: HttpRedirect
+              action: CreateHttpRedirect
+        update:
+            - helper: tfresource.UpdateResource
+              entityType: HttpRedirect
+              action: UpdateHttpRedirect
+        delete:
+            - helper: tfresource.DeleteResource
+              entityType: HttpRedirect
+              action: DeleteHttpRedirect
+    followUp:
+        create: read-after-write
+        update: read-after-write
+        delete: confirm-delete
+notes:
+    - The production runtime uses generatedruntime/workrequest async handling for create, update, delete work-request phases.
+    - Lifecycle success states are ACTIVE; pending create, update, and delete states requeue until the corresponding follow-up converges.
+    - Status projection is required, Secret side effects are none, and the finalizer policy is retain-until-confirmed-delete.
+    - Delete policy required retains ownership until DELETED or confirmed absence.

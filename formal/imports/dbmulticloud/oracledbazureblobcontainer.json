@@ -1,0 +1,127 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "dbmulticloud",
+  "slug": "oracledbazureblobcontainer",
+  "kind": "OracleDbAzureBlobContainer",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_dbmulticloud_oracle_db_azure_blob_container",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOracleDbAzureBlobContainer",
+        "requestType": "dbmulticloud.CreateOracleDbAzureBlobContainerRequest",
+        "responseType": "dbmulticloud.CreateOracleDbAzureBlobContainerResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOracleDbAzureBlobContainer",
+        "requestType": "dbmulticloud.GetOracleDbAzureBlobContainerRequest",
+        "responseType": "dbmulticloud.GetOracleDbAzureBlobContainerResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOracleDbAzureBlobContainers",
+        "requestType": "dbmulticloud.ListOracleDbAzureBlobContainersRequest",
+        "responseType": "dbmulticloud.ListOracleDbAzureBlobContainersResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeOracleDbAzureBlobContainerCompartment",
+        "requestType": "dbmulticloud.ChangeOracleDbAzureBlobContainerCompartmentRequest",
+        "responseType": "dbmulticloud.ChangeOracleDbAzureBlobContainerCompartmentResponse"
+      },
+      {
+        "operation": "UpdateOracleDbAzureBlobContainer",
+        "requestType": "dbmulticloud.UpdateOracleDbAzureBlobContainerRequest",
+        "responseType": "dbmulticloud.UpdateOracleDbAzureBlobContainerResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOracleDbAzureBlobContainer",
+        "requestType": "dbmulticloud.DeleteOracleDbAzureBlobContainerRequest",
+        "responseType": "dbmulticloud.DeleteOracleDbAzureBlobContainerResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "azure_storage_account_name",
+      "azure_storage_container_name",
+      "compartment_id",
+      "defined_tags",
+      "display_name",
+      "freeform_tags",
+      "private_endpoint_dns_alias",
+      "private_endpoint_ip_address"
+    ],
+    "forceNew": null,
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_dbmulticloud_oracle_db_azure_blob_containers",
+    "collectionField": "oracle_db_azure_blob_container_summary_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "azure_storage_account_name",
+      "azure_storage_container_name",
+      "compartment_id",
+      "display_name",
+      "oracle_db_azure_blob_container_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/dbmulticloud/oracledbazureblobcontainer/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/dbmulticloud/oracledbazureblobcontainer/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from the pinned terraform-provider-oci source revision."
+  ]
+}

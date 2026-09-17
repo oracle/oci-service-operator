@@ -1,0 +1,21 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: cloudguard
+slug: targetresponderrecipe
+kind: TargetResponderRecipe
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  listLookup:
+    filters: ["targetId","compartmentId","responderRecipeId"]
+    matchRule: exact target, compartment, and source responder recipe match; duplicate matches fail
+  mutation:
+    mutable: ["responderRules"]
+    forceNew: ["targetId","compartmentId","responderRecipeId"]
+  followUp: {create: read-after-write, update: read-after-write, delete: confirm-delete}
+notes:
+  - "The OCI model has no top-level lifecycle field, so successful readback is treated as active while delete still requires not-found confirmation."

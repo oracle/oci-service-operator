@@ -32,8 +32,28 @@ type defaultSchedulerDefinitionServiceClient struct {
 
 var _ SchedulerDefinitionServiceClient = defaultSchedulerDefinitionServiceClient{}
 
+type SchedulerDefinitionSDKClients struct {
+	fleetAppsManagementOperationsClient  fleetappsmanagementsdk.FleetAppsManagementOperationsClient
+	fleetAppsManagementWorkRequestClient fleetappsmanagementsdk.FleetAppsManagementWorkRequestClient
+}
+
+func newSchedulerDefinitionSDKClients(manager *SchedulerDefinitionServiceManager) (SchedulerDefinitionSDKClients, error) {
+	var clients SchedulerDefinitionSDKClients
+	fleetAppsManagementOperationsClientClient, err := fleetappsmanagementsdk.NewFleetAppsManagementOperationsClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize SchedulerDefinition OCI client FleetAppsManagementOperationsClient: %w", err)
+	}
+	clients.fleetAppsManagementOperationsClient = fleetAppsManagementOperationsClientClient
+	fleetAppsManagementWorkRequestClientClient, err := fleetappsmanagementsdk.NewFleetAppsManagementWorkRequestClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize SchedulerDefinition OCI client FleetAppsManagementWorkRequestClient: %w", err)
+	}
+	clients.fleetAppsManagementWorkRequestClient = fleetAppsManagementWorkRequestClientClient
+	return clients, nil
+}
+
 var newSchedulerDefinitionServiceClient = func(manager *SchedulerDefinitionServiceManager) SchedulerDefinitionServiceClient {
-	sdkClient, err := fleetappsmanagementsdk.NewFleetAppsManagementOperationsClientWithConfigurationProvider(manager.Provider)
+	sdkClient, err := newSchedulerDefinitionSDKClients(manager)
 	hooks := newSchedulerDefinitionRuntimeHooks(manager, sdkClient)
 	config := buildSchedulerDefinitionGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {

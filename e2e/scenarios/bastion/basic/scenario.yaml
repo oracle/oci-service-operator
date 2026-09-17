@@ -1,0 +1,33 @@
+version: 1
+name: bastion-basic-crud
+service: bastion
+namespace: default
+timeout: 30m
+pollInterval: 10s
+create: create.yaml
+update: update.yaml
+ready:
+  conditionTypes: [Active]
+  lifecycleStates: [ACTIVE]
+  requireOCID: true
+  fieldsEqual:
+    - desired: spec.bastionType
+      observed: status.bastionType
+    - desired: spec.name
+      observed: status.name
+    - desired: spec.targetSubnetId
+      observed: status.targetSubnetId
+    - desired: spec.clientCidrBlockAllowList
+      observed: status.clientCidrBlockAllowList
+    - desired: spec.maxSessionTtlInSeconds
+      observed: status.maxSessionTtlInSeconds
+    - desired: spec.dnsProxyStatus
+      observed: status.dnsProxyStatus
+    - desired: spec.freeformTags
+      observed: status.freeformTags
+failureConditionTypes: [Failed]
+delete:
+  enabled: true
+  timeout: 30m
+  cleanupDependencies: true
+cleanupOnFailure: true

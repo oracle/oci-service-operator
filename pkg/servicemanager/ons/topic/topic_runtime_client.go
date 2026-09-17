@@ -490,10 +490,22 @@ func handleTopicDeleteError(resource *onsv1beta1.Topic, err error) error {
 	if resource != nil {
 		servicemanager.SetOpcRequestID(&resource.Status.OsokStatus, requestID)
 	}
+	if topicDeleteAlreadyPending(resource) {
+		return nil
+	}
 	return topicAmbiguousNotFoundError{
 		message:      "topic delete returned ambiguous 404 NotAuthorizedOrNotFound; keeping the finalizer until deletion is unambiguously confirmed",
 		opcRequestID: requestID,
 	}
+}
+
+func topicDeleteAlreadyPending(resource *onsv1beta1.Topic) bool {
+	if resource == nil || resource.Status.OsokStatus.Async.Current == nil {
+		return false
+	}
+	current := resource.Status.OsokStatus.Async.Current
+	return current.Phase == shared.OSOKAsyncPhaseDelete &&
+		current.NormalizedClass == shared.OSOKAsyncClassPending
 }
 
 func adaptTopicOperationResponse(topic onssdk.NotificationTopic, requestID *string, etag *string) topicOperationResponse {

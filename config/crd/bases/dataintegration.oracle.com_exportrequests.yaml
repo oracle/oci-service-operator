@@ -88,8 +88,13 @@ spec:
               status:
                 description: The status of the object.
                 type: string
+              workspaceId:
+                description: The OCID of the Data Integration workspace containing
+                  this resource.
+                type: string
             required:
             - bucketName
+            - workspaceId
             type: object
           status:
             description: ExportRequestStatus defines the observed state of ExportRequest.

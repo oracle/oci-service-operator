@@ -1,0 +1,66 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: cloudbridge
+slug: agentdependency
+kind: AgentDependency
+archetype: generated-service-manager
+states:
+- provisioning
+- active
+- updating
+- terminating
+repoAuthored:
+  operations:
+    create:
+    - CreateAgentDependency
+    update:
+    - UpdateAgentDependency
+    delete:
+    - DeleteAgentDependency
+  providerLifecycle:
+    createPending:
+    - CREATING
+    updatePending: []
+    deletePending:
+    - DELETING
+  listLookup:
+    filters:
+    - agentId
+    - compartmentId
+    - displayName
+    - environmentId
+    - state
+    matchRule: exact declared filters match within the resource scope; duplicate matches
+      fail
+  mutation:
+    mutable:
+    - bucket
+    - compartmentId
+    - definedTags
+    - dependencyName
+    - dependencyVersion
+    - description
+    - displayName
+    - freeformTags
+    - namespace
+    - object
+    - systemTags
+    forceNew: []
+  hooks:
+    create:
+    - helper: tfresource.CreateResource
+    update:
+    - helper: tfresource.UpdateResource
+    - helper: tfresource.WaitForUpdatedState
+    delete:
+    - helper: tfresource.DeleteResource
+  followUp:
+    create: GetWorkRequest -> read-after-write
+    update: GetWorkRequest -> read-after-write
+    delete: confirm-delete
+notes:
+- The generated service manager uses the reviewed CRUD request, response, lifecycle,
+  and status projection contract.
+- Work-request phases are declared per operation from the vendored SDK response surface.
+- Secret side effects are none and finalizer ownership is retained until confirmed
+  deletion.

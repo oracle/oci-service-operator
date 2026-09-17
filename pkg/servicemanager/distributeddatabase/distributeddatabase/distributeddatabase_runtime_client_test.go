@@ -17,6 +17,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/common"
 	distributeddatabasesdk "github.com/oracle/oci-go-sdk/v65/distributeddatabase"
 	distributeddatabasev1beta1 "github.com/oracle/oci-service-operator/api/distributeddatabase/v1beta1"
+	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 )
 
@@ -47,7 +48,21 @@ func TestApplyDistributedDatabaseRuntimeHooksOverridesGeneratedDefaults(t *testi
 	if got, want := hooks.Semantics.List.MatchFields, []string{"compartmentId", "displayName", "prefix", "dbDeploymentType", "lifecycleState"}; !reflect.DeepEqual(got, want) {
 		t.Fatalf("hooks.Semantics.List.MatchFields = %#v, want %#v", got, want)
 	}
-	if got, want := hooks.List.Fields, reviewedDistributedDatabaseListFields(); !reflect.DeepEqual(got, want) {
+	if got, want := hooks.Get.Fields, []generatedruntime.RequestField{
+		{FieldName: "DistributedDatabaseId", RequestName: "distributedDatabaseId", Contribution: "path", PreferResourceID: true},
+	}; !reflect.DeepEqual(got, want) {
+		t.Fatalf("hooks.Get.Fields = %#v, want %#v", got, want)
+	}
+	if got, want := hooks.List.Fields, []generatedruntime.RequestField{
+		{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
+		{FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query"},
+		{FieldName: "Limit", RequestName: "limit", Contribution: "query"},
+		{FieldName: "Page", RequestName: "page", Contribution: "query"},
+		{FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query"},
+		{FieldName: "SortBy", RequestName: "sortBy", Contribution: "query"},
+		{FieldName: "DisplayName", RequestName: "displayName", Contribution: "query"},
+		{FieldName: "DbDeploymentType", RequestName: "dbDeploymentType", Contribution: "query"},
+	}; !reflect.DeepEqual(got, want) {
 		t.Fatalf("hooks.List.Fields = %#v, want %#v", got, want)
 	}
 	if hooks.BuildCreateBody == nil {
@@ -58,6 +73,57 @@ func TestApplyDistributedDatabaseRuntimeHooksOverridesGeneratedDefaults(t *testi
 	}
 	if hooks.TrackedRecreate.ClearTrackedIdentity == nil {
 		t.Fatal("hooks.TrackedRecreate.ClearTrackedIdentity = nil, want tracked identity cleanup")
+	}
+}
+
+func TestDistributedDatabaseUnsupportedDriftEquivalent(t *testing.T) {
+	t.Parallel()
+
+	desired := []any{map[string]any{
+		"source":           "EXADB_XS",
+		"adminPassword":    "secret",
+		"peerVmClusterIds": []any{"ocid1.vmcluster.oc1..peer"},
+		"vmClusterId":      "ocid1.vmcluster.oc1..primary",
+	}}
+	observed := []any{map[string]any{
+		"source":      "EXADB_XS",
+		"vmClusterId": "ocid1.vmcluster.oc1..primary",
+		"name":        "server-generated",
+	}}
+
+	handled, equivalent := distributedDatabaseUnsupportedDriftEquivalent("shardDetails", desired, observed)
+	if !handled || !equivalent {
+		t.Fatalf("unobservable create fields = handled %t, equivalent %t; want true, true", handled, equivalent)
+	}
+
+	observed[0].(map[string]any)["vmClusterId"] = "ocid1.vmcluster.oc1..different"
+	handled, equivalent = distributedDatabaseUnsupportedDriftEquivalent("shardDetails", desired, observed)
+	if !handled || equivalent {
+		t.Fatalf("observable drift = handled %t, equivalent %t; want true, false", handled, equivalent)
+	}
+
+	catalogDesired := []any{map[string]any{
+		"source":        "NEW_VAULT_AND_CLUSTER",
+		"adminPassword": "secret",
+		"shardSpace":    "CATALOG",
+		"vmClusterDetails": map[string]any{
+			"subnetId": "ocid1.subnet.oc1..catalog",
+		},
+	}}
+	catalogObserved := []any{map[string]any{
+		"source": "NEW_VAULT_AND_CLUSTER",
+		"vmClusterDetails": map[string]any{
+			"subnetId": "ocid1.subnet.oc1..catalog",
+		},
+	}}
+	handled, equivalent = distributedDatabaseUnsupportedDriftEquivalent("catalogDetails", catalogDesired, catalogObserved)
+	if !handled || !equivalent {
+		t.Fatalf("unobservable catalog fields = handled %t, equivalent %t; want true, true", handled, equivalent)
+	}
+
+	handled, equivalent = distributedDatabaseUnsupportedDriftEquivalent("displayName", "a", "a")
+	if handled || equivalent {
+		t.Fatalf("unowned path = handled %t, equivalent %t; want false, false", handled, equivalent)
 	}
 }
 

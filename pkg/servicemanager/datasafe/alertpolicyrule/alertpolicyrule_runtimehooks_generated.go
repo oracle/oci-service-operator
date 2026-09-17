@@ -66,25 +66,25 @@ func newAlertPolicyRuleDefaultRuntimeHooks(sdkClient datasafesdk.DataSafeClient)
 			},
 		},
 		Get: runtimeOperationHooks[datasafesdk.GetAlertPolicyRuleRequest, datasafesdk.GetAlertPolicyRuleResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "AlertPolicyId", RequestName: "alertPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "RuleKey", RequestName: "ruleKey", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "AlertPolicyId", RequestName: "alertPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "RuleKey", RequestName: "ruleKey", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request datasafesdk.GetAlertPolicyRuleRequest) (datasafesdk.GetAlertPolicyRuleResponse, error) {
 				return sdkClient.GetAlertPolicyRule(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[datasafesdk.ListAlertPolicyRulesRequest, datasafesdk.ListAlertPolicyRulesResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "AlertPolicyId", RequestName: "alertPolicyId", Contribution: "path", PreferResourceID: true}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "AlertPolicyId", RequestName: "alertPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request datasafesdk.ListAlertPolicyRulesRequest) (datasafesdk.ListAlertPolicyRulesResponse, error) {
 				return sdkClient.ListAlertPolicyRules(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[datasafesdk.UpdateAlertPolicyRuleRequest, datasafesdk.UpdateAlertPolicyRuleResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "AlertPolicyId", RequestName: "alertPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "RuleKey", RequestName: "ruleKey", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdateAlertPolicyRuleDetails", RequestName: "UpdateAlertPolicyRuleDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "AlertPolicyId", RequestName: "alertPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "RuleKey", RequestName: "ruleKey", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateAlertPolicyRuleDetails", RequestName: "UpdateAlertPolicyRuleDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request datasafesdk.UpdateAlertPolicyRuleRequest) (datasafesdk.UpdateAlertPolicyRuleResponse, error) {
 				return sdkClient.UpdateAlertPolicyRule(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[datasafesdk.DeleteAlertPolicyRuleRequest, datasafesdk.DeleteAlertPolicyRuleResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "AlertPolicyId", RequestName: "alertPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "RuleKey", RequestName: "ruleKey", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "AlertPolicyId", RequestName: "alertPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "RuleKey", RequestName: "ruleKey", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request datasafesdk.DeleteAlertPolicyRuleRequest) (datasafesdk.DeleteAlertPolicyRuleResponse, error) {
 				return sdkClient.DeleteAlertPolicyRule(ctx, request)
 			},

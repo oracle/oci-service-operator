@@ -196,6 +196,9 @@ func (c *organizationSubscriptionRuntimeClient) CreateOrUpdate(
 	if err != nil {
 		return c.fail(resource, err)
 	}
+	if err := generatedruntime.ProjectResponseBodyWithAliases(resource, summary, map[string]string{"status": "sdkStatus"}); err != nil {
+		return c.fail(resource, err)
+	}
 	return c.markActive(resource, summary, requestID), nil
 }
 

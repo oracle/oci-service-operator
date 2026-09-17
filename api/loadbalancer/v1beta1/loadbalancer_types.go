@@ -35,7 +35,7 @@ type LoadBalancerSpec struct {
 	SubnetIds []string `json:"subnetIds"`
 	// The configuration details to create load balancer using Flexible shape. This is required only if shapeName is `Flexible`.
 	// +kubebuilder:validation:Optional
-	ShapeDetails LoadBalancerShapeDetails `json:"shapeDetails,omitempty"`
+	ShapeDetails LoadBalancerShapeDetails `json:"shapeDetails,omitempty,omitzero"`
 	// Whether the load balancer has a VCN-local (private) IP address.
 	// If "true", the service assigns a private IP address to the load balancer.
 	// If "false", the service assigns a public IP address to the load balancer.
@@ -285,9 +285,9 @@ type LoadBalancerListeners struct {
 	// +kubebuilder:validation:Optional
 	PathRouteSetName string `json:"pathRouteSetName,omitempty"`
 	// +kubebuilder:validation:Optional
-	SslConfiguration LoadBalancerListenersSslConfiguration `json:"sslConfiguration,omitempty"`
+	SslConfiguration LoadBalancerListenersSslConfiguration `json:"sslConfiguration,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	ConnectionConfiguration LoadBalancerListenersConnectionConfiguration `json:"connectionConfiguration,omitempty"`
+	ConnectionConfiguration LoadBalancerListenersConnectionConfiguration `json:"connectionConfiguration,omitempty,omitzero"`
 	// The name of the routing policy applied to this listener's traffic.
 	// Example: `example_routing_policy`
 	// +kubebuilder:validation:Optional
@@ -594,11 +594,11 @@ type LoadBalancerBackendSets struct {
 	// +kubebuilder:validation:Optional
 	BackendMaxConnections int `json:"backendMaxConnections,omitempty"`
 	// +kubebuilder:validation:Optional
-	SslConfiguration LoadBalancerBackendSetsSslConfiguration `json:"sslConfiguration,omitempty"`
+	SslConfiguration LoadBalancerBackendSetsSslConfiguration `json:"sslConfiguration,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	SessionPersistenceConfiguration LoadBalancerBackendSetsSessionPersistenceConfiguration `json:"sessionPersistenceConfiguration,omitempty"`
+	SessionPersistenceConfiguration LoadBalancerBackendSetsSessionPersistenceConfiguration `json:"sessionPersistenceConfiguration,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	LbCookieSessionPersistenceConfiguration LoadBalancerBackendSetsLbCookieSessionPersistenceConfiguration `json:"lbCookieSessionPersistenceConfiguration,omitempty"`
+	LbCookieSessionPersistenceConfiguration LoadBalancerBackendSetsLbCookieSessionPersistenceConfiguration `json:"lbCookieSessionPersistenceConfiguration,omitempty,omitzero"`
 }
 
 // LoadBalancerCertificates defines nested fields for LoadBalancer.Certificates.
@@ -967,7 +967,7 @@ type LoadBalancerRuleSetsItem struct {
 	// +kubebuilder:validation:Optional
 	ResponseCode int `json:"responseCode,omitempty"`
 	// +kubebuilder:validation:Optional
-	RedirectUri LoadBalancerRuleSetsItemRedirectUri `json:"redirectUri,omitempty"`
+	RedirectUri LoadBalancerRuleSetsItemRedirectUri `json:"redirectUri,omitempty,omitzero"`
 	// A string to prepend to the header value. The resulting header value must conform to RFC 7230.
 	// With the following exceptions:
 	// *  value cannot contain `$`

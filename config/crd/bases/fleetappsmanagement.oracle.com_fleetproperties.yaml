@@ -52,6 +52,10 @@ spec:
           spec:
             description: FleetPropertySpec defines the desired state of FleetProperty.
             properties:
+              fleetId:
+                description: The OCID of the Fleet Application Management fleet containing
+                  this resource.
+                type: string
               propertyId:
                 description: OCID referring to global level metadata property.
                 type: string
@@ -59,6 +63,7 @@ spec:
                 description: Value of the Property.
                 type: string
             required:
+            - fleetId
             - propertyId
             - value
             type: object

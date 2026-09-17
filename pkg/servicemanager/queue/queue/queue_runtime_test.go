@@ -408,6 +408,26 @@ func TestQueueWorkRequestAsyncOperationRejectsUnmodeledStatus(t *testing.T) {
 	assert.EqualError(t, err, `unmodeled async status "WAITING"`)
 }
 
+func TestQueueWorkRequestAsyncOperationUsesOperationTypeWhileActionIsInProgress(t *testing.T) {
+	t.Parallel()
+
+	workRequest := makeWorkRequest(
+		"wr-update-in-progress",
+		queuesdk.OperationStatusInProgress,
+		queuesdk.ActionTypeInProgress,
+		"ocid1.queue.oc1..existing",
+	)
+	workRequest.OperationType = queuesdk.OperationTypeUpdateQueue
+
+	current, err := queueWorkRequestAsyncOperation(makeSpecQueue(), workRequest, shared.OSOKAsyncPhaseUpdate)
+	assert.NoError(t, err)
+	if assert.NotNil(t, current) {
+		assert.Equal(t, shared.OSOKAsyncPhaseUpdate, current.Phase)
+		assert.Equal(t, shared.OSOKAsyncClassPending, current.NormalizedClass)
+		assert.Equal(t, string(queuesdk.OperationTypeUpdateQueue), current.RawOperationType)
+	}
+}
+
 func TestBuildQueueCapabilitiesPreservesJsonDataFields(t *testing.T) {
 	t.Parallel()
 

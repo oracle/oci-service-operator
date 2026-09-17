@@ -176,7 +176,10 @@ func newReviewedNetworkLoadBalancerRuntimeSemantics() *generatedruntime.Semantic
 		},
 		Hooks: generatedruntime.HookSet{
 			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
-			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{
+				{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""},
+				{Helper: "UpdateNetworkSecurityGroups"},
+			},
 			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
 		},
 		CreateFollowUp: generatedruntime.FollowUpSemantics{
@@ -902,7 +905,10 @@ func (c networkLoadBalancerDeleteConfirmationClient) rejectAmbiguousSucceededDel
 	if normalizedClass != shared.OSOKAsyncClassSucceeded {
 		return nil
 	}
-	return c.rejectAmbiguousDeleteConfirmation(ctx, resource)
+	// A succeeded delete work request is stronger evidence than the service's
+	// auth-shaped confirmation response. Let generatedruntime finish the tracked
+	// delete; untracked auth-shaped reads remain conservative below.
+	return nil
 }
 
 func (c networkLoadBalancerDeleteConfirmationClient) rejectAmbiguousDeleteConfirmation(

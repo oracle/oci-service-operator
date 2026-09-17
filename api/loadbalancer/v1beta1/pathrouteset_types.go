@@ -22,6 +22,9 @@ type PathRouteSetSpec struct {
 	// The set of path route rules.
 	// +kubebuilder:validation:Required
 	PathRoutes []PathRouteSetPathRoute `json:"pathRoutes"`
+	// The OCID of the load balancer that owns this path route set.
+	// +kubebuilder:validation:Optional
+	LoadBalancerId string `json:"loadBalancerId,omitempty"`
 }
 
 // PathRouteSetPathRoutePathMatchType defines nested fields for PathRouteSet.PathRoute.PathMatchType.
@@ -65,6 +68,8 @@ type PathRouteSetStatus struct {
 	Name string `json:"name,omitempty"`
 	// The set of path route rules.
 	PathRoutes []PathRouteSetPathRoute `json:"pathRoutes,omitempty"`
+	// The bound load balancer OCID used to address this path route set.
+	LoadBalancerId string `json:"loadBalancerId,omitempty"`
 }
 
 // +kubebuilder:object:root=true

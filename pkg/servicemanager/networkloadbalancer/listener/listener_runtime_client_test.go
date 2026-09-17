@@ -286,6 +286,7 @@ func TestCreateOrUpdateRejectsMissingListenerNetworkLoadBalancerAnnotation(t *te
 
 	resource := makeUntrackedListenerResource()
 	resource.Annotations = nil
+	resource.Spec.NetworkLoadBalancerId = ""
 	client := &fakeListenerOCIClient{}
 
 	_, err := newTestListenerRuntimeClient(client).CreateOrUpdate(context.Background(), resource, ctrl.Request{})
@@ -324,10 +325,12 @@ func TestCreateOrUpdateBindsExistingListener(t *testing.T) {
 	if len(client.updateRequests) != 0 {
 		t.Fatalf("update requests = %d, want 0 for no-drift bind path", len(client.updateRequests))
 	}
-	if len(client.getRequests) != 1 {
-		t.Fatalf("get requests = %d, want 1 for bind path", len(client.getRequests))
+	if len(client.getRequests) != 0 || len(client.listRequests) != 1 {
+		t.Fatalf("bind reads = get:%d list:%d, want list-only identity binding", len(client.getRequests), len(client.listRequests))
 	}
-	assertListenerPathIdentity(t, client.getRequests[0].NetworkLoadBalancerId, client.getRequests[0].ListenerName, listenerNetworkLoadBalancerIDValue, listenerNameValue)
+	if got := stringValue(client.listRequests[0].NetworkLoadBalancerId); got != listenerNetworkLoadBalancerIDValue {
+		t.Fatalf("list networkLoadBalancerId = %q, want %q", got, listenerNetworkLoadBalancerIDValue)
+	}
 	assertListenerTrackedStatus(t, resource, listenerNetworkLoadBalancerIDValue, listenerNameValue)
 }
 
@@ -443,7 +446,7 @@ func TestCreateOrUpdateRejectsListenerIdentityDriftBeforeOCI(t *testing.T) {
 				resource.Annotations[listenerNetworkLoadBalancerIDAnnotation] = "ocid1.networkloadbalancer.oc1..replacement"
 				return resource
 			}(),
-			wantErr: "changed from recorded networkLoadBalancerId",
+			wantErr: "conflicts with",
 		},
 	}
 	for _, tc := range tests {
@@ -606,7 +609,7 @@ func TestDeleteWithPendingUpdateWorkRequestRetainsFinalizer(t *testing.T) {
 	assertListenerTrailingCondition(t, resource, shared.Updating)
 }
 
-func TestDeleteAuthShaped404FromPreDeleteReadIsFatal(t *testing.T) {
+func TestDeleteAuthShaped404FromPreDeleteReadConfirmsAbsenceByList(t *testing.T) {
 	t.Parallel()
 
 	resource := makeTrackedListenerResource()
@@ -615,25 +618,22 @@ func TestDeleteAuthShaped404FromPreDeleteReadIsFatal(t *testing.T) {
 	}
 
 	deleted, err := newTestListenerRuntimeClient(client).Delete(context.Background(), resource)
-	if err == nil {
-		t.Fatal("Delete() error = nil, want auth-shaped 404 to be fatal")
+	if err != nil {
+		t.Fatalf("Delete() error = %v", err)
 	}
-	if !strings.Contains(err.Error(), errorutil.NotAuthorizedOrNotFound) {
-		t.Fatalf("Delete() error = %v, want %s", err, errorutil.NotAuthorizedOrNotFound)
-	}
-	if deleted {
-		t.Fatal("Delete() deleted = true, want finalizer retained for auth-shaped 404")
+	if !deleted {
+		t.Fatal("Delete() deleted = false, want scoped-list-confirmed deletion")
 	}
 	if len(client.deleteRequests) != 0 {
 		t.Fatalf("delete requests = %d, want none after auth-shaped pre-delete read", len(client.deleteRequests))
 	}
-	if resource.Status.OsokStatus.DeletedAt != nil {
-		t.Fatalf("status.deletedAt = %#v, want nil", resource.Status.OsokStatus.DeletedAt)
+	if resource.Status.OsokStatus.DeletedAt == nil {
+		t.Fatal("status.deletedAt = nil, want confirmed deletion timestamp")
 	}
-	assertListenerTrailingCondition(t, resource, shared.Failed)
+	assertListenerTrailingCondition(t, resource, shared.Terminating)
 }
 
-func TestDeleteAuthShaped404FromDeleteIsFatal(t *testing.T) {
+func TestDeleteAuthShaped404FromDeleteRetainsFinalizerWhenListFindsTarget(t *testing.T) {
 	t.Parallel()
 
 	resource := makeTrackedListenerResource()
@@ -645,14 +645,8 @@ func TestDeleteAuthShaped404FromDeleteIsFatal(t *testing.T) {
 	}
 
 	deleted, err := newTestListenerRuntimeClient(client).Delete(context.Background(), resource)
-	if err == nil {
-		t.Fatal("Delete() error = nil, want auth-shaped 404 to be fatal")
-	}
-	if errorutil.ClassifyDeleteError(err).IsAuthShapedNotFound() {
-		t.Fatalf("Delete() error still classifies as delete-not-found: %v", err)
-	}
-	if !strings.Contains(err.Error(), errorutil.NotAuthorizedOrNotFound) {
-		t.Fatalf("Delete() error = %v, want %s", err, errorutil.NotAuthorizedOrNotFound)
+	if err != nil {
+		t.Fatalf("Delete() error = %v", err)
 	}
 	if deleted {
 		t.Fatal("Delete() deleted = true, want finalizer retained for auth-shaped delete error")
@@ -663,10 +657,10 @@ func TestDeleteAuthShaped404FromDeleteIsFatal(t *testing.T) {
 	if resource.Status.OsokStatus.DeletedAt != nil {
 		t.Fatalf("status.deletedAt = %#v, want nil", resource.Status.OsokStatus.DeletedAt)
 	}
-	assertListenerTrailingCondition(t, resource, shared.Failed)
+	assertListenerTrailingCondition(t, resource, shared.Terminating)
 }
 
-func TestDeleteAuthShaped404FromDeleteConfirmationIsFatal(t *testing.T) {
+func TestDeleteAuthShaped404FromDeleteConfirmationConfirmsAbsenceByList(t *testing.T) {
 	t.Parallel()
 
 	resource := makeTrackedListenerResource()
@@ -682,26 +676,19 @@ func TestDeleteAuthShaped404FromDeleteConfirmationIsFatal(t *testing.T) {
 	}
 
 	deleted, err := newTestListenerRuntimeClient(client).Delete(context.Background(), resource)
-	if err == nil {
-		t.Fatal("Delete() error = nil, want auth-shaped confirmation 404 to be fatal")
+	if err != nil {
+		t.Fatalf("Delete() error = %v", err)
 	}
-	if errorutil.ClassifyDeleteError(err).IsAuthShapedNotFound() {
-		t.Fatalf("Delete() error still classifies as delete-not-found: %v", err)
-	}
-	if !strings.Contains(err.Error(), errorutil.NotAuthorizedOrNotFound) {
-		t.Fatalf("Delete() error = %v, want %s", err, errorutil.NotAuthorizedOrNotFound)
-	}
-	if deleted {
-		t.Fatal("Delete() deleted = true, want finalizer retained for auth-shaped confirmation error")
+	if !deleted {
+		t.Fatal("Delete() deleted = false, want scoped-list-confirmed deletion")
 	}
 	if len(client.deleteRequests) != 1 {
 		t.Fatalf("delete requests = %d, want 1", len(client.deleteRequests))
 	}
-	if resource.Status.OsokStatus.DeletedAt != nil {
-		t.Fatalf("status.deletedAt = %#v, want nil", resource.Status.OsokStatus.DeletedAt)
+	if resource.Status.OsokStatus.DeletedAt == nil {
+		t.Fatal("status.deletedAt = nil, want confirmed deletion timestamp")
 	}
-	requireListenerAsync(t, resource, shared.OSOKAsyncPhaseDelete, "wr-delete-1", shared.OSOKAsyncClassFailed)
-	assertListenerTrailingCondition(t, resource, shared.Failed)
+	assertListenerTrailingCondition(t, resource, shared.Terminating)
 }
 
 func TestListListenerRuntimeViewsPaginatesAllPages(t *testing.T) {
@@ -755,6 +742,7 @@ func makeUntrackedListenerResource() *networkloadbalancerv1beta1.Listener {
 		},
 		Spec: networkloadbalancerv1beta1.ListenerSpec{
 			Name:                  listenerNameValue,
+			NetworkLoadBalancerId: listenerNetworkLoadBalancerIDValue,
 			DefaultBackendSetName: "backend_set_a",
 			Port:                  80,
 			Protocol:              string(networkloadbalancersdk.ListenerProtocolsTcp),
@@ -765,7 +753,8 @@ func makeUntrackedListenerResource() *networkloadbalancerv1beta1.Listener {
 func makeTrackedListenerResource() *networkloadbalancerv1beta1.Listener {
 	resource := makeUntrackedListenerResource()
 	resource.Status.Name = listenerNameValue
-	resource.Status.OsokStatus.Ocid = shared.OCID(listenerNetworkLoadBalancerIDValue)
+	resource.Status.NetworkLoadBalancerId = listenerNetworkLoadBalancerIDValue
+	resource.Status.OsokStatus.Ocid = shared.OCID(listenerNameValue)
 	return resource
 }
 
@@ -894,8 +883,11 @@ func assertListenerPendingCreate(
 
 func assertListenerTrackedStatus(t *testing.T, resource *networkloadbalancerv1beta1.Listener, wantParent string, wantName string) {
 	t.Helper()
-	if got := string(resource.Status.OsokStatus.Ocid); got != wantParent {
-		t.Fatalf("status.status.ocid = %q, want %q", got, wantParent)
+	if got := resource.Status.NetworkLoadBalancerId; got != wantParent {
+		t.Fatalf("status.networkLoadBalancerId = %q, want %q", got, wantParent)
+	}
+	if got := string(resource.Status.OsokStatus.Ocid); got != wantName {
+		t.Fatalf("status.status.ocid = %q, want tracked listener name %q", got, wantName)
 	}
 	if got := resource.Status.Name; got != wantName {
 		t.Fatalf("status.name = %q, want %q", got, wantName)

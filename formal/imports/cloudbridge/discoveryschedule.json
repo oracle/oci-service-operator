@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "cloudbridge",
+  "slug": "discoveryschedule",
+  "kind": "DiscoverySchedule",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_cloud_bridge_discovery_schedule",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDiscoverySchedule",
+        "requestType": "cloudbridge.CreateDiscoveryScheduleRequest",
+        "responseType": "cloudbridge.CreateDiscoveryScheduleResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDiscoverySchedule",
+        "requestType": "cloudbridge.GetDiscoveryScheduleRequest",
+        "responseType": "cloudbridge.GetDiscoveryScheduleResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDiscoverySchedules",
+        "requestType": "cloudbridge.ListDiscoverySchedulesRequest",
+        "responseType": "cloudbridge.ListDiscoverySchedulesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeDiscoveryScheduleCompartment",
+        "requestType": "cloudbridge.ChangeDiscoveryScheduleCompartmentRequest",
+        "responseType": "cloudbridge.ChangeDiscoveryScheduleCompartmentResponse"
+      },
+      {
+        "operation": "UpdateDiscoverySchedule",
+        "requestType": "cloudbridge.UpdateDiscoveryScheduleRequest",
+        "responseType": "cloudbridge.UpdateDiscoveryScheduleResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDiscoverySchedule",
+        "requestType": "cloudbridge.DeleteDiscoveryScheduleRequest",
+        "responseType": "cloudbridge.DeleteDiscoveryScheduleResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "display_name",
+      "execution_recurrences",
+      "freeform_tags"
+    ],
+    "forceNew": null,
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_cloud_bridge_discovery_schedules",
+    "collectionField": "discovery_schedule_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "discovery_schedule_id",
+      "display_name",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/cloudbridge/discoveryschedule/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/cloudbridge/discoveryschedule/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from the pinned terraform-provider-oci source revision."
+  ]
+}

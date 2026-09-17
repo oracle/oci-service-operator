@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datacatalog",
+  "slug": "connection",
+  "kind": "Connection",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_datacatalog_connection",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateConnection",
+        "requestType": "datacatalog.CreateConnectionRequest",
+        "responseType": "datacatalog.CreateConnectionResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetConnection",
+        "requestType": "datacatalog.GetConnectionRequest",
+        "responseType": "datacatalog.GetConnectionResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListConnection",
+        "requestType": "datacatalog.ListConnectionRequest",
+        "responseType": "datacatalog.ListConnectionResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateConnection",
+        "requestType": "datacatalog.UpdateConnectionRequest",
+        "responseType": "datacatalog.UpdateConnectionResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteConnection",
+        "requestType": "datacatalog.DeleteConnectionRequest",
+        "responseType": "datacatalog.DeleteConnectionResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_datacatalog_connection",
+    "collectionField": "connection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datacatalog/connection/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datacatalog/connection/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for datacatalog/connection; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

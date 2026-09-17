@@ -5,7 +5,7 @@
   "slug": "schedule",
   "kind": "Schedule",
   "sourceRef": "terraform-provider-oci",
-  "providerResource": "oci_usage_schedule",
+  "providerResource": "oci_metering_computation_schedule",
   "operations": {
     "create": [
       {
@@ -121,6 +121,6 @@
     ]
   },
   "notes": [
-    "Seeded from the OCI Usage API Schedule SDK surface; refresh with formal-import when a matching terraform-provider-oci checkout is available."
+    "Refreshed from the pinned terraform-provider-oci Metering Computation Schedule resource; ACTIVE and INACTIVE settling remains repo-authored."
   ]
 }

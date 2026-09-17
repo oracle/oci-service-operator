@@ -24,7 +24,7 @@ type RoverNodeSpec struct {
 	// +kubebuilder:validation:Optional
 	Shape string `json:"shape,omitempty"`
 	// +kubebuilder:validation:Optional
-	CustomerShippingAddress RoverNodeCustomerShippingAddress `json:"customerShippingAddress,omitempty"`
+	CustomerShippingAddress RoverNodeCustomerShippingAddress `json:"customerShippingAddress,omitempty,omitzero"`
 	// List of existing workloads that should be provisioned on the node.
 	// +kubebuilder:validation:Optional
 	NodeWorkloads []RoverNodeNodeWorkload `json:"nodeWorkloads,omitempty"`

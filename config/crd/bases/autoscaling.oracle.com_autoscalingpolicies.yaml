@@ -56,6 +56,10 @@ spec:
           spec:
             description: AutoScalingPolicySpec defines the desired state of AutoScalingPolicy.
             properties:
+              autoScalingConfigurationId:
+                description: The OCID of the autoscaling configuration containing
+                  this policy.
+                type: string
               capacity:
                 description: The capacity requirements of the autoscaling policy.
                 properties:
@@ -213,6 +217,8 @@ spec:
                   - metric
                   type: object
                 type: array
+            required:
+            - autoScalingConfigurationId
             type: object
           status:
             description: AutoScalingPolicyStatus defines the observed state of AutoScalingPolicy.

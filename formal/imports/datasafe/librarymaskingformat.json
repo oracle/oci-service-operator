@@ -1,0 +1,156 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "librarymaskingformat",
+  "kind": "LibraryMaskingFormat",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_library_masking_format",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateLibraryMaskingFormat",
+        "requestType": "datasafe.CreateLibraryMaskingFormatRequest",
+        "responseType": "datasafe.CreateLibraryMaskingFormatResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetLibraryMaskingFormat",
+        "requestType": "datasafe.GetLibraryMaskingFormatRequest",
+        "responseType": "datasafe.GetLibraryMaskingFormatResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListLibraryMaskingFormats",
+        "requestType": "datasafe.ListLibraryMaskingFormatsRequest",
+        "responseType": "datasafe.ListLibraryMaskingFormatsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeLibraryMaskingFormatCompartment",
+        "requestType": "datasafe.ChangeLibraryMaskingFormatCompartmentRequest",
+        "responseType": "datasafe.ChangeLibraryMaskingFormatCompartmentResponse"
+      },
+      {
+        "operation": "UpdateLibraryMaskingFormat",
+        "requestType": "datasafe.UpdateLibraryMaskingFormatRequest",
+        "responseType": "datasafe.UpdateLibraryMaskingFormatResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteLibraryMaskingFormat",
+        "requestType": "datasafe.DeleteLibraryMaskingFormatRequest",
+        "responseType": "datasafe.DeleteLibraryMaskingFormatResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "NEEDS_ATTENTION"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "description",
+      "display_name",
+      "format_entries.column_name",
+      "format_entries.description",
+      "format_entries.end_date",
+      "format_entries.end_length",
+      "format_entries.end_value",
+      "format_entries.fixed_number",
+      "format_entries.fixed_string",
+      "format_entries.grouping_columns",
+      "format_entries.length",
+      "format_entries.library_masking_format_id",
+      "format_entries.pattern",
+      "format_entries.post_processing_function",
+      "format_entries.random_list",
+      "format_entries.regular_expression",
+      "format_entries.replace_with",
+      "format_entries.schema_name",
+      "format_entries.sql_expression",
+      "format_entries.start_date",
+      "format_entries.start_length",
+      "format_entries.start_position",
+      "format_entries.start_value",
+      "format_entries.table_name",
+      "format_entries.type",
+      "format_entries.user_defined_function",
+      "freeform_tags",
+      "sensitive_type_ids"
+    ],
+    "forceNew": null,
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_data_safe_library_masking_formats",
+    "collectionField": "library_masking_format_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "access_level",
+      "compartment_id",
+      "compartment_id_in_subtree",
+      "display_name",
+      "library_masking_format_id",
+      "library_masking_format_source",
+      "state",
+      "time_created_greater_than_or_equal_to",
+      "time_created_less_than"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/librarymaskingformat/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/librarymaskingformat/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Pinned provider facts are paired with reviewed LibraryMaskingFormat service-manager semantics and sanitized live CRUD evidence."
+  ]
+}

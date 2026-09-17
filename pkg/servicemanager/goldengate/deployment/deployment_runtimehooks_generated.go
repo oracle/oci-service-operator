@@ -50,15 +50,84 @@ func registerDeploymentRuntimeHooksMutator(mutator DeploymentRuntimeHooksMutator
 	}
 	deploymentRuntimeHooksMutators = append(deploymentRuntimeHooksMutators, mutator)
 }
+func newDeploymentRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "goldengate",
+		FormalSlug:    "deployment",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{"UPDATING"},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"assignableConnectionId", "assignedConnectionId", "compartmentId", "deploymentType", "displayName", "lifecycleState", "lifecycleSubState", "supportedConnectionType"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"backupSchedule", "byolCpuCoreCountLimit", "cpuCoreCount", "definedTags", "description", "displayName", "environmentType", "fqdn", "freeformTags", "isAutoScalingEnabled", "isByolCpuCoreCountLimitEnabled", "isPublic", "licenseModel", "loadBalancerSubnetId", "maintenanceConfiguration", "maintenanceWindow", "nsgIds", "oggData", "placements", "securityAttributes", "subnetId"},
+			ForceNew:      []string{"availabilityDomain", "clusterPlacementGroupId", "compartmentId", "deploymentBackupId", "deploymentType", "faultDomain", "locks", "sourceDeploymentId", "subscriptionId"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "Deployment", Action: "CreateDeployment"}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "Deployment", Action: "UpdateDeployment"}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "Deployment", Action: "DeleteDeployment"}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "Deployment", Action: "CreateDeployment"}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "Deployment", Action: "UpdateDeployment"}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "Deployment", Action: "DeleteDeployment"}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newDeploymentDefaultRuntimeHooks(sdkClient goldengatesdk.GoldenGateClient) DeploymentRuntimeHooks {
 	return DeploymentRuntimeHooks{
+		Semantics:       newDeploymentRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*goldengatev1beta1.Deployment]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*goldengatev1beta1.Deployment]{},
 		StatusHooks:     generatedruntime.StatusHooks[*goldengatev1beta1.Deployment]{},
 		ParityHooks:     generatedruntime.ParityHooks[*goldengatev1beta1.Deployment]{},
-		Async:           generatedruntime.AsyncHooks[*goldengatev1beta1.Deployment]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*goldengatev1beta1.Deployment]{},
+		Async: generatedruntime.AsyncHooks[*goldengatev1beta1.Deployment]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := goldengatesdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*goldengatev1beta1.Deployment]{},
 		Create: runtimeOperationHooks[goldengatesdk.CreateDeploymentRequest, goldengatesdk.CreateDeploymentResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateDeploymentDetails", RequestName: "CreateDeploymentDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request goldengatesdk.CreateDeploymentRequest) (goldengatesdk.CreateDeploymentResponse, error) {
@@ -106,10 +175,19 @@ func buildDeploymentGeneratedRuntimeConfig(
 	hooks DeploymentRuntimeHooks,
 ) generatedruntime.Config[*goldengatev1beta1.Deployment] {
 	return generatedruntime.Config[*goldengatev1beta1.Deployment]{
-		Kind:            "Deployment",
-		SDKName:         "Deployment",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "Deployment",
+		SDKName:   "Deployment",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

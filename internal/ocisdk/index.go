@@ -69,6 +69,7 @@ type OperationMethod struct {
 	ClientType   string
 	RequestType  string
 	ResponseType string
+	Path         string
 	UsesRequest  bool
 }
 
@@ -94,14 +95,15 @@ type Index struct {
 }
 
 type Package struct {
-	typeNames           []string
-	structs             map[string]structDefinition
-	aliases             map[string]ast.Expr
-	interfaces          map[string]struct{}
-	polymorphic         map[string][]string
-	requestBodyPayloads map[string][]string
-	requestMethods      map[string]OperationMethod
-	clientConstructors  map[string]ClientConstructor
+	typeNames            []string
+	structs              map[string]structDefinition
+	aliases              map[string]ast.Expr
+	interfaces           map[string]struct{}
+	polymorphic          map[string][]string
+	requestBodyPayloads  map[string][]string
+	responseBodyPayloads map[string][]string
+	requestMethods       map[string]OperationMethod
+	clientConstructors   map[string]ClientConstructor
 
 	mu       sync.Mutex
 	resolved map[string]Struct
@@ -197,6 +199,13 @@ func (pkg *Package) TypeNames() []string {
 
 func (pkg *Package) RequestBodyPayloads(typeName string) []string {
 	return append([]string(nil), pkg.requestBodyPayloads[typeName]...)
+}
+
+// ResponseBodyPayloads returns local SDK model types carried in an operation
+// response body. Binary bodies are intentionally excluded because they are not
+// safe Kubernetes status schemas.
+func (pkg *Package) ResponseBodyPayloads(typeName string) []string {
+	return append([]string(nil), pkg.responseBodyPayloads[typeName]...)
 }
 
 func (pkg *Package) OperationForRequest(typeName string) (OperationMethod, bool) {
@@ -561,17 +570,20 @@ func parsePackage(dir string) (*Package, error) {
 	}
 
 	pkg := &Package{
-		structs:             make(map[string]structDefinition),
-		aliases:             make(map[string]ast.Expr),
-		interfaces:          make(map[string]struct{}),
-		polymorphic:         make(map[string][]string),
-		requestBodyPayloads: make(map[string][]string),
-		requestMethods:      make(map[string]OperationMethod),
-		clientConstructors:  make(map[string]ClientConstructor),
-		resolved:            make(map[string]Struct),
+		structs:              make(map[string]structDefinition),
+		aliases:              make(map[string]ast.Expr),
+		interfaces:           make(map[string]struct{}),
+		polymorphic:          make(map[string][]string),
+		requestBodyPayloads:  make(map[string][]string),
+		responseBodyPayloads: make(map[string][]string),
+		requestMethods:       make(map[string]OperationMethod),
+		clientConstructors:   make(map[string]ClientConstructor),
+		resolved:             make(map[string]Struct),
 	}
 	exportedTypes := make(map[string]struct{})
 	requestBodyPayloadExprs := make(map[string][]ast.Expr)
+	responseBodyPayloadExprs := make(map[string][]ast.Expr)
+	operationPaths := make(map[string]string)
 	for _, parsedPackage := range pkgs {
 		for _, fileNode := range parsedPackage.Files {
 			for _, declaration := range fileNode.Decls {
@@ -593,6 +605,7 @@ func parsePackage(dir string) (*Package, error) {
 						case *ast.StructType:
 							pkg.structs[typeSpec.Name.Name] = parseStruct(concrete)
 							requestBodyPayloadExprs[typeSpec.Name.Name] = append(requestBodyPayloadExprs[typeSpec.Name.Name], bodyContributorExprs(concrete)...)
+							responseBodyPayloadExprs[typeSpec.Name.Name] = append(responseBodyPayloadExprs[typeSpec.Name.Name], bodyPresenterExprs(concrete)...)
 						case *ast.InterfaceType:
 							pkg.interfaces[typeSpec.Name.Name] = struct{}{}
 						default:
@@ -600,6 +613,9 @@ func parsePackage(dir string) (*Package, error) {
 						}
 					}
 				case *ast.FuncDecl:
+					if clientType, methodName, path, ok := operationImplementationPath(typedDeclaration); ok {
+						operationPaths[operationPathKey(clientType, methodName)] = path
+					}
 					receiverName, implementations := polymorphicMethod(typedDeclaration)
 					if receiverName != "" && len(implementations) > 0 {
 						pkg.polymorphic[receiverName] = appendUniqueNames(pkg.polymorphic[receiverName], implementations...)
@@ -614,6 +630,10 @@ func parsePackage(dir string) (*Package, error) {
 			}
 		}
 	}
+	for requestType, method := range pkg.requestMethods {
+		method.Path = operationPaths[operationPathKey(method.ClientType, method.MethodName)]
+		pkg.requestMethods[requestType] = method
+	}
 
 	for typeName, exprs := range requestBodyPayloadExprs {
 		for _, expr := range exprs {
@@ -624,6 +644,15 @@ func parsePackage(dir string) (*Package, error) {
 			pkg.requestBodyPayloads[typeName] = appendUniqueNames(pkg.requestBodyPayloads[typeName], payloadType)
 		}
 	}
+	for typeName, exprs := range responseBodyPayloadExprs {
+		for _, expr := range exprs {
+			payloadType, ok := pkg.referencedTypeName(expr, map[string]struct{}{})
+			if !ok {
+				continue
+			}
+			pkg.responseBodyPayloads[typeName] = appendUniqueNames(pkg.responseBodyPayloads[typeName], payloadType)
+		}
+	}
 
 	for typeName := range exportedTypes {
 		pkg.typeNames = append(pkg.typeNames, typeName)
@@ -631,6 +660,48 @@ func parsePackage(dir string) (*Package, error) {
 	sort.Strings(pkg.typeNames)
 
 	return pkg, nil
+}
+
+func operationImplementationPath(decl *ast.FuncDecl) (string, string, string, bool) {
+	if decl == nil || decl.Name == nil || decl.Body == nil || decl.Recv == nil || len(decl.Recv.List) == 0 {
+		return "", "", "", false
+	}
+	clientType := receiverTypeName(decl.Recv.List[0].Type)
+	if clientType == "" {
+		return "", "", "", false
+	}
+	var path string
+	ast.Inspect(decl.Body, func(node ast.Node) bool {
+		if path != "" {
+			return false
+		}
+		call, ok := node.(*ast.CallExpr)
+		if !ok || len(call.Args) < 2 {
+			return true
+		}
+		selector, ok := call.Fun.(*ast.SelectorExpr)
+		if !ok || selector.Sel == nil || selector.Sel.Name != "HTTPRequest" {
+			return true
+		}
+		literal, ok := call.Args[1].(*ast.BasicLit)
+		if !ok || literal.Kind != token.STRING {
+			return true
+		}
+		value, err := strconv.Unquote(literal.Value)
+		if err != nil {
+			return true
+		}
+		path = value
+		return false
+	})
+	if path == "" {
+		return "", "", "", false
+	}
+	return clientType, decl.Name.Name, path, true
+}
+
+func operationPathKey(clientType string, methodName string) string {
+	return strings.ToLower(strings.TrimSpace(clientType)) + "\x00" + strings.ToLower(strings.TrimSpace(methodName))
 }
 
 func parseStruct(structType *ast.StructType) structDefinition {
@@ -685,12 +756,35 @@ func bodyContributorExprs(structType *ast.StructType) []ast.Expr {
 	return contributors
 }
 
+func bodyPresenterExprs(structType *ast.StructType) []ast.Expr {
+	if structType.Fields == nil {
+		return nil
+	}
+
+	presenters := make([]ast.Expr, 0, len(structType.Fields.List))
+	for _, field := range structType.Fields.List {
+		if !presentsResponseBody(field.Tag) {
+			continue
+		}
+		presenters = append(presenters, field.Type)
+	}
+	return presenters
+}
+
 func contributesToBody(tag *ast.BasicLit) bool {
 	structTag, ok := parseStructTag(tag)
 	if !ok {
 		return false
 	}
 	return structTag.Get("contributesTo") == "body"
+}
+
+func presentsResponseBody(tag *ast.BasicLit) bool {
+	structTag, ok := parseStructTag(tag)
+	if !ok {
+		return false
+	}
+	return structTag.Get("presentIn") == "body" && structTag.Get("encoding") != "binary"
 }
 
 func jsonFieldName(tag *ast.BasicLit) (string, bool) {

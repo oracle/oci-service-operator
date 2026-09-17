@@ -66,25 +66,25 @@ func newCopyObjectRequestDefaultRuntimeHooks(sdkClient dataintegrationsdk.DataIn
 			},
 		},
 		Get: runtimeOperationHooks[dataintegrationsdk.GetCopyObjectRequestRequest, dataintegrationsdk.GetCopyObjectRequestResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "CopyObjectRequestKey", RequestName: "copyObjectRequestKey", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "CopyObjectRequestKey", RequestName: "copyObjectRequestKey", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request dataintegrationsdk.GetCopyObjectRequestRequest) (dataintegrationsdk.GetCopyObjectRequestResponse, error) {
 				return sdkClient.GetCopyObjectRequest(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[dataintegrationsdk.ListCopyObjectRequestsRequest, dataintegrationsdk.ListCopyObjectRequestsResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: true}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Name", RequestName: "name", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "CopyStatus", RequestName: "copyStatus", Contribution: "query", PreferResourceID: false}, {FieldName: "Projection", RequestName: "projection", Contribution: "query", PreferResourceID: false}, {FieldName: "TimeStartedInMillis", RequestName: "timeStartedInMillis", Contribution: "query", PreferResourceID: false}, {FieldName: "TimeEndedInMillis", RequestName: "timeEndedInMillis", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Name", RequestName: "name", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "CopyStatus", RequestName: "copyStatus", Contribution: "query", PreferResourceID: false}, {FieldName: "Projection", RequestName: "projection", Contribution: "query", PreferResourceID: false}, {FieldName: "TimeStartedInMillis", RequestName: "timeStartedInMillis", Contribution: "query", PreferResourceID: false}, {FieldName: "TimeEndedInMillis", RequestName: "timeEndedInMillis", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dataintegrationsdk.ListCopyObjectRequestsRequest) (dataintegrationsdk.ListCopyObjectRequestsResponse, error) {
 				return sdkClient.ListCopyObjectRequests(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[dataintegrationsdk.UpdateCopyObjectRequestRequest, dataintegrationsdk.UpdateCopyObjectRequestResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "CopyObjectRequestKey", RequestName: "copyObjectRequestKey", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdateCopyObjectRequestDetails", RequestName: "UpdateCopyObjectRequestDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "CopyObjectRequestKey", RequestName: "copyObjectRequestKey", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateCopyObjectRequestDetails", RequestName: "UpdateCopyObjectRequestDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dataintegrationsdk.UpdateCopyObjectRequestRequest) (dataintegrationsdk.UpdateCopyObjectRequestResponse, error) {
 				return sdkClient.UpdateCopyObjectRequest(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[dataintegrationsdk.DeleteCopyObjectRequestRequest, dataintegrationsdk.DeleteCopyObjectRequestResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "CopyObjectRequestKey", RequestName: "copyObjectRequestKey", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "CopyObjectRequestKey", RequestName: "copyObjectRequestKey", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request dataintegrationsdk.DeleteCopyObjectRequestRequest) (dataintegrationsdk.DeleteCopyObjectRequestResponse, error) {
 				return sdkClient.DeleteCopyObjectRequest(ctx, request)
 			},

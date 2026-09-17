@@ -1,0 +1,66 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: opsi
+slug: operationsinsightswarehouse
+kind: OperationsInsightsWarehouse
+archetype: generated-service-manager
+states:
+- provisioning
+- active
+- updating
+- terminating
+repoAuthored:
+  operations:
+    update:
+    - UpdateOperationsInsightsWarehouse
+  providerLifecycle:
+    createPending:
+    - CREATING
+    updatePending:
+    - UPDATING
+    deletePending:
+    - DELETING
+  listLookup:
+    filters:
+    - compartmentId
+    - displayName
+    - id
+    matchRule: exact compartmentId, displayName, id match within the resource scope;
+      duplicate matches fail
+  mutation:
+    mutable:
+    - displayName
+    - cpuAllocated
+    - computeModel
+    - storageAllocatedInGBs
+    - freeformTags
+    - definedTags
+    forceNew:
+    - compartmentId
+  hooks:
+    create:
+    - helper: tfresource.CreateResource
+    - helper: tfresource.WaitForWorkRequestWithErrorHandling
+      entityType: operationsInsightsWarehouse
+      action: CREATE_OPSI_WAREHOUSE
+    update:
+    - helper: tfresource.UpdateResource
+    - helper: tfresource.WaitForWorkRequestWithErrorHandling
+      entityType: operationsInsightsWarehouse
+      action: UPDATE_OPSI_WAREHOUSE
+    delete:
+    - helper: tfresource.DeleteResource
+    - helper: tfresource.WaitForWorkRequestWithErrorHandling
+      entityType: operationsInsightsWarehouse
+      action: DELETE_OPSI_WAREHOUSE
+  followUp:
+    create: GetWorkRequest -> GetOperationsInsightsWarehouse
+    update: GetWorkRequest -> GetOperationsInsightsWarehouse
+    delete: confirm-delete
+notes:
+- The production runtime uses the declared work-request phases and service-local async
+  adapter.
+- Lifecycle success and pending states mirror the production service-manager semantics.
+- Status projection is required, Secret side effects are none, and the finalizer policy
+  is retain-until-confirmed-delete.
+- Delete ownership is retained until a terminal lifecycle state or confirmed absence.

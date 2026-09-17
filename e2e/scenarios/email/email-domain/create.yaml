@@ -1,0 +1,15 @@
+#
+# Copyright (c) 2026, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+#
+
+apiVersion: email.oracle.com/v1beta1
+kind: EmailDomain
+metadata:
+  name: osok-email-domain-${OSOK_E2E_SUFFIX}
+spec:
+  name: osok-${OSOK_E2E_ID}.example.com
+  compartmentId: ${OCI_COMPARTMENT_ID}
+  description: OSOK lifecycle test email domain
+  freeformTags:
+    osok-e2e-phase: create

@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "stackmonitoring",
+  "slug": "processset",
+  "kind": "ProcessSet",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_stack_monitoring_process_set",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateProcessSet",
+        "requestType": "stackmonitoring.CreateProcessSetRequest",
+        "responseType": "stackmonitoring.CreateProcessSetResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetProcessSet",
+        "requestType": "stackmonitoring.GetProcessSetRequest",
+        "responseType": "stackmonitoring.GetProcessSetResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListProcessSets",
+        "requestType": "stackmonitoring.ListProcessSetsRequest",
+        "responseType": "stackmonitoring.ListProcessSetsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeProcessSetCompartment",
+        "requestType": "stackmonitoring.ChangeProcessSetCompartmentRequest",
+        "responseType": "stackmonitoring.ChangeProcessSetCompartmentResponse"
+      },
+      {
+        "operation": "UpdateProcessSet",
+        "requestType": "stackmonitoring.UpdateProcessSetRequest",
+        "responseType": "stackmonitoring.UpdateProcessSetResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteProcessSet",
+        "requestType": "stackmonitoring.DeleteProcessSetRequest",
+        "responseType": "stackmonitoring.DeleteProcessSetResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "display_name",
+      "freeform_tags",
+      "specification.items.label",
+      "specification.items.process_command",
+      "specification.items.process_line_regex_pattern",
+      "specification.items.process_user"
+    ],
+    "forceNew": null,
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_stack_monitoring_process_sets",
+    "collectionField": "process_set_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/stackmonitoring/processset/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/stackmonitoring/processset/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts refreshed from the pinned Terraform provider; repository-authored process-set semantics are reviewed separately."
+  ]
+}

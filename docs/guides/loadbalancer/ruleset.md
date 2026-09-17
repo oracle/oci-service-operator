@@ -33,6 +33,7 @@ This summary shows the top-level `spec` fields. Use [the full API reference](../
 | Field | Description | Type | Required |
 | --- | --- | --- | --- |
 | [`items`](../../reference/api/loadbalancer/v1beta1/index.md#kind-ruleset-spec-items) | An array of rules that compose the rule set. | `list[object]` | Yes |
+| `loadBalancerId` | The OCID of the load balancer that owns this rule set. | `string` | No |
 | `name` | The name for this set of rules. It must be unique and it cannot be changed. Avoid entering confidential information. Example: `example_rule_set` | `string` | Yes |
 
 
@@ -43,6 +44,7 @@ This summary shows the top-level `status` fields. Use [the full API reference](.
 | Field | Description | Type | Required |
 | --- | --- | --- | --- |
 | [`items`](../../reference/api/loadbalancer/v1beta1/index.md#kind-ruleset-status-items) | An array of rules that compose the rule set. | `list[object]` | No |
+| `loadBalancerId` | The bound load balancer OCID used to address this rule set. | `string` | No |
 | `name` | The name for this set of rules. It must be unique and it cannot be changed. Avoid entering confidential information. Example: `example_rule_set` | `string` | No |
 | [`status`](../../reference/api/loadbalancer/v1beta1/index.md#kind-ruleset-status-status) | - | `object` | Yes |
 

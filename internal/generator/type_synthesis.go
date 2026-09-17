@@ -18,10 +18,24 @@ type resourceFieldSet struct {
 	HelperTypes  []TypeModel
 }
 
-func synthesizeResourceFieldSet(index *ocisdk.Package, service ServiceConfig, resourceKind string, rawName string, specCandidates []string) resourceFieldSet {
+func synthesizeResourceFieldSet(
+	index *ocisdk.Package,
+	service ServiceConfig,
+	resourceKind string,
+	rawName string,
+	specCandidates []string,
+	responseStatusCandidates []string,
+) resourceFieldSet {
 	synthesizer := newFieldSynthesizer(index, resourceKind)
+	preserveOptionalBool := false
+	if override, ok := service.resourceGenerationOverride(resourceKind); ok {
+		preserveOptionalBool = override.PreserveOptionalBooleanPresence
+	}
 
-	specFields, _ := synthesizer.mergeStructFields(specCandidates, nil, fieldRenderingOptions{scope: fieldScopeSpec})
+	specFields, _ := synthesizer.mergeStructFields(specCandidates, nil, fieldRenderingOptions{
+		scope:                fieldScopeSpec,
+		preserveOptionalBool: preserveOptionalBool,
+	})
 
 	statusFields := defaultStatusFields()
 	statusJSONNames := fieldJSONNames(statusFields)
@@ -31,10 +45,24 @@ func synthesizeResourceFieldSet(index *ocisdk.Package, service ServiceConfig, re
 		fieldRenderingOptions{
 			scope:                     fieldScopeStatus,
 			escapeStatusJSONCollision: true,
+			preserveOptionalBool:      preserveOptionalBool,
 			excludedFieldPaths:        service.ObservedStateExcludedFieldPaths(rawName),
 			requiredPointerFieldPaths: service.ObservedStateRequiredPointerFieldPaths(rawName),
 		},
 	)
+	if len(observedFields) == 0 {
+		observedFields, _ = synthesizer.mergeStructFields(
+			responseStatusCandidates,
+			nil,
+			fieldRenderingOptions{
+				scope:                     fieldScopeStatus,
+				escapeStatusJSONCollision: true,
+				preserveOptionalBool:      preserveOptionalBool,
+				excludedFieldPaths:        service.ObservedStateExcludedFieldPaths(rawName),
+				requiredPointerFieldPaths: service.ObservedStateRequiredPointerFieldPaths(rawName),
+			},
+		)
+	}
 	for _, field := range observedFields {
 		jsonName := tagJSONName(field.Tag)
 		if _, exists := statusJSONNames[jsonName]; exists {
@@ -159,11 +187,48 @@ func (s *fieldSynthesizer) buildGeneratedField(
 
 	fieldModel := buildFieldModel(field, jsonName, options)
 	fieldModel.Type = renderedType
+	if shouldPreserveOptionalBooleanPointer(field, renderedType, options) {
+		fieldModel.Type = pointerRenderedType(renderedType)
+	}
+	if shouldOmitZeroGeneratedField(field, renderedType, options) {
+		fieldModel.Tag = jsonTagWithOmitZero(renderedFieldJSONName(jsonName, options))
+	}
 	if isObservedStateRequiredPointerField(fieldPath, options) {
 		fieldModel.Type = pointerRenderedType(renderedType)
 		fieldModel.Tag = jsonTag(renderedFieldJSONName(jsonName, options), false)
 	}
 	return fieldModel, true
+}
+
+func shouldPreserveOptionalBooleanPointer(field ocisdk.Field, renderedType string, options fieldRenderingOptions) bool {
+	return options.preserveOptionalBool &&
+		!field.Mandatory &&
+		strings.TrimSpace(renderedType) == "bool" &&
+		strings.TrimSpace(field.Type) == "*bool"
+}
+
+// shouldOmitZeroGeneratedField preserves the SDK's absent-vs-present contract
+// for optional nested objects while keeping the existing value-shaped CRD API.
+// encoding/json's omitempty does not omit zero-value structs, so without
+// omitzero an absent SDK pointer is serialized as an empty object. That empty
+// object can then violate required validation rules on its nested fields.
+func shouldOmitZeroGeneratedField(field ocisdk.Field, renderedType string, options fieldRenderingOptions) bool {
+	if options.scope != fieldScopeSpec || field.Mandatory {
+		return false
+	}
+	if field.Kind != ocisdk.FieldKindStruct && field.Kind != ocisdk.FieldKindInterface {
+		return false
+	}
+
+	trimmed := strings.TrimSpace(renderedType)
+	return trimmed != "" &&
+		!strings.HasPrefix(trimmed, "*") &&
+		!strings.HasPrefix(trimmed, "[]") &&
+		!strings.HasPrefix(trimmed, "map[")
+}
+
+func jsonTagWithOmitZero(name string) string {
+	return fmt.Sprintf(`json:"%s,omitempty,omitzero"`, name)
 }
 
 func (s *fieldSynthesizer) renderFieldType(

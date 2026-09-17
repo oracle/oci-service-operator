@@ -50,15 +50,84 @@ func registerNetworkLoadBalancerRuntimeHooksMutator(mutator NetworkLoadBalancerR
 	}
 	networkloadbalancerRuntimeHooksMutators = append(networkloadbalancerRuntimeHooksMutators, mutator)
 }
+func newNetworkLoadBalancerRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "networkloadbalancer",
+		FormalSlug:    "networkloadbalancer",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE", "FAILED"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "displayName", "state"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"assignedIpv6", "definedTags", "displayName", "freeformTags", "isPreserveSourceDestination", "isSymmetricHashEnabled", "networkSecurityGroupIds", "nlbIpVersion", "reservedIpv6Id", "securityAttributes", "subnetIpv6Cidr"},
+			ForceNew:      []string{"assignedPrivateIpv4", "backendSets", "compartmentId", "isPrivate", "listeners", "reservedIps", "subnetId"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "UpdateNetworkSecurityGroups", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "UpdateNetworkSecurityGroups", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newNetworkLoadBalancerDefaultRuntimeHooks(sdkClient networkloadbalancersdk.NetworkLoadBalancerClient) NetworkLoadBalancerRuntimeHooks {
 	return NetworkLoadBalancerRuntimeHooks{
+		Semantics:       newNetworkLoadBalancerRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*networkloadbalancerv1beta1.NetworkLoadBalancer]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*networkloadbalancerv1beta1.NetworkLoadBalancer]{},
 		StatusHooks:     generatedruntime.StatusHooks[*networkloadbalancerv1beta1.NetworkLoadBalancer]{},
 		ParityHooks:     generatedruntime.ParityHooks[*networkloadbalancerv1beta1.NetworkLoadBalancer]{},
-		Async:           generatedruntime.AsyncHooks[*networkloadbalancerv1beta1.NetworkLoadBalancer]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*networkloadbalancerv1beta1.NetworkLoadBalancer]{},
+		Async: generatedruntime.AsyncHooks[*networkloadbalancerv1beta1.NetworkLoadBalancer]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := networkloadbalancersdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*networkloadbalancerv1beta1.NetworkLoadBalancer]{},
 		Create: runtimeOperationHooks[networkloadbalancersdk.CreateNetworkLoadBalancerRequest, networkloadbalancersdk.CreateNetworkLoadBalancerResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateNetworkLoadBalancerDetails", RequestName: "CreateNetworkLoadBalancerDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request networkloadbalancersdk.CreateNetworkLoadBalancerRequest) (networkloadbalancersdk.CreateNetworkLoadBalancerResponse, error) {
@@ -106,10 +175,19 @@ func buildNetworkLoadBalancerGeneratedRuntimeConfig(
 	hooks NetworkLoadBalancerRuntimeHooks,
 ) generatedruntime.Config[*networkloadbalancerv1beta1.NetworkLoadBalancer] {
 	return generatedruntime.Config[*networkloadbalancerv1beta1.NetworkLoadBalancer]{
-		Kind:            "NetworkLoadBalancer",
-		SDKName:         "NetworkLoadBalancer",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "NetworkLoadBalancer",
+		SDKName:   "NetworkLoadBalancer",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

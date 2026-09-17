@@ -1,0 +1,111 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "osmanagementhub",
+  "slug": "managementstation",
+  "kind": "ManagementStation",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_os_management_hub_management_station",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateManagementStation",
+        "requestType": "osmanagementhub.CreateManagementStationRequest",
+        "responseType": "osmanagementhub.CreateManagementStationResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetManagementStation",
+        "requestType": "osmanagementhub.GetManagementStationRequest",
+        "responseType": "osmanagementhub.GetManagementStationResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeManagementStationCompartment",
+        "requestType": "osmanagementhub.ChangeManagementStationCompartmentRequest",
+        "responseType": "osmanagementhub.ChangeManagementStationCompartmentResponse"
+      },
+      {
+        "operation": "UpdateManagementStation",
+        "requestType": "osmanagementhub.UpdateManagementStationRequest",
+        "responseType": "osmanagementhub.UpdateManagementStationResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteManagementStation",
+        "requestType": "osmanagementhub.DeleteManagementStationRequest",
+        "responseType": "osmanagementhub.DeleteManagementStationResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags",
+      "hostname",
+      "is_auto_config_enabled",
+      "mirror.directory",
+      "mirror.is_sslverify_enabled",
+      "mirror.port",
+      "mirror.sslcert",
+      "mirror.sslport",
+      "proxy.forward",
+      "proxy.hosts",
+      "proxy.is_enabled",
+      "proxy.port",
+      "refresh_trigger"
+    ],
+    "forceNew": null,
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "update": [
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/osmanagementhub/managementstation/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/osmanagementhub/managementstation/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts are imported from the pinned terraform-provider-oci revision; repo-authored runtime semantics remain authoritative."
+  ]
+}

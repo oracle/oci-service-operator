@@ -9,5 +9,29 @@ states:
   - active
   - updating
   - terminating
+repoAuthored:
+  operations:
+    update:
+      - UpdateAgentEndpoint
+  mutation:
+    mutable:
+      - contentModerationConfig
+      - definedTags
+      - description
+      - displayName
+      - freeformTags
+      - guardrailConfig
+      - humanInputConfig
+      - metadata
+      - outputConfig
+      - provisionedCapacityConfig
+      - sessionConfig
+      - shouldEnableCitation
+      - shouldEnableMultiLanguage
+      - shouldEnableTrace
+    forceNew:
+      - agentId
+      - compartmentId
+      - shouldEnableSession
 notes:
-  - Scaffold metadata only; replace with controller-specific runtime states before promotion.
+  - The reviewed handwritten runtime reconciles the mutable fields in place and rejects drift for agentId, compartmentId, and shouldEnableSession without invoking ChangeAgentEndpointCompartment.

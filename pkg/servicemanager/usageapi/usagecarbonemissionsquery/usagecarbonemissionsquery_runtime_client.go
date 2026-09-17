@@ -65,8 +65,8 @@ func newUsageCarbonEmissionsQueryRuntimeSemantics() *generatedruntime.Semantics 
 		SecretSideEffects: "none",
 		FinalizerPolicy:   "retain-until-confirmed-delete",
 		Lifecycle: generatedruntime.LifecycleSemantics{
-			ProvisioningStates: []string{"PROVISIONING"},
-			UpdatingStates:     []string{"UPDATING"},
+			ProvisioningStates: []string{},
+			UpdatingStates:     []string{},
 			ActiveStates:       []string{"ACTIVE"},
 		},
 		Delete: generatedruntime.DeleteSemantics{

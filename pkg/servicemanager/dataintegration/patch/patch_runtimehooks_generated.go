@@ -65,7 +65,7 @@ func newPatchDefaultRuntimeHooks(sdkClient dataintegrationsdk.DataIntegrationCli
 			},
 		},
 		Get: runtimeOperationHooks[dataintegrationsdk.GetPatchRequest, dataintegrationsdk.GetPatchResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "ApplicationKey", RequestName: "applicationKey", Contribution: "path", PreferResourceID: false}, {FieldName: "PatchKey", RequestName: "patchKey", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "ApplicationKey", RequestName: "applicationKey", Contribution: "path", PreferResourceID: false}, {FieldName: "PatchKey", RequestName: "patchKey", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request dataintegrationsdk.GetPatchRequest) (dataintegrationsdk.GetPatchResponse, error) {
 				return sdkClient.GetPatch(ctx, request)
 			},
@@ -77,7 +77,7 @@ func newPatchDefaultRuntimeHooks(sdkClient dataintegrationsdk.DataIntegrationCli
 			},
 		},
 		Delete: runtimeOperationHooks[dataintegrationsdk.DeletePatchRequest, dataintegrationsdk.DeletePatchResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "ApplicationKey", RequestName: "applicationKey", Contribution: "path", PreferResourceID: false}, {FieldName: "PatchKey", RequestName: "patchKey", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "ApplicationKey", RequestName: "applicationKey", Contribution: "path", PreferResourceID: false}, {FieldName: "PatchKey", RequestName: "patchKey", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request dataintegrationsdk.DeletePatchRequest) (dataintegrationsdk.DeletePatchResponse, error) {
 				return sdkClient.DeletePatch(ctx, request)
 			},

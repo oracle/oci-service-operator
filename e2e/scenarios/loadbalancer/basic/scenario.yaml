@@ -1,0 +1,25 @@
+version: 1
+name: loadbalancer-basic-crud
+service: loadbalancer
+namespace: default
+timeout: 45m
+pollInterval: 15s
+create: create.yaml
+update: update.yaml
+ready:
+  conditionTypes: [Active]
+  lifecycleStates: [ACTIVE]
+  requireOCID: true
+  fieldsEqual:
+    - desired: spec.displayName
+      observed: status.displayName
+    - desired: spec.subnetIds
+      observed: status.subnetIds
+    - desired: spec.freeformTags
+      observed: status.freeformTags
+failureConditionTypes: [Failed]
+delete:
+  enabled: true
+  timeout: 45m
+  cleanupDependencies: true
+cleanupOnFailure: true

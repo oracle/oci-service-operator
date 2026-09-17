@@ -1,0 +1,17 @@
+version: 1
+name: ons-topic-basic-crud
+service: ons
+namespace: default
+timeout: 20m
+pollInterval: 10s
+create: create.yaml
+update: update.yaml
+ready:
+  conditionTypes: [Active]
+  requireOCID: true
+failureConditionTypes: [Failed]
+delete:
+  enabled: true
+  timeout: 20m
+  cleanupDependencies: true
+cleanupOnFailure: true

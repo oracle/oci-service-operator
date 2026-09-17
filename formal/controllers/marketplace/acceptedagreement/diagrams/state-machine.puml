@@ -38,7 +38,7 @@ observe --> evaluate_ready : OCI state in ACTIVE
 observe --> failed : unresolved OCI error or non-success state
 evaluate_ready --> reject_unsupported_drift : force-new or conflicting\ndrift detected
 reject_unsupported_drift --> ready : wait for spec or live state change
-evaluate_ready --> apply_update : supported mutable drift for\ndefined_tags, display_name,\nfreeform_tags
+evaluate_ready --> apply_update : supported mutable drift for\ndefinedTags, displayName,\nfreeformTags
 apply_update --> ready : update path completes
 evaluate_ready --> ready : no supported drift remains
 ready --> ready : no supported drift remains
@@ -69,15 +69,18 @@ retain-until-confirmed-delete
 requeue: terminating
 provider states: create none; update none;
 delete none
-supported drift: defined_tags, display_name,
-freeform_tags
+follow-up: create=read-after-write;
+update=read-after-write; delete=confirm-delete
+supported drift: definedTags, displayName,
+freeformTags
 reject before mutate: force-new fields
-agreement_id, compartment_id, listing_id,
-package_version (+1 more)
+agreementId, compartmentId, listingId,
+packageVersion (+1 more)
 create-only fields: none
 list lookup: oci_marketplace_accepted_agreements
-filters agreement_id, compartment_id,
-display_name, listing_id (+1 more)
+filters agreementId, compartmentId, displayName,
+listingId (+1 more); exact agreement identity
+match; duplicate matches fail
 conflicts: none
 open gaps: none
 AcceptedAgreement reuses an existing OCI

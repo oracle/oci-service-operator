@@ -17,6 +17,20 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// DefaultWorkRequestAsyncAdapter covers the common OCI work-request status
+// vocabulary. Resource-specific adapters remain available when a service uses
+// a narrower or nonstandard state model.
+func DefaultWorkRequestAsyncAdapter() servicemanager.WorkRequestAsyncAdapter {
+	return servicemanager.WorkRequestAsyncAdapter{
+		PendingStatusTokens:   []string{"ACCEPTED", "IN_PROGRESS", "WAITING", "CANCELING"},
+		SucceededStatusTokens: []string{"SUCCEEDED", "SUCCESS", "COMPLETED"},
+		FailedStatusTokens:    []string{"FAILED"},
+		CanceledStatusTokens:  []string{"CANCELED", "CANCELLED"},
+		AttentionStatusTokens: []string{"NEEDS_ATTENTION"},
+		UnknownStatusTokens:   []string{"UNKNOWN"},
+	}
+}
+
 func (c ServiceClient[T]) workRequestLegacyBridge() servicemanager.WorkRequestLegacyBridge {
 	workRequest := c.generatedWorkRequestSemantics()
 	if workRequest == nil || workRequest.LegacyFieldBridge == nil {
@@ -30,10 +44,13 @@ func (c ServiceClient[T]) workRequestLegacyBridge() servicemanager.WorkRequestLe
 }
 
 func (c ServiceClient[T]) generatedWorkRequestSemantics() *WorkRequestSemantics {
-	if c.config.Semantics == nil || c.config.Semantics.Async == nil {
+	async := c.config.AsyncSemantics
+	if async == nil && c.config.Semantics != nil {
+		async = c.config.Semantics.Async
+	}
+	if async == nil {
 		return nil
 	}
-	async := c.config.Semantics.Async
 	if strings.TrimSpace(async.Strategy) != asyncStrategyWorkRequest ||
 		strings.TrimSpace(async.Runtime) != asyncRuntimeGeneratedRuntime {
 		return nil
@@ -356,6 +373,13 @@ func (c ServiceClient[T]) resolveGeneratedWorkRequestResourceID(resource T, work
 			return resourceID, nil
 		}
 	}
+	resourceID, err := recoverSingleWorkRequestResourceID(workRequest)
+	if err != nil {
+		return "", err
+	}
+	if resourceID != "" {
+		return resourceID, nil
+	}
 	return "", fmt.Errorf("%s %s work request %s did not expose a %s identifier", c.config.Kind, phase, workRequestStringField(workRequest, "Id"), c.config.Kind)
 }
 
@@ -405,10 +429,14 @@ func (c ServiceClient[T]) completeGeneratedWorkRequestDelete(
 	current *shared.OSOKAsyncOperation,
 ) (bool, error) {
 	currentID := strings.TrimSpace(c.currentID(resource))
-	if currentID == "" && c.config.Async.RecoverResourceID != nil {
-		recoveredID, err := c.config.Async.RecoverResourceID(resource, workRequest, shared.OSOKAsyncPhaseDelete)
-		if err == nil {
-			currentID = strings.TrimSpace(recoveredID)
+	if currentID == "" {
+		if c.config.Async.RecoverResourceID != nil {
+			recoveredID, err := c.config.Async.RecoverResourceID(resource, workRequest, shared.OSOKAsyncPhaseDelete)
+			if err == nil {
+				currentID = strings.TrimSpace(recoveredID)
+			}
+		} else if recoveredID, err := recoverSingleWorkRequestResourceID(workRequest); err == nil {
+			currentID = recoveredID
 		}
 	}
 	if currentID == "" {
@@ -416,7 +444,13 @@ func (c ServiceClient[T]) completeGeneratedWorkRequestDelete(
 		return true, nil
 	}
 
-	response, err := c.readResource(ctx, resource, currentID, readPhaseDelete)
+	var response any
+	var err error
+	if c.config.DeleteHooks.UseConfirmReadAfterWorkRequest && c.config.DeleteHooks.ConfirmRead != nil {
+		response, err = c.confirmDeleteRead(ctx, resource, currentID)
+	} else {
+		response, err = c.readResource(ctx, resource, currentID, readPhaseDelete)
+	}
 	if err != nil {
 		if isDeleteNotFound(err) || errors.Is(err, errResourceNotFound) {
 			c.recordErrorRequestID(resource, err)
@@ -438,6 +472,41 @@ func (c ServiceClient[T]) completeGeneratedWorkRequestDelete(
 		return false, err
 	}
 	return false, nil
+}
+
+func recoverSingleWorkRequestResourceID(workRequest any) (string, error) {
+	resources, ok := indirectValue(workRequestFieldValue(workRequest, "Resources"))
+	if !ok || (resources.Kind() != reflect.Slice && resources.Kind() != reflect.Array) {
+		return "", nil
+	}
+
+	identifiers := map[string]struct{}{}
+	for index := 0; index < resources.Len(); index++ {
+		resource, ok := indirectValue(resources.Index(index))
+		if !ok || resource.Kind() != reflect.Struct {
+			continue
+		}
+		identifier := ""
+		for _, fieldName := range []string{"Identifier", "ResourceId", "Id"} {
+			identifier = strings.TrimSpace(stringFieldValue(resource.FieldByName(fieldName)))
+			if identifier != "" {
+				break
+			}
+		}
+		if identifier != "" {
+			identifiers[identifier] = struct{}{}
+		}
+	}
+	if len(identifiers) == 0 {
+		return "", nil
+	}
+	if len(identifiers) > 1 {
+		return "", fmt.Errorf("work request exposes multiple resource identifiers")
+	}
+	for identifier := range identifiers {
+		return identifier, nil
+	}
+	return "", nil
 }
 
 func workRequestStringField(workRequest any, fieldName string) string {
@@ -472,11 +541,13 @@ func workRequestFieldValue(workRequest any, fieldName string) reflect.Value {
 }
 
 func validateGeneratedWorkRequestAsyncHooks[T any](cfg Config[T]) error {
-	if cfg.Semantics == nil || cfg.Semantics.Async == nil {
+	async := cfg.AsyncSemantics
+	if async == nil && cfg.Semantics != nil {
+		async = cfg.Semantics.Async
+	}
+	if async == nil {
 		return nil
 	}
-
-	async := cfg.Semantics.Async
 	if strings.TrimSpace(async.Strategy) != asyncStrategyWorkRequest ||
 		strings.TrimSpace(async.Runtime) != asyncRuntimeGeneratedRuntime {
 		return nil

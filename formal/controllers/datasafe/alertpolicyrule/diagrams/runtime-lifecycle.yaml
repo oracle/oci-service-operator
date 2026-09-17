@@ -1,0 +1,22 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: datasafe
+slug: alertpolicyrule
+kind: AlertPolicyRule
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  providerLifecycle: {createPending: ["CREATING"], updatePending: ["UPDATING"], deletePending: ["DELETING"]}
+  listLookup:
+    filters: ["alertPolicyId","expression","displayName"]
+    matchRule: exact parent policy plus expression and display name match; duplicate matches fail
+  mutation:
+    mutable: ["expression","description","displayName"]
+    forceNew: ["alertPolicyId"]
+  followUp: {create: work-request-or-response, update: work-request-or-read, delete: work-request-or-confirm-delete}
+notes:
+  - "Write responses may include a Data Safe work request. The runtime resumes that request when present and otherwise converges from the response or a confirmed read."

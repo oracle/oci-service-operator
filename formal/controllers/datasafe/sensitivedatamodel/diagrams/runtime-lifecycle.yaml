@@ -1,0 +1,29 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: datasafe
+slug: sensitivedatamodel
+kind: SensitiveDataModel
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending: ["CREATING"]
+    updatePending: ["UPDATING"]
+    deletePending: ["DELETING"]
+  listLookup:
+    filters: ["compartmentId","displayName","id","targetId"]
+    matchRule: exact resource identity match; duplicate matches fail
+  mutation:
+    mutable: ["appSuiteName","definedTags","description","displayName","freeformTags","isAppDefinedRelationDiscoveryEnabled","isSampleDataCollectionEnabled","schemasForDiscovery","sensitiveTypeGroupIdsForDiscovery","sensitiveTypeIdsForDiscovery","tablesForDiscovery","targetId"]
+    forceNew: ["compartmentId","isIncludeAllSchemas","isIncludeAllSensitiveTypes"]
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - "The runtime uses its declared lifecycle-state contract for SensitiveDataModel reconciliation."
+  - "The credential-free mock exercises SDK request serialization, response projection, mutation when supported, and confirmed deletion."

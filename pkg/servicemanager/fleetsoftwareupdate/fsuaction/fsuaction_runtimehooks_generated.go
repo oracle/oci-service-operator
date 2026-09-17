@@ -50,15 +50,84 @@ func registerFsuActionRuntimeHooksMutator(mutator FsuActionRuntimeHooksMutator) 
 	}
 	fsuactionRuntimeHooksMutators = append(fsuactionRuntimeHooksMutators, mutator)
 }
+func newFsuActionRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "fleetsoftwareupdate",
+		FormalSlug:    "fsuaction",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{"UPDATING"},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "displayName", "fsuCycleId", "lifecycleState", "opc-request-id", "type"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"definedTags", "displayName", "freeformTags"},
+			ForceNew:      []string{"compartmentId", "details", "fsuCycleId", "jsonData", "scheduleDetails", "type"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "FsuAction", Action: "CreateFsuAction"}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "FsuAction", Action: "UpdateFsuAction"}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "FsuAction", Action: "DeleteFsuAction"}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "FsuAction", Action: "CreateFsuAction"}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "FsuAction", Action: "UpdateFsuAction"}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "FsuAction", Action: "DeleteFsuAction"}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newFsuActionDefaultRuntimeHooks(sdkClient fleetsoftwareupdatesdk.FleetSoftwareUpdateClient) FsuActionRuntimeHooks {
 	return FsuActionRuntimeHooks{
+		Semantics:       newFsuActionRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*fleetsoftwareupdatev1beta1.FsuAction]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*fleetsoftwareupdatev1beta1.FsuAction]{},
 		StatusHooks:     generatedruntime.StatusHooks[*fleetsoftwareupdatev1beta1.FsuAction]{},
 		ParityHooks:     generatedruntime.ParityHooks[*fleetsoftwareupdatev1beta1.FsuAction]{},
-		Async:           generatedruntime.AsyncHooks[*fleetsoftwareupdatev1beta1.FsuAction]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*fleetsoftwareupdatev1beta1.FsuAction]{},
+		Async: generatedruntime.AsyncHooks[*fleetsoftwareupdatev1beta1.FsuAction]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := fleetsoftwareupdatesdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*fleetsoftwareupdatev1beta1.FsuAction]{},
 		Create: runtimeOperationHooks[fleetsoftwareupdatesdk.CreateFsuActionRequest, fleetsoftwareupdatesdk.CreateFsuActionResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateFsuActionDetails", RequestName: "CreateFsuActionDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request fleetsoftwareupdatesdk.CreateFsuActionRequest) (fleetsoftwareupdatesdk.CreateFsuActionResponse, error) {
@@ -106,10 +175,19 @@ func buildFsuActionGeneratedRuntimeConfig(
 	hooks FsuActionRuntimeHooks,
 ) generatedruntime.Config[*fleetsoftwareupdatev1beta1.FsuAction] {
 	return generatedruntime.Config[*fleetsoftwareupdatev1beta1.FsuAction]{
-		Kind:            "FsuAction",
-		SDKName:         "FsuAction",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "FsuAction",
+		SDKName:   "FsuAction",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

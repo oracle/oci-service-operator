@@ -1,0 +1,29 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: marketplacepublisher
+slug: listingrevisionpackage
+kind: ListingRevisionPackage
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending: ["CREATING"]
+    updatePending: ["UPDATING"]
+    deletePending: ["CREATING","DELETING","UPDATING"]
+  listLookup:
+    filters: ["id","listingRevisionId","packageVersion"]
+    matchRule: exact resource identity match; duplicate matches fail
+  mutation:
+    mutable: ["areSecurityUpgradesProvided","artifactId","definedTags","description","displayName","freeformTags","isDefault","packageVersion","termId"]
+    forceNew: ["listingRevisionId"]
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - "The runtime uses its declared lifecycle-state contract for ListingRevisionPackage reconciliation."
+  - "The credential-free mock exercises SDK request serialization, response projection, mutation when supported, and confirmed deletion."

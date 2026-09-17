@@ -51,6 +51,7 @@ type configuredService struct {
 	Group         string
 	Version       string
 	SelectedKinds []string
+	SDKKinds      map[string]string
 }
 
 var (
@@ -474,11 +475,16 @@ func loadConfiguredServices(root string, serviceName string, all bool) ([]config
 		if sdkPackageBase != service.Service {
 			return nil, fmt.Errorf("service %q sdkPackage %q does not match SDK package basename %q", service.Service, service.SDKPackage, sdkPackageBase)
 		}
+		sdkKinds := make(map[string]string, len(service.SelectedKinds()))
+		for _, sdkKind := range service.SelectedKinds() {
+			sdkKinds[service.APIKindFor(sdkKind)] = sdkKind
+		}
 		services = append(services, configuredService{
 			Service:       service.Service,
 			Group:         service.Group,
 			Version:       service.VersionOrDefault(cfg.DefaultVersion),
-			SelectedKinds: service.SelectedKinds(),
+			SelectedKinds: service.SelectedAPIKinds(),
+			SDKKinds:      sdkKinds,
 		})
 	}
 
@@ -737,7 +743,12 @@ func buildServiceTarget(service configuredService, specInfo apiTypeInfo, sdkStru
 }
 
 func sdkCandidatesForTarget(service configuredService, spec string, targetName string, sdkStructs map[string]bool, existing specTarget) []string {
-	candidates := deriveSDKTypes(service.Service, spec, targetName, sdkStructs)
+	sdkSpec := spec
+	if alias := strings.TrimSpace(service.SDKKinds[spec]); alias != "" {
+		sdkSpec = alias
+		targetName = alias
+	}
+	candidates := deriveSDKTypes(service.Service, sdkSpec, targetName, sdkStructs)
 	candidates = appendExistingSDKCandidates(service.Service, candidates, existing.SDKMappings)
 	candidates = uniqueByOrder(candidates)
 	sortSDKTypeNames(candidates)
@@ -887,6 +898,10 @@ func applySDKMappingOverride(mapping sdkMapping, override apiTargetOverride, typ
 	if strings.TrimSpace(overrideMapping.APISurface) != "" {
 		mapping.APISurface = overrideMapping.APISurface
 	}
+	if overrideMapping.Include {
+		mapping.Exclude = false
+		mapping.Reason = ""
+	}
 	if overrideMapping.Exclude {
 		mapping.Exclude = true
 	}
@@ -939,6 +954,7 @@ type apiTargetOverride struct {
 type mappingOverride struct {
 	APISurface string
 	Exclude    bool
+	Include    bool
 	Reason     string
 }
 
@@ -956,6 +972,15 @@ func specMappingOverrides(sdkTypes ...string) map[string]mappingOverride {
 
 func statusMappingOverrides(sdkTypes ...string) map[string]mappingOverride {
 	return mappingOverridesForSurface("status", sdkTypes...)
+}
+
+func includedStatusMappingOverrides(sdkTypes ...string) map[string]mappingOverride {
+	overrides := mappingOverridesForSurface("status", sdkTypes...)
+	for sdkType, override := range overrides {
+		override.Include = true
+		overrides[sdkType] = override
+	}
+	return overrides
 }
 
 func excludedMappingOverrides(reason string, sdkTypes ...string) map[string]mappingOverride {
@@ -990,6 +1015,54 @@ const (
 
 // Explicit overrides cover specs whose API surface or SDK names do not follow the common generator conventions.
 var explicitAPITargetOverrides = map[string]apiTargetOverride{
+	"dataintegration.ApplicationDetailedDescription": {
+		SDKTypes: []string{"CreateDetailedDescriptionDetails", "UpdateDetailedDescriptionDetails", "DetailedDescription"},
+		MappingOverrides: statusMappingOverrides(
+			"DetailedDescription",
+		),
+	},
+	"dataintegration.DisApplicationDetailedDescription": {
+		SDKTypes: []string{"CreateDetailedDescriptionDetails", "UpdateDetailedDescriptionDetails", "DetailedDescription"},
+		MappingOverrides: statusMappingOverrides(
+			"DetailedDescription",
+		),
+	},
+	"multicloud.ExternalLocationDetailsMetadata": {
+		SDKTypes: []string{"ExternalLocationsMetadatumSummary"},
+		MappingOverrides: statusMappingOverrides(
+			"ExternalLocationsMetadatumSummary",
+		),
+	},
+	"multicloud.ExternalLocationMappingMetadata": {
+		SDKTypes: []string{"ExternalLocationMappingMetadatumSummary"},
+		MappingOverrides: statusMappingOverrides(
+			"ExternalLocationMappingMetadatumSummary",
+		),
+	},
+	"multicloud.ExternalLocationSummariesMetadata": {
+		SDKTypes: []string{"ExternalLocationSummariesMetadatumSummaryCollection"},
+		MappingOverrides: statusMappingOverrides(
+			"ExternalLocationSummariesMetadatumSummaryCollection",
+		),
+	},
+	"osuborganizationsubscription.OrganizationSubscription": {
+		SDKTypes: []string{"SubscriptionSummary"},
+		MappingOverrides: statusMappingOverrides(
+			"SubscriptionSummary",
+		),
+	},
+	"apigateway.ApiGateway": {
+		MappingOverrides: excludedMappingOverrides(
+			collectionResponseExcludedReason,
+			"GatewayCollection",
+		),
+	},
+	"apigateway.ApiGatewayDeployment": {
+		MappingOverrides: excludedMappingOverrides(
+			collectionResponseExcludedReason,
+			"DeploymentCollection",
+		),
+	},
 	"artifacts.ContainerImage": {
 		MappingOverrides: excludedMappingOverrides(
 			"Intentionally untracked: collection responses do not map to a singular resource status surface.",
@@ -1700,8 +1773,7 @@ var explicitAPITargetOverrides = map[string]apiTargetOverride{
 		"SubscriptionSummary",
 	)},
 	"ons.Topic": {
-		MappingOverrides: excludedMappingOverrides(
-			"Intentionally untracked: OCI read-model mappings broaden desired-state coverage, and this CRD does not expose a meaningful status surface for parity tracking.",
+		MappingOverrides: includedStatusMappingOverrides(
 			"NotificationTopic",
 			"NotificationTopicSummary",
 		),
@@ -2481,6 +2553,7 @@ func reportDiff(path string, next []byte) {
 
 func makeTargetName(group, spec string) string {
 	prefix := map[string]string{
+		"apigateway":             "",
 		"database":               "",
 		"email":                  "Email",
 		"generativeai":           "GenerativeAI",

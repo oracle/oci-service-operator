@@ -33,16 +33,16 @@ type ArtifactSpec struct {
 	// +kubebuilder:validation:Optional
 	ArtifactType string `json:"artifactType,omitempty"`
 	// +kubebuilder:validation:Optional
-	HelmChart ArtifactHelmChart `json:"helmChart,omitempty"`
+	HelmChart ArtifactHelmChart `json:"helmChart,omitempty,omitzero"`
 	// List of container image artifact uniquie identifiers included in the helm chart.
 	// +kubebuilder:validation:Optional
 	ContainerImageArtifactIds []string `json:"containerImageArtifactIds,omitempty"`
 	// +kubebuilder:validation:Optional
-	Stack ArtifactStack `json:"stack,omitempty"`
+	Stack ArtifactStack `json:"stack,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	ContainerImage ArtifactContainerImage `json:"containerImage,omitempty"`
+	ContainerImage ArtifactContainerImage `json:"containerImage,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	MachineImage ArtifactMachineImage `json:"machineImage,omitempty"`
+	MachineImage ArtifactMachineImage `json:"machineImage,omitempty,omitzero"`
 }
 
 // ArtifactHelmChart defines nested fields for Artifact.HelmChart.
@@ -104,9 +104,9 @@ type ArtifactMachineImageImageShapeCompatibilityEntry struct {
 	// +kubebuilder:validation:Required
 	Shape string `json:"shape"`
 	// +kubebuilder:validation:Optional
-	MemoryConstraints ArtifactMachineImageImageShapeCompatibilityEntryMemoryConstraints `json:"memoryConstraints,omitempty"`
+	MemoryConstraints ArtifactMachineImageImageShapeCompatibilityEntryMemoryConstraints `json:"memoryConstraints,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	OcpuConstraints ArtifactMachineImageImageShapeCompatibilityEntryOcpuConstraints `json:"ocpuConstraints,omitempty"`
+	OcpuConstraints ArtifactMachineImageImageShapeCompatibilityEntryOcpuConstraints `json:"ocpuConstraints,omitempty,omitzero"`
 }
 
 // ArtifactMachineImage defines nested fields for Artifact.MachineImage.

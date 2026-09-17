@@ -1,0 +1,67 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: opsi
+slug: awrhub
+kind: AwrHub
+archetype: generated-service-manager
+states:
+- provisioning
+- active
+- updating
+- terminating
+repoAuthored:
+  operations:
+    update:
+    - UpdateAwrHub
+  providerLifecycle:
+    createPending:
+    - CREATING
+    updatePending:
+    - UPDATING
+    deletePending:
+    - DELETING
+  listLookup:
+    filters:
+    - operationsInsightsWarehouseId
+    - compartmentId
+    - displayName
+    - objectStorageBucketName
+    - id
+    matchRule: exact operationsInsightsWarehouseId, compartmentId, displayName, objectStorageBucketName,
+      id match within the resource scope; duplicate matches fail
+  mutation:
+    mutable:
+    - displayName
+    - freeformTags
+    - definedTags
+    forceNew:
+    - operationsInsightsWarehouseId
+    - compartmentId
+    - objectStorageBucketName
+  hooks:
+    create:
+    - helper: tfresource.CreateResource
+    - helper: tfresource.WaitForWorkRequestWithErrorHandling
+      entityType: awrHub
+      action: CREATE_AWRHUB
+    update:
+    - helper: tfresource.UpdateResource
+    - helper: tfresource.WaitForWorkRequestWithErrorHandling
+      entityType: awrHub
+      action: UPDATE_AWRHUB
+    delete:
+    - helper: tfresource.DeleteResource
+    - helper: tfresource.WaitForWorkRequestWithErrorHandling
+      entityType: awrHub
+      action: DELETE_AWRHUB
+  followUp:
+    create: GetWorkRequest -> GetAwrHub
+    update: GetWorkRequest -> GetAwrHub
+    delete: confirm-delete
+notes:
+- The production runtime uses the declared work-request phases and service-local async
+  adapter.
+- Lifecycle success and pending states mirror the production service-manager semantics.
+- Status projection is required, Secret side effects are none, and the finalizer policy
+  is retain-until-confirmed-delete.
+- Delete ownership is retained until a terminal lifecycle state or confirmed absence.

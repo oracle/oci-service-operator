@@ -36,6 +36,30 @@ type TopicSpec struct {
 // TopicStatus defines the observed state of Topic.
 type TopicStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The name of the topic.
+	Name string `json:"name,omitempty"`
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the topic.
+	TopicId string `json:"topicId,omitempty"`
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment for the topic.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The lifecycle state of the topic.
+	LifecycleState string `json:"lifecycleState,omitempty"`
+	// The time the topic was created.
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The endpoint for managing subscriptions or publishing messages to the topic.
+	ApiEndpoint string `json:"apiEndpoint,omitempty"`
+	// A unique short topic Id. This is used only for SMS subscriptions.
+	ShortTopicId string `json:"shortTopicId,omitempty"`
+	// The description of the topic.
+	Description string `json:"description,omitempty"`
+	// For optimistic concurrency control. See `if-match`.
+	Etag string `json:"etag,omitempty"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 }
 
 // +kubebuilder:object:root=true

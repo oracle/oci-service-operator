@@ -39,7 +39,7 @@ type OceInstanceSpec struct {
 	// +kubebuilder:validation:Optional
 	Description string `json:"description,omitempty"`
 	// +kubebuilder:validation:Optional
-	IdentityStripe OceInstanceIdentityStripe `json:"identityStripe,omitempty"`
+	IdentityStripe OceInstanceIdentityStripe `json:"identityStripe,omitempty,omitzero"`
 	// Instance type based on its usage
 	// +kubebuilder:validation:Optional
 	InstanceUsageType string `json:"instanceUsageType,omitempty"`

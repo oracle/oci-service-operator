@@ -50,50 +50,62 @@ func registerOracleDbAwsIdentityConnectorRuntimeHooksMutator(mutator OracleDbAws
 	}
 	oracledbawsidentityconnectorRuntimeHooksMutators = append(oracledbawsidentityconnectorRuntimeHooksMutators, mutator)
 }
-func newOracleDbAwsIdentityConnectorDefaultRuntimeHooks(sdkClient dbmulticloudsdk.DbMulticloudAwsProviderClient) OracleDbAwsIdentityConnectorRuntimeHooks {
+func newOracleDbAwsIdentityConnectorDefaultRuntimeHooks(sdkClient OracleDbAwsIdentityConnectorSDKClients) OracleDbAwsIdentityConnectorRuntimeHooks {
 	return OracleDbAwsIdentityConnectorRuntimeHooks{
 		Identity:        generatedruntime.IdentityHooks[*dbmulticloudv1beta1.OracleDbAwsIdentityConnector]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*dbmulticloudv1beta1.OracleDbAwsIdentityConnector]{},
 		StatusHooks:     generatedruntime.StatusHooks[*dbmulticloudv1beta1.OracleDbAwsIdentityConnector]{},
 		ParityHooks:     generatedruntime.ParityHooks[*dbmulticloudv1beta1.OracleDbAwsIdentityConnector]{},
-		Async:           generatedruntime.AsyncHooks[*dbmulticloudv1beta1.OracleDbAwsIdentityConnector]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*dbmulticloudv1beta1.OracleDbAwsIdentityConnector]{},
+		Async: generatedruntime.AsyncHooks[*dbmulticloudv1beta1.OracleDbAwsIdentityConnector]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := dbmulticloudsdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.workRequestClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*dbmulticloudv1beta1.OracleDbAwsIdentityConnector]{},
 		Create: runtimeOperationHooks[dbmulticloudsdk.CreateOracleDbAwsIdentityConnectorRequest, dbmulticloudsdk.CreateOracleDbAwsIdentityConnectorResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateOracleDbAwsIdentityConnectorDetails", RequestName: "CreateOracleDbAwsIdentityConnectorDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dbmulticloudsdk.CreateOracleDbAwsIdentityConnectorRequest) (dbmulticloudsdk.CreateOracleDbAwsIdentityConnectorResponse, error) {
-				return sdkClient.CreateOracleDbAwsIdentityConnector(ctx, request)
+				return sdkClient.dbMulticloudAwsProviderClient.CreateOracleDbAwsIdentityConnector(ctx, request)
 			},
 		},
 		Get: runtimeOperationHooks[dbmulticloudsdk.GetOracleDbAwsIdentityConnectorRequest, dbmulticloudsdk.GetOracleDbAwsIdentityConnectorResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OracleDbAwsIdentityConnectorId", RequestName: "oracleDbAwsIdentityConnectorId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request dbmulticloudsdk.GetOracleDbAwsIdentityConnectorRequest) (dbmulticloudsdk.GetOracleDbAwsIdentityConnectorResponse, error) {
-				return sdkClient.GetOracleDbAwsIdentityConnector(ctx, request)
+				return sdkClient.dbMulticloudAwsProviderClient.GetOracleDbAwsIdentityConnector(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[dbmulticloudsdk.ListOracleDbAwsIdentityConnectorsRequest, dbmulticloudsdk.ListOracleDbAwsIdentityConnectorsResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "ResourceId", RequestName: "resourceId", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dbmulticloudsdk.ListOracleDbAwsIdentityConnectorsRequest) (dbmulticloudsdk.ListOracleDbAwsIdentityConnectorsResponse, error) {
-				return sdkClient.ListOracleDbAwsIdentityConnectors(ctx, request)
+				return sdkClient.dbMulticloudAwsProviderClient.ListOracleDbAwsIdentityConnectors(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[dbmulticloudsdk.UpdateOracleDbAwsIdentityConnectorRequest, dbmulticloudsdk.UpdateOracleDbAwsIdentityConnectorResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OracleDbAwsIdentityConnectorId", RequestName: "oracleDbAwsIdentityConnectorId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateOracleDbAwsIdentityConnectorDetails", RequestName: "UpdateOracleDbAwsIdentityConnectorDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dbmulticloudsdk.UpdateOracleDbAwsIdentityConnectorRequest) (dbmulticloudsdk.UpdateOracleDbAwsIdentityConnectorResponse, error) {
-				return sdkClient.UpdateOracleDbAwsIdentityConnector(ctx, request)
+				return sdkClient.dbMulticloudAwsProviderClient.UpdateOracleDbAwsIdentityConnector(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[dbmulticloudsdk.DeleteOracleDbAwsIdentityConnectorRequest, dbmulticloudsdk.DeleteOracleDbAwsIdentityConnectorResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OracleDbAwsIdentityConnectorId", RequestName: "oracleDbAwsIdentityConnectorId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request dbmulticloudsdk.DeleteOracleDbAwsIdentityConnectorRequest) (dbmulticloudsdk.DeleteOracleDbAwsIdentityConnectorResponse, error) {
-				return sdkClient.DeleteOracleDbAwsIdentityConnector(ctx, request)
+				return sdkClient.dbMulticloudAwsProviderClient.DeleteOracleDbAwsIdentityConnector(ctx, request)
 			},
 		},
 		WrapGeneratedClient: []func(OracleDbAwsIdentityConnectorServiceClient) OracleDbAwsIdentityConnectorServiceClient{},
 	}
 }
 
-func newOracleDbAwsIdentityConnectorRuntimeHooks(manager *OracleDbAwsIdentityConnectorServiceManager, sdkClient dbmulticloudsdk.DbMulticloudAwsProviderClient) OracleDbAwsIdentityConnectorRuntimeHooks {
+func newOracleDbAwsIdentityConnectorRuntimeHooks(manager *OracleDbAwsIdentityConnectorServiceManager, sdkClient OracleDbAwsIdentityConnectorSDKClients) OracleDbAwsIdentityConnectorRuntimeHooks {
 	hooks := newOracleDbAwsIdentityConnectorDefaultRuntimeHooks(sdkClient)
 	for _, mutator := range oracledbawsidentityconnectorRuntimeHooksMutators {
 		mutator(manager, &hooks)
@@ -106,10 +118,19 @@ func buildOracleDbAwsIdentityConnectorGeneratedRuntimeConfig(
 	hooks OracleDbAwsIdentityConnectorRuntimeHooks,
 ) generatedruntime.Config[*dbmulticloudv1beta1.OracleDbAwsIdentityConnector] {
 	return generatedruntime.Config[*dbmulticloudv1beta1.OracleDbAwsIdentityConnector]{
-		Kind:            "OracleDbAwsIdentityConnector",
-		SDKName:         "OracleDbAwsIdentityConnector",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "OracleDbAwsIdentityConnector",
+		SDKName:   "OracleDbAwsIdentityConnector",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

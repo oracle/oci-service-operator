@@ -41,6 +41,7 @@ func applyDistributedDatabaseRuntimeHooks(
 	}
 
 	hooks.Semantics = reviewedDistributedDatabaseRuntimeSemantics()
+	hooks.Get.Fields = reviewedDistributedDatabaseGetFields()
 	hooks.List.Fields = reviewedDistributedDatabaseListFields()
 	hooks.BuildCreateBody = func(
 		ctx context.Context,
@@ -57,7 +58,74 @@ func applyDistributedDatabaseRuntimeHooks(
 	) (any, bool, error) {
 		return buildDistributedDatabaseUpdateBody(resource, currentResponse)
 	}
+	hooks.ParityHooks.UnsupportedDriftEquivalent = distributedDatabaseUnsupportedDriftEquivalent
 	hooks.TrackedRecreate.ClearTrackedIdentity = clearTrackedDistributedDatabaseIdentity
+}
+
+func distributedDatabaseUnsupportedDriftEquivalent(path string, desired, observed any) (bool, bool) {
+	switch path {
+	case "catalogDetails", "shardDetails":
+		return true, distributedDatabaseDesiredSubsetMatches(path, desired, observed)
+	default:
+		return false, false
+	}
+}
+
+func distributedDatabaseDesiredSubsetMatches(rootPath string, desired, observed any) bool {
+	switch desiredValue := desired.(type) {
+	case map[string]any:
+		observedValue, ok := observed.(map[string]any)
+		if !ok {
+			return false
+		}
+		for key, desiredChild := range desiredValue {
+			if distributedDatabaseUnobservableCreateField(rootPath, key) {
+				continue
+			}
+			observedChild, found := distributedDatabaseMapValue(observedValue, key)
+			if !found || !distributedDatabaseDesiredSubsetMatches(rootPath, desiredChild, observedChild) {
+				return false
+			}
+		}
+		return true
+	case []any:
+		observedValue, ok := observed.([]any)
+		if !ok || len(desiredValue) != len(observedValue) {
+			return false
+		}
+		for index := range desiredValue {
+			if !distributedDatabaseDesiredSubsetMatches(rootPath, desiredValue[index], observedValue[index]) {
+				return false
+			}
+		}
+		return true
+	default:
+		return reflect.DeepEqual(desired, observed)
+	}
+}
+
+func distributedDatabaseUnobservableCreateField(rootPath, field string) bool {
+	switch strings.ToLower(strings.TrimSpace(field)) {
+	case "adminpassword", "peervmclusterids":
+		return true
+	case "shardspace":
+		return rootPath == "catalogDetails"
+	default:
+		return false
+	}
+}
+
+func distributedDatabaseMapValue(values map[string]any, key string) (any, bool) {
+	if value, ok := values[key]; ok {
+		return value, true
+	}
+	normalized := strings.ToLower(strings.TrimSpace(key))
+	for candidate, value := range values {
+		if strings.ToLower(strings.TrimSpace(candidate)) == normalized {
+			return value, true
+		}
+	}
+	return nil, false
 }
 
 func reviewedDistributedDatabaseRuntimeSemantics() *generatedruntime.Semantics {
@@ -85,10 +153,15 @@ func reviewedDistributedDatabaseRuntimeSemantics() *generatedruntime.Semantics {
 	return semantics
 }
 
+func reviewedDistributedDatabaseGetFields() []generatedruntime.RequestField {
+	return []generatedruntime.RequestField{
+		{FieldName: "DistributedDatabaseId", RequestName: "distributedDatabaseId", Contribution: "path", PreferResourceID: true},
+	}
+}
+
 func reviewedDistributedDatabaseListFields() []generatedruntime.RequestField {
 	return []generatedruntime.RequestField{
 		{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
-		{FieldName: "PrivateEndpointId", RequestName: "privateEndpointId", Contribution: "query"},
 		{FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query"},
 		{FieldName: "Limit", RequestName: "limit", Contribution: "query"},
 		{FieldName: "Page", RequestName: "page", Contribution: "query"},
@@ -96,7 +169,6 @@ func reviewedDistributedDatabaseListFields() []generatedruntime.RequestField {
 		{FieldName: "SortBy", RequestName: "sortBy", Contribution: "query"},
 		{FieldName: "DisplayName", RequestName: "displayName", Contribution: "query"},
 		{FieldName: "DbDeploymentType", RequestName: "dbDeploymentType", Contribution: "query"},
-		{FieldName: "Metadata", RequestName: "metadata", Contribution: "query"},
 	}
 }
 

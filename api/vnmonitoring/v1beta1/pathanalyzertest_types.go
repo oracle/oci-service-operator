@@ -29,9 +29,9 @@ type PathAnalyzerTestSpec struct {
 	// +kubebuilder:validation:Optional
 	DisplayName string `json:"displayName,omitempty"`
 	// +kubebuilder:validation:Optional
-	ProtocolParameters PathAnalyzerTestProtocolParameters `json:"protocolParameters,omitempty"`
+	ProtocolParameters PathAnalyzerTestProtocolParameters `json:"protocolParameters,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	QueryOptions PathAnalyzerTestQueryOptions `json:"queryOptions,omitempty"`
+	QueryOptions PathAnalyzerTestQueryOptions `json:"queryOptions,omitempty,omitzero"`
 	// Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
 	// Example: `{"bar-key": "value"}`
 	// +kubebuilder:validation:Optional

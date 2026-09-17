@@ -24,6 +24,7 @@ Manage OCI API Gateway deployment routes and backend bindings. This page is gene
 - [API Reference](../../reference/api/apigateway/v1beta1/index.md#kind-apigatewaydeployment)
 - [Spec Reference](../../reference/api/apigateway/v1beta1/index.md#kind-apigatewaydeployment-spec)
 - [Status Reference](../../reference/api/apigateway/v1beta1/index.md#kind-apigatewaydeployment-status)
+- [Rendered Sample](../../reference/samples/apigateway/v1beta1/apigatewaydeployment.md) (`config/samples/apigateway_v1beta1_apigatewaydeployment.yaml`)
 
 ## Spec Fields
 
@@ -31,14 +32,16 @@ This summary shows the top-level `spec` fields. Use [the full API reference](../
 
 | Field | Description | Type | Required |
 | --- | --- | --- | --- |
-| `compartmentId` | CompartmentId is the OCID of the compartment in which to create the deployment. | `string` | Yes |
-| `definedTags` | - | `map[string, map[string, string]]` | No |
-| `displayName` | DisplayName is a user-friendly name for the deployment. | `string` | No |
-| `freeformTags` | - | `map[string, string]` | No |
-| `gatewayId` | GatewayId is the OCID of the API Gateway to deploy to. Validation: gatewayId is immutable. | `string` | Yes |
-| `id` | The OCID of an existing Deployment to bind to. | `string` | No |
-| `pathPrefix` | PathPrefix is the path prefix for all routes in this deployment. Validation: pathPrefix is immutable. | `string` | Yes |
-| [`routes`](../../reference/api/apigateway/v1beta1/index.md#kind-apigatewaydeployment-spec-routes) | Routes is the list of API routes in this deployment. | `list[object]` | No |
+| `compartmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment in which the resource is created. | `string` | Yes |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No |
+| `displayName` | A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information. Example: `My new resource` | `string` | No |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No |
+| `gatewayId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the resource. | `string` | Yes |
+| `id` | The OCID of an existing API Gateway Deployment to bind to. | `string` | No |
+| [`locks`](../../reference/api/apigateway/v1beta1/index.md#kind-apigatewaydeployment-spec-locks) | Locks associated with this resource. | `list[object]` | No |
+| `pathPrefix` | A path on which to deploy all routes contained in the API deployment specification. For more information, see Deploying an API on an API Gateway by Creating an API Deployment (https://docs.oracle.com/iaas/Content/APIGateway/Tasks/apigatewaycreatingdeployment.htm). | `string` | Yes |
+| [`routes`](../../reference/api/apigateway/v1beta1/index.md#kind-apigatewaydeployment-spec-routes) | Routes is the compatibility shorthand for specification.routes. Set either routes or specification.routes; the runtime rejects conflicting values. | `list[object]` | No |
+| [`specification`](../../reference/api/apigateway/v1beta1/index.md#kind-apigatewaydeployment-spec-specification) | ApiGatewayDeploymentSpecification defines nested fields for ApiGatewayDeployment.Specification. | `object` | No |
 
 
 ## Status Fields
@@ -47,9 +50,53 @@ This summary shows the top-level `status` fields. Use [the full API reference](.
 
 | Field | Description | Type | Required |
 | --- | --- | --- | --- |
+| `compartmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment in which the resource is created. | `string` | No |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No |
+| `displayName` | A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information. Example: `My new resource` | `string` | No |
+| `endpoint` | The endpoint to access this deployment on the gateway. | `string` | No |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No |
+| `gatewayId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the resource. | `string` | No |
+| `id` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the resource. | `string` | No |
+| `lifecycleDetails` | A message describing the current state in more detail. For example, can be used to provide actionable information for a resource in a Failed state. | `string` | No |
+| `lifecycleState` | The current state of the deployment. | `string` | No |
+| [`locks`](../../reference/api/apigateway/v1beta1/index.md#kind-apigatewaydeployment-status-locks) | Locks associated with this resource. | `list[object]` | No |
+| `pathPrefix` | A path on which to deploy all routes contained in the API deployment specification. For more information, see Deploying an API on an API Gateway by Creating an API Deployment (https://docs.oracle.com/iaas/Content/APIGateway/Tasks/apigatewaycreatingdeployment.htm). | `string` | No |
+| [`specification`](../../reference/api/apigateway/v1beta1/index.md#kind-apigatewaydeployment-status-specification) | ApiGatewayDeploymentSpecification defines nested fields for ApiGatewayDeployment.Specification. | `object` | No |
 | [`status`](../../reference/api/apigateway/v1beta1/index.md#kind-apigatewaydeployment-status-status) | - | `object` | Yes |
+| `systemTags` | System tags for this resource. Each key is predefined and scoped to a namespace. Example: `{"orcl-cloud": {"free-tier-retained": "true"}}` | `map[string, map[string, string]]` | No |
+| `timeCreated` | The time this resource was created. An RFC3339 formatted datetime string. | `string` | No |
+| `timeUpdated` | The time this resource was last updated. An RFC3339 formatted datetime string. | `string` | No |
 
 
 ## Sample Manifest
 
-No checked-in sample manifest currently exists for this resource.
+This example is generated from the checked-in sample manifest at `config/samples/apigateway_v1beta1_apigatewaydeployment.yaml`. Replace placeholder values before applying it.
+
+[Open the rendered sample page](../../reference/samples/apigateway/v1beta1/apigatewaydeployment.md)
+
+```yaml
+#
+# Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+#
+
+#
+# Replace the gateway and compartment OCIDs below before running e2e.
+#
+apiVersion: apigateway.oracle.com/v1beta1
+kind: ApiGatewayDeployment
+metadata:
+  name: apigatewaydeployment-sample
+spec:
+  gatewayId: ocid1.apigateway.oc1..exampleuniqueID
+  compartmentId: ocid1.compartment.oc1..exampleuniqueID
+  displayName: apigatewaydeployment-sample
+  pathPrefix: /sample
+  routes:
+    - path: /hello
+      methods: [GET]
+      backend:
+        type: STOCK_RESPONSE_BACKEND
+        status: 200
+        body: hello
+```

@@ -50,15 +50,84 @@ func registerDesktopPoolRuntimeHooksMutator(mutator DesktopPoolRuntimeHooksMutat
 	}
 	desktoppoolRuntimeHooksMutators = append(desktoppoolRuntimeHooksMutators, mutator)
 }
+func newDesktopPoolRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "desktops",
+		FormalSlug:    "desktoppool",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"availabilityDomain", "compartmentId", "displayName", "id", "state"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"areVolumesPreserved", "availabilityPolicy.startSchedule.cronExpression", "availabilityPolicy.startSchedule.timezone", "availabilityPolicy.stopSchedule.cronExpression", "availabilityPolicy.stopSchedule.timezone", "bootVolumeSizeInGbs", "compartmentId", "contactDetails", "definedTags", "description", "devicePolicy.audioMode", "devicePolicy.cdmMode", "devicePolicy.clipboardMode", "devicePolicy.isDisplayEnabled", "devicePolicy.isKeyboardEnabled", "devicePolicy.isPointerEnabled", "devicePolicy.isPrintingEnabled", "devicePolicy.isVideoInputEnabled", "displayName", "freeformTags", "image.imageId", "image.imageName", "image.operatingSystem", "maximumSize", "sessionLifecycleActions.disconnect.action", "sessionLifecycleActions.disconnect.gracePeriodInMinutes", "sessionLifecycleActions.inactivity.action", "sessionLifecycleActions.inactivity.gracePeriodInMinutes", "standbySize", "timeStartScheduled", "timeStopScheduled"},
+			ForceNew:      []string{"arePrivilegedUsers", "availabilityDomain", "isStorageEnabled", "networkConfiguration", "networkConfiguration.subnetId", "networkConfiguration.vcnId", "nsgIds", "privateAccessDetails", "privateAccessDetails.nsgIds", "privateAccessDetails.privateIp", "privateAccessDetails.subnetId", "sessionLifecycleActions", "shapeConfig", "shapeConfig.baselineOcpuUtilization", "shapeConfig.memoryInGbs", "shapeConfig.ocpus", "shapeName", "storageBackupPolicyId", "storageSizeInGbs", "useDedicatedVmHost"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newDesktopPoolDefaultRuntimeHooks(sdkClient desktopssdk.DesktopServiceClient) DesktopPoolRuntimeHooks {
 	return DesktopPoolRuntimeHooks{
+		Semantics:       newDesktopPoolRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*desktopsv1beta1.DesktopPool]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*desktopsv1beta1.DesktopPool]{},
 		StatusHooks:     generatedruntime.StatusHooks[*desktopsv1beta1.DesktopPool]{},
 		ParityHooks:     generatedruntime.ParityHooks[*desktopsv1beta1.DesktopPool]{},
-		Async:           generatedruntime.AsyncHooks[*desktopsv1beta1.DesktopPool]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*desktopsv1beta1.DesktopPool]{},
+		Async: generatedruntime.AsyncHooks[*desktopsv1beta1.DesktopPool]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := desktopssdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*desktopsv1beta1.DesktopPool]{},
 		Create: runtimeOperationHooks[desktopssdk.CreateDesktopPoolRequest, desktopssdk.CreateDesktopPoolResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateDesktopPoolDetails", RequestName: "CreateDesktopPoolDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request desktopssdk.CreateDesktopPoolRequest) (desktopssdk.CreateDesktopPoolResponse, error) {
@@ -106,10 +175,19 @@ func buildDesktopPoolGeneratedRuntimeConfig(
 	hooks DesktopPoolRuntimeHooks,
 ) generatedruntime.Config[*desktopsv1beta1.DesktopPool] {
 	return generatedruntime.Config[*desktopsv1beta1.DesktopPool]{
-		Kind:            "DesktopPool",
-		SDKName:         "DesktopPool",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "DesktopPool",
+		SDKName:   "DesktopPool",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

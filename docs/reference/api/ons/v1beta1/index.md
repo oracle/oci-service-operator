@@ -205,7 +205,18 @@ TopicStatus defines the observed state of Topic.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| `apiEndpoint` | The endpoint for managing subscriptions or publishing messages to the topic. | `string` | No | - | - |
+| `compartmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment for the topic. | `string` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `description` | The description of the topic. | `string` | No | - | - |
+| `etag` | For optimistic concurrency control. See `if-match`. | `string` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `lifecycleState` | The lifecycle state of the topic. | `string` | No | - | - |
+| `name` | The name of the topic. | `string` | No | - | - |
+| `shortTopicId` | A unique short topic Id. This is used only for SMS subscriptions. | `string` | No | - | - |
 | [`status`](#kind-topic-status-status) | - | `object` | Yes | - | - |
+| `timeCreated` | The time the topic was created. | `string` | No | - | - |
+| `topicId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the topic. | `string` | No | - | - |
 
 <a id="kind-topic-status-status"></a>
 #### Status.status

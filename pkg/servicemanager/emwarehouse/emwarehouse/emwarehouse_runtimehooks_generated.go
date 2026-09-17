@@ -50,15 +50,84 @@ func registerEmWarehouseRuntimeHooksMutator(mutator EmWarehouseRuntimeHooksMutat
 	}
 	emwarehouseRuntimeHooksMutators = append(emwarehouseRuntimeHooksMutators, mutator)
 }
+func newEmWarehouseRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "emwarehouse",
+		FormalSlug:    "emwarehouse",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{"UPDATING"},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "displayName", "id", "lifecycleState", "opc-request-id", "operationsInsightsWarehouseId"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"compartmentId", "definedTags", "emBridgeId", "freeformTags"},
+			ForceNew:      []string{"displayName", "operationsInsightsWarehouseId"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "EmWarehouse", Action: "CreateEmWarehouse"}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "EmWarehouse", Action: "UpdateEmWarehouse"}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "EmWarehouse", Action: "DeleteEmWarehouse"}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "EmWarehouse", Action: "CreateEmWarehouse"}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "EmWarehouse", Action: "UpdateEmWarehouse"}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "EmWarehouse", Action: "DeleteEmWarehouse"}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newEmWarehouseDefaultRuntimeHooks(sdkClient emwarehousesdk.EmWarehouseClient) EmWarehouseRuntimeHooks {
 	return EmWarehouseRuntimeHooks{
+		Semantics:       newEmWarehouseRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*emwarehousev1beta1.EmWarehouse]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*emwarehousev1beta1.EmWarehouse]{},
 		StatusHooks:     generatedruntime.StatusHooks[*emwarehousev1beta1.EmWarehouse]{},
 		ParityHooks:     generatedruntime.ParityHooks[*emwarehousev1beta1.EmWarehouse]{},
-		Async:           generatedruntime.AsyncHooks[*emwarehousev1beta1.EmWarehouse]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*emwarehousev1beta1.EmWarehouse]{},
+		Async: generatedruntime.AsyncHooks[*emwarehousev1beta1.EmWarehouse]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := emwarehousesdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*emwarehousev1beta1.EmWarehouse]{},
 		Create: runtimeOperationHooks[emwarehousesdk.CreateEmWarehouseRequest, emwarehousesdk.CreateEmWarehouseResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateEmWarehouseDetails", RequestName: "CreateEmWarehouseDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request emwarehousesdk.CreateEmWarehouseRequest) (emwarehousesdk.CreateEmWarehouseResponse, error) {
@@ -106,10 +175,19 @@ func buildEmWarehouseGeneratedRuntimeConfig(
 	hooks EmWarehouseRuntimeHooks,
 ) generatedruntime.Config[*emwarehousev1beta1.EmWarehouse] {
 	return generatedruntime.Config[*emwarehousev1beta1.EmWarehouse]{
-		Kind:            "EmWarehouse",
-		SDKName:         "EmWarehouse",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "EmWarehouse",
+		SDKName:   "EmWarehouse",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

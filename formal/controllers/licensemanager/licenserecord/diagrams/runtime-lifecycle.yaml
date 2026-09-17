@@ -1,0 +1,27 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: licensemanager
+slug: licenserecord
+kind: LicenseRecord
+archetype: generated-service-manager
+states:
+  - active
+  - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending: []
+    updatePending: []
+    deletePending: ["DELETING"]
+  listLookup:
+    filters: ["displayName","productId","productLicenseId"]
+    matchRule: exact resource identity match; duplicate matches fail
+  mutation:
+    mutable: ["definedTags","displayName","expirationDate","freeformTags","isPerpetual","isUnlimited","licenseCount","productId","supportEndDate"]
+    forceNew: ["productLicenseId"]
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - "The runtime uses its declared lifecycle-state contract for LicenseRecord reconciliation."
+  - "The credential-free mock exercises SDK request serialization, response projection, mutation when supported, and confirmed deletion."

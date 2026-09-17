@@ -378,7 +378,7 @@ func TestBuildVbInstanceUpdateBodyDoesNotDisableOrReplayIdcsOpenID(t *testing.T)
 		t.Fatalf("buildVbInstanceUpdateBody() error = %v", err)
 	}
 	if updateNeeded {
-		t.Fatalf("buildVbInstanceUpdateBody() updateNeeded = true, want no-op when only desired drift is disable/idcsOpenId replay: %#v", details)
+		t.Fatalf("buildVbInstanceUpdateBody() updateNeeded = true, want no-op when only desired drift reapplies disable/idcsOpenId: %#v", details)
 	}
 	if details.IsVisualBuilderEnabled != nil {
 		t.Fatalf("IsVisualBuilderEnabled = %#v, want nil to avoid disable", details.IsVisualBuilderEnabled)

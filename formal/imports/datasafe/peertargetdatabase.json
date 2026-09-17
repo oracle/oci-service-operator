@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "peertargetdatabase",
+  "kind": "PeerTargetDatabase",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_datasafe_peertargetdatabase",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreatePeerTargetDatabase",
+        "requestType": "datasafe.CreatePeerTargetDatabaseRequest",
+        "responseType": "datasafe.CreatePeerTargetDatabaseResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetPeerTargetDatabase",
+        "requestType": "datasafe.GetPeerTargetDatabaseRequest",
+        "responseType": "datasafe.GetPeerTargetDatabaseResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListPeerTargetDatabase",
+        "requestType": "datasafe.ListPeerTargetDatabaseRequest",
+        "responseType": "datasafe.ListPeerTargetDatabaseResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdatePeerTargetDatabase",
+        "requestType": "datasafe.UpdatePeerTargetDatabaseRequest",
+        "responseType": "datasafe.UpdatePeerTargetDatabaseResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeletePeerTargetDatabase",
+        "requestType": "datasafe.DeletePeerTargetDatabaseRequest",
+        "responseType": "datasafe.DeletePeerTargetDatabaseResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_datasafe_peertargetdatabase",
+    "collectionField": "peertargetdatabase",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/peertargetdatabase/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/peertargetdatabase/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for datasafe/peertargetdatabase; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -56,6 +56,9 @@ spec:
           spec:
             description: TermSpec defines the desired state of Term.
             properties:
+              catalogId:
+                description: The OCID of the catalog containing the term.
+                type: string
               customPropertyMembers:
                 description: The list of customized properties along with the values
                   for this object
@@ -85,6 +88,9 @@ spec:
                   A user-friendly display name. Is changeable. The combination of 'displayName' and 'parentTermKey'
                   must be unique. Avoid entering confidential information.
                 type: string
+              glossaryKey:
+                description: The key of the glossary containing the term.
+                type: string
               isAllowedToHaveChildTerms:
                 description: Indicates whether a term may contain child terms.
                 type: boolean
@@ -101,7 +107,9 @@ spec:
                   term in the glossary.
                 type: string
             required:
+            - catalogId
             - displayName
+            - glossaryKey
             type: object
           status:
             description: TermStatus defines the observed state of Term.

@@ -66,25 +66,25 @@ func newUserDefinedFunctionDefaultRuntimeHooks(sdkClient dataintegrationsdk.Data
 			},
 		},
 		Get: runtimeOperationHooks[dataintegrationsdk.GetUserDefinedFunctionRequest, dataintegrationsdk.GetUserDefinedFunctionResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "UserDefinedFunctionKey", RequestName: "userDefinedFunctionKey", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "UserDefinedFunctionKey", RequestName: "userDefinedFunctionKey", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request dataintegrationsdk.GetUserDefinedFunctionRequest) (dataintegrationsdk.GetUserDefinedFunctionResponse, error) {
 				return sdkClient.GetUserDefinedFunction(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[dataintegrationsdk.ListUserDefinedFunctionsRequest, dataintegrationsdk.ListUserDefinedFunctionsResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: true}, {FieldName: "FunctionLibraryKey", RequestName: "functionLibraryKey", Contribution: "query", PreferResourceID: false}, {FieldName: "Fields", RequestName: "fields", Contribution: "query", PreferResourceID: false}, {FieldName: "Name", RequestName: "name", Contribution: "query", PreferResourceID: false}, {FieldName: "Identifier", RequestName: "identifier", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "FunctionLibraryKey", RequestName: "functionLibraryKey", Contribution: "query", PreferResourceID: false}, {FieldName: "Fields", RequestName: "fields", Contribution: "query", PreferResourceID: false}, {FieldName: "Name", RequestName: "name", Contribution: "query", PreferResourceID: false}, {FieldName: "Identifier", RequestName: "identifier", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dataintegrationsdk.ListUserDefinedFunctionsRequest) (dataintegrationsdk.ListUserDefinedFunctionsResponse, error) {
 				return sdkClient.ListUserDefinedFunctions(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[dataintegrationsdk.UpdateUserDefinedFunctionRequest, dataintegrationsdk.UpdateUserDefinedFunctionResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "UserDefinedFunctionKey", RequestName: "userDefinedFunctionKey", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdateUserDefinedFunctionDetails", RequestName: "UpdateUserDefinedFunctionDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "UserDefinedFunctionKey", RequestName: "userDefinedFunctionKey", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateUserDefinedFunctionDetails", RequestName: "UpdateUserDefinedFunctionDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dataintegrationsdk.UpdateUserDefinedFunctionRequest) (dataintegrationsdk.UpdateUserDefinedFunctionResponse, error) {
 				return sdkClient.UpdateUserDefinedFunction(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[dataintegrationsdk.DeleteUserDefinedFunctionRequest, dataintegrationsdk.DeleteUserDefinedFunctionResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "UserDefinedFunctionKey", RequestName: "userDefinedFunctionKey", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "UserDefinedFunctionKey", RequestName: "userDefinedFunctionKey", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request dataintegrationsdk.DeleteUserDefinedFunctionRequest) (dataintegrationsdk.DeleteUserDefinedFunctionResponse, error) {
 				return sdkClient.DeleteUserDefinedFunction(ctx, request)
 			},

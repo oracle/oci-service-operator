@@ -1,0 +1,28 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: limitsincrease
+slug: limitsincreaserequest
+kind: LimitsIncreaseRequest
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending: ["ACCEPTED","IN_PROGRESS"]
+    updatePending: []
+    deletePending: []
+  listLookup:
+    filters: ["compartmentId","displayName","id","justification","subscriptionId"]
+    matchRule: exact resource identity match; duplicate matches fail
+  mutation:
+    mutable: ["definedTags","freeformTags"]
+    forceNew: ["compartmentId","displayName","justification","limitsIncreaseItemRequests","subscriptionId"]
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - "The runtime uses its declared lifecycle-state contract for LimitsIncreaseRequest reconciliation."
+  - "The credential-free mock exercises SDK request serialization, response projection, mutation when supported, and confirmed deletion."

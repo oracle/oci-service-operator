@@ -26,15 +26,15 @@ type WebAppFirewallPolicySpec struct {
 	// +kubebuilder:validation:Optional
 	Actions []WebAppFirewallPolicyAction `json:"actions,omitempty"`
 	// +kubebuilder:validation:Optional
-	RequestAccessControl WebAppFirewallPolicyRequestAccessControl `json:"requestAccessControl,omitempty"`
+	RequestAccessControl WebAppFirewallPolicyRequestAccessControl `json:"requestAccessControl,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	RequestRateLimiting WebAppFirewallPolicyRequestRateLimiting `json:"requestRateLimiting,omitempty"`
+	RequestRateLimiting WebAppFirewallPolicyRequestRateLimiting `json:"requestRateLimiting,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	RequestProtection WebAppFirewallPolicyRequestProtection `json:"requestProtection,omitempty"`
+	RequestProtection WebAppFirewallPolicyRequestProtection `json:"requestProtection,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	ResponseAccessControl WebAppFirewallPolicyResponseAccessControl `json:"responseAccessControl,omitempty"`
+	ResponseAccessControl WebAppFirewallPolicyResponseAccessControl `json:"responseAccessControl,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	ResponseProtection WebAppFirewallPolicyResponseProtection `json:"responseProtection,omitempty"`
+	ResponseProtection WebAppFirewallPolicyResponseProtection `json:"responseProtection,omitempty,omitzero"`
 	// Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
 	// Example: `{"bar-key": "value"}`
 	// +kubebuilder:validation:Optional
@@ -138,7 +138,7 @@ type WebAppFirewallPolicyAction struct {
 	// +kubebuilder:validation:Optional
 	Headers []WebAppFirewallPolicyActionHeader `json:"headers,omitempty"`
 	// +kubebuilder:validation:Optional
-	Body WebAppFirewallPolicyActionBody `json:"body,omitempty"`
+	Body WebAppFirewallPolicyActionBody `json:"body,omitempty,omitzero"`
 }
 
 // WebAppFirewallPolicyRequestAccessControlRule defines nested fields for WebAppFirewallPolicy.RequestAccessControl.Rule.
@@ -242,7 +242,7 @@ type WebAppFirewallPolicyRequestProtectionRuleProtectionCapability struct {
 	// +kubebuilder:validation:Required
 	Version int `json:"version"`
 	// +kubebuilder:validation:Optional
-	Exclusions WebAppFirewallPolicyRequestProtectionRuleProtectionCapabilityExclusions `json:"exclusions,omitempty"`
+	Exclusions WebAppFirewallPolicyRequestProtectionRuleProtectionCapabilityExclusions `json:"exclusions,omitempty,omitzero"`
 	// Override action to take if capability was triggered, defined in Protection Rule for this capability.
 	// Only actions of type CHECK are allowed.
 	// +kubebuilder:validation:Optional
@@ -298,7 +298,7 @@ type WebAppFirewallPolicyRequestProtectionRule struct {
 	// +kubebuilder:validation:Optional
 	Condition string `json:"condition,omitempty"`
 	// +kubebuilder:validation:Optional
-	ProtectionCapabilitySettings WebAppFirewallPolicyRequestProtectionRuleProtectionCapabilitySettings `json:"protectionCapabilitySettings,omitempty"`
+	ProtectionCapabilitySettings WebAppFirewallPolicyRequestProtectionRuleProtectionCapabilitySettings `json:"protectionCapabilitySettings,omitempty,omitzero"`
 	// Enables/disables body inspection for this protection rule.
 	// Only Protection Rules in RequestProtection can have this option enabled. Response body inspection will
 	// be available at a later date.
@@ -385,7 +385,7 @@ type WebAppFirewallPolicyResponseProtectionRuleProtectionCapability struct {
 	// +kubebuilder:validation:Required
 	Version int `json:"version"`
 	// +kubebuilder:validation:Optional
-	Exclusions WebAppFirewallPolicyResponseProtectionRuleProtectionCapabilityExclusions `json:"exclusions,omitempty"`
+	Exclusions WebAppFirewallPolicyResponseProtectionRuleProtectionCapabilityExclusions `json:"exclusions,omitempty,omitzero"`
 	// Override action to take if capability was triggered, defined in Protection Rule for this capability.
 	// Only actions of type CHECK are allowed.
 	// +kubebuilder:validation:Optional
@@ -441,7 +441,7 @@ type WebAppFirewallPolicyResponseProtectionRule struct {
 	// +kubebuilder:validation:Optional
 	Condition string `json:"condition,omitempty"`
 	// +kubebuilder:validation:Optional
-	ProtectionCapabilitySettings WebAppFirewallPolicyResponseProtectionRuleProtectionCapabilitySettings `json:"protectionCapabilitySettings,omitempty"`
+	ProtectionCapabilitySettings WebAppFirewallPolicyResponseProtectionRuleProtectionCapabilitySettings `json:"protectionCapabilitySettings,omitempty,omitzero"`
 	// Enables/disables body inspection for this protection rule.
 	// Only Protection Rules in RequestProtection can have this option enabled. Response body inspection will
 	// be available at a later date.

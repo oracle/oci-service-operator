@@ -259,5 +259,6 @@ nav:
   - Contributor Docs:
       - Overview: contributor/index.md
       - Generator Contract: api-generator-contract.md
+      - Service-Manager Mock Integration: contributor/service-manager-mock-integration.md
       - GitHub Pages Handoff: contributor/github-pages-handoff.md
       - Validator Guide: validator-guide.md

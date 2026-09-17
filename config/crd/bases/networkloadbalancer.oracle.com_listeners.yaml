@@ -77,6 +77,10 @@ spec:
                   A friendly name for the listener. It must be unique and it cannot be changed.
                   Example: `example_listener`
                 type: string
+              networkLoadBalancerId:
+                description: The OCID of the network load balancer that owns this
+                  listener.
+                type: string
               port:
                 description: |-
                   The communication port for the listener.
@@ -129,6 +133,10 @@ spec:
                 description: |-
                   A friendly name for the listener. It must be unique and it cannot be changed.
                   Example: `example_listener`
+                type: string
+              networkLoadBalancerId:
+                description: The bound network load balancer OCID used to address
+                  this listener.
                 type: string
               port:
                 description: |-

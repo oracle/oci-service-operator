@@ -1,0 +1,57 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: iot
+slug: iotdomain
+kind: IotDomain
+archetype: generated-service-manager
+states:
+    - provisioning
+    - active
+    - updating
+    - terminating
+repoAuthored:
+    providerLifecycle:
+        createPending:
+            - CREATING
+        updatePending:
+            - UPDATING
+        deletePending:
+            - DELETING
+    listLookup:
+        filters:
+            - compartmentId
+            - iotDomainGroupId
+            - displayName
+            - id
+        matchRule: exact compartmentId, iotDomainGroupId, displayName, id match within the resource scope; duplicate matches fail
+    mutation:
+        mutable:
+            - displayName
+            - description
+            - freeformTags
+            - definedTags
+        forceNew:
+            - iotDomainGroupId
+            - compartmentId
+    hooks:
+        create:
+            - helper: tfresource.CreateResource
+              entityType: IotDomain
+              action: CreateIotDomain
+        update:
+            - helper: tfresource.UpdateResource
+              entityType: IotDomain
+              action: UpdateIotDomain
+        delete:
+            - helper: tfresource.DeleteResource
+              entityType: IotDomain
+              action: DeleteIotDomain
+    followUp:
+        create: read-after-write
+        update: read-after-write
+        delete: confirm-delete
+notes:
+    - The production runtime uses generatedruntime/workrequest async handling for create, update, delete work-request phases.
+    - Lifecycle success states are ACTIVE; pending create, update, and delete states requeue until the corresponding follow-up converges.
+    - Status projection is required, Secret side effects are none, and the finalizer policy is retain-until-confirmed-delete.
+    - Delete policy required retains ownership until DELETED or confirmed absence.

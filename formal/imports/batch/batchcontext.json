@@ -1,0 +1,146 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "batch",
+  "slug": "batchcontext",
+  "kind": "BatchContext",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_batch_batch_context",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateBatchContext",
+        "requestType": "batch.CreateBatchContextRequest",
+        "responseType": "batch.CreateBatchContextResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetBatchContext",
+        "requestType": "batch.GetBatchContextRequest",
+        "responseType": "batch.GetBatchContextResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListBatchContexts",
+        "requestType": "batch.ListBatchContextsRequest",
+        "responseType": "batch.ListBatchContextsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateBatchContext",
+        "requestType": "batch.UpdateBatchContextRequest",
+        "responseType": "batch.UpdateBatchContextResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteBatchContext",
+        "requestType": "batch.DeleteBatchContextRequest",
+        "responseType": "batch.DeleteBatchContextResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "displayName",
+      "description",
+      "freeformTags",
+      "definedTags",
+      "jobPriorityConfigurations",
+      "entitlements"
+    ],
+    "forceNew": [
+      "compartmentId",
+      "network",
+      "fleets",
+      "loggingConfiguration"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "BatchContext",
+        "action": "CreateBatchContext"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "BatchContext",
+        "action": "UpdateBatchContext"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "BatchContext",
+        "action": "DeleteBatchContext"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "unavailable",
+    "collectionField": "Items",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartmentId",
+      "lifecycleState",
+      "displayName",
+      "id",
+      "opc-request-id"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/batch/batchcontext/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/batch/batchcontext/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Terraform provider formal-import could not resolve oci_batch_batch_context; the vendored SDK, generated runtime, and package-owned typed OCI fixtures define this reviewed contract."
+  ]
+}

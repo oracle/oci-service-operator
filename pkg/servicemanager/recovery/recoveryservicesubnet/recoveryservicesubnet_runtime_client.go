@@ -271,6 +271,7 @@ func recoveryServiceSubnetRuntimeSemantics() *generatedruntime.Semantics {
 			},
 			Update: []generatedruntime.Hook{
 				{Helper: "tfresource.UpdateResource"},
+				{Helper: "ChangeRecoveryServiceSubnetCompartment"},
 				{Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: recoveryServiceSubnetWorkRequestEntityType, Action: "UPDATED"},
 			},
 			Delete: []generatedruntime.Hook{

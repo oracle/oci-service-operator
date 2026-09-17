@@ -33,9 +33,9 @@ type DbSystemSpec struct {
 	// +kubebuilder:validation:Optional
 	Description string `json:"description,omitempty"`
 	// +kubebuilder:validation:Optional
-	Rest DbSystemRest `json:"rest,omitempty"`
+	Rest DbSystemRest `json:"rest,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	DatabaseConsole DbSystemDatabaseConsole `json:"databaseConsole,omitempty"`
+	DatabaseConsole DbSystemDatabaseConsole `json:"databaseConsole,omitempty,omitzero"`
 	// Specifies if the DB System is highly available.
 	// When creating a DB System with High Availability, three instances
 	// are created and placed according to your region- and
@@ -86,7 +86,7 @@ type DbSystemSpec struct {
 	// +kubebuilder:validation:Optional
 	DataStorageSizeInGBs int `json:"dataStorageSizeInGBs,omitempty"`
 	// +kubebuilder:validation:Optional
-	DataStorage DbSystemDataStorage `json:"dataStorage,omitempty"`
+	DataStorage DbSystemDataStorage `json:"dataStorage,omitempty,omitzero"`
 	// The hostname for the primary endpoint of the DB System. Used for DNS.
 	// The value is the hostname portion of the primary private IP's fully qualified domain name (FQDN)
 	// (for example, "dbsystem-1" in FQDN "dbsystem-1.subnet123.vcn1.oraclevcn.com").
@@ -107,11 +107,11 @@ type DbSystemSpec struct {
 	// +kubebuilder:validation:Optional
 	PortX int `json:"portX,omitempty"`
 	// +kubebuilder:validation:Optional
-	BackupPolicy DbSystemBackupPolicy `json:"backupPolicy,omitempty"`
+	BackupPolicy DbSystemBackupPolicy `json:"backupPolicy,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	Source DbSystemSource `json:"source,omitempty"`
+	Source DbSystemSource `json:"source,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	Maintenance DbSystemMaintenance `json:"maintenance,omitempty"`
+	Maintenance DbSystemMaintenance `json:"maintenance,omitempty,omitzero"`
 	// Simple key-value pair applied without any predefined name, type or scope. Exists for cross-compatibility only.
 	// Example: `{"bar-key": "value"}`
 	// +kubebuilder:validation:Optional
@@ -121,7 +121,7 @@ type DbSystemSpec struct {
 	// +kubebuilder:validation:Optional
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 	// +kubebuilder:validation:Optional
-	DeletionPolicy DbSystemDeletionPolicy `json:"deletionPolicy,omitempty"`
+	DeletionPolicy DbSystemDeletionPolicy `json:"deletionPolicy,omitempty,omitzero"`
 	// Whether to run the DB System with InnoDB Redo Logs and the Double Write Buffer enabled or disabled,
 	// and whether to enable or disable syncing of the Binary Logs.
 	// +kubebuilder:validation:Optional
@@ -130,9 +130,9 @@ type DbSystemSpec struct {
 	// +kubebuilder:validation:Optional
 	DatabaseManagement string `json:"databaseManagement,omitempty"`
 	// +kubebuilder:validation:Optional
-	SecureConnections DbSystemSecureConnections `json:"secureConnections,omitempty"`
+	SecureConnections DbSystemSecureConnections `json:"secureConnections,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	EncryptData DbSystemEncryptData `json:"encryptData,omitempty"`
+	EncryptData DbSystemEncryptData `json:"encryptData,omitempty,omitzero"`
 	// The database mode indicating the types of statements that will be allowed to run in the DB system.
 	// This mode will apply only to statements run by user connections. Replicated write statements will continue
 	// to be allowed regardless of the DatabaseMode.
@@ -153,9 +153,9 @@ type DbSystemSpec struct {
 	// +kubebuilder:validation:Optional
 	CustomerContacts []DbSystemCustomerContact `json:"customerContacts,omitempty"`
 	// +kubebuilder:validation:Optional
-	ReadEndpoint DbSystemReadEndpoint `json:"readEndpoint,omitempty"`
+	ReadEndpoint DbSystemReadEndpoint `json:"readEndpoint,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	TelemetryConfiguration DbSystemTelemetryConfiguration `json:"telemetryConfiguration,omitempty"`
+	TelemetryConfiguration DbSystemTelemetryConfiguration `json:"telemetryConfiguration,omitempty,omitzero"`
 }
 
 // DbSystemRest defines nested fields for DbSystem.Rest.
@@ -247,7 +247,7 @@ type DbSystemBackupPolicy struct {
 	// +kubebuilder:validation:Optional
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 	// +kubebuilder:validation:Optional
-	PitrPolicy DbSystemBackupPolicyPitrPolicy `json:"pitrPolicy,omitempty"`
+	PitrPolicy DbSystemBackupPolicyPitrPolicy `json:"pitrPolicy,omitempty,omitzero"`
 }
 
 // DbSystemSource defines nested fields for DbSystem.Source.

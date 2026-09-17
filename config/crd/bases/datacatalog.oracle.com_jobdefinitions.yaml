@@ -56,6 +56,9 @@ spec:
           spec:
             description: JobDefinitionSpec defines the desired state of JobDefinition.
             properties:
+              catalogId:
+                description: The OCID of the catalog containing this resource.
+                type: string
               connectionKey:
                 description: The key of the connection resource to be used for the
                   job.
@@ -101,6 +104,7 @@ spec:
                   of rows, for this metadata harvest.
                 type: integer
             required:
+            - catalogId
             - displayName
             - jobType
             type: object

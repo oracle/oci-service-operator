@@ -141,7 +141,7 @@ func applyHostInsightRuntimeHooks(
 		return
 	}
 
-	hooks.Semantics = newHostInsightRuntimeSemantics()
+	hooks.Semantics = reviewedHostInsightRuntimeSemantics()
 	applyHostInsightBodyHooks(hooks)
 	applyHostInsightOperationHooks(hooks, client, initErr)
 	applyHostInsightIdentityHooks(hooks)
@@ -724,7 +724,7 @@ func markHostInsightDeleteWorkRequestPending(resource *opsiv1beta1.HostInsight, 
 	}, loggerutil.OSOKLogger{})
 }
 
-func newHostInsightRuntimeSemantics() *generatedruntime.Semantics {
+func reviewedHostInsightRuntimeSemantics() *generatedruntime.Semantics {
 	return &generatedruntime.Semantics{
 		FormalService: "opsi",
 		FormalSlug:    "hostinsight",
@@ -826,7 +826,6 @@ func hostInsightGetFields() []generatedruntime.RequestField {
 func hostInsightListFields() []generatedruntime.RequestField {
 	return []generatedruntime.RequestField{
 		{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", LookupPaths: []string{"status.compartmentId", "spec.compartmentId", "compartmentId"}},
-		{FieldName: "Id", RequestName: "id", Contribution: "query", PreferResourceID: true},
 		{FieldName: "EnterpriseManagerBridgeId", RequestName: "enterpriseManagerBridgeId", Contribution: "query", LookupPaths: []string{"status.enterpriseManagerBridgeId", "spec.enterpriseManagerBridgeId", "enterpriseManagerBridgeId"}},
 		{FieldName: "ExadataInsightId", RequestName: "exadataInsightId", Contribution: "query", LookupPaths: []string{"status.exadataInsightId", "spec.exadataInsightId", "exadataInsightId"}},
 		{FieldName: "Page", RequestName: "page", Contribution: "query"},

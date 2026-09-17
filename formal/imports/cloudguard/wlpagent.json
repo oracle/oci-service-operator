@@ -1,0 +1,121 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "cloudguard",
+  "slug": "wlpagent",
+  "kind": "WlpAgent",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_cloud_guard_wlp_agent",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateWlpAgent",
+        "requestType": "cloudguard.CreateWlpAgentRequest",
+        "responseType": "cloudguard.CreateWlpAgentResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetWlpAgent",
+        "requestType": "cloudguard.GetWlpAgentRequest",
+        "responseType": "cloudguard.GetWlpAgentResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListWlpAgents",
+        "requestType": "cloudguard.ListWlpAgentsRequest",
+        "responseType": "cloudguard.ListWlpAgentsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateWlpAgent",
+        "requestType": "cloudguard.UpdateWlpAgentRequest",
+        "responseType": "cloudguard.UpdateWlpAgentResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteWlpAgent",
+        "requestType": "cloudguard.DeleteWlpAgentRequest",
+        "responseType": "cloudguard.DeleteWlpAgentResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "certificate_signed_request",
+      "defined_tags",
+      "freeform_tags"
+    ],
+    "forceNew": [
+      "agent_version",
+      "compartment_id",
+      "os_info"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "target": [
+      "NOT_FOUND"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_cloud_guard_wlp_agents",
+    "collectionField": "wlp_agent_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "agent_version"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/cloudguard/wlpagent/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/cloudguard/wlpagent/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "lifecycle-classification",
+      "list-lookup",
+      "mutation-policy",
+      "status-projection",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Pinned provider boundary: formal-import cannot resolve the provider's CloudGuardWlpAgentResource CRUD type, so this row records reviewed provider and SDK facts directly at the sources.lock revision.",
+    "The OCI SDK WlpAgent response exposes no lifecycle state; ACTIVE is the repo-authored immediate steady-state abstraction used by the state-free wrapper.",
+    "The provider and SDK agree that certificateSignedRequest and tag maps update in place while compartmentId, agentVersion, and osInfo are replacement-only; deletion completes after a NotFound reread."
+  ]
+}

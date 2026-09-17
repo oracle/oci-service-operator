@@ -65,7 +65,7 @@ func newExternalPublicationValidationDefaultRuntimeHooks(sdkClient dataintegrati
 			},
 		},
 		Get: runtimeOperationHooks[dataintegrationsdk.GetExternalPublicationValidationRequest, dataintegrationsdk.GetExternalPublicationValidationResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "TaskKey", RequestName: "taskKey", Contribution: "path", PreferResourceID: false}, {FieldName: "ExternalPublicationValidationKey", RequestName: "externalPublicationValidationKey", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "TaskKey", RequestName: "taskKey", Contribution: "path", PreferResourceID: false}, {FieldName: "ExternalPublicationValidationKey", RequestName: "externalPublicationValidationKey", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request dataintegrationsdk.GetExternalPublicationValidationRequest) (dataintegrationsdk.GetExternalPublicationValidationResponse, error) {
 				return sdkClient.GetExternalPublicationValidation(ctx, request)
 			},
@@ -77,7 +77,7 @@ func newExternalPublicationValidationDefaultRuntimeHooks(sdkClient dataintegrati
 			},
 		},
 		Delete: runtimeOperationHooks[dataintegrationsdk.DeleteExternalPublicationValidationRequest, dataintegrationsdk.DeleteExternalPublicationValidationResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "TaskKey", RequestName: "taskKey", Contribution: "path", PreferResourceID: false}, {FieldName: "ExternalPublicationValidationKey", RequestName: "externalPublicationValidationKey", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "TaskKey", RequestName: "taskKey", Contribution: "path", PreferResourceID: false}, {FieldName: "ExternalPublicationValidationKey", RequestName: "externalPublicationValidationKey", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request dataintegrationsdk.DeleteExternalPublicationValidationRequest) (dataintegrationsdk.DeleteExternalPublicationValidationResponse, error) {
 				return sdkClient.DeleteExternalPublicationValidation(ctx, request)
 			},

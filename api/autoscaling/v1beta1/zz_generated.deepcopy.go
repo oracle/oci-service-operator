@@ -77,6 +77,11 @@ func (in *AutoScalingConfigurationList) DeepCopyObject() runtime.Object {
 func (in *AutoScalingConfigurationPolicy) DeepCopyInto(out *AutoScalingConfigurationPolicy) {
 	*out = *in
 	out.Capacity = in.Capacity
+	if in.IsEnabled != nil {
+		in, out := &in.IsEnabled, &out.IsEnabled
+		*out = new(bool)
+		**out = **in
+	}
 	out.ExecutionSchedule = in.ExecutionSchedule
 	out.ResourceAction = in.ResourceAction
 	if in.Rules != nil {
@@ -254,6 +259,11 @@ func (in *AutoScalingConfigurationSpec) DeepCopyInto(out *AutoScalingConfigurati
 		for key, val := range *in {
 			(*out)[key] = val
 		}
+	}
+	if in.IsEnabled != nil {
+		in, out := &in.IsEnabled, &out.IsEnabled
+		*out = new(bool)
+		**out = **in
 	}
 }
 
@@ -487,6 +497,11 @@ func (in *AutoScalingPolicyRuleMetricThreshold) DeepCopy() *AutoScalingPolicyRul
 func (in *AutoScalingPolicySpec) DeepCopyInto(out *AutoScalingPolicySpec) {
 	*out = *in
 	out.Capacity = in.Capacity
+	if in.IsEnabled != nil {
+		in, out := &in.IsEnabled, &out.IsEnabled
+		*out = new(bool)
+		**out = **in
+	}
 	out.ExecutionSchedule = in.ExecutionSchedule
 	out.ResourceAction = in.ResourceAction
 	if in.Rules != nil {

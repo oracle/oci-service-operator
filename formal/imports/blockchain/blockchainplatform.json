@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "blockchain",
+  "slug": "blockchainplatform",
+  "kind": "BlockchainPlatform",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_blockchain_blockchain_platform",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateBlockchainPlatform",
+        "requestType": "blockchain.CreateBlockchainPlatformRequest",
+        "responseType": "blockchain.CreateBlockchainPlatformResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetBlockchainPlatform",
+        "requestType": "blockchain.GetBlockchainPlatformRequest",
+        "responseType": "blockchain.GetBlockchainPlatformResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListBlockchainPlatforms",
+        "requestType": "blockchain.ListBlockchainPlatformsRequest",
+        "responseType": "blockchain.ListBlockchainPlatformsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeBlockchainPlatformCompartment",
+        "requestType": "blockchain.ChangeBlockchainPlatformCompartmentRequest",
+        "responseType": "blockchain.ChangeBlockchainPlatformCompartmentResponse"
+      },
+      {
+        "operation": "UpdateBlockchainPlatform",
+        "requestType": "blockchain.UpdateBlockchainPlatformRequest",
+        "responseType": "blockchain.UpdateBlockchainPlatformResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteBlockchainPlatform",
+        "requestType": "blockchain.DeleteBlockchainPlatformRequest",
+        "responseType": "blockchain.DeleteBlockchainPlatformResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING",
+        "SCALING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "description",
+      "freeform_tags",
+      "idcs_access_token",
+      "load_balancer_shape",
+      "replicas.ca_count",
+      "replicas.console_count",
+      "replicas.proxy_count",
+      "storage_size_in_tbs",
+      "total_ocpu_capacity"
+    ],
+    "forceNew": [
+      "ca_cert_archive_text",
+      "compute_shape",
+      "display_name",
+      "federated_user_id",
+      "is_byol",
+      "platform_role",
+      "platform_version"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_blockchain_blockchain_platforms",
+    "collectionField": "blockchain_platform_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/blockchain/blockchainplatform/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/blockchain/blockchainplatform/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from the pinned terraform-provider-oci source revision."
+  ]
+}

@@ -35,6 +35,9 @@ type QuotaRuleSpec struct {
 	// Example: `UserXYZ's quota`
 	// +kubebuilder:validation:Optional
 	DisplayName string `json:"displayName,omitempty"`
+	// The OCID of the file system containing this quota rule.
+	// +kubebuilder:validation:Required
+	FileSystemId string `json:"fileSystemId"`
 }
 
 // QuotaRuleStatus defines the observed state of QuotaRule.

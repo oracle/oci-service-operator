@@ -1,0 +1,67 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: datasafe
+slug: sensitivetype
+kind: SensitiveType
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+  - deleted
+repoAuthored:
+  providerLifecycle:
+    createPending:
+      - CREATING
+    updatePending:
+      - UPDATING
+    deletePending:
+      - DELETING
+  listLookup:
+    filters:
+      - compartmentId
+      - entityType
+      - displayName
+      - shortName
+    matchRule: exact unique compartmentId plus entityType, displayName, and shortName match
+  mutation:
+    mutable:
+      - commentPattern
+      - dataPattern
+      - defaultMaskingFormatId
+      - definedTags
+      - description
+      - displayName
+      - freeformTags
+      - namePattern
+      - parentCategoryId
+      - searchType
+      - shortName
+    forceNew:
+      - compartmentId
+      - entityType
+  operations:
+    update:
+      - UpdateSensitiveType
+  hooks:
+    create:
+      - helper: tfresource.CreateResource
+    update:
+      - helper: tfresource.UpdateResource
+    delete:
+      - helper: tfresource.DeleteResource
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - Create and update work-request IDs remain observable breadcrumbs, while
+    generatedruntime converges through GetSensitiveType lifecycle reads.
+  - The retained resource-local builders preserve SENSITIVE_TYPE and
+    SENSITIVE_CATEGORY polymorphic request bodies.
+  - Mutable fields follow the reviewed UpdateSensitiveType subtype surfaces.
+    ChangeSensitiveTypeCompartment and cross-subtype mutation remain outside
+    the published runtime.
+  - Delete retains the finalizer through DELETING until DELETED or NotFound.
+    There are no Secret side effects.

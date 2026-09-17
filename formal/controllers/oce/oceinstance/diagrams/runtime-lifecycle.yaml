@@ -9,5 +9,72 @@ states:
   - active
   - updating
   - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending:
+      - CREATING
+    updatePending:
+      - UPDATING
+    deletePending:
+      - DELETING
+  listLookup:
+    filters:
+      - compartmentId
+      - tenancyId
+      - displayName
+    matchRule: exact compartmentId, tenancyId, and name unique match outside FAILED, DELETING, and DELETED; duplicate matches fail
+  mutation:
+    mutable:
+      - addOnFeatures
+      - definedTags
+      - description
+      - drRegion
+      - freeformTags
+      - instanceLicenseType
+      - instanceUsageType
+      - wafPrimaryDomain
+    forceNew:
+      - adminEmail
+      - compartmentId
+      - identityStripe.serviceName
+      - identityStripe.tenancy
+      - instanceAccessType
+      - name
+      - objectStorageNamespace
+      - tenancyId
+      - tenancyName
+      - upgradeSchedule
+  hooks:
+    create:
+      - helper: tfresource.CreateResource
+      - helper: tfresource.WaitForWorkRequestWithErrorHandling
+        entityType: oceinstance
+        action: CREATED
+    update:
+      - helper: tfresource.UpdateResource
+      - helper: tfresource.WaitForWorkRequestWithErrorHandling
+        entityType: oceinstance
+        action: UPDATED
+    delete:
+      - helper: tfresource.DeleteResource
+      - helper: tfresource.WaitForWorkRequestWithErrorHandling
+        entityType: oceinstance
+        action: DELETED
+  followUp:
+    create: GetWorkRequest -> GetOceInstance
+    update: GetWorkRequest -> GetOceInstance
+    delete: GetWorkRequest -> GetOceInstance/ListOceInstances confirm-delete
 notes:
-  - Scaffold metadata only; replace with controller-specific runtime states before promotion.
+  - CREATING requeues as provisioning, UPDATING requeues as updating, ACTIVE
+    settles success, and DELETING retains the finalizer until DELETED or
+    confirmed absence.
+  - Create, update, and delete persist and poll the OCE work request, recover
+    the OceInstance identifier, and reread the instance before projecting
+    status.
+  - Pre-create reuse requires compartmentId, tenancyId, and name and adopts
+    only one exact eligible match. Failed or deleting instances are never
+    reused.
+  - IdcsAccessToken is a create-time secret that OCI does not echo, so
+    post-create parity normalizes it away. Only the reviewed update-detail
+    fields reconcile in place; the remaining identity and shape fields require
+    replacement, and ChangeOceInstanceCompartment stays out of scope.

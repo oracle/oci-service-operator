@@ -62,7 +62,7 @@ type BlockchainPlatformSpec struct {
 	// +kubebuilder:validation:Optional
 	StorageSizeInTBs float64 `json:"storageSizeInTBs,omitempty"`
 	// +kubebuilder:validation:Optional
-	Replicas BlockchainPlatformReplicas `json:"replicas,omitempty"`
+	Replicas BlockchainPlatformReplicas `json:"replicas,omitempty,omitzero"`
 	// Number of total OCPUs to allocate
 	// +kubebuilder:validation:Optional
 	TotalOcpuCapacity int `json:"totalOcpuCapacity,omitempty"`

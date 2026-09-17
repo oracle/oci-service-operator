@@ -6,6 +6,7 @@
 package generator
 
 import (
+	"fmt"
 	"sort"
 	"strings"
 
@@ -70,7 +71,7 @@ func buildRuntimeSemanticsModelWithAsync(
 			Update: updateHooks,
 			Delete: deleteHooks,
 		},
-		AuxiliaryOperations: buildAuxiliaryOperationModels(binding, runtime),
+		AuxiliaryOperations: buildAuxiliaryOperationModels(formalModel, runtime),
 		OpenGaps:            buildRuntimeGapModels(binding),
 	}
 	if binding.Import.ListLookup != nil {
@@ -96,6 +97,41 @@ func buildRuntimeSemanticsModelWithAsync(
 		repoAuthoredFollowUpStrategy(formalModel, "delete"),
 	)
 	return semantics
+}
+
+func validateRuntimeUpdateOperationSubset(formalModel *FormalModel, runtime *RuntimeModel) error {
+	if formalModel == nil || formalModel.RuntimeLifecycle == nil ||
+		formalModel.RuntimeLifecycle.RepoAuthored == nil ||
+		formalModel.RuntimeLifecycle.RepoAuthored.Operations == nil ||
+		formalModel.RuntimeLifecycle.RepoAuthored.Operations.Update == nil {
+		return nil
+	}
+
+	subset := formalModel.RuntimeLifecycle.RepoAuthored.Operations.Update
+	if runtime == nil || runtime.Update == nil {
+		if len(subset) == 0 {
+			return nil
+		}
+		return fmt.Errorf("repo-authored update-operation subset is present but the SDK runtime has no primary update operation")
+	}
+
+	primary := strings.TrimSpace(runtime.Update.MethodName)
+	importedPrimary := false
+	for _, operation := range formalModel.Binding.Import.Operations.Update {
+		if strings.TrimSpace(operation.Operation) == primary {
+			importedPrimary = true
+			break
+		}
+	}
+	if !importedPrimary {
+		return nil
+	}
+	for _, operation := range subset {
+		if strings.TrimSpace(operation) == primary {
+			return nil
+		}
+	}
+	return fmt.Errorf("repo-authored update-operation subset must include primary runtime update operation %q", primary)
 }
 
 func buildRuntimeAsyncModel(async AsyncConfig) *RuntimeAsyncModel {
@@ -259,7 +295,11 @@ func repoAuthoredFollowUpStrategy(formalModel *FormalModel, phase string) string
 	}
 }
 
-func buildAuxiliaryOperationModels(binding formal.ControllerBinding, runtime *RuntimeModel) []RuntimeAuxiliaryOperationModel {
+func buildAuxiliaryOperationModels(formalModel *FormalModel, runtime *RuntimeModel) []RuntimeAuxiliaryOperationModel {
+	if formalModel == nil {
+		return nil
+	}
+	binding := formalModel.Binding
 	primary := map[string]string{}
 	if runtime != nil {
 		if runtime.Create != nil {
@@ -294,11 +334,11 @@ func buildAuxiliaryOperationModels(binding formal.ControllerBinding, runtime *Ru
 		}
 	}
 
-	appendPhase("create", binding.Import.Operations.Create)
+	appendPhase("create", formal.EffectiveRuntimeLifecycleCreateOperations(formalModel.RuntimeLifecycle, binding.Import.Operations.Create))
 	appendPhase("get", binding.Import.Operations.Get)
 	appendPhase("list", binding.Import.Operations.List)
-	appendPhase("update", binding.Import.Operations.Update)
-	appendPhase("delete", binding.Import.Operations.Delete)
+	appendPhase("update", formal.EffectiveRuntimeLifecycleUpdateOperations(formalModel.RuntimeLifecycle, binding.Import.Operations.Update))
+	appendPhase("delete", formal.EffectiveRuntimeLifecycleDeleteOperations(formalModel.RuntimeLifecycle, binding.Import.Operations.Delete))
 
 	sort.Slice(auxiliary, func(i, j int) bool {
 		if auxiliary[i].Phase != auxiliary[j].Phase {

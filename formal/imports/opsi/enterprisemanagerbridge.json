@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "opsi",
+  "slug": "enterprisemanagerbridge",
+  "kind": "EnterpriseManagerBridge",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_opsi_enterprise_manager_bridge",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateEnterpriseManagerBridge",
+        "requestType": "opsi.CreateEnterpriseManagerBridgeRequest",
+        "responseType": "opsi.CreateEnterpriseManagerBridgeResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetEnterpriseManagerBridge",
+        "requestType": "opsi.GetEnterpriseManagerBridgeRequest",
+        "responseType": "opsi.GetEnterpriseManagerBridgeResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListEnterpriseManagerBridges",
+        "requestType": "opsi.ListEnterpriseManagerBridgesRequest",
+        "responseType": "opsi.ListEnterpriseManagerBridgesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeEnterpriseManagerBridgeCompartment",
+        "requestType": "opsi.ChangeEnterpriseManagerBridgeCompartmentRequest",
+        "responseType": "opsi.ChangeEnterpriseManagerBridgeCompartmentResponse"
+      },
+      {
+        "operation": "UpdateEnterpriseManagerBridge",
+        "requestType": "opsi.UpdateEnterpriseManagerBridgeRequest",
+        "responseType": "opsi.UpdateEnterpriseManagerBridgeResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteEnterpriseManagerBridge",
+        "requestType": "opsi.DeleteEnterpriseManagerBridgeRequest",
+        "responseType": "opsi.DeleteEnterpriseManagerBridgeResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "NEEDS_ATTENTION"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags"
+    ],
+    "forceNew": [
+      "object_storage_bucket_name"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_opsi_enterprise_manager_bridges",
+    "collectionField": "enterprise_manager_bridge_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "compartment_id_in_subtree",
+      "display_name",
+      "id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/opsi/enterprisemanagerbridge/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/opsi/enterprisemanagerbridge/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from terraform-provider-oci for opsi/enterprisemanagerbridge."
+  ]
+}

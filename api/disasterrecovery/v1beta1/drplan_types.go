@@ -88,7 +88,7 @@ type DrPlanPlanGroupStepUserDefinedStep struct {
 	// +kubebuilder:validation:Optional
 	RequestBody string `json:"requestBody,omitempty"`
 	// +kubebuilder:validation:Optional
-	ObjectStorageScriptLocation DrPlanPlanGroupStepUserDefinedStepObjectStorageScriptLocation `json:"objectStorageScriptLocation,omitempty"`
+	ObjectStorageScriptLocation DrPlanPlanGroupStepUserDefinedStepObjectStorageScriptLocation `json:"objectStorageScriptLocation,omitempty,omitzero"`
 }
 
 // DrPlanPlanGroupStep defines nested fields for DrPlan.PlanGroup.Step.
@@ -116,7 +116,7 @@ type DrPlanPlanGroupStep struct {
 	// +kubebuilder:validation:Optional
 	IsEnabled bool `json:"isEnabled,omitempty"`
 	// +kubebuilder:validation:Optional
-	UserDefinedStep DrPlanPlanGroupStepUserDefinedStep `json:"userDefinedStep,omitempty"`
+	UserDefinedStep DrPlanPlanGroupStepUserDefinedStep `json:"userDefinedStep,omitempty,omitzero"`
 }
 
 // DrPlanPlanGroup defines nested fields for DrPlan.PlanGroup.

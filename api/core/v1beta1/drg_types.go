@@ -32,7 +32,7 @@ type DrgSpec struct {
 	// +kubebuilder:validation:Optional
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// +kubebuilder:validation:Optional
-	DefaultDrgRouteTables DrgDefaultDrgRouteTables `json:"defaultDrgRouteTables,omitempty"`
+	DefaultDrgRouteTables DrgDefaultDrgRouteTables `json:"defaultDrgRouteTables,omitempty,omitzero"`
 }
 
 // DrgDefaultDrgRouteTables defines nested fields for Drg.DefaultDrgRouteTables.

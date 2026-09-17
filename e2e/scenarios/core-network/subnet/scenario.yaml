@@ -1,0 +1,27 @@
+version: 1
+name: core-subnet-basic-crud
+service: core-network
+namespace: default
+timeout: 20m
+pollInterval: 10s
+create: create.yaml
+update: update.yaml
+ready:
+  conditionTypes: [Active]
+  lifecycleStates: [AVAILABLE]
+  requireOCID: true
+  fieldsEqual:
+    - desired: spec.displayName
+      observed: status.displayName
+    - desired: spec.cidrBlock
+      observed: status.cidrBlock
+    - desired: spec.vcnId
+      observed: status.vcnId
+    - desired: spec.freeformTags
+      observed: status.freeformTags
+failureConditionTypes: [Failed]
+delete:
+  enabled: true
+  timeout: 20m
+  cleanupDependencies: true
+cleanupOnFailure: true

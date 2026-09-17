@@ -1,0 +1,22 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: osmanagementhub
+slug: scheduledjob
+kind: ScheduledJob
+archetype: generated-service-manager
+states: [provisioning, active, updating, terminating]
+repoAuthored:
+  providerLifecycle:
+    createPending: [CREATING]
+    updatePending: [UPDATING]
+    deletePending: [CREATING, UPDATING, DELETING]
+  listLookup:
+    filters: [compartmentId, scheduleType, timeNextExecution, operations, locations, managedInstanceIds, managedInstanceGroupIds, managedCompartmentIds, lifecycleStageIds, isSubcompartmentIncluded, isManagedByAutonomousLinux, retryIntervals, workRequestId]
+    matchRule: exact schedule and target identity match; duplicate matches fail
+  mutation:
+    mutable: [displayName, description, scheduleType, timeNextExecution, recurringRule, operations, freeformTags, definedTags, retryIntervals]
+    forceNew: [compartmentId, locations, managedInstanceIds, managedInstanceGroupIds, managedCompartmentIds, lifecycleStageIds, workRequestId]
+  followUp: {create: read-after-write, update: read-after-write, delete: confirm-delete}
+notes:
+  - ACTIVE and INACTIVE are stable states; DELETED confirms deletion after pending lifecycle states.
+  - Target selectors are mutually exclusive and are normalized before identity matching.

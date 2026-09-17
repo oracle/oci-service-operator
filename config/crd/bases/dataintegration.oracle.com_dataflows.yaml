@@ -142,12 +142,17 @@ spec:
                     description: The registry version.
                     type: integer
                 type: object
+              workspaceId:
+                description: The OCID of the Data Integration workspace containing
+                  this resource.
+                type: string
             required:
             - identifier
             - modelType
             - name
             - objectVersion
             - registryMetadata
+            - workspaceId
             type: object
           status:
             description: DataFlowStatus defines the observed state of DataFlow.

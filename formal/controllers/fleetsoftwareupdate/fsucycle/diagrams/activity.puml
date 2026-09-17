@@ -1,0 +1,128 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Activity - fleetsoftwareupdate/FsuCycle
+skinparam activity {
+  backgroundColor #f8fafc
+  borderColor #0f172a
+  fontColor #0f172a
+  diamondBackgroundColor #e2e8f0
+  diamondBorderColor #1d4ed8
+  diamondFontColor #0f172a
+  startColor #1d4ed8
+  endColor #0f172a
+  barColor #1d4ed8
+}
+start
+partition "Observe and Bind" {
+:Start from shared flow\nshared/diagrams/shared-reconcile-activity.svg;
+:Read desired FsuCycle spec, tracked status,\nand delete intent;
+if ("Tracked or explicit OCI identity present?") then (yes)
+:Get the current OCI resource via GetFsuCycle;
+else (no)
+:Resolve an existing OCI resource through\nListFsuCycles using filters collectionType,\ncompartmentId, displayName, fsuCollectionId\n(+2 more);
+:Create the OCI resource via CreateFsuCycle\nwhen no reusable match is found;
+:Persist the resolved or created OCI identity\ninto status;
+endif
+}
+if ("Delete requested?") then (yes)
+partition "Delete" {
+:Delete path uses DeleteFsuCycle with required\nvia GetFsuCycle or ListFsuCycles to DELETED\nconfirmation;
+:Confirm deletion via GetFsuCycle or\nListFsuCycles until OCI reaches DELETED;
+if ("Delete cleanup and finalizer release succeed?") then (yes)
+:Remove the finalizer after delete completion;
+else (no)
+:Stay blocked until cleanup or finalizer\nrelease succeeds;
+endif
+}
+stop
+else (no)
+partition "Lifecycle Classification" {
+if ("OCI state in retryable set?") then (yes)
+:Request requeue while OCI remains in\nS_CREATING, S_IN_PROGRESS, DELETING;
+stop
+endif
+if ("OCI state is outside success targets?") then (yes)
+:Return an unsuccessful reconcile result until\nOCI reaches S_ACTIVE, S_NEEDS_ATTENTION,\nS_SUCCEEDED;
+stop
+endif
+}
+partition "Ready and Drift Handling" {
+:Compare live OCI state against the\nrepo-authored mutation surface;
+if ("Force-new or conflicting drift detected?") then (yes)
+:Reject drift before OCI mutation for force-new\nfields applyActionSchedule,\napplyActionSchedule.timeToStart,\napplyActionSchedule.type, fsuCollectionId (+3\nmore);
+stop
+endif
+if ("Supported mutable drift detected?") then (yes)
+:Apply UpdateFsuCycle only for mutable fields\nbatchingStrategy.isForceRolling,\nbatchingStrategy.isWaitForBatchResume,\nbatchingStrategy.percentage,\nbatchingStrategy.type (+27 more);
+else (no)
+:Skip the no-op mutation path;
+endif
+:Run provider helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource when the\nmatching field-driven path executes;
+:Apply explicit follow-up semantics\ncreate=GetWorkRequest -> read-after-write;\nupdate=GetWorkRequest -> read-after-write;\ndelete=GetWorkRequest -> confirm-delete;
+:Return success for the S_ACTIVE,\nS_NEEDS_ATTENTION, S_SUCCEEDED success state;
+:Project required status and finalizer policy\nretain-until-confirmed-delete;
+:Requeue on provisioning, updating, terminating;
+}
+endif
+stop
+note right
+shared diagram:
+shared/diagrams/shared-reconcile-activity.svg
+Start from the shared reconcile activity and
+specialize provider-backed CRUD, wait, and
+status-projection details here.
+Controller-local activity diagrams add
+list-lookup hints, secret policies, delete
+handling, and open formal gaps.
+archetype batch: Generated service-manager
+controllers specialize the shared reconcile path
+with formal runtime ownership.
+service: fleetsoftwareupdate
+slug: fsucycle
+kind: FsuCycle
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: provisioning, updating, terminating
+provider states: create S_CREATING,
+S_IN_PROGRESS; update none; delete DELETING
+follow-up: create=GetWorkRequest ->
+read-after-write; update=GetWorkRequest ->
+read-after-write; delete=GetWorkRequest ->
+confirm-delete
+supported drift:
+batchingStrategy.isForceRolling,
+batchingStrategy.isWaitForBatchResume,
+batchingStrategy.percentage,
+batchingStrategy.type (+27 more)
+reject before mutate: force-new fields
+applyActionSchedule,
+applyActionSchedule.timeToStart,
+applyActionSchedule.type, fsuCollectionId (+3
+more)
+create-only fields: none
+list lookup:
+oci_fleet_software_update_fsu_cycles filters
+collectionType, compartmentId, displayName,
+fsuCollectionId (+2 more); exact declared
+filters match within the resource scope;
+duplicate matches fail
+conflicts: none
+open gaps: none
+The generated service manager uses the reviewed
+CRUD request, response, lifecycle, and status
+projection contract.
+Work-request phases are declared per operation
+from the vendored SDK response surface.
+Secret side effects are none and finalizer
+ownership is retained until confirmed deletion.
+end note
+@enduml

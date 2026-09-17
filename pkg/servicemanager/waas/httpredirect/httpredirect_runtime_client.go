@@ -7,6 +7,7 @@ package httpredirect
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"reflect"
 	"strings"
@@ -137,7 +138,10 @@ func httpRedirectWorkRequestClientFromOCI(client httpRedirectOCIClient) httpRedi
 }
 
 func newHttpRedirectRuntimeHooksWithOCIClient(client httpRedirectOCIClient) HttpRedirectRuntimeHooks {
-	hooks := newHttpRedirectDefaultRuntimeHooks(waassdk.RedirectClient{})
+	hooks := newHttpRedirectDefaultRuntimeHooks(HttpRedirectSDKClients{
+		redirectClient: waassdk.RedirectClient{},
+		waasClient:     waassdk.WaasClient{},
+	})
 	hooks.Create.Call = func(ctx context.Context, request waassdk.CreateHttpRedirectRequest) (waassdk.CreateHttpRedirectResponse, error) {
 		if client == nil {
 			return waassdk.CreateHttpRedirectResponse{}, fmt.Errorf("HttpRedirect OCI client is not configured")
@@ -650,15 +654,17 @@ func handleHttpRedirectDeleteError(resource *waasv1beta1.HttpRedirect, err error
 }
 
 func wrapHttpRedirectDeleteConfirmation(hooks *HttpRedirectRuntimeHooks) {
-	if hooks == nil || hooks.Get.Call == nil {
+	if hooks == nil || hooks.Get.Call == nil || hooks.List.Call == nil {
 		return
 	}
 	getHttpRedirect := hooks.Get.Call
+	listHttpRedirects := hooks.List.Call
 	hooks.Get.Call = rejectHttpRedirectAuthShapedGet(getHttpRedirect)
 	hooks.WrapGeneratedClient = append(hooks.WrapGeneratedClient, func(delegate HttpRedirectServiceClient) HttpRedirectServiceClient {
 		return httpRedirectDeleteConfirmationClient{
-			delegate:        delegate,
-			getHttpRedirect: getHttpRedirect,
+			delegate:          delegate,
+			getHttpRedirect:   getHttpRedirect,
+			listHttpRedirects: listHttpRedirects,
 		}
 	})
 }
@@ -679,8 +685,9 @@ func rejectHttpRedirectAuthShapedGet(
 }
 
 type httpRedirectDeleteConfirmationClient struct {
-	delegate        HttpRedirectServiceClient
-	getHttpRedirect func(context.Context, waassdk.GetHttpRedirectRequest) (waassdk.GetHttpRedirectResponse, error)
+	delegate          HttpRedirectServiceClient
+	getHttpRedirect   func(context.Context, waassdk.GetHttpRedirectRequest) (waassdk.GetHttpRedirectResponse, error)
+	listHttpRedirects func(context.Context, waassdk.ListHttpRedirectsRequest) (waassdk.ListHttpRedirectsResponse, error)
 }
 
 func (c httpRedirectDeleteConfirmationClient) CreateOrUpdate(
@@ -697,6 +704,16 @@ func (c httpRedirectDeleteConfirmationClient) Delete(
 ) (bool, error) {
 	if httpRedirectPendingDeleteWorkRequestID(resource) != "" {
 		deleted, err := c.delegate.Delete(ctx, resource)
+		var ambiguous httpRedirectAmbiguousNotFoundError
+		if errors.As(err, &ambiguous) {
+			absent, confirmErr := c.confirmAbsentByList(ctx, resource)
+			if confirmErr != nil {
+				return false, confirmErr
+			}
+			if absent {
+				return true, nil
+			}
+		}
 		if httpRedirectShouldWaitForLiveDeleteReadback(resource, err) {
 			markHttpRedirectTerminatingFromStatus(resource)
 			return false, nil
@@ -724,8 +741,40 @@ func (c httpRedirectDeleteConfirmationClient) rejectAuthShapedPreDeleteConfirmRe
 	if err == nil || !errorutil.ClassifyDeleteError(err).IsAuthShapedNotFound() {
 		return nil
 	}
+	absent, confirmErr := c.confirmAbsentByList(ctx, resource)
+	if confirmErr != nil {
+		return confirmErr
+	}
+	if absent {
+		return nil
+	}
 	servicemanager.RecordErrorOpcRequestID(&resource.Status.OsokStatus, err)
 	return fmt.Errorf("HttpRedirect delete confirmation returned ambiguous 404 NotAuthorizedOrNotFound; refusing to call delete: %w", err)
+}
+
+func (c httpRedirectDeleteConfirmationClient) confirmAbsentByList(
+	ctx context.Context,
+	resource *waasv1beta1.HttpRedirect,
+) (bool, error) {
+	if c.listHttpRedirects == nil || resource == nil {
+		return false, fmt.Errorf("HttpRedirect scoped list confirmation is unavailable")
+	}
+	trackedID := trackedHttpRedirectID(resource)
+	if trackedID == "" {
+		return false, fmt.Errorf("HttpRedirect tracked identity is empty")
+	}
+	response, err := c.listHttpRedirects(ctx, waassdk.ListHttpRedirectsRequest{
+		CompartmentId: common.String(resource.Spec.CompartmentId),
+	})
+	if err != nil {
+		return false, fmt.Errorf("confirm HttpRedirect deletion with scoped list: %w", err)
+	}
+	for _, item := range response.Items {
+		if strings.TrimSpace(stringPtrValue(item.Id)) == trackedID {
+			return false, nil
+		}
+	}
+	return true, nil
 }
 
 func trackedHttpRedirectID(resource *waasv1beta1.HttpRedirect) string {

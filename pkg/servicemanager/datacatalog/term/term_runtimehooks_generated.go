@@ -66,7 +66,7 @@ func newTermDefaultRuntimeHooks(sdkClient datacatalogsdk.DataCatalogClient) Term
 			},
 		},
 		Get: runtimeOperationHooks[datacatalogsdk.GetTermRequest, datacatalogsdk.GetTermResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "GlossaryKey", RequestName: "glossaryKey", Contribution: "path", PreferResourceID: false}, {FieldName: "TermKey", RequestName: "termKey", Contribution: "path", PreferResourceID: false}, {FieldName: "Fields", RequestName: "fields", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "GlossaryKey", RequestName: "glossaryKey", Contribution: "path", PreferResourceID: false}, {FieldName: "TermKey", RequestName: "termKey", Contribution: "path", PreferResourceID: true}, {FieldName: "Fields", RequestName: "fields", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request datacatalogsdk.GetTermRequest) (datacatalogsdk.GetTermResponse, error) {
 				return sdkClient.GetTerm(ctx, request)
 			},
@@ -78,13 +78,13 @@ func newTermDefaultRuntimeHooks(sdkClient datacatalogsdk.DataCatalogClient) Term
 			},
 		},
 		Update: runtimeOperationHooks[datacatalogsdk.UpdateTermRequest, datacatalogsdk.UpdateTermResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "GlossaryKey", RequestName: "glossaryKey", Contribution: "path", PreferResourceID: false}, {FieldName: "TermKey", RequestName: "termKey", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdateTermDetails", RequestName: "UpdateTermDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "GlossaryKey", RequestName: "glossaryKey", Contribution: "path", PreferResourceID: false}, {FieldName: "TermKey", RequestName: "termKey", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateTermDetails", RequestName: "UpdateTermDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request datacatalogsdk.UpdateTermRequest) (datacatalogsdk.UpdateTermResponse, error) {
 				return sdkClient.UpdateTerm(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[datacatalogsdk.DeleteTermRequest, datacatalogsdk.DeleteTermResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "GlossaryKey", RequestName: "glossaryKey", Contribution: "path", PreferResourceID: false}, {FieldName: "TermKey", RequestName: "termKey", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "GlossaryKey", RequestName: "glossaryKey", Contribution: "path", PreferResourceID: false}, {FieldName: "TermKey", RequestName: "termKey", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request datacatalogsdk.DeleteTermRequest) (datacatalogsdk.DeleteTermResponse, error) {
 				return sdkClient.DeleteTerm(ctx, request)
 			},

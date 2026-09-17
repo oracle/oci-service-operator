@@ -1,0 +1,27 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: operatoraccesscontrol
+slug: operatorcontrol
+kind: OperatorControl
+archetype: generated-service-manager
+states:
+  - active
+  - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending: []
+    updatePending: []
+    deletePending: []
+  listLookup:
+    filters: ["compartmentId","id","operatorControlName","resourceType"]
+    matchRule: exact resource identity match; duplicate matches fail
+  mutation:
+    mutable: ["approverGroupsList","approversList","definedTags","description","emailIdList","freeformTags","isFullyPreApproved","numberOfApprovers","operatorControlName","preApprovedOpActionList","systemMessage"]
+    forceNew: ["compartmentId","resourceType"]
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - "The runtime uses its declared lifecycle-state contract for OperatorControl reconciliation."
+  - "The credential-free mock exercises SDK request serialization, response projection, mutation when supported, and confirmed deletion."

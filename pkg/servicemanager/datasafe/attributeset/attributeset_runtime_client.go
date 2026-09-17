@@ -85,7 +85,7 @@ func applyAttributeSetRuntimeHooks(
 		return
 	}
 
-	hooks.Semantics = newAttributeSetRuntimeSemantics()
+	hooks.Semantics = reviewedAttributeSetRuntimeSemantics()
 	hooks.BuildCreateBody = func(_ context.Context, resource *datasafev1beta1.AttributeSet, _ string) (any, error) {
 		return buildAttributeSetCreateBody(resource)
 	}
@@ -165,7 +165,7 @@ func requireAttributeSetOCIClient(client attributeSetOCIClient, initErr error) e
 	return nil
 }
 
-func newAttributeSetRuntimeSemantics() *generatedruntime.Semantics {
+func reviewedAttributeSetRuntimeSemantics() *generatedruntime.Semantics {
 	return &generatedruntime.Semantics{
 		FormalService:     "datasafe",
 		FormalSlug:        "attributeset",
@@ -219,7 +219,10 @@ func newAttributeSetRuntimeSemantics() *generatedruntime.Semantics {
 		},
 		Hooks: generatedruntime.HookSet{
 			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "AttributeSet", Action: "CreateAttributeSet"}},
-			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "AttributeSet", Action: "UpdateAttributeSet"}},
+			Update: []generatedruntime.Hook{
+				{Helper: "tfresource.UpdateResource", EntityType: "AttributeSet", Action: "UpdateAttributeSet"},
+				{Helper: "ChangeAttributeSetCompartment"},
+			},
 			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "AttributeSet", Action: "DeleteAttributeSet"}},
 		},
 		CreateFollowUp: generatedruntime.FollowUpSemantics{
@@ -828,7 +831,9 @@ func (c attributeSetDeleteGuardClient) confirmDeleteAfterSucceededWorkRequest(
 			markAttributeSetDeleted(resource, "OCI resource deleted")
 			return true, nil
 		case classification.IsAuthShapedNotFound():
-			return false, rejectAttributeSetAuthShapedNotFound(resource, err)
+			servicemanager.RecordErrorOpcRequestID(&resource.Status.OsokStatus, err)
+			markAttributeSetDeleted(resource, "OCI AttributeSet delete work request completed and the resource is no longer readable")
+			return true, nil
 		default:
 			servicemanager.RecordErrorOpcRequestID(&resource.Status.OsokStatus, err)
 			return false, err

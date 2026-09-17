@@ -56,7 +56,7 @@ func newMetricPropertyDefaultRuntimeHooks(sdkClient ocicontrolcentersdk.OccMetri
 		Async:           generatedruntime.AsyncHooks[*ocicontrolcenterv1beta1.MetricProperty]{},
 		DeleteHooks:     generatedruntime.DeleteHooks[*ocicontrolcenterv1beta1.MetricProperty]{},
 		List: runtimeOperationHooks[ocicontrolcentersdk.ListMetricPropertiesRequest, ocicontrolcentersdk.ListMetricPropertiesResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NamespaceName", RequestName: "namespaceName", Contribution: "path", PreferResourceID: true}, {FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NamespaceName", RequestName: "namespaceName", Contribution: "path", PreferResourceID: false}, {FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request ocicontrolcentersdk.ListMetricPropertiesRequest) (ocicontrolcentersdk.ListMetricPropertiesResponse, error) {
 				return sdkClient.ListMetricProperties(ctx, request)
 			},

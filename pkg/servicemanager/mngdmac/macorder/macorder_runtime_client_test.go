@@ -687,7 +687,7 @@ func TestMacOrderDeleteWaitsAfterSucceededWorkRequestUntilCanceledReadback(t *te
 		t.Fatal("Delete() = false, want true after canceled readback confirmation")
 	}
 	if getCalls != 2 {
-		t.Fatalf("GetMacOrder() calls = %d, want 2 after replaying the succeeded work request", getCalls)
+		t.Fatalf("GetMacOrder() calls = %d, want 2 after processing the succeeded work request", getCalls)
 	}
 	if resource.Status.OsokStatus.DeletedAt == nil {
 		t.Fatal("status.deletedAt = nil, want delete timestamp after canceled readback")

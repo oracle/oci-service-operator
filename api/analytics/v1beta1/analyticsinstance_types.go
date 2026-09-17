@@ -35,7 +35,7 @@ type AnalyticsInstanceSpec struct {
 	// +kubebuilder:validation:Optional
 	EmailNotification string `json:"emailNotification,omitempty"`
 	// +kubebuilder:validation:Optional
-	NetworkEndpointDetails AnalyticsInstanceNetworkEndpointDetails `json:"networkEndpointDetails,omitempty"`
+	NetworkEndpointDetails AnalyticsInstanceNetworkEndpointDetails `json:"networkEndpointDetails,omitempty,omitzero"`
 	// IDCS access token identifying a stripe and service administrator user.
 	// +kubebuilder:validation:Optional
 	IdcsAccessToken string `json:"idcsAccessToken,omitempty"`

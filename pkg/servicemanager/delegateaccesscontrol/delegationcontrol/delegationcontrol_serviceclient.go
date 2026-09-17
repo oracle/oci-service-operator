@@ -32,8 +32,28 @@ type defaultDelegationControlServiceClient struct {
 
 var _ DelegationControlServiceClient = defaultDelegationControlServiceClient{}
 
+type DelegationControlSDKClients struct {
+	delegateAccessControlClient delegateaccesscontrolsdk.DelegateAccessControlClient
+	workRequestClient           delegateaccesscontrolsdk.WorkRequestClient
+}
+
+func newDelegationControlSDKClients(manager *DelegationControlServiceManager) (DelegationControlSDKClients, error) {
+	var clients DelegationControlSDKClients
+	delegateAccessControlClientClient, err := delegateaccesscontrolsdk.NewDelegateAccessControlClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize DelegationControl OCI client DelegateAccessControlClient: %w", err)
+	}
+	clients.delegateAccessControlClient = delegateAccessControlClientClient
+	workRequestClientClient, err := delegateaccesscontrolsdk.NewWorkRequestClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize DelegationControl OCI client WorkRequestClient: %w", err)
+	}
+	clients.workRequestClient = workRequestClientClient
+	return clients, nil
+}
+
 var newDelegationControlServiceClient = func(manager *DelegationControlServiceManager) DelegationControlServiceClient {
-	sdkClient, err := delegateaccesscontrolsdk.NewDelegateAccessControlClientWithConfigurationProvider(manager.Provider)
+	sdkClient, err := newDelegationControlSDKClients(manager)
 	hooks := newDelegationControlRuntimeHooks(manager, sdkClient)
 	config := buildDelegationControlGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {

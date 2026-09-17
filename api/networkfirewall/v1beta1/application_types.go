@@ -30,6 +30,9 @@ type ApplicationSpec struct {
 	// The value of the ICMP message Code (subtype) field as defined by RFC 792 (https://www.rfc-editor.org/rfc/rfc792.html).
 	// +kubebuilder:validation:Optional
 	IcmpCode int `json:"icmpCode,omitempty"`
+	// The OCID of the Network Firewall policy that owns this resource.
+	// +kubebuilder:validation:Required
+	NetworkFirewallPolicyId string `json:"networkFirewallPolicyId"`
 }
 
 // ApplicationStatus defines the observed state of Application.

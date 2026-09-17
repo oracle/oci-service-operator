@@ -132,7 +132,7 @@ func applyNewsReportRuntimeHooks(
 		return
 	}
 
-	hooks.Semantics = newNewsReportRuntimeSemantics()
+	hooks.Semantics = reviewedNewsReportRuntimeSemantics()
 	hooks.BuildCreateBody = func(_ context.Context, resource *opsiv1beta1.NewsReport, _ string) (any, error) {
 		return buildNewsReportCreateBody(resource)
 	}
@@ -175,7 +175,7 @@ func applyNewsReportRuntimeHooks(
 	})
 }
 
-func newNewsReportRuntimeSemantics() *generatedruntime.Semantics {
+func reviewedNewsReportRuntimeSemantics() *generatedruntime.Semantics {
 	return &generatedruntime.Semantics{
 		FormalService:     "opsi",
 		FormalSlug:        "newsreport",

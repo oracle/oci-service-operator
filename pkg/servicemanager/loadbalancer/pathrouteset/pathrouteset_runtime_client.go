@@ -60,6 +60,7 @@ func applyPathRouteSetRuntimeHooks(hooks *PathRouteSetRuntimeHooks) {
 		return buildPathRouteSetUpdateBody(resource, currentResponse)
 	}
 	hooks.Identity = generatedruntime.IdentityHooks[*loadbalancerv1beta1.PathRouteSet]{
+		RecordBeforeCreateFollowUp: true,
 		Resolve: func(resource *loadbalancerv1beta1.PathRouteSet) (any, error) {
 			return resolvePathRouteSetIdentity(resource)
 		},
@@ -71,6 +72,9 @@ func applyPathRouteSetRuntimeHooks(hooks *PathRouteSetRuntimeHooks) {
 		},
 		LookupExisting: func(context.Context, *loadbalancerv1beta1.PathRouteSet, any) (any, error) {
 			return nil, nil
+		},
+		SeedSyntheticTrackedID: func(resource *loadbalancerv1beta1.PathRouteSet, identity any) func() {
+			return seedSyntheticPathRouteSetID(resource, identity.(pathRouteSetIdentity).pathRouteSetName)
 		},
 	}
 	hooks.Create.Fields = pathRouteSetCreateFields()
@@ -217,20 +221,20 @@ func pathRouteSetDeleteFields() []generatedruntime.RequestField {
 
 func pathRouteSetLoadBalancerIDField() generatedruntime.RequestField {
 	return generatedruntime.RequestField{
-		FieldName:        "LoadBalancerId",
-		RequestName:      "loadBalancerId",
-		Contribution:     "path",
-		PreferResourceID: true,
-		LookupPaths:      []string{"status.status.ocid"},
+		FieldName:    "LoadBalancerId",
+		RequestName:  "loadBalancerId",
+		Contribution: "path",
+		LookupPaths:  []string{"status.loadBalancerId", "spec.loadBalancerId"},
 	}
 }
 
 func pathRouteSetNameField() generatedruntime.RequestField {
 	return generatedruntime.RequestField{
-		FieldName:    "PathRouteSetName",
-		RequestName:  "pathRouteSetName",
-		Contribution: "path",
-		LookupPaths:  []string{"status.name", "spec.name", "name"},
+		FieldName:        "PathRouteSetName",
+		RequestName:      "pathRouteSetName",
+		Contribution:     "path",
+		PreferResourceID: true,
+		LookupPaths:      []string{"status.name", "spec.name", "name"},
 	}
 }
 
@@ -348,23 +352,27 @@ func resolvePathRouteSetIdentity(resource *loadbalancerv1beta1.PathRouteSet) (pa
 		return pathRouteSetIdentity{}, fmt.Errorf("resolve PathRouteSet identity: resource is nil")
 	}
 
-	statusLoadBalancerID := strings.TrimSpace(string(resource.Status.OsokStatus.Ocid))
+	statusLoadBalancerID := strings.TrimSpace(resource.Status.LoadBalancerId)
+	specLoadBalancerID := strings.TrimSpace(resource.Spec.LoadBalancerId)
 	annotationLoadBalancerID := strings.TrimSpace(resource.Annotations[pathRouteSetLoadBalancerIDAnnotation])
-	if statusLoadBalancerID != "" && annotationLoadBalancerID != "" && statusLoadBalancerID != annotationLoadBalancerID {
+	if specLoadBalancerID != "" && annotationLoadBalancerID != "" && specLoadBalancerID != annotationLoadBalancerID {
+		return pathRouteSetIdentity{}, fmt.Errorf("resolve PathRouteSet identity: spec.loadBalancerId %q conflicts with %s annotation %q", specLoadBalancerID, pathRouteSetLoadBalancerIDAnnotation, annotationLoadBalancerID)
+	}
+	desiredLoadBalancerID := firstNonEmptyTrim(specLoadBalancerID, annotationLoadBalancerID)
+	if statusLoadBalancerID != "" && desiredLoadBalancerID != "" && statusLoadBalancerID != desiredLoadBalancerID {
 		return pathRouteSetIdentity{}, fmt.Errorf(
-			"resolve PathRouteSet identity: %s changed from recorded loadBalancerId %q to %q",
-			pathRouteSetLoadBalancerIDAnnotation,
+			"resolve PathRouteSet identity: loadBalancerId changed from recorded value %q to %q",
 			statusLoadBalancerID,
-			annotationLoadBalancerID,
+			desiredLoadBalancerID,
 		)
 	}
 
 	identity := pathRouteSetIdentity{
-		loadBalancerID:   firstNonEmptyTrim(statusLoadBalancerID, annotationLoadBalancerID),
+		loadBalancerID:   firstNonEmptyTrim(statusLoadBalancerID, desiredLoadBalancerID),
 		pathRouteSetName: firstNonEmptyTrim(resource.Status.Name, resource.Spec.Name, resource.Name),
 	}
 	if identity.loadBalancerID == "" {
-		return pathRouteSetIdentity{}, fmt.Errorf("resolve PathRouteSet identity: %s annotation is required", pathRouteSetLoadBalancerIDAnnotation)
+		return pathRouteSetIdentity{}, fmt.Errorf("resolve PathRouteSet identity: spec.loadBalancerId or %s annotation is required", pathRouteSetLoadBalancerIDAnnotation)
 	}
 	if identity.pathRouteSetName == "" {
 		return pathRouteSetIdentity{}, fmt.Errorf("resolve PathRouteSet identity: path route set name is empty")
@@ -376,14 +384,19 @@ func recordPathRouteSetPathIdentity(resource *loadbalancerv1beta1.PathRouteSet, 
 	if resource == nil {
 		return
 	}
+	resource.Status.LoadBalancerId = identity.loadBalancerID
 	resource.Status.Name = identity.pathRouteSetName
-	// PathRouteSet has no child OCID in the Load Balancer API, so the runtime records
-	// the parent loadBalancerId as the stable path identity used for Get/Update/Delete.
-	resource.Status.OsokStatus.Ocid = shared.OCID(identity.loadBalancerID)
 }
 
 func recordPathRouteSetTrackedIdentity(resource *loadbalancerv1beta1.PathRouteSet, identity pathRouteSetIdentity) {
 	recordPathRouteSetPathIdentity(resource, identity)
+	resource.Status.OsokStatus.Ocid = shared.OCID(identity.pathRouteSetName)
+}
+
+func seedSyntheticPathRouteSetID(resource *loadbalancerv1beta1.PathRouteSet, name string) func() {
+	previous := resource.Status.OsokStatus.Ocid
+	resource.Status.OsokStatus.Ocid = shared.OCID(name)
+	return func() { resource.Status.OsokStatus.Ocid = previous }
 }
 
 func firstNonEmptyTrim(values ...string) string {

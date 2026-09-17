@@ -31,9 +31,9 @@ type TranscriptionJobSpec struct {
 	// +kubebuilder:validation:Optional
 	AdditionalTranscriptionFormats []string `json:"additionalTranscriptionFormats,omitempty"`
 	// +kubebuilder:validation:Optional
-	ModelDetails TranscriptionJobModelDetails `json:"modelDetails,omitempty"`
+	ModelDetails TranscriptionJobModelDetails `json:"modelDetails,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	Normalization TranscriptionJobNormalization `json:"normalization,omitempty"`
+	Normalization TranscriptionJobNormalization `json:"normalization,omitempty,omitzero"`
 	// Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
 	// Example: `{"bar-key": "value"}`.
 	// +kubebuilder:validation:Optional
@@ -64,7 +64,7 @@ type TranscriptionJobInputLocation struct {
 	// +kubebuilder:validation:Optional
 	LocationType string `json:"locationType,omitempty"`
 	// +kubebuilder:validation:Optional
-	ObjectLocation TranscriptionJobInputLocationObjectLocation `json:"objectLocation,omitempty"`
+	ObjectLocation TranscriptionJobInputLocationObjectLocation `json:"objectLocation,omitempty,omitzero"`
 	// A list of ObjectLocations.
 	// +kubebuilder:validation:Optional
 	ObjectLocations []TranscriptionJobInputLocationObjectLocation `json:"objectLocations,omitempty"`
@@ -96,7 +96,7 @@ type TranscriptionJobModelDetailsTranscriptionSettingsDiarization struct {
 // TranscriptionJobModelDetailsTranscriptionSettings defines nested fields for TranscriptionJob.ModelDetails.TranscriptionSettings.
 type TranscriptionJobModelDetailsTranscriptionSettings struct {
 	// +kubebuilder:validation:Optional
-	Diarization TranscriptionJobModelDetailsTranscriptionSettingsDiarization `json:"diarization,omitempty"`
+	Diarization TranscriptionJobModelDetailsTranscriptionSettingsDiarization `json:"diarization,omitempty,omitzero"`
 	// Simple key-value pair for setting model specific properties. For more details, refer the documentation.
 	// +kubebuilder:validation:Optional
 	AdditionalSettings map[string]string `json:"additionalSettings,omitempty"`
@@ -186,7 +186,7 @@ type TranscriptionJobModelDetails struct {
 	// +kubebuilder:validation:Optional
 	LanguageCode string `json:"languageCode,omitempty"`
 	// +kubebuilder:validation:Optional
-	TranscriptionSettings TranscriptionJobModelDetailsTranscriptionSettings `json:"transcriptionSettings,omitempty"`
+	TranscriptionSettings TranscriptionJobModelDetailsTranscriptionSettings `json:"transcriptionSettings,omitempty,omitzero"`
 }
 
 // TranscriptionJobNormalizationFilter defines nested fields for TranscriptionJob.Normalization.Filter.

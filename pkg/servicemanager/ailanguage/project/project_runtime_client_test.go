@@ -462,6 +462,61 @@ func TestProjectServiceClientCreateOrUpdateSkipsUpdateWhenMutableStateMatches(t 
 	}
 }
 
+func TestProjectServiceClientIgnoresAutomaticOracleDefinedTags(t *testing.T) {
+	t.Parallel()
+
+	project := makeSDKProject(
+		"ocid1.project.oc1..existing",
+		"ocid1.compartment.oc1..example",
+		"project-alpha",
+		"desired description",
+		ailanguagesdk.ProjectLifecycleStateActive,
+	)
+	project.DefinedTags = map[string]map[string]interface{}{
+		"Oracle-Tags": {"CreatedBy": "recorded-user", "CreatedOn": "2026-09-01T00:00:00Z"},
+	}
+	client := testProjectClient(&fakeProjectOCIClient{
+		getProjectFn: func(context.Context, ailanguagesdk.GetProjectRequest) (ailanguagesdk.GetProjectResponse, error) {
+			return ailanguagesdk.GetProjectResponse{Project: project}, nil
+		},
+		updateProjectFn: func(context.Context, ailanguagesdk.UpdateProjectRequest) (ailanguagesdk.UpdateProjectResponse, error) {
+			t.Fatal("UpdateProject() should not be called for automatic Oracle-Tags")
+			return ailanguagesdk.UpdateProjectResponse{}, nil
+		},
+	})
+	resource := makeProjectResource()
+	resource.Spec.DefinedTags = nil
+	resource.Status.Id = "ocid1.project.oc1..existing"
+
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful || response.ShouldRequeue {
+		t.Fatalf("CreateOrUpdate() response = %#v, want stable active state", response)
+	}
+}
+
+func TestProjectWorkRequestUsesOperationTypeWhenLiveResourceActionIsAlwaysCreated(t *testing.T) {
+	t.Parallel()
+
+	resource := makeProjectResource()
+	workRequest := makeProjectWorkRequest(
+		"wr-delete-live",
+		ailanguagesdk.OperationTypeDeleteProject,
+		ailanguagesdk.OperationStatusSucceeded,
+		ailanguagesdk.ActionTypeCreated,
+		"ocid1.project.oc1..existing",
+	)
+	current, err := projectWorkRequestAsyncOperation(resource, workRequest, shared.OSOKAsyncPhaseDelete)
+	if err != nil {
+		t.Fatalf("projectWorkRequestAsyncOperation() error = %v", err)
+	}
+	if current.Phase != shared.OSOKAsyncPhaseDelete {
+		t.Fatalf("phase = %q, want delete", current.Phase)
+	}
+}
+
 func TestProjectServiceClientCreateOrUpdateStartsUpdateWorkRequestWhenMutableDriftExists(t *testing.T) {
 	t.Parallel()
 
@@ -535,6 +590,50 @@ func TestProjectServiceClientCreateOrUpdateStartsUpdateWorkRequestWhenMutableDri
 	requireAsyncCurrent(t, resource, shared.OSOKAsyncPhaseUpdate, "wr-update-1")
 	if resource.Status.OsokStatus.Async.Current.RawStatus != "IN_PROGRESS" {
 		t.Fatalf("status.async.current.rawStatus = %q, want %q", resource.Status.OsokStatus.Async.Current.RawStatus, "IN_PROGRESS")
+	}
+}
+
+func TestProjectServiceClientCreateOrUpdateAcceptsSynchronousUpdateWithoutWorkRequest(t *testing.T) {
+	t.Parallel()
+
+	getCalls := 0
+	client := testProjectClient(&fakeProjectOCIClient{
+		getProjectFn: func(_ context.Context, _ ailanguagesdk.GetProjectRequest) (ailanguagesdk.GetProjectResponse, error) {
+			getCalls++
+			description := "stale description"
+			if getCalls > 1 {
+				description = "desired description"
+			}
+			return ailanguagesdk.GetProjectResponse{Project: makeSDKProject(
+				"ocid1.project.oc1..existing",
+				"ocid1.compartment.oc1..example",
+				"project-alpha",
+				description,
+				ailanguagesdk.ProjectLifecycleStateActive,
+			)}, nil
+		},
+		updateProjectFn: func(_ context.Context, _ ailanguagesdk.UpdateProjectRequest) (ailanguagesdk.UpdateProjectResponse, error) {
+			return ailanguagesdk.UpdateProjectResponse{OpcRequestId: common.String("opc-update-sync")}, nil
+		},
+	})
+
+	resource := makeProjectResource()
+	resource.Status.Id = "ocid1.project.oc1..existing"
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful || response.ShouldRequeue {
+		t.Fatalf("CreateOrUpdate() response = %#v, want converged synchronous update", response)
+	}
+	if getCalls != 2 {
+		t.Fatalf("GetProject() calls = %d, want pre-update and post-update reads", getCalls)
+	}
+	if resource.Status.Description != "desired description" {
+		t.Fatalf("status.description = %q, want desired description", resource.Status.Description)
+	}
+	if resource.Status.OsokStatus.OpcRequestID != "opc-update-sync" {
+		t.Fatalf("status.opcRequestId = %q, want opc-update-sync", resource.Status.OsokStatus.OpcRequestID)
 	}
 }
 

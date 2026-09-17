@@ -1,0 +1,54 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: opsi
+slug: chargebackplanreport
+kind: ChargebackPlanReport
+archetype: generated-service-manager
+states:
+- provisioning
+- active
+- updating
+- terminating
+repoAuthored:
+  operations:
+    update:
+    - UpdateChargebackPlanReport
+  providerLifecycle:
+    createPending: []
+    updatePending: []
+    deletePending:
+    - DELETING
+  listLookup:
+    filters:
+    - reportName
+    matchRule: exact reportName match within the resource scope; duplicate matches
+      fail
+  mutation:
+    mutable:
+    - reportName
+    - reportProperties
+    forceNew: []
+  hooks:
+    create:
+    - helper: generatedruntime.Create
+      entityType: ChargebackPlanReport
+      action: CREATED
+    update:
+    - helper: generatedruntime.Update
+      entityType: ChargebackPlanReport
+      action: UPDATED
+    delete:
+    - helper: generatedruntime.Delete
+      entityType: ChargebackPlanReport
+      action: DELETED
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+- The production runtime uses the declared work-request phases and service-local async
+  adapter.
+- Lifecycle success and pending states mirror the production service-manager semantics.
+- Status projection is required, Secret side effects are none, and the finalizer policy
+  is retain-until-confirmed-delete.
+- Delete ownership is retained until a terminal lifecycle state or confirmed absence.

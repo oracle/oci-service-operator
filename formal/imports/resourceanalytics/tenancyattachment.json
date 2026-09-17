@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "resourceanalytics",
+  "slug": "tenancyattachment",
+  "kind": "TenancyAttachment",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_resource_analytics_tenancy_attachment",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateTenancyAttachment",
+        "requestType": "resourceanalytics.CreateTenancyAttachmentRequest",
+        "responseType": "resourceanalytics.CreateTenancyAttachmentResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetTenancyAttachment",
+        "requestType": "resourceanalytics.GetTenancyAttachmentRequest",
+        "responseType": "resourceanalytics.GetTenancyAttachmentResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListTenancyAttachments",
+        "requestType": "resourceanalytics.ListTenancyAttachmentsRequest",
+        "responseType": "resourceanalytics.ListTenancyAttachmentsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateTenancyAttachment",
+        "requestType": "resourceanalytics.UpdateTenancyAttachmentRequest",
+        "responseType": "resourceanalytics.UpdateTenancyAttachmentResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteTenancyAttachment",
+        "requestType": "resourceanalytics.DeleteTenancyAttachmentRequest",
+        "responseType": "resourceanalytics.DeleteTenancyAttachmentResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "NEEDS_ATTENTION"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "description"
+    ],
+    "forceNew": [
+      "resource_analytics_instance_id",
+      "tenancy_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_resource_analytics_tenancy_attachments",
+    "collectionField": "tenancy_attachment_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "id",
+      "resource_analytics_instance_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/resourceanalytics/tenancyattachment/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/resourceanalytics/tenancyattachment/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts are imported from the pinned terraform-provider-oci revision; repo-authored runtime semantics remain authoritative."
+  ]
+}

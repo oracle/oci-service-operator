@@ -1,0 +1,138 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "osmanagementhub",
+  "slug": "softwaresource",
+  "kind": "SoftwareSource",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_os_management_hub_software_source",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateSoftwareSource",
+        "requestType": "osmanagementhub.CreateSoftwareSourceRequest",
+        "responseType": "osmanagementhub.CreateSoftwareSourceResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetSoftwareSource",
+        "requestType": "osmanagementhub.GetSoftwareSourceRequest",
+        "responseType": "osmanagementhub.GetSoftwareSourceResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeSoftwareSourceCompartment",
+        "requestType": "osmanagementhub.ChangeSoftwareSourceCompartmentRequest",
+        "responseType": "osmanagementhub.ChangeSoftwareSourceCompartmentResponse"
+      },
+      {
+        "operation": "UpdateSoftwareSource",
+        "requestType": "osmanagementhub.UpdateSoftwareSourceRequest",
+        "responseType": "osmanagementhub.UpdateSoftwareSourceResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteSoftwareSource",
+        "requestType": "osmanagementhub.DeleteSoftwareSourceRequest",
+        "responseType": "osmanagementhub.DeleteSoftwareSourceResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "NEEDS_ATTENTION"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "advanced_repo_options",
+      "compartment_id",
+      "custom_software_source_filter.module_stream_profile_filters.filter_type",
+      "custom_software_source_filter.module_stream_profile_filters.module_name",
+      "custom_software_source_filter.module_stream_profile_filters.profile_name",
+      "custom_software_source_filter.module_stream_profile_filters.stream_name",
+      "custom_software_source_filter.package_filters.filter_type",
+      "custom_software_source_filter.package_filters.package_name",
+      "custom_software_source_filter.package_filters.package_name_pattern",
+      "custom_software_source_filter.package_filters.package_version",
+      "custom_software_source_filter.package_group_filters.filter_type",
+      "custom_software_source_filter.package_group_filters.package_groups",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags",
+      "gpg_key_url",
+      "is_auto_resolve_dependencies",
+      "is_automatically_updated",
+      "is_gpg_check_enabled",
+      "is_latest_content_only",
+      "is_mirror_sync_allowed",
+      "is_ssl_verify_enabled",
+      "packages",
+      "software_source_type",
+      "url",
+      "vendor_software_sources.display_name",
+      "vendor_software_sources.id"
+    ],
+    "forceNew": [
+      "arch_type",
+      "is_created_from_package_list",
+      "origin_software_source_id",
+      "os_family",
+      "software_source_sub_type",
+      "software_source_version"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/osmanagementhub/softwaresource/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/osmanagementhub/softwaresource/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts refreshed from the pinned Terraform provider; repository-authored polymorphic software-source semantics are reviewed separately."
+  ]
+}

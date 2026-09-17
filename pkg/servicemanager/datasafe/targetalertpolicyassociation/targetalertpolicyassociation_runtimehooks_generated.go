@@ -50,15 +50,84 @@ func registerTargetAlertPolicyAssociationRuntimeHooksMutator(mutator TargetAlert
 	}
 	targetalertpolicyassociationRuntimeHooksMutators = append(targetalertpolicyassociationRuntimeHooksMutators, mutator)
 }
+func newTargetAlertPolicyAssociationRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "datasafe",
+		FormalSlug:    "targetalertpolicyassociation",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{"UPDATING"},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "id", "policyId", "targetId"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"definedTags", "description", "displayName", "freeformTags", "isEnabled"},
+			ForceNew:      []string{"compartmentId", "policyId", "targetId"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "generatedruntime.Create", EntityType: "TargetAlertPolicyAssociation", Action: "CreateTargetAlertPolicyAssociation"}},
+			Update: []generatedruntime.Hook{{Helper: "generatedruntime.Update", EntityType: "TargetAlertPolicyAssociation", Action: "UpdateTargetAlertPolicyAssociation"}},
+			Delete: []generatedruntime.Hook{{Helper: "generatedruntime.Delete", EntityType: "TargetAlertPolicyAssociation", Action: "DeleteTargetAlertPolicyAssociation"}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> GetTargetAlertPolicyAssociation",
+			Hooks:    []generatedruntime.Hook{{Helper: "generatedruntime.Create", EntityType: "TargetAlertPolicyAssociation", Action: "CreateTargetAlertPolicyAssociation"}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> GetTargetAlertPolicyAssociation",
+			Hooks:    []generatedruntime.Hook{{Helper: "generatedruntime.Update", EntityType: "TargetAlertPolicyAssociation", Action: "UpdateTargetAlertPolicyAssociation"}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "generatedruntime.Delete", EntityType: "TargetAlertPolicyAssociation", Action: "DeleteTargetAlertPolicyAssociation"}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newTargetAlertPolicyAssociationDefaultRuntimeHooks(sdkClient datasafesdk.DataSafeClient) TargetAlertPolicyAssociationRuntimeHooks {
 	return TargetAlertPolicyAssociationRuntimeHooks{
+		Semantics:       newTargetAlertPolicyAssociationRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*datasafev1beta1.TargetAlertPolicyAssociation]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*datasafev1beta1.TargetAlertPolicyAssociation]{},
 		StatusHooks:     generatedruntime.StatusHooks[*datasafev1beta1.TargetAlertPolicyAssociation]{},
 		ParityHooks:     generatedruntime.ParityHooks[*datasafev1beta1.TargetAlertPolicyAssociation]{},
-		Async:           generatedruntime.AsyncHooks[*datasafev1beta1.TargetAlertPolicyAssociation]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*datasafev1beta1.TargetAlertPolicyAssociation]{},
+		Async: generatedruntime.AsyncHooks[*datasafev1beta1.TargetAlertPolicyAssociation]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := datasafesdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*datasafev1beta1.TargetAlertPolicyAssociation]{},
 		Create: runtimeOperationHooks[datasafesdk.CreateTargetAlertPolicyAssociationRequest, datasafesdk.CreateTargetAlertPolicyAssociationResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateTargetAlertPolicyAssociationDetails", RequestName: "CreateTargetAlertPolicyAssociationDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request datasafesdk.CreateTargetAlertPolicyAssociationRequest) (datasafesdk.CreateTargetAlertPolicyAssociationResponse, error) {
@@ -106,10 +175,19 @@ func buildTargetAlertPolicyAssociationGeneratedRuntimeConfig(
 	hooks TargetAlertPolicyAssociationRuntimeHooks,
 ) generatedruntime.Config[*datasafev1beta1.TargetAlertPolicyAssociation] {
 	return generatedruntime.Config[*datasafev1beta1.TargetAlertPolicyAssociation]{
-		Kind:            "TargetAlertPolicyAssociation",
-		SDKName:         "TargetAlertPolicyAssociation",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "TargetAlertPolicyAssociation",
+		SDKName:   "TargetAlertPolicyAssociation",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

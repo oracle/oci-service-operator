@@ -212,6 +212,101 @@ func TestRecursiveNestedStructFallsBackToSharedJSONValue(t *testing.T) {
 	}
 }
 
+func TestOptionalNestedObjectUsesOmitZeroWithoutChangingCRDType(t *testing.T) {
+	t.Parallel()
+
+	synthesizer := &fieldSynthesizer{
+		resourceKind:        "Thing",
+		helperIndex:         make(map[string]int),
+		normalizedTypeNames: make(map[string]string),
+	}
+	field, ok := synthesizer.buildGeneratedField(
+		ocisdk.Field{
+			Name:      "Exclude",
+			Type:      "*Exclude",
+			JSONName:  "exclude",
+			Mandatory: false,
+			Kind:      ocisdk.FieldKindStruct,
+			NestedFields: []ocisdk.Field{
+				{
+					Name:           "TargetIds",
+					Type:           "[]string",
+					JSONName:       "targetIds",
+					RenderableType: "[]string",
+					Mandatory:      true,
+				},
+			},
+		},
+		fieldRenderingOptions{scope: fieldScopeSpec},
+		[]string{"Exclude"},
+		[]string{"Exclude"},
+		[]string{"CreateThingDetails"},
+	)
+	if !ok {
+		t.Fatal("buildGeneratedField() ok = false")
+	}
+	if field.Type != "ThingExclude" {
+		t.Fatalf("field.Type = %q, want %q", field.Type, "ThingExclude")
+	}
+	if field.Tag != `json:"exclude,omitempty,omitzero"` {
+		t.Fatalf("field.Tag = %q, want omitzero tag", field.Tag)
+	}
+}
+
+func TestOmitZeroIsLimitedToOptionalValueShapedNestedObjects(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name         string
+		field        ocisdk.Field
+		renderedType string
+		options      fieldRenderingOptions
+		want         bool
+	}{
+		{
+			name:         "optional object",
+			field:        ocisdk.Field{Kind: ocisdk.FieldKindStruct},
+			renderedType: "ThingConfig",
+			options:      fieldRenderingOptions{scope: fieldScopeSpec},
+			want:         true,
+		},
+		{
+			name:         "required object",
+			field:        ocisdk.Field{Kind: ocisdk.FieldKindStruct, Mandatory: true},
+			renderedType: "ThingConfig",
+			options:      fieldRenderingOptions{scope: fieldScopeSpec},
+		},
+		{
+			name:         "optional object slice",
+			field:        ocisdk.Field{Kind: ocisdk.FieldKindStruct},
+			renderedType: "[]ThingConfig",
+			options:      fieldRenderingOptions{scope: fieldScopeSpec},
+		},
+		{
+			name:         "status object",
+			field:        ocisdk.Field{Kind: ocisdk.FieldKindStruct},
+			renderedType: "ThingConfig",
+			options:      fieldRenderingOptions{scope: fieldScopeStatus},
+		},
+		{
+			name:         "optional scalar",
+			field:        ocisdk.Field{Kind: ocisdk.FieldKindScalar},
+			renderedType: "string",
+			options:      fieldRenderingOptions{scope: fieldScopeSpec},
+		},
+	}
+
+	for _, tt := range tests {
+		current := tt
+		t.Run(current.name, func(t *testing.T) {
+			t.Parallel()
+			if got := shouldOmitZeroGeneratedField(current.field, current.renderedType, current.options); got != current.want {
+				t.Fatalf("shouldOmitZeroGeneratedField() = %t, want %t", got, current.want)
+			}
+		})
+	}
+}
+
 func TestSensitiveObservedStateFieldsAreExcluded(t *testing.T) {
 	t.Parallel()
 

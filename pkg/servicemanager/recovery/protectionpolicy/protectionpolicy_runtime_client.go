@@ -96,7 +96,7 @@ func applyProtectionPolicyRuntimeHooks(
 		return
 	}
 
-	hooks.Semantics = newProtectionPolicyRuntimeSemantics()
+	hooks.Semantics = reviewedProtectionPolicyRuntimeSemantics()
 	hooks.BuildCreateBody = buildProtectionPolicyCreateBody
 	hooks.BuildUpdateBody = buildProtectionPolicyUpdateBody
 	hooks.List.Fields = protectionPolicyListFields()
@@ -115,7 +115,7 @@ func applyProtectionPolicyRuntimeHooks(
 	hooks.WrapGeneratedClient = append(hooks.WrapGeneratedClient, wrapProtectionPolicyDeleteGuard(client, initErr))
 }
 
-func newProtectionPolicyRuntimeSemantics() *generatedruntime.Semantics {
+func reviewedProtectionPolicyRuntimeSemantics() *generatedruntime.Semantics {
 	return &generatedruntime.Semantics{
 		FormalService: "recovery",
 		FormalSlug:    "protectionpolicy",

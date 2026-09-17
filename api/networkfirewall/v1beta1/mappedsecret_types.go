@@ -35,6 +35,9 @@ type MappedSecretSpec struct {
 	// Version number of the secret to be used.
 	// +kubebuilder:validation:Optional
 	VersionNumber int `json:"versionNumber,omitempty"`
+	// The OCID of the Network Firewall policy that owns this resource.
+	// +kubebuilder:validation:Required
+	NetworkFirewallPolicyId string `json:"networkFirewallPolicyId"`
 }
 
 // MappedSecretStatus defines the observed state of MappedSecret.

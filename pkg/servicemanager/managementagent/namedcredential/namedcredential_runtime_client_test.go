@@ -192,9 +192,9 @@ func makeNamedCredentialWorkRequest(
 func TestNamedCredentialRuntimeSemanticsEncodesWorkRequestContract(t *testing.T) {
 	t.Parallel()
 
-	got := newNamedCredentialRuntimeSemantics()
+	got := reviewedNamedCredentialRuntimeSemantics()
 	if got == nil {
-		t.Fatal("newNamedCredentialRuntimeSemantics() = nil")
+		t.Fatal("reviewedNamedCredentialRuntimeSemantics() = nil")
 	}
 	requireNamedCredentialAsyncSemantics(t, got)
 	requireNamedCredentialLifecycleSemantics(t, got)

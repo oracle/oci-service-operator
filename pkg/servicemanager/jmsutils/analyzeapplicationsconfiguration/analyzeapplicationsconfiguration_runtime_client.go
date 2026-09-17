@@ -30,10 +30,11 @@ type analyzeApplicationsConfigurationOCIClient interface {
 }
 
 type analyzeApplicationsConfigurationRuntimeClient struct {
-	delegate AnalyzeApplicationsConfigurationServiceClient
-	client   analyzeApplicationsConfigurationOCIClient
-	initErr  error
-	log      loggerutil.OSOKLogger
+	delegate      AnalyzeApplicationsConfigurationServiceClient
+	client        analyzeApplicationsConfigurationOCIClient
+	compartmentID *string
+	initErr       error
+	log           loggerutil.OSOKLogger
 }
 
 var _ AnalyzeApplicationsConfigurationServiceClient = (*analyzeApplicationsConfigurationRuntimeClient)(nil)
@@ -67,16 +68,28 @@ func applyAnalyzeApplicationsConfigurationRuntimeHooks(
 	}
 
 	log := loggerutil.OSOKLogger{}
+	var compartmentID *string
 	if manager != nil {
 		log = manager.Log
+		if initErr == nil && manager.Provider != nil {
+			tenancyID, err := manager.Provider.TenancyOCID()
+			if err != nil {
+				initErr = fmt.Errorf("resolve AnalyzeApplicationsConfiguration tenancy: %w", err)
+			} else if strings.TrimSpace(tenancyID) == "" {
+				initErr = fmt.Errorf("resolve AnalyzeApplicationsConfiguration tenancy: empty tenancy OCID")
+			} else {
+				compartmentID = common.String(tenancyID)
+			}
+		}
 	}
 
 	hooks.WrapGeneratedClient = append(hooks.WrapGeneratedClient, func(delegate AnalyzeApplicationsConfigurationServiceClient) AnalyzeApplicationsConfigurationServiceClient {
 		return &analyzeApplicationsConfigurationRuntimeClient{
-			delegate: delegate,
-			client:   client,
-			initErr:  initErr,
-			log:      log,
+			delegate:      delegate,
+			client:        client,
+			compartmentID: compartmentID,
+			initErr:       initErr,
+			log:           log,
 		}
 	})
 }
@@ -96,7 +109,9 @@ func (c *analyzeApplicationsConfigurationRuntimeClient) CreateOrUpdate(
 		return c.fail(resource, fmt.Errorf("AnalyzeApplicationsConfiguration OCI client is not configured"))
 	}
 
-	getResponse, err := c.client.GetAnalyzeApplicationsConfiguration(ctx, jmsutilssdk.GetAnalyzeApplicationsConfigurationRequest{})
+	getResponse, err := c.client.GetAnalyzeApplicationsConfiguration(ctx, jmsutilssdk.GetAnalyzeApplicationsConfigurationRequest{
+		CompartmentId: c.compartmentID,
+	})
 	if err != nil {
 		return c.fail(resource, err)
 	}
@@ -109,6 +124,7 @@ func (c *analyzeApplicationsConfigurationRuntimeClient) CreateOrUpdate(
 
 	updateRequest := jmsutilssdk.UpdateAnalyzeApplicationsConfigurationRequest{
 		UpdateAnalyzeApplicationsConfigurationDetails: updateDetails,
+		CompartmentId: c.compartmentID,
 	}
 	if getResponse.Etag != nil && strings.TrimSpace(*getResponse.Etag) != "" {
 		updateRequest.IfMatch = getResponse.Etag
@@ -119,7 +135,9 @@ func (c *analyzeApplicationsConfigurationRuntimeClient) CreateOrUpdate(
 		return c.fail(resource, err)
 	}
 	servicemanager.RecordResponseOpcRequestID(&resource.Status.OsokStatus, updateResponse)
-	refreshResponse, err := c.client.GetAnalyzeApplicationsConfiguration(ctx, jmsutilssdk.GetAnalyzeApplicationsConfigurationRequest{})
+	refreshResponse, err := c.client.GetAnalyzeApplicationsConfiguration(ctx, jmsutilssdk.GetAnalyzeApplicationsConfigurationRequest{
+		CompartmentId: c.compartmentID,
+	})
 	if err != nil {
 		return c.fail(resource, err)
 	}

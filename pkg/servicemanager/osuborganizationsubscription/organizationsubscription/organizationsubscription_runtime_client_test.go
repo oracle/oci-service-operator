@@ -106,6 +106,9 @@ func requireOrganizationSubscriptionActiveStatus(
 	if got := resource.Status.OsokStatus.Reason; got != string(shared.Active) {
 		t.Fatalf("status.status.reason = %q, want Active", got)
 	}
+	if resource.Status.Id != wantSubscriptionID || resource.Status.ServiceName != "Compute" || resource.Status.Status != "ACTIVE" {
+		t.Fatalf("projected OrganizationSubscription status = %+v", resource.Status)
+	}
 	if len(resource.Status.OsokStatus.Conditions) == 0 ||
 		resource.Status.OsokStatus.Conditions[len(resource.Status.OsokStatus.Conditions)-1].Type != shared.Active {
 		t.Fatalf("status conditions = %#v, want trailing Active condition", resource.Status.OsokStatus.Conditions)

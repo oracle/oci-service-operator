@@ -7,11 +7,16 @@ package project
 
 import (
 	"context"
+	"strings"
+	"time"
 
 	aidocumentsdk "github.com/oracle/oci-go-sdk/v65/aidocument"
 	aidocumentv1beta1 "github.com/oracle/oci-service-operator/api/aidocument/v1beta1"
+	"github.com/oracle/oci-service-operator/pkg/errorutil"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
+	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
+	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 type projectOCIClient interface {
@@ -39,14 +44,63 @@ func applyProjectRuntimeHooks(hooks *ProjectRuntimeHooks) {
 	hooks.List.Fields = projectListFields()
 	hooks.Update.Fields = projectUpdateFields()
 	hooks.Delete.Fields = projectDeleteFields()
+	hooks.WrapGeneratedClient = append(hooks.WrapGeneratedClient, func(delegate ProjectServiceClient) ProjectServiceClient {
+		return projectConvergenceClient{delegate: delegate}
+	})
 }
 
 func newProjectServiceClientWithOCIClient(log loggerutil.OSOKLogger, client projectOCIClient) ProjectServiceClient {
-	return defaultProjectServiceClient{
+	manager := &ProjectServiceManager{Log: log}
+	hooks := newProjectRuntimeHooksWithOCIClient(client)
+	applyProjectRuntimeHooks(&hooks)
+	delegate := defaultProjectServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*aidocumentv1beta1.Project](
-			newProjectRuntimeConfig(log, client),
+			buildProjectGeneratedRuntimeConfig(manager, hooks),
 		),
 	}
+	return wrapProjectGeneratedClient(hooks, delegate)
+}
+
+type projectConvergenceClient struct {
+	delegate ProjectServiceClient
+}
+
+func (c projectConvergenceClient) CreateOrUpdate(
+	ctx context.Context,
+	resource *aidocumentv1beta1.Project,
+	req ctrl.Request,
+) (servicemanager.OSOKResponse, error) {
+	response, err := c.delegate.CreateOrUpdate(ctx, resource, req)
+	if err != nil && projectUpdateStillInProgress(err) {
+		response.IsSuccessful = true
+		response.ShouldRequeue = true
+		response.RequeueDuration = 5 * time.Second
+		return response, nil
+	}
+	if err == nil && response.IsSuccessful && !response.ShouldRequeue && projectMutableStatusDrift(resource) {
+		response.ShouldRequeue = true
+		response.RequeueDuration = 5 * time.Second
+	}
+	return response, err
+}
+
+func projectUpdateStillInProgress(err error) bool {
+	classification := errorutil.ClassifyDeleteError(err)
+	return classification.HTTPStatusCode == 409 && strings.Contains(strings.ToLower(err.Error()), "currently being modified")
+}
+
+func (c projectConvergenceClient) Delete(ctx context.Context, resource *aidocumentv1beta1.Project) (bool, error) {
+	return c.delegate.Delete(ctx, resource)
+}
+
+func projectMutableStatusDrift(resource *aidocumentv1beta1.Project) bool {
+	if resource == nil {
+		return false
+	}
+	if resource.Status.DisplayName != resource.Spec.DisplayName || resource.Status.Description != resource.Spec.Description {
+		return true
+	}
+	return false
 }
 
 func newProjectRuntimeConfig(
@@ -100,6 +154,8 @@ func reviewedProjectRuntimeSemantics() *generatedruntime.Semantics {
 		ResponseItemsField: "Items",
 		MatchFields:        []string{"compartmentId", "displayName", "id"},
 	}
+	semantics.Mutation.Mutable = []string{"description", "displayName"}
+	semantics.Mutation.ForceNew = []string{"compartmentId", "definedTags", "freeformTags"}
 	semantics.AuxiliaryOperations = nil
 	return semantics
 }

@@ -50,15 +50,84 @@ func registerKafkaClusterRuntimeHooksMutator(mutator KafkaClusterRuntimeHooksMut
 	}
 	kafkaclusterRuntimeHooksMutators = append(kafkaclusterRuntimeHooksMutators, mutator)
 }
+func newKafkaClusterRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "managedkafka",
+		FormalSlug:    "kafkacluster",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "displayName", "id", "state"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"accessSubnets", "brokerShape", "clientCertificateBundle", "clusterConfigId", "clusterConfigVersion", "coordinationType", "definedTags", "displayName", "freeformTags"},
+			ForceNew:      []string{"clusterType", "compartmentId", "kafkaVersion"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "kafkaCluster", Action: "CREATED"}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "kafkaCluster", Action: "UPDATED"}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "kafkaCluster", Action: "DELETED"}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "kafkaCluster", Action: "CREATED"}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "kafkaCluster", Action: "UPDATED"}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "kafkaCluster", Action: "DELETED"}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newKafkaClusterDefaultRuntimeHooks(sdkClient managedkafkasdk.KafkaClusterClient) KafkaClusterRuntimeHooks {
 	return KafkaClusterRuntimeHooks{
+		Semantics:       newKafkaClusterRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*managedkafkav1beta1.KafkaCluster]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*managedkafkav1beta1.KafkaCluster]{},
 		StatusHooks:     generatedruntime.StatusHooks[*managedkafkav1beta1.KafkaCluster]{},
 		ParityHooks:     generatedruntime.ParityHooks[*managedkafkav1beta1.KafkaCluster]{},
-		Async:           generatedruntime.AsyncHooks[*managedkafkav1beta1.KafkaCluster]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*managedkafkav1beta1.KafkaCluster]{},
+		Async: generatedruntime.AsyncHooks[*managedkafkav1beta1.KafkaCluster]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := managedkafkasdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*managedkafkav1beta1.KafkaCluster]{},
 		Create: runtimeOperationHooks[managedkafkasdk.CreateKafkaClusterRequest, managedkafkasdk.CreateKafkaClusterResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateKafkaClusterDetails", RequestName: "CreateKafkaClusterDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request managedkafkasdk.CreateKafkaClusterRequest) (managedkafkasdk.CreateKafkaClusterResponse, error) {
@@ -106,10 +175,19 @@ func buildKafkaClusterGeneratedRuntimeConfig(
 	hooks KafkaClusterRuntimeHooks,
 ) generatedruntime.Config[*managedkafkav1beta1.KafkaCluster] {
 	return generatedruntime.Config[*managedkafkav1beta1.KafkaCluster]{
-		Kind:            "KafkaCluster",
-		SDKName:         "KafkaCluster",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "KafkaCluster",
+		SDKName:   "KafkaCluster",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

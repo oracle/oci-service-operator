@@ -1,0 +1,130 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: fleetappsmanagement
+slug: fleet
+kind: Fleet
+archetype: generated-service-manager
+states:
+- provisioning
+- active
+- updating
+- terminating
+repoAuthored:
+  operations:
+    create:
+    - CreateFleet
+    update:
+    - UpdateFleet
+    delete:
+    - DeleteFleet
+  providerLifecycle:
+    createPending:
+    - CREATING
+    updatePending: []
+    deletePending:
+    - DELETING
+  listLookup:
+    filters:
+    - applicationType
+    - compartmentId
+    - displayName
+    - environmentType
+    - fleetType
+    - id
+    - product
+    - state
+    matchRule: exact declared filters match within the resource scope; duplicate matches
+      fail
+  mutation:
+    mutable:
+    - definedTags
+    - description
+    - displayName
+    - environmentType
+    - freeformTags
+    - isTargetAutoConfirm
+    - notificationPreferences.compartmentId
+    - notificationPreferences.preferences.onJobCanceled
+    - notificationPreferences.preferences.onJobFailure
+    - notificationPreferences.preferences.onJobScheduleChange
+    - notificationPreferences.preferences.onJobStart
+    - notificationPreferences.preferences.onJobSuccess
+    - notificationPreferences.preferences.onResourceNonCompliance
+    - notificationPreferences.preferences.onRunbookNewerVersion
+    - notificationPreferences.preferences.onTaskFailure
+    - notificationPreferences.preferences.onTaskPause
+    - notificationPreferences.preferences.onTaskSuccess
+    - notificationPreferences.preferences.onTopologyModification
+    - notificationPreferences.preferences.upcomingSchedule.notifyBefore
+    - notificationPreferences.preferences.upcomingSchedule.onUpcomingSchedule
+    - notificationPreferences.topicId
+    - products
+    - resourceSelection.resourceSelectionType
+    - resourceSelection.ruleSelectionCriteria.matchCondition
+    - resourceSelection.ruleSelectionCriteria.rules.basis
+    - resourceSelection.ruleSelectionCriteria.rules.compartmentId
+    - resourceSelection.ruleSelectionCriteria.rules.compartmentIdInSubtree
+    - resourceSelection.ruleSelectionCriteria.rules.conditions.attrGroup
+    - resourceSelection.ruleSelectionCriteria.rules.conditions.attrKey
+    - resourceSelection.ruleSelectionCriteria.rules.conditions.attrValue
+    - resourceSelection.ruleSelectionCriteria.rules.matchCondition
+    - resourceSelection.ruleSelectionCriteria.rules.resourceCompartmentId
+    - resources.compartmentId
+    forceNew:
+    - compartmentId
+    - credentials
+    - credentials.compartmentId
+    - credentials.displayName
+    - credentials.entitySpecifics
+    - credentials.entitySpecifics.credentialLevel
+    - credentials.entitySpecifics.resourceId
+    - credentials.entitySpecifics.target
+    - credentials.entitySpecifics.variables
+    - credentials.entitySpecifics.variables.name
+    - credentials.entitySpecifics.variables.value
+    - credentials.password
+    - credentials.password.credentialType
+    - credentials.password.keyId
+    - credentials.password.keyVersion
+    - credentials.password.secretId
+    - credentials.password.secretVersion
+    - credentials.password.value
+    - credentials.password.vaultId
+    - credentials.user
+    - credentials.user.credentialType
+    - credentials.user.keyId
+    - credentials.user.keyVersion
+    - credentials.user.secretId
+    - credentials.user.secretVersion
+    - credentials.user.value
+    - credentials.user.vaultId
+    - details
+    - details.fleetType
+    - parentFleetId
+    - properties
+    - properties.compartmentId
+    - properties.displayName
+    - properties.fleetPropertyType
+    - properties.isRequired
+    - properties.value
+    - resources
+    - resources.fleetResourceType
+    - resources.resourceId
+    - resources.tenancyId
+  hooks:
+    create:
+    - helper: tfresource.CreateResource
+    update:
+    - helper: tfresource.UpdateResource
+    delete:
+    - helper: tfresource.DeleteResource
+  followUp:
+    create: GetWorkRequest -> read-after-write
+    update: read-after-write
+    delete: GetWorkRequest -> confirm-delete
+notes:
+- The generated service manager uses the reviewed CRUD request, response, lifecycle,
+  and status projection contract.
+- Work-request phases are declared per operation from the vendored SDK response surface.
+- Secret side effects are none and finalizer ownership is retained until confirmed
+  deletion.

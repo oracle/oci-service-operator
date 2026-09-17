@@ -75,6 +75,7 @@ func TestSkillParameterServiceClientCreatesAndProjectsStatus(t *testing.T) {
 	)
 	client := newSkillParameterServiceClientWithOCIClient(loggerutil.OSOKLogger{}, fake)
 	resource := testSkillParameter()
+	resource.UID = "skill-parameter-uid"
 
 	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
 	if err != nil {
@@ -87,6 +88,9 @@ func TestSkillParameterServiceClientCreatesAndProjectsStatus(t *testing.T) {
 		t.Fatalf("create requests = %d, want 1", len(fake.createRequests))
 	}
 	create := fake.createRequests[0]
+	if got := stringValue(create.OpcRetryToken); got != string(resource.UID) {
+		t.Fatalf("create OpcRetryToken = %q, want %q", got, resource.UID)
+	}
 	if got := stringValue(create.OdaInstanceId); got != "oda-1" {
 		t.Fatalf("create OdaInstanceId = %q, want oda-1", got)
 	}

@@ -1,0 +1,61 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: stackmonitoring
+slug: maintenancewindow
+kind: MaintenanceWindow
+archetype: generated-service-manager
+states:
+- provisioning
+- active
+- updating
+- terminating
+repoAuthored:
+  operations:
+    create:
+    - CreateMaintenanceWindow
+    update:
+    - UpdateMaintenanceWindow
+    delete:
+    - DeleteMaintenanceWindow
+  providerLifecycle:
+    createPending:
+    - CREATING
+    updatePending: []
+    deletePending:
+    - DELETING
+  listLookup:
+    filters: []
+    matchRule: exact declared filters match within the resource scope; duplicate matches
+      fail
+  mutation:
+    mutable:
+    - definedTags
+    - description
+    - freeformTags
+    - resources.resourceId
+    - schedule.maintenanceWindowDuration
+    - schedule.maintenanceWindowRecurrences
+    - schedule.scheduleType
+    - schedule.timeMaintenanceWindowEnd
+    - schedule.timeMaintenanceWindowStart
+    forceNew:
+    - compartmentId
+    - name
+    - resources.areMembersIncluded
+  hooks:
+    create:
+    - helper: tfresource.CreateResource
+    update:
+    - helper: tfresource.UpdateResource
+    delete:
+    - helper: tfresource.DeleteResource
+  followUp:
+    create: GetWorkRequest -> read-after-write
+    update: GetWorkRequest -> read-after-write
+    delete: GetWorkRequest -> confirm-delete
+notes:
+- The generated service manager uses the reviewed CRUD request, response, lifecycle,
+  and status projection contract.
+- Work-request phases are declared per operation from the vendored SDK response surface.
+- Secret side effects are none and finalizer ownership is retained until confirmed
+  deletion.

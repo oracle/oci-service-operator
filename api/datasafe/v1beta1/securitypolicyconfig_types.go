@@ -27,9 +27,9 @@ type SecurityPolicyConfigSpec struct {
 	// +kubebuilder:validation:Optional
 	Description string `json:"description,omitempty"`
 	// +kubebuilder:validation:Optional
-	FirewallConfig SecurityPolicyConfigFirewallConfig `json:"firewallConfig,omitempty"`
+	FirewallConfig SecurityPolicyConfigFirewallConfig `json:"firewallConfig,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	UnifiedAuditPolicyConfig SecurityPolicyConfigUnifiedAuditPolicyConfig `json:"unifiedAuditPolicyConfig,omitempty"`
+	UnifiedAuditPolicyConfig SecurityPolicyConfigUnifiedAuditPolicyConfig `json:"unifiedAuditPolicyConfig,omitempty,omitzero"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm)
 	// Example: `{"Department": "Finance"}`
 	// +kubebuilder:validation:Optional

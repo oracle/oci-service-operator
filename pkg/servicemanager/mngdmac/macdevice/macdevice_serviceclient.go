@@ -32,8 +32,28 @@ type defaultMacDeviceServiceClient struct {
 
 var _ MacDeviceServiceClient = defaultMacDeviceServiceClient{}
 
+type MacDeviceSDKClients struct {
+	macDeviceClient mngdmacsdk.MacDeviceClient
+	macOrderClient  mngdmacsdk.MacOrderClient
+}
+
+func newMacDeviceSDKClients(manager *MacDeviceServiceManager) (MacDeviceSDKClients, error) {
+	var clients MacDeviceSDKClients
+	macDeviceClientClient, err := mngdmacsdk.NewMacDeviceClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize MacDevice OCI client MacDeviceClient: %w", err)
+	}
+	clients.macDeviceClient = macDeviceClientClient
+	macOrderClientClient, err := mngdmacsdk.NewMacOrderClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize MacDevice OCI client MacOrderClient: %w", err)
+	}
+	clients.macOrderClient = macOrderClientClient
+	return clients, nil
+}
+
 var newMacDeviceServiceClient = func(manager *MacDeviceServiceManager) MacDeviceServiceClient {
-	sdkClient, err := mngdmacsdk.NewMacDeviceClientWithConfigurationProvider(manager.Provider)
+	sdkClient, err := newMacDeviceSDKClients(manager)
 	hooks := newMacDeviceRuntimeHooks(manager, sdkClient)
 	config := buildMacDeviceGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {

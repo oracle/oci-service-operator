@@ -74,8 +74,8 @@ func selectedValidatorStructs(services []generator.ServiceConfig) map[string]str
 			continue
 		}
 
-		kinds := make(map[string]struct{}, len(service.SelectedKinds()))
-		for _, kind := range service.SelectedKinds() {
+		kinds := make(map[string]struct{}, len(service.SelectedAPIKinds()))
+		for _, kind := range service.SelectedAPIKinds() {
 			kinds[kind] = struct{}{}
 		}
 		for _, target := range registryTargets {
@@ -126,8 +126,8 @@ func filterAPIReportBySelectedServices(report apispec.Report, services []generat
 			selectedServices[service.Service] = struct{}{}
 			continue
 		}
-		kinds := make(map[string]struct{}, len(service.SelectedKinds()))
-		for _, kind := range service.SelectedKinds() {
+		kinds := make(map[string]struct{}, len(service.SelectedAPIKinds()))
+		for _, kind := range service.SelectedAPIKinds() {
 			kinds[kind] = struct{}{}
 		}
 		selectedKinds[service.Service] = kinds

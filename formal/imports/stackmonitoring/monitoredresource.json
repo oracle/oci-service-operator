@@ -1,0 +1,173 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "stackmonitoring",
+  "slug": "monitoredresource",
+  "kind": "MonitoredResource",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_stack_monitoring_monitored_resource",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateMonitoredResource",
+        "requestType": "stackmonitoring.CreateMonitoredResourceRequest",
+        "responseType": "stackmonitoring.CreateMonitoredResourceResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetMonitoredResource",
+        "requestType": "stackmonitoring.GetMonitoredResourceRequest",
+        "responseType": "stackmonitoring.GetMonitoredResourceResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListMonitoredResources",
+        "requestType": "stackmonitoring.ListMonitoredResourcesRequest",
+        "responseType": "stackmonitoring.ListMonitoredResourcesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeMonitoredResourceCompartment",
+        "requestType": "stackmonitoring.ChangeMonitoredResourceCompartmentRequest",
+        "responseType": "stackmonitoring.ChangeMonitoredResourceCompartmentResponse"
+      },
+      {
+        "operation": "ManageLicense",
+        "requestType": "stackmonitoring.ManageLicenseRequest",
+        "responseType": "stackmonitoring.ManageLicenseResponse"
+      },
+      {
+        "operation": "UpdateMonitoredResource",
+        "requestType": "stackmonitoring.UpdateMonitoredResourceRequest",
+        "responseType": "stackmonitoring.UpdateMonitoredResourceResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteMonitoredResource",
+        "requestType": "stackmonitoring.DeleteMonitoredResourceRequest",
+        "responseType": "stackmonitoring.DeleteMonitoredResourceResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "additional_aliases.credential.name",
+      "additional_aliases.credential.service",
+      "additional_aliases.credential.source",
+      "additional_aliases.name",
+      "additional_aliases.source",
+      "additional_credentials.credential_type",
+      "additional_credentials.description",
+      "additional_credentials.key_id",
+      "additional_credentials.name",
+      "additional_credentials.properties.name",
+      "additional_credentials.properties.value",
+      "additional_credentials.source",
+      "additional_credentials.type",
+      "aliases.credential.name",
+      "aliases.credential.service",
+      "aliases.credential.source",
+      "aliases.name",
+      "aliases.source",
+      "compartment_id",
+      "credentials.credential_type",
+      "credentials.description",
+      "credentials.key_id",
+      "credentials.name",
+      "credentials.properties.name",
+      "credentials.properties.value",
+      "credentials.source",
+      "credentials.type",
+      "database_connection_details.connector_id",
+      "database_connection_details.db_id",
+      "database_connection_details.db_unique_name",
+      "database_connection_details.port",
+      "database_connection_details.protocol",
+      "database_connection_details.service_name",
+      "database_connection_details.ssl_secret_id",
+      "defined_tags",
+      "display_name",
+      "freeform_tags",
+      "host_name",
+      "license",
+      "properties.name",
+      "properties.value",
+      "resource_time_zone"
+    ],
+    "forceNew": [
+      "external_id",
+      "external_resource_id",
+      "management_agent_id",
+      "name",
+      "type"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_stack_monitoring_monitored_resources",
+    "collectionField": "monitored_resource_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "name",
+      "status",
+      "work_request_id"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/stackmonitoring/monitoredresource/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/stackmonitoring/monitoredresource/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from the pinned terraform-provider-oci source revision."
+  ]
+}

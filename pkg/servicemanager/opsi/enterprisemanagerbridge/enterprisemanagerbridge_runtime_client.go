@@ -182,8 +182,6 @@ func enterpriseManagerBridgeListFields() []generatedruntime.RequestField {
 	return []generatedruntime.RequestField{
 		{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
 		{FieldName: "DisplayName", RequestName: "displayName", Contribution: "query"},
-		{FieldName: "Id", RequestName: "id", Contribution: "query"},
-		{FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query"},
 		{FieldName: "Limit", RequestName: "limit", Contribution: "query"},
 		{FieldName: "Page", RequestName: "page", Contribution: "query"},
 	}

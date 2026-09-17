@@ -50,15 +50,84 @@ func registerTargetAssetRuntimeHooksMutator(mutator TargetAssetRuntimeHooksMutat
 	}
 	targetassetRuntimeHooksMutators = append(targetassetRuntimeHooksMutators, mutator)
 }
+func newTargetAssetRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "cloudmigrations",
+		FormalSlug:    "targetasset",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE", "NEEDS_ATTENTION"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"displayName", "migrationPlanId", "state", "targetAssetId"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"blockVolumesPerformance", "isExcludedFromExecution", "msLicense", "preferredShapeType", "type", "userSpec.agentConfig.areAllPluginsDisabled", "userSpec.agentConfig.isManagementDisabled", "userSpec.agentConfig.isMonitoringDisabled", "userSpec.agentConfig.pluginsConfig.desiredState", "userSpec.agentConfig.pluginsConfig.name", "userSpec.availabilityDomain", "userSpec.capacityReservationId", "userSpec.compartmentId", "userSpec.createVnicDetails.assignPrivateDnsRecord", "userSpec.createVnicDetails.assignPublicIp", "userSpec.createVnicDetails.definedTags", "userSpec.createVnicDetails.displayName", "userSpec.createVnicDetails.freeformTags", "userSpec.createVnicDetails.hostnameLabel", "userSpec.createVnicDetails.nsgIds", "userSpec.createVnicDetails.privateIp", "userSpec.createVnicDetails.skipSourceDestCheck", "userSpec.createVnicDetails.subnetId", "userSpec.createVnicDetails.vlanId", "userSpec.dedicatedVmHostId", "userSpec.definedTags", "userSpec.displayName", "userSpec.faultDomain", "userSpec.freeformTags", "userSpec.hostnameLabel", "userSpec.instanceOptions.areLegacyImdsEndpointsDisabled", "userSpec.ipxeScript", "userSpec.isPvEncryptionInTransitEnabled", "userSpec.preemptibleInstanceConfig.preemptionAction.preserveBootVolume", "userSpec.preemptibleInstanceConfig.preemptionAction.type", "userSpec.shape", "userSpec.shapeConfig.baselineOcpuUtilization", "userSpec.shapeConfig.memoryInGbs", "userSpec.shapeConfig.ocpus", "userSpec.sourceDetails.bootVolumeId", "userSpec.sourceDetails.bootVolumeSizeInGbs", "userSpec.sourceDetails.bootVolumeVpusPerGb", "userSpec.sourceDetails.imageId", "userSpec.sourceDetails.kmsKeyId", "userSpec.sourceDetails.sourceType"},
+			ForceNew:      []string{"migrationPlanId"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newTargetAssetDefaultRuntimeHooks(sdkClient cloudmigrationssdk.MigrationClient) TargetAssetRuntimeHooks {
 	return TargetAssetRuntimeHooks{
+		Semantics:       newTargetAssetRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*cloudmigrationsv1beta1.TargetAsset]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*cloudmigrationsv1beta1.TargetAsset]{},
 		StatusHooks:     generatedruntime.StatusHooks[*cloudmigrationsv1beta1.TargetAsset]{},
 		ParityHooks:     generatedruntime.ParityHooks[*cloudmigrationsv1beta1.TargetAsset]{},
-		Async:           generatedruntime.AsyncHooks[*cloudmigrationsv1beta1.TargetAsset]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*cloudmigrationsv1beta1.TargetAsset]{},
+		Async: generatedruntime.AsyncHooks[*cloudmigrationsv1beta1.TargetAsset]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := cloudmigrationssdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*cloudmigrationsv1beta1.TargetAsset]{},
 		Create: runtimeOperationHooks[cloudmigrationssdk.CreateTargetAssetRequest, cloudmigrationssdk.CreateTargetAssetResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateTargetAssetDetails", RequestName: "CreateTargetAssetDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request cloudmigrationssdk.CreateTargetAssetRequest) (cloudmigrationssdk.CreateTargetAssetResponse, error) {
@@ -106,10 +175,19 @@ func buildTargetAssetGeneratedRuntimeConfig(
 	hooks TargetAssetRuntimeHooks,
 ) generatedruntime.Config[*cloudmigrationsv1beta1.TargetAsset] {
 	return generatedruntime.Config[*cloudmigrationsv1beta1.TargetAsset]{
-		Kind:            "TargetAsset",
-		SDKName:         "TargetAsset",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "TargetAsset",
+		SDKName:   "TargetAsset",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

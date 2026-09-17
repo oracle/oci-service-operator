@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "opsi",
+  "slug": "opsiconfiguration",
+  "kind": "OpsiConfiguration",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_opsi_opsi_configuration",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOpsiConfiguration",
+        "requestType": "opsi.CreateOpsiConfigurationRequest",
+        "responseType": "opsi.CreateOpsiConfigurationResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOpsiConfiguration",
+        "requestType": "opsi.GetOpsiConfigurationRequest",
+        "responseType": "opsi.GetOpsiConfigurationResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOpsiConfigurations",
+        "requestType": "opsi.ListOpsiConfigurationsRequest",
+        "responseType": "opsi.ListOpsiConfigurationsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeOpsiConfigurationCompartment",
+        "requestType": "opsi.ChangeOpsiConfigurationCompartmentRequest",
+        "responseType": "opsi.ChangeOpsiConfigurationCompartmentResponse"
+      },
+      {
+        "operation": "UpdateOpsiConfiguration",
+        "requestType": "opsi.UpdateOpsiConfigurationRequest",
+        "responseType": "opsi.UpdateOpsiConfigurationResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOpsiConfiguration",
+        "requestType": "opsi.DeleteOpsiConfigurationRequest",
+        "responseType": "opsi.DeleteOpsiConfigurationResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "config_item_custom_status",
+      "config_item_field",
+      "config_items.config_item_type",
+      "config_items.name",
+      "config_items.value",
+      "config_items_applicable_context",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags",
+      "opsi_config_field",
+      "opsi_config_type",
+      "system_tags"
+    ],
+    "forceNew": null,
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_opsi_opsi_configurations",
+    "collectionField": "opsi_configurations_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "opsi_config_type",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/opsi/opsiconfiguration/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/opsi/opsiconfiguration/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from terraform-provider-oci for opsi/opsiconfiguration."
+  ]
+}

@@ -400,6 +400,33 @@ func TestSubscriptionCreateOrUpdateSkipsNoOpUpdate(t *testing.T) {
 	assertTrailingCondition(t, resource, shared.Active)
 }
 
+func TestSubscriptionDeleteConfirmsAuthShapedNotFoundByScopedList(t *testing.T) {
+	t.Parallel()
+
+	resource := makeSubscriptionResource()
+	resource.Status.OsokStatus.Ocid = shared.OCID(testSubscriptionID)
+	resource.Status.Id = testSubscriptionID
+	fake := &fakeSubscriptionOCIClient{
+		getFn: func(context.Context, onssdk.GetSubscriptionRequest) (onssdk.GetSubscriptionResponse, error) {
+			return onssdk.GetSubscriptionResponse{Subscription: makeSDKSubscription(testSubscriptionID, onssdk.SubscriptionLifecycleStatePending)}, nil
+		},
+		deleteFn: func(context.Context, onssdk.DeleteSubscriptionRequest) (onssdk.DeleteSubscriptionResponse, error) {
+			return onssdk.DeleteSubscriptionResponse{}, errortest.NewServiceError(404, errorutil.NotAuthorizedOrNotFound, "not authorized or missing")
+		},
+		listFn: func(context.Context, onssdk.ListSubscriptionsRequest) (onssdk.ListSubscriptionsResponse, error) {
+			return onssdk.ListSubscriptionsResponse{}, nil
+		},
+	}
+
+	deleted, err := testSubscriptionClient(fake).Delete(context.Background(), resource)
+	if err != nil {
+		t.Fatalf("Delete() error = %v", err)
+	}
+	if !deleted || resource.Status.OsokStatus.DeletedAt == nil {
+		t.Fatalf("Delete() deleted=%v deletedAt=%v, want scoped absence confirmation", deleted, resource.Status.OsokStatus.DeletedAt)
+	}
+}
+
 func TestSubscriptionCreateOrUpdateAppliesMutableUpdate(t *testing.T) {
 	t.Parallel()
 
@@ -447,6 +474,72 @@ func TestSubscriptionCreateOrUpdateAppliesMutableUpdate(t *testing.T) {
 	assertSubscriptionMetadataFingerprint(t, resource, "owner=ops")
 }
 
+func TestSubscriptionUpdatePreservesOmittedDefinedTags(t *testing.T) {
+	t.Parallel()
+
+	resource := makeSubscriptionResource()
+	resource.Spec.FreeformTags = map[string]string{"env": "prod"}
+	resource.Spec.DefinedTags = nil
+	current := makeSDKSubscription(testSubscriptionID, onssdk.SubscriptionLifecycleStateActive)
+	current.FreeformTags = map[string]string{"env": "dev"}
+	current.DefinedTags = map[string]map[string]interface{}{
+		"Oracle-Tags": {"CreatedBy": "osok-mock"},
+	}
+
+	body, updateNeeded, err := buildSubscriptionUpdateBody(
+		resource,
+		onssdk.GetSubscriptionResponse{Subscription: current},
+	)
+	if err != nil {
+		t.Fatalf("build update body: %v", err)
+	}
+	if !updateNeeded {
+		t.Fatal("updateNeeded = false, want true")
+	}
+	update, ok := body.(onssdk.UpdateSubscriptionDetails)
+	if !ok {
+		t.Fatalf("update body type = %T", body)
+	}
+	if got, want := update.FreeformTags, map[string]string{"env": "prod"}; !jsonEqual(got, want) {
+		t.Fatalf("update freeformTags = %#v, want %#v", got, want)
+	}
+	if got, want := update.DefinedTags, current.DefinedTags; !jsonEqual(got, want) {
+		t.Fatalf("update definedTags = %#v, want preserved %#v", got, want)
+	}
+}
+
+func TestSubscriptionUpdatePreservesOmittedFreeformTags(t *testing.T) {
+	t.Parallel()
+
+	resource := makeSubscriptionResource()
+	resource.Spec.FreeformTags = nil
+	resource.Spec.DefinedTags = map[string]shared.MapValue{"Operations": {"CostCenter": "99"}}
+	current := makeSDKSubscription(testSubscriptionID, onssdk.SubscriptionLifecycleStateActive)
+	current.FreeformTags = map[string]string{"env": "dev"}
+	current.DefinedTags = map[string]map[string]interface{}{"Operations": {"CostCenter": "42"}}
+
+	body, updateNeeded, err := buildSubscriptionUpdateBody(
+		resource,
+		onssdk.GetSubscriptionResponse{Subscription: current},
+	)
+	if err != nil {
+		t.Fatalf("build update body: %v", err)
+	}
+	if !updateNeeded {
+		t.Fatal("updateNeeded = false, want true")
+	}
+	update, ok := body.(onssdk.UpdateSubscriptionDetails)
+	if !ok {
+		t.Fatalf("update body type = %T", body)
+	}
+	if got, want := update.FreeformTags, current.FreeformTags; !jsonEqual(got, want) {
+		t.Fatalf("update freeformTags = %#v, want preserved %#v", got, want)
+	}
+	if got, want := update.DefinedTags, subscriptionDefinedTags(resource.Spec.DefinedTags); !jsonEqual(got, want) {
+		t.Fatalf("update definedTags = %#v, want %#v", got, want)
+	}
+}
+
 func TestSubscriptionCreateOrUpdateRejectsCreateOnlyDriftBeforeUpdate(t *testing.T) {
 	t.Parallel()
 
@@ -455,6 +548,9 @@ func TestSubscriptionCreateOrUpdateRejectsCreateOnlyDriftBeforeUpdate(t *testing
 	resource.Status.OsokStatus.Ocid = shared.OCID(testSubscriptionID)
 	resource.Status.Id = testSubscriptionID
 	fake := &fakeSubscriptionOCIClient{
+		listFn: func(context.Context, onssdk.ListSubscriptionsRequest) (onssdk.ListSubscriptionsResponse, error) {
+			return onssdk.ListSubscriptionsResponse{Items: []onssdk.SubscriptionSummary{{Id: common.String(testSubscriptionID)}}}, nil
+		},
 		getFn: func(_ context.Context, _ onssdk.GetSubscriptionRequest) (onssdk.GetSubscriptionResponse, error) {
 			return onssdk.GetSubscriptionResponse{
 				Subscription: makeSDKSubscription(testSubscriptionID, onssdk.SubscriptionLifecycleStateActive),
@@ -660,6 +756,9 @@ func TestSubscriptionDeleteTreatsAuthShapedNotFoundConservatively(t *testing.T) 
 	resource.Status.OsokStatus.Ocid = shared.OCID(testSubscriptionID)
 	resource.Status.Id = testSubscriptionID
 	fake := &fakeSubscriptionOCIClient{
+		listFn: func(context.Context, onssdk.ListSubscriptionsRequest) (onssdk.ListSubscriptionsResponse, error) {
+			return onssdk.ListSubscriptionsResponse{Items: []onssdk.SubscriptionSummary{{Id: common.String(testSubscriptionID)}}}, nil
+		},
 		getFn: func(_ context.Context, _ onssdk.GetSubscriptionRequest) (onssdk.GetSubscriptionResponse, error) {
 			return onssdk.GetSubscriptionResponse{
 				Subscription: makeSDKSubscription(testSubscriptionID, onssdk.SubscriptionLifecycleStateActive),
@@ -691,6 +790,9 @@ func TestSubscriptionDeleteRejectsAuthShapedPreDeleteConfirmRead(t *testing.T) {
 	resource.Status.OsokStatus.Ocid = shared.OCID(testSubscriptionID)
 	resource.Status.Id = testSubscriptionID
 	fake := &fakeSubscriptionOCIClient{
+		listFn: func(context.Context, onssdk.ListSubscriptionsRequest) (onssdk.ListSubscriptionsResponse, error) {
+			return onssdk.ListSubscriptionsResponse{Items: []onssdk.SubscriptionSummary{{Id: common.String(testSubscriptionID)}}}, nil
+		},
 		getFn: func(context.Context, onssdk.GetSubscriptionRequest) (onssdk.GetSubscriptionResponse, error) {
 			err := errortest.NewServiceError(404, errorutil.NotAuthorizedOrNotFound, "not authorized or missing")
 			err.OpcRequestID = "opc-auth-read"

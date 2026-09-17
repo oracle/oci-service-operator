@@ -56,6 +56,9 @@ spec:
           spec:
             description: ScheduleSpec defines the desired state of Schedule.
             properties:
+              applicationKey:
+                description: The key of the application containing this resource.
+                type: string
               description:
                 description: Detailed description for the object.
                 type: string
@@ -180,9 +183,15 @@ spec:
               timezone:
                 description: The timezone for the schedule.
                 type: string
+              workspaceId:
+                description: The OCID of the Data Integration workspace containing
+                  this resource.
+                type: string
             required:
+            - applicationKey
             - identifier
             - name
+            - workspaceId
             type: object
           status:
             description: ScheduleStatus defines the observed state of Schedule.

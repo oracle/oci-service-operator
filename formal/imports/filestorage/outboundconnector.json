@@ -1,0 +1,140 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "filestorage",
+  "slug": "outboundconnector",
+  "kind": "OutboundConnector",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_file_storage_outbound_connector",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOutboundConnector",
+        "requestType": "filestorage.CreateOutboundConnectorRequest",
+        "responseType": "filestorage.CreateOutboundConnectorResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOutboundConnector",
+        "requestType": "filestorage.GetOutboundConnectorRequest",
+        "responseType": "filestorage.GetOutboundConnectorResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOutboundConnectors",
+        "requestType": "filestorage.ListOutboundConnectorsRequest",
+        "responseType": "filestorage.ListOutboundConnectorsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeOutboundConnectorCompartment",
+        "requestType": "filestorage.ChangeOutboundConnectorCompartmentRequest",
+        "responseType": "filestorage.ChangeOutboundConnectorCompartmentResponse"
+      },
+      {
+        "operation": "UpdateOutboundConnector",
+        "requestType": "filestorage.UpdateOutboundConnectorRequest",
+        "responseType": "filestorage.UpdateOutboundConnectorResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOutboundConnector",
+        "requestType": "filestorage.DeleteOutboundConnectorRequest",
+        "responseType": "filestorage.DeleteOutboundConnectorResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "display_name",
+      "freeform_tags",
+      "is_lock_override"
+    ],
+    "forceNew": [
+      "availability_domain",
+      "bind_distinguished_name",
+      "connector_type",
+      "endpoints",
+      "endpoints.hostname",
+      "endpoints.port",
+      "locks",
+      "locks.message",
+      "locks.related_resource_id",
+      "locks.time_created",
+      "locks.type",
+      "password_secret_id",
+      "password_secret_version"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_file_storage_outbound_connectors",
+    "collectionField": "outbound_connectors",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "availability_domain",
+      "compartment_id",
+      "display_name",
+      "id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/filestorage/outboundconnector/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/filestorage/outboundconnector/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from the pinned terraform-provider-oci source revision."
+  ]
+}

@@ -50,11 +50,11 @@ type MonitoredResourceSpec struct {
 	// +kubebuilder:validation:Optional
 	Properties []MonitoredResourceProperty `json:"properties,omitempty"`
 	// +kubebuilder:validation:Optional
-	DatabaseConnectionDetails MonitoredResourceDatabaseConnectionDetails `json:"databaseConnectionDetails,omitempty"`
+	DatabaseConnectionDetails MonitoredResourceDatabaseConnectionDetails `json:"databaseConnectionDetails,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	Credentials MonitoredResourceCredentials `json:"credentials,omitempty"`
+	Credentials MonitoredResourceCredentials `json:"credentials,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	Aliases MonitoredResourceAliases `json:"aliases,omitempty"`
+	Aliases MonitoredResourceAliases `json:"aliases,omitempty,omitzero"`
 	// List of MonitoredResourceCredentials. This property complements the existing
 	// "credentials" property by allowing user to specify more than one credential.
 	// If both "credential" and "additionalCredentials" are specified, union of the

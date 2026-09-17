@@ -50,15 +50,84 @@ func registerDeployArtifactRuntimeHooksMutator(mutator DeployArtifactRuntimeHook
 	}
 	deployartifactRuntimeHooksMutators = append(deployartifactRuntimeHooksMutators, mutator)
 }
+func newDeployArtifactRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "devops",
+		FormalSlug:    "deployartifact",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "displayName", "id", "projectId", "state"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"argumentSubstitutionMode", "definedTags", "deployArtifactSource", "deployArtifactType", "description", "displayName", "freeformTags"},
+			ForceNew:      []string{"projectId"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> GetDeployArtifact",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> GetDeployArtifact",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newDeployArtifactDefaultRuntimeHooks(sdkClient devopssdk.DevopsClient) DeployArtifactRuntimeHooks {
 	return DeployArtifactRuntimeHooks{
+		Semantics:       newDeployArtifactRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*devopsv1beta1.DeployArtifact]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*devopsv1beta1.DeployArtifact]{},
 		StatusHooks:     generatedruntime.StatusHooks[*devopsv1beta1.DeployArtifact]{},
 		ParityHooks:     generatedruntime.ParityHooks[*devopsv1beta1.DeployArtifact]{},
-		Async:           generatedruntime.AsyncHooks[*devopsv1beta1.DeployArtifact]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*devopsv1beta1.DeployArtifact]{},
+		Async: generatedruntime.AsyncHooks[*devopsv1beta1.DeployArtifact]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := devopssdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*devopsv1beta1.DeployArtifact]{},
 		Create: runtimeOperationHooks[devopssdk.CreateDeployArtifactRequest, devopssdk.CreateDeployArtifactResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateDeployArtifactDetails", RequestName: "CreateDeployArtifactDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request devopssdk.CreateDeployArtifactRequest) (devopssdk.CreateDeployArtifactResponse, error) {
@@ -106,10 +175,19 @@ func buildDeployArtifactGeneratedRuntimeConfig(
 	hooks DeployArtifactRuntimeHooks,
 ) generatedruntime.Config[*devopsv1beta1.DeployArtifact] {
 	return generatedruntime.Config[*devopsv1beta1.DeployArtifact]{
-		Kind:            "DeployArtifact",
-		SDKName:         "DeployArtifact",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "DeployArtifact",
+		SDKName:   "DeployArtifact",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

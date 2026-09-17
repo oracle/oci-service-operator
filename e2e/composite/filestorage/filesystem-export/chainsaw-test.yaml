@@ -1,0 +1,224 @@
+# Copyright (c) 2026, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+# yaml-language-server: $schema=https://raw.githubusercontent.com/kyverno/chainsaw/v0.2.15/.schemas/json/test-chainsaw-v1alpha1.json
+
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: Test
+metadata:
+  name: filestorage-filesystem-export
+spec:
+  concurrent: false
+  timeouts:
+    apply: 2m
+    assert: 30m
+    cleanup: 45m
+    delete: 45m
+    exec: 2m
+  bindings:
+    - name: suffix
+      value: (env('OSOK_E2E_SUFFIX'))
+    - name: compartmentId
+      value: (env('OCI_COMPARTMENT_ID'))
+    - name: availabilityDomain
+      value: (env('OCI_AVAILABILITY_DOMAIN'))
+    - name: subnetId
+      value: (env('OCI_SUBNET_ID'))
+    - name: fileSystemName
+      value: (join('-', ['osok-chain-fs', $suffix]))
+    - name: mountTargetName
+      value: (join('-', ['osok-chain-mt', $suffix]))
+    - name: exportName
+      value: (join('-', ['osok-chain-export', $suffix]))
+    - name: exportPath
+      value: (join('', ['/osok-', $suffix]))
+  steps:
+    - name: exercise-filesystem-export-chain
+      description: Create a file system and mount target, inject both observed identifiers into an export, update the graph, and delete it safely.
+      try:
+        - script:
+            env:
+              - name: OCI_COMPARTMENT_ID
+                value: ($compartmentId)
+              - name: OCI_AVAILABILITY_DOMAIN
+                value: ($availabilityDomain)
+              - name: OCI_SUBNET_ID
+                value: ($subnetId)
+            content: |
+              set -eu
+              test -n "$OCI_COMPARTMENT_ID" || { echo "OCI_COMPARTMENT_ID is required" >&2; exit 2; }
+              test -n "$OCI_AVAILABILITY_DOMAIN" || { echo "OCI_AVAILABILITY_DOMAIN is required" >&2; exit 2; }
+              test -n "$OCI_SUBNET_ID" || { echo "OCI_SUBNET_ID is required" >&2; exit 2; }
+        - apply:
+            resource:
+              apiVersion: filestorage.oracle.com/v1beta1
+              kind: FileSystem
+              metadata:
+                name: ($fileSystemName)
+                namespace: ($namespace)
+              spec:
+                availabilityDomain: ($availabilityDomain)
+                compartmentId: ($compartmentId)
+                displayName: ($fileSystemName)
+                freeformTags:
+                  osok-e2e-phase: create
+        - assert:
+            resource:
+              apiVersion: filestorage.oracle.com/v1beta1
+              kind: FileSystem
+              metadata:
+                name: ($fileSystemName)
+              status:
+                lifecycleState: ACTIVE
+                status:
+                  (conditions[?type == 'Active' && status == 'True'] | length(@) > `0`): true
+                  (ocid != null && length(ocid) > `0`): true
+        - script:
+            env:
+              - name: RESOURCE_NAME
+                value: ($fileSystemName)
+            content: kubectl get filesystem.filestorage.oracle.com "$RESOURCE_NAME" -n "$NAMESPACE" -o json
+            outputs:
+              - name: fileSystem
+                value: (json_parse($stdout))
+        - apply:
+            resource:
+              apiVersion: filestorage.oracle.com/v1beta1
+              kind: MountTarget
+              metadata:
+                name: ($mountTargetName)
+                namespace: ($namespace)
+              spec:
+                availabilityDomain: ($availabilityDomain)
+                compartmentId: ($compartmentId)
+                subnetId: ($subnetId)
+                displayName: ($mountTargetName)
+                freeformTags:
+                  osok-e2e-phase: create
+        - assert:
+            resource:
+              apiVersion: filestorage.oracle.com/v1beta1
+              kind: MountTarget
+              metadata:
+                name: ($mountTargetName)
+              status:
+                lifecycleState: ACTIVE
+                (exportSetId != null && length(exportSetId) > `0`): true
+                status:
+                  (conditions[?type == 'Active' && status == 'True'] | length(@) > `0`): true
+                  (ocid != null && length(ocid) > `0`): true
+        - script:
+            env:
+              - name: RESOURCE_NAME
+                value: ($mountTargetName)
+            content: kubectl get mounttarget.filestorage.oracle.com "$RESOURCE_NAME" -n "$NAMESPACE" -o json
+            outputs:
+              - name: mountTarget
+                value: (json_parse($stdout))
+        - apply:
+            resource:
+              apiVersion: filestorage.oracle.com/v1beta1
+              kind: Export
+              metadata:
+                name: ($exportName)
+                namespace: ($namespace)
+              spec:
+                exportSetId: ($mountTarget.status.exportSetId)
+                fileSystemId: ($fileSystem.status.status.ocid)
+                path: ($exportPath)
+                exportOptions:
+                  - source: 0.0.0.0/0
+                    requirePrivilegedSourcePort: true
+                    access: READ_ONLY
+                    identitySquash: ROOT
+                    anonymousUid: 65534
+                    anonymousGid: 65534
+                    allowedAuth: [SYS]
+        - assert:
+            resource:
+              apiVersion: filestorage.oracle.com/v1beta1
+              kind: Export
+              metadata:
+                name: ($exportName)
+              status:
+                lifecycleState: ACTIVE
+                (fileSystemId == $fileSystem.status.status.ocid): true
+                (exportSetId == $mountTarget.status.exportSetId): true
+                status:
+                  (conditions[?type == 'Active' && status == 'True'] | length(@) > `0`): true
+                  (ocid != null && length(ocid) > `0`): true
+        - apply:
+            resource:
+              apiVersion: filestorage.oracle.com/v1beta1
+              kind: FileSystem
+              metadata:
+                name: ($fileSystemName)
+                namespace: ($namespace)
+              spec:
+                availabilityDomain: ($availabilityDomain)
+                compartmentId: ($compartmentId)
+                displayName: ($fileSystemName)
+                freeformTags:
+                  osok-e2e-phase: update
+        - apply:
+            resource:
+              apiVersion: filestorage.oracle.com/v1beta1
+              kind: MountTarget
+              metadata:
+                name: ($mountTargetName)
+                namespace: ($namespace)
+              spec:
+                availabilityDomain: ($availabilityDomain)
+                compartmentId: ($compartmentId)
+                subnetId: ($subnetId)
+                displayName: ($mountTargetName)
+                freeformTags:
+                  osok-e2e-phase: update
+        - apply:
+            resource:
+              apiVersion: filestorage.oracle.com/v1beta1
+              kind: Export
+              metadata:
+                name: ($exportName)
+                namespace: ($namespace)
+              spec:
+                exportSetId: ($mountTarget.status.exportSetId)
+                fileSystemId: ($fileSystem.status.status.ocid)
+                path: ($exportPath)
+                exportOptions:
+                  - source: 0.0.0.0/0
+                    requirePrivilegedSourcePort: true
+                    access: READ_WRITE
+                    identitySquash: ROOT
+                    anonymousUid: 65534
+                    anonymousGid: 65534
+                    allowedAuth: [SYS]
+        - assert:
+            resource:
+              apiVersion: filestorage.oracle.com/v1beta1
+              kind: FileSystem
+              metadata:
+                name: ($fileSystemName)
+              status:
+                lifecycleState: ACTIVE
+                freeformTags:
+                  osok-e2e-phase: update
+        - assert:
+            resource:
+              apiVersion: filestorage.oracle.com/v1beta1
+              kind: MountTarget
+              metadata:
+                name: ($mountTargetName)
+              status:
+                lifecycleState: ACTIVE
+                freeformTags:
+                  osok-e2e-phase: update
+        - assert:
+            resource:
+              apiVersion: filestorage.oracle.com/v1beta1
+              kind: Export
+              metadata:
+                name: ($exportName)
+              status:
+                lifecycleState: ACTIVE
+                exportOptions:
+                  - access: READ_WRITE

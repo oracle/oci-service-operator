@@ -66,7 +66,7 @@ func newTermRelationshipDefaultRuntimeHooks(sdkClient datacatalogsdk.DataCatalog
 			},
 		},
 		Get: runtimeOperationHooks[datacatalogsdk.GetTermRelationshipRequest, datacatalogsdk.GetTermRelationshipResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "GlossaryKey", RequestName: "glossaryKey", Contribution: "path", PreferResourceID: false}, {FieldName: "TermKey", RequestName: "termKey", Contribution: "path", PreferResourceID: false}, {FieldName: "TermRelationshipKey", RequestName: "termRelationshipKey", Contribution: "path", PreferResourceID: false}, {FieldName: "Fields", RequestName: "fields", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "GlossaryKey", RequestName: "glossaryKey", Contribution: "path", PreferResourceID: false}, {FieldName: "TermKey", RequestName: "termKey", Contribution: "path", PreferResourceID: false}, {FieldName: "TermRelationshipKey", RequestName: "termRelationshipKey", Contribution: "path", PreferResourceID: true}, {FieldName: "Fields", RequestName: "fields", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request datacatalogsdk.GetTermRelationshipRequest) (datacatalogsdk.GetTermRelationshipResponse, error) {
 				return sdkClient.GetTermRelationship(ctx, request)
 			},
@@ -78,13 +78,13 @@ func newTermRelationshipDefaultRuntimeHooks(sdkClient datacatalogsdk.DataCatalog
 			},
 		},
 		Update: runtimeOperationHooks[datacatalogsdk.UpdateTermRelationshipRequest, datacatalogsdk.UpdateTermRelationshipResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "GlossaryKey", RequestName: "glossaryKey", Contribution: "path", PreferResourceID: false}, {FieldName: "TermKey", RequestName: "termKey", Contribution: "path", PreferResourceID: false}, {FieldName: "TermRelationshipKey", RequestName: "termRelationshipKey", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdateTermRelationshipDetails", RequestName: "UpdateTermRelationshipDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "GlossaryKey", RequestName: "glossaryKey", Contribution: "path", PreferResourceID: false}, {FieldName: "TermKey", RequestName: "termKey", Contribution: "path", PreferResourceID: false}, {FieldName: "TermRelationshipKey", RequestName: "termRelationshipKey", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateTermRelationshipDetails", RequestName: "UpdateTermRelationshipDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request datacatalogsdk.UpdateTermRelationshipRequest) (datacatalogsdk.UpdateTermRelationshipResponse, error) {
 				return sdkClient.UpdateTermRelationship(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[datacatalogsdk.DeleteTermRelationshipRequest, datacatalogsdk.DeleteTermRelationshipResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "GlossaryKey", RequestName: "glossaryKey", Contribution: "path", PreferResourceID: false}, {FieldName: "TermKey", RequestName: "termKey", Contribution: "path", PreferResourceID: false}, {FieldName: "TermRelationshipKey", RequestName: "termRelationshipKey", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "GlossaryKey", RequestName: "glossaryKey", Contribution: "path", PreferResourceID: false}, {FieldName: "TermKey", RequestName: "termKey", Contribution: "path", PreferResourceID: false}, {FieldName: "TermRelationshipKey", RequestName: "termRelationshipKey", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request datacatalogsdk.DeleteTermRelationshipRequest) (datacatalogsdk.DeleteTermRelationshipResponse, error) {
 				return sdkClient.DeleteTermRelationship(ctx, request)
 			},

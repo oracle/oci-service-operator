@@ -50,50 +50,119 @@ func registerOracleDbGcpIdentityConnectorRuntimeHooksMutator(mutator OracleDbGcp
 	}
 	oracledbgcpidentityconnectorRuntimeHooksMutators = append(oracledbgcpidentityconnectorRuntimeHooksMutators, mutator)
 }
-func newOracleDbGcpIdentityConnectorDefaultRuntimeHooks(sdkClient dbmulticloudsdk.DbMulticloudGCPProviderClient) OracleDbGcpIdentityConnectorRuntimeHooks {
+func newOracleDbGcpIdentityConnectorRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "dbmulticloud",
+		FormalSlug:    "oracledbgcpidentityconnector",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "displayName", "resourceId", "state"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"compartmentId", "definedTags", "displayName", "freeformTags", "gcpLocation", "gcpResourceServiceAgentId", "gcpWorkloadIdentityPoolId", "gcpWorkloadIdentityProviderId", "issuerUrl", "projectId", "resourceId"},
+			ForceNew:      []string{},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
+func newOracleDbGcpIdentityConnectorDefaultRuntimeHooks(sdkClient OracleDbGcpIdentityConnectorSDKClients) OracleDbGcpIdentityConnectorRuntimeHooks {
 	return OracleDbGcpIdentityConnectorRuntimeHooks{
+		Semantics:       newOracleDbGcpIdentityConnectorRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*dbmulticloudv1beta1.OracleDbGcpIdentityConnector]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*dbmulticloudv1beta1.OracleDbGcpIdentityConnector]{},
 		StatusHooks:     generatedruntime.StatusHooks[*dbmulticloudv1beta1.OracleDbGcpIdentityConnector]{},
 		ParityHooks:     generatedruntime.ParityHooks[*dbmulticloudv1beta1.OracleDbGcpIdentityConnector]{},
-		Async:           generatedruntime.AsyncHooks[*dbmulticloudv1beta1.OracleDbGcpIdentityConnector]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*dbmulticloudv1beta1.OracleDbGcpIdentityConnector]{},
+		Async: generatedruntime.AsyncHooks[*dbmulticloudv1beta1.OracleDbGcpIdentityConnector]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := dbmulticloudsdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.workRequestClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*dbmulticloudv1beta1.OracleDbGcpIdentityConnector]{},
 		Create: runtimeOperationHooks[dbmulticloudsdk.CreateOracleDbGcpIdentityConnectorRequest, dbmulticloudsdk.CreateOracleDbGcpIdentityConnectorResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateOracleDbGcpIdentityConnectorDetails", RequestName: "CreateOracleDbGcpIdentityConnectorDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dbmulticloudsdk.CreateOracleDbGcpIdentityConnectorRequest) (dbmulticloudsdk.CreateOracleDbGcpIdentityConnectorResponse, error) {
-				return sdkClient.CreateOracleDbGcpIdentityConnector(ctx, request)
+				return sdkClient.dbMulticloudGcpProviderClient.CreateOracleDbGcpIdentityConnector(ctx, request)
 			},
 		},
 		Get: runtimeOperationHooks[dbmulticloudsdk.GetOracleDbGcpIdentityConnectorRequest, dbmulticloudsdk.GetOracleDbGcpIdentityConnectorResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OracleDbGcpIdentityConnectorId", RequestName: "oracleDbGcpIdentityConnectorId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request dbmulticloudsdk.GetOracleDbGcpIdentityConnectorRequest) (dbmulticloudsdk.GetOracleDbGcpIdentityConnectorResponse, error) {
-				return sdkClient.GetOracleDbGcpIdentityConnector(ctx, request)
+				return sdkClient.dbMulticloudGcpProviderClient.GetOracleDbGcpIdentityConnector(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[dbmulticloudsdk.ListOracleDbGcpIdentityConnectorsRequest, dbmulticloudsdk.ListOracleDbGcpIdentityConnectorsResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "ResourceId", RequestName: "resourceId", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dbmulticloudsdk.ListOracleDbGcpIdentityConnectorsRequest) (dbmulticloudsdk.ListOracleDbGcpIdentityConnectorsResponse, error) {
-				return sdkClient.ListOracleDbGcpIdentityConnectors(ctx, request)
+				return sdkClient.dbMulticloudGcpProviderClient.ListOracleDbGcpIdentityConnectors(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[dbmulticloudsdk.UpdateOracleDbGcpIdentityConnectorRequest, dbmulticloudsdk.UpdateOracleDbGcpIdentityConnectorResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OracleDbGcpIdentityConnectorId", RequestName: "oracleDbGcpIdentityConnectorId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateOracleDbGcpIdentityConnectorDetails", RequestName: "UpdateOracleDbGcpIdentityConnectorDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dbmulticloudsdk.UpdateOracleDbGcpIdentityConnectorRequest) (dbmulticloudsdk.UpdateOracleDbGcpIdentityConnectorResponse, error) {
-				return sdkClient.UpdateOracleDbGcpIdentityConnector(ctx, request)
+				return sdkClient.dbMulticloudGcpProviderClient.UpdateOracleDbGcpIdentityConnector(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[dbmulticloudsdk.DeleteOracleDbGcpIdentityConnectorRequest, dbmulticloudsdk.DeleteOracleDbGcpIdentityConnectorResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OracleDbGcpIdentityConnectorId", RequestName: "oracleDbGcpIdentityConnectorId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request dbmulticloudsdk.DeleteOracleDbGcpIdentityConnectorRequest) (dbmulticloudsdk.DeleteOracleDbGcpIdentityConnectorResponse, error) {
-				return sdkClient.DeleteOracleDbGcpIdentityConnector(ctx, request)
+				return sdkClient.dbMulticloudGcpProviderClient.DeleteOracleDbGcpIdentityConnector(ctx, request)
 			},
 		},
 		WrapGeneratedClient: []func(OracleDbGcpIdentityConnectorServiceClient) OracleDbGcpIdentityConnectorServiceClient{},
 	}
 }
 
-func newOracleDbGcpIdentityConnectorRuntimeHooks(manager *OracleDbGcpIdentityConnectorServiceManager, sdkClient dbmulticloudsdk.DbMulticloudGCPProviderClient) OracleDbGcpIdentityConnectorRuntimeHooks {
+func newOracleDbGcpIdentityConnectorRuntimeHooks(manager *OracleDbGcpIdentityConnectorServiceManager, sdkClient OracleDbGcpIdentityConnectorSDKClients) OracleDbGcpIdentityConnectorRuntimeHooks {
 	hooks := newOracleDbGcpIdentityConnectorDefaultRuntimeHooks(sdkClient)
 	for _, mutator := range oracledbgcpidentityconnectorRuntimeHooksMutators {
 		mutator(manager, &hooks)
@@ -106,10 +175,19 @@ func buildOracleDbGcpIdentityConnectorGeneratedRuntimeConfig(
 	hooks OracleDbGcpIdentityConnectorRuntimeHooks,
 ) generatedruntime.Config[*dbmulticloudv1beta1.OracleDbGcpIdentityConnector] {
 	return generatedruntime.Config[*dbmulticloudv1beta1.OracleDbGcpIdentityConnector]{
-		Kind:            "OracleDbGcpIdentityConnector",
-		SDKName:         "OracleDbGcpIdentityConnector",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "OracleDbGcpIdentityConnector",
+		SDKName:   "OracleDbGcpIdentityConnector",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

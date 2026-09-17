@@ -13,6 +13,7 @@ import (
 	analyticsv1beta1 "github.com/oracle/oci-service-operator/api/analytics/v1beta1"
 	announcementsservicev1beta1 "github.com/oracle/oci-service-operator/api/announcementsservice/v1beta1"
 	apiaccesscontrolv1beta1 "github.com/oracle/oci-service-operator/api/apiaccesscontrol/v1beta1"
+	apigatewayv1beta1 "github.com/oracle/oci-service-operator/api/apigateway/v1beta1"
 	apiplatformv1beta1 "github.com/oracle/oci-service-operator/api/apiplatform/v1beta1"
 	apmconfigv1beta1 "github.com/oracle/oci-service-operator/api/apmconfig/v1beta1"
 	apmcontrolplanev1beta1 "github.com/oracle/oci-service-operator/api/apmcontrolplane/v1beta1"
@@ -855,14 +856,12 @@ var targets = []Target{
 				SDKStruct: "ons.CreateTopicDetails",
 			},
 			{
-				SDKStruct: "ons.NotificationTopic",
-				Exclude:   true,
-				Reason:    "Intentionally untracked: OCI read-model mappings broaden desired-state coverage, and this CRD does not expose a meaningful status surface for parity tracking.",
+				SDKStruct:  "ons.NotificationTopic",
+				APISurface: "status",
 			},
 			{
-				SDKStruct: "ons.NotificationTopicSummary",
-				Exclude:   true,
-				Reason:    "Intentionally untracked: OCI read-model mappings broaden desired-state coverage, and this CRD does not expose a meaningful status surface for parity tracking.",
+				SDKStruct:  "ons.NotificationTopicSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -2139,6 +2138,54 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "apiaccesscontrol.PrivilegedApiControlSummary",
+			},
+		},
+	},
+	{
+		Name:       "ApigatewayApiGateway",
+		SpecType:   reflect.TypeOf(apigatewayv1beta1.ApiGatewaySpec{}),
+		StatusType: reflect.TypeOf(apigatewayv1beta1.ApiGatewayStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "apigateway.CreateGatewayDetails",
+			},
+			{
+				SDKStruct: "apigateway.UpdateGatewayDetails",
+			},
+			{
+				SDKStruct: "apigateway.Gateway",
+			},
+			{
+				SDKStruct: "apigateway.GatewayCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
+			},
+			{
+				SDKStruct: "apigateway.GatewaySummary",
+			},
+		},
+	},
+	{
+		Name:       "ApigatewayApiGatewayDeployment",
+		SpecType:   reflect.TypeOf(apigatewayv1beta1.ApiGatewayDeploymentSpec{}),
+		StatusType: reflect.TypeOf(apigatewayv1beta1.ApiGatewayDeploymentStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "apigateway.CreateDeploymentDetails",
+			},
+			{
+				SDKStruct: "apigateway.UpdateDeploymentDetails",
+			},
+			{
+				SDKStruct: "apigateway.Deployment",
+			},
+			{
+				SDKStruct: "apigateway.DeploymentCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
+			},
+			{
+				SDKStruct: "apigateway.DeploymentSummary",
 			},
 		},
 	},
@@ -3758,10 +3805,21 @@ var targets = []Target{
 		},
 	},
 	{
-		Name:        "DataintegrationApplicationDetailedDescription",
-		SpecType:    reflect.TypeOf(dataintegrationv1beta1.ApplicationDetailedDescriptionSpec{}),
-		StatusType:  reflect.TypeOf(dataintegrationv1beta1.ApplicationDetailedDescriptionStatus{}),
-		SDKMappings: []SDKMapping{},
+		Name:       "DataintegrationApplicationDetailedDescription",
+		SpecType:   reflect.TypeOf(dataintegrationv1beta1.ApplicationDetailedDescriptionSpec{}),
+		StatusType: reflect.TypeOf(dataintegrationv1beta1.ApplicationDetailedDescriptionStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "dataintegration.CreateDetailedDescriptionDetails",
+			},
+			{
+				SDKStruct: "dataintegration.UpdateDetailedDescriptionDetails",
+			},
+			{
+				SDKStruct:  "dataintegration.DetailedDescription",
+				APISurface: "status",
+			},
+		},
 	},
 	{
 		Name:        "DataintegrationConnection",
@@ -3868,10 +3926,21 @@ var targets = []Target{
 		},
 	},
 	{
-		Name:        "DataintegrationDisApplicationDetailedDescription",
-		SpecType:    reflect.TypeOf(dataintegrationv1beta1.DisApplicationDetailedDescriptionSpec{}),
-		StatusType:  reflect.TypeOf(dataintegrationv1beta1.DisApplicationDetailedDescriptionStatus{}),
-		SDKMappings: []SDKMapping{},
+		Name:       "DataintegrationDisApplicationDetailedDescription",
+		SpecType:   reflect.TypeOf(dataintegrationv1beta1.DisApplicationDetailedDescriptionSpec{}),
+		StatusType: reflect.TypeOf(dataintegrationv1beta1.DisApplicationDetailedDescriptionStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "dataintegration.CreateDetailedDescriptionDetails",
+			},
+			{
+				SDKStruct: "dataintegration.UpdateDetailedDescriptionDetails",
+			},
+			{
+				SDKStruct:  "dataintegration.DetailedDescription",
+				APISurface: "status",
+			},
+		},
 	},
 	{
 		Name:       "DataintegrationExportRequest",
@@ -7437,22 +7506,37 @@ var targets = []Target{
 		},
 	},
 	{
-		Name:        "MulticloudExternalLocationDetailsMetadata",
-		SpecType:    reflect.TypeOf(multicloudv1beta1.ExternalLocationDetailsMetadataSpec{}),
-		StatusType:  reflect.TypeOf(multicloudv1beta1.ExternalLocationDetailsMetadataStatus{}),
-		SDKMappings: []SDKMapping{},
+		Name:       "MulticloudExternalLocationDetailsMetadata",
+		SpecType:   reflect.TypeOf(multicloudv1beta1.ExternalLocationDetailsMetadataSpec{}),
+		StatusType: reflect.TypeOf(multicloudv1beta1.ExternalLocationDetailsMetadataStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct:  "multicloud.ExternalLocationsMetadatumSummary",
+				APISurface: "status",
+			},
+		},
 	},
 	{
-		Name:        "MulticloudExternalLocationMappingMetadata",
-		SpecType:    reflect.TypeOf(multicloudv1beta1.ExternalLocationMappingMetadataSpec{}),
-		StatusType:  reflect.TypeOf(multicloudv1beta1.ExternalLocationMappingMetadataStatus{}),
-		SDKMappings: []SDKMapping{},
+		Name:       "MulticloudExternalLocationMappingMetadata",
+		SpecType:   reflect.TypeOf(multicloudv1beta1.ExternalLocationMappingMetadataSpec{}),
+		StatusType: reflect.TypeOf(multicloudv1beta1.ExternalLocationMappingMetadataStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct:  "multicloud.ExternalLocationMappingMetadatumSummary",
+				APISurface: "status",
+			},
+		},
 	},
 	{
-		Name:        "MulticloudExternalLocationSummariesMetadata",
-		SpecType:    reflect.TypeOf(multicloudv1beta1.ExternalLocationSummariesMetadataSpec{}),
-		StatusType:  reflect.TypeOf(multicloudv1beta1.ExternalLocationSummariesMetadataStatus{}),
-		SDKMappings: []SDKMapping{},
+		Name:       "MulticloudExternalLocationSummariesMetadata",
+		SpecType:   reflect.TypeOf(multicloudv1beta1.ExternalLocationSummariesMetadataSpec{}),
+		StatusType: reflect.TypeOf(multicloudv1beta1.ExternalLocationSummariesMetadataStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct:  "multicloud.ExternalLocationSummariesMetadatumSummaryCollection",
+				APISurface: "status",
+			},
+		},
 	},
 	{
 		Name:       "MulticloudMultiCloudMetadata",
@@ -8280,10 +8364,15 @@ var targets = []Target{
 		},
 	},
 	{
-		Name:        "OsuborganizationsubscriptionOrganizationSubscription",
-		SpecType:    reflect.TypeOf(osuborganizationsubscriptionv1beta1.OrganizationSubscriptionSpec{}),
-		StatusType:  reflect.TypeOf(osuborganizationsubscriptionv1beta1.OrganizationSubscriptionStatus{}),
-		SDKMappings: []SDKMapping{},
+		Name:       "OsuborganizationsubscriptionOrganizationSubscription",
+		SpecType:   reflect.TypeOf(osuborganizationsubscriptionv1beta1.OrganizationSubscriptionSpec{}),
+		StatusType: reflect.TypeOf(osuborganizationsubscriptionv1beta1.OrganizationSubscriptionStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct:  "osuborganizationsubscription.SubscriptionSummary",
+				APISurface: "status",
+			},
+		},
 	},
 	{
 		Name:       "OsubsubscriptionSubscription",

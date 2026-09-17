@@ -50,15 +50,84 @@ func registerAwrHubRuntimeHooksMutator(mutator AwrHubRuntimeHooksMutator) {
 	}
 	awrhubRuntimeHooksMutators = append(awrhubRuntimeHooksMutators, mutator)
 }
+func newAwrHubRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "opsi",
+		FormalSlug:    "awrhub",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "displayName", "id", "operationsInsightsWarehouseId", "state"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"definedTags", "displayName", "freeformTags"},
+			ForceNew:      []string{"compartmentId", "objectStorageBucketName", "operationsInsightsWarehouseId"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "awrHub", Action: "CREATE_AWRHUB"}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "awrHub", Action: "UPDATE_AWRHUB"}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "awrHub", Action: "DELETE_AWRHUB"}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> GetAwrHub",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "awrHub", Action: "CREATE_AWRHUB"}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> GetAwrHub",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "awrHub", Action: "UPDATE_AWRHUB"}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "awrHub", Action: "DELETE_AWRHUB"}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newAwrHubDefaultRuntimeHooks(sdkClient opsisdk.OperationsInsightsClient) AwrHubRuntimeHooks {
 	return AwrHubRuntimeHooks{
+		Semantics:       newAwrHubRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*opsiv1beta1.AwrHub]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*opsiv1beta1.AwrHub]{},
 		StatusHooks:     generatedruntime.StatusHooks[*opsiv1beta1.AwrHub]{},
 		ParityHooks:     generatedruntime.ParityHooks[*opsiv1beta1.AwrHub]{},
-		Async:           generatedruntime.AsyncHooks[*opsiv1beta1.AwrHub]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*opsiv1beta1.AwrHub]{},
+		Async: generatedruntime.AsyncHooks[*opsiv1beta1.AwrHub]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := opsisdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*opsiv1beta1.AwrHub]{},
 		Create: runtimeOperationHooks[opsisdk.CreateAwrHubRequest, opsisdk.CreateAwrHubResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateAwrHubDetails", RequestName: "CreateAwrHubDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request opsisdk.CreateAwrHubRequest) (opsisdk.CreateAwrHubResponse, error) {
@@ -106,10 +175,19 @@ func buildAwrHubGeneratedRuntimeConfig(
 	hooks AwrHubRuntimeHooks,
 ) generatedruntime.Config[*opsiv1beta1.AwrHub] {
 	return generatedruntime.Config[*opsiv1beta1.AwrHub]{
-		Kind:            "AwrHub",
-		SDKName:         "AwrHub",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "AwrHub",
+		SDKName:   "AwrHub",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

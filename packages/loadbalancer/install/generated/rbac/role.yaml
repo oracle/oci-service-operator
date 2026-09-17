@@ -1,0 +1,66 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
+  - loadbalancer.oracle.com
+  resources:
+  - backends
+  - backendsets
+  - certificates
+  - hostnames
+  - listeners
+  - loadbalancers
+  - pathroutesets
+  - routingpolicies
+  - rulesets
+  - sslciphersuites
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - loadbalancer.oracle.com
+  resources:
+  - backends/finalizers
+  - backendsets/finalizers
+  - certificates/finalizers
+  - hostnames/finalizers
+  - listeners/finalizers
+  - loadbalancers/finalizers
+  - pathroutesets/finalizers
+  - routingpolicies/finalizers
+  - rulesets/finalizers
+  - sslciphersuites/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - loadbalancer.oracle.com
+  resources:
+  - backends/status
+  - backendsets/status
+  - certificates/status
+  - hostnames/status
+  - listeners/status
+  - loadbalancers/status
+  - pathroutesets/status
+  - routingpolicies/status
+  - rulesets/status
+  - sslciphersuites/status
+  verbs:
+  - get
+  - patch
+  - update

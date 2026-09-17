@@ -86,28 +86,27 @@
     },
     {
       "astFieldPath": "compartmentId",
-      "terraformFieldPath": "compartment_id",
+      "terraformFieldPath": "compartmentId",
       "canonicalJoinKey": "compartmentId",
       "pathShape": "scalar",
       "ast": {
-        "updateCandidateState": "updateCandidate",
-        "forceNew": false,
+        "updateCandidateState": "notUpdateCandidate",
+        "forceNew": true,
         "conflictsWith": null
       },
       "docs": {
-        "evidenceState": "confirmedUpdatable",
-        "detail": "Argument Reference marks the field as updatable in place.",
-        "rawSignal": "(updatable)"
+        "evidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
       },
       "merge": {
         "joinStatus": "matched",
-        "mergeCase": "docsConfirmedCandidate",
-        "finalPolicy": "allowInPlaceUpdate"
+        "mergeCase": "replacementRequired",
+        "finalPolicy": "replacementRequired"
       },
       "provenance": {
         "formalImportPath": "imports/oce/oceinstance.json",
         "formalSourceRef": "terraform-provider-oci",
-        "astSourceBucket": "mutation.mutable",
+        "astSourceBucket": "mutation.forceNew",
         "terraformDocsPage": "oce_oce_instance#argument-reference",
         "terraformDocsSection": "Argument Reference"
       }
@@ -220,33 +219,6 @@
         "formalImportPath": "imports/oce/oceinstance.json",
         "formalSourceRef": "terraform-provider-oci",
         "astSourceBucket": "mutation.mutable",
-        "terraformDocsPage": "oce_oce_instance#argument-reference",
-        "terraformDocsSection": "Argument Reference"
-      }
-    },
-    {
-      "astFieldPath": "idcsAccessToken",
-      "terraformFieldPath": "idcsAccessToken",
-      "canonicalJoinKey": "idcsAccessToken",
-      "pathShape": "scalar",
-      "ast": {
-        "updateCandidateState": "notUpdateCandidate",
-        "forceNew": true,
-        "conflictsWith": null
-      },
-      "docs": {
-        "evidenceState": "notDocumented",
-        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
-      },
-      "merge": {
-        "joinStatus": "matched",
-        "mergeCase": "replacementRequired",
-        "finalPolicy": "replacementRequired"
-      },
-      "provenance": {
-        "formalImportPath": "imports/oce/oceinstance.json",
-        "formalSourceRef": "terraform-provider-oci",
-        "astSourceBucket": "mutation.forceNew",
         "terraformDocsPage": "oce_oce_instance#argument-reference",
         "terraformDocsSection": "Argument Reference"
       }
@@ -379,33 +351,6 @@
         "joinStatus": "matched",
         "mergeCase": "docsConfirmedCandidate",
         "finalPolicy": "allowInPlaceUpdate"
-      },
-      "provenance": {
-        "formalImportPath": "imports/oce/oceinstance.json",
-        "formalSourceRef": "terraform-provider-oci",
-        "astSourceBucket": "mutation.mutable",
-        "terraformDocsPage": "oce_oce_instance#argument-reference",
-        "terraformDocsSection": "Argument Reference"
-      }
-    },
-    {
-      "astFieldPath": "lifecycleDetails",
-      "terraformFieldPath": "lifecycleDetails",
-      "canonicalJoinKey": "lifecycleDetails",
-      "pathShape": "scalar",
-      "ast": {
-        "updateCandidateState": "updateCandidate",
-        "forceNew": false,
-        "conflictsWith": null
-      },
-      "docs": {
-        "evidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
-      "merge": {
-        "joinStatus": "matched",
-        "mergeCase": "astOnlyCandidate",
-        "finalPolicy": "unknown"
       },
       "provenance": {
         "formalImportPath": "imports/oce/oceinstance.json",

@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "resourcemanager",
+  "slug": "privateendpoint",
+  "kind": "PrivateEndpoint",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_resourcemanager_private_endpoint",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreatePrivateEndpoint",
+        "requestType": "resourcemanager.CreatePrivateEndpointRequest",
+        "responseType": "resourcemanager.CreatePrivateEndpointResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetPrivateEndpoint",
+        "requestType": "resourcemanager.GetPrivateEndpointRequest",
+        "responseType": "resourcemanager.GetPrivateEndpointResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListPrivateEndpoints",
+        "requestType": "resourcemanager.ListPrivateEndpointsRequest",
+        "responseType": "resourcemanager.ListPrivateEndpointsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangePrivateEndpointCompartment",
+        "requestType": "resourcemanager.ChangePrivateEndpointCompartmentRequest",
+        "responseType": "resourcemanager.ChangePrivateEndpointCompartmentResponse"
+      },
+      {
+        "operation": "UpdatePrivateEndpoint",
+        "requestType": "resourcemanager.UpdatePrivateEndpointRequest",
+        "responseType": "resourcemanager.UpdatePrivateEndpointResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeletePrivateEndpoint",
+        "requestType": "resourcemanager.DeletePrivateEndpointRequest",
+        "responseType": "resourcemanager.DeletePrivateEndpointResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "description",
+      "display_name",
+      "dns_zones",
+      "freeform_tags",
+      "is_used_with_configuration_source_provider",
+      "nsg_id_list",
+      "security_attributes",
+      "subnet_id",
+      "vcn_id"
+    ],
+    "forceNew": null,
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_resourcemanager_private_endpoints",
+    "collectionField": "private_endpoint_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "private_endpoint_id",
+      "vcn_id"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/resourcemanager/privateendpoint/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/resourcemanager/privateendpoint/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Pinned provider facts are paired with reviewed PrivateEndpoint service-manager semantics and sanitized live CRUD evidence."
+  ]
+}

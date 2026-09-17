@@ -1,0 +1,123 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Activity - dns/SteeringPolicy
+skinparam activity {
+  backgroundColor #f8fafc
+  borderColor #0f172a
+  fontColor #0f172a
+  diamondBackgroundColor #e2e8f0
+  diamondBorderColor #1d4ed8
+  diamondFontColor #0f172a
+  startColor #1d4ed8
+  endColor #0f172a
+  barColor #1d4ed8
+}
+start
+partition "Observe and Bind" {
+:Start from shared flow\nshared/diagrams/shared-reconcile-activity.svg;
+:Read desired SteeringPolicy spec, tracked\nstatus, and delete intent;
+if ("Tracked or explicit OCI identity present?") then (yes)
+:Get the current OCI resource via\nGetSteeringPolicy;
+else (no)
+:Resolve an existing OCI resource through\nListSteeringPolicies using filters\ncompartmentId, displayName;
+:Create the OCI resource via\nCreateSteeringPolicy when no reusable match is\nfound;
+:Persist the resolved or created OCI identity\ninto status;
+endif
+}
+if ("Delete requested?") then (yes)
+partition "Delete" {
+:Delete path uses DeleteSteeringPolicy with\nrequired via GetSteeringPolicy or\nListSteeringPolicies to DELETED confirmation;
+:Confirm deletion via GetSteeringPolicy or\nListSteeringPolicies until OCI reaches DELETED;
+if ("Delete cleanup and finalizer release succeed?") then (yes)
+:Remove the finalizer after delete completion;
+else (no)
+:Stay blocked until cleanup or finalizer\nrelease succeeds;
+endif
+}
+stop
+else (no)
+partition "Lifecycle Classification" {
+if ("OCI state in retryable set?") then (yes)
+:Request requeue while OCI remains in CREATING,\nDELETING;
+stop
+endif
+if ("OCI state is outside success targets?") then (yes)
+:Return an unsuccessful reconcile result until\nOCI reaches ACTIVE;
+stop
+endif
+}
+partition "Ready and Drift Handling" {
+:Compare live OCI state against the\nrepo-authored mutation surface;
+if ("Force-new or conflicting drift detected?") then (yes)
+:Reject drift before OCI mutation for force-new\nfields compartmentId;
+stop
+endif
+if ("Supported mutable drift detected?") then (yes)
+:Apply ChangeSteeringPolicyCompartment,\nUpdateSteeringPolicy only for mutable fields\ndisplayName, ttl, healthCheckMonitorId,\ntemplate (+4 more);
+else (no)
+:Skip the no-op mutation path;
+endif
+:Run provider helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForCreatedState;\nupdate=tfresource.UpdateResource,\ntfresource.WaitForUpdatedState;\ndelete=tfresource.DeleteResource when the\nmatching field-driven path executes;
+:Apply explicit follow-up semantics\ncreate=read-after-write;\nupdate=read-after-write; delete=confirm-delete;
+:Return success for the ACTIVE success state;
+:Project required status and finalizer policy\nretain-until-confirmed-delete;
+:Requeue on provisioning, updating, terminating;
+}
+endif
+stop
+note right
+shared diagram:
+shared/diagrams/shared-reconcile-activity.svg
+Start from the shared reconcile activity and
+specialize provider-backed CRUD, wait, and
+status-projection details here.
+Controller-local activity diagrams add
+list-lookup hints, secret policies, delete
+handling, and open formal gaps.
+archetype batch: Generated service-manager
+controllers specialize the shared reconcile path
+with formal runtime ownership.
+service: dns
+slug: steeringpolicy
+kind: SteeringPolicy
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: provisioning, updating, terminating
+provider states: create CREATING; update none;
+delete DELETING
+follow-up: create=read-after-write;
+update=read-after-write; delete=confirm-delete
+supported drift: displayName, ttl,
+healthCheckMonitorId, template (+4 more)
+reject before mutate: force-new fields
+compartmentId
+create-only fields: none
+list lookup: oci_dns_steering_policies filters
+compartmentId, displayName; Adopt only a unique
+steering-policy match in the requested
+compartment.
+conflicts: none
+open gaps: none
+CREATING and the live-observed UPDATING value
+requeue, ACTIVE succeeds, and DELETING retains
+the finalizer until DELETED or scoped absence.
+The service can return UPDATING even though that
+value is missing from the pinned SDK enum
+constants; runtime classification intentionally
+uses the observed string.
+Answers and polymorphic rules are
+replace-on-update request fields, not
+replacement-only Kubernetes drift.
+CompartmentId requires replacement and no
+Kubernetes Secret side effects are present.
+end note
+@enduml

@@ -51,11 +51,11 @@ type MigrationSpec struct {
 	// +kubebuilder:validation:Optional
 	DatabaseCombination string `json:"databaseCombination,omitempty"`
 	// +kubebuilder:validation:Optional
-	DataTransferMediumDetails MigrationDataTransferMediumDetails `json:"dataTransferMediumDetails,omitempty"`
+	DataTransferMediumDetails MigrationDataTransferMediumDetails `json:"dataTransferMediumDetails,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	InitialLoadSettings MigrationInitialLoadSettings `json:"initialLoadSettings,omitempty"`
+	InitialLoadSettings MigrationInitialLoadSettings `json:"initialLoadSettings,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	AdvisorSettings MigrationAdvisorSettings `json:"advisorSettings,omitempty"`
+	AdvisorSettings MigrationAdvisorSettings `json:"advisorSettings,omitempty,omitzero"`
 	// Database objects to exclude from migration, cannot be specified alongside 'includeObjects'
 	// +kubebuilder:validation:Optional
 	ExcludeObjects []MigrationExcludeObject `json:"excludeObjects,omitempty"`
@@ -68,9 +68,9 @@ type MigrationSpec struct {
 	// +kubebuilder:validation:Optional
 	BulkIncludeExcludeData string `json:"bulkIncludeExcludeData,omitempty"`
 	// +kubebuilder:validation:Optional
-	HubDetails MigrationHubDetails `json:"hubDetails,omitempty"`
+	HubDetails MigrationHubDetails `json:"hubDetails,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	GgsDetails MigrationGgsDetails `json:"ggsDetails,omitempty"`
+	GgsDetails MigrationGgsDetails `json:"ggsDetails,omitempty,omitzero"`
 	// List of Migration Parameter objects.
 	// +kubebuilder:validation:Optional
 	AdvancedParameters []MigrationAdvancedParameter `json:"advancedParameters,omitempty"`
@@ -99,7 +99,7 @@ type MigrationDataTransferMediumDetails struct {
 	// +kubebuilder:validation:Optional
 	Type string `json:"type,omitempty"`
 	// +kubebuilder:validation:Optional
-	ObjectStorageBucket MigrationDataTransferMediumDetailsObjectStorageBucket `json:"objectStorageBucket,omitempty"`
+	ObjectStorageBucket MigrationDataTransferMediumDetailsObjectStorageBucket `json:"objectStorageBucket,omitempty,omitzero"`
 }
 
 // MigrationInitialLoadSettings defines nested fields for Migration.InitialLoadSettings.
@@ -211,9 +211,9 @@ type MigrationHubDetails struct {
 	// +kubebuilder:validation:Optional
 	ComputeId string `json:"computeId,omitempty"`
 	// +kubebuilder:validation:Optional
-	Extract MigrationHubDetailsExtract `json:"extract,omitempty"`
+	Extract MigrationHubDetailsExtract `json:"extract,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	Replicat MigrationHubDetailsReplicat `json:"replicat,omitempty"`
+	Replicat MigrationHubDetailsReplicat `json:"replicat,omitempty,omitzero"`
 	// ODMS will monitor GoldenGate end-to-end latency until the lag time is lower than the specified value in seconds.
 	// +kubebuilder:validation:Optional
 	AcceptableLag int `json:"acceptableLag,omitempty"`
@@ -229,7 +229,7 @@ type MigrationGgsDetailsReplicat struct {
 // MigrationGgsDetails defines nested fields for Migration.GgsDetails.
 type MigrationGgsDetails struct {
 	// +kubebuilder:validation:Optional
-	Replicat MigrationGgsDetailsReplicat `json:"replicat,omitempty"`
+	Replicat MigrationGgsDetailsReplicat `json:"replicat,omitempty,omitzero"`
 	// ODMS will monitor GoldenGate end-to-end latency until the lag time is lower than the specified value in seconds.
 	// +kubebuilder:validation:Optional
 	AcceptableLag int `json:"acceptableLag,omitempty"`

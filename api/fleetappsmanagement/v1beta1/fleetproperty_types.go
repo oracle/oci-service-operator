@@ -20,6 +20,9 @@ type FleetPropertySpec struct {
 	// OCID referring to global level metadata property.
 	// +kubebuilder:validation:Required
 	PropertyId string `json:"propertyId"`
+	// The OCID of the Fleet Application Management fleet containing this resource.
+	// +kubebuilder:validation:Required
+	FleetId string `json:"fleetId"`
 }
 
 // FleetPropertyStatus defines the observed state of FleetProperty.

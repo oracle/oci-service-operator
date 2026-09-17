@@ -23,7 +23,7 @@ type ConnectionSpec struct {
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef ConnectionParentRef `json:"parentRef,omitempty"`
+	ParentRef ConnectionParentRef `json:"parentRef,omitempty,omitzero"`
 	// User-defined description for the connection.
 	// +kubebuilder:validation:Optional
 	Description string `json:"description,omitempty"`
@@ -34,7 +34,7 @@ type ConnectionSpec struct {
 	// +kubebuilder:validation:Optional
 	ConnectionProperties []ConnectionProperty `json:"connectionProperties,omitempty"`
 	// +kubebuilder:validation:Optional
-	RegistryMetadata ConnectionRegistryMetadata `json:"registryMetadata,omitempty"`
+	RegistryMetadata ConnectionRegistryMetadata `json:"registryMetadata,omitempty,omitzero"`
 	// Free form text without any restriction on permitted characters. Name can have letters, numbers, and special characters. The value is editable and is restricted to 1000 characters.
 	// +kubebuilder:validation:Required
 	Name string `json:"name"`
@@ -50,13 +50,13 @@ type ConnectionSpec struct {
 	// +kubebuilder:validation:Optional
 	Password string `json:"password,omitempty"`
 	// +kubebuilder:validation:Optional
-	PasswordSecret ConnectionPasswordSecret `json:"passwordSecret,omitempty"`
+	PasswordSecret ConnectionPasswordSecret `json:"passwordSecret,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	AccessKey ConnectionAccessKey `json:"accessKey,omitempty"`
+	AccessKey ConnectionAccessKey `json:"accessKey,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	SecretKey ConnectionSecretKey `json:"secretKey,omitempty"`
+	SecretKey ConnectionSecretKey `json:"secretKey,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	DefaultExternalStorage ConnectionDefaultExternalStorage `json:"defaultExternalStorage,omitempty"`
+	DefaultExternalStorage ConnectionDefaultExternalStorage `json:"defaultExternalStorage,omitempty,omitzero"`
 	// The Autonomous Transaction Processing instance service name.
 	// +kubebuilder:validation:Optional
 	TnsAlias string `json:"tnsAlias,omitempty"`
@@ -79,7 +79,7 @@ type ConnectionSpec struct {
 	// +kubebuilder:validation:Optional
 	KeyDistributionCenter string `json:"keyDistributionCenter,omitempty"`
 	// +kubebuilder:validation:Optional
-	KeyTabContent ConnectionKeyTabContent `json:"keyTabContent,omitempty"`
+	KeyTabContent ConnectionKeyTabContent `json:"keyTabContent,omitempty,omitzero"`
 	// Optional header name if used other than default header(Authorization).
 	// +kubebuilder:validation:Optional
 	AuthHeader string `json:"authHeader,omitempty"`
@@ -90,7 +90,7 @@ type ConnectionSpec struct {
 	// +kubebuilder:validation:Optional
 	ClientId string `json:"clientId,omitempty"`
 	// +kubebuilder:validation:Optional
-	ClientSecret ConnectionClientSecret `json:"clientSecret,omitempty"`
+	ClientSecret ConnectionClientSecret `json:"clientSecret,omitempty,omitzero"`
 	// Specifies the OAuth scopes that limit the permissions granted by an access token.
 	// +kubebuilder:validation:Optional
 	Scope string `json:"scope,omitempty"`
@@ -112,6 +112,12 @@ type ConnectionSpec struct {
 	// The version of the object that is used to track changes in the object instance.
 	// +kubebuilder:validation:Required
 	ObjectVersion int `json:"objectVersion"`
+	// The OCID of the Data Integration workspace containing this resource.
+	// +kubebuilder:validation:Required
+	WorkspaceId string `json:"workspaceId"`
+	// The data asset key required by the connection collection lookup.
+	// +kubebuilder:validation:Required
+	DataAssetKey string `json:"dataAssetKey"`
 }
 
 // ConnectionParentRef defines nested fields for Connection.ParentRef.
@@ -167,7 +173,7 @@ type ConnectionPasswordSecretSecretConfig struct {
 // ConnectionPasswordSecret defines nested fields for Connection.PasswordSecret.
 type ConnectionPasswordSecret struct {
 	// +kubebuilder:validation:Optional
-	SecretConfig ConnectionPasswordSecretSecretConfig `json:"secretConfig,omitempty"`
+	SecretConfig ConnectionPasswordSecretSecretConfig `json:"secretConfig,omitempty,omitzero"`
 	// Attribute to provide sensitive content.
 	// +kubebuilder:validation:Optional
 	Value string `json:"value,omitempty"`
@@ -187,7 +193,7 @@ type ConnectionAccessKeySecretConfig struct {
 // ConnectionAccessKey defines nested fields for Connection.AccessKey.
 type ConnectionAccessKey struct {
 	// +kubebuilder:validation:Optional
-	SecretConfig ConnectionAccessKeySecretConfig `json:"secretConfig,omitempty"`
+	SecretConfig ConnectionAccessKeySecretConfig `json:"secretConfig,omitempty,omitzero"`
 	// Attribute to provide sensitive content.
 	// +kubebuilder:validation:Optional
 	Value string `json:"value,omitempty"`
@@ -207,7 +213,7 @@ type ConnectionSecretKeySecretConfig struct {
 // ConnectionSecretKey defines nested fields for Connection.SecretKey.
 type ConnectionSecretKey struct {
 	// +kubebuilder:validation:Optional
-	SecretConfig ConnectionSecretKeySecretConfig `json:"secretConfig,omitempty"`
+	SecretConfig ConnectionSecretKeySecretConfig `json:"secretConfig,omitempty,omitzero"`
 	// Attribute to provide sensitive content.
 	// +kubebuilder:validation:Optional
 	Value string `json:"value,omitempty"`
@@ -249,7 +255,7 @@ type ConnectionKeyTabContentSecretConfig struct {
 // ConnectionKeyTabContent defines nested fields for Connection.KeyTabContent.
 type ConnectionKeyTabContent struct {
 	// +kubebuilder:validation:Optional
-	SecretConfig ConnectionKeyTabContentSecretConfig `json:"secretConfig,omitempty"`
+	SecretConfig ConnectionKeyTabContentSecretConfig `json:"secretConfig,omitempty,omitzero"`
 	// Attribute to provide sensitive content.
 	// +kubebuilder:validation:Optional
 	Value string `json:"value,omitempty"`
@@ -269,7 +275,7 @@ type ConnectionClientSecretSecretConfig struct {
 // ConnectionClientSecret defines nested fields for Connection.ClientSecret.
 type ConnectionClientSecret struct {
 	// +kubebuilder:validation:Optional
-	SecretConfig ConnectionClientSecretSecretConfig `json:"secretConfig,omitempty"`
+	SecretConfig ConnectionClientSecretSecretConfig `json:"secretConfig,omitempty,omitzero"`
 	// Attribute to provide sensitive content.
 	// +kubebuilder:validation:Optional
 	Value string `json:"value,omitempty"`

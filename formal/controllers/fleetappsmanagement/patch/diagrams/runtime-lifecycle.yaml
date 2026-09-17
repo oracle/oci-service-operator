@@ -1,0 +1,83 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: fleetappsmanagement
+slug: patch
+kind: Patch
+archetype: generated-service-manager
+states:
+- provisioning
+- active
+- updating
+- terminating
+repoAuthored:
+  operations:
+    create:
+    - CreatePatch
+    update:
+    - UpdatePatch
+    delete:
+    - DeletePatch
+  providerLifecycle:
+    createPending: []
+    updatePending: []
+    deletePending:
+    - DELETING
+  listLookup:
+    filters:
+    - compartmentId
+    - id
+    - name
+    - patchTypeId
+    - productId
+    - shouldCompliancePolicyRulesBeApplied
+    - state
+    - timeReleasedGreaterThanOrEqualTo
+    - timeReleasedLessThan
+    - type
+    - version
+    matchRule: exact declared filters match within the resource scope; duplicate matches
+      fail
+  mutation:
+    mutable:
+    - artifactDetails.artifact.content.bucket
+    - artifactDetails.artifact.content.checksum
+    - artifactDetails.artifact.content.namespace
+    - artifactDetails.artifact.content.object
+    - artifactDetails.artifact.content.sourceType
+    - artifactDetails.artifacts.architecture
+    - artifactDetails.artifacts.content.bucket
+    - artifactDetails.artifacts.content.checksum
+    - artifactDetails.artifacts.content.namespace
+    - artifactDetails.artifacts.content.object
+    - artifactDetails.artifacts.content.sourceType
+    - artifactDetails.artifacts.osType
+    - artifactDetails.category
+    - compartmentId
+    - definedTags
+    - dependentPatches.id
+    - description
+    - freeformTags
+    - patchType.platformConfigurationId
+    - product.platformConfigurationId
+    - product.version
+    - severity
+    - timeReleased
+    forceNew:
+    - name
+  hooks:
+    create:
+    - helper: tfresource.CreateResource
+    update:
+    - helper: tfresource.UpdateResource
+    delete:
+    - helper: tfresource.DeleteResource
+  followUp:
+    create: read-after-write
+    update: GetWorkRequest -> read-after-write
+    delete: GetWorkRequest -> confirm-delete
+notes:
+- The generated service manager uses the reviewed CRUD request, response, lifecycle,
+  and status projection contract.
+- Work-request phases are declared per operation from the vendored SDK response surface.
+- Secret side effects are none and finalizer ownership is retained until confirmed
+  deletion.

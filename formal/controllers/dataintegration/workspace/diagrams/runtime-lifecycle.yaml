@@ -1,0 +1,71 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: dataintegration
+slug: workspace
+kind: Workspace
+archetype: generated-service-manager
+states:
+- provisioning
+- active
+- updating
+- terminating
+repoAuthored:
+  operations:
+    create:
+    - CreateWorkspace
+    update:
+    - UpdateWorkspace
+    delete:
+    - DeleteWorkspace
+  providerLifecycle:
+    createPending:
+    - CREATING
+    - STARTING
+    updatePending: []
+    deletePending:
+    - DELETING
+  listLookup:
+    filters:
+    - compartmentId
+    - name
+    - state
+    matchRule: exact declared filters match within the resource scope; duplicate matches
+      fail
+  mutation:
+    mutable:
+    - compartmentId
+    - definedTags
+    - description
+    - displayName
+    - freeformTags
+    - isForceOperation
+    forceNew:
+    - dnsServerIp
+    - dnsServerZone
+    - endpointCompartmentId
+    - endpointId
+    - endpointName
+    - isPrivateNetworkEnabled
+    - quiesceTimeout
+    - registryCompartmentId
+    - registryId
+    - registryName
+    - subnetId
+    - vcnId
+  hooks:
+    create:
+    - helper: tfresource.CreateResource
+    update:
+    - helper: tfresource.UpdateResource
+    delete:
+    - helper: tfresource.DeleteResource
+  followUp:
+    create: GetWorkRequest -> read-after-write
+    update: GetWorkRequest -> read-after-write
+    delete: GetWorkRequest -> confirm-delete
+notes:
+- The generated service manager uses the reviewed CRUD request, response, lifecycle,
+  and status projection contract.
+- Work-request phases are declared per operation from the vendored SDK response surface.
+- Secret side effects are none and finalizer ownership is retained until confirmed
+  deletion.

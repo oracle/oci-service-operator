@@ -1,0 +1,22 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: cloudguard
+slug: targetdetectorrecipe
+kind: TargetDetectorRecipe
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  providerLifecycle: {createPending: ["CREATING"], updatePending: ["UPDATING"], deletePending: ["DELETING"]}
+  listLookup:
+    filters: ["targetId","compartmentId","detectorRecipeId"]
+    matchRule: exact target, compartment, and source detector recipe match; duplicate matches fail
+  mutation:
+    mutable: ["detectorRules","isValidationOnlyQuery"]
+    forceNew: ["targetId","compartmentId","detectorRecipeId"]
+  followUp: {create: read-after-write, update: read-after-write, delete: confirm-delete}
+notes:
+  - "Target detector recipes are path-addressed beneath a target and retain the attached source recipe as create-only identity."

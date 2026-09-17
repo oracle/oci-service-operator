@@ -1,0 +1,27 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: licensemanager
+slug: productlicense
+kind: ProductLicense
+archetype: generated-service-manager
+states:
+  - active
+  - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending: []
+    updatePending: []
+    deletePending: []
+  listLookup:
+    filters: ["compartmentId","displayName","id"]
+    matchRule: exact resource identity match; duplicate matches fail
+  mutation:
+    mutable: ["definedTags","freeformTags","images"]
+    forceNew: ["compartmentId","displayName","isVendorOracle","licenseUnit","vendorName"]
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - "The runtime uses its declared lifecycle-state contract for ProductLicense reconciliation."
+  - "The credential-free mock exercises SDK request serialization, response projection, mutation when supported, and confirmed deletion."

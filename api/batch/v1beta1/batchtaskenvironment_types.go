@@ -28,7 +28,7 @@ type BatchTaskEnvironmentSpec struct {
 	// +kubebuilder:validation:Optional
 	Description string `json:"description,omitempty"`
 	// +kubebuilder:validation:Optional
-	SecurityContext BatchTaskEnvironmentSecurityContext `json:"securityContext,omitempty"`
+	SecurityContext BatchTaskEnvironmentSecurityContext `json:"securityContext,omitempty,omitzero"`
 	// Container's working directory.
 	// +kubebuilder:validation:Optional
 	WorkingDirectory string `json:"workingDirectory,omitempty"`

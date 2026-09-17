@@ -762,11 +762,12 @@ func manualServiceManagerRoots(services []generator.ServiceConfig) []string {
 	seen := make(map[string]struct{})
 	for _, service := range services {
 		for _, kind := range service.SelectedKinds() {
+			apiKind := service.APIKindFor(kind)
 			if service.ServiceManagerGenerationStrategyFor(kind) == generator.GenerationStrategyGenerated {
 				continue
 			}
 			for _, resource := range service.Generation.Resources {
-				if strings.TrimSpace(resource.Kind) != kind {
+				if strings.TrimSpace(resource.Kind) != apiKind {
 					continue
 				}
 				root := strings.Split(filepath.ToSlash(strings.TrimSpace(resource.ServiceManager.PackagePath)), "/")[0]

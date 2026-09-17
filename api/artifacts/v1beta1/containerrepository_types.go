@@ -27,7 +27,7 @@ type ContainerRepositorySpec struct {
 	// +kubebuilder:validation:Optional
 	IsPublic bool `json:"isPublic,omitempty"`
 	// +kubebuilder:validation:Optional
-	Readme ContainerRepositoryReadme `json:"readme,omitempty"`
+	Readme ContainerRepositoryReadme `json:"readme,omitempty,omitzero"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no
 	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`

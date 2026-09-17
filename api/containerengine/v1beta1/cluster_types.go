@@ -28,7 +28,7 @@ type ClusterSpec struct {
 	KubernetesVersion string `json:"kubernetesVersion"`
 	// The network configuration for access to the Cluster control plane.
 	// +kubebuilder:validation:Optional
-	EndpointConfig ClusterEndpointConfig `json:"endpointConfig,omitempty"`
+	EndpointConfig ClusterEndpointConfig `json:"endpointConfig,omitempty,omitzero"`
 	// The OCID of the KMS key to be used as the master encryption key for Kubernetes secret encryption.
 	// When used, `kubernetesVersion` must be at least `v1.13.0`.
 	// +kubebuilder:validation:Optional
@@ -45,12 +45,12 @@ type ClusterSpec struct {
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 	// Optional attributes for the cluster.
 	// +kubebuilder:validation:Optional
-	Options ClusterOptions `json:"options,omitempty"`
+	Options ClusterOptions `json:"options,omitempty,omitzero"`
 	// The image verification policy for signature validation. Once a policy is created and enabled with
 	// one or more kms keys, the policy will ensure all images deployed has been signed with the key(s)
 	// attached to the policy.
 	// +kubebuilder:validation:Optional
-	ImagePolicyConfig ClusterImagePolicyConfig `json:"imagePolicyConfig,omitempty"`
+	ImagePolicyConfig ClusterImagePolicyConfig `json:"imagePolicyConfig,omitempty,omitzero"`
 	// Available CNIs and network options for existing and new node pools of the cluster
 	// +kubebuilder:validation:Optional
 	ClusterPodNetworkOptions []ClusterPodNetworkOption `json:"clusterPodNetworkOptions,omitempty"`
@@ -202,21 +202,21 @@ type ClusterOptions struct {
 	IpFamilies []string `json:"ipFamilies,omitempty"`
 	// Network configuration for Kubernetes.
 	// +kubebuilder:validation:Optional
-	KubernetesNetworkConfig ClusterOptionsKubernetesNetworkConfig `json:"kubernetesNetworkConfig,omitempty"`
+	KubernetesNetworkConfig ClusterOptionsKubernetesNetworkConfig `json:"kubernetesNetworkConfig,omitempty,omitzero"`
 	// Configurable cluster add-ons
 	// +kubebuilder:validation:Optional
-	AddOns ClusterOptionsAddOns `json:"addOns,omitempty"`
+	AddOns ClusterOptionsAddOns `json:"addOns,omitempty,omitzero"`
 	// Configurable cluster admission controllers
 	// +kubebuilder:validation:Optional
-	AdmissionControllerOptions ClusterOptionsAdmissionControllerOptions `json:"admissionControllerOptions,omitempty"`
+	AdmissionControllerOptions ClusterOptionsAdmissionControllerOptions `json:"admissionControllerOptions,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	PersistentVolumeConfig ClusterOptionsPersistentVolumeConfig `json:"persistentVolumeConfig,omitempty"`
+	PersistentVolumeConfig ClusterOptionsPersistentVolumeConfig `json:"persistentVolumeConfig,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	ServiceLbConfig ClusterOptionsServiceLbConfig `json:"serviceLbConfig,omitempty"`
+	ServiceLbConfig ClusterOptionsServiceLbConfig `json:"serviceLbConfig,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	OpenIdConnectTokenAuthenticationConfig ClusterOptionsOpenIdConnectTokenAuthenticationConfig `json:"openIdConnectTokenAuthenticationConfig,omitempty"`
+	OpenIdConnectTokenAuthenticationConfig ClusterOptionsOpenIdConnectTokenAuthenticationConfig `json:"openIdConnectTokenAuthenticationConfig,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	OpenIdConnectDiscovery ClusterOptionsOpenIdConnectDiscovery `json:"openIdConnectDiscovery,omitempty"`
+	OpenIdConnectDiscovery ClusterOptionsOpenIdConnectDiscovery `json:"openIdConnectDiscovery,omitempty,omitzero"`
 }
 
 // ClusterImagePolicyConfigKeyDetail defines nested fields for Cluster.ImagePolicyConfig.KeyDetail.

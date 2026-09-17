@@ -50,15 +50,84 @@ func registerAiDataPlatformRuntimeHooksMutator(mutator AiDataPlatformRuntimeHook
 	}
 	aidataplatformRuntimeHooksMutators = append(aidataplatformRuntimeHooksMutators, mutator)
 }
+func newAiDataPlatformRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "aidataplatform",
+		FormalSlug:    "aidataplatform",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{"UPDATING"},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "displayName", "id"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"aiDataPlatformType", "definedTags", "displayName", "freeformTags", "systemTags"},
+			ForceNew:      []string{"compartmentId", "defaultWorkspaceName"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> GetAiDataPlatform",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> GetAiDataPlatform",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newAiDataPlatformDefaultRuntimeHooks(sdkClient aidataplatformsdk.AiDataPlatformClient) AiDataPlatformRuntimeHooks {
 	return AiDataPlatformRuntimeHooks{
+		Semantics:       newAiDataPlatformRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*aidataplatformv1beta1.AiDataPlatform]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*aidataplatformv1beta1.AiDataPlatform]{},
 		StatusHooks:     generatedruntime.StatusHooks[*aidataplatformv1beta1.AiDataPlatform]{},
 		ParityHooks:     generatedruntime.ParityHooks[*aidataplatformv1beta1.AiDataPlatform]{},
-		Async:           generatedruntime.AsyncHooks[*aidataplatformv1beta1.AiDataPlatform]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*aidataplatformv1beta1.AiDataPlatform]{},
+		Async: generatedruntime.AsyncHooks[*aidataplatformv1beta1.AiDataPlatform]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := aidataplatformsdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*aidataplatformv1beta1.AiDataPlatform]{},
 		Create: runtimeOperationHooks[aidataplatformsdk.CreateAiDataPlatformRequest, aidataplatformsdk.CreateAiDataPlatformResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateAiDataPlatformDetails", RequestName: "CreateAiDataPlatformDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request aidataplatformsdk.CreateAiDataPlatformRequest) (aidataplatformsdk.CreateAiDataPlatformResponse, error) {
@@ -106,10 +175,19 @@ func buildAiDataPlatformGeneratedRuntimeConfig(
 	hooks AiDataPlatformRuntimeHooks,
 ) generatedruntime.Config[*aidataplatformv1beta1.AiDataPlatform] {
 	return generatedruntime.Config[*aidataplatformv1beta1.AiDataPlatform]{
-		Kind:            "AiDataPlatform",
-		SDKName:         "AiDataPlatform",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "AiDataPlatform",
+		SDKName:   "AiDataPlatform",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

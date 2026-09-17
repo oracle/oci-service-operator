@@ -64,13 +64,13 @@ func newCertificateDefaultRuntimeHooks(sdkClient loadbalancersdk.LoadBalancerCli
 			},
 		},
 		List: runtimeOperationHooks[loadbalancersdk.ListCertificatesRequest, loadbalancersdk.ListCertificatesResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: true}},
+			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loadbalancersdk.ListCertificatesRequest) (loadbalancersdk.ListCertificatesResponse, error) {
 				return sdkClient.ListCertificates(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[loadbalancersdk.DeleteCertificateRequest, loadbalancersdk.DeleteCertificateResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "CertificateName", RequestName: "certificateName", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "CertificateName", RequestName: "certificateName", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request loadbalancersdk.DeleteCertificateRequest) (loadbalancersdk.DeleteCertificateResponse, error) {
 				return sdkClient.DeleteCertificate(ctx, request)
 			},

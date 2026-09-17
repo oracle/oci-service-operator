@@ -50,15 +50,84 @@ func registerExadataInsightRuntimeHooksMutator(mutator ExadataInsightRuntimeHook
 	}
 	exadatainsightRuntimeHooksMutators = append(exadatainsightRuntimeHooksMutators, mutator)
 }
+func newExadataInsightRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "opsi",
+		FormalSlug:    "exadatainsight",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "compartmentIdInSubtree", "enterpriseManagerBridgeId", "exadataType", "id", "state", "status"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"definedTags", "freeformTags", "isAutoSyncEnabled"},
+			ForceNew:      []string{"compartmentId", "enterpriseManagerBridgeId", "enterpriseManagerEntityIdentifier", "enterpriseManagerIdentifier", "entitySource", "exadataInfraId", "jsonData", "memberEntityDetails", "memberVmClusterDetails"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "generatedruntime.Create", EntityType: "ExadataInsight", Action: "CREATE_EXADATA_INSIGHT"}},
+			Update: []generatedruntime.Hook{{Helper: "generatedruntime.Update", EntityType: "ExadataInsight", Action: "UPDATE_EXADATA_INSIGHT"}},
+			Delete: []generatedruntime.Hook{{Helper: "generatedruntime.Delete", EntityType: "ExadataInsight", Action: "DELETE_EXADATA_INSIGHT"}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "generatedruntime.Create", EntityType: "ExadataInsight", Action: "CREATE_EXADATA_INSIGHT"}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "generatedruntime.Update", EntityType: "ExadataInsight", Action: "UPDATE_EXADATA_INSIGHT"}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "generatedruntime.Delete", EntityType: "ExadataInsight", Action: "DELETE_EXADATA_INSIGHT"}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newExadataInsightDefaultRuntimeHooks(sdkClient opsisdk.OperationsInsightsClient) ExadataInsightRuntimeHooks {
 	return ExadataInsightRuntimeHooks{
+		Semantics:       newExadataInsightRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*opsiv1beta1.ExadataInsight]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*opsiv1beta1.ExadataInsight]{},
 		StatusHooks:     generatedruntime.StatusHooks[*opsiv1beta1.ExadataInsight]{},
 		ParityHooks:     generatedruntime.ParityHooks[*opsiv1beta1.ExadataInsight]{},
-		Async:           generatedruntime.AsyncHooks[*opsiv1beta1.ExadataInsight]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*opsiv1beta1.ExadataInsight]{},
+		Async: generatedruntime.AsyncHooks[*opsiv1beta1.ExadataInsight]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := opsisdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*opsiv1beta1.ExadataInsight]{},
 		Create: runtimeOperationHooks[opsisdk.CreateExadataInsightRequest, opsisdk.CreateExadataInsightResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateExadataInsightDetails", RequestName: "CreateExadataInsightDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request opsisdk.CreateExadataInsightRequest) (opsisdk.CreateExadataInsightResponse, error) {
@@ -106,10 +175,19 @@ func buildExadataInsightGeneratedRuntimeConfig(
 	hooks ExadataInsightRuntimeHooks,
 ) generatedruntime.Config[*opsiv1beta1.ExadataInsight] {
 	return generatedruntime.Config[*opsiv1beta1.ExadataInsight]{
-		Kind:            "ExadataInsight",
-		SDKName:         "ExadataInsight",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "ExadataInsight",
+		SDKName:   "ExadataInsight",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

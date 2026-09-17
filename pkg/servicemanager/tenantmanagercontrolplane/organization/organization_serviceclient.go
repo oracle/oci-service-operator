@@ -32,8 +32,28 @@ type defaultOrganizationServiceClient struct {
 
 var _ OrganizationServiceClient = defaultOrganizationServiceClient{}
 
+type OrganizationSDKClients struct {
+	organizationClient tenantmanagercontrolplanesdk.OrganizationClient
+	workRequestClient  tenantmanagercontrolplanesdk.WorkRequestClient
+}
+
+func newOrganizationSDKClients(manager *OrganizationServiceManager) (OrganizationSDKClients, error) {
+	var clients OrganizationSDKClients
+	organizationClientClient, err := tenantmanagercontrolplanesdk.NewOrganizationClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize Organization OCI client OrganizationClient: %w", err)
+	}
+	clients.organizationClient = organizationClientClient
+	workRequestClientClient, err := tenantmanagercontrolplanesdk.NewWorkRequestClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize Organization OCI client WorkRequestClient: %w", err)
+	}
+	clients.workRequestClient = workRequestClientClient
+	return clients, nil
+}
+
 var newOrganizationServiceClient = func(manager *OrganizationServiceManager) OrganizationServiceClient {
-	sdkClient, err := tenantmanagercontrolplanesdk.NewOrganizationClientWithConfigurationProvider(manager.Provider)
+	sdkClient, err := newOrganizationSDKClients(manager)
 	hooks := newOrganizationRuntimeHooks(manager, sdkClient)
 	config := buildOrganizationGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {

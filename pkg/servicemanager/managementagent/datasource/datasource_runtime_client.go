@@ -118,7 +118,7 @@ func applyDataSourceRuntimeHooks(manager *DataSourceServiceManager, hooks *DataS
 		log = manager.Log
 	}
 
-	hooks.Semantics = newDataSourceRuntimeSemantics()
+	hooks.Semantics = reviewedDataSourceRuntimeSemantics()
 	hooks.WrapGeneratedClient = append(hooks.WrapGeneratedClient, func(_ DataSourceServiceClient) DataSourceServiceClient {
 		return newDataSourceRuntimeClient(newDataSourceSDKOCIClient(manager), log)
 	})
@@ -142,7 +142,7 @@ func newDataSourceRuntimeClient(client dataSourceRuntimeOCIClient, log loggeruti
 	}
 }
 
-func newDataSourceRuntimeSemantics() *generatedruntime.Semantics {
+func reviewedDataSourceRuntimeSemantics() *generatedruntime.Semantics {
 	return &generatedruntime.Semantics{
 		FormalService:     "managementagent",
 		FormalSlug:        "datasource",

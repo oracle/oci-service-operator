@@ -182,9 +182,9 @@ func requireBastionCreatedStatus(t *testing.T, resource *bastionv1beta1.Bastion)
 func TestBastionRuntimeSemanticsEncodesWorkRequestContract(t *testing.T) {
 	t.Parallel()
 
-	got := newBastionRuntimeSemantics()
+	got := reviewedBastionRuntimeSemantics()
 	if got == nil {
-		t.Fatal("newBastionRuntimeSemantics() = nil")
+		t.Fatal("reviewedBastionRuntimeSemantics() = nil")
 	}
 	if got.Async == nil || got.Async.Strategy != "workrequest" || got.Async.Runtime != "generatedruntime" {
 		t.Fatalf("Async = %#v, want generatedruntime workrequest", got.Async)

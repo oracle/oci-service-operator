@@ -25,6 +25,9 @@ type PeerSpec struct {
 	// peer alias
 	// +kubebuilder:validation:Optional
 	Alias string `json:"alias,omitempty"`
+	// The OCID of the blockchain platform containing this node.
+	// +kubebuilder:validation:Required
+	BlockchainPlatformId string `json:"blockchainPlatformId"`
 }
 
 // PeerOcpuAllocationParam defines nested fields for Peer.OcpuAllocationParam.

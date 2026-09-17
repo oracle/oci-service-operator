@@ -10,6 +10,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -117,8 +118,9 @@ func (c subscriptionMetadataTrackingClient) Delete(
 }
 
 type subscriptionDeleteConfirmationClient struct {
-	delegate        SubscriptionServiceClient
-	getSubscription func(context.Context, onssdk.GetSubscriptionRequest) (onssdk.GetSubscriptionResponse, error)
+	delegate          SubscriptionServiceClient
+	getSubscription   func(context.Context, onssdk.GetSubscriptionRequest) (onssdk.GetSubscriptionResponse, error)
+	listSubscriptions func(context.Context, onssdk.ListSubscriptionsRequest) (onssdk.ListSubscriptionsResponse, error)
 }
 
 func (c subscriptionDeleteConfirmationClient) CreateOrUpdate(
@@ -134,9 +136,13 @@ func (c subscriptionDeleteConfirmationClient) Delete(
 	resource *onsv1beta1.Subscription,
 ) (bool, error) {
 	if err := c.rejectAuthShapedConfirmRead(ctx, resource); err != nil {
-		return false, err
+		return c.confirmAuthShapedAbsence(ctx, resource, err)
 	}
-	return c.delegate.Delete(ctx, resource)
+	deleted, err := c.delegate.Delete(ctx, resource)
+	if isSubscriptionAuthShapedNotFound(err) {
+		return c.confirmAuthShapedAbsence(ctx, resource, err)
+	}
+	return deleted, err
 }
 
 func subscriptionRuntimeSemantics() *generatedruntime.Semantics {
@@ -331,6 +337,14 @@ func buildSubscriptionUpdateBody(resource *onsv1beta1.Subscription, currentRespo
 		update.DeliveryPolicy = desiredDeliveryPolicy
 		updateNeeded = true
 	}
+	if updateNeeded {
+		if resource.Spec.FreeformTags == nil && current.freeformTags != nil {
+			update.FreeformTags = cloneStringMap(current.freeformTags)
+		}
+		if resource.Spec.DefinedTags == nil && current.definedTags != nil {
+			update.DefinedTags = cloneInterfaceTags(current.definedTags)
+		}
+	}
 
 	return update, updateNeeded, nil
 }
@@ -354,16 +368,65 @@ func validateSubscriptionMetadataDrift(resource *onsv1beta1.Subscription, _ any)
 }
 
 func wrapSubscriptionDeleteConfirmation(hooks *SubscriptionRuntimeHooks) {
-	if hooks == nil || hooks.Get.Call == nil {
+	if hooks == nil || hooks.Get.Call == nil || hooks.List.Call == nil {
 		return
 	}
 	getSubscription := hooks.Get.Call
+	listSubscriptions := hooks.List.Call
 	hooks.WrapGeneratedClient = append(hooks.WrapGeneratedClient, func(delegate SubscriptionServiceClient) SubscriptionServiceClient {
 		return subscriptionDeleteConfirmationClient{
-			delegate:        delegate,
-			getSubscription: getSubscription,
+			delegate:          delegate,
+			getSubscription:   getSubscription,
+			listSubscriptions: listSubscriptions,
 		}
 	})
+}
+
+func (c subscriptionDeleteConfirmationClient) confirmAuthShapedAbsence(
+	ctx context.Context,
+	resource *onsv1beta1.Subscription,
+	ambiguousErr error,
+) (bool, error) {
+	if resource == nil || c.listSubscriptions == nil {
+		return false, ambiguousErr
+	}
+	response, err := c.listSubscriptions(ctx, onssdk.ListSubscriptionsRequest{
+		CompartmentId: common.String(strings.TrimSpace(resource.Spec.CompartmentId)),
+		TopicId:       common.String(strings.TrimSpace(resource.Spec.TopicId)),
+	})
+	if err != nil {
+		return false, fmt.Errorf("confirm subscription deletion by scoped list: %w", err)
+	}
+	currentID := trackedSubscriptionID(resource)
+	for _, item := range response.Items {
+		if item.Id != nil && strings.TrimSpace(*item.Id) == currentID {
+			return false, ambiguousErr
+		}
+	}
+	markSubscriptionDeleted(resource, "OCI subscription no longer exists")
+	return true, nil
+}
+
+func isSubscriptionAuthShapedNotFound(err error) bool {
+	if err == nil {
+		return false
+	}
+	var ambiguous subscriptionAmbiguousNotFoundError
+	return errors.As(err, &ambiguous) || errorutil.ClassifyDeleteError(err).IsAuthShapedNotFound()
+}
+
+func markSubscriptionDeleted(resource *onsv1beta1.Subscription, message string) {
+	if resource == nil {
+		return
+	}
+	now := metav1.Now()
+	status := &resource.Status.OsokStatus
+	status.DeletedAt = &now
+	status.UpdatedAt = &now
+	status.Message = message
+	status.Reason = string(shared.Terminating)
+	status.Async.Current = nil
+	*status = util.UpdateOSOKStatusCondition(*status, shared.Terminating, corev1.ConditionTrue, "", message, loggerutil.OSOKLogger{})
 }
 
 func (c subscriptionDeleteConfirmationClient) rejectAuthShapedConfirmRead(

@@ -99,7 +99,7 @@ type PatchArtifactDetails struct {
 	// +kubebuilder:validation:Optional
 	Artifacts []PatchArtifactDetailsArtifact `json:"artifacts,omitempty"`
 	// +kubebuilder:validation:Optional
-	Artifact PatchArtifactDetailsArtifact `json:"artifact,omitempty"`
+	Artifact PatchArtifactDetailsArtifact `json:"artifact,omitempty,omitzero"`
 }
 
 // PatchProduct defines nested fields for Patch.Product.

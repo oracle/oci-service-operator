@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "certificatesmanagement",
+  "slug": "cabundle",
+  "kind": "CaBundle",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_certificates_management_ca_bundle",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateCaBundle",
+        "requestType": "certificatesmanagement.CreateCaBundleRequest",
+        "responseType": "certificatesmanagement.CreateCaBundleResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetCaBundle",
+        "requestType": "certificatesmanagement.GetCaBundleRequest",
+        "responseType": "certificatesmanagement.GetCaBundleResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListCaBundles",
+        "requestType": "certificatesmanagement.ListCaBundlesRequest",
+        "responseType": "certificatesmanagement.ListCaBundlesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeCaBundleCompartment",
+        "requestType": "certificatesmanagement.ChangeCaBundleCompartmentRequest",
+        "responseType": "certificatesmanagement.ChangeCaBundleCompartmentResponse"
+      },
+      {
+        "operation": "UpdateCaBundle",
+        "requestType": "certificatesmanagement.UpdateCaBundleRequest",
+        "responseType": "certificatesmanagement.UpdateCaBundleResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteCaBundle",
+        "requestType": "certificatesmanagement.DeleteCaBundleRequest",
+        "responseType": "certificatesmanagement.DeleteCaBundleResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "ca_bundle_pem",
+      "compartment_id",
+      "defined_tags",
+      "description",
+      "freeform_tags"
+    ],
+    "forceNew": [
+      "name"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_certificates_management_ca_bundles",
+    "collectionField": "ca_bundle_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "ca_bundle_id",
+      "compartment_id",
+      "name",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/certificatesmanagement/cabundle/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/certificatesmanagement/cabundle/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Pinned provider facts are paired with reviewed CaBundle service-manager semantics and sanitized live CRUD evidence."
+  ]
+}

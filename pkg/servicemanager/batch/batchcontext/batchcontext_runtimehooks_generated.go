@@ -57,8 +57,20 @@ func newBatchContextDefaultRuntimeHooks(sdkClient batchsdk.BatchComputingClient)
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*batchv1beta1.BatchContext]{},
 		StatusHooks:     generatedruntime.StatusHooks[*batchv1beta1.BatchContext]{},
 		ParityHooks:     generatedruntime.ParityHooks[*batchv1beta1.BatchContext]{},
-		Async:           generatedruntime.AsyncHooks[*batchv1beta1.BatchContext]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*batchv1beta1.BatchContext]{},
+		Async: generatedruntime.AsyncHooks[*batchv1beta1.BatchContext]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := batchsdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*batchv1beta1.BatchContext]{},
 		Create: runtimeOperationHooks[batchsdk.CreateBatchContextRequest, batchsdk.CreateBatchContextResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateBatchContextDetails", RequestName: "CreateBatchContextDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request batchsdk.CreateBatchContextRequest) (batchsdk.CreateBatchContextResponse, error) {
@@ -106,10 +118,19 @@ func buildBatchContextGeneratedRuntimeConfig(
 	hooks BatchContextRuntimeHooks,
 ) generatedruntime.Config[*batchv1beta1.BatchContext] {
 	return generatedruntime.Config[*batchv1beta1.BatchContext]{
-		Kind:            "BatchContext",
-		SDKName:         "BatchContext",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "BatchContext",
+		SDKName:   "BatchContext",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

@@ -1,0 +1,149 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "fleetappsmanagement",
+  "slug": "platformconfiguration",
+  "kind": "PlatformConfiguration",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_fleet_apps_management_platform_configuration",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreatePlatformConfiguration",
+        "requestType": "fleetappsmanagement.CreatePlatformConfigurationRequest",
+        "responseType": "fleetappsmanagement.CreatePlatformConfigurationResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetPlatformConfiguration",
+        "requestType": "fleetappsmanagement.GetPlatformConfigurationRequest",
+        "responseType": "fleetappsmanagement.GetPlatformConfigurationResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListPlatformConfigurations",
+        "requestType": "fleetappsmanagement.ListPlatformConfigurationsRequest",
+        "responseType": "fleetappsmanagement.ListPlatformConfigurationsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangePlatformConfigurationCompartment",
+        "requestType": "fleetappsmanagement.ChangePlatformConfigurationCompartmentRequest",
+        "responseType": "fleetappsmanagement.ChangePlatformConfigurationCompartmentResponse"
+      },
+      {
+        "operation": "UpdatePlatformConfiguration",
+        "requestType": "fleetappsmanagement.UpdatePlatformConfigurationRequest",
+        "responseType": "fleetappsmanagement.UpdatePlatformConfigurationResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeletePlatformConfiguration",
+        "requestType": "fleetappsmanagement.DeletePlatformConfigurationRequest",
+        "responseType": "fleetappsmanagement.DeletePlatformConfigurationResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "config_category_details.compatible_products.display_name",
+      "config_category_details.compatible_products.id",
+      "config_category_details.components",
+      "config_category_details.config_category",
+      "config_category_details.credentials.display_name",
+      "config_category_details.credentials.id",
+      "config_category_details.instance_id",
+      "config_category_details.instance_name",
+      "config_category_details.is_compliance_policy_required_for_softlink",
+      "config_category_details.is_softlink",
+      "config_category_details.link_product_id",
+      "config_category_details.patch_types.display_name",
+      "config_category_details.patch_types.id",
+      "config_category_details.products.display_name",
+      "config_category_details.products.id",
+      "config_category_details.sub_category_details.components",
+      "config_category_details.sub_category_details.credentials.display_name",
+      "config_category_details.sub_category_details.credentials.id",
+      "config_category_details.sub_category_details.patch_types.display_name",
+      "config_category_details.sub_category_details.patch_types.id",
+      "config_category_details.sub_category_details.sub_category",
+      "config_category_details.sub_category_details.versions",
+      "config_category_details.versions",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_fleet_apps_management_platform_configurations",
+    "collectionField": "platform_configuration_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "compartment_id_in_subtree",
+      "config_category",
+      "display_name",
+      "id",
+      "state",
+      "type"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/fleetappsmanagement/platformconfiguration/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/fleetappsmanagement/platformconfiguration/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from the pinned terraform-provider-oci source revision."
+  ]
+}

@@ -1,0 +1,29 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: datasafe
+slug: maskingpolicy
+kind: MaskingPolicy
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending: ["CREATING"]
+    updatePending: ["UPDATING"]
+    deletePending: ["DELETING"]
+  listLookup:
+    filters: ["columnSource.columnSource","columnSource.sensitiveDataModelId","columnSource.targetId","compartmentId","displayName","id"]
+    matchRule: exact resource identity match; duplicate matches fail
+  mutation:
+    mutable: ["columnSource","definedTags","description","displayName","freeformTags","isDropTempTablesEnabled","isRedoLoggingEnabled","isRefreshStatsEnabled","parallelDegree","postMaskingScript","preMaskingScript","recompile"]
+    forceNew: ["compartmentId"]
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - "The runtime uses its declared lifecycle-state contract for MaskingPolicy reconciliation."
+  - "The credential-free mock exercises SDK request serialization, response projection, mutation when supported, and confirmed deletion."

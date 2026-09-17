@@ -1,0 +1,46 @@
+version: 1
+name: mysql-db-system-basic-crud
+service: mysql
+namespace: default
+timeout: 90m
+pollInterval: 20s
+dependencies:
+  - admin-secret.yaml
+create: create.yaml
+update: update.yaml
+ready:
+  conditionTypes: [Active]
+  lifecycleStates: [ACTIVE]
+  requireOCID: true
+  fieldsEqual:
+    - desired: spec.displayName
+      observed: status.displayName
+    - desired: spec.description
+      observed: status.description
+    - desired: spec.shapeName
+      observed: status.shapeName
+    - desired: spec.subnetId
+      observed: status.subnetId
+    - desired: spec.dataStorageSizeInGBs
+      observed: status.dataStorageSizeInGBs
+    - desired: spec.hostnameLabel
+      observed: status.hostnameLabel
+    - desired: spec.freeformTags
+      observed: status.freeformTags
+failureConditionTypes: [Failed]
+relatedObjects:
+  - apiVersion: v1
+    kind: Secret
+    requiredDataKeys:
+      - PrivateIPAddress
+      - InternalFQDN
+      - AvailabilityDomain
+      - MySQLPort
+      - MySQLXProtocolPort
+      - Endpoints
+    deleteWithResource: true
+delete:
+  enabled: true
+  timeout: 90m
+  cleanupDependencies: true
+cleanupOnFailure: true

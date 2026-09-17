@@ -55,6 +55,9 @@ spec:
               ad:
                 description: Availability Domain to place new OSN
                 type: string
+              blockchainPlatformId:
+                description: The OCID of the blockchain platform containing this node.
+                type: string
               ocpuAllocationParam:
                 description: OsnOcpuAllocationParam defines nested fields for Osn.OcpuAllocationParam.
                 properties:
@@ -66,6 +69,7 @@ spec:
                 type: object
             required:
             - ad
+            - blockchainPlatformId
             type: object
           status:
             description: OsnStatus defines the observed state of Osn.

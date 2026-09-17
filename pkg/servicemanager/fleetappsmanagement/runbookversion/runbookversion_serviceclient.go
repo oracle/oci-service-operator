@@ -32,8 +32,28 @@ type defaultRunbookVersionServiceClient struct {
 
 var _ RunbookVersionServiceClient = defaultRunbookVersionServiceClient{}
 
+type RunbookVersionSDKClients struct {
+	fleetAppsManagementRunbooksClient    fleetappsmanagementsdk.FleetAppsManagementRunbooksClient
+	fleetAppsManagementWorkRequestClient fleetappsmanagementsdk.FleetAppsManagementWorkRequestClient
+}
+
+func newRunbookVersionSDKClients(manager *RunbookVersionServiceManager) (RunbookVersionSDKClients, error) {
+	var clients RunbookVersionSDKClients
+	fleetAppsManagementRunbooksClientClient, err := fleetappsmanagementsdk.NewFleetAppsManagementRunbooksClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize RunbookVersion OCI client FleetAppsManagementRunbooksClient: %w", err)
+	}
+	clients.fleetAppsManagementRunbooksClient = fleetAppsManagementRunbooksClientClient
+	fleetAppsManagementWorkRequestClientClient, err := fleetappsmanagementsdk.NewFleetAppsManagementWorkRequestClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize RunbookVersion OCI client FleetAppsManagementWorkRequestClient: %w", err)
+	}
+	clients.fleetAppsManagementWorkRequestClient = fleetAppsManagementWorkRequestClientClient
+	return clients, nil
+}
+
 var newRunbookVersionServiceClient = func(manager *RunbookVersionServiceManager) RunbookVersionServiceClient {
-	sdkClient, err := fleetappsmanagementsdk.NewFleetAppsManagementRunbooksClientWithConfigurationProvider(manager.Provider)
+	sdkClient, err := newRunbookVersionSDKClients(manager)
 	hooks := newRunbookVersionRuntimeHooks(manager, sdkClient)
 	config := buildRunbookVersionGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {

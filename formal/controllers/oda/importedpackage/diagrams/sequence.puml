@@ -38,10 +38,10 @@ group Lookup and bind
 alt tracked or explicit OCI identity already exists
 ServiceManager -> OCI: GetImportedPackage
 else tracked identity is missing
-ServiceManager -> OCI: ListImportedPackage(filters:\ncompartment_id, state)
+ServiceManager -> OCI: ListImportedPackage(filters:\nodaInstanceId, currentPackageId)
 alt reusable OCI resource is not found
 ServiceManager -> OCI: CreateImportedPackage
-loop create pending PROVISIONING
+loop create pending OPERATION_PENDING
 ServiceManager -> OCI: GetImportedPackage
 end
 else reusable OCI resource already exists
@@ -53,7 +53,7 @@ alt delete requested
 group Delete
 ServiceManager -> OCI: DeleteImportedPackage
 ServiceManager -> OCI: confirm delete via\nGetImportedPackage or\nListImportedPackage
-loop delete pending DELETING
+loop delete pending OPERATION_PENDING
 ServiceManager -> OCI: GetImportedPackage or\nListImportedPackage
 end
 alt cleanup or finalizer release is blocked
@@ -63,25 +63,32 @@ ServiceManager --> BaseReconciler: release finalizer after delete completion
 end
 end
 else OCI state is retryable
-ServiceManager --> BaseReconciler: requeue while OCI remains in\nPROVISIONING, UPDATING, DELETING
+ServiceManager --> BaseReconciler: requeue while OCI remains in\nOPERATION_PENDING
 else live state requires field-aware\ndrift evaluation
 group Drift handling
 note over ServiceManager,OCI
-Supported update surface: display_name
+Supported update surface:
+currentPackageId, parameterValues,
+freeformTags, definedTags
 Reject before mutate: force-new fields
 compartment_id
-Lookup filters: compartment_id, state
+Lookup filters: odaInstanceId,
+currentPackageId
+Lookup matching: exact parent and
+current package identity match;
+duplicate matches fail
 end note
 opt force-new or conflicting drift is detected
 ServiceManager --> BaseReconciler: reject before OCI mutation
 end
 opt supported mutable drift is detected
-ServiceManager -> OCI: Apply UpdateImportedPackage only for\nmutable fields display_name
-loop update pending UPDATING
+ServiceManager -> OCI: Apply UpdateImportedPackage only for\nmutable fields currentPackageId,\nparameterValues, freeformTags,\ndefinedTags
+loop update pending OPERATION_PENDING
 ServiceManager -> OCI: GetImportedPackage
 end
 end
 ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=template action=CREATED;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource
+ServiceManager -> OCI: apply follow-up strategy\ncreate=read-after-write;\nupdate=read-after-write;\ndelete=confirm-delete
 end
 ServiceManager --> BaseReconciler: status=required,\nfinalizer=retain-until-confirmed-delete
 end
@@ -108,18 +115,25 @@ archetype: generated-service-manager
 status/finalizer: required /
 retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
-provider states: create PROVISIONING; update
-UPDATING; delete DELETING
-supported drift: display_name
+provider states: create OPERATION_PENDING;
+update OPERATION_PENDING; delete
+OPERATION_PENDING
+follow-up: create=read-after-write;
+update=read-after-write; delete=confirm-delete
+supported drift: currentPackageId,
+parameterValues, freeformTags, definedTags
 reject before mutate: force-new fields
 compartment_id
 create-only fields: none
 list lookup: scaffold_oda_importedpackage
-filters compartment_id, state
+filters odaInstanceId, currentPackageId; exact
+parent and current package identity match;
+duplicate matches fail
 conflicts: none
 open gaps: none
-Scaffold metadata only; replace with
-controller-specific runtime states before
-promotion.
+The package ID is both the nested request
+identity and a mutable version target; status
+records the currently imported package after
+reread.
 end note
 @enduml

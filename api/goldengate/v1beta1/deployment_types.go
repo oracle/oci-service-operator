@@ -108,13 +108,13 @@ type DeploymentSpec struct {
 	// +kubebuilder:validation:Optional
 	SecurityAttributes map[string]shared.MapValue `json:"securityAttributes,omitempty"`
 	// +kubebuilder:validation:Optional
-	OggData DeploymentOggData `json:"oggData,omitempty"`
+	OggData DeploymentOggData `json:"oggData,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	MaintenanceWindow DeploymentMaintenanceWindow `json:"maintenanceWindow,omitempty"`
+	MaintenanceWindow DeploymentMaintenanceWindow `json:"maintenanceWindow,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	MaintenanceConfiguration DeploymentMaintenanceConfiguration `json:"maintenanceConfiguration,omitempty"`
+	MaintenanceConfiguration DeploymentMaintenanceConfiguration `json:"maintenanceConfiguration,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	BackupSchedule DeploymentBackupSchedule `json:"backupSchedule,omitempty"`
+	BackupSchedule DeploymentBackupSchedule `json:"backupSchedule,omitempty,omitzero"`
 }
 
 // DeploymentPlacement defines nested fields for Deployment.Placement.
@@ -194,7 +194,7 @@ type DeploymentOggData struct {
 	// +kubebuilder:validation:Optional
 	OggVersion string `json:"oggVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	GroupToRolesMapping DeploymentOggDataGroupToRolesMapping `json:"groupToRolesMapping,omitempty"`
+	GroupToRolesMapping DeploymentOggDataGroupToRolesMapping `json:"groupToRolesMapping,omitempty,omitzero"`
 }
 
 // DeploymentMaintenanceWindow defines nested fields for Deployment.MaintenanceWindow.

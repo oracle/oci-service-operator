@@ -1,0 +1,27 @@
+#
+# Copyright (c) 2026, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+#
+
+apiVersion: core.oracle.com/v1beta1
+kind: SecurityList
+metadata:
+  name: osok-security-list-${OSOK_E2E_SUFFIX}
+spec:
+  compartmentId: ${OCI_COMPARTMENT_ID}
+  vcnId: ${OCI_VCN_ID}
+  displayName: osok-security-list-updated-${OSOK_E2E_SUFFIX}
+  egressSecurityRules:
+    - destination: 0.0.0.0/0
+      protocol: "all"
+      description: Allow outbound traffic
+  ingressSecurityRules:
+    - protocol: "6"
+      source: 10.0.0.0/16
+      description: Allow SSH from the VCN CIDR
+      tcpOptions:
+        destinationPortRange:
+          min: 22
+          max: 22
+  freeformTags:
+    osok-e2e-phase: update

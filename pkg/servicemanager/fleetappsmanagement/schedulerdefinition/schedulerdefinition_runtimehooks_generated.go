@@ -50,50 +50,119 @@ func registerSchedulerDefinitionRuntimeHooksMutator(mutator SchedulerDefinitionR
 	}
 	schedulerdefinitionRuntimeHooksMutators = append(schedulerdefinitionRuntimeHooksMutators, mutator)
 }
-func newSchedulerDefinitionDefaultRuntimeHooks(sdkClient fleetappsmanagementsdk.FleetAppsManagementOperationsClient) SchedulerDefinitionRuntimeHooks {
+func newSchedulerDefinitionRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "fleetappsmanagement",
+		FormalSlug:    "schedulerdefinition",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "displayName", "fleetId", "id", "maintenanceWindowId", "product", "runbookId", "runbookVersionName", "state", "timeScheduledGreaterThanOrEqualTo", "timeScheduledLessThan"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"actionGroups.displayName", "actionGroups.fleetId", "actionGroups.kind", "actionGroups.runbookId", "actionGroups.runbookVersionName", "actionGroups.sequence", "definedTags", "description", "displayName", "freeformTags", "runBooks.inputParameters.arguments.content.bucket", "runBooks.inputParameters.arguments.content.checksum", "runBooks.inputParameters.arguments.content.namespace", "runBooks.inputParameters.arguments.content.object", "runBooks.inputParameters.arguments.content.sourceType", "runBooks.inputParameters.arguments.kind", "runBooks.inputParameters.arguments.name", "runBooks.inputParameters.arguments.value", "runBooks.inputParameters.stepName", "runBooks.runbookId", "runBooks.runbookVersionName", "schedule.duration", "schedule.executionStartdate", "schedule.maintenanceWindowId", "schedule.recurrences", "schedule.type"},
+			ForceNew:      []string{"compartmentId"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
+func newSchedulerDefinitionDefaultRuntimeHooks(sdkClient SchedulerDefinitionSDKClients) SchedulerDefinitionRuntimeHooks {
 	return SchedulerDefinitionRuntimeHooks{
+		Semantics:       newSchedulerDefinitionRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*fleetappsmanagementv1beta1.SchedulerDefinition]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*fleetappsmanagementv1beta1.SchedulerDefinition]{},
 		StatusHooks:     generatedruntime.StatusHooks[*fleetappsmanagementv1beta1.SchedulerDefinition]{},
 		ParityHooks:     generatedruntime.ParityHooks[*fleetappsmanagementv1beta1.SchedulerDefinition]{},
-		Async:           generatedruntime.AsyncHooks[*fleetappsmanagementv1beta1.SchedulerDefinition]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*fleetappsmanagementv1beta1.SchedulerDefinition]{},
+		Async: generatedruntime.AsyncHooks[*fleetappsmanagementv1beta1.SchedulerDefinition]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := fleetappsmanagementsdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.fleetAppsManagementWorkRequestClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*fleetappsmanagementv1beta1.SchedulerDefinition]{},
 		Create: runtimeOperationHooks[fleetappsmanagementsdk.CreateSchedulerDefinitionRequest, fleetappsmanagementsdk.CreateSchedulerDefinitionResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateSchedulerDefinitionDetails", RequestName: "CreateSchedulerDefinitionDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.CreateSchedulerDefinitionRequest) (fleetappsmanagementsdk.CreateSchedulerDefinitionResponse, error) {
-				return sdkClient.CreateSchedulerDefinition(ctx, request)
+				return sdkClient.fleetAppsManagementOperationsClient.CreateSchedulerDefinition(ctx, request)
 			},
 		},
 		Get: runtimeOperationHooks[fleetappsmanagementsdk.GetSchedulerDefinitionRequest, fleetappsmanagementsdk.GetSchedulerDefinitionResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "SchedulerDefinitionId", RequestName: "schedulerDefinitionId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.GetSchedulerDefinitionRequest) (fleetappsmanagementsdk.GetSchedulerDefinitionResponse, error) {
-				return sdkClient.GetSchedulerDefinition(ctx, request)
+				return sdkClient.fleetAppsManagementOperationsClient.GetSchedulerDefinition(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[fleetappsmanagementsdk.ListSchedulerDefinitionsRequest, fleetappsmanagementsdk.ListSchedulerDefinitionsResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "Product", RequestName: "product", Contribution: "query", PreferResourceID: false}, {FieldName: "Id", RequestName: "id", Contribution: "query", PreferResourceID: false}, {FieldName: "MaintenanceWindowId", RequestName: "maintenanceWindowId", Contribution: "query", PreferResourceID: false}, {FieldName: "RunbookId", RequestName: "runbookId", Contribution: "query", PreferResourceID: false}, {FieldName: "RunbookVersionName", RequestName: "runbookVersionName", Contribution: "query", PreferResourceID: false}, {FieldName: "TimeScheduledGreaterThanOrEqualTo", RequestName: "timeScheduledGreaterThanOrEqualTo", Contribution: "query", PreferResourceID: false}, {FieldName: "TimeScheduledLessThan", RequestName: "timeScheduledLessThan", Contribution: "query", PreferResourceID: false}, {FieldName: "FleetId", RequestName: "fleetId", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.ListSchedulerDefinitionsRequest) (fleetappsmanagementsdk.ListSchedulerDefinitionsResponse, error) {
-				return sdkClient.ListSchedulerDefinitions(ctx, request)
+				return sdkClient.fleetAppsManagementOperationsClient.ListSchedulerDefinitions(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[fleetappsmanagementsdk.UpdateSchedulerDefinitionRequest, fleetappsmanagementsdk.UpdateSchedulerDefinitionResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "SchedulerDefinitionId", RequestName: "schedulerDefinitionId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateSchedulerDefinitionDetails", RequestName: "UpdateSchedulerDefinitionDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.UpdateSchedulerDefinitionRequest) (fleetappsmanagementsdk.UpdateSchedulerDefinitionResponse, error) {
-				return sdkClient.UpdateSchedulerDefinition(ctx, request)
+				return sdkClient.fleetAppsManagementOperationsClient.UpdateSchedulerDefinition(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[fleetappsmanagementsdk.DeleteSchedulerDefinitionRequest, fleetappsmanagementsdk.DeleteSchedulerDefinitionResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "SchedulerDefinitionId", RequestName: "schedulerDefinitionId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.DeleteSchedulerDefinitionRequest) (fleetappsmanagementsdk.DeleteSchedulerDefinitionResponse, error) {
-				return sdkClient.DeleteSchedulerDefinition(ctx, request)
+				return sdkClient.fleetAppsManagementOperationsClient.DeleteSchedulerDefinition(ctx, request)
 			},
 		},
 		WrapGeneratedClient: []func(SchedulerDefinitionServiceClient) SchedulerDefinitionServiceClient{},
 	}
 }
 
-func newSchedulerDefinitionRuntimeHooks(manager *SchedulerDefinitionServiceManager, sdkClient fleetappsmanagementsdk.FleetAppsManagementOperationsClient) SchedulerDefinitionRuntimeHooks {
+func newSchedulerDefinitionRuntimeHooks(manager *SchedulerDefinitionServiceManager, sdkClient SchedulerDefinitionSDKClients) SchedulerDefinitionRuntimeHooks {
 	hooks := newSchedulerDefinitionDefaultRuntimeHooks(sdkClient)
 	for _, mutator := range schedulerdefinitionRuntimeHooksMutators {
 		mutator(manager, &hooks)
@@ -106,10 +175,19 @@ func buildSchedulerDefinitionGeneratedRuntimeConfig(
 	hooks SchedulerDefinitionRuntimeHooks,
 ) generatedruntime.Config[*fleetappsmanagementv1beta1.SchedulerDefinition] {
 	return generatedruntime.Config[*fleetappsmanagementv1beta1.SchedulerDefinition]{
-		Kind:            "SchedulerDefinition",
-		SDKName:         "SchedulerDefinition",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "SchedulerDefinition",
+		SDKName:   "SchedulerDefinition",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

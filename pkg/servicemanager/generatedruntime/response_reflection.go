@@ -76,6 +76,9 @@ func shouldSkipResponseFallback(fieldType reflect.StructField) bool {
 	if !fieldType.IsExported() {
 		return true
 	}
+	if location := fieldType.Tag.Get("presentIn"); location != "" && location != "body" {
+		return true
+	}
 	return fieldType.Name == "RawResponse" || strings.HasPrefix(fieldType.Name, "Opc") || fieldType.Name == "Etag"
 }
 
@@ -94,8 +97,85 @@ func mergeResponseIntoStatus(resource any, response any) error {
 	if err != nil {
 		return fmt.Errorf("marshal OCI response body: %w", err)
 	}
+	payload, err = applyGeneratedStatusAliases(payload, statusValue)
+	if err != nil {
+		return err
+	}
 	if err := json.Unmarshal(payload, statusValue.Addr().Interface()); err != nil {
 		return fmt.Errorf("project OCI response body into status: %w", err)
+	}
+	return nil
+}
+
+func applyGeneratedStatusAliases(payload []byte, statusValue reflect.Value) ([]byte, error) {
+	if !structHasJSONField(statusValue.Type(), "sdkStatus") {
+		return payload, nil
+	}
+	values := map[string]json.RawMessage{}
+	if err := json.Unmarshal(payload, &values); err != nil {
+		return nil, fmt.Errorf("decode OCI response body for generated aliases: %w", err)
+	}
+	value, exists := values["status"]
+	if !exists {
+		return payload, nil
+	}
+	if _, exists := values["sdkStatus"]; !exists {
+		values["sdkStatus"] = value
+	}
+	delete(values, "status")
+	aliased, err := json.Marshal(values)
+	if err != nil {
+		return nil, fmt.Errorf("marshal OCI response body with generated aliases: %w", err)
+	}
+	return aliased, nil
+}
+
+func structHasJSONField(typ reflect.Type, name string) bool {
+	for index := 0; index < typ.NumField(); index++ {
+		field := typ.Field(index)
+		jsonName := strings.Split(field.Tag.Get("json"), ",")[0]
+		if jsonName == name {
+			return true
+		}
+	}
+	return false
+}
+
+// ProjectResponseBodyWithAliases projects an OCI response into Status after
+// renaming caller-specified collision-prone JSON fields. Default projection
+// handles the generated status-to-sdkStatus alias; this helper remains useful
+// for resource-specific aliases.
+func ProjectResponseBodyWithAliases(resource any, response any, aliases map[string]string) error {
+	body, ok := responseBody(response)
+	if !ok || body == nil {
+		return nil
+	}
+	statusValue, err := statusStruct(resource)
+	if err != nil {
+		return err
+	}
+	payload, err := json.Marshal(body)
+	if err != nil {
+		return fmt.Errorf("marshal OCI response body: %w", err)
+	}
+	values := map[string]json.RawMessage{}
+	if err := json.Unmarshal(payload, &values); err != nil {
+		return fmt.Errorf("decode OCI response body for aliased projection: %w", err)
+	}
+	for source, target := range aliases {
+		value, exists := values[source]
+		if !exists {
+			continue
+		}
+		values[target] = value
+		delete(values, source)
+	}
+	payload, err = json.Marshal(values)
+	if err != nil {
+		return fmt.Errorf("marshal aliased OCI response body: %w", err)
+	}
+	if err := json.Unmarshal(payload, statusValue.Addr().Interface()); err != nil {
+		return fmt.Errorf("project aliased OCI response body into status: %w", err)
 	}
 	return nil
 }

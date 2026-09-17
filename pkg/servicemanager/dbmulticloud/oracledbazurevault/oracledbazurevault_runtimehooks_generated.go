@@ -50,50 +50,119 @@ func registerOracleDbAzureVaultRuntimeHooksMutator(mutator OracleDbAzureVaultRun
 	}
 	oracledbazurevaultRuntimeHooksMutators = append(oracledbazurevaultRuntimeHooksMutators, mutator)
 }
-func newOracleDbAzureVaultDefaultRuntimeHooks(sdkClient dbmulticloudsdk.OracleDbAzureVaultClient) OracleDbAzureVaultRuntimeHooks {
+func newOracleDbAzureVaultRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "dbmulticloud",
+		FormalSlug:    "oracledbazurevault",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "displayName", "oracleDbAzureConnectorId", "oracleDbAzureResourceGroup", "oracleDbAzureVaultId", "state"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"azureVaultId", "compartmentId", "definedTags", "displayName", "freeformTags", "location", "oracleDbAzureResourceGroup", "oracleDbConnectorId", "properties", "type"},
+			ForceNew:      []string{},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
+func newOracleDbAzureVaultDefaultRuntimeHooks(sdkClient OracleDbAzureVaultSDKClients) OracleDbAzureVaultRuntimeHooks {
 	return OracleDbAzureVaultRuntimeHooks{
+		Semantics:       newOracleDbAzureVaultRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*dbmulticloudv1beta1.OracleDbAzureVault]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*dbmulticloudv1beta1.OracleDbAzureVault]{},
 		StatusHooks:     generatedruntime.StatusHooks[*dbmulticloudv1beta1.OracleDbAzureVault]{},
 		ParityHooks:     generatedruntime.ParityHooks[*dbmulticloudv1beta1.OracleDbAzureVault]{},
-		Async:           generatedruntime.AsyncHooks[*dbmulticloudv1beta1.OracleDbAzureVault]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*dbmulticloudv1beta1.OracleDbAzureVault]{},
+		Async: generatedruntime.AsyncHooks[*dbmulticloudv1beta1.OracleDbAzureVault]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := dbmulticloudsdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.workRequestClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*dbmulticloudv1beta1.OracleDbAzureVault]{},
 		Create: runtimeOperationHooks[dbmulticloudsdk.CreateOracleDbAzureVaultRequest, dbmulticloudsdk.CreateOracleDbAzureVaultResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateOracleDbAzureVaultDetails", RequestName: "CreateOracleDbAzureVaultDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dbmulticloudsdk.CreateOracleDbAzureVaultRequest) (dbmulticloudsdk.CreateOracleDbAzureVaultResponse, error) {
-				return sdkClient.CreateOracleDbAzureVault(ctx, request)
+				return sdkClient.oracleDbAzureVaultClient.CreateOracleDbAzureVault(ctx, request)
 			},
 		},
 		Get: runtimeOperationHooks[dbmulticloudsdk.GetOracleDbAzureVaultRequest, dbmulticloudsdk.GetOracleDbAzureVaultResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OracleDbAzureVaultId", RequestName: "oracleDbAzureVaultId", Contribution: "path", PreferResourceID: true}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dbmulticloudsdk.GetOracleDbAzureVaultRequest) (dbmulticloudsdk.GetOracleDbAzureVaultResponse, error) {
-				return sdkClient.GetOracleDbAzureVault(ctx, request)
+				return sdkClient.oracleDbAzureVaultClient.GetOracleDbAzureVault(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[dbmulticloudsdk.ListOracleDbAzureVaultsRequest, dbmulticloudsdk.ListOracleDbAzureVaultsResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "OracleDbAzureVaultId", RequestName: "oracleDbAzureVaultId", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "OracleDbAzureResourceGroup", RequestName: "oracleDbAzureResourceGroup", Contribution: "query", PreferResourceID: false}, {FieldName: "OracleDbAzureConnectorId", RequestName: "oracleDbAzureConnectorId", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dbmulticloudsdk.ListOracleDbAzureVaultsRequest) (dbmulticloudsdk.ListOracleDbAzureVaultsResponse, error) {
-				return sdkClient.ListOracleDbAzureVaults(ctx, request)
+				return sdkClient.oracleDbAzureVaultClient.ListOracleDbAzureVaults(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[dbmulticloudsdk.UpdateOracleDbAzureVaultRequest, dbmulticloudsdk.UpdateOracleDbAzureVaultResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OracleDbAzureVaultId", RequestName: "oracleDbAzureVaultId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateOracleDbAzureVaultDetails", RequestName: "UpdateOracleDbAzureVaultDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dbmulticloudsdk.UpdateOracleDbAzureVaultRequest) (dbmulticloudsdk.UpdateOracleDbAzureVaultResponse, error) {
-				return sdkClient.UpdateOracleDbAzureVault(ctx, request)
+				return sdkClient.oracleDbAzureVaultClient.UpdateOracleDbAzureVault(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[dbmulticloudsdk.DeleteOracleDbAzureVaultRequest, dbmulticloudsdk.DeleteOracleDbAzureVaultResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OracleDbAzureVaultId", RequestName: "oracleDbAzureVaultId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request dbmulticloudsdk.DeleteOracleDbAzureVaultRequest) (dbmulticloudsdk.DeleteOracleDbAzureVaultResponse, error) {
-				return sdkClient.DeleteOracleDbAzureVault(ctx, request)
+				return sdkClient.oracleDbAzureVaultClient.DeleteOracleDbAzureVault(ctx, request)
 			},
 		},
 		WrapGeneratedClient: []func(OracleDbAzureVaultServiceClient) OracleDbAzureVaultServiceClient{},
 	}
 }
 
-func newOracleDbAzureVaultRuntimeHooks(manager *OracleDbAzureVaultServiceManager, sdkClient dbmulticloudsdk.OracleDbAzureVaultClient) OracleDbAzureVaultRuntimeHooks {
+func newOracleDbAzureVaultRuntimeHooks(manager *OracleDbAzureVaultServiceManager, sdkClient OracleDbAzureVaultSDKClients) OracleDbAzureVaultRuntimeHooks {
 	hooks := newOracleDbAzureVaultDefaultRuntimeHooks(sdkClient)
 	for _, mutator := range oracledbazurevaultRuntimeHooksMutators {
 		mutator(manager, &hooks)
@@ -106,10 +175,19 @@ func buildOracleDbAzureVaultGeneratedRuntimeConfig(
 	hooks OracleDbAzureVaultRuntimeHooks,
 ) generatedruntime.Config[*dbmulticloudv1beta1.OracleDbAzureVault] {
 	return generatedruntime.Config[*dbmulticloudv1beta1.OracleDbAzureVault]{
-		Kind:            "OracleDbAzureVault",
-		SDKName:         "OracleDbAzureVault",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "OracleDbAzureVault",
+		SDKName:   "OracleDbAzureVault",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

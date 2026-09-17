@@ -57,10 +57,11 @@ func applyLogAnalyticsLogGroupRuntimeHooks(hooks *LogAnalyticsLogGroupRuntimeHoo
 	hooks.ParityHooks.ValidateCreateOnlyDrift = validateLogAnalyticsLogGroupCreateOnlyDriftForResponse
 	hooks.DeleteHooks.HandleError = handleLogAnalyticsLogGroupDeleteError
 	hooks.DeleteHooks.ApplyOutcome = applyLogAnalyticsLogGroupDeleteOutcome
-	if hooks.Get.Call != nil {
+	if hooks.Get.Call != nil && hooks.List.Call != nil {
 		get := hooks.Get.Call
+		list := hooks.List.Call
 		hooks.WrapGeneratedClient = append(hooks.WrapGeneratedClient, func(delegate LogAnalyticsLogGroupServiceClient) LogAnalyticsLogGroupServiceClient {
-			return logAnalyticsLogGroupDeleteGuardClient{delegate: delegate, get: get}
+			return logAnalyticsLogGroupDeleteGuardClient{delegate: delegate, get: get, list: list}
 		})
 	}
 }
@@ -371,10 +372,11 @@ func handleLogAnalyticsLogGroupDeleteError(resource *loganalyticsv1beta1.LogAnal
 	if !classification.IsAuthShapedNotFound() {
 		return err
 	}
-	return fmt.Errorf("%s delete returned ambiguous %s %s; retaining finalizer",
+	return fmt.Errorf("%s delete returned ambiguous %s %s; retaining finalizer: %w",
 		logAnalyticsLogGroupKind,
 		classification.HTTPStatusCodeString(),
-		classification.ErrorCodeString())
+		classification.ErrorCodeString(),
+		err)
 }
 
 func applyLogAnalyticsLogGroupDeleteOutcome(
@@ -477,6 +479,7 @@ func logAnalyticsLogGroupFromSummary(summary loganalyticssdk.LogAnalyticsLogGrou
 type logAnalyticsLogGroupDeleteGuardClient struct {
 	delegate LogAnalyticsLogGroupServiceClient
 	get      func(context.Context, loganalyticssdk.GetLogAnalyticsLogGroupRequest) (loganalyticssdk.GetLogAnalyticsLogGroupResponse, error)
+	list     func(context.Context, loganalyticssdk.ListLogAnalyticsLogGroupsRequest) (loganalyticssdk.ListLogAnalyticsLogGroupsResponse, error)
 }
 
 func (c logAnalyticsLogGroupDeleteGuardClient) CreateOrUpdate(
@@ -501,10 +504,50 @@ func (c logAnalyticsLogGroupDeleteGuardClient) Delete(
 		NamespaceName:          common.String(namespace),
 		LogAnalyticsLogGroupId: common.String(currentID),
 	})
-	if err != nil && errorutil.ClassifyDeleteError(err).IsAuthShapedNotFound() {
-		return false, handleLogAnalyticsLogGroupDeleteError(resource, err)
+	if isLogAnalyticsLogGroupAuthShapedNotFound(err) {
+		return c.confirmAuthShapedAbsence(ctx, resource, currentID, err)
 	}
-	return c.delegate.Delete(ctx, resource)
+	deleted, err := c.delegate.Delete(ctx, resource)
+	if isLogAnalyticsLogGroupAuthShapedNotFound(err) {
+		return c.confirmAuthShapedAbsence(ctx, resource, currentID, err)
+	}
+	return deleted, err
+}
+
+func isLogAnalyticsLogGroupAuthShapedNotFound(err error) bool {
+	if err == nil {
+		return false
+	}
+	if errorutil.ClassifyDeleteError(err).IsAuthShapedNotFound() {
+		return true
+	}
+	return strings.Contains(err.Error(), "ambiguous 404 NotAuthorizedOrNotFound")
+}
+
+func (c logAnalyticsLogGroupDeleteGuardClient) confirmAuthShapedAbsence(
+	ctx context.Context,
+	resource *loganalyticsv1beta1.LogAnalyticsLogGroup,
+	currentID string,
+	authShapedErr error,
+) (bool, error) {
+	if resource == nil || c.list == nil {
+		return false, handleLogAnalyticsLogGroupDeleteError(resource, authShapedErr)
+	}
+	response, err := c.list(ctx, loganalyticssdk.ListLogAnalyticsLogGroupsRequest{
+		NamespaceName: common.String(logAnalyticsLogGroupNamespace(resource)),
+		CompartmentId: common.String(strings.TrimSpace(resource.Spec.CompartmentId)),
+		DisplayName:   common.String(strings.TrimSpace(resource.Spec.DisplayName)),
+	})
+	if err != nil {
+		return false, fmt.Errorf("confirm %s deletion by scoped list: %w", logAnalyticsLogGroupKind, err)
+	}
+	for _, item := range response.Items {
+		if item.Id != nil && strings.TrimSpace(*item.Id) == currentID {
+			return false, handleLogAnalyticsLogGroupDeleteError(resource, authShapedErr)
+		}
+	}
+	clearTrackedLogAnalyticsLogGroupIdentity(resource)
+	return true, nil
 }
 
 func logAnalyticsLogGroupTrackedID(resource *loganalyticsv1beta1.LogAnalyticsLogGroup) string {

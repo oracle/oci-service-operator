@@ -50,15 +50,84 @@ func registerProtectionPolicyRuntimeHooksMutator(mutator ProtectionPolicyRuntime
 	}
 	protectionpolicyRuntimeHooksMutators = append(protectionpolicyRuntimeHooksMutators, mutator)
 }
+func newProtectionPolicyRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "recovery",
+		FormalSlug:    "protectionpolicy",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "displayName", "owner", "protectionPolicyId", "state"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"backupRetentionPeriodInDays", "definedTags", "displayName", "freeformTags", "policyLockedDateTime"},
+			ForceNew:      []string{"compartmentId", "mustEnforceCloudLocality"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "ProtectionPolicy", Action: "CreateProtectionPolicy"}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "ProtectionPolicy", Action: "UpdateProtectionPolicy"}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "ProtectionPolicy", Action: "DeleteProtectionPolicy"}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "workrequest",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "ProtectionPolicy", Action: "CreateProtectionPolicy"}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "workrequest",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "ProtectionPolicy", Action: "UpdateProtectionPolicy"}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "ProtectionPolicy", Action: "DeleteProtectionPolicy"}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newProtectionPolicyDefaultRuntimeHooks(sdkClient recoverysdk.DatabaseRecoveryClient) ProtectionPolicyRuntimeHooks {
 	return ProtectionPolicyRuntimeHooks{
+		Semantics:       newProtectionPolicyRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*recoveryv1beta1.ProtectionPolicy]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*recoveryv1beta1.ProtectionPolicy]{},
 		StatusHooks:     generatedruntime.StatusHooks[*recoveryv1beta1.ProtectionPolicy]{},
 		ParityHooks:     generatedruntime.ParityHooks[*recoveryv1beta1.ProtectionPolicy]{},
-		Async:           generatedruntime.AsyncHooks[*recoveryv1beta1.ProtectionPolicy]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*recoveryv1beta1.ProtectionPolicy]{},
+		Async: generatedruntime.AsyncHooks[*recoveryv1beta1.ProtectionPolicy]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := recoverysdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*recoveryv1beta1.ProtectionPolicy]{},
 		Create: runtimeOperationHooks[recoverysdk.CreateProtectionPolicyRequest, recoverysdk.CreateProtectionPolicyResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateProtectionPolicyDetails", RequestName: "CreateProtectionPolicyDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request recoverysdk.CreateProtectionPolicyRequest) (recoverysdk.CreateProtectionPolicyResponse, error) {
@@ -106,10 +175,19 @@ func buildProtectionPolicyGeneratedRuntimeConfig(
 	hooks ProtectionPolicyRuntimeHooks,
 ) generatedruntime.Config[*recoveryv1beta1.ProtectionPolicy] {
 	return generatedruntime.Config[*recoveryv1beta1.ProtectionPolicy]{
-		Kind:            "ProtectionPolicy",
-		SDKName:         "ProtectionPolicy",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "ProtectionPolicy",
+		SDKName:   "ProtectionPolicy",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

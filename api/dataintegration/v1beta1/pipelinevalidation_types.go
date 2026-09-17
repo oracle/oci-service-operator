@@ -21,7 +21,7 @@ type PipelineValidationSpec struct {
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef PipelineValidationParentRef `json:"parentRef,omitempty"`
+	ParentRef PipelineValidationParentRef `json:"parentRef,omitempty,omitzero"`
 	// Free form text without any restriction on permitted characters. Name can have letters, numbers, and special characters. The value is editable and is restricted to 1000 characters.
 	// +kubebuilder:validation:Optional
 	Name string `json:"name,omitempty"`
@@ -125,7 +125,7 @@ type PipelineValidationMetadata struct {
 	// +kubebuilder:validation:Optional
 	AggregatorKey string `json:"aggregatorKey,omitempty"`
 	// +kubebuilder:validation:Optional
-	Aggregator PipelineValidationMetadataAggregator `json:"aggregator,omitempty"`
+	Aggregator PipelineValidationMetadataAggregator `json:"aggregator,omitempty,omitzero"`
 	// The full path to identify this object.
 	// +kubebuilder:validation:Optional
 	IdentifierPath string `json:"identifierPath,omitempty"`
@@ -142,7 +142,7 @@ type PipelineValidationMetadata struct {
 	// +kubebuilder:validation:Optional
 	IsFavorite bool `json:"isFavorite,omitempty"`
 	// +kubebuilder:validation:Optional
-	CountStatistics PipelineValidationMetadataCountStatistics `json:"countStatistics,omitempty"`
+	CountStatistics PipelineValidationMetadataCountStatistics `json:"countStatistics,omitempty,omitzero"`
 }
 
 // PipelineValidationValidationMessages defines nested fields for PipelineValidation.ValidationMessages.

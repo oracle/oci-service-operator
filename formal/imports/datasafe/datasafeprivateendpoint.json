@@ -1,0 +1,117 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "datasafeprivateendpoint",
+  "kind": "DataSafePrivateEndpoint",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_data_safe_private_endpoint",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDataSafePrivateEndpoint",
+        "requestType": "datasafe.CreateDataSafePrivateEndpointRequest",
+        "responseType": "datasafe.CreateDataSafePrivateEndpointResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDataSafePrivateEndpoint",
+        "requestType": "datasafe.GetDataSafePrivateEndpointRequest",
+        "responseType": "datasafe.GetDataSafePrivateEndpointResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDataSafePrivateEndpoints",
+        "requestType": "datasafe.ListDataSafePrivateEndpointsRequest",
+        "responseType": "datasafe.ListDataSafePrivateEndpointsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDataSafePrivateEndpoint",
+        "requestType": "datasafe.UpdateDataSafePrivateEndpointRequest",
+        "responseType": "datasafe.UpdateDataSafePrivateEndpointResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDataSafePrivateEndpoint",
+        "requestType": "datasafe.DeleteDataSafePrivateEndpointRequest",
+        "responseType": "datasafe.DeleteDataSafePrivateEndpointResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "displayName",
+      "description",
+      "nsgIds",
+      "freeformTags",
+      "definedTags"
+    ],
+    "forceNew": [
+      "compartmentId",
+      "vcnId",
+      "subnetId",
+      "privateEndpointIp"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [],
+    "update": [],
+    "delete": []
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "unavailable",
+    "collectionField": "Items",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "displayName",
+      "compartmentId",
+      "vcnId",
+      "subnetId"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/datasafeprivateendpoint/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/datasafeprivateendpoint/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Terraform provider formal-import cannot resolve oci_data_safe_data_safe_private_endpoint; the vendored SDK, production runtime, and package-owned typed OCI fixtures define this contract."
+  ]
+}

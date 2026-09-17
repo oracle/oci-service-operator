@@ -50,15 +50,84 @@ func registerCatalogPrivateEndpointRuntimeHooksMutator(mutator CatalogPrivateEnd
 	}
 	catalogprivateendpointRuntimeHooksMutators = append(catalogprivateendpointRuntimeHooksMutators, mutator)
 }
+func newCatalogPrivateEndpointRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "datacatalog",
+		FormalSlug:    "catalogprivateendpoint",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "displayName", "state"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"compartmentId", "definedTags", "displayName", "dnsZones", "freeformTags", "securityAttributes"},
+			ForceNew:      []string{"subnetId"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newCatalogPrivateEndpointDefaultRuntimeHooks(sdkClient datacatalogsdk.DataCatalogClient) CatalogPrivateEndpointRuntimeHooks {
 	return CatalogPrivateEndpointRuntimeHooks{
+		Semantics:       newCatalogPrivateEndpointRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*datacatalogv1beta1.CatalogPrivateEndpoint]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*datacatalogv1beta1.CatalogPrivateEndpoint]{},
 		StatusHooks:     generatedruntime.StatusHooks[*datacatalogv1beta1.CatalogPrivateEndpoint]{},
 		ParityHooks:     generatedruntime.ParityHooks[*datacatalogv1beta1.CatalogPrivateEndpoint]{},
-		Async:           generatedruntime.AsyncHooks[*datacatalogv1beta1.CatalogPrivateEndpoint]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*datacatalogv1beta1.CatalogPrivateEndpoint]{},
+		Async: generatedruntime.AsyncHooks[*datacatalogv1beta1.CatalogPrivateEndpoint]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := datacatalogsdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*datacatalogv1beta1.CatalogPrivateEndpoint]{},
 		Create: runtimeOperationHooks[datacatalogsdk.CreateCatalogPrivateEndpointRequest, datacatalogsdk.CreateCatalogPrivateEndpointResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateCatalogPrivateEndpointDetails", RequestName: "CreateCatalogPrivateEndpointDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request datacatalogsdk.CreateCatalogPrivateEndpointRequest) (datacatalogsdk.CreateCatalogPrivateEndpointResponse, error) {
@@ -106,10 +175,19 @@ func buildCatalogPrivateEndpointGeneratedRuntimeConfig(
 	hooks CatalogPrivateEndpointRuntimeHooks,
 ) generatedruntime.Config[*datacatalogv1beta1.CatalogPrivateEndpoint] {
 	return generatedruntime.Config[*datacatalogv1beta1.CatalogPrivateEndpoint]{
-		Kind:            "CatalogPrivateEndpoint",
-		SDKName:         "CatalogPrivateEndpoint",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "CatalogPrivateEndpoint",
+		SDKName:   "CatalogPrivateEndpoint",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

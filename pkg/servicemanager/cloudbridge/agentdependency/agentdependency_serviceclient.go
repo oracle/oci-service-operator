@@ -32,8 +32,28 @@ type defaultAgentDependencyServiceClient struct {
 
 var _ AgentDependencyServiceClient = defaultAgentDependencyServiceClient{}
 
+type AgentDependencySDKClients struct {
+	ocbAgentSvcClient cloudbridgesdk.OcbAgentSvcClient
+	commonClient      cloudbridgesdk.CommonClient
+}
+
+func newAgentDependencySDKClients(manager *AgentDependencyServiceManager) (AgentDependencySDKClients, error) {
+	var clients AgentDependencySDKClients
+	ocbAgentSvcClientClient, err := cloudbridgesdk.NewOcbAgentSvcClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize AgentDependency OCI client OcbAgentSvcClient: %w", err)
+	}
+	clients.ocbAgentSvcClient = ocbAgentSvcClientClient
+	commonClientClient, err := cloudbridgesdk.NewCommonClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize AgentDependency OCI client CommonClient: %w", err)
+	}
+	clients.commonClient = commonClientClient
+	return clients, nil
+}
+
 var newAgentDependencyServiceClient = func(manager *AgentDependencyServiceManager) AgentDependencyServiceClient {
-	sdkClient, err := cloudbridgesdk.NewOcbAgentSvcClientWithConfigurationProvider(manager.Provider)
+	sdkClient, err := newAgentDependencySDKClients(manager)
 	hooks := newAgentDependencyRuntimeHooks(manager, sdkClient)
 	config := buildAgentDependencyGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {

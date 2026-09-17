@@ -1,0 +1,61 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: recovery
+slug: protectionpolicy
+kind: ProtectionPolicy
+archetype: generated-service-manager
+states:
+    - provisioning
+    - active
+    - updating
+    - terminating
+repoAuthored:
+    operations:
+        update:
+            - UpdateProtectionPolicy
+    providerLifecycle:
+        createPending:
+            - CREATING
+        updatePending:
+            - UPDATING
+        deletePending:
+            - DELETE_SCHEDULED
+            - DELETING
+    listLookup:
+        filters:
+            - compartmentId
+            - displayName
+            - id
+        matchRule: exact compartmentId, displayName, id match within the resource scope; duplicate matches fail
+    mutation:
+        mutable:
+            - displayName
+            - backupRetentionPeriodInDays
+            - policyLockedDateTime
+            - freeformTags
+            - definedTags
+        forceNew:
+            - compartmentId
+            - mustEnforceCloudLocality
+    hooks:
+        create:
+            - helper: tfresource.CreateResource
+              entityType: ProtectionPolicy
+              action: CreateProtectionPolicy
+        update:
+            - helper: tfresource.UpdateResource
+              entityType: ProtectionPolicy
+              action: UpdateProtectionPolicy
+        delete:
+            - helper: tfresource.DeleteResource
+              entityType: ProtectionPolicy
+              action: DeleteProtectionPolicy
+    followUp:
+        create: workrequest
+        update: workrequest
+        delete: confirm-delete
+notes:
+    - The production runtime uses generatedruntime/workrequest async handling for create, update, delete work-request phases.
+    - Lifecycle success states are ACTIVE; pending create, update, and delete states requeue until the corresponding follow-up converges.
+    - Status projection is required, Secret side effects are none, and the finalizer policy is retain-until-confirmed-delete.
+    - Delete policy required retains ownership until DELETED or confirmed absence.

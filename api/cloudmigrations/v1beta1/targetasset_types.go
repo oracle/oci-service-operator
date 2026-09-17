@@ -28,7 +28,7 @@ type TargetAssetSpec struct {
 	// +kubebuilder:validation:Optional
 	MsLicense string `json:"msLicense,omitempty"`
 	// +kubebuilder:validation:Optional
-	UserSpec TargetAssetUserSpec `json:"userSpec,omitempty"`
+	UserSpec TargetAssetUserSpec `json:"userSpec,omitempty,omitzero"`
 	// Performance of the block volumes.
 	// +kubebuilder:validation:Optional
 	BlockVolumesPerformance int `json:"blockVolumesPerformance,omitempty"`
@@ -296,7 +296,7 @@ type TargetAssetUserSpec struct {
 	// +kubebuilder:validation:Optional
 	CompartmentId string `json:"compartmentId,omitempty"`
 	// +kubebuilder:validation:Optional
-	CreateVnicDetails TargetAssetUserSpecCreateVnicDetails `json:"createVnicDetails,omitempty"`
+	CreateVnicDetails TargetAssetUserSpecCreateVnicDetails `json:"createVnicDetails,omitempty,omitzero"`
 	// The OCID of the dedicated VM host.
 	// +kubebuilder:validation:Optional
 	DedicatedVmHostId string `json:"dedicatedVmHostId,omitempty"`
@@ -357,20 +357,20 @@ type TargetAssetUserSpec struct {
 	// +kubebuilder:validation:Optional
 	IpxeScript string `json:"ipxeScript,omitempty"`
 	// +kubebuilder:validation:Optional
-	InstanceOptions TargetAssetUserSpecInstanceOptions `json:"instanceOptions,omitempty"`
+	InstanceOptions TargetAssetUserSpecInstanceOptions `json:"instanceOptions,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	PreemptibleInstanceConfig TargetAssetUserSpecPreemptibleInstanceConfig `json:"preemptibleInstanceConfig,omitempty"`
+	PreemptibleInstanceConfig TargetAssetUserSpecPreemptibleInstanceConfig `json:"preemptibleInstanceConfig,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	AgentConfig TargetAssetUserSpecAgentConfig `json:"agentConfig,omitempty"`
+	AgentConfig TargetAssetUserSpecAgentConfig `json:"agentConfig,omitempty,omitzero"`
 	// The shape of an instance. The shape determines the number of CPUs, amount of memory,
 	// and other resources allocated to the instance.
 	// You can enumerate all available shapes by calling ListShapes.
 	// +kubebuilder:validation:Optional
 	Shape string `json:"shape,omitempty"`
 	// +kubebuilder:validation:Optional
-	ShapeConfig TargetAssetUserSpecShapeConfig `json:"shapeConfig,omitempty"`
+	ShapeConfig TargetAssetUserSpecShapeConfig `json:"shapeConfig,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	SourceDetails TargetAssetUserSpecSourceDetails `json:"sourceDetails,omitempty"`
+	SourceDetails TargetAssetUserSpecSourceDetails `json:"sourceDetails,omitempty,omitzero"`
 	// Whether to enable in-transit encryption for the data volume's paravirtualized attachment. This field applies to both block volumes and boot volumes. By default, the value is false.
 	// +kubebuilder:validation:Optional
 	IsPvEncryptionInTransitEnabled bool `json:"isPvEncryptionInTransitEnabled,omitempty"`

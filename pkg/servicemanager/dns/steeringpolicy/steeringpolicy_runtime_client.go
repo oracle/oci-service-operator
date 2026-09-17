@@ -64,7 +64,29 @@ func applySteeringPolicyRuntimeHooks(hooks *SteeringPolicyRuntimeHooks) {
 			return lookupExistingSteeringPolicy(ctx, hooks, resource, identity)
 		},
 	}
+	hooks.DeleteHooks.ConfirmRead = steeringPolicyDeleteConfirmRead(hooks)
 	hooks.DeleteHooks.HandleError = handleSteeringPolicyDeleteError
+}
+
+func steeringPolicyDeleteConfirmRead(hooks *SteeringPolicyRuntimeHooks) func(context.Context, *dnsv1beta1.SteeringPolicy, string) (any, error) {
+	return func(ctx context.Context, resource *dnsv1beta1.SteeringPolicy, currentID string) (any, error) {
+		response, err := hooks.Get.Call(ctx, dnssdk.GetSteeringPolicyRequest{SteeringPolicyId: stringPointer(currentID), Scope: dnssdk.GetSteeringPolicyScopeGlobal})
+		if err == nil || !errorutil.ClassifyDeleteError(err).IsAuthShapedNotFound() {
+			return response, err
+		}
+		identity, identityErr := resolveSteeringPolicyIdentity(resource)
+		if identityErr != nil {
+			return nil, identityErr
+		}
+		matches, listErr := listMatchingSteeringPolicies(ctx, hooks.List.Call, identity)
+		if listErr != nil {
+			return nil, listErr
+		}
+		if len(matches) != 0 {
+			return nil, err
+		}
+		return dnssdk.GetSteeringPolicyResponse{SteeringPolicy: dnssdk.SteeringPolicy{Id: stringPointer(currentID), LifecycleState: dnssdk.SteeringPolicyLifecycleStateDeleted}}, nil
+	}
 }
 
 func newSteeringPolicyRuntimeSemantics() *generatedruntime.Semantics {
@@ -83,7 +105,7 @@ func newSteeringPolicyRuntimeSemantics() *generatedruntime.Semantics {
 		},
 		Lifecycle: generatedruntime.LifecycleSemantics{
 			ProvisioningStates: []string{"CREATING"},
-			UpdatingStates:     []string{},
+			UpdatingStates:     []string{"UPDATING"},
 			ActiveStates:       []string{"ACTIVE"},
 		},
 		Delete: generatedruntime.DeleteSemantics{

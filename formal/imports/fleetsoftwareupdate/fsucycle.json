@@ -1,0 +1,161 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "fleetsoftwareupdate",
+  "slug": "fsucycle",
+  "kind": "FsuCycle",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_fleet_software_update_fsu_cycle",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateFsuCycle",
+        "requestType": "fleetsoftwareupdate.CreateFsuCycleRequest",
+        "responseType": "fleetsoftwareupdate.CreateFsuCycleResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetFsuCycle",
+        "requestType": "fleetsoftwareupdate.GetFsuCycleRequest",
+        "responseType": "fleetsoftwareupdate.GetFsuCycleResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListFsuCycles",
+        "requestType": "fleetsoftwareupdate.ListFsuCyclesRequest",
+        "responseType": "fleetsoftwareupdate.ListFsuCyclesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeFsuCycleCompartment",
+        "requestType": "fleetsoftwareupdate.ChangeFsuCycleCompartmentRequest",
+        "responseType": "fleetsoftwareupdate.ChangeFsuCycleCompartmentResponse"
+      },
+      {
+        "operation": "UpdateFsuCycle",
+        "requestType": "fleetsoftwareupdate.UpdateFsuCycleRequest",
+        "responseType": "fleetsoftwareupdate.UpdateFsuCycleResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteFsuCycle",
+        "requestType": "fleetsoftwareupdate.DeleteFsuCycleRequest",
+        "responseType": "fleetsoftwareupdate.DeleteFsuCycleResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "S_CREATING",
+        "S_IN_PROGRESS"
+      ],
+      "target": [
+        "S_ACTIVE",
+        "S_NEEDS_ATTENTION",
+        "S_SUCCEEDED"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "batching_strategy.is_force_rolling",
+      "batching_strategy.is_wait_for_batch_resume",
+      "batching_strategy.percentage",
+      "batching_strategy.type",
+      "compartment_id",
+      "defined_tags",
+      "diagnostics_collection.log_collection_mode",
+      "display_name",
+      "freeform_tags",
+      "goal_version_details.components.component_type",
+      "goal_version_details.components.goal_version_details.goal_software_image_id",
+      "goal_version_details.components.goal_version_details.goal_type",
+      "goal_version_details.components.goal_version_details.goal_version",
+      "goal_version_details.components.home_policy",
+      "goal_version_details.components.new_home_prefix",
+      "goal_version_details.home_policy",
+      "goal_version_details.new_home_prefix",
+      "goal_version_details.software_image_id",
+      "goal_version_details.type",
+      "goal_version_details.version",
+      "is_ignore_missing_patches",
+      "is_ignore_patches",
+      "is_keep_placement",
+      "max_drain_timeout_in_seconds",
+      "type",
+      "upgrade_details.collection_type",
+      "upgrade_details.is_ignore_post_upgrade_errors",
+      "upgrade_details.is_ignore_prerequisites",
+      "upgrade_details.is_recompile_invalid_objects",
+      "upgrade_details.is_time_zone_upgrade",
+      "upgrade_details.max_drain_timeout_in_seconds"
+    ],
+    "forceNew": [
+      "apply_action_schedule",
+      "apply_action_schedule.time_to_start",
+      "apply_action_schedule.type",
+      "fsu_collection_id",
+      "stage_action_schedule",
+      "stage_action_schedule.time_to_start",
+      "stage_action_schedule.type"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_fleet_software_update_fsu_cycles",
+    "collectionField": "fsu_cycle_summary_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "collection_type",
+      "compartment_id",
+      "display_name",
+      "fsu_collection_id",
+      "state",
+      "target_version"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/fleetsoftwareupdate/fsucycle/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/fleetsoftwareupdate/fsucycle/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from the pinned terraform-provider-oci source revision."
+  ]
+}

@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "networkfirewall",
+  "slug": "decryptionrule",
+  "kind": "DecryptionRule",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_network_firewall_network_firewall_policy_decryption_rule",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDecryptionRule",
+        "requestType": "networkfirewall.CreateDecryptionRuleRequest",
+        "responseType": "networkfirewall.CreateDecryptionRuleResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDecryptionRule",
+        "requestType": "networkfirewall.GetDecryptionRuleRequest",
+        "responseType": "networkfirewall.GetDecryptionRuleResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDecryptionRule",
+        "requestType": "networkfirewall.UpdateDecryptionRuleRequest",
+        "responseType": "networkfirewall.UpdateDecryptionRuleResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDecryptionRule",
+        "requestType": "networkfirewall.DeleteDecryptionRuleRequest",
+        "responseType": "networkfirewall.DeleteDecryptionRuleResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "condition",
+      "action",
+      "decryption_profile",
+      "secret",
+      "position"
+    ],
+    "forceNew": [
+      "network_firewall_policy_id",
+      "name"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/networkfirewall/decryptionrule/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/networkfirewall/decryptionrule/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "delete-confirmation",
+      "lifecycle-classification",
+      "list-lookup",
+      "mutation-policy",
+      "secret-output"
+    ]
+  },
+  "notes": [
+    "Pinned provider operations are combined with reviewed composite parent/name identity and DecryptionRule runtime semantics."
+  ]
+}

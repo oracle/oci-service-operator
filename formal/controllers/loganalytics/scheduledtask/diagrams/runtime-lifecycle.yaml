@@ -1,0 +1,21 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: loganalytics
+slug: scheduledtask
+kind: ScheduledTask
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  listLookup:
+    filters: ["namespaceName","compartmentId","taskType","displayName","savedSearchId","id"]
+    matchRule: exact resolved namespace and task identity match; duplicate matches fail
+  mutation:
+    mutable: ["action","definedTags","description","displayName","freeformTags","schedules"]
+    forceNew: ["compartmentId","kind","savedSearchId","taskType"]
+  followUp: {create: read-after-write, update: read-after-write, delete: confirm-delete}
+notes:
+  - "The runtime resolves the tenancy Log Analytics namespace before every operation and preserves explicit zero values in schedule bodies."

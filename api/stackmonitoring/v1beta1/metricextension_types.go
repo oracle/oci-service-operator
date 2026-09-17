@@ -123,7 +123,7 @@ type MetricExtensionQueryProperties struct {
 	// +kubebuilder:validation:Optional
 	Delimiter string `json:"delimiter,omitempty"`
 	// +kubebuilder:validation:Optional
-	ScriptDetails MetricExtensionQueryPropertiesScriptDetails `json:"scriptDetails,omitempty"`
+	ScriptDetails MetricExtensionQueryPropertiesScriptDetails `json:"scriptDetails,omitempty,omitzero"`
 	// Arguments required by either command or script
 	// +kubebuilder:validation:Optional
 	Arguments string `json:"arguments,omitempty"`
@@ -131,12 +131,12 @@ type MetricExtensionQueryProperties struct {
 	// +kubebuilder:validation:Optional
 	StartsWith string `json:"startsWith,omitempty"`
 	// +kubebuilder:validation:Optional
-	SqlDetails MetricExtensionQueryPropertiesSqlDetails `json:"sqlDetails,omitempty"`
+	SqlDetails MetricExtensionQueryPropertiesSqlDetails `json:"sqlDetails,omitempty,omitzero"`
 	// List of values and position of PL/SQL procedure IN parameters
 	// +kubebuilder:validation:Optional
 	InParamDetails []MetricExtensionQueryPropertiesInParamDetail `json:"inParamDetails,omitempty"`
 	// +kubebuilder:validation:Optional
-	OutParamDetails MetricExtensionQueryPropertiesOutParamDetails `json:"outParamDetails,omitempty"`
+	OutParamDetails MetricExtensionQueryPropertiesOutParamDetails `json:"outParamDetails,omitempty,omitzero"`
 	// Type of SQL data collection method i.e. either a Statement or SQL Script File
 	// +kubebuilder:validation:Optional
 	SqlType string `json:"sqlType,omitempty"`

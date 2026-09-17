@@ -67,8 +67,8 @@ func TestCreateOrUpdateBindsExistingBackend(t *testing.T) {
 	if updateCalled {
 		t.Fatal("UpdateBackend() called, want observe-only bind path")
 	}
-	if got := resource.Status.OsokStatus.Ocid; got != "" {
-		t.Fatalf("status.status.ocid = %q, want empty after synthetic ID restore", got)
+	if got := string(resource.Status.OsokStatus.Ocid); got != "10.0.0.3:8080" {
+		t.Fatalf("status.status.ocid = %q, want tracked backend name", got)
 	}
 	if got := resource.Status.LoadBalancerId; got != resource.Spec.LoadBalancerId {
 		t.Fatalf("status.loadBalancerId = %q, want %q", got, resource.Spec.LoadBalancerId)
@@ -126,14 +126,17 @@ func TestCreateOrUpdateCreatesWhenBackendIsMissing(t *testing.T) {
 	if !createCalled {
 		t.Fatal("CreateBackend() not called, want create path after missing lookup")
 	}
-	if got := resource.Status.OsokStatus.Ocid; got != "" {
-		t.Fatalf("status.status.ocid = %q, want empty for create path", got)
+	if got := string(resource.Status.OsokStatus.Ocid); got != "10.0.0.3:8080" {
+		t.Fatalf("status.status.ocid = %q, want tracked backend name", got)
 	}
 	if got := resource.Status.LoadBalancerId; got != resource.Spec.LoadBalancerId {
 		t.Fatalf("status.loadBalancerId = %q, want %q", got, resource.Spec.LoadBalancerId)
 	}
 	if got := resource.Status.BackendSetName; got != resource.Spec.BackendSetName {
 		t.Fatalf("status.backendSetName = %q, want %q", got, resource.Spec.BackendSetName)
+	}
+	if got := resource.Status.Name; got != "10.0.0.3:8080" {
+		t.Fatalf("status.name = %q, want tracked backend name", got)
 	}
 }
 
@@ -201,8 +204,8 @@ func TestDeleteUsesBoundStatusIdentity(t *testing.T) {
 	if got := resource.Status.BackendSetName; got != "old_backend_set" {
 		t.Fatalf("status.backendSetName = %q, want %q", got, "old_backend_set")
 	}
-	if got := resource.Status.OsokStatus.Ocid; got != "" {
-		t.Fatalf("status.status.ocid = %q, want empty after synthetic ID restore", got)
+	if got := string(resource.Status.OsokStatus.Ocid); got != "10.0.0.3:8080" {
+		t.Fatalf("status.status.ocid = %q, want tracked backend name", got)
 	}
 }
 

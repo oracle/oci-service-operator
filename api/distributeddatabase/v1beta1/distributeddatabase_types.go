@@ -98,7 +98,7 @@ type DistributedDatabaseSpec struct {
 	// +kubebuilder:validation:Optional
 	GsmSshPublicKey string `json:"gsmSshPublicKey,omitempty"`
 	// +kubebuilder:validation:Optional
-	DbBackupConfig DistributedDatabaseDbBackupConfig `json:"dbBackupConfig,omitempty"`
+	DbBackupConfig DistributedDatabaseDbBackupConfig `json:"dbBackupConfig,omitempty,omitzero"`
 	// Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
 	// Example: `{"bar-key": "value"}`
 	// +kubebuilder:validation:Optional
@@ -281,9 +281,9 @@ type DistributedDatabaseShardDetail struct {
 	// +kubebuilder:validation:Optional
 	AvailabilityDomain string `json:"availabilityDomain,omitempty"`
 	// +kubebuilder:validation:Optional
-	DbStorageVaultDetails DistributedDatabaseShardDetailDbStorageVaultDetails `json:"dbStorageVaultDetails,omitempty"`
+	DbStorageVaultDetails DistributedDatabaseShardDetailDbStorageVaultDetails `json:"dbStorageVaultDetails,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	VmClusterDetails DistributedDatabaseShardDetailVmClusterDetails `json:"vmClusterDetails,omitempty"`
+	VmClusterDetails DistributedDatabaseShardDetailVmClusterDetails `json:"vmClusterDetails,omitempty,omitzero"`
 	// The details required for creation of the peer for the ExadbXs infrastructure based shard.
 	// +kubebuilder:validation:Optional
 	PeerDetails []DistributedDatabaseShardDetailPeerDetail `json:"peerDetails,omitempty"`
@@ -481,9 +481,9 @@ type DistributedDatabaseCatalogDetail struct {
 	// +kubebuilder:validation:Optional
 	AvailabilityDomain string `json:"availabilityDomain,omitempty"`
 	// +kubebuilder:validation:Optional
-	DbStorageVaultDetails DistributedDatabaseCatalogDetailDbStorageVaultDetails `json:"dbStorageVaultDetails,omitempty"`
+	DbStorageVaultDetails DistributedDatabaseCatalogDetailDbStorageVaultDetails `json:"dbStorageVaultDetails,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	VmClusterDetails DistributedDatabaseCatalogDetailVmClusterDetails `json:"vmClusterDetails,omitempty"`
+	VmClusterDetails DistributedDatabaseCatalogDetailVmClusterDetails `json:"vmClusterDetails,omitempty,omitzero"`
 	// The details required for creation of the peer for the ExadbXs infrastructure based catalog.
 	// +kubebuilder:validation:Optional
 	PeerDetails []DistributedDatabaseCatalogDetailPeerDetail `json:"peerDetails,omitempty"`

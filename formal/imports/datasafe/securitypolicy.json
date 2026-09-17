@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "securitypolicy",
+  "kind": "SecurityPolicy",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_security_policy",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateSecurityPolicy",
+        "requestType": "datasafe.CreateSecurityPolicyRequest",
+        "responseType": "datasafe.CreateSecurityPolicyResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetSecurityPolicy",
+        "requestType": "datasafe.GetSecurityPolicyRequest",
+        "responseType": "datasafe.GetSecurityPolicyResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListSecurityPolicies",
+        "requestType": "datasafe.ListSecurityPoliciesRequest",
+        "responseType": "datasafe.ListSecurityPoliciesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeSecurityPolicyCompartment",
+        "requestType": "datasafe.ChangeSecurityPolicyCompartmentRequest",
+        "responseType": "datasafe.ChangeSecurityPolicyCompartmentResponse"
+      },
+      {
+        "operation": "UpdateSecurityPolicy",
+        "requestType": "datasafe.UpdateSecurityPolicyRequest",
+        "responseType": "datasafe.UpdateSecurityPolicyResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteSecurityPolicy",
+        "requestType": "datasafe.DeleteSecurityPolicyRequest",
+        "responseType": "datasafe.DeleteSecurityPolicyResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags"
+    ],
+    "forceNew": null,
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_data_safe_security_policies",
+    "collectionField": "security_policy_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "access_level",
+      "compartment_id",
+      "compartment_id_in_subtree",
+      "display_name",
+      "security_policy_id",
+      "security_policy_type",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/securitypolicy/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/securitypolicy/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Pinned provider facts are paired with reviewed SecurityPolicy service-manager semantics and sanitized live CRUD evidence."
+  ]
+}

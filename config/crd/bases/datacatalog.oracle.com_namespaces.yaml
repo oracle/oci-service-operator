@@ -56,6 +56,9 @@ spec:
           spec:
             description: NamespaceSpec defines the desired state of Namespace.
             properties:
+              catalogId:
+                description: The OCID of the catalog containing the namespace.
+                type: string
               description:
                 description: Detailed description of the Namespace.
                 type: string
@@ -68,6 +71,7 @@ spec:
                 description: If this field is defined by service or by a user
                 type: boolean
             required:
+            - catalogId
             - displayName
             type: object
           status:

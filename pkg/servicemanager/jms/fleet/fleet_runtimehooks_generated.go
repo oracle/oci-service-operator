@@ -114,8 +114,20 @@ func newFleetDefaultRuntimeHooks(sdkClient jmssdk.JavaManagementServiceClient) F
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*jmsv1beta1.Fleet]{},
 		StatusHooks:     generatedruntime.StatusHooks[*jmsv1beta1.Fleet]{},
 		ParityHooks:     generatedruntime.ParityHooks[*jmsv1beta1.Fleet]{},
-		Async:           generatedruntime.AsyncHooks[*jmsv1beta1.Fleet]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*jmsv1beta1.Fleet]{},
+		Async: generatedruntime.AsyncHooks[*jmsv1beta1.Fleet]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := jmssdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*jmsv1beta1.Fleet]{},
 		Create: runtimeOperationHooks[jmssdk.CreateFleetRequest, jmssdk.CreateFleetResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateFleetDetails", RequestName: "CreateFleetDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request jmssdk.CreateFleetRequest) (jmssdk.CreateFleetResponse, error) {
@@ -163,10 +175,19 @@ func buildFleetGeneratedRuntimeConfig(
 	hooks FleetRuntimeHooks,
 ) generatedruntime.Config[*jmsv1beta1.Fleet] {
 	return generatedruntime.Config[*jmsv1beta1.Fleet]{
-		Kind:            "Fleet",
-		SDKName:         "Fleet",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "Fleet",
+		SDKName:   "Fleet",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

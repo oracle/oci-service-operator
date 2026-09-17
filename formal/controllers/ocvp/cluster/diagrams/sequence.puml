@@ -38,7 +38,7 @@ group Lookup and bind
 alt tracked or explicit OCI identity already exists
 ServiceManager -> OCI: GetCluster
 else tracked identity is missing
-ServiceManager -> OCI: ListClusters(filters:\ncompartment_id, display_name,\nlifecycle_state, sddc_id)
+ServiceManager -> OCI: ListClusters(filters: compartmentId,\ndisplayName, lifecycleState, sddcId)
 alt reusable OCI resource is not found
 ServiceManager -> OCI: CreateCluster
 loop create pending CREATING, UPDATING
@@ -67,21 +67,24 @@ ServiceManager --> BaseReconciler: requeue while OCI remains in\nCREATING, UPDAT
 else live state requires field-aware\ndrift evaluation
 group Drift handling
 note over ServiceManager,OCI
-Supported update surface: defined_tags,
-display_name, esxi_software_version,
-freeform_tags (+2 more)
+Supported update surface: definedTags,
+displayName, esxiSoftwareVersion,
+freeformTags (+2 more)
 Reject before mutate: force-new fields
-capacity_reservation_id,
-compute_availability_domain, datastores,
-esxi_hosts_count (+7 more)
-Lookup filters: compartment_id,
-display_name, lifecycle_state, sddc_id
+capacityReservationId,
+computeAvailabilityDomain, datastores,
+esxiHostsCount (+7 more)
+Lookup filters: compartmentId,
+displayName, lifecycleState, sddcId
+Lookup matching: exact SDDC and
+display-name identity match; duplicate
+matches fail
 end note
 opt force-new or conflicting drift is detected
 ServiceManager --> BaseReconciler: reject before OCI mutation
 end
 opt supported mutable drift is detected
-ServiceManager -> OCI: Apply UpdateCluster only for mutable\nfields defined_tags, display_name,\nesxi_software_version, freeform_tags\n(+2 more)
+ServiceManager -> OCI: Apply UpdateCluster only for mutable\nfields definedTags, displayName,\nesxiSoftwareVersion, freeformTags\n(+2 more)
 loop update pending UPDATING
 ServiceManager -> OCI: GetCluster
 end
@@ -118,16 +121,17 @@ provider states: create CREATING, UPDATING;
 update UPDATING; delete DELETING
 follow-up: create=read-after-write;
 update=read-after-write; delete=confirm-delete
-supported drift: defined_tags, display_name,
-esxi_software_version, freeform_tags (+2 more)
+supported drift: definedTags, displayName,
+esxiSoftwareVersion, freeformTags (+2 more)
 reject before mutate: force-new fields
-capacity_reservation_id,
-compute_availability_domain, datastores,
-esxi_hosts_count (+7 more)
+capacityReservationId,
+computeAvailabilityDomain, datastores,
+esxiHostsCount (+7 more)
 create-only fields: none
 list lookup: oci_ocvp_clusters filters
-compartment_id, display_name, lifecycle_state,
-sddc_id
+compartmentId, displayName, lifecycleState,
+sddcId; exact SDDC and display-name identity
+match; duplicate matches fail
 conflicts: none
 open gaps: none
 Create or bind only attempts list reuse when

@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "targetalertpolicyassociation",
+  "kind": "TargetAlertPolicyAssociation",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_target_alert_policy_association",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateTargetAlertPolicyAssociation",
+        "requestType": "datasafe.CreateTargetAlertPolicyAssociationRequest",
+        "responseType": "datasafe.CreateTargetAlertPolicyAssociationResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetTargetAlertPolicyAssociation",
+        "requestType": "datasafe.GetTargetAlertPolicyAssociationRequest",
+        "responseType": "datasafe.GetTargetAlertPolicyAssociationResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListTargetAlertPolicyAssociations",
+        "requestType": "datasafe.ListTargetAlertPolicyAssociationsRequest",
+        "responseType": "datasafe.ListTargetAlertPolicyAssociationsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateTargetAlertPolicyAssociation",
+        "requestType": "datasafe.UpdateTargetAlertPolicyAssociationRequest",
+        "responseType": "datasafe.UpdateTargetAlertPolicyAssociationResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteTargetAlertPolicyAssociation",
+        "requestType": "datasafe.DeleteTargetAlertPolicyAssociationRequest",
+        "responseType": "datasafe.DeleteTargetAlertPolicyAssociationResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "isEnabled",
+      "displayName",
+      "description",
+      "freeformTags",
+      "definedTags"
+    ],
+    "forceNew": [
+      "compartmentId",
+      "policyId",
+      "targetId"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "generatedruntime.Create",
+        "entityType": "TargetAlertPolicyAssociation",
+        "action": "CreateTargetAlertPolicyAssociation"
+      }
+    ],
+    "update": [
+      {
+        "helper": "generatedruntime.Update",
+        "entityType": "TargetAlertPolicyAssociation",
+        "action": "UpdateTargetAlertPolicyAssociation"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "generatedruntime.Delete",
+        "entityType": "TargetAlertPolicyAssociation",
+        "action": "DeleteTargetAlertPolicyAssociation"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "unavailable",
+    "collectionField": "Items",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartmentId",
+      "policyId",
+      "targetId",
+      "id"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/targetalertpolicyassociation/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/targetalertpolicyassociation/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Terraform provider formal-import cannot resolve oci_data_safe_target_alert_policy_association; the vendored SDK, production runtime, and package-owned typed OCI fixtures define this contract."
+  ]
+}

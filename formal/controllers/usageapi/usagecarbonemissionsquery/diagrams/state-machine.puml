@@ -33,14 +33,12 @@ state "DeleteCleanupBlocked" as delete_cleanup_blocked
 [*] --> observe : CreateUsageCarbonEmissionsQuery
 observe --> resolve_by_lookup : tracked identity missing
 resolve_by_lookup --> evaluate_ready : lookup or create reaches\nACTIVE
-resolve_by_lookup --> retryable : OCI state in PROVISIONING,\nUPDATING, DELETING
 resolve_by_lookup --> failed : unresolved OCI error or non-success state
 observe --> evaluate_ready : OCI state in ACTIVE
-observe --> retryable : OCI state in PROVISIONING,\nUPDATING, DELETING
 observe --> failed : unresolved OCI error or non-success state
 evaluate_ready --> reject_unsupported_drift : force-new or conflicting\ndrift detected
 reject_unsupported_drift --> ready : wait for spec or live state change
-evaluate_ready --> apply_update : supported mutable drift for\ndisplay_name
+evaluate_ready --> apply_update : supported mutable drift for\nquery_definition.cost_analysis_ui.graph,\nquery_definition.cost_analysis_ui.is_cumulative_graph,\nquery_definition.display_name\n(+15 more)
 apply_update --> ready : update path completes
 evaluate_ready --> ready : no supported drift remains
 ready --> ready : no supported drift remains
@@ -68,26 +66,40 @@ kind: UsageCarbonEmissionsQuery
 archetype: generated-service-manager
 status/finalizer: required /
 retain-until-confirmed-delete
-requeue: provisioning, updating, terminating
-provider states: create PROVISIONING; update
-UPDATING; delete DELETING
-supported drift: display_name
+requeue: terminating
+provider states: create none; update none;
+delete none
+supported drift:
+query_definition.cost_analysis_ui.graph,
+query_definition.cost_analysis_ui.is_cumulative_graph,
+query_definition.display_name,
+query_definition.report_query.compartment_depth
+(+14 more)
 reject before mutate: force-new fields
 compartment_id
 create-only fields: none
 list lookup:
-scaffold_usageapi_usagecarbonemissionsquery
-filters compartment_id, state
+oci_metering_computation_usage_carbon_emissions_queries
+filters compartment_id
 conflicts: none
 open gaps: none
-Scaffold metadata only; replace with
-controller-specific runtime states before
-promotion.
+The SDK does not expose lifecycle state on
+UsageCarbonEmissionsQuery bodies, so create and
+update settle through read-after-write
+confirmation and the service-local wrapper
+projects Active status.
+In-place updates are limited to queryDefinition;
+compartmentId requires replacement.
+Existing queries are matched by the populated
+queryDefinition fields, and delete retains the
+finalizer until Get confirms absence.
+The runtime has no Kubernetes Secret side
+effects.
 end note
 note right of delete_pending
 delete policy: required
 delete observe: GetUsageCarbonEmissionsQuery or
-ListUsageCarbonEmissionsQuery
+ListUsageCarbonEmissionsQueries
 delete targets: DELETED
 end note
 @enduml

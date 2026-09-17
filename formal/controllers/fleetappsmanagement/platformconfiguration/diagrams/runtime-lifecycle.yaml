@@ -1,0 +1,84 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: fleetappsmanagement
+slug: platformconfiguration
+kind: PlatformConfiguration
+archetype: generated-service-manager
+states:
+- provisioning
+- active
+- updating
+- terminating
+repoAuthored:
+  operations:
+    create:
+    - CreatePlatformConfiguration
+    update:
+    - UpdatePlatformConfiguration
+    delete:
+    - DeletePlatformConfiguration
+  providerLifecycle:
+    createPending:
+    - CREATING
+    updatePending: []
+    deletePending:
+    - DELETING
+  listLookup:
+    filters:
+    - compartmentId
+    - compartmentIdInSubtree
+    - configCategory
+    - displayName
+    - id
+    - state
+    - type
+    matchRule: exact declared filters match within the resource scope; duplicate matches
+      fail
+  mutation:
+    mutable:
+    - configCategoryDetails.compatibleProducts.displayName
+    - configCategoryDetails.compatibleProducts.id
+    - configCategoryDetails.components
+    - configCategoryDetails.configCategory
+    - configCategoryDetails.credentials.displayName
+    - configCategoryDetails.credentials.id
+    - configCategoryDetails.instanceId
+    - configCategoryDetails.instanceName
+    - configCategoryDetails.isCompliancePolicyRequiredForSoftlink
+    - configCategoryDetails.isSoftlink
+    - configCategoryDetails.linkProductId
+    - configCategoryDetails.patchTypes.displayName
+    - configCategoryDetails.patchTypes.id
+    - configCategoryDetails.products.displayName
+    - configCategoryDetails.products.id
+    - configCategoryDetails.subCategoryDetails.components
+    - configCategoryDetails.subCategoryDetails.credentials.displayName
+    - configCategoryDetails.subCategoryDetails.credentials.id
+    - configCategoryDetails.subCategoryDetails.patchTypes.displayName
+    - configCategoryDetails.subCategoryDetails.patchTypes.id
+    - configCategoryDetails.subCategoryDetails.subCategory
+    - configCategoryDetails.subCategoryDetails.versions
+    - configCategoryDetails.versions
+    - definedTags
+    - description
+    - displayName
+    - freeformTags
+    forceNew:
+    - compartmentId
+  hooks:
+    create:
+    - helper: tfresource.CreateResource
+    update:
+    - helper: tfresource.UpdateResource
+    delete:
+    - helper: tfresource.DeleteResource
+  followUp:
+    create: GetWorkRequest -> read-after-write
+    update: GetWorkRequest -> read-after-write
+    delete: GetWorkRequest -> confirm-delete
+notes:
+- The generated service manager uses the reviewed CRUD request, response, lifecycle,
+  and status projection contract.
+- Work-request phases are declared per operation from the vendored SDK response surface.
+- Secret side effects are none and finalizer ownership is retained until confirmed
+  deletion.

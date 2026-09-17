@@ -1,0 +1,188 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "opsi",
+  "slug": "databaseinsight",
+  "kind": "DatabaseInsight",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_opsi_database_insight",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseInsight",
+        "requestType": "opsi.CreateDatabaseInsightRequest",
+        "responseType": "opsi.CreateDatabaseInsightResponse"
+      },
+      {
+        "operation": "DisableDatabaseInsight",
+        "requestType": "opsi.DisableDatabaseInsightRequest",
+        "responseType": "opsi.DisableDatabaseInsightResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseInsight",
+        "requestType": "opsi.GetDatabaseInsightRequest",
+        "responseType": "opsi.GetDatabaseInsightResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseInsights",
+        "requestType": "opsi.ListDatabaseInsightsRequest",
+        "responseType": "opsi.ListDatabaseInsightsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeDatabaseInsightCompartment",
+        "requestType": "opsi.ChangeDatabaseInsightCompartmentRequest",
+        "responseType": "opsi.ChangeDatabaseInsightCompartmentResponse"
+      },
+      {
+        "operation": "DisableDatabaseInsight",
+        "requestType": "opsi.DisableDatabaseInsightRequest",
+        "responseType": "opsi.DisableDatabaseInsightResponse"
+      },
+      {
+        "operation": "EnableDatabaseInsight",
+        "requestType": "opsi.EnableDatabaseInsightRequest",
+        "responseType": "opsi.EnableDatabaseInsightResponse"
+      },
+      {
+        "operation": "UpdateDatabaseInsight",
+        "requestType": "opsi.UpdateDatabaseInsightRequest",
+        "responseType": "opsi.UpdateDatabaseInsightResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseInsight",
+        "requestType": "opsi.DeleteDatabaseInsightRequest",
+        "responseType": "opsi.DeleteDatabaseInsightResponse"
+      },
+      {
+        "operation": "DisableDatabaseInsight",
+        "requestType": "opsi.DisableDatabaseInsightRequest",
+        "responseType": "opsi.DisableDatabaseInsightResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "connection_credential_details.credential_source_name",
+      "connection_credential_details.credential_type",
+      "connection_credential_details.named_credential_id",
+      "connection_credential_details.password_secret_id",
+      "connection_credential_details.role",
+      "connection_credential_details.user_name",
+      "connection_details.host_name",
+      "connection_details.hosts.host_ip",
+      "connection_details.hosts.port",
+      "connection_details.port",
+      "connection_details.protocol",
+      "connection_details.service_name",
+      "connector_id",
+      "credential_details.credential_source_name",
+      "credential_details.credential_type",
+      "credential_details.named_credential_id",
+      "credential_details.password_secret_id",
+      "credential_details.role",
+      "credential_details.user_name",
+      "credential_details.wallet_secret_id",
+      "database_connection_status_details",
+      "database_connector_id",
+      "defined_tags",
+      "entity_source",
+      "freeform_tags",
+      "is_advanced_features_enabled",
+      "management_agent_id",
+      "status",
+      "system_tags"
+    ],
+    "forceNew": [
+      "connection_details",
+      "connection_details.hosts",
+      "credential_details",
+      "database_id",
+      "database_resource_type",
+      "dbm_private_endpoint_id",
+      "deployment_type",
+      "enterprise_manager_bridge_id",
+      "enterprise_manager_entity_identifier",
+      "enterprise_manager_identifier",
+      "exadata_insight_id",
+      "opsi_private_endpoint_id",
+      "service_name"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_opsi_database_insights",
+    "collectionField": "database_insights_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "compartment_id_in_subtree",
+      "database_id",
+      "database_type",
+      "enterprise_manager_bridge_id",
+      "exadata_insight_id",
+      "fields",
+      "id",
+      "opsi_private_endpoint_id",
+      "state",
+      "status"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/opsi/databaseinsight/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/opsi/databaseinsight/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts are imported from the pinned terraform-provider-oci revision; repo-authored runtime semantics remain authoritative."
+  ]
+}

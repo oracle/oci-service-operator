@@ -74,6 +74,33 @@ func TestScheduledTaskCreateResolvesNamespaceAndProjectsStatus(t *testing.T) {
 	requireListScheduledTaskRequest(t, fake.listScheduledTasksRequests[0], "", testNamespaceName)
 }
 
+func TestScheduledTaskNamespaceLookupUsesTenancyCompartment(t *testing.T) {
+	resource := scheduledTaskFixture()
+	fake := &fakeScheduledTaskOCIClient{
+		listNamespacesFunc: func(context.Context, loganalyticssdk.ListNamespacesRequest) (loganalyticssdk.ListNamespacesResponse, error) {
+			return namespaceResponse(testNamespaceName, "ocid1.tenancy.oc1..example"), nil
+		},
+	}
+	client := &namespaceResolvingScheduledTaskClient{
+		client:                 fake,
+		namespaceCompartmentID: "ocid1.tenancy.oc1..example",
+	}
+
+	got, err := client.resolveLogAnalyticsNamespace(context.Background(), resource)
+	if err != nil {
+		t.Fatalf("resolveLogAnalyticsNamespace() error = %v", err)
+	}
+	if got != testNamespaceName {
+		t.Fatalf("resolveLogAnalyticsNamespace() = %q, want %q", got, testNamespaceName)
+	}
+	if len(fake.listNamespacesRequests) != 1 {
+		t.Fatalf("ListNamespaces() calls = %d, want 1", len(fake.listNamespacesRequests))
+	}
+	if got := stringValue(fake.listNamespacesRequests[0].CompartmentId); got != "ocid1.tenancy.oc1..example" {
+		t.Fatalf("ListNamespaces() compartment = %q, want tenancy OCID", got)
+	}
+}
+
 func TestScheduledTaskAccelerationCreateBodyUsesPolymorphicDetails(t *testing.T) {
 	resource := scheduledTaskFixture()
 	resource.Spec.Kind = "ACCELERATION"

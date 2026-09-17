@@ -22,5 +22,5 @@ Manage OCI API Gateway gateways and deployments from Kubernetes.
 
 | Resource | API Version | Summary | Guide | Sample | API Spec |
 | --- | --- | --- | --- | --- | --- |
-| `apigateway/ApiGateway` | `apigateway.oracle.com/v1beta1` | Manage OCI API Gateway gateway resources. | [Guide](../../../guides/apigateway/apigateway.md) | — | [Reference](../../api/apigateway/v1beta1/index.md#kind-apigateway) |
-| `apigateway/ApiGatewayDeployment` | `apigateway.oracle.com/v1beta1` | Manage OCI API Gateway deployment routes and backend bindings. | [Guide](../../../guides/apigateway/apigatewaydeployment.md) | — | [Reference](../../api/apigateway/v1beta1/index.md#kind-apigatewaydeployment) |
+| `apigateway/ApiGateway` | `apigateway.oracle.com/v1beta1` | Manage OCI API Gateway gateway resources. | [Guide](../../../guides/apigateway/apigateway.md) | [Sample](../../samples/apigateway/v1beta1/apigateway.md) | [Reference](../../api/apigateway/v1beta1/index.md#kind-apigateway) |
+| `apigateway/ApiGatewayDeployment` | `apigateway.oracle.com/v1beta1` | Manage OCI API Gateway deployment routes and backend bindings. | [Guide](../../../guides/apigateway/apigatewaydeployment.md) | [Sample](../../samples/apigateway/v1beta1/apigatewaydeployment.md) | [Reference](../../api/apigateway/v1beta1/index.md#kind-apigatewaydeployment) |

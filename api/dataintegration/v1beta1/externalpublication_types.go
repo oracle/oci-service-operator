@@ -27,9 +27,15 @@ type ExternalPublicationSpec struct {
 	// +kubebuilder:validation:Optional
 	Description string `json:"description,omitempty"`
 	// +kubebuilder:validation:Optional
-	ResourceConfiguration ExternalPublicationResourceConfiguration `json:"resourceConfiguration,omitempty"`
+	ResourceConfiguration ExternalPublicationResourceConfiguration `json:"resourceConfiguration,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	ConfigurationDetails ExternalPublicationConfigurationDetails `json:"configurationDetails,omitempty"`
+	ConfigurationDetails ExternalPublicationConfigurationDetails `json:"configurationDetails,omitempty,omitzero"`
+	// The OCID of the Data Integration workspace containing this resource.
+	// +kubebuilder:validation:Required
+	WorkspaceId string `json:"workspaceId"`
+	// The key of the task containing this external publication.
+	// +kubebuilder:validation:Required
+	TaskKey string `json:"taskKey"`
 }
 
 // ExternalPublicationResourceConfiguration defines nested fields for ExternalPublication.ResourceConfiguration.
@@ -126,7 +132,7 @@ type ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystemTypeConfigD
 	// +kubebuilder:validation:Optional
 	ConfigParamValues map[string]ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystemTypeConfigDefinitionConfigParameterDefinitionsParameterTypeConfigValuesConfigParamValues `json:"configParamValues,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystemTypeConfigDefinitionConfigParameterDefinitionsParameterTypeConfigValuesParentRef `json:"parentRef,omitempty"`
+	ParentRef ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystemTypeConfigDefinitionConfigParameterDefinitionsParameterTypeConfigValuesParentRef `json:"parentRef,omitempty,omitzero"`
 }
 
 // ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystemTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerParentRef defines nested fields for ExternalPublication.ConfigurationDetails.DataAsset.NativeTypeSystem.Type.ConfigDefinition.ConfigParameterDefinitions.ParameterType.TypeHandler.ParentRef.
@@ -177,7 +183,7 @@ type ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystemTypeConfigD
 	// +kubebuilder:validation:Optional
 	ConfigParamValues map[string]ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystemTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerConfigValuesConfigParamValues `json:"configParamValues,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystemTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerConfigValuesParentRef `json:"parentRef,omitempty"`
+	ParentRef ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystemTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerConfigValuesParentRef `json:"parentRef,omitempty,omitzero"`
 }
 
 // ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystemTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerScopeReference defines nested fields for ExternalPublication.ConfigurationDetails.DataAsset.NativeTypeSystem.Type.ConfigDefinition.ConfigParameterDefinitions.ParameterType.TypeHandler.ScopeReference.
@@ -241,7 +247,7 @@ type ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystemTypeConfigD
 	// +kubebuilder:validation:Optional
 	ConfigParamValues map[string]ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystemTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerProjectionRuleConfigValuesConfigParamValues `json:"configParamValues,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystemTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerProjectionRuleConfigValuesParentRef `json:"parentRef,omitempty"`
+	ParentRef ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystemTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerProjectionRuleConfigValuesParentRef `json:"parentRef,omitempty,omitzero"`
 }
 
 // ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystemTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerProjectionRule defines nested fields for ExternalPublication.ConfigurationDetails.DataAsset.NativeTypeSystem.Type.ConfigDefinition.ConfigParameterDefinitions.ParameterType.TypeHandler.ProjectionRule.
@@ -255,12 +261,12 @@ type ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystemTypeConfigD
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystemTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerProjectionRuleParentRef `json:"parentRef,omitempty"`
+	ParentRef ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystemTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerProjectionRuleParentRef `json:"parentRef,omitempty,omitzero"`
 	// Specifies whether the rule uses a java regex syntax.
 	// +kubebuilder:validation:Optional
 	IsJavaRegexSyntax bool `json:"isJavaRegexSyntax,omitempty"`
 	// +kubebuilder:validation:Optional
-	ConfigValues ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystemTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerProjectionRuleConfigValues `json:"configValues,omitempty"`
+	ConfigValues ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystemTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerProjectionRuleConfigValues `json:"configValues,omitempty,omitzero"`
 	// The status of an object that can be set to value 1 for shallow references across objects, other values reserved.
 	// +kubebuilder:validation:Optional
 	ObjectStatus int `json:"objectStatus,omitempty"`
@@ -320,7 +326,7 @@ type ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystemTypeConfigD
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystemTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerParentRef `json:"parentRef,omitempty"`
+	ParentRef ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystemTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerParentRef `json:"parentRef,omitempty,omitzero"`
 	// Reference key for the typed object.
 	// +kubebuilder:validation:Optional
 	Scope string `json:"scope,omitempty"`
@@ -328,12 +334,12 @@ type ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystemTypeConfigD
 	// +kubebuilder:validation:Optional
 	FlattenDetails string `json:"flattenDetails,omitempty"`
 	// +kubebuilder:validation:Optional
-	ConfigValues ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystemTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerConfigValues `json:"configValues,omitempty"`
+	ConfigValues ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystemTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerConfigValues `json:"configValues,omitempty,omitzero"`
 	// The status of an object that can be set to value 1 for shallow references across objects, other values reserved.
 	// +kubebuilder:validation:Optional
 	ObjectStatus int `json:"objectStatus,omitempty"`
 	// +kubebuilder:validation:Optional
-	ScopeReference ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystemTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerScopeReference `json:"scopeReference,omitempty"`
+	ScopeReference ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystemTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerScopeReference `json:"scopeReference,omitempty,omitzero"`
 	// Specifies whether it is ordered by rule.
 	// +kubebuilder:validation:Optional
 	IsOrderByRule bool `json:"isOrderByRule,omitempty"`
@@ -353,7 +359,7 @@ type ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystemTypeConfigD
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystemTypeConfigDefinitionConfigParameterDefinitionsParameterTypeParentRef `json:"parentRef,omitempty"`
+	ParentRef ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystemTypeConfigDefinitionConfigParameterDefinitionsParameterTypeParentRef `json:"parentRef,omitempty,omitzero"`
 	// Free form text without any restriction on permitted characters. Name can have letters, numbers, and special characters. The value is editable and is restricted to 1000 characters.
 	// +kubebuilder:validation:Optional
 	Name string `json:"name,omitempty"`
@@ -372,14 +378,14 @@ type ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystemTypeConfigD
 	// +kubebuilder:validation:Optional
 	WrappedType shared.JSONValue `json:"wrappedType,omitempty"`
 	// +kubebuilder:validation:Optional
-	ConfigValues ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystemTypeConfigDefinitionConfigParameterDefinitionsParameterTypeConfigValues `json:"configValues,omitempty"`
+	ConfigValues ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystemTypeConfigDefinitionConfigParameterDefinitionsParameterTypeConfigValues `json:"configValues,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	ConfigDefinition shared.JSONValue `json:"configDefinition,omitempty"`
+	ConfigDefinition shared.JSONValue `json:"configDefinition,omitempty,omitzero"`
 	// The java type name.
 	// +kubebuilder:validation:Optional
 	JavaTypeName string `json:"javaTypeName,omitempty"`
 	// +kubebuilder:validation:Optional
-	TypeHandler ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystemTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandler `json:"typeHandler,omitempty"`
+	TypeHandler ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystemTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandler `json:"typeHandler,omitempty,omitzero"`
 	// The data type system name.
 	// +kubebuilder:validation:Optional
 	TypeSystemName string `json:"typeSystemName,omitempty"`
@@ -406,7 +412,7 @@ type ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystemTypeConfigD
 // ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystemTypeConfigDefinitionConfigParameterDefinitions defines nested fields for ExternalPublication.ConfigurationDetails.DataAsset.NativeTypeSystem.Type.ConfigDefinition.ConfigParameterDefinitions.
 type ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystemTypeConfigDefinitionConfigParameterDefinitions struct {
 	// +kubebuilder:validation:Optional
-	ParameterType ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystemTypeConfigDefinitionConfigParameterDefinitionsParameterType `json:"parameterType,omitempty"`
+	ParameterType ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystemTypeConfigDefinitionConfigParameterDefinitionsParameterType `json:"parameterType,omitempty,omitzero"`
 	// This object represents the configurable properties for an object type.
 	// +kubebuilder:validation:Optional
 	ParameterName string `json:"parameterName,omitempty"`
@@ -439,7 +445,7 @@ type ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystemTypeConfigD
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystemTypeConfigDefinitionParentRef `json:"parentRef,omitempty"`
+	ParentRef ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystemTypeConfigDefinitionParentRef `json:"parentRef,omitempty,omitzero"`
 	// Free form text without any restriction on permitted characters. Name can have letters, numbers, and special characters. The value is editable and is restricted to 1000 characters.
 	// +kubebuilder:validation:Optional
 	Name string `json:"name,omitempty"`
@@ -463,7 +469,7 @@ type ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystemType struct
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystemTypeParentRef `json:"parentRef,omitempty"`
+	ParentRef ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystemTypeParentRef `json:"parentRef,omitempty,omitzero"`
 	// Free form text without any restriction on permitted characters. Name can have letters, numbers, and special characters. The value is editable and is restricted to 1000 characters.
 	// +kubebuilder:validation:Optional
 	Name string `json:"name,omitempty"`
@@ -477,7 +483,7 @@ type ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystemType struct
 	// +kubebuilder:validation:Optional
 	TypeSystemName string `json:"typeSystemName,omitempty"`
 	// +kubebuilder:validation:Optional
-	ConfigDefinition ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystemTypeConfigDefinition `json:"configDefinition,omitempty"`
+	ConfigDefinition ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystemTypeConfigDefinition `json:"configDefinition,omitempty,omitzero"`
 	// The data type.
 	// +kubebuilder:validation:Optional
 	DtType string `json:"dtType,omitempty"`
@@ -495,7 +501,7 @@ type ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystem struct {
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystemParentRef `json:"parentRef,omitempty"`
+	ParentRef ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystemParentRef `json:"parentRef,omitempty,omitzero"`
 	// Free form text without any restriction on permitted characters. Name can have letters, numbers, and special characters. The value is editable and is restricted to 1000 characters.
 	// +kubebuilder:validation:Optional
 	Name string `json:"name,omitempty"`
@@ -592,7 +598,7 @@ type ExternalPublicationConfigurationDetailsDataAssetMetadata struct {
 	// +kubebuilder:validation:Optional
 	AggregatorKey string `json:"aggregatorKey,omitempty"`
 	// +kubebuilder:validation:Optional
-	Aggregator ExternalPublicationConfigurationDetailsDataAssetMetadataAggregator `json:"aggregator,omitempty"`
+	Aggregator ExternalPublicationConfigurationDetailsDataAssetMetadataAggregator `json:"aggregator,omitempty,omitzero"`
 	// The full path to identify this object.
 	// +kubebuilder:validation:Optional
 	IdentifierPath string `json:"identifierPath,omitempty"`
@@ -609,7 +615,7 @@ type ExternalPublicationConfigurationDetailsDataAssetMetadata struct {
 	// +kubebuilder:validation:Optional
 	IsFavorite bool `json:"isFavorite,omitempty"`
 	// +kubebuilder:validation:Optional
-	CountStatistics ExternalPublicationConfigurationDetailsDataAssetMetadataCountStatistics `json:"countStatistics,omitempty"`
+	CountStatistics ExternalPublicationConfigurationDetailsDataAssetMetadataCountStatistics `json:"countStatistics,omitempty,omitzero"`
 }
 
 // ExternalPublicationConfigurationDetailsDataAssetDefaultConnectionParentRef defines nested fields for ExternalPublication.ConfigurationDetails.DataAsset.DefaultConnection.ParentRef.
@@ -692,7 +698,7 @@ type ExternalPublicationConfigurationDetailsDataAssetDefaultConnectionPrimarySch
 	// +kubebuilder:validation:Optional
 	AggregatorKey string `json:"aggregatorKey,omitempty"`
 	// +kubebuilder:validation:Optional
-	Aggregator ExternalPublicationConfigurationDetailsDataAssetDefaultConnectionPrimarySchemaMetadataAggregator `json:"aggregator,omitempty"`
+	Aggregator ExternalPublicationConfigurationDetailsDataAssetDefaultConnectionPrimarySchemaMetadataAggregator `json:"aggregator,omitempty,omitzero"`
 	// The full path to identify this object.
 	// +kubebuilder:validation:Optional
 	IdentifierPath string `json:"identifierPath,omitempty"`
@@ -709,7 +715,7 @@ type ExternalPublicationConfigurationDetailsDataAssetDefaultConnectionPrimarySch
 	// +kubebuilder:validation:Optional
 	IsFavorite bool `json:"isFavorite,omitempty"`
 	// +kubebuilder:validation:Optional
-	CountStatistics ExternalPublicationConfigurationDetailsDataAssetDefaultConnectionPrimarySchemaMetadataCountStatistics `json:"countStatistics,omitempty"`
+	CountStatistics ExternalPublicationConfigurationDetailsDataAssetDefaultConnectionPrimarySchemaMetadataCountStatistics `json:"countStatistics,omitempty,omitzero"`
 }
 
 // ExternalPublicationConfigurationDetailsDataAssetDefaultConnectionPrimarySchema defines nested fields for ExternalPublication.ConfigurationDetails.DataAsset.DefaultConnection.PrimarySchema.
@@ -724,7 +730,7 @@ type ExternalPublicationConfigurationDetailsDataAssetDefaultConnectionPrimarySch
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef ExternalPublicationConfigurationDetailsDataAssetDefaultConnectionPrimarySchemaParentRef `json:"parentRef,omitempty"`
+	ParentRef ExternalPublicationConfigurationDetailsDataAssetDefaultConnectionPrimarySchemaParentRef `json:"parentRef,omitempty,omitzero"`
 	// Free form text without any restriction on permitted characters. Name can have letters, numbers, and special characters. The value is editable and is restricted to 1000 characters.
 	// +kubebuilder:validation:Optional
 	Name string `json:"name,omitempty"`
@@ -753,7 +759,7 @@ type ExternalPublicationConfigurationDetailsDataAssetDefaultConnectionPrimarySch
 	// +kubebuilder:validation:Optional
 	Identifier string `json:"identifier,omitempty"`
 	// +kubebuilder:validation:Optional
-	Metadata ExternalPublicationConfigurationDetailsDataAssetDefaultConnectionPrimarySchemaMetadata `json:"metadata,omitempty"`
+	Metadata ExternalPublicationConfigurationDetailsDataAssetDefaultConnectionPrimarySchemaMetadata `json:"metadata,omitempty,omitzero"`
 }
 
 // ExternalPublicationConfigurationDetailsDataAssetDefaultConnectionConnectionProperty defines nested fields for ExternalPublication.ConfigurationDetails.DataAsset.DefaultConnection.ConnectionProperty.
@@ -826,7 +832,7 @@ type ExternalPublicationConfigurationDetailsDataAssetDefaultConnectionMetadata s
 	// +kubebuilder:validation:Optional
 	AggregatorKey string `json:"aggregatorKey,omitempty"`
 	// +kubebuilder:validation:Optional
-	Aggregator ExternalPublicationConfigurationDetailsDataAssetDefaultConnectionMetadataAggregator `json:"aggregator,omitempty"`
+	Aggregator ExternalPublicationConfigurationDetailsDataAssetDefaultConnectionMetadataAggregator `json:"aggregator,omitempty,omitzero"`
 	// The full path to identify this object.
 	// +kubebuilder:validation:Optional
 	IdentifierPath string `json:"identifierPath,omitempty"`
@@ -843,7 +849,7 @@ type ExternalPublicationConfigurationDetailsDataAssetDefaultConnectionMetadata s
 	// +kubebuilder:validation:Optional
 	IsFavorite bool `json:"isFavorite,omitempty"`
 	// +kubebuilder:validation:Optional
-	CountStatistics ExternalPublicationConfigurationDetailsDataAssetDefaultConnectionMetadataCountStatistics `json:"countStatistics,omitempty"`
+	CountStatistics ExternalPublicationConfigurationDetailsDataAssetDefaultConnectionMetadataCountStatistics `json:"countStatistics,omitempty,omitzero"`
 }
 
 // ExternalPublicationConfigurationDetailsDataAssetDefaultConnection defines nested fields for ExternalPublication.ConfigurationDetails.DataAsset.DefaultConnection.
@@ -855,7 +861,7 @@ type ExternalPublicationConfigurationDetailsDataAssetDefaultConnection struct {
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef ExternalPublicationConfigurationDetailsDataAssetDefaultConnectionParentRef `json:"parentRef,omitempty"`
+	ParentRef ExternalPublicationConfigurationDetailsDataAssetDefaultConnectionParentRef `json:"parentRef,omitempty,omitzero"`
 	// Free form text without any restriction on permitted characters. Name can have letters, numbers, and special characters. The value is editable and is restricted to 1000 characters.
 	// +kubebuilder:validation:Optional
 	Name string `json:"name,omitempty"`
@@ -872,7 +878,7 @@ type ExternalPublicationConfigurationDetailsDataAssetDefaultConnection struct {
 	// +kubebuilder:validation:Optional
 	Identifier string `json:"identifier,omitempty"`
 	// +kubebuilder:validation:Optional
-	PrimarySchema ExternalPublicationConfigurationDetailsDataAssetDefaultConnectionPrimarySchema `json:"primarySchema,omitempty"`
+	PrimarySchema ExternalPublicationConfigurationDetailsDataAssetDefaultConnectionPrimarySchema `json:"primarySchema,omitempty,omitzero"`
 	// The properties for the connection.
 	// +kubebuilder:validation:Optional
 	ConnectionProperties []ExternalPublicationConfigurationDetailsDataAssetDefaultConnectionConnectionProperty `json:"connectionProperties,omitempty"`
@@ -880,7 +886,7 @@ type ExternalPublicationConfigurationDetailsDataAssetDefaultConnection struct {
 	// +kubebuilder:validation:Optional
 	IsDefault bool `json:"isDefault,omitempty"`
 	// +kubebuilder:validation:Optional
-	Metadata ExternalPublicationConfigurationDetailsDataAssetDefaultConnectionMetadata `json:"metadata,omitempty"`
+	Metadata ExternalPublicationConfigurationDetailsDataAssetDefaultConnectionMetadata `json:"metadata,omitempty,omitzero"`
 	// The user name for the connection.
 	// +kubebuilder:validation:Optional
 	Username string `json:"username,omitempty"`
@@ -900,7 +906,7 @@ type ExternalPublicationConfigurationDetailsDataAssetWalletSecretSecretConfig st
 // ExternalPublicationConfigurationDetailsDataAssetWalletSecret defines nested fields for ExternalPublication.ConfigurationDetails.DataAsset.WalletSecret.
 type ExternalPublicationConfigurationDetailsDataAssetWalletSecret struct {
 	// +kubebuilder:validation:Optional
-	SecretConfig ExternalPublicationConfigurationDetailsDataAssetWalletSecretSecretConfig `json:"secretConfig,omitempty"`
+	SecretConfig ExternalPublicationConfigurationDetailsDataAssetWalletSecretSecretConfig `json:"secretConfig,omitempty,omitzero"`
 	// Attribute to provide sensitive content.
 	// +kubebuilder:validation:Optional
 	Value string `json:"value,omitempty"`
@@ -920,7 +926,7 @@ type ExternalPublicationConfigurationDetailsDataAssetWalletPasswordSecretSecretC
 // ExternalPublicationConfigurationDetailsDataAssetWalletPasswordSecret defines nested fields for ExternalPublication.ConfigurationDetails.DataAsset.WalletPasswordSecret.
 type ExternalPublicationConfigurationDetailsDataAssetWalletPasswordSecret struct {
 	// +kubebuilder:validation:Optional
-	SecretConfig ExternalPublicationConfigurationDetailsDataAssetWalletPasswordSecretSecretConfig `json:"secretConfig,omitempty"`
+	SecretConfig ExternalPublicationConfigurationDetailsDataAssetWalletPasswordSecretSecretConfig `json:"secretConfig,omitempty,omitzero"`
 	// Attribute to provide sensitive content.
 	// +kubebuilder:validation:Optional
 	Value string `json:"value,omitempty"`
@@ -1006,7 +1012,7 @@ type ExternalPublicationConfigurationDetailsDataAssetStagingConnectionPrimarySch
 	// +kubebuilder:validation:Optional
 	AggregatorKey string `json:"aggregatorKey,omitempty"`
 	// +kubebuilder:validation:Optional
-	Aggregator ExternalPublicationConfigurationDetailsDataAssetStagingConnectionPrimarySchemaMetadataAggregator `json:"aggregator,omitempty"`
+	Aggregator ExternalPublicationConfigurationDetailsDataAssetStagingConnectionPrimarySchemaMetadataAggregator `json:"aggregator,omitempty,omitzero"`
 	// The full path to identify this object.
 	// +kubebuilder:validation:Optional
 	IdentifierPath string `json:"identifierPath,omitempty"`
@@ -1023,7 +1029,7 @@ type ExternalPublicationConfigurationDetailsDataAssetStagingConnectionPrimarySch
 	// +kubebuilder:validation:Optional
 	IsFavorite bool `json:"isFavorite,omitempty"`
 	// +kubebuilder:validation:Optional
-	CountStatistics ExternalPublicationConfigurationDetailsDataAssetStagingConnectionPrimarySchemaMetadataCountStatistics `json:"countStatistics,omitempty"`
+	CountStatistics ExternalPublicationConfigurationDetailsDataAssetStagingConnectionPrimarySchemaMetadataCountStatistics `json:"countStatistics,omitempty,omitzero"`
 }
 
 // ExternalPublicationConfigurationDetailsDataAssetStagingConnectionPrimarySchema defines nested fields for ExternalPublication.ConfigurationDetails.DataAsset.StagingConnection.PrimarySchema.
@@ -1038,7 +1044,7 @@ type ExternalPublicationConfigurationDetailsDataAssetStagingConnectionPrimarySch
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef ExternalPublicationConfigurationDetailsDataAssetStagingConnectionPrimarySchemaParentRef `json:"parentRef,omitempty"`
+	ParentRef ExternalPublicationConfigurationDetailsDataAssetStagingConnectionPrimarySchemaParentRef `json:"parentRef,omitempty,omitzero"`
 	// Free form text without any restriction on permitted characters. Name can have letters, numbers, and special characters. The value is editable and is restricted to 1000 characters.
 	// +kubebuilder:validation:Optional
 	Name string `json:"name,omitempty"`
@@ -1067,7 +1073,7 @@ type ExternalPublicationConfigurationDetailsDataAssetStagingConnectionPrimarySch
 	// +kubebuilder:validation:Optional
 	Identifier string `json:"identifier,omitempty"`
 	// +kubebuilder:validation:Optional
-	Metadata ExternalPublicationConfigurationDetailsDataAssetStagingConnectionPrimarySchemaMetadata `json:"metadata,omitempty"`
+	Metadata ExternalPublicationConfigurationDetailsDataAssetStagingConnectionPrimarySchemaMetadata `json:"metadata,omitempty,omitzero"`
 }
 
 // ExternalPublicationConfigurationDetailsDataAssetStagingConnectionConnectionProperty defines nested fields for ExternalPublication.ConfigurationDetails.DataAsset.StagingConnection.ConnectionProperty.
@@ -1140,7 +1146,7 @@ type ExternalPublicationConfigurationDetailsDataAssetStagingConnectionMetadata s
 	// +kubebuilder:validation:Optional
 	AggregatorKey string `json:"aggregatorKey,omitempty"`
 	// +kubebuilder:validation:Optional
-	Aggregator ExternalPublicationConfigurationDetailsDataAssetStagingConnectionMetadataAggregator `json:"aggregator,omitempty"`
+	Aggregator ExternalPublicationConfigurationDetailsDataAssetStagingConnectionMetadataAggregator `json:"aggregator,omitempty,omitzero"`
 	// The full path to identify this object.
 	// +kubebuilder:validation:Optional
 	IdentifierPath string `json:"identifierPath,omitempty"`
@@ -1157,7 +1163,7 @@ type ExternalPublicationConfigurationDetailsDataAssetStagingConnectionMetadata s
 	// +kubebuilder:validation:Optional
 	IsFavorite bool `json:"isFavorite,omitempty"`
 	// +kubebuilder:validation:Optional
-	CountStatistics ExternalPublicationConfigurationDetailsDataAssetStagingConnectionMetadataCountStatistics `json:"countStatistics,omitempty"`
+	CountStatistics ExternalPublicationConfigurationDetailsDataAssetStagingConnectionMetadataCountStatistics `json:"countStatistics,omitempty,omitzero"`
 }
 
 // ExternalPublicationConfigurationDetailsDataAssetStagingConnectionAccessKeySecretConfig defines nested fields for ExternalPublication.ConfigurationDetails.DataAsset.StagingConnection.AccessKey.SecretConfig.
@@ -1174,7 +1180,7 @@ type ExternalPublicationConfigurationDetailsDataAssetStagingConnectionAccessKeyS
 // ExternalPublicationConfigurationDetailsDataAssetStagingConnectionAccessKey defines nested fields for ExternalPublication.ConfigurationDetails.DataAsset.StagingConnection.AccessKey.
 type ExternalPublicationConfigurationDetailsDataAssetStagingConnectionAccessKey struct {
 	// +kubebuilder:validation:Optional
-	SecretConfig ExternalPublicationConfigurationDetailsDataAssetStagingConnectionAccessKeySecretConfig `json:"secretConfig,omitempty"`
+	SecretConfig ExternalPublicationConfigurationDetailsDataAssetStagingConnectionAccessKeySecretConfig `json:"secretConfig,omitempty,omitzero"`
 	// Attribute to provide sensitive content.
 	// +kubebuilder:validation:Optional
 	Value string `json:"value,omitempty"`
@@ -1194,7 +1200,7 @@ type ExternalPublicationConfigurationDetailsDataAssetStagingConnectionSecretKeyS
 // ExternalPublicationConfigurationDetailsDataAssetStagingConnectionSecretKey defines nested fields for ExternalPublication.ConfigurationDetails.DataAsset.StagingConnection.SecretKey.
 type ExternalPublicationConfigurationDetailsDataAssetStagingConnectionSecretKey struct {
 	// +kubebuilder:validation:Optional
-	SecretConfig ExternalPublicationConfigurationDetailsDataAssetStagingConnectionSecretKeySecretConfig `json:"secretConfig,omitempty"`
+	SecretConfig ExternalPublicationConfigurationDetailsDataAssetStagingConnectionSecretKeySecretConfig `json:"secretConfig,omitempty,omitzero"`
 	// Attribute to provide sensitive content.
 	// +kubebuilder:validation:Optional
 	Value string `json:"value,omitempty"`
@@ -1214,7 +1220,7 @@ type ExternalPublicationConfigurationDetailsDataAssetStagingConnectionPasswordSe
 // ExternalPublicationConfigurationDetailsDataAssetStagingConnectionPasswordSecret defines nested fields for ExternalPublication.ConfigurationDetails.DataAsset.StagingConnection.PasswordSecret.
 type ExternalPublicationConfigurationDetailsDataAssetStagingConnectionPasswordSecret struct {
 	// +kubebuilder:validation:Optional
-	SecretConfig ExternalPublicationConfigurationDetailsDataAssetStagingConnectionPasswordSecretSecretConfig `json:"secretConfig,omitempty"`
+	SecretConfig ExternalPublicationConfigurationDetailsDataAssetStagingConnectionPasswordSecretSecretConfig `json:"secretConfig,omitempty,omitzero"`
 	// Attribute to provide sensitive content.
 	// +kubebuilder:validation:Optional
 	Value string `json:"value,omitempty"`
@@ -1234,7 +1240,7 @@ type ExternalPublicationConfigurationDetailsDataAssetStagingConnectionClientSecr
 // ExternalPublicationConfigurationDetailsDataAssetStagingConnectionClientSecret defines nested fields for ExternalPublication.ConfigurationDetails.DataAsset.StagingConnection.ClientSecret.
 type ExternalPublicationConfigurationDetailsDataAssetStagingConnectionClientSecret struct {
 	// +kubebuilder:validation:Optional
-	SecretConfig ExternalPublicationConfigurationDetailsDataAssetStagingConnectionClientSecretSecretConfig `json:"secretConfig,omitempty"`
+	SecretConfig ExternalPublicationConfigurationDetailsDataAssetStagingConnectionClientSecretSecretConfig `json:"secretConfig,omitempty,omitzero"`
 	// Attribute to provide sensitive content.
 	// +kubebuilder:validation:Optional
 	Value string `json:"value,omitempty"`
@@ -1276,7 +1282,7 @@ type ExternalPublicationConfigurationDetailsDataAssetStagingConnectionKeyTabCont
 // ExternalPublicationConfigurationDetailsDataAssetStagingConnectionKeyTabContent defines nested fields for ExternalPublication.ConfigurationDetails.DataAsset.StagingConnection.KeyTabContent.
 type ExternalPublicationConfigurationDetailsDataAssetStagingConnectionKeyTabContent struct {
 	// +kubebuilder:validation:Optional
-	SecretConfig ExternalPublicationConfigurationDetailsDataAssetStagingConnectionKeyTabContentSecretConfig `json:"secretConfig,omitempty"`
+	SecretConfig ExternalPublicationConfigurationDetailsDataAssetStagingConnectionKeyTabContentSecretConfig `json:"secretConfig,omitempty,omitzero"`
 	// Attribute to provide sensitive content.
 	// +kubebuilder:validation:Optional
 	Value string `json:"value,omitempty"`
@@ -1293,7 +1299,7 @@ type ExternalPublicationConfigurationDetailsDataAssetStagingConnection struct {
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef ExternalPublicationConfigurationDetailsDataAssetStagingConnectionParentRef `json:"parentRef,omitempty"`
+	ParentRef ExternalPublicationConfigurationDetailsDataAssetStagingConnectionParentRef `json:"parentRef,omitempty,omitzero"`
 	// Free form text without any restriction on permitted characters. Name can have letters, numbers, and special characters. The value is editable and is restricted to 1000 characters.
 	// +kubebuilder:validation:Optional
 	Name string `json:"name,omitempty"`
@@ -1310,7 +1316,7 @@ type ExternalPublicationConfigurationDetailsDataAssetStagingConnection struct {
 	// +kubebuilder:validation:Optional
 	Identifier string `json:"identifier,omitempty"`
 	// +kubebuilder:validation:Optional
-	PrimarySchema ExternalPublicationConfigurationDetailsDataAssetStagingConnectionPrimarySchema `json:"primarySchema,omitempty"`
+	PrimarySchema ExternalPublicationConfigurationDetailsDataAssetStagingConnectionPrimarySchema `json:"primarySchema,omitempty,omitzero"`
 	// The properties for the connection.
 	// +kubebuilder:validation:Optional
 	ConnectionProperties []ExternalPublicationConfigurationDetailsDataAssetStagingConnectionConnectionProperty `json:"connectionProperties,omitempty"`
@@ -1318,21 +1324,21 @@ type ExternalPublicationConfigurationDetailsDataAssetStagingConnection struct {
 	// +kubebuilder:validation:Optional
 	IsDefault bool `json:"isDefault,omitempty"`
 	// +kubebuilder:validation:Optional
-	Metadata ExternalPublicationConfigurationDetailsDataAssetStagingConnectionMetadata `json:"metadata,omitempty"`
+	Metadata ExternalPublicationConfigurationDetailsDataAssetStagingConnectionMetadata `json:"metadata,omitempty,omitzero"`
 	// A key map. If provided, key is replaced with generated key. This structure provides mapping between user provided key and generated key.
 	// +kubebuilder:validation:Optional
 	KeyMap map[string]string `json:"keyMap,omitempty"`
 	// +kubebuilder:validation:Optional
 	ModelType string `json:"modelType,omitempty"`
 	// +kubebuilder:validation:Optional
-	AccessKey ExternalPublicationConfigurationDetailsDataAssetStagingConnectionAccessKey `json:"accessKey,omitempty"`
+	AccessKey ExternalPublicationConfigurationDetailsDataAssetStagingConnectionAccessKey `json:"accessKey,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	SecretKey ExternalPublicationConfigurationDetailsDataAssetStagingConnectionSecretKey `json:"secretKey,omitempty"`
+	SecretKey ExternalPublicationConfigurationDetailsDataAssetStagingConnectionSecretKey `json:"secretKey,omitempty,omitzero"`
 	// The user name for the connection.
 	// +kubebuilder:validation:Optional
 	Username string `json:"username,omitempty"`
 	// +kubebuilder:validation:Optional
-	PasswordSecret ExternalPublicationConfigurationDetailsDataAssetStagingConnectionPasswordSecret `json:"passwordSecret,omitempty"`
+	PasswordSecret ExternalPublicationConfigurationDetailsDataAssetStagingConnectionPasswordSecret `json:"passwordSecret,omitempty,omitzero"`
 	// Specifies the endpoint used to exchange authentication credentials for access tokens
 	// +kubebuilder:validation:Optional
 	AccessTokenUrl string `json:"accessTokenUrl,omitempty"`
@@ -1340,7 +1346,7 @@ type ExternalPublicationConfigurationDetailsDataAssetStagingConnection struct {
 	// +kubebuilder:validation:Optional
 	ClientId string `json:"clientId,omitempty"`
 	// +kubebuilder:validation:Optional
-	ClientSecret ExternalPublicationConfigurationDetailsDataAssetStagingConnectionClientSecret `json:"clientSecret,omitempty"`
+	ClientSecret ExternalPublicationConfigurationDetailsDataAssetStagingConnectionClientSecret `json:"clientSecret,omitempty,omitzero"`
 	// Specifies the OAuth scopes that limit the permissions granted by an access token.
 	// +kubebuilder:validation:Optional
 	Scope string `json:"scope,omitempty"`
@@ -1348,7 +1354,7 @@ type ExternalPublicationConfigurationDetailsDataAssetStagingConnection struct {
 	// +kubebuilder:validation:Optional
 	GrantType string `json:"grantType,omitempty"`
 	// +kubebuilder:validation:Optional
-	DefaultExternalStorage ExternalPublicationConfigurationDetailsDataAssetStagingConnectionDefaultExternalStorage `json:"defaultExternalStorage,omitempty"`
+	DefaultExternalStorage ExternalPublicationConfigurationDetailsDataAssetStagingConnectionDefaultExternalStorage `json:"defaultExternalStorage,omitempty,omitzero"`
 	// The password for the connection.
 	// +kubebuilder:validation:Optional
 	Password string `json:"password,omitempty"`
@@ -1389,7 +1395,7 @@ type ExternalPublicationConfigurationDetailsDataAssetStagingConnection struct {
 	// +kubebuilder:validation:Optional
 	KeyDistributionCenter string `json:"keyDistributionCenter,omitempty"`
 	// +kubebuilder:validation:Optional
-	KeyTabContent ExternalPublicationConfigurationDetailsDataAssetStagingConnectionKeyTabContent `json:"keyTabContent,omitempty"`
+	KeyTabContent ExternalPublicationConfigurationDetailsDataAssetStagingConnectionKeyTabContent `json:"keyTabContent,omitempty,omitzero"`
 }
 
 // ExternalPublicationConfigurationDetailsDataAssetBucketSchemaParentRef defines nested fields for ExternalPublication.ConfigurationDetails.DataAsset.BucketSchema.ParentRef.
@@ -1462,7 +1468,7 @@ type ExternalPublicationConfigurationDetailsDataAssetBucketSchemaMetadata struct
 	// +kubebuilder:validation:Optional
 	AggregatorKey string `json:"aggregatorKey,omitempty"`
 	// +kubebuilder:validation:Optional
-	Aggregator ExternalPublicationConfigurationDetailsDataAssetBucketSchemaMetadataAggregator `json:"aggregator,omitempty"`
+	Aggregator ExternalPublicationConfigurationDetailsDataAssetBucketSchemaMetadataAggregator `json:"aggregator,omitempty,omitzero"`
 	// The full path to identify this object.
 	// +kubebuilder:validation:Optional
 	IdentifierPath string `json:"identifierPath,omitempty"`
@@ -1479,7 +1485,7 @@ type ExternalPublicationConfigurationDetailsDataAssetBucketSchemaMetadata struct
 	// +kubebuilder:validation:Optional
 	IsFavorite bool `json:"isFavorite,omitempty"`
 	// +kubebuilder:validation:Optional
-	CountStatistics ExternalPublicationConfigurationDetailsDataAssetBucketSchemaMetadataCountStatistics `json:"countStatistics,omitempty"`
+	CountStatistics ExternalPublicationConfigurationDetailsDataAssetBucketSchemaMetadataCountStatistics `json:"countStatistics,omitempty,omitzero"`
 }
 
 // ExternalPublicationConfigurationDetailsDataAssetBucketSchema defines nested fields for ExternalPublication.ConfigurationDetails.DataAsset.BucketSchema.
@@ -1494,7 +1500,7 @@ type ExternalPublicationConfigurationDetailsDataAssetBucketSchema struct {
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef ExternalPublicationConfigurationDetailsDataAssetBucketSchemaParentRef `json:"parentRef,omitempty"`
+	ParentRef ExternalPublicationConfigurationDetailsDataAssetBucketSchemaParentRef `json:"parentRef,omitempty,omitzero"`
 	// Free form text without any restriction on permitted characters. Name can have letters, numbers, and special characters. The value is editable and is restricted to 1000 characters.
 	// +kubebuilder:validation:Optional
 	Name string `json:"name,omitempty"`
@@ -1523,7 +1529,7 @@ type ExternalPublicationConfigurationDetailsDataAssetBucketSchema struct {
 	// +kubebuilder:validation:Optional
 	Identifier string `json:"identifier,omitempty"`
 	// +kubebuilder:validation:Optional
-	Metadata ExternalPublicationConfigurationDetailsDataAssetBucketSchemaMetadata `json:"metadata,omitempty"`
+	Metadata ExternalPublicationConfigurationDetailsDataAssetBucketSchemaMetadata `json:"metadata,omitempty,omitzero"`
 }
 
 // ExternalPublicationConfigurationDetailsDataAsset defines nested fields for ExternalPublication.ConfigurationDetails.DataAsset.
@@ -1555,14 +1561,14 @@ type ExternalPublicationConfigurationDetailsDataAsset struct {
 	// +kubebuilder:validation:Optional
 	AssetProperties map[string]string `json:"assetProperties,omitempty"`
 	// +kubebuilder:validation:Optional
-	NativeTypeSystem ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystem `json:"nativeTypeSystem,omitempty"`
+	NativeTypeSystem ExternalPublicationConfigurationDetailsDataAssetNativeTypeSystem `json:"nativeTypeSystem,omitempty,omitzero"`
 	// The version of the object that is used to track changes in the object instance.
 	// +kubebuilder:validation:Optional
 	ObjectVersion int `json:"objectVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef ExternalPublicationConfigurationDetailsDataAssetParentRef `json:"parentRef,omitempty"`
+	ParentRef ExternalPublicationConfigurationDetailsDataAssetParentRef `json:"parentRef,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	Metadata ExternalPublicationConfigurationDetailsDataAssetMetadata `json:"metadata,omitempty"`
+	Metadata ExternalPublicationConfigurationDetailsDataAssetMetadata `json:"metadata,omitempty,omitzero"`
 	// A key map. If provided, key is replaced with generated key. This structure provides mapping between user provided key and generated key.
 	// +kubebuilder:validation:Optional
 	KeyMap map[string]string `json:"keyMap,omitempty"`
@@ -1578,7 +1584,7 @@ type ExternalPublicationConfigurationDetailsDataAsset struct {
 	// +kubebuilder:validation:Optional
 	DataAssetType string `json:"dataAssetType,omitempty"`
 	// +kubebuilder:validation:Optional
-	DefaultConnection ExternalPublicationConfigurationDetailsDataAssetDefaultConnection `json:"defaultConnection,omitempty"`
+	DefaultConnection ExternalPublicationConfigurationDetailsDataAssetDefaultConnection `json:"defaultConnection,omitempty,omitzero"`
 	// The Oracle Database service name.
 	// +kubebuilder:validation:Optional
 	ServiceName string `json:"serviceName,omitempty"`
@@ -1592,9 +1598,9 @@ type ExternalPublicationConfigurationDetailsDataAsset struct {
 	// +kubebuilder:validation:Optional
 	CredentialFileContent string `json:"credentialFileContent,omitempty"`
 	// +kubebuilder:validation:Optional
-	WalletSecret ExternalPublicationConfigurationDetailsDataAssetWalletSecret `json:"walletSecret,omitempty"`
+	WalletSecret ExternalPublicationConfigurationDetailsDataAssetWalletSecret `json:"walletSecret,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	WalletPasswordSecret ExternalPublicationConfigurationDetailsDataAssetWalletPasswordSecret `json:"walletPasswordSecret,omitempty"`
+	WalletPasswordSecret ExternalPublicationConfigurationDetailsDataAssetWalletPasswordSecret `json:"walletPasswordSecret,omitempty,omitzero"`
 	// The region for Amazon s3
 	// +kubebuilder:validation:Optional
 	Region string `json:"region,omitempty"`
@@ -1608,11 +1614,11 @@ type ExternalPublicationConfigurationDetailsDataAsset struct {
 	// +kubebuilder:validation:Optional
 	ServiceNames []string `json:"serviceNames,omitempty"`
 	// +kubebuilder:validation:Optional
-	StagingDataAsset shared.JSONValue `json:"stagingDataAsset,omitempty"`
+	StagingDataAsset shared.JSONValue `json:"stagingDataAsset,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	StagingConnection ExternalPublicationConfigurationDetailsDataAssetStagingConnection `json:"stagingConnection,omitempty"`
+	StagingConnection ExternalPublicationConfigurationDetailsDataAssetStagingConnection `json:"stagingConnection,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	BucketSchema ExternalPublicationConfigurationDetailsDataAssetBucketSchema `json:"bucketSchema,omitempty"`
+	BucketSchema ExternalPublicationConfigurationDetailsDataAssetBucketSchema `json:"bucketSchema,omitempty,omitzero"`
 	// The HDFS Protocol name.
 	// +kubebuilder:validation:Optional
 	Protocol string `json:"protocol,omitempty"`
@@ -1725,7 +1731,7 @@ type ExternalPublicationConfigurationDetailsConnectionPrimarySchemaMetadata stru
 	// +kubebuilder:validation:Optional
 	AggregatorKey string `json:"aggregatorKey,omitempty"`
 	// +kubebuilder:validation:Optional
-	Aggregator ExternalPublicationConfigurationDetailsConnectionPrimarySchemaMetadataAggregator `json:"aggregator,omitempty"`
+	Aggregator ExternalPublicationConfigurationDetailsConnectionPrimarySchemaMetadataAggregator `json:"aggregator,omitempty,omitzero"`
 	// The full path to identify this object.
 	// +kubebuilder:validation:Optional
 	IdentifierPath string `json:"identifierPath,omitempty"`
@@ -1742,7 +1748,7 @@ type ExternalPublicationConfigurationDetailsConnectionPrimarySchemaMetadata stru
 	// +kubebuilder:validation:Optional
 	IsFavorite bool `json:"isFavorite,omitempty"`
 	// +kubebuilder:validation:Optional
-	CountStatistics ExternalPublicationConfigurationDetailsConnectionPrimarySchemaMetadataCountStatistics `json:"countStatistics,omitempty"`
+	CountStatistics ExternalPublicationConfigurationDetailsConnectionPrimarySchemaMetadataCountStatistics `json:"countStatistics,omitempty,omitzero"`
 }
 
 // ExternalPublicationConfigurationDetailsConnectionPrimarySchema defines nested fields for ExternalPublication.ConfigurationDetails.Connection.PrimarySchema.
@@ -1757,7 +1763,7 @@ type ExternalPublicationConfigurationDetailsConnectionPrimarySchema struct {
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef ExternalPublicationConfigurationDetailsConnectionPrimarySchemaParentRef `json:"parentRef,omitempty"`
+	ParentRef ExternalPublicationConfigurationDetailsConnectionPrimarySchemaParentRef `json:"parentRef,omitempty,omitzero"`
 	// Free form text without any restriction on permitted characters. Name can have letters, numbers, and special characters. The value is editable and is restricted to 1000 characters.
 	// +kubebuilder:validation:Optional
 	Name string `json:"name,omitempty"`
@@ -1786,7 +1792,7 @@ type ExternalPublicationConfigurationDetailsConnectionPrimarySchema struct {
 	// +kubebuilder:validation:Optional
 	Identifier string `json:"identifier,omitempty"`
 	// +kubebuilder:validation:Optional
-	Metadata ExternalPublicationConfigurationDetailsConnectionPrimarySchemaMetadata `json:"metadata,omitempty"`
+	Metadata ExternalPublicationConfigurationDetailsConnectionPrimarySchemaMetadata `json:"metadata,omitempty,omitzero"`
 }
 
 // ExternalPublicationConfigurationDetailsConnectionConnectionProperty defines nested fields for ExternalPublication.ConfigurationDetails.Connection.ConnectionProperty.
@@ -1859,7 +1865,7 @@ type ExternalPublicationConfigurationDetailsConnectionMetadata struct {
 	// +kubebuilder:validation:Optional
 	AggregatorKey string `json:"aggregatorKey,omitempty"`
 	// +kubebuilder:validation:Optional
-	Aggregator ExternalPublicationConfigurationDetailsConnectionMetadataAggregator `json:"aggregator,omitempty"`
+	Aggregator ExternalPublicationConfigurationDetailsConnectionMetadataAggregator `json:"aggregator,omitempty,omitzero"`
 	// The full path to identify this object.
 	// +kubebuilder:validation:Optional
 	IdentifierPath string `json:"identifierPath,omitempty"`
@@ -1876,7 +1882,7 @@ type ExternalPublicationConfigurationDetailsConnectionMetadata struct {
 	// +kubebuilder:validation:Optional
 	IsFavorite bool `json:"isFavorite,omitempty"`
 	// +kubebuilder:validation:Optional
-	CountStatistics ExternalPublicationConfigurationDetailsConnectionMetadataCountStatistics `json:"countStatistics,omitempty"`
+	CountStatistics ExternalPublicationConfigurationDetailsConnectionMetadataCountStatistics `json:"countStatistics,omitempty,omitzero"`
 }
 
 // ExternalPublicationConfigurationDetailsConnectionAccessKeySecretConfig defines nested fields for ExternalPublication.ConfigurationDetails.Connection.AccessKey.SecretConfig.
@@ -1893,7 +1899,7 @@ type ExternalPublicationConfigurationDetailsConnectionAccessKeySecretConfig stru
 // ExternalPublicationConfigurationDetailsConnectionAccessKey defines nested fields for ExternalPublication.ConfigurationDetails.Connection.AccessKey.
 type ExternalPublicationConfigurationDetailsConnectionAccessKey struct {
 	// +kubebuilder:validation:Optional
-	SecretConfig ExternalPublicationConfigurationDetailsConnectionAccessKeySecretConfig `json:"secretConfig,omitempty"`
+	SecretConfig ExternalPublicationConfigurationDetailsConnectionAccessKeySecretConfig `json:"secretConfig,omitempty,omitzero"`
 	// Attribute to provide sensitive content.
 	// +kubebuilder:validation:Optional
 	Value string `json:"value,omitempty"`
@@ -1913,7 +1919,7 @@ type ExternalPublicationConfigurationDetailsConnectionSecretKeySecretConfig stru
 // ExternalPublicationConfigurationDetailsConnectionSecretKey defines nested fields for ExternalPublication.ConfigurationDetails.Connection.SecretKey.
 type ExternalPublicationConfigurationDetailsConnectionSecretKey struct {
 	// +kubebuilder:validation:Optional
-	SecretConfig ExternalPublicationConfigurationDetailsConnectionSecretKeySecretConfig `json:"secretConfig,omitempty"`
+	SecretConfig ExternalPublicationConfigurationDetailsConnectionSecretKeySecretConfig `json:"secretConfig,omitempty,omitzero"`
 	// Attribute to provide sensitive content.
 	// +kubebuilder:validation:Optional
 	Value string `json:"value,omitempty"`
@@ -1933,7 +1939,7 @@ type ExternalPublicationConfigurationDetailsConnectionPasswordSecretSecretConfig
 // ExternalPublicationConfigurationDetailsConnectionPasswordSecret defines nested fields for ExternalPublication.ConfigurationDetails.Connection.PasswordSecret.
 type ExternalPublicationConfigurationDetailsConnectionPasswordSecret struct {
 	// +kubebuilder:validation:Optional
-	SecretConfig ExternalPublicationConfigurationDetailsConnectionPasswordSecretSecretConfig `json:"secretConfig,omitempty"`
+	SecretConfig ExternalPublicationConfigurationDetailsConnectionPasswordSecretSecretConfig `json:"secretConfig,omitempty,omitzero"`
 	// Attribute to provide sensitive content.
 	// +kubebuilder:validation:Optional
 	Value string `json:"value,omitempty"`
@@ -1953,7 +1959,7 @@ type ExternalPublicationConfigurationDetailsConnectionClientSecretSecretConfig s
 // ExternalPublicationConfigurationDetailsConnectionClientSecret defines nested fields for ExternalPublication.ConfigurationDetails.Connection.ClientSecret.
 type ExternalPublicationConfigurationDetailsConnectionClientSecret struct {
 	// +kubebuilder:validation:Optional
-	SecretConfig ExternalPublicationConfigurationDetailsConnectionClientSecretSecretConfig `json:"secretConfig,omitempty"`
+	SecretConfig ExternalPublicationConfigurationDetailsConnectionClientSecretSecretConfig `json:"secretConfig,omitempty,omitzero"`
 	// Attribute to provide sensitive content.
 	// +kubebuilder:validation:Optional
 	Value string `json:"value,omitempty"`
@@ -1995,7 +2001,7 @@ type ExternalPublicationConfigurationDetailsConnectionKeyTabContentSecretConfig 
 // ExternalPublicationConfigurationDetailsConnectionKeyTabContent defines nested fields for ExternalPublication.ConfigurationDetails.Connection.KeyTabContent.
 type ExternalPublicationConfigurationDetailsConnectionKeyTabContent struct {
 	// +kubebuilder:validation:Optional
-	SecretConfig ExternalPublicationConfigurationDetailsConnectionKeyTabContentSecretConfig `json:"secretConfig,omitempty"`
+	SecretConfig ExternalPublicationConfigurationDetailsConnectionKeyTabContentSecretConfig `json:"secretConfig,omitempty,omitzero"`
 	// Attribute to provide sensitive content.
 	// +kubebuilder:validation:Optional
 	Value string `json:"value,omitempty"`
@@ -2012,7 +2018,7 @@ type ExternalPublicationConfigurationDetailsConnection struct {
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef ExternalPublicationConfigurationDetailsConnectionParentRef `json:"parentRef,omitempty"`
+	ParentRef ExternalPublicationConfigurationDetailsConnectionParentRef `json:"parentRef,omitempty,omitzero"`
 	// Free form text without any restriction on permitted characters. Name can have letters, numbers, and special characters. The value is editable and is restricted to 1000 characters.
 	// +kubebuilder:validation:Optional
 	Name string `json:"name,omitempty"`
@@ -2029,7 +2035,7 @@ type ExternalPublicationConfigurationDetailsConnection struct {
 	// +kubebuilder:validation:Optional
 	Identifier string `json:"identifier,omitempty"`
 	// +kubebuilder:validation:Optional
-	PrimarySchema ExternalPublicationConfigurationDetailsConnectionPrimarySchema `json:"primarySchema,omitempty"`
+	PrimarySchema ExternalPublicationConfigurationDetailsConnectionPrimarySchema `json:"primarySchema,omitempty,omitzero"`
 	// The properties for the connection.
 	// +kubebuilder:validation:Optional
 	ConnectionProperties []ExternalPublicationConfigurationDetailsConnectionConnectionProperty `json:"connectionProperties,omitempty"`
@@ -2037,21 +2043,21 @@ type ExternalPublicationConfigurationDetailsConnection struct {
 	// +kubebuilder:validation:Optional
 	IsDefault bool `json:"isDefault,omitempty"`
 	// +kubebuilder:validation:Optional
-	Metadata ExternalPublicationConfigurationDetailsConnectionMetadata `json:"metadata,omitempty"`
+	Metadata ExternalPublicationConfigurationDetailsConnectionMetadata `json:"metadata,omitempty,omitzero"`
 	// A key map. If provided, key is replaced with generated key. This structure provides mapping between user provided key and generated key.
 	// +kubebuilder:validation:Optional
 	KeyMap map[string]string `json:"keyMap,omitempty"`
 	// +kubebuilder:validation:Optional
 	ModelType string `json:"modelType,omitempty"`
 	// +kubebuilder:validation:Optional
-	AccessKey ExternalPublicationConfigurationDetailsConnectionAccessKey `json:"accessKey,omitempty"`
+	AccessKey ExternalPublicationConfigurationDetailsConnectionAccessKey `json:"accessKey,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	SecretKey ExternalPublicationConfigurationDetailsConnectionSecretKey `json:"secretKey,omitempty"`
+	SecretKey ExternalPublicationConfigurationDetailsConnectionSecretKey `json:"secretKey,omitempty,omitzero"`
 	// The user name for the connection.
 	// +kubebuilder:validation:Optional
 	Username string `json:"username,omitempty"`
 	// +kubebuilder:validation:Optional
-	PasswordSecret ExternalPublicationConfigurationDetailsConnectionPasswordSecret `json:"passwordSecret,omitempty"`
+	PasswordSecret ExternalPublicationConfigurationDetailsConnectionPasswordSecret `json:"passwordSecret,omitempty,omitzero"`
 	// Specifies the endpoint used to exchange authentication credentials for access tokens
 	// +kubebuilder:validation:Optional
 	AccessTokenUrl string `json:"accessTokenUrl,omitempty"`
@@ -2059,7 +2065,7 @@ type ExternalPublicationConfigurationDetailsConnection struct {
 	// +kubebuilder:validation:Optional
 	ClientId string `json:"clientId,omitempty"`
 	// +kubebuilder:validation:Optional
-	ClientSecret ExternalPublicationConfigurationDetailsConnectionClientSecret `json:"clientSecret,omitempty"`
+	ClientSecret ExternalPublicationConfigurationDetailsConnectionClientSecret `json:"clientSecret,omitempty,omitzero"`
 	// Specifies the OAuth scopes that limit the permissions granted by an access token.
 	// +kubebuilder:validation:Optional
 	Scope string `json:"scope,omitempty"`
@@ -2067,7 +2073,7 @@ type ExternalPublicationConfigurationDetailsConnection struct {
 	// +kubebuilder:validation:Optional
 	GrantType string `json:"grantType,omitempty"`
 	// +kubebuilder:validation:Optional
-	DefaultExternalStorage ExternalPublicationConfigurationDetailsConnectionDefaultExternalStorage `json:"defaultExternalStorage,omitempty"`
+	DefaultExternalStorage ExternalPublicationConfigurationDetailsConnectionDefaultExternalStorage `json:"defaultExternalStorage,omitempty,omitzero"`
 	// The password for the connection.
 	// +kubebuilder:validation:Optional
 	Password string `json:"password,omitempty"`
@@ -2108,7 +2114,7 @@ type ExternalPublicationConfigurationDetailsConnection struct {
 	// +kubebuilder:validation:Optional
 	KeyDistributionCenter string `json:"keyDistributionCenter,omitempty"`
 	// +kubebuilder:validation:Optional
-	KeyTabContent ExternalPublicationConfigurationDetailsConnectionKeyTabContent `json:"keyTabContent,omitempty"`
+	KeyTabContent ExternalPublicationConfigurationDetailsConnectionKeyTabContent `json:"keyTabContent,omitempty,omitzero"`
 }
 
 // ExternalPublicationConfigurationDetailsSchemaParentRef defines nested fields for ExternalPublication.ConfigurationDetails.Schema.ParentRef.
@@ -2181,7 +2187,7 @@ type ExternalPublicationConfigurationDetailsSchemaMetadata struct {
 	// +kubebuilder:validation:Optional
 	AggregatorKey string `json:"aggregatorKey,omitempty"`
 	// +kubebuilder:validation:Optional
-	Aggregator ExternalPublicationConfigurationDetailsSchemaMetadataAggregator `json:"aggregator,omitempty"`
+	Aggregator ExternalPublicationConfigurationDetailsSchemaMetadataAggregator `json:"aggregator,omitempty,omitzero"`
 	// The full path to identify this object.
 	// +kubebuilder:validation:Optional
 	IdentifierPath string `json:"identifierPath,omitempty"`
@@ -2198,7 +2204,7 @@ type ExternalPublicationConfigurationDetailsSchemaMetadata struct {
 	// +kubebuilder:validation:Optional
 	IsFavorite bool `json:"isFavorite,omitempty"`
 	// +kubebuilder:validation:Optional
-	CountStatistics ExternalPublicationConfigurationDetailsSchemaMetadataCountStatistics `json:"countStatistics,omitempty"`
+	CountStatistics ExternalPublicationConfigurationDetailsSchemaMetadataCountStatistics `json:"countStatistics,omitempty,omitzero"`
 }
 
 // ExternalPublicationConfigurationDetailsSchema defines nested fields for ExternalPublication.ConfigurationDetails.Schema.
@@ -2213,7 +2219,7 @@ type ExternalPublicationConfigurationDetailsSchema struct {
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef ExternalPublicationConfigurationDetailsSchemaParentRef `json:"parentRef,omitempty"`
+	ParentRef ExternalPublicationConfigurationDetailsSchemaParentRef `json:"parentRef,omitempty,omitzero"`
 	// Free form text without any restriction on permitted characters. Name can have letters, numbers, and special characters. The value is editable and is restricted to 1000 characters.
 	// +kubebuilder:validation:Optional
 	Name string `json:"name,omitempty"`
@@ -2242,20 +2248,20 @@ type ExternalPublicationConfigurationDetailsSchema struct {
 	// +kubebuilder:validation:Optional
 	Identifier string `json:"identifier,omitempty"`
 	// +kubebuilder:validation:Optional
-	Metadata ExternalPublicationConfigurationDetailsSchemaMetadata `json:"metadata,omitempty"`
+	Metadata ExternalPublicationConfigurationDetailsSchemaMetadata `json:"metadata,omitempty,omitzero"`
 }
 
 // ExternalPublicationConfigurationDetails defines nested fields for ExternalPublication.ConfigurationDetails.
 type ExternalPublicationConfigurationDetails struct {
 	// +kubebuilder:validation:Optional
-	DataAsset ExternalPublicationConfigurationDetailsDataAsset `json:"dataAsset,omitempty"`
+	DataAsset ExternalPublicationConfigurationDetailsDataAsset `json:"dataAsset,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	Connection ExternalPublicationConfigurationDetailsConnection `json:"connection,omitempty"`
+	Connection ExternalPublicationConfigurationDetailsConnection `json:"connection,omitempty,omitzero"`
 	// The compartment ID of the object store.
 	// +kubebuilder:validation:Optional
 	CompartmentId string `json:"compartmentId,omitempty"`
 	// +kubebuilder:validation:Optional
-	Schema ExternalPublicationConfigurationDetailsSchema `json:"schema,omitempty"`
+	Schema ExternalPublicationConfigurationDetailsSchema `json:"schema,omitempty,omitzero"`
 }
 
 // ExternalPublicationConfigurationDetailsDataAssetStagingConnectionObservedState defines nested fields for ExternalPublication.ConfigurationDetails.DataAsset.StagingConnection.

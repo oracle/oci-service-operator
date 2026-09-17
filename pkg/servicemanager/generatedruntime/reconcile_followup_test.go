@@ -68,6 +68,39 @@ func TestServiceClientCreateFollowUpPreservesSeededWorkRequestID(t *testing.T) {
 	requireTrailingCondition(t, resource, shared.Provisioning)
 }
 
+func TestServiceClientRecordsPathIdentityBeforeCreateFollowUp(t *testing.T) {
+	t.Parallel()
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind: "PathChild",
+		Semantics: &Semantics{
+			Lifecycle:      LifecycleSemantics{ActiveStates: []string{"ACTIVE"}},
+			CreateFollowUp: FollowUpSemantics{Strategy: "read-after-write"},
+		},
+		Identity: IdentityHooks[*fakeResource]{
+			Resolve:                    func(*fakeResource) (any, error) { return "path-child", nil },
+			RecordBeforeCreateFollowUp: true,
+			RecordTracked: func(resource *fakeResource, identity any, _ string) {
+				resource.Status.OsokStatus.Ocid = shared.OCID(identity.(string))
+			},
+		},
+		Create: &Operation{NewRequest: func() any { return &fakeCreateThingRequest{} }, Call: func(context.Context, any) (any, error) {
+			return fakeCreateThingResponse{}, nil
+		}},
+		Get: &Operation{NewRequest: func() any { return &fakeGetThingRequest{} }, Call: func(context.Context, any) (any, error) {
+			return nil, errortest.NewServiceError(404, "NotAuthorizedOrNotFound", "eventual readback")
+		}, Fields: []RequestField{{FieldName: "ThingId", Contribution: "path", PreferResourceID: true}}},
+	})
+	resource := &fakeResource{}
+	_, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err == nil {
+		t.Fatal("CreateOrUpdate() error = nil, want ambiguous follow-up error")
+	}
+	if got := string(resource.Status.OsokStatus.Ocid); got != "path-child" {
+		t.Fatalf("status.status.ocid = %q, want identity recorded before follow-up", got)
+	}
+}
+
 func TestServiceClientCreateWaitForWorkRequestFollowUpUsesMatrix(t *testing.T) {
 	t.Parallel()
 	focused := errortest.FocusedAsyncFollowUpCases(t)

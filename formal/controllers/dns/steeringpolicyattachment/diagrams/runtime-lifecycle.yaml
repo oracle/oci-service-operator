@@ -1,0 +1,33 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: dns
+slug: steeringpolicyattachment
+kind: SteeringPolicyAttachment
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - terminating
+repoAuthored:
+  listLookup:
+    filters:
+      - steeringPolicyId
+      - zoneId
+      - domainName
+    matchRule: Adopt only a unique attachment matching the policy, zone, and domain.
+  mutation:
+    mutable:
+      - displayName
+    forceNew:
+      - steeringPolicyId
+      - zoneId
+      - domainName
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - CREATING requeues and ACTIVE succeeds; displayName updates settle without a distinct update lifecycle state.
+  - List requests resolve compartmentId from the parent steering policy before applying policy, zone, and domain selectors.
+  - Delete treats an auth-shaped Get 404 as ambiguous until the scoped attachment list is empty, then synthesizes the DELETED terminal outcome.
+  - Attachment identity fields require replacement and no Kubernetes Secret side effects are present.

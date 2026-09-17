@@ -24,6 +24,15 @@ type TermRelationshipSpec struct {
 	// Detailed description of the term relationship usually defined at the time of creation.
 	// +kubebuilder:validation:Optional
 	Description string `json:"description,omitempty"`
+	// The OCID of the catalog containing the term relationship.
+	// +kubebuilder:validation:Required
+	CatalogId string `json:"catalogId"`
+	// The key of the glossary containing the related terms.
+	// +kubebuilder:validation:Required
+	GlossaryKey string `json:"glossaryKey"`
+	// The key of the source term for the relationship.
+	// +kubebuilder:validation:Required
+	TermKey string `json:"termKey"`
 }
 
 // TermRelationshipStatus defines the observed state of TermRelationship.

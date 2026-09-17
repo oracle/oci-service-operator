@@ -1,0 +1,141 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "osmanagementhub",
+  "slug": "managedinstancegroup",
+  "kind": "ManagedInstanceGroup",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_os_management_hub_managed_instance_group",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateManagedInstanceGroup",
+        "requestType": "osmanagementhub.CreateManagedInstanceGroupRequest",
+        "responseType": "osmanagementhub.CreateManagedInstanceGroupResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetManagedInstanceGroup",
+        "requestType": "osmanagementhub.GetManagedInstanceGroupRequest",
+        "responseType": "osmanagementhub.GetManagedInstanceGroupResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListManagedInstanceGroups",
+        "requestType": "osmanagementhub.ListManagedInstanceGroupsRequest",
+        "responseType": "osmanagementhub.ListManagedInstanceGroupsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeManagedInstanceGroupCompartment",
+        "requestType": "osmanagementhub.ChangeManagedInstanceGroupCompartmentRequest",
+        "responseType": "osmanagementhub.ChangeManagedInstanceGroupCompartmentResponse"
+      },
+      {
+        "operation": "UpdateManagedInstanceGroup",
+        "requestType": "osmanagementhub.UpdateManagedInstanceGroupRequest",
+        "responseType": "osmanagementhub.UpdateManagedInstanceGroupResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteManagedInstanceGroup",
+        "requestType": "osmanagementhub.DeleteManagedInstanceGroupRequest",
+        "responseType": "osmanagementhub.DeleteManagedInstanceGroupResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "autonomous_settings.is_data_collection_authorized",
+      "compartment_id",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags",
+      "managed_instance_ids",
+      "notification_topic_id",
+      "software_source_ids"
+    ],
+    "forceNew": [
+      "arch_type",
+      "location",
+      "os_family",
+      "vendor_name"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_os_management_hub_managed_instance_groups",
+    "collectionField": "managed_instance_group_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "arch_type",
+      "compartment_id",
+      "display_name",
+      "display_name_contains",
+      "is_managed_by_autonomous_linux",
+      "location",
+      "location_not_equal_to",
+      "managed_instance_group_id",
+      "os_family",
+      "software_source_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/osmanagementhub/managedinstancegroup/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/osmanagementhub/managedinstancegroup/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts refreshed from the pinned Terraform provider; repository-authored lifecycle and membership semantics are reviewed separately."
+  ]
+}

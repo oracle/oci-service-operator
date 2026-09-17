@@ -7,6 +7,7 @@ package hostname
 
 import (
 	"context"
+	"crypto/sha256"
 	"fmt"
 	"strings"
 	"time"
@@ -297,6 +298,7 @@ func (c *hostnameRuntimeClient) createHostname(
 ) (servicemanager.OSOKResponse, error) {
 	response, err := c.client.CreateHostname(ctx, loadbalancersdk.CreateHostnameRequest{
 		LoadBalancerId: common.String(identity.loadBalancerID),
+		OpcRetryToken:  common.String(hostnameCreateRetryToken(resource, identity)),
 		CreateHostnameDetails: loadbalancersdk.CreateHostnameDetails{
 			Name:     common.String(identity.name),
 			Hostname: common.String(strings.TrimSpace(resource.Spec.Hostname)),
@@ -315,6 +317,21 @@ func (c *hostnameRuntimeClient) createHostname(
 		return c.markPending(resource, identity, shared.OSOKAsyncPhaseCreate, hostnameCreatePendingState, stringValue(response.OpcWorkRequestId)), nil
 	}
 	return c.markActive(resource, identity, *current), nil
+}
+
+func hostnameCreateRetryToken(resource *loadbalancerv1beta1.Hostname, identity hostnameIdentity) string {
+	namespace := ""
+	name := ""
+	if resource != nil {
+		if uid := strings.TrimSpace(string(resource.UID)); uid != "" {
+			return uid
+		}
+		namespace = strings.TrimSpace(resource.Namespace)
+		name = strings.TrimSpace(resource.Name)
+	}
+	payload := strings.Join([]string{namespace, name, identity.loadBalancerID, identity.name}, "/")
+	sum := sha256.Sum256([]byte(payload))
+	return fmt.Sprintf("%x", sum[:16])
 }
 
 func (c *hostnameRuntimeClient) updateHostname(

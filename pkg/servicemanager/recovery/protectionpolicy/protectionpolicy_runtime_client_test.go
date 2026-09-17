@@ -233,9 +233,9 @@ func protectionPolicySucceededWorkRequest(
 func TestProtectionPolicyRuntimeSemantics(t *testing.T) {
 	t.Parallel()
 
-	got := newProtectionPolicyRuntimeSemantics()
+	got := reviewedProtectionPolicyRuntimeSemantics()
 	if got == nil {
-		t.Fatal("newProtectionPolicyRuntimeSemantics() = nil")
+		t.Fatal("reviewedProtectionPolicyRuntimeSemantics() = nil")
 	}
 	if got.Async == nil || got.Async.Strategy != "workrequest" || got.Async.Runtime != "generatedruntime" {
 		t.Fatalf("Async = %#v, want workrequest generatedruntime", got.Async)

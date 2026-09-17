@@ -143,7 +143,10 @@ func newOrganizationServiceClientWithClients(
 
 func newOrganizationRuntimeHooksWithClients(organizationClient organizationOCIClient) OrganizationRuntimeHooks {
 	_ = organizationClient
-	return newOrganizationDefaultRuntimeHooks(tenantmanagercontrolplanesdk.OrganizationClient{})
+	return newOrganizationDefaultRuntimeHooks(OrganizationSDKClients{
+		organizationClient: tenantmanagercontrolplanesdk.OrganizationClient{},
+		workRequestClient:  tenantmanagercontrolplanesdk.WorkRequestClient{},
+	})
 }
 
 func organizationListFields() []generatedruntime.RequestField {

@@ -56,6 +56,12 @@ spec:
           spec:
             description: TaskRunSpec defines the desired state of TaskRun.
             properties:
+              aggregatorKey:
+                description: The aggregator key required by the collection lookup.
+                type: string
+              applicationKey:
+                description: The key of the application containing this resource.
+                type: string
               configProvider:
                 description: TaskRunConfigProvider defines nested fields for TaskRun.ConfigProvider.
                 properties:
@@ -141,6 +147,14 @@ spec:
               taskScheduleKey:
                 description: Optional task schedule key reference.
                 type: string
+              workspaceId:
+                description: The OCID of the Data Integration workspace containing
+                  this resource.
+                type: string
+            required:
+            - aggregatorKey
+            - applicationKey
+            - workspaceId
             type: object
           status:
             description: TaskRunStatus defines the observed state of TaskRun.

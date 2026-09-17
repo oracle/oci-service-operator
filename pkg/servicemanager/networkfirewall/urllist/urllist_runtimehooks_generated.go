@@ -66,25 +66,25 @@ func newUrlListDefaultRuntimeHooks(sdkClient networkfirewallsdk.NetworkFirewallC
 			},
 		},
 		Get: runtimeOperationHooks[networkfirewallsdk.GetUrlListRequest, networkfirewallsdk.GetUrlListResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "UrlListName", RequestName: "urlListName", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "UrlListName", RequestName: "urlListName", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request networkfirewallsdk.GetUrlListRequest) (networkfirewallsdk.GetUrlListResponse, error) {
 				return sdkClient.GetUrlList(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[networkfirewallsdk.ListUrlListsRequest, networkfirewallsdk.ListUrlListsResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: true}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request networkfirewallsdk.ListUrlListsRequest) (networkfirewallsdk.ListUrlListsResponse, error) {
 				return sdkClient.ListUrlLists(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[networkfirewallsdk.UpdateUrlListRequest, networkfirewallsdk.UpdateUrlListResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "UrlListName", RequestName: "urlListName", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdateUrlListDetails", RequestName: "UpdateUrlListDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "UrlListName", RequestName: "urlListName", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateUrlListDetails", RequestName: "UpdateUrlListDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request networkfirewallsdk.UpdateUrlListRequest) (networkfirewallsdk.UpdateUrlListResponse, error) {
 				return sdkClient.UpdateUrlList(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[networkfirewallsdk.DeleteUrlListRequest, networkfirewallsdk.DeleteUrlListResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "UrlListName", RequestName: "urlListName", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "UrlListName", RequestName: "urlListName", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request networkfirewallsdk.DeleteUrlListRequest) (networkfirewallsdk.DeleteUrlListResponse, error) {
 				return sdkClient.DeleteUrlList(ctx, request)
 			},

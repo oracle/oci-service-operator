@@ -1,0 +1,80 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: recovery
+slug: protecteddatabase
+kind: ProtectedDatabase
+archetype: generated-service-manager
+states:
+- provisioning
+- active
+- updating
+- terminating
+repoAuthored:
+  operations:
+    update:
+    - UpdateProtectedDatabase
+    delete: []
+  providerLifecycle:
+    createPending:
+    - CREATING
+    updatePending:
+    - UPDATING
+    deletePending:
+    - DELETE_SCHEDULED
+    - DELETING
+  listLookup:
+    filters:
+    - compartmentId
+    - dbUniqueName
+    - id
+    matchRule: exact compartmentId, dbUniqueName, id match within the resource scope;
+      duplicate matches fail
+  mutation:
+    mutable:
+    - compartmentId
+    - displayName
+    - databaseSize
+    - databaseSizeInGBs
+    - password
+    - protectionPolicyId
+    - recoveryServiceSubnets
+    - isRedoLogsShipped
+    - subscriptionId
+    - freeformTags
+    - definedTags
+    forceNew:
+    - dbUniqueName
+    - databaseId
+    - changeRate
+    - compressionRatio
+  hooks:
+    create:
+    - helper: tfresource.CreateResource
+    - helper: tfresource.WaitForWorkRequestWithErrorHandling
+      entityType: protectedDatabase
+      action: CREATED
+    update:
+    - helper: tfresource.UpdateResource
+    - helper: ChangeProtectedDatabaseCompartment
+    - helper: ChangeProtectedDatabaseSubscription
+    - helper: tfresource.WaitForWorkRequestWithErrorHandling
+      entityType: protectedDatabase
+      action: UPDATED
+    delete:
+    - helper: tfresource.DeleteResource
+    - helper: tfresource.WaitForWorkRequestWithErrorHandling
+      entityType: protectedDatabase
+      action: DELETED
+  followUp:
+    create: GetWorkRequest -> GetProtectedDatabase
+    update: GetWorkRequest -> GetProtectedDatabase
+    delete: confirm-delete
+notes:
+- The production runtime uses the declared work-request phases and service-local async
+  adapter.
+- Lifecycle success and pending states mirror the production service-manager semantics.
+- Status projection is required, Secret side effects are controller-owned-password-state,
+  and the finalizer policy is retain-until-confirmed-delete.
+- The runtime uses DeleteProtectedDatabase; the provider-only
+  ScheduleProtectedDatabaseDeletion operation is intentionally excluded.
+- Delete ownership is retained until a terminal lifecycle state or confirmed absence.

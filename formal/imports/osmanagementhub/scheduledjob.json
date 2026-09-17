@@ -1,0 +1,174 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "osmanagementhub",
+  "slug": "scheduledjob",
+  "kind": "ScheduledJob",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_os_management_hub_scheduled_job",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateScheduledJob",
+        "requestType": "osmanagementhub.CreateScheduledJobRequest",
+        "responseType": "osmanagementhub.CreateScheduledJobResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetScheduledJob",
+        "requestType": "osmanagementhub.GetScheduledJobRequest",
+        "responseType": "osmanagementhub.GetScheduledJobResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListScheduledJobs",
+        "requestType": "osmanagementhub.ListScheduledJobsRequest",
+        "responseType": "osmanagementhub.ListScheduledJobsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeScheduledJobCompartment",
+        "requestType": "osmanagementhub.ChangeScheduledJobCompartmentRequest",
+        "responseType": "osmanagementhub.ChangeScheduledJobCompartmentResponse"
+      },
+      {
+        "operation": "UpdateScheduledJob",
+        "requestType": "osmanagementhub.UpdateScheduledJobRequest",
+        "responseType": "osmanagementhub.UpdateScheduledJobResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteScheduledJob",
+        "requestType": "osmanagementhub.DeleteScheduledJobRequest",
+        "responseType": "osmanagementhub.DeleteScheduledJobResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags",
+      "operations.manage_module_streams_details.disable.module_name",
+      "operations.manage_module_streams_details.disable.software_source_id",
+      "operations.manage_module_streams_details.disable.stream_name",
+      "operations.manage_module_streams_details.enable.module_name",
+      "operations.manage_module_streams_details.enable.software_source_id",
+      "operations.manage_module_streams_details.enable.stream_name",
+      "operations.manage_module_streams_details.install.module_name",
+      "operations.manage_module_streams_details.install.profile_name",
+      "operations.manage_module_streams_details.install.software_source_id",
+      "operations.manage_module_streams_details.install.stream_name",
+      "operations.manage_module_streams_details.remove.module_name",
+      "operations.manage_module_streams_details.remove.profile_name",
+      "operations.manage_module_streams_details.remove.software_source_id",
+      "operations.manage_module_streams_details.remove.stream_name",
+      "operations.operation_type",
+      "operations.package_names",
+      "operations.reboot_timeout_in_mins",
+      "operations.software_source_ids",
+      "operations.switch_module_streams_details.module_name",
+      "operations.switch_module_streams_details.software_source_id",
+      "operations.switch_module_streams_details.stream_name",
+      "operations.windows_update_names",
+      "recurring_rule",
+      "retry_intervals",
+      "schedule_type",
+      "time_next_execution"
+    ],
+    "forceNew": [
+      "is_managed_by_autonomous_linux",
+      "is_subcompartment_included",
+      "lifecycle_stage_ids",
+      "locations",
+      "managed_compartment_ids",
+      "managed_instance_group_ids",
+      "managed_instance_ids",
+      "work_request_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_os_management_hub_scheduled_jobs",
+    "collectionField": "scheduled_job_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "compartment_id_in_subtree",
+      "display_name",
+      "display_name_contains",
+      "id",
+      "is_managed_by_autonomous_linux",
+      "is_restricted",
+      "lifecycle_stage_id",
+      "location",
+      "location_not_equal_to",
+      "managed_compartment_id",
+      "managed_instance_group_id",
+      "managed_instance_id",
+      "operation_type",
+      "schedule_type",
+      "state",
+      "time_end",
+      "time_start"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/osmanagementhub/scheduledjob/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/osmanagementhub/scheduledjob/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts refreshed from the pinned Terraform provider; repository-authored scheduled-job semantics are reviewed separately."
+  ]
+}

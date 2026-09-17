@@ -71,6 +71,10 @@ spec:
                 description: Unique name to identify the group of addresses to be
                   used in the policy rules.
                 type: string
+              networkFirewallPolicyId:
+                description: The OCID of the Network Firewall policy that owns this
+                  resource.
+                type: string
               type:
                 description: Type of address List. The accepted values are - * FQDN
                   * IP
@@ -78,6 +82,7 @@ spec:
             required:
             - addresses
             - name
+            - networkFirewallPolicyId
             - type
             type: object
           status:

@@ -50,50 +50,119 @@ func registerMaintenanceWindowRuntimeHooksMutator(mutator MaintenanceWindowRunti
 	}
 	maintenancewindowRuntimeHooksMutators = append(maintenancewindowRuntimeHooksMutators, mutator)
 }
-func newMaintenanceWindowDefaultRuntimeHooks(sdkClient fleetappsmanagementsdk.FleetAppsManagementMaintenanceWindowClient) MaintenanceWindowRuntimeHooks {
+func newMaintenanceWindowRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "fleetappsmanagement",
+		FormalSlug:    "maintenancewindow",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE", "NEEDS_ATTENTION"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "displayName", "id", "state", "timeScheduleStartGreaterThanOrEqualTo"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"definedTags", "description", "displayName", "duration", "freeformTags", "isOutage", "isRecurring", "recurrences", "timeScheduleStart"},
+			ForceNew:      []string{"compartmentId"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
+func newMaintenanceWindowDefaultRuntimeHooks(sdkClient MaintenanceWindowSDKClients) MaintenanceWindowRuntimeHooks {
 	return MaintenanceWindowRuntimeHooks{
+		Semantics:       newMaintenanceWindowRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*fleetappsmanagementv1beta1.MaintenanceWindow]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*fleetappsmanagementv1beta1.MaintenanceWindow]{},
 		StatusHooks:     generatedruntime.StatusHooks[*fleetappsmanagementv1beta1.MaintenanceWindow]{},
 		ParityHooks:     generatedruntime.ParityHooks[*fleetappsmanagementv1beta1.MaintenanceWindow]{},
-		Async:           generatedruntime.AsyncHooks[*fleetappsmanagementv1beta1.MaintenanceWindow]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*fleetappsmanagementv1beta1.MaintenanceWindow]{},
+		Async: generatedruntime.AsyncHooks[*fleetappsmanagementv1beta1.MaintenanceWindow]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := fleetappsmanagementsdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.fleetAppsManagementWorkRequestClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*fleetappsmanagementv1beta1.MaintenanceWindow]{},
 		Create: runtimeOperationHooks[fleetappsmanagementsdk.CreateMaintenanceWindowRequest, fleetappsmanagementsdk.CreateMaintenanceWindowResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateMaintenanceWindowDetails", RequestName: "CreateMaintenanceWindowDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.CreateMaintenanceWindowRequest) (fleetappsmanagementsdk.CreateMaintenanceWindowResponse, error) {
-				return sdkClient.CreateMaintenanceWindow(ctx, request)
+				return sdkClient.fleetAppsManagementMaintenanceWindowClient.CreateMaintenanceWindow(ctx, request)
 			},
 		},
 		Get: runtimeOperationHooks[fleetappsmanagementsdk.GetMaintenanceWindowRequest, fleetappsmanagementsdk.GetMaintenanceWindowResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "MaintenanceWindowId", RequestName: "maintenanceWindowId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.GetMaintenanceWindowRequest) (fleetappsmanagementsdk.GetMaintenanceWindowResponse, error) {
-				return sdkClient.GetMaintenanceWindow(ctx, request)
+				return sdkClient.fleetAppsManagementMaintenanceWindowClient.GetMaintenanceWindow(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[fleetappsmanagementsdk.ListMaintenanceWindowsRequest, fleetappsmanagementsdk.ListMaintenanceWindowsResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "TimeScheduleStartGreaterThanOrEqualTo", RequestName: "timeScheduleStartGreaterThanOrEqualTo", Contribution: "query", PreferResourceID: false}, {FieldName: "Id", RequestName: "id", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.ListMaintenanceWindowsRequest) (fleetappsmanagementsdk.ListMaintenanceWindowsResponse, error) {
-				return sdkClient.ListMaintenanceWindows(ctx, request)
+				return sdkClient.fleetAppsManagementMaintenanceWindowClient.ListMaintenanceWindows(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[fleetappsmanagementsdk.UpdateMaintenanceWindowRequest, fleetappsmanagementsdk.UpdateMaintenanceWindowResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "MaintenanceWindowId", RequestName: "maintenanceWindowId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateMaintenanceWindowDetails", RequestName: "UpdateMaintenanceWindowDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.UpdateMaintenanceWindowRequest) (fleetappsmanagementsdk.UpdateMaintenanceWindowResponse, error) {
-				return sdkClient.UpdateMaintenanceWindow(ctx, request)
+				return sdkClient.fleetAppsManagementMaintenanceWindowClient.UpdateMaintenanceWindow(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[fleetappsmanagementsdk.DeleteMaintenanceWindowRequest, fleetappsmanagementsdk.DeleteMaintenanceWindowResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "MaintenanceWindowId", RequestName: "maintenanceWindowId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.DeleteMaintenanceWindowRequest) (fleetappsmanagementsdk.DeleteMaintenanceWindowResponse, error) {
-				return sdkClient.DeleteMaintenanceWindow(ctx, request)
+				return sdkClient.fleetAppsManagementMaintenanceWindowClient.DeleteMaintenanceWindow(ctx, request)
 			},
 		},
 		WrapGeneratedClient: []func(MaintenanceWindowServiceClient) MaintenanceWindowServiceClient{},
 	}
 }
 
-func newMaintenanceWindowRuntimeHooks(manager *MaintenanceWindowServiceManager, sdkClient fleetappsmanagementsdk.FleetAppsManagementMaintenanceWindowClient) MaintenanceWindowRuntimeHooks {
+func newMaintenanceWindowRuntimeHooks(manager *MaintenanceWindowServiceManager, sdkClient MaintenanceWindowSDKClients) MaintenanceWindowRuntimeHooks {
 	hooks := newMaintenanceWindowDefaultRuntimeHooks(sdkClient)
 	for _, mutator := range maintenancewindowRuntimeHooksMutators {
 		mutator(manager, &hooks)
@@ -106,10 +175,19 @@ func buildMaintenanceWindowGeneratedRuntimeConfig(
 	hooks MaintenanceWindowRuntimeHooks,
 ) generatedruntime.Config[*fleetappsmanagementv1beta1.MaintenanceWindow] {
 	return generatedruntime.Config[*fleetappsmanagementv1beta1.MaintenanceWindow]{
-		Kind:            "MaintenanceWindow",
-		SDKName:         "MaintenanceWindow",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "MaintenanceWindow",
+		SDKName:   "MaintenanceWindow",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

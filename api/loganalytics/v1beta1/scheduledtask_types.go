@@ -39,7 +39,7 @@ type ScheduledTaskSpec struct {
 	// +kubebuilder:validation:Optional
 	Kind string `json:"kind,omitempty"`
 	// +kubebuilder:validation:Optional
-	Action ScheduledTaskAction `json:"action,omitempty"`
+	Action ScheduledTaskAction `json:"action,omitempty,omitzero"`
 	// Schedules, typically a single schedule.
 	// Note there may only be a single schedule for SAVED_SEARCH and PURGE scheduled tasks.
 	// +kubebuilder:validation:Optional
@@ -155,9 +155,9 @@ type ScheduledTaskAction struct {
 	// +kubebuilder:validation:Optional
 	SavedSearchId string `json:"savedSearchId,omitempty"`
 	// +kubebuilder:validation:Optional
-	TemplateDetails ScheduledTaskActionTemplateDetails `json:"templateDetails,omitempty"`
+	TemplateDetails ScheduledTaskActionTemplateDetails `json:"templateDetails,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	MetricExtraction ScheduledTaskActionMetricExtraction `json:"metricExtraction,omitempty"`
+	MetricExtraction ScheduledTaskActionMetricExtraction `json:"metricExtraction,omitempty,omitzero"`
 	// The duration of data to be searched for SAVED_SEARCH tasks,
 	// used when the task fires to calculate the query time range.
 	// Duration in ISO 8601 extended format as described in

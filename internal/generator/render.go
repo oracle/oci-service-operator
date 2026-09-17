@@ -1155,7 +1155,27 @@ func new{{ .Kind }}DefaultRuntimeHooks(sdkClient {{- if gt (len .SDKClients) 1 }
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*{{ .APIImportAlias }}.{{ .Kind }}]{},
 		StatusHooks:     generatedruntime.StatusHooks[*{{ .APIImportAlias }}.{{ .Kind }}]{},
 		ParityHooks:     generatedruntime.ParityHooks[*{{ .APIImportAlias }}.{{ .Kind }}]{},
+{{- if and .Async .Async.WorkRequest .WorkRequestOperation }}
+		Async: generatedruntime.AsyncHooks[*{{ .APIImportAlias }}.{{ .Kind }}]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := {{ .SDKImportAlias }}.{{ .WorkRequestOperation.RequestTypeName }}{
+					{{ .WorkRequestIDFieldName }}: &workRequestID,
+				}
+{{- if gt (len $.SDKClients) 1 }}
+				response, err := sdkClient.{{ .WorkRequestOperation.ClientFieldName }}.{{ .WorkRequestOperation.MethodName }}(ctx, request)
+{{- else }}
+				response, err := sdkClient.{{ .WorkRequestOperation.MethodName }}(ctx, request)
+{{- end }}
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+{{- else }}
 		Async:           generatedruntime.AsyncHooks[*{{ .APIImportAlias }}.{{ .Kind }}]{},
+{{- end }}
 		DeleteHooks:     generatedruntime.DeleteHooks[*{{ .APIImportAlias }}.{{ .Kind }}]{},
 {{- if .CreateOperation }}
 		Create: runtimeOperationHooks[{{ .SDKImportAlias }}.{{ .CreateOperation.RequestTypeName }}, {{ .SDKImportAlias }}.{{ .CreateOperation.ResponseTypeName }}]{
@@ -1281,6 +1301,24 @@ func build{{ .Kind }}GeneratedRuntimeConfig(
 		CredentialClient: manager.CredentialClient,
 {{- end }}
 		Semantics:        hooks.Semantics,
+{{- if and .Async .Async.WorkRequest }}
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "{{ .Async.Strategy }}",
+			Runtime:              "{{ .Async.Runtime }}",
+			FormalClassification: "{{ .Async.FormalClassification }}",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "{{ .Async.WorkRequest.Source }}",
+				Phases: {{ stringSliceLiteral .Async.WorkRequest.Phases }},
+{{- if .Async.WorkRequest.LegacyFieldBridge }}
+				LegacyFieldBridge: &generatedruntime.WorkRequestLegacyFieldBridge{
+					Create: "{{ .Async.WorkRequest.LegacyFieldBridge.Create }}",
+					Update: "{{ .Async.WorkRequest.LegacyFieldBridge.Update }}",
+					Delete: "{{ .Async.WorkRequest.LegacyFieldBridge.Delete }}",
+				},
+{{- end }}
+			},
+		},
+{{- end }}
 		Identity:         hooks.Identity,
 		Read:             hooks.Read,
 		TrackedRecreate:  hooks.TrackedRecreate,

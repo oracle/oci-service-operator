@@ -106,7 +106,7 @@ func newDomainRuntimeSemantics() *generatedruntime.Semantics {
 		Unsupported:         []generatedruntime.UnsupportedSemantic{},
 	}
 }
-func newDomainDefaultRuntimeHooks(sdkClient tenantmanagercontrolplanesdk.DomainClient) DomainRuntimeHooks {
+func newDomainDefaultRuntimeHooks(sdkClient DomainSDKClients) DomainRuntimeHooks {
 	return DomainRuntimeHooks{
 		Semantics:       newDomainRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*tenantmanagercontrolplanev1beta1.Domain]{},
@@ -114,43 +114,55 @@ func newDomainDefaultRuntimeHooks(sdkClient tenantmanagercontrolplanesdk.DomainC
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*tenantmanagercontrolplanev1beta1.Domain]{},
 		StatusHooks:     generatedruntime.StatusHooks[*tenantmanagercontrolplanev1beta1.Domain]{},
 		ParityHooks:     generatedruntime.ParityHooks[*tenantmanagercontrolplanev1beta1.Domain]{},
-		Async:           generatedruntime.AsyncHooks[*tenantmanagercontrolplanev1beta1.Domain]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*tenantmanagercontrolplanev1beta1.Domain]{},
+		Async: generatedruntime.AsyncHooks[*tenantmanagercontrolplanev1beta1.Domain]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := tenantmanagercontrolplanesdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.workRequestClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*tenantmanagercontrolplanev1beta1.Domain]{},
 		Create: runtimeOperationHooks[tenantmanagercontrolplanesdk.CreateDomainRequest, tenantmanagercontrolplanesdk.CreateDomainResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateDomainDetails", RequestName: "CreateDomainDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request tenantmanagercontrolplanesdk.CreateDomainRequest) (tenantmanagercontrolplanesdk.CreateDomainResponse, error) {
-				return sdkClient.CreateDomain(ctx, request)
+				return sdkClient.domainClient.CreateDomain(ctx, request)
 			},
 		},
 		Get: runtimeOperationHooks[tenantmanagercontrolplanesdk.GetDomainRequest, tenantmanagercontrolplanesdk.GetDomainResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "DomainId", RequestName: "domainId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request tenantmanagercontrolplanesdk.GetDomainRequest) (tenantmanagercontrolplanesdk.GetDomainResponse, error) {
-				return sdkClient.GetDomain(ctx, request)
+				return sdkClient.domainClient.GetDomain(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[tenantmanagercontrolplanesdk.ListDomainsRequest, tenantmanagercontrolplanesdk.ListDomainsResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "DomainId", RequestName: "domainId", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "Status", RequestName: "status", Contribution: "query", PreferResourceID: false}, {FieldName: "Name", RequestName: "name", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request tenantmanagercontrolplanesdk.ListDomainsRequest) (tenantmanagercontrolplanesdk.ListDomainsResponse, error) {
-				return sdkClient.ListDomains(ctx, request)
+				return sdkClient.domainClient.ListDomains(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[tenantmanagercontrolplanesdk.UpdateDomainRequest, tenantmanagercontrolplanesdk.UpdateDomainResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "DomainId", RequestName: "domainId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateDomainDetails", RequestName: "UpdateDomainDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request tenantmanagercontrolplanesdk.UpdateDomainRequest) (tenantmanagercontrolplanesdk.UpdateDomainResponse, error) {
-				return sdkClient.UpdateDomain(ctx, request)
+				return sdkClient.domainClient.UpdateDomain(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[tenantmanagercontrolplanesdk.DeleteDomainRequest, tenantmanagercontrolplanesdk.DeleteDomainResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "DomainId", RequestName: "domainId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request tenantmanagercontrolplanesdk.DeleteDomainRequest) (tenantmanagercontrolplanesdk.DeleteDomainResponse, error) {
-				return sdkClient.DeleteDomain(ctx, request)
+				return sdkClient.domainClient.DeleteDomain(ctx, request)
 			},
 		},
 		WrapGeneratedClient: []func(DomainServiceClient) DomainServiceClient{},
 	}
 }
 
-func newDomainRuntimeHooks(manager *DomainServiceManager, sdkClient tenantmanagercontrolplanesdk.DomainClient) DomainRuntimeHooks {
+func newDomainRuntimeHooks(manager *DomainServiceManager, sdkClient DomainSDKClients) DomainRuntimeHooks {
 	hooks := newDomainDefaultRuntimeHooks(sdkClient)
 	for _, mutator := range domainRuntimeHooksMutators {
 		mutator(manager, &hooks)
@@ -163,10 +175,19 @@ func buildDomainGeneratedRuntimeConfig(
 	hooks DomainRuntimeHooks,
 ) generatedruntime.Config[*tenantmanagercontrolplanev1beta1.Domain] {
 	return generatedruntime.Config[*tenantmanagercontrolplanev1beta1.Domain]{
-		Kind:            "Domain",
-		SDKName:         "Domain",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "Domain",
+		SDKName:   "Domain",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

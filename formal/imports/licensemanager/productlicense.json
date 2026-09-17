@@ -1,0 +1,117 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "licensemanager",
+  "slug": "productlicense",
+  "kind": "ProductLicense",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_license_manager_product_license",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateProductLicense",
+        "requestType": "licensemanager.CreateProductLicenseRequest",
+        "responseType": "licensemanager.CreateProductLicenseResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetProductLicense",
+        "requestType": "licensemanager.GetProductLicenseRequest",
+        "responseType": "licensemanager.GetProductLicenseResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListProductLicenses",
+        "requestType": "licensemanager.ListProductLicensesRequest",
+        "responseType": "licensemanager.ListProductLicensesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateProductLicense",
+        "requestType": "licensemanager.UpdateProductLicenseRequest",
+        "responseType": "licensemanager.UpdateProductLicenseResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteProductLicense",
+        "requestType": "licensemanager.DeleteProductLicenseRequest",
+        "responseType": "licensemanager.DeleteProductLicenseResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "defined_tags",
+      "freeform_tags",
+      "images.listing_id",
+      "images.package_version"
+    ],
+    "forceNew": [
+      "compartment_id",
+      "display_name",
+      "is_vendor_oracle",
+      "license_unit",
+      "vendor_name"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_license_manager_product_licenses",
+    "collectionField": "product_license_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "is_compartment_id_in_subtree"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/licensemanager/productlicense/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/licensemanager/productlicense/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts are imported from the pinned terraform-provider-oci revision; repo-authored runtime semantics remain authoritative."
+  ]
+}

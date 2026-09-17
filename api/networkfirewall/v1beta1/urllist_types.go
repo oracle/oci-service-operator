@@ -23,6 +23,9 @@ type UrlListSpec struct {
 	// The description of the Url list. This field can be used to add additional info.
 	// +kubebuilder:validation:Optional
 	Description string `json:"description,omitempty"`
+	// The OCID of the Network Firewall policy that owns this resource.
+	// +kubebuilder:validation:Required
+	NetworkFirewallPolicyId string `json:"networkFirewallPolicyId"`
 }
 
 // UrlListUrl defines nested fields for UrlList.Url.

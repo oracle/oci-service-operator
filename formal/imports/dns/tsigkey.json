@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "dns",
+  "slug": "tsigkey",
+  "kind": "TsigKey",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_dns_tsig_key",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateTsigKey",
+        "requestType": "dns.CreateTsigKeyRequest",
+        "responseType": "dns.CreateTsigKeyResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetTsigKey",
+        "requestType": "dns.GetTsigKeyRequest",
+        "responseType": "dns.GetTsigKeyResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListTsigKeys",
+        "requestType": "dns.ListTsigKeysRequest",
+        "responseType": "dns.ListTsigKeysResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeTsigKeyCompartment",
+        "requestType": "dns.ChangeTsigKeyCompartmentRequest",
+        "responseType": "dns.ChangeTsigKeyCompartmentResponse"
+      },
+      {
+        "operation": "UpdateTsigKey",
+        "requestType": "dns.UpdateTsigKeyRequest",
+        "responseType": "dns.UpdateTsigKeyResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteTsigKey",
+        "requestType": "dns.DeleteTsigKeyRequest",
+        "responseType": "dns.DeleteTsigKeyResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "freeform_tags"
+    ],
+    "forceNew": [
+      "algorithm",
+      "name",
+      "secret"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_dns_tsig_keys",
+    "collectionField": "tsig_keys",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "id",
+      "name",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/dns/tsigkey/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/dns/tsigkey/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Refreshed from the pinned terraform-provider-oci DNS TSIG Key resource; write-only secret and scoped delete behavior remain repo-authored."
+  ]
+}

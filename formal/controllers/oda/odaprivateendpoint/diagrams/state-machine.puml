@@ -33,14 +33,14 @@ state "DeleteCleanupBlocked" as delete_cleanup_blocked
 [*] --> observe : CreateOdaPrivateEndpoint
 observe --> resolve_by_lookup : tracked identity missing
 resolve_by_lookup --> evaluate_ready : lookup or create reaches\nACTIVE
-resolve_by_lookup --> retryable : OCI state in PROVISIONING,\nUPDATING, DELETING
+resolve_by_lookup --> retryable : OCI state in CREATING,\nUPDATING, DELETING
 resolve_by_lookup --> failed : unresolved OCI error or non-success state
 observe --> evaluate_ready : OCI state in ACTIVE
-observe --> retryable : OCI state in PROVISIONING,\nUPDATING, DELETING
+observe --> retryable : OCI state in CREATING,\nUPDATING, DELETING
 observe --> failed : unresolved OCI error or non-success state
 evaluate_ready --> reject_unsupported_drift : force-new or conflicting\ndrift detected
 reject_unsupported_drift --> ready : wait for spec or live state change
-evaluate_ready --> apply_update : supported mutable drift for\ndisplay_name
+evaluate_ready --> apply_update : supported mutable drift for\ndisplayName, description,\nnsgIds (+2 more)
 apply_update --> ready : update path completes
 evaluate_ready --> ready : no supported drift remains
 ready --> ready : no supported drift remains
@@ -69,19 +69,26 @@ archetype: generated-service-manager
 status/finalizer: required /
 retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
-provider states: create PROVISIONING; update
+provider states: create CREATING; update
 UPDATING; delete DELETING
-supported drift: display_name
+follow-up: create=read-after-write;
+update=read-after-write; delete=confirm-delete
+supported drift: displayName, description,
+nsgIds, freeformTags (+1 more)
 reject before mutate: force-new fields
-compartment_id
+compartmentId, subnetId
 create-only fields: none
 list lookup: scaffold_oda_odaprivateendpoint
-filters compartment_id, state
+filters displayName, compartmentId; exact
+compartmentId plus displayName match; duplicate
+matches fail
 conflicts: none
 open gaps: none
-Scaffold metadata only; replace with
-controller-specific runtime states before
-promotion.
+The ODA update operation reconciles display
+metadata, NSGs, and tags in place; compartmentId
+and subnetId require replacement.
+Create, update, and delete converge through
+GetOdaPrivateEndpoint lifecycle reads.
 end note
 note right of delete_pending
 delete policy: required

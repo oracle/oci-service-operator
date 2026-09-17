@@ -56,6 +56,9 @@ spec:
           spec:
             description: TermRelationshipSpec defines the desired state of TermRelationship.
             properties:
+              catalogId:
+                description: The OCID of the catalog containing the term relationship.
+                type: string
               description:
                 description: Detailed description of the term relationship usually
                   defined at the time of creation.
@@ -65,12 +68,21 @@ spec:
                   A user-friendly display name. Is changeable. The combination of 'displayName' and 'parentTermKey'
                   must be unique. Avoid entering confidential information. This is the same as 'relationshipType' for 'termRelationship'.
                 type: string
+              glossaryKey:
+                description: The key of the glossary containing the related terms.
+                type: string
               relatedTermKey:
                 description: Unique id of the related term.
                 type: string
+              termKey:
+                description: The key of the source term for the relationship.
+                type: string
             required:
+            - catalogId
             - displayName
+            - glossaryKey
             - relatedTermKey
+            - termKey
             type: object
           status:
             description: TermRelationshipStatus defines the observed state of TermRelationship.

@@ -1,0 +1,385 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "apigateway",
+  "slug": "deployment",
+  "kind": "ApiGatewayDeployment",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_apigateway_deployment",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDeployment",
+        "requestType": "apigateway.CreateDeploymentRequest",
+        "responseType": "apigateway.CreateDeploymentResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDeployment",
+        "requestType": "apigateway.GetDeploymentRequest",
+        "responseType": "apigateway.GetDeploymentResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDeployments",
+        "requestType": "apigateway.ListDeploymentsRequest",
+        "responseType": "apigateway.ListDeploymentsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeDeploymentCompartment",
+        "requestType": "apigateway.ChangeDeploymentCompartmentRequest",
+        "responseType": "apigateway.ChangeDeploymentCompartmentResponse"
+      },
+      {
+        "operation": "UpdateDeployment",
+        "requestType": "apigateway.UpdateDeploymentRequest",
+        "responseType": "apigateway.UpdateDeploymentResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDeployment",
+        "requestType": "apigateway.DeleteDeploymentRequest",
+        "responseType": "apigateway.DeleteDeploymentResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "display_name",
+      "freeform_tags",
+      "is_lock_override",
+      "locks.message",
+      "locks.type",
+      "specification.logging_policies.access_log.is_enabled",
+      "specification.logging_policies.execution_log.is_enabled",
+      "specification.logging_policies.execution_log.log_level",
+      "specification.request_policies.authentication.audiences",
+      "specification.request_policies.authentication.cache_key",
+      "specification.request_policies.authentication.function_id",
+      "specification.request_policies.authentication.is_anonymous_access_allowed",
+      "specification.request_policies.authentication.issuers",
+      "specification.request_policies.authentication.max_clock_skew_in_seconds",
+      "specification.request_policies.authentication.parameters",
+      "specification.request_policies.authentication.public_keys.is_ssl_verify_disabled",
+      "specification.request_policies.authentication.public_keys.keys.alg",
+      "specification.request_policies.authentication.public_keys.keys.e",
+      "specification.request_policies.authentication.public_keys.keys.format",
+      "specification.request_policies.authentication.public_keys.keys.key",
+      "specification.request_policies.authentication.public_keys.keys.key_ops",
+      "specification.request_policies.authentication.public_keys.keys.kid",
+      "specification.request_policies.authentication.public_keys.keys.kty",
+      "specification.request_policies.authentication.public_keys.keys.n",
+      "specification.request_policies.authentication.public_keys.keys.use",
+      "specification.request_policies.authentication.public_keys.max_cache_duration_in_hours",
+      "specification.request_policies.authentication.public_keys.type",
+      "specification.request_policies.authentication.public_keys.uri",
+      "specification.request_policies.authentication.token_auth_scheme",
+      "specification.request_policies.authentication.token_header",
+      "specification.request_policies.authentication.token_query_param",
+      "specification.request_policies.authentication.type",
+      "specification.request_policies.authentication.validation_failure_policy.client_details.client_id",
+      "specification.request_policies.authentication.validation_failure_policy.client_details.client_secret_id",
+      "specification.request_policies.authentication.validation_failure_policy.client_details.client_secret_version_number",
+      "specification.request_policies.authentication.validation_failure_policy.client_details.type",
+      "specification.request_policies.authentication.validation_failure_policy.fallback_redirect_path",
+      "specification.request_policies.authentication.validation_failure_policy.logout_path",
+      "specification.request_policies.authentication.validation_failure_policy.max_expiry_duration_in_hours",
+      "specification.request_policies.authentication.validation_failure_policy.response_code",
+      "specification.request_policies.authentication.validation_failure_policy.response_header_transformations.filter_headers.items.name",
+      "specification.request_policies.authentication.validation_failure_policy.response_header_transformations.filter_headers.type",
+      "specification.request_policies.authentication.validation_failure_policy.response_header_transformations.rename_headers.items.from",
+      "specification.request_policies.authentication.validation_failure_policy.response_header_transformations.rename_headers.items.to",
+      "specification.request_policies.authentication.validation_failure_policy.response_header_transformations.set_headers.items.if_exists",
+      "specification.request_policies.authentication.validation_failure_policy.response_header_transformations.set_headers.items.name",
+      "specification.request_policies.authentication.validation_failure_policy.response_header_transformations.set_headers.items.values",
+      "specification.request_policies.authentication.validation_failure_policy.response_message",
+      "specification.request_policies.authentication.validation_failure_policy.response_type",
+      "specification.request_policies.authentication.validation_failure_policy.scopes",
+      "specification.request_policies.authentication.validation_failure_policy.source_uri_details.type",
+      "specification.request_policies.authentication.validation_failure_policy.source_uri_details.uri",
+      "specification.request_policies.authentication.validation_failure_policy.type",
+      "specification.request_policies.authentication.validation_failure_policy.use_cookies_for_intermediate_steps",
+      "specification.request_policies.authentication.validation_failure_policy.use_cookies_for_session",
+      "specification.request_policies.authentication.validation_failure_policy.use_pkce",
+      "specification.request_policies.authentication.validation_policy.additional_validation_policy.audiences",
+      "specification.request_policies.authentication.validation_policy.additional_validation_policy.issuers",
+      "specification.request_policies.authentication.validation_policy.additional_validation_policy.verify_claims.is_required",
+      "specification.request_policies.authentication.validation_policy.additional_validation_policy.verify_claims.key",
+      "specification.request_policies.authentication.validation_policy.additional_validation_policy.verify_claims.values",
+      "specification.request_policies.authentication.validation_policy.client_details.client_id",
+      "specification.request_policies.authentication.validation_policy.client_details.client_secret_id",
+      "specification.request_policies.authentication.validation_policy.client_details.client_secret_version_number",
+      "specification.request_policies.authentication.validation_policy.client_details.type",
+      "specification.request_policies.authentication.validation_policy.is_ssl_verify_disabled",
+      "specification.request_policies.authentication.validation_policy.keys.alg",
+      "specification.request_policies.authentication.validation_policy.keys.e",
+      "specification.request_policies.authentication.validation_policy.keys.format",
+      "specification.request_policies.authentication.validation_policy.keys.key",
+      "specification.request_policies.authentication.validation_policy.keys.key_ops",
+      "specification.request_policies.authentication.validation_policy.keys.kid",
+      "specification.request_policies.authentication.validation_policy.keys.kty",
+      "specification.request_policies.authentication.validation_policy.keys.n",
+      "specification.request_policies.authentication.validation_policy.keys.use",
+      "specification.request_policies.authentication.validation_policy.max_cache_duration_in_hours",
+      "specification.request_policies.authentication.validation_policy.source_uri_details.type",
+      "specification.request_policies.authentication.validation_policy.source_uri_details.uri",
+      "specification.request_policies.authentication.validation_policy.type",
+      "specification.request_policies.authentication.validation_policy.uri",
+      "specification.request_policies.authentication.verify_claims.is_required",
+      "specification.request_policies.authentication.verify_claims.key",
+      "specification.request_policies.authentication.verify_claims.values",
+      "specification.request_policies.cors.allowed_headers",
+      "specification.request_policies.cors.allowed_methods",
+      "specification.request_policies.cors.allowed_origins",
+      "specification.request_policies.cors.exposed_headers",
+      "specification.request_policies.cors.is_allow_credentials_enabled",
+      "specification.request_policies.cors.max_age_in_seconds",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.audiences",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.cache_key",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.function_id",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.is_anonymous_access_allowed",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.issuers",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.max_clock_skew_in_seconds",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.parameters",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.public_keys.is_ssl_verify_disabled",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.public_keys.keys.alg",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.public_keys.keys.e",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.public_keys.keys.format",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.public_keys.keys.key",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.public_keys.keys.key_ops",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.public_keys.keys.kid",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.public_keys.keys.kty",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.public_keys.keys.n",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.public_keys.keys.use",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.public_keys.max_cache_duration_in_hours",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.public_keys.type",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.public_keys.uri",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.token_auth_scheme",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.token_header",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.token_query_param",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.type",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.validation_failure_policy.client_details.client_id",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.validation_failure_policy.client_details.client_secret_id",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.validation_failure_policy.client_details.client_secret_version_number",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.validation_failure_policy.client_details.type",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.validation_failure_policy.fallback_redirect_path",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.validation_failure_policy.logout_path",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.validation_failure_policy.max_expiry_duration_in_hours",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.validation_failure_policy.response_code",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.validation_failure_policy.response_header_transformations.filter_headers.items.name",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.validation_failure_policy.response_header_transformations.filter_headers.type",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.validation_failure_policy.response_header_transformations.rename_headers.items.from",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.validation_failure_policy.response_header_transformations.rename_headers.items.to",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.validation_failure_policy.response_header_transformations.set_headers.items.if_exists",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.validation_failure_policy.response_header_transformations.set_headers.items.name",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.validation_failure_policy.response_header_transformations.set_headers.items.values",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.validation_failure_policy.response_message",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.validation_failure_policy.response_type",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.validation_failure_policy.scopes",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.validation_failure_policy.source_uri_details.type",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.validation_failure_policy.source_uri_details.uri",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.validation_failure_policy.type",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.validation_failure_policy.use_cookies_for_intermediate_steps",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.validation_failure_policy.use_cookies_for_session",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.validation_failure_policy.use_pkce",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.validation_policy.additional_validation_policy.audiences",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.validation_policy.additional_validation_policy.issuers",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.validation_policy.additional_validation_policy.verify_claims.is_required",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.validation_policy.additional_validation_policy.verify_claims.key",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.validation_policy.additional_validation_policy.verify_claims.values",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.validation_policy.client_details.client_id",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.validation_policy.client_details.client_secret_id",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.validation_policy.client_details.client_secret_version_number",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.validation_policy.client_details.type",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.validation_policy.is_ssl_verify_disabled",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.validation_policy.keys.alg",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.validation_policy.keys.e",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.validation_policy.keys.format",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.validation_policy.keys.key",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.validation_policy.keys.key_ops",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.validation_policy.keys.kid",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.validation_policy.keys.kty",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.validation_policy.keys.n",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.validation_policy.keys.use",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.validation_policy.max_cache_duration_in_hours",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.validation_policy.source_uri_details.type",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.validation_policy.source_uri_details.uri",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.validation_policy.type",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.validation_policy.uri",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.verify_claims.is_required",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.verify_claims.key",
+      "specification.request_policies.dynamic_authentication.authentication_servers.authentication_server_detail.verify_claims.values",
+      "specification.request_policies.dynamic_authentication.authentication_servers.key.expression",
+      "specification.request_policies.dynamic_authentication.authentication_servers.key.is_default",
+      "specification.request_policies.dynamic_authentication.authentication_servers.key.name",
+      "specification.request_policies.dynamic_authentication.authentication_servers.key.type",
+      "specification.request_policies.dynamic_authentication.authentication_servers.key.values",
+      "specification.request_policies.dynamic_authentication.selection_source.selector",
+      "specification.request_policies.dynamic_authentication.selection_source.type",
+      "specification.request_policies.mutual_tls.allowed_sans",
+      "specification.request_policies.mutual_tls.is_verified_certificate_required",
+      "specification.request_policies.rate_limiting.rate_in_requests_per_second",
+      "specification.request_policies.rate_limiting.rate_key",
+      "specification.request_policies.usage_plans.token_locations",
+      "specification.routes.backend.allowed_post_logout_uris",
+      "specification.routes.backend.body",
+      "specification.routes.backend.connect_timeout_in_seconds",
+      "specification.routes.backend.function_id",
+      "specification.routes.backend.headers.name",
+      "specification.routes.backend.headers.value",
+      "specification.routes.backend.is_ssl_verify_disabled",
+      "specification.routes.backend.post_logout_state",
+      "specification.routes.backend.read_timeout_in_seconds",
+      "specification.routes.backend.routing_backends.backend.body",
+      "specification.routes.backend.routing_backends.backend.connect_timeout_in_seconds",
+      "specification.routes.backend.routing_backends.backend.function_id",
+      "specification.routes.backend.routing_backends.backend.headers.name",
+      "specification.routes.backend.routing_backends.backend.headers.value",
+      "specification.routes.backend.routing_backends.backend.is_ssl_verify_disabled",
+      "specification.routes.backend.routing_backends.backend.read_timeout_in_seconds",
+      "specification.routes.backend.routing_backends.backend.status",
+      "specification.routes.backend.routing_backends.backend.type",
+      "specification.routes.backend.routing_backends.backend.url",
+      "specification.routes.backend.routing_backends.key.expression",
+      "specification.routes.backend.routing_backends.key.is_default",
+      "specification.routes.backend.routing_backends.key.name",
+      "specification.routes.backend.routing_backends.key.type",
+      "specification.routes.backend.routing_backends.key.values",
+      "specification.routes.backend.selection_source.selector",
+      "specification.routes.backend.selection_source.type",
+      "specification.routes.backend.send_timeout_in_seconds",
+      "specification.routes.backend.status",
+      "specification.routes.backend.type",
+      "specification.routes.backend.url",
+      "specification.routes.logging_policies.access_log.is_enabled",
+      "specification.routes.logging_policies.execution_log.is_enabled",
+      "specification.routes.logging_policies.execution_log.log_level",
+      "specification.routes.methods",
+      "specification.routes.path",
+      "specification.routes.request_policies.authorization.allowed_scope",
+      "specification.routes.request_policies.authorization.type",
+      "specification.routes.request_policies.body_validation.content.media_type",
+      "specification.routes.request_policies.body_validation.content.validation_type",
+      "specification.routes.request_policies.body_validation.required",
+      "specification.routes.request_policies.body_validation.validation_mode",
+      "specification.routes.request_policies.cors.allowed_headers",
+      "specification.routes.request_policies.cors.allowed_methods",
+      "specification.routes.request_policies.cors.allowed_origins",
+      "specification.routes.request_policies.cors.exposed_headers",
+      "specification.routes.request_policies.cors.is_allow_credentials_enabled",
+      "specification.routes.request_policies.cors.max_age_in_seconds",
+      "specification.routes.request_policies.header_transformations.filter_headers.items.name",
+      "specification.routes.request_policies.header_transformations.filter_headers.type",
+      "specification.routes.request_policies.header_transformations.rename_headers.items.from",
+      "specification.routes.request_policies.header_transformations.rename_headers.items.to",
+      "specification.routes.request_policies.header_transformations.set_headers.items.if_exists",
+      "specification.routes.request_policies.header_transformations.set_headers.items.name",
+      "specification.routes.request_policies.header_transformations.set_headers.items.values",
+      "specification.routes.request_policies.header_validations.headers.name",
+      "specification.routes.request_policies.header_validations.headers.required",
+      "specification.routes.request_policies.header_validations.validation_mode",
+      "specification.routes.request_policies.query_parameter_transformations.filter_query_parameters.items.name",
+      "specification.routes.request_policies.query_parameter_transformations.filter_query_parameters.type",
+      "specification.routes.request_policies.query_parameter_transformations.rename_query_parameters.items.from",
+      "specification.routes.request_policies.query_parameter_transformations.rename_query_parameters.items.to",
+      "specification.routes.request_policies.query_parameter_transformations.set_query_parameters.items.if_exists",
+      "specification.routes.request_policies.query_parameter_transformations.set_query_parameters.items.name",
+      "specification.routes.request_policies.query_parameter_transformations.set_query_parameters.items.values",
+      "specification.routes.request_policies.query_parameter_validations.parameters.name",
+      "specification.routes.request_policies.query_parameter_validations.parameters.required",
+      "specification.routes.request_policies.query_parameter_validations.validation_mode",
+      "specification.routes.request_policies.response_cache_lookup.cache_key_additions",
+      "specification.routes.request_policies.response_cache_lookup.is_enabled",
+      "specification.routes.request_policies.response_cache_lookup.is_private_caching_enabled",
+      "specification.routes.request_policies.response_cache_lookup.type",
+      "specification.routes.response_policies.header_transformations.filter_headers.items.name",
+      "specification.routes.response_policies.header_transformations.filter_headers.type",
+      "specification.routes.response_policies.header_transformations.rename_headers.items.from",
+      "specification.routes.response_policies.header_transformations.rename_headers.items.to",
+      "specification.routes.response_policies.header_transformations.set_headers.items.if_exists",
+      "specification.routes.response_policies.header_transformations.set_headers.items.name",
+      "specification.routes.response_policies.header_transformations.set_headers.items.values",
+      "specification.routes.response_policies.response_cache_store.time_to_live_in_seconds",
+      "specification.routes.response_policies.response_cache_store.type"
+    ],
+    "forceNew": [
+      "gateway_id",
+      "path_prefix"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_apigateway_deployments",
+    "collectionField": "deployment_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "gateway_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/apigateway/deployment/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/apigateway/deployment/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for apigateway/apigatewaydeployment; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -40,7 +40,7 @@ observe --> retryable : OCI state in PROVISIONING,\nUPDATING, DELETING
 observe --> failed : unresolved OCI error or non-success state
 evaluate_ready --> reject_unsupported_drift : force-new or conflicting\ndrift detected
 reject_unsupported_drift --> ready : wait for spec or live state change
-evaluate_ready --> apply_update : supported mutable drift for\ndisplay_name
+evaluate_ready --> apply_update : supported mutable drift for\ndefined_tags, description,\nfreeform_tags
 apply_update --> ready : update path completes
 evaluate_ready --> ready : no supported drift remains
 ready --> ready : no supported drift remains
@@ -71,17 +71,33 @@ retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
 provider states: create PROVISIONING; update
 UPDATING; delete DELETING
-supported drift: display_name
+follow-up: create=read-after-write;
+update=read-after-write; delete=confirm-delete
+supported drift: defined_tags, description,
+freeform_tags
 reject before mutate: force-new fields
-compartment_id
+email_domain_id, name
 create-only fields: none
 list lookup: scaffold_email_dkim filters
-compartment_id, state
+email_domain_id, id, name; Adopt only a unique
+selector match beneath the requested email
+domain.
 conflicts: none
 open gaps: none
-Scaffold metadata only; replace with
-controller-specific runtime states before
-promotion.
+`NEEDS_ATTENTION` is a steady successful state
+for an unverified DKIM: OCI has created the key
+and is waiting for the operator to publish its
+DNS records. The runtime must not fail
+reconciliation while that external DNS action is
+pending.
+`CREATING` and `UPDATING` requeue; `ACTIVE` and
+`NEEDS_ATTENTION` are successful steady states;
+delete retains the finalizer through `DELETING`
+until OCI reports `DELETED` or an unambiguous
+absence.
+The runtime projects the generated selector and
+DNS CNAME/TXT values into status without
+creating Kubernetes Secrets.
 end note
 note right of delete_pending
 delete policy: required

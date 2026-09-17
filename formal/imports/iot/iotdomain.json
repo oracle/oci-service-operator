@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "iot",
+  "slug": "iotdomain",
+  "kind": "IotDomain",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_iot_iot_domain",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateIotDomain",
+        "requestType": "iot.CreateIotDomainRequest",
+        "responseType": "iot.CreateIotDomainResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetIotDomain",
+        "requestType": "iot.GetIotDomainRequest",
+        "responseType": "iot.GetIotDomainResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListIotDomains",
+        "requestType": "iot.ListIotDomainsRequest",
+        "responseType": "iot.ListIotDomainsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateIotDomain",
+        "requestType": "iot.UpdateIotDomainRequest",
+        "responseType": "iot.UpdateIotDomainResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteIotDomain",
+        "requestType": "iot.DeleteIotDomainRequest",
+        "responseType": "iot.DeleteIotDomainResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags"
+    ],
+    "forceNew": [
+      "compartment_id",
+      "iot_domain_group_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource",
+        "entityType": "IotDomain",
+        "action": "CreateIotDomain"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource",
+        "entityType": "IotDomain",
+        "action": "UpdateIotDomain"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource",
+        "entityType": "IotDomain",
+        "action": "DeleteIotDomain"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_iot_iot_domains",
+    "collectionField": "iotDomainCollection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "id",
+      "iot_domain_group_id"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/iot/iotdomain/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/iot/iotdomain/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Terraform registers oci_iot_iot_domain, but formal-import cannot resolve its CRUD type; the vendored SDK, production runtime, and reviewed OCI API behavior define this contract."
+  ]
+}

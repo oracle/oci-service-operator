@@ -18,6 +18,7 @@ import (
 	multicloudv1beta1 "github.com/oracle/oci-service-operator/api/multicloud/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
+	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	"github.com/oracle/oci-service-operator/pkg/util"
 	v1 "k8s.io/api/core/v1"
@@ -118,6 +119,10 @@ func (c *externalLocationDetailsMetadataRuntimeClient) CreateOrUpdate(
 	identity := selector.identity(selected)
 	if tracked := strings.TrimSpace(string(resource.Status.OsokStatus.Ocid)); tracked != "" && tracked != identity {
 		err := fmt.Errorf("ExternalLocationDetailsMetadata annotations select identity %q but status.status.ocid records %q; replacement is required for selector drift", identity, tracked)
+		markExternalLocationDetailsMetadataFailed(resource, err, opcRequestID, c.logger())
+		return servicemanager.OSOKResponse{IsSuccessful: false}, err
+	}
+	if err := generatedruntime.ProjectResponseBodyWithAliases(resource, selected, nil); err != nil {
 		markExternalLocationDetailsMetadataFailed(resource, err, opcRequestID, c.logger())
 		return servicemanager.OSOKResponse{IsSuccessful: false}, err
 	}

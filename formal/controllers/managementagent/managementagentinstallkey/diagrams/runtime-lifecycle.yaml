@@ -1,0 +1,29 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: managementagent
+slug: managementagentinstallkey
+kind: ManagementAgentInstallKey
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending: ["S_CREATING"]
+    updatePending: []
+    deletePending: ["DELETING"]
+  listLookup:
+    filters: ["accessLevel","compartmentId","compartmentIdInSubtree","displayName","state"]
+    matchRule: exact resource identity match; duplicate matches fail
+  mutation:
+    mutable: ["displayName"]
+    forceNew: ["allowedKeyInstallCount","compartmentId","isUnlimited","timeExpires"]
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - "The ManagementAgentInstallKey runtime retains package-local lifecycle, identity, mutation, and delete handling."
+  - "The credential-free evidence mock verifies the recorded create/update payloads, SDK response decoding, status projection, and delete confirmation."

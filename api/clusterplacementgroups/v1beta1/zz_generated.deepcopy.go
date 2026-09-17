@@ -127,7 +127,11 @@ func (in *ClusterPlacementGroupPlacementInstruction) DeepCopy() *ClusterPlacemen
 func (in *ClusterPlacementGroupSpec) DeepCopyInto(out *ClusterPlacementGroupSpec) {
 	*out = *in
 	out.PlacementInstruction = in.PlacementInstruction
-	in.Capabilities.DeepCopyInto(&out.Capabilities)
+	if in.Capabilities != nil {
+		in, out := &in.Capabilities, &out.Capabilities
+		*out = new(ClusterPlacementGroupCapabilities)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.FreeformTags != nil {
 		in, out := &in.FreeformTags, &out.FreeformTags
 		*out = make(map[string]string, len(*in))
@@ -195,7 +199,11 @@ func (in *ClusterPlacementGroupStatus) DeepCopyInto(out *ClusterPlacementGroupSt
 		}
 	}
 	out.PlacementInstruction = in.PlacementInstruction
-	in.Capabilities.DeepCopyInto(&out.Capabilities)
+	if in.Capabilities != nil {
+		in, out := &in.Capabilities, &out.Capabilities
+		*out = new(ClusterPlacementGroupCapabilities)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.SystemTags != nil {
 		in, out := &in.SystemTags, &out.SystemTags
 		*out = make(map[string]shared.MapValue, len(*in))

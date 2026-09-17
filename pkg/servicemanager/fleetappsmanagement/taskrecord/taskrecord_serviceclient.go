@@ -32,8 +32,28 @@ type defaultTaskRecordServiceClient struct {
 
 var _ TaskRecordServiceClient = defaultTaskRecordServiceClient{}
 
+type TaskRecordSDKClients struct {
+	fleetAppsManagementRunbooksClient    fleetappsmanagementsdk.FleetAppsManagementRunbooksClient
+	fleetAppsManagementWorkRequestClient fleetappsmanagementsdk.FleetAppsManagementWorkRequestClient
+}
+
+func newTaskRecordSDKClients(manager *TaskRecordServiceManager) (TaskRecordSDKClients, error) {
+	var clients TaskRecordSDKClients
+	fleetAppsManagementRunbooksClientClient, err := fleetappsmanagementsdk.NewFleetAppsManagementRunbooksClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize TaskRecord OCI client FleetAppsManagementRunbooksClient: %w", err)
+	}
+	clients.fleetAppsManagementRunbooksClient = fleetAppsManagementRunbooksClientClient
+	fleetAppsManagementWorkRequestClientClient, err := fleetappsmanagementsdk.NewFleetAppsManagementWorkRequestClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize TaskRecord OCI client FleetAppsManagementWorkRequestClient: %w", err)
+	}
+	clients.fleetAppsManagementWorkRequestClient = fleetAppsManagementWorkRequestClientClient
+	return clients, nil
+}
+
 var newTaskRecordServiceClient = func(manager *TaskRecordServiceManager) TaskRecordServiceClient {
-	sdkClient, err := fleetappsmanagementsdk.NewFleetAppsManagementRunbooksClientWithConfigurationProvider(manager.Provider)
+	sdkClient, err := newTaskRecordSDKClients(manager)
 	hooks := newTaskRecordRuntimeHooks(manager, sdkClient)
 	config := buildTaskRecordGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {

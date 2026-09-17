@@ -38,10 +38,10 @@ group Lookup and bind
 alt tracked or explicit OCI identity already exists
 ServiceManager -> OCI: GetTranslator
 else tracked identity is missing
-ServiceManager -> OCI: ListTranslator(filters:\ncompartment_id, state)
+ServiceManager -> OCI: ListTranslator(filters:\nodaInstanceId, type)
 alt reusable OCI resource is not found
 ServiceManager -> OCI: CreateTranslator
-loop create pending PROVISIONING
+loop create pending CREATING
 ServiceManager -> OCI: GetTranslator
 end
 else reusable OCI resource already exists
@@ -63,25 +63,30 @@ ServiceManager --> BaseReconciler: release finalizer after delete completion
 end
 end
 else OCI state is retryable
-ServiceManager --> BaseReconciler: requeue while OCI remains in\nPROVISIONING, UPDATING, DELETING
+ServiceManager --> BaseReconciler: requeue while OCI remains in\nCREATING, UPDATING, DELETING
 else live state requires field-aware\ndrift evaluation
 group Drift handling
 note over ServiceManager,OCI
-Supported update surface: display_name
+Supported update surface: baseUrl,
+properties, freeformTags, definedTags
 Reject before mutate: force-new fields
-compartment_id
-Lookup filters: compartment_id, state
+type
+Lookup filters: odaInstanceId, type
+Lookup matching: exact parent and
+translator type match; duplicate matches
+fail
 end note
 opt force-new or conflicting drift is detected
 ServiceManager --> BaseReconciler: reject before OCI mutation
 end
 opt supported mutable drift is detected
-ServiceManager -> OCI: Apply UpdateTranslator only for\nmutable fields display_name
+ServiceManager -> OCI: Apply UpdateTranslator only for\nmutable fields baseUrl, properties,\nfreeformTags, definedTags
 loop update pending UPDATING
 ServiceManager -> OCI: GetTranslator
 end
 end
 ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=template action=CREATED;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource
+ServiceManager -> OCI: apply follow-up strategy\ncreate=read-after-write;\nupdate=read-after-write;\ndelete=confirm-delete
 end
 ServiceManager --> BaseReconciler: status=required,\nfinalizer=retain-until-confirmed-delete
 end
@@ -108,18 +113,21 @@ archetype: generated-service-manager
 status/finalizer: required /
 retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
-provider states: create PROVISIONING; update
+provider states: create CREATING; update
 UPDATING; delete DELETING
-supported drift: display_name
-reject before mutate: force-new fields
-compartment_id
+follow-up: create=read-after-write;
+update=read-after-write; delete=confirm-delete
+supported drift: baseUrl, properties,
+freeformTags, definedTags
+reject before mutate: force-new fields type
 create-only fields: none
 list lookup: scaffold_oda_translator filters
-compartment_id, state
+odaInstanceId, type; exact parent and translator
+type match; duplicate matches fail
 conflicts: none
 open gaps: none
-Scaffold metadata only; replace with
-controller-specific runtime states before
-promotion.
+authToken is write-only: it accompanies create
+and detected mutable updates but cannot
+independently trigger drift correction.
 end note
 @enduml

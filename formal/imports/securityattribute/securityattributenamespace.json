@@ -1,0 +1,124 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "securityattribute",
+  "slug": "securityattributenamespace",
+  "kind": "SecurityAttributeNamespace",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_security_attribute_security_attribute_namespace",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateSecurityAttributeNamespace",
+        "requestType": "securityattribute.CreateSecurityAttributeNamespaceRequest",
+        "responseType": "securityattribute.CreateSecurityAttributeNamespaceResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetSecurityAttributeNamespace",
+        "requestType": "securityattribute.GetSecurityAttributeNamespaceRequest",
+        "responseType": "securityattribute.GetSecurityAttributeNamespaceResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListSecurityAttributeNamespaces",
+        "requestType": "securityattribute.ListSecurityAttributeNamespacesRequest",
+        "responseType": "securityattribute.ListSecurityAttributeNamespacesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeSecurityAttributeNamespaceCompartment",
+        "requestType": "securityattribute.ChangeSecurityAttributeNamespaceCompartmentRequest",
+        "responseType": "securityattribute.ChangeSecurityAttributeNamespaceCompartmentResponse"
+      },
+      {
+        "operation": "UpdateSecurityAttributeNamespace",
+        "requestType": "securityattribute.UpdateSecurityAttributeNamespaceRequest",
+        "responseType": "securityattribute.UpdateSecurityAttributeNamespaceResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteSecurityAttributeNamespace",
+        "requestType": "securityattribute.DeleteSecurityAttributeNamespaceRequest",
+        "responseType": "securityattribute.DeleteSecurityAttributeNamespaceResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "description",
+      "freeform_tags",
+      "is_retired"
+    ],
+    "forceNew": [
+      "name"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_security_attribute_security_attribute_namespaces",
+    "collectionField": "security_attribute_namespaces",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "compartment_id_in_subtree",
+      "name",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/securityattribute/securityattributenamespace/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/securityattribute/securityattributenamespace/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts are imported from the pinned terraform-provider-oci revision; repo-authored runtime semantics remain authoritative."
+  ]
+}

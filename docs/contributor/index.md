@@ -16,6 +16,7 @@ validation, and repository-owned documentation flows.
 - [APM Synthetics Onboarding Audit](apmsynthetics-onboarding-audit.md)
 - [APM Traces Onboarding Audit](apmtraces-onboarding-audit.md)
 - [API Error Coverage Registry](api-error-coverage-registry.md)
+- [Service-Manager Mock Integration](service-manager-mock-integration.md)
 - [API Platform Onboarding Audit](apiplatform-onboarding-audit.md)
 - [Budget Onboarding Audit](budget-onboarding-audit.md)
 - [Capacity Management Onboarding Audit](capacitymanagement-onboarding-audit.md)

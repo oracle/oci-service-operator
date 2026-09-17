@@ -32,8 +32,28 @@ type defaultRunbookServiceClient struct {
 
 var _ RunbookServiceClient = defaultRunbookServiceClient{}
 
+type RunbookSDKClients struct {
+	fleetAppsManagementRunbooksClient    fleetappsmanagementsdk.FleetAppsManagementRunbooksClient
+	fleetAppsManagementWorkRequestClient fleetappsmanagementsdk.FleetAppsManagementWorkRequestClient
+}
+
+func newRunbookSDKClients(manager *RunbookServiceManager) (RunbookSDKClients, error) {
+	var clients RunbookSDKClients
+	fleetAppsManagementRunbooksClientClient, err := fleetappsmanagementsdk.NewFleetAppsManagementRunbooksClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize Runbook OCI client FleetAppsManagementRunbooksClient: %w", err)
+	}
+	clients.fleetAppsManagementRunbooksClient = fleetAppsManagementRunbooksClientClient
+	fleetAppsManagementWorkRequestClientClient, err := fleetappsmanagementsdk.NewFleetAppsManagementWorkRequestClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize Runbook OCI client FleetAppsManagementWorkRequestClient: %w", err)
+	}
+	clients.fleetAppsManagementWorkRequestClient = fleetAppsManagementWorkRequestClientClient
+	return clients, nil
+}
+
 var newRunbookServiceClient = func(manager *RunbookServiceManager) RunbookServiceClient {
-	sdkClient, err := fleetappsmanagementsdk.NewFleetAppsManagementRunbooksClientWithConfigurationProvider(manager.Provider)
+	sdkClient, err := newRunbookSDKClients(manager)
 	hooks := newRunbookRuntimeHooks(manager, sdkClient)
 	config := buildRunbookGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {

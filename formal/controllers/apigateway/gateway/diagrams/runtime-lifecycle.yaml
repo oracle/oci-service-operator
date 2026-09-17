@@ -1,0 +1,64 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: apigateway
+slug: gateway
+kind: ApiGateway
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+  - deleted
+  - failed
+repoAuthored:
+  operations:
+    update:
+      - UpdateGateway
+  providerLifecycle:
+    createPending:
+      - CREATING
+    updatePending:
+      - UPDATING
+    deletePending:
+      - DELETING
+  listLookup:
+    filters:
+      - compartmentId
+      - displayName
+      - certificateId
+      - lifecycleState
+    matchRule: exact compartmentId and displayName identify a reusable Gateway; optional certificateId and lifecycleState narrow candidates when present
+  mutation:
+    mutable:
+      - caBundles
+      - certificateId
+      - definedTags
+      - displayName
+      - freeformTags
+      - networkSecurityGroupIds
+      - responseCacheDetails
+    forceNew:
+      - compartmentId
+      - endpointType
+      - ipMode
+      - ipv4AddressConfiguration
+      - ipv6AddressConfiguration
+      - subnetId
+    createOnly:
+      - locks
+  hooks:
+    create:
+      - helper: tfresource.CreateResource
+    update:
+      - helper: tfresource.UpdateResource
+    delete:
+      - helper: tfresource.DeleteResource
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - The generated runtime tracks create, update, and delete through API Gateway work requests and rereads the Gateway before declaring convergence.
+  - Existing Gateways are reused only through exact compartment and display-name lookup or an explicitly supplied spec.id; lifecycle and certificate filters narrow candidates only when present.
+  - A package-local companion writes the ready-only hostname Secret and removes only Secrets carrying the current Gateway kind/name ownership metadata.

@@ -50,15 +50,84 @@ func registerMonitoredResourceRuntimeHooksMutator(mutator MonitoredResourceRunti
 	}
 	monitoredresourceRuntimeHooksMutators = append(monitoredresourceRuntimeHooksMutators, mutator)
 }
+func newMonitoredResourceRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "stackmonitoring",
+		FormalSlug:    "monitoredresource",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "name", "status", "workRequestId"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"additionalAliases.credential.name", "additionalAliases.credential.service", "additionalAliases.credential.source", "additionalAliases.name", "additionalAliases.source", "additionalCredentials.credentialType", "additionalCredentials.description", "additionalCredentials.keyId", "additionalCredentials.name", "additionalCredentials.properties.name", "additionalCredentials.properties.value", "additionalCredentials.source", "additionalCredentials.type", "aliases.credential.name", "aliases.credential.service", "aliases.credential.source", "aliases.name", "aliases.source", "compartmentId", "credentials.credentialType", "credentials.description", "credentials.keyId", "credentials.name", "credentials.properties.name", "credentials.properties.value", "credentials.source", "credentials.type", "databaseConnectionDetails.connectorId", "databaseConnectionDetails.dbId", "databaseConnectionDetails.dbUniqueName", "databaseConnectionDetails.port", "databaseConnectionDetails.protocol", "databaseConnectionDetails.serviceName", "databaseConnectionDetails.sslSecretId", "definedTags", "displayName", "freeformTags", "hostName", "license", "properties.name", "properties.value", "resourceTimeZone"},
+			ForceNew:      []string{"externalId", "externalResourceId", "managementAgentId", "name", "type"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForUpdatedState", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForUpdatedState", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newMonitoredResourceDefaultRuntimeHooks(sdkClient stackmonitoringsdk.StackMonitoringClient) MonitoredResourceRuntimeHooks {
 	return MonitoredResourceRuntimeHooks{
+		Semantics:       newMonitoredResourceRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*stackmonitoringv1beta1.MonitoredResource]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*stackmonitoringv1beta1.MonitoredResource]{},
 		StatusHooks:     generatedruntime.StatusHooks[*stackmonitoringv1beta1.MonitoredResource]{},
 		ParityHooks:     generatedruntime.ParityHooks[*stackmonitoringv1beta1.MonitoredResource]{},
-		Async:           generatedruntime.AsyncHooks[*stackmonitoringv1beta1.MonitoredResource]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*stackmonitoringv1beta1.MonitoredResource]{},
+		Async: generatedruntime.AsyncHooks[*stackmonitoringv1beta1.MonitoredResource]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := stackmonitoringsdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*stackmonitoringv1beta1.MonitoredResource]{},
 		Create: runtimeOperationHooks[stackmonitoringsdk.CreateMonitoredResourceRequest, stackmonitoringsdk.CreateMonitoredResourceResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateMonitoredResourceDetails", RequestName: "CreateMonitoredResourceDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request stackmonitoringsdk.CreateMonitoredResourceRequest) (stackmonitoringsdk.CreateMonitoredResourceResponse, error) {
@@ -106,10 +175,19 @@ func buildMonitoredResourceGeneratedRuntimeConfig(
 	hooks MonitoredResourceRuntimeHooks,
 ) generatedruntime.Config[*stackmonitoringv1beta1.MonitoredResource] {
 	return generatedruntime.Config[*stackmonitoringv1beta1.MonitoredResource]{
-		Kind:            "MonitoredResource",
-		SDKName:         "MonitoredResource",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "MonitoredResource",
+		SDKName:   "MonitoredResource",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

@@ -32,8 +32,28 @@ type defaultInventoryServiceClient struct {
 
 var _ InventoryServiceClient = defaultInventoryServiceClient{}
 
+type InventorySDKClients struct {
+	inventoryClient cloudbridgesdk.InventoryClient
+	commonClient    cloudbridgesdk.CommonClient
+}
+
+func newInventorySDKClients(manager *InventoryServiceManager) (InventorySDKClients, error) {
+	var clients InventorySDKClients
+	inventoryClientClient, err := cloudbridgesdk.NewInventoryClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize Inventory OCI client InventoryClient: %w", err)
+	}
+	clients.inventoryClient = inventoryClientClient
+	commonClientClient, err := cloudbridgesdk.NewCommonClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize Inventory OCI client CommonClient: %w", err)
+	}
+	clients.commonClient = commonClientClient
+	return clients, nil
+}
+
 var newInventoryServiceClient = func(manager *InventoryServiceManager) InventoryServiceClient {
-	sdkClient, err := cloudbridgesdk.NewInventoryClientWithConfigurationProvider(manager.Provider)
+	sdkClient, err := newInventorySDKClients(manager)
 	hooks := newInventoryRuntimeHooks(manager, sdkClient)
 	config := buildInventoryGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {

@@ -1,0 +1,28 @@
+version: 1
+name: autoscaling-configuration-basic-crud
+service: autoscaling
+namespace: default
+timeout: 20m
+pollInterval: 10s
+create: create.yaml
+update: update.yaml
+ready:
+  conditionTypes: [Active]
+  requireOCID: true
+  fieldsEqual:
+    - desired: spec.displayName
+      observed: status.displayName
+    - desired: spec.resource.id
+      observed: status.resource.id
+    - desired: spec.policies
+      observed: status.policies
+    - desired: spec.coolDownInSeconds
+      observed: status.coolDownInSeconds
+    - desired: spec.freeformTags
+      observed: status.freeformTags
+failureConditionTypes: [Failed]
+delete:
+  enabled: true
+  timeout: 20m
+  cleanupDependencies: true
+cleanupOnFailure: true

@@ -1,0 +1,140 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "unifiedauditpolicy",
+  "kind": "UnifiedAuditPolicy",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_unified_audit_policy",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateUnifiedAuditPolicy",
+        "requestType": "datasafe.CreateUnifiedAuditPolicyRequest",
+        "responseType": "datasafe.CreateUnifiedAuditPolicyResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetUnifiedAuditPolicy",
+        "requestType": "datasafe.GetUnifiedAuditPolicyRequest",
+        "responseType": "datasafe.GetUnifiedAuditPolicyResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListUnifiedAuditPolicies",
+        "requestType": "datasafe.ListUnifiedAuditPoliciesRequest",
+        "responseType": "datasafe.ListUnifiedAuditPoliciesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeUnifiedAuditPolicyCompartment",
+        "requestType": "datasafe.ChangeUnifiedAuditPolicyCompartmentRequest",
+        "responseType": "datasafe.ChangeUnifiedAuditPolicyCompartmentResponse"
+      },
+      {
+        "operation": "UpdateUnifiedAuditPolicy",
+        "requestType": "datasafe.UpdateUnifiedAuditPolicyRequest",
+        "responseType": "datasafe.UpdateUnifiedAuditPolicyResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteUnifiedAuditPolicy",
+        "requestType": "datasafe.DeleteUnifiedAuditPolicyRequest",
+        "responseType": "datasafe.DeleteUnifiedAuditPolicyResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "NEEDS_ATTENTION"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "conditions.attribute_set_id",
+      "conditions.entity_selection",
+      "conditions.entity_type",
+      "conditions.operation_status",
+      "conditions.role_names",
+      "conditions.user_names",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags",
+      "status"
+    ],
+    "forceNew": [
+      "security_policy_id",
+      "unified_audit_policy_definition_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_data_safe_unified_audit_policies",
+    "collectionField": "unified_audit_policy_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "access_level",
+      "compartment_id",
+      "compartment_id_in_subtree",
+      "display_name",
+      "is_seeded",
+      "security_policy_id",
+      "state",
+      "time_created_greater_than_or_equal_to",
+      "time_created_less_than",
+      "unified_audit_policy_definition_id",
+      "unified_audit_policy_id"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/unifiedauditpolicy/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/unifiedauditpolicy/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts are imported from the pinned terraform-provider-oci revision; repo-authored runtime semantics remain authoritative."
+  ]
+}

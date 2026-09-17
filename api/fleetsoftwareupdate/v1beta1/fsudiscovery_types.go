@@ -163,7 +163,7 @@ type FsuDiscoveryDetailsComponent struct {
 	// +kubebuilder:validation:Optional
 	ComponentType string `json:"componentType,omitempty"`
 	// +kubebuilder:validation:Optional
-	Criteria FsuDiscoveryDetailsComponentCriteria `json:"criteria,omitempty"`
+	Criteria FsuDiscoveryDetailsComponentCriteria `json:"criteria,omitempty,omitzero"`
 	// Major version of Exadata Image (Guest OS) release for Exadata VM Cluster targets to be included in the results for an Exadata Fleet Update Discovery.
 	// Major Versions of Exadata Software are demarcated by the underlying Oracle Linux OS version.
 	// For more details, refer to Oracle document 2075007.1 (https://support.oracle.com/knowledge/Oracle%20Database%20Products/2075007_1.html)
@@ -181,7 +181,7 @@ type FsuDiscoveryDetails struct {
 	// +kubebuilder:validation:Optional
 	Type string `json:"type,omitempty"`
 	// +kubebuilder:validation:Optional
-	Criteria FsuDiscoveryDetailsCriteria `json:"criteria,omitempty"`
+	Criteria FsuDiscoveryDetailsCriteria `json:"criteria,omitempty,omitzero"`
 	// Grid Infrastructure Major Version of targets to be included in the Exadata Fleet Update Discovery results.
 	// Only GI targets that match the version specified in this value would be added to the Exadata Fleet Update Discovery results.
 	// +kubebuilder:validation:Optional

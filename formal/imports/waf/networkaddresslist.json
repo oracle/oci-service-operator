@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "waf",
+  "slug": "networkaddresslist",
+  "kind": "NetworkAddressList",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_waf_network_address_list",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateNetworkAddressList",
+        "requestType": "waf.CreateNetworkAddressListRequest",
+        "responseType": "waf.CreateNetworkAddressListResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetNetworkAddressList",
+        "requestType": "waf.GetNetworkAddressListRequest",
+        "responseType": "waf.GetNetworkAddressListResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListNetworkAddressLists",
+        "requestType": "waf.ListNetworkAddressListsRequest",
+        "responseType": "waf.ListNetworkAddressListsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeNetworkAddressListCompartment",
+        "requestType": "waf.ChangeNetworkAddressListCompartmentRequest",
+        "responseType": "waf.ChangeNetworkAddressListCompartmentResponse"
+      },
+      {
+        "operation": "UpdateNetworkAddressList",
+        "requestType": "waf.UpdateNetworkAddressListRequest",
+        "responseType": "waf.UpdateNetworkAddressListResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteNetworkAddressList",
+        "requestType": "waf.DeleteNetworkAddressListRequest",
+        "responseType": "waf.DeleteNetworkAddressListResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "addresses",
+      "compartment_id",
+      "defined_tags",
+      "display_name",
+      "freeform_tags",
+      "system_tags",
+      "type",
+      "vcn_addresses.addresses",
+      "vcn_addresses.vcn_id"
+    ],
+    "forceNew": null,
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_waf_network_address_lists",
+    "collectionField": "network_address_list_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/waf/networkaddresslist/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/waf/networkaddresslist/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Pinned provider facts are paired with reviewed NetworkAddressList service-manager semantics and sanitized live CRUD evidence."
+  ]
+}

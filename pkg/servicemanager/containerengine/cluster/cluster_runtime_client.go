@@ -204,6 +204,7 @@ func buildClusterUpdateBody(
 	if err != nil {
 		return containerenginesdk.UpdateClusterDetails{}, false, err
 	}
+	normalizeClusterOptionalUpdateBlocks(resource.Spec, currentDetails, &details)
 	explicitClearDrift := applyClusterExplicitMutableClears(resolvedValues, resource.Spec, currentDetails, &details)
 
 	desiredValues, err := clusterJSONMap(details)
@@ -259,6 +260,75 @@ func buildClusterResolvedUpdateDetails(
 	applyClusterExplicitEmptySliceValues(resource.Spec, &details)
 
 	return resolvedValues, details, nil
+}
+
+func normalizeClusterOptionalUpdateBlocks(
+	spec containerenginev1beta1.ClusterSpec,
+	current containerenginesdk.UpdateClusterDetails,
+	details *containerenginesdk.UpdateClusterDetails,
+) {
+	if details == nil {
+		return
+	}
+
+	if details.Options != nil {
+		if !spec.Options.AdmissionControllerOptions.IsPodSecurityPolicyEnabled &&
+			(current.Options == nil ||
+				current.Options.AdmissionControllerOptions == nil ||
+				!clusterBoolPtrTrue(current.Options.AdmissionControllerOptions.IsPodSecurityPolicyEnabled)) {
+			details.Options.AdmissionControllerOptions = nil
+		}
+		if len(spec.Options.PersistentVolumeConfig.FreeformTags) == 0 &&
+			len(spec.Options.PersistentVolumeConfig.DefinedTags) == 0 {
+			details.Options.PersistentVolumeConfig = nil
+		}
+		if len(spec.Options.ServiceLbConfig.FreeformTags) == 0 &&
+			len(spec.Options.ServiceLbConfig.DefinedTags) == 0 &&
+			spec.Options.ServiceLbConfig.BackendNsgIds == nil {
+			details.Options.ServiceLbConfig = nil
+		}
+		if !clusterOIDCSpecConfigured(spec.Options.OpenIdConnectTokenAuthenticationConfig) &&
+			!clusterCurrentOIDCNeedsClear(clusterCurrentOIDCTokenAuthenticationConfig(current)) {
+			details.Options.OpenIdConnectTokenAuthenticationConfig = nil
+		}
+		if !spec.Options.OpenIdConnectDiscovery.IsOpenIdConnectDiscoveryEnabled &&
+			(current.Options == nil ||
+				current.Options.OpenIdConnectDiscovery == nil ||
+				!clusterBoolPtrTrue(current.Options.OpenIdConnectDiscovery.IsOpenIdConnectDiscoveryEnabled)) {
+			details.Options.OpenIdConnectDiscovery = nil
+		}
+		if details.Options.AdmissionControllerOptions == nil &&
+			details.Options.PersistentVolumeConfig == nil &&
+			details.Options.ServiceLbConfig == nil &&
+			details.Options.OpenIdConnectTokenAuthenticationConfig == nil &&
+			details.Options.OpenIdConnectDiscovery == nil {
+			details.Options = nil
+		}
+	}
+
+	if !spec.ImagePolicyConfig.IsPolicyEnabled &&
+		len(spec.ImagePolicyConfig.KeyDetails) == 0 &&
+		(current.ImagePolicyConfig == nil ||
+			(!clusterBoolPtrTrue(current.ImagePolicyConfig.IsPolicyEnabled) &&
+				len(current.ImagePolicyConfig.KeyDetails) == 0)) {
+		details.ImagePolicyConfig = nil
+	}
+}
+
+func clusterOIDCSpecConfigured(
+	spec containerenginev1beta1.ClusterOptionsOpenIdConnectTokenAuthenticationConfig,
+) bool {
+	return spec.IsOpenIdConnectAuthEnabled ||
+		spec.IssuerUrl != "" ||
+		spec.ClientId != "" ||
+		spec.UsernameClaim != "" ||
+		spec.UsernamePrefix != "" ||
+		spec.GroupsClaim != "" ||
+		spec.GroupsPrefix != "" ||
+		spec.RequiredClaims != nil ||
+		spec.CaCertificate != "" ||
+		spec.SigningAlgorithms != nil ||
+		spec.ConfigurationFile != ""
 }
 
 func buildCurrentClusterUpdateDetails(currentResponse any) (containerenginesdk.UpdateClusterDetails, error) {
@@ -566,6 +636,33 @@ func applyClusterExplicitMutableClears(
 	}
 
 	updateNeeded := false
+	if current.Options != nil &&
+		current.Options.AdmissionControllerOptions != nil &&
+		clusterBoolPtrTrue(current.Options.AdmissionControllerOptions.IsPodSecurityPolicyEnabled) &&
+		!spec.Options.AdmissionControllerOptions.IsPodSecurityPolicyEnabled {
+		ensureClusterUpdateAdmissionControllerOptions(details).IsPodSecurityPolicyEnabled = common.Bool(false)
+		updateNeeded = true
+	}
+	if current.ImagePolicyConfig != nil &&
+		clusterBoolPtrTrue(current.ImagePolicyConfig.IsPolicyEnabled) &&
+		!spec.ImagePolicyConfig.IsPolicyEnabled {
+		ensureClusterUpdateImagePolicyConfig(details).IsPolicyEnabled = common.Bool(false)
+		updateNeeded = true
+	}
+	if current.Options != nil &&
+		current.Options.OpenIdConnectDiscovery != nil &&
+		clusterBoolPtrTrue(current.Options.OpenIdConnectDiscovery.IsOpenIdConnectDiscoveryEnabled) &&
+		!spec.Options.OpenIdConnectDiscovery.IsOpenIdConnectDiscoveryEnabled {
+		ensureClusterUpdateOpenIDConnectDiscovery(details).IsOpenIdConnectDiscoveryEnabled = common.Bool(false)
+		updateNeeded = true
+	}
+	if current.Options != nil &&
+		current.Options.OpenIdConnectTokenAuthenticationConfig != nil &&
+		clusterBoolPtrTrue(current.Options.OpenIdConnectTokenAuthenticationConfig.IsOpenIdConnectAuthEnabled) &&
+		!spec.Options.OpenIdConnectTokenAuthenticationConfig.IsOpenIdConnectAuthEnabled {
+		ensureClusterUpdateOIDCTokenAuthenticationConfig(details).IsOpenIdConnectAuthEnabled = common.Bool(false)
+		updateNeeded = true
+	}
 
 	if spec.Options.ServiceLbConfig.BackendNsgIds != nil &&
 		len(spec.Options.ServiceLbConfig.BackendNsgIds) == 0 &&
@@ -643,6 +740,35 @@ func ensureClusterUpdateOptions(details *containerenginesdk.UpdateClusterDetails
 	return details.Options
 }
 
+func ensureClusterUpdateAdmissionControllerOptions(
+	details *containerenginesdk.UpdateClusterDetails,
+) *containerenginesdk.AdmissionControllerOptions {
+	options := ensureClusterUpdateOptions(details)
+	if options.AdmissionControllerOptions == nil {
+		options.AdmissionControllerOptions = &containerenginesdk.AdmissionControllerOptions{}
+	}
+	return options.AdmissionControllerOptions
+}
+
+func ensureClusterUpdateOpenIDConnectDiscovery(
+	details *containerenginesdk.UpdateClusterDetails,
+) *containerenginesdk.OpenIdConnectDiscovery {
+	options := ensureClusterUpdateOptions(details)
+	if options.OpenIdConnectDiscovery == nil {
+		options.OpenIdConnectDiscovery = &containerenginesdk.OpenIdConnectDiscovery{}
+	}
+	return options.OpenIdConnectDiscovery
+}
+
+func ensureClusterUpdateImagePolicyConfig(
+	details *containerenginesdk.UpdateClusterDetails,
+) *containerenginesdk.UpdateImagePolicyConfigDetails {
+	if details.ImagePolicyConfig == nil {
+		details.ImagePolicyConfig = &containerenginesdk.UpdateImagePolicyConfigDetails{}
+	}
+	return details.ImagePolicyConfig
+}
+
 func ensureClusterUpdateServiceLBConfig(details *containerenginesdk.UpdateClusterDetails) *containerenginesdk.ServiceLbConfigDetails {
 	options := ensureClusterUpdateOptions(details)
 	if options.ServiceLbConfig == nil {
@@ -693,8 +819,31 @@ func clusterCurrentOIDCSigningAlgorithms(current containerenginesdk.UpdateCluste
 	return currentOIDC.SigningAlgorithms
 }
 
+func clusterCurrentOIDCNeedsClear(
+	current *containerenginesdk.OpenIdConnectTokenAuthenticationConfig,
+) bool {
+	if current == nil {
+		return false
+	}
+	return clusterBoolPtrTrue(current.IsOpenIdConnectAuthEnabled) ||
+		clusterStringPtrHasValue(current.IssuerUrl) ||
+		clusterStringPtrHasValue(current.ClientId) ||
+		clusterStringPtrHasValue(current.UsernameClaim) ||
+		clusterStringPtrHasValue(current.UsernamePrefix) ||
+		clusterStringPtrHasValue(current.GroupsClaim) ||
+		clusterStringPtrHasValue(current.GroupsPrefix) ||
+		len(current.RequiredClaims) > 0 ||
+		clusterStringPtrHasValue(current.CaCertificate) ||
+		len(current.SigningAlgorithms) > 0 ||
+		clusterStringPtrHasValue(current.ConfigurationFile)
+}
+
 func clusterStringPtrHasValue(value *string) bool {
 	return value != nil && *value != ""
+}
+
+func clusterBoolPtrTrue(value *bool) bool {
+	return value != nil && *value
 }
 
 func clusterResolvedSpecHasPath(values map[string]any, path string) bool {

@@ -232,7 +232,7 @@ func deployArtifactWorkRequest(
 func TestDeployArtifactRuntimeSemanticsEncodesWorkRequestAndDeleteContracts(t *testing.T) {
 	t.Parallel()
 
-	got := newDeployArtifactRuntimeSemantics()
+	got := reviewedDeployArtifactRuntimeSemantics()
 	if got.FormalService != "devops" || got.FormalSlug != "deployartifact" {
 		t.Fatalf("formal identity = %s/%s, want devops/deployartifact", got.FormalService, got.FormalSlug)
 	}
@@ -548,8 +548,8 @@ func TestDeployArtifactDeletePollsWorkRequestAndConfirmsNotFound(t *testing.T) {
 	if !deleted {
 		t.Fatal("Delete() deleted = false, want true after work request and not-found confirmation")
 	}
-	if got := resource.Status.OsokStatus.OpcRequestID; got != "opc-delete" {
-		t.Fatalf("status.status.opcRequestId = %q, want opc-delete", got)
+	if got := resource.Status.OsokStatus.OpcRequestID; got != "opc-request-id" {
+		t.Fatalf("status.status.opcRequestId = %q, want final confirmation request ID", got)
 	}
 	if resource.Status.OsokStatus.DeletedAt == nil {
 		t.Fatal("status.status.deletedAt = nil, want deletion timestamp")
@@ -587,7 +587,7 @@ func TestDeployArtifactDeleteTreatsAuthShapedNotFoundConservatively(t *testing.T
 	}
 }
 
-func TestDeployArtifactDeleteTreatsPreReadAuthShapedNotFoundAsAmbiguous(t *testing.T) {
+func TestDeployArtifactDeleteAcceptsPreReadAuthShapedNotFoundAfterScopedListProvesAbsence(t *testing.T) {
 	t.Parallel()
 
 	resource := newExistingDeployArtifactResource(testDeployArtifactID)
@@ -603,17 +603,17 @@ func TestDeployArtifactDeleteTreatsPreReadAuthShapedNotFoundAsAmbiguous(t *testi
 	client := newDeployArtifactTestClient(fake)
 
 	deleted, err := client.Delete(context.Background(), resource)
-	if err == nil {
-		t.Fatal("Delete() error = nil, want ambiguous pre-read to stay fatal")
+	if err != nil {
+		t.Fatalf("Delete() error = %v", err)
 	}
-	if deleted {
-		t.Fatal("Delete() deleted = true, want false")
+	if !deleted {
+		t.Fatal("Delete() deleted = false, want true after scoped list proves absence")
 	}
 	if len(fake.deleteRequests) != 0 {
 		t.Fatalf("DeleteDeployArtifact() calls = %d, want 0", len(fake.deleteRequests))
 	}
-	if !strings.Contains(err.Error(), "ambiguous") {
-		t.Fatalf("Delete() error = %v, want ambiguous detail", err)
+	if resource.Status.OsokStatus.DeletedAt == nil {
+		t.Fatal("status.status.deletedAt = nil, want deletion timestamp")
 	}
 }
 

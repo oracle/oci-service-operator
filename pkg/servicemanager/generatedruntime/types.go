@@ -14,10 +14,14 @@ import (
 	"time"
 
 	apmconfigsdk "github.com/oracle/oci-go-sdk/v65/apmconfig"
+	autoscalingsdk "github.com/oracle/oci-go-sdk/v65/autoscaling"
 	dashboardservicesdk "github.com/oracle/oci-go-sdk/v65/dashboardservice"
 	databasesdk "github.com/oracle/oci-go-sdk/v65/database"
 	databasemigrationsdk "github.com/oracle/oci-go-sdk/v65/databasemigration"
 	databasetoolssdk "github.com/oracle/oci-go-sdk/v65/databasetools"
+	dataintegrationsdk "github.com/oracle/oci-go-sdk/v65/dataintegration"
+	datasafesdk "github.com/oracle/oci-go-sdk/v65/datasafe"
+	networkfirewallsdk "github.com/oracle/oci-go-sdk/v65/networkfirewall"
 	"github.com/oracle/oci-service-operator/pkg/credhelper"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
@@ -48,6 +52,8 @@ var errResourceNotFound = errors.New("generated runtime resource not found")
 var (
 	passwordSourceType                       = reflect.TypeOf(shared.PasswordSource{})
 	usernameSourceType                       = reflect.TypeOf(shared.UsernameSource{})
+	autoScalingPolicyCreateDetailsType       = reflect.TypeOf((*autoscalingsdk.CreateAutoScalingPolicyDetails)(nil)).Elem()
+	autoScalingPolicyUpdateDetailsType       = reflect.TypeOf((*autoscalingsdk.UpdateAutoScalingPolicyDetails)(nil)).Elem()
 	autonomousDatabaseBaseType               = reflect.TypeOf((*databasesdk.CreateAutonomousDatabaseBase)(nil)).Elem()
 	configCreateDetailsType                  = reflect.TypeOf((*apmconfigsdk.CreateConfigDetails)(nil)).Elem()
 	configUpdateDetailsType                  = reflect.TypeOf((*apmconfigsdk.UpdateConfigDetails)(nil)).Elem()
@@ -55,8 +61,29 @@ var (
 	connectionUpdateDetailsType              = reflect.TypeOf((*databasemigrationsdk.UpdateConnectionDetails)(nil)).Elem()
 	databaseToolsConnectionCreateDetailsType = reflect.TypeOf((*databasetoolssdk.CreateDatabaseToolsConnectionDetails)(nil)).Elem()
 	databaseToolsConnectionUpdateDetailsType = reflect.TypeOf((*databasetoolssdk.UpdateDatabaseToolsConnectionDetails)(nil)).Elem()
+	dataIntegrationConnectionCreateType      = reflect.TypeOf((*dataintegrationsdk.CreateConnectionDetails)(nil)).Elem()
+	dataIntegrationConnectionUpdateType      = reflect.TypeOf((*dataintegrationsdk.UpdateConnectionDetails)(nil)).Elem()
+	dataIntegrationDataAssetCreateType       = reflect.TypeOf((*dataintegrationsdk.CreateDataAssetDetails)(nil)).Elem()
+	dataIntegrationDataAssetUpdateType       = reflect.TypeOf((*dataintegrationsdk.UpdateDataAssetDetails)(nil)).Elem()
+	dataIntegrationTaskCreateType            = reflect.TypeOf((*dataintegrationsdk.CreateTaskDetails)(nil)).Elem()
+	dataIntegrationTaskUpdateType            = reflect.TypeOf((*dataintegrationsdk.UpdateTaskDetails)(nil)).Elem()
 	dashboardCreateDetailsType               = reflect.TypeOf((*dashboardservicesdk.CreateDashboardDetails)(nil)).Elem()
 	dashboardUpdateDetailsType               = reflect.TypeOf((*dashboardservicesdk.UpdateDashboardDetails)(nil)).Elem()
+	sensitiveTypeCreateDetailsType           = reflect.TypeOf((*datasafesdk.CreateSensitiveTypeDetails)(nil)).Elem()
+	sensitiveTypeUpdateDetailsType           = reflect.TypeOf((*datasafesdk.UpdateSensitiveTypeDetails)(nil)).Elem()
+	networkFirewallCreateApplicationType     = reflect.TypeOf((*networkfirewallsdk.CreateApplicationDetails)(nil)).Elem()
+	networkFirewallUpdateApplicationType     = reflect.TypeOf((*networkfirewallsdk.UpdateApplicationDetails)(nil)).Elem()
+	networkFirewallUpdateAddressListType     = reflect.TypeOf((*networkfirewallsdk.UpdateAddressListDetails)(nil)).Elem()
+	networkFirewallCreateDecryptionType      = reflect.TypeOf((*networkfirewallsdk.CreateDecryptionProfileDetails)(nil)).Elem()
+	networkFirewallUpdateDecryptionType      = reflect.TypeOf((*networkfirewallsdk.UpdateDecryptionProfileDetails)(nil)).Elem()
+	networkFirewallCreateMappedSecretType    = reflect.TypeOf((*networkfirewallsdk.CreateMappedSecretDetails)(nil)).Elem()
+	networkFirewallUpdateMappedSecretType    = reflect.TypeOf((*networkfirewallsdk.UpdateMappedSecretDetails)(nil)).Elem()
+	networkFirewallCreateNatRuleType         = reflect.TypeOf((*networkfirewallsdk.CreateNatRuleDetails)(nil)).Elem()
+	networkFirewallUpdateNatRuleType         = reflect.TypeOf((*networkfirewallsdk.UpdateNatRuleDetails)(nil)).Elem()
+	networkFirewallCreateServiceType         = reflect.TypeOf((*networkfirewallsdk.CreateServiceDetails)(nil)).Elem()
+	networkFirewallUpdateServiceType         = reflect.TypeOf((*networkfirewallsdk.UpdateServiceDetails)(nil)).Elem()
+	networkFirewallCreateTunnelRuleType      = reflect.TypeOf((*networkfirewallsdk.CreateTunnelInspectionRuleDetails)(nil)).Elem()
+	networkFirewallUpdateTunnelRuleType      = reflect.TypeOf((*networkfirewallsdk.UpdateTunnelInspectionRuleDetails)(nil)).Elem()
 )
 
 type createContextKey string
@@ -126,12 +153,15 @@ type HookSet struct {
 }
 
 type IdentityHooks[T any] struct {
-	Resolve                   func(T) (any, error)
-	RecordPath                func(T, any)
-	RecordTracked             func(T, any, string)
-	GuardExistingBeforeCreate func(context.Context, T) (ExistingBeforeCreateDecision, error)
-	LookupExisting            func(context.Context, T, any) (any, error)
-	SeedSyntheticTrackedID    func(T, any) func()
+	Resolve       func(T) (any, error)
+	RecordPath    func(T, any)
+	RecordTracked func(T, any, string)
+	// RecordBeforeCreateFollowUp preserves a path-addressed child's known identity
+	// when OCI accepts create before the child becomes readable.
+	RecordBeforeCreateFollowUp bool
+	GuardExistingBeforeCreate  func(context.Context, T) (ExistingBeforeCreateDecision, error)
+	LookupExisting             func(context.Context, T, any) (any, error)
+	SeedSyntheticTrackedID     func(T, any) func()
 }
 
 type ReadHooks struct {
@@ -153,11 +183,17 @@ type StatusHooks[T any] struct {
 	MarkTerminating        func(T, any)
 }
 
+// UnsupportedDriftEquivalent recognizes a resource-specific canonical form
+// without weakening mutable or force-new comparisons. The first result says
+// the hook owns the path; the second says the values are equivalent.
+type UnsupportedDriftEquivalent func(path string, desired any, observed any) (handled bool, equivalent bool)
+
 type ParityHooks[T any] struct {
-	NormalizeDesiredState   func(T, any)
-	ValidateCreateOnlyDrift func(T, any) error
-	RequiresParityHandling  func(T, any) bool
-	ApplyParityUpdate       func(context.Context, T, any) (servicemanager.OSOKResponse, error)
+	NormalizeDesiredState      func(T, any)
+	ValidateCreateOnlyDrift    func(T, any) error
+	UnsupportedDriftEquivalent UnsupportedDriftEquivalent
+	RequiresParityHandling     func(T, any) bool
+	ApplyParityUpdate          func(context.Context, T, any) (servicemanager.OSOKResponse, error)
 }
 
 type AsyncHooks[T any] struct {
@@ -182,9 +218,13 @@ type DeleteOutcome struct {
 }
 
 type DeleteHooks[T any] struct {
-	ConfirmRead  func(context.Context, T, string) (any, error)
-	HandleError  func(T, error) error
-	ApplyOutcome func(T, any, DeleteConfirmStage) (DeleteOutcome, error)
+	ConfirmRead func(context.Context, T, string) (any, error)
+	// UseConfirmReadAfterWorkRequest opts a resource into its scoped confirmation
+	// hook after an asynchronous delete completes. The default preserves the
+	// generated Get-based confirmation used by existing resources.
+	UseConfirmReadAfterWorkRequest bool
+	HandleError                    func(T, error) error
+	ApplyOutcome                   func(T, any, DeleteConfirmStage) (DeleteOutcome, error)
 }
 
 type LifecycleSemantics struct {
@@ -205,10 +245,11 @@ type ListSemantics struct {
 }
 
 type MutationSemantics struct {
-	UpdateCandidate []string
-	Mutable         []string
-	ForceNew        []string
-	ConflictsWith   map[string][]string
+	UpdateCandidate         []string
+	Mutable                 []string
+	ForceNew                []string
+	ZeroValueNullEquivalent []string
+	ConflictsWith           map[string][]string
 }
 
 type AuxiliaryOperation struct {
@@ -249,8 +290,11 @@ type Config[T any] struct {
 	CredentialClient credhelper.CredentialClient
 	InitError        error
 	Semantics        *Semantics
-	BuildCreateBody  func(context.Context, T, string) (any, error)
-	BuildUpdateBody  func(context.Context, T, string, any) (any, bool, error)
+	// AsyncSemantics carries the generated async contract independently from
+	// optional formal mutability and lifecycle metadata.
+	AsyncSemantics  *AsyncSemantics
+	BuildCreateBody func(context.Context, T, string) (any, error)
+	BuildUpdateBody func(context.Context, T, string, any) (any, bool, error)
 
 	Identity        IdentityHooks[T]
 	Read            ReadHooks
@@ -298,10 +342,24 @@ func NewServiceClient[T any](cfg Config[T]) ServiceClient[T] {
 	if err := validateFormalSemantics(cfg.Kind, cfg.Semantics); err != nil {
 		cfg.InitError = errors.Join(cfg.InitError, err)
 	}
+	if err := validateRuntimeAsyncSemantics(cfg.Kind, cfg.AsyncSemantics); err != nil {
+		cfg.InitError = errors.Join(cfg.InitError, err)
+	}
 	if err := validateGeneratedWorkRequestAsyncHooks(cfg); err != nil {
 		cfg.InitError = errors.Join(cfg.InitError, err)
 	}
 	return ServiceClient[T]{config: cfg}
+}
+
+func validateRuntimeAsyncSemantics(kind string, async *AsyncSemantics) error {
+	if async == nil {
+		return nil
+	}
+	problems := invalidAsyncSemanticsProblems(&Semantics{Async: async})
+	if len(problems) == 0 {
+		return nil
+	}
+	return fmt.Errorf("%s async semantics blocked: %s", kind, strings.Join(problems, "; "))
 }
 
 func WithSkipExistingBeforeCreate(ctx context.Context) context.Context {

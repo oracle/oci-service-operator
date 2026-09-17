@@ -66,25 +66,25 @@ func newApplicationGroupDefaultRuntimeHooks(sdkClient networkfirewallsdk.Network
 			},
 		},
 		Get: runtimeOperationHooks[networkfirewallsdk.GetApplicationGroupRequest, networkfirewallsdk.GetApplicationGroupResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "ApplicationGroupName", RequestName: "applicationGroupName", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "ApplicationGroupName", RequestName: "applicationGroupName", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request networkfirewallsdk.GetApplicationGroupRequest) (networkfirewallsdk.GetApplicationGroupResponse, error) {
 				return sdkClient.GetApplicationGroup(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[networkfirewallsdk.ListApplicationGroupsRequest, networkfirewallsdk.ListApplicationGroupsResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: true}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request networkfirewallsdk.ListApplicationGroupsRequest) (networkfirewallsdk.ListApplicationGroupsResponse, error) {
 				return sdkClient.ListApplicationGroups(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[networkfirewallsdk.UpdateApplicationGroupRequest, networkfirewallsdk.UpdateApplicationGroupResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "ApplicationGroupName", RequestName: "applicationGroupName", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdateApplicationGroupDetails", RequestName: "UpdateApplicationGroupDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "ApplicationGroupName", RequestName: "applicationGroupName", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateApplicationGroupDetails", RequestName: "UpdateApplicationGroupDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request networkfirewallsdk.UpdateApplicationGroupRequest) (networkfirewallsdk.UpdateApplicationGroupResponse, error) {
 				return sdkClient.UpdateApplicationGroup(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[networkfirewallsdk.DeleteApplicationGroupRequest, networkfirewallsdk.DeleteApplicationGroupResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "ApplicationGroupName", RequestName: "applicationGroupName", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "ApplicationGroupName", RequestName: "applicationGroupName", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request networkfirewallsdk.DeleteApplicationGroupRequest) (networkfirewallsdk.DeleteApplicationGroupResponse, error) {
 				return sdkClient.DeleteApplicationGroup(ctx, request)
 			},

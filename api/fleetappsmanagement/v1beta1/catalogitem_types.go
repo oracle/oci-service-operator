@@ -40,7 +40,7 @@ type CatalogItemSpec struct {
 	// +kubebuilder:validation:Optional
 	TimeReleased string `json:"timeReleased,omitempty"`
 	// +kubebuilder:validation:Optional
-	CatalogSourcePayload CatalogItemCatalogSourcePayload `json:"catalogSourcePayload,omitempty"`
+	CatalogSourcePayload CatalogItemCatalogSourcePayload `json:"catalogSourcePayload,omitempty,omitzero"`
 	// The catalog listing Id.
 	// +kubebuilder:validation:Optional
 	ListingId string `json:"listingId,omitempty"`

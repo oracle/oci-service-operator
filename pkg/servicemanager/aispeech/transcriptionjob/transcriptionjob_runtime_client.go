@@ -80,6 +80,7 @@ func applyTranscriptionJobRuntimeHooks(
 	hooks.List.Fields = transcriptionJobListFields()
 	hooks.Update.Fields = transcriptionJobUpdateFields()
 	hooks.Delete.Fields = transcriptionJobDeleteFields()
+	hooks.ParityHooks.UnsupportedDriftEquivalent = transcriptionJobUnsupportedDriftEquivalent
 	hooks.DeleteHooks.ConfirmRead = runtimeClient.confirmDeleteRead
 	hooks.DeleteHooks.HandleError = runtimeClient.handleDeleteError
 	hooks.DeleteHooks.ApplyOutcome = runtimeClient.applyDeleteOutcome
@@ -88,6 +89,24 @@ func applyTranscriptionJobRuntimeHooks(
 		wrapped.delegate = delegate
 		return &wrapped
 	})
+}
+
+func transcriptionJobUnsupportedDriftEquivalent(path string, desired any, observed any) (bool, bool) {
+	if path != "outputLocation.prefix" {
+		return false, false
+	}
+	desiredPrefix, desiredOK := desired.(string)
+	observedPrefix, observedOK := observed.(string)
+	if !desiredOK || !observedOK {
+		return true, false
+	}
+	desiredPrefix = strings.TrimSuffix(strings.TrimSpace(desiredPrefix), "/")
+	observedPrefix = strings.TrimSuffix(strings.TrimSpace(observedPrefix), "/")
+	if desiredPrefix == "" || observedPrefix == "" {
+		return true, desiredPrefix == observedPrefix
+	}
+	jobPrefix := strings.TrimPrefix(observedPrefix, desiredPrefix+"/job-")
+	return true, jobPrefix != observedPrefix && jobPrefix != "" && !strings.Contains(jobPrefix, "/")
 }
 
 func newTranscriptionJobRuntimeClient(

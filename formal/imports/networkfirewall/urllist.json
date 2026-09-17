@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "networkfirewall",
+  "slug": "urllist",
+  "kind": "UrlList",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_network_firewall_network_firewall_policy_url_list",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateUrlList",
+        "requestType": "networkfirewall.CreateUrlListRequest",
+        "responseType": "networkfirewall.CreateUrlListResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetUrlList",
+        "requestType": "networkfirewall.GetUrlListRequest",
+        "responseType": "networkfirewall.GetUrlListResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateUrlList",
+        "requestType": "networkfirewall.UpdateUrlListRequest",
+        "responseType": "networkfirewall.UpdateUrlListResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteUrlList",
+        "requestType": "networkfirewall.DeleteUrlListRequest",
+        "responseType": "networkfirewall.DeleteUrlListResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "urls",
+      "description"
+    ],
+    "forceNew": [
+      "network_firewall_policy_id",
+      "name"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/networkfirewall/urllist/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/networkfirewall/urllist/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "delete-confirmation",
+      "lifecycle-classification",
+      "list-lookup",
+      "mutation-policy",
+      "secret-output"
+    ]
+  },
+  "notes": [
+    "Pinned provider operations are combined with reviewed composite parent/name identity and UrlList runtime semantics."
+  ]
+}

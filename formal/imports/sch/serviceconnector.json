@@ -1,0 +1,151 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "sch",
+  "slug": "serviceconnector",
+  "kind": "ServiceConnector",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_sch_service_connector",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateServiceConnector",
+        "requestType": "sch.CreateServiceConnectorRequest",
+        "responseType": "sch.CreateServiceConnectorResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetServiceConnector",
+        "requestType": "sch.GetServiceConnectorRequest",
+        "responseType": "sch.GetServiceConnectorResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListServiceConnectors",
+        "requestType": "sch.ListServiceConnectorsRequest",
+        "responseType": "sch.ListServiceConnectorsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeServiceConnectorCompartment",
+        "requestType": "sch.ChangeServiceConnectorCompartmentRequest",
+        "responseType": "sch.ChangeServiceConnectorCompartmentResponse"
+      },
+      {
+        "operation": "UpdateServiceConnector",
+        "requestType": "sch.UpdateServiceConnectorRequest",
+        "responseType": "sch.UpdateServiceConnectorResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteServiceConnector",
+        "requestType": "sch.DeleteServiceConnectorRequest",
+        "responseType": "sch.DeleteServiceConnectorResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags",
+      "source.config_map",
+      "source.cursor.kind",
+      "source.kind",
+      "source.log_sources.compartment_id",
+      "source.log_sources.log_group_id",
+      "source.log_sources.log_id",
+      "source.monitoring_sources.compartment_id",
+      "source.monitoring_sources.namespace_details.kind",
+      "source.monitoring_sources.namespace_details.namespaces.metrics.kind",
+      "source.monitoring_sources.namespace_details.namespaces.namespace",
+      "source.plugin_name",
+      "source.stream_id",
+      "state",
+      "target.batch_rollover_size_in_mbs",
+      "target.batch_rollover_time_in_ms",
+      "target.batch_size_in_kbs",
+      "target.batch_size_in_num",
+      "target.batch_time_in_sec",
+      "target.bucket",
+      "target.compartment_id",
+      "target.dimensions.dimension_value.kind",
+      "target.dimensions.dimension_value.path",
+      "target.dimensions.dimension_value.value",
+      "target.dimensions.name",
+      "target.enable_formatted_messaging",
+      "target.function_id",
+      "target.kind",
+      "target.log_group_id",
+      "target.log_source_identifier",
+      "target.metric",
+      "target.metric_namespace",
+      "target.namespace",
+      "target.object_name_prefix",
+      "target.stream_id",
+      "target.topic_id",
+      "tasks.batch_size_in_kbs",
+      "tasks.batch_time_in_sec",
+      "tasks.condition",
+      "tasks.function_id",
+      "tasks.kind"
+    ],
+    "forceNew": null,
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_sch_service_connectors",
+    "collectionField": "service_connector_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/sch/serviceconnector/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/sch/serviceconnector/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from terraform-provider-oci for sch/serviceconnector."
+  ]
+}

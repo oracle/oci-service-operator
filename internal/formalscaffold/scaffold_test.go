@@ -6,6 +6,7 @@
 package formalscaffold
 
 import (
+	"bytes"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -532,6 +533,56 @@ func TestGenerateAddsScaffoldsForPublishedKindsAndPreservesSeededRows(t *testing
 	assertRenderedDiagramFamily(t, filepath.Join(repoRoot, "formal", "controllers", "identity", "networksource", "diagrams"))
 }
 
+func TestGeneratePreservesRepoAuthoredScaffoldRows(t *testing.T) {
+	requirePlantUML(t)
+	repoRoot := writeTestRepo(t)
+	formalRoot := filepath.Join(repoRoot, "formal")
+
+	writeTestFile(
+		t,
+		filepath.Join(formalRoot, "controller_manifest.tsv"),
+		manifestHeader+testTemplateManifestRow+strings.Replace(testSeededManifestRow, "\tseeded\t", "\tscaffold\t", 1),
+	)
+	writeTestFile(
+		t,
+		filepath.Join(formalRoot, "controllers", "identity", "user", "spec.cfg"),
+		strings.Replace(testSeededSpec, "stage = seeded", "stage = scaffold", 1),
+	)
+
+	paths := []string{
+		filepath.Join(formalRoot, "controllers", "identity", "user", "spec.cfg"),
+		filepath.Join(formalRoot, "controllers", "identity", "user", "logic-gaps.md"),
+		filepath.Join(formalRoot, "controllers", "identity", "user", "diagrams", "runtime-lifecycle.yaml"),
+		filepath.Join(formalRoot, "imports", "identity", "user.json"),
+	}
+	before := make(map[string][]byte, len(paths))
+	for _, path := range paths {
+		contents, err := os.ReadFile(path)
+		if err != nil {
+			t.Fatalf("ReadFile(%q) error = %v", path, err)
+		}
+		before[path] = contents
+	}
+
+	if _, err := Generate(Options{
+		Root:            formalRoot,
+		ConfigPath:      filepath.Join(repoRoot, "internal", "generator", "config", "services.yaml"),
+		BackfillMissing: true,
+	}); err != nil {
+		t.Fatalf("Generate() error = %v", err)
+	}
+
+	for _, path := range paths {
+		contents, err := os.ReadFile(path)
+		if err != nil {
+			t.Fatalf("ReadFile(%q) after Generate error = %v", path, err)
+		}
+		if !bytes.Equal(contents, before[path]) {
+			t.Fatalf("Generate() replaced repo-authored scaffold artifact %q", path)
+		}
+	}
+}
+
 func TestGenerateSkipsMissingPublishedKindsWithoutBackfill(t *testing.T) {
 	requirePlantUML(t)
 	repoRoot := writeTestRepo(t)
@@ -850,6 +901,59 @@ services:
 			Slug:    "user",
 			Kind:    "User",
 		},
+	}
+	if !reflect.DeepEqual(entries, want) {
+		t.Fatalf("discoverPublishedKinds() = %#v, want %#v", entries, want)
+	}
+}
+
+func TestDiscoverPublishedKindsUsesStableAPIKindAliases(t *testing.T) {
+	t.Parallel()
+
+	repoRoot := t.TempDir()
+	configPath := filepath.Join(repoRoot, "internal", "generator", "config", "services.yaml")
+	writeTestFile(t, configPath, `schemaVersion: v1
+domain: oracle.com
+defaultVersion: v1beta1
+generatorEntrypoint: ./cmd/generator
+packageProfiles:
+  controller-backed:
+    description: Shared manager install
+services:
+  - service: apigateway
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/apigateway
+    group: apigateway
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Deployment
+        - Gateway
+    kindAliases:
+      Deployment: ApiGatewayDeployment
+      Gateway: ApiGateway
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+`)
+	writeTestFile(t, filepath.Join(repoRoot, "api", "apigateway", "v1beta1", "apigateway_types.go"), strings.ReplaceAll(testUserAPI, "User", "ApiGateway"))
+	writeTestFile(t, filepath.Join(repoRoot, "api", "apigateway", "v1beta1", "apigatewaydeployment_types.go"), strings.ReplaceAll(testUserAPI, "User", "ApiGatewayDeployment"))
+
+	cfg, err := generator.LoadConfig(configPath)
+	if err != nil {
+		t.Fatalf("generator.LoadConfig() error = %v", err)
+	}
+	entries, _, err := discoverPublishedKinds(repoRoot, cfg)
+	if err != nil {
+		t.Fatalf("discoverPublishedKinds() error = %v", err)
+	}
+	want := []inventoryEntry{
+		{Service: "apigateway", Group: "apigateway", Version: "v1beta1", Slug: "apigateway", Kind: "ApiGateway"},
+		{Service: "apigateway", Group: "apigateway", Version: "v1beta1", Slug: "apigatewaydeployment", Kind: "ApiGatewayDeployment"},
 	}
 	if !reflect.DeepEqual(entries, want) {
 		t.Fatalf("discoverPublishedKinds() = %#v, want %#v", entries, want)

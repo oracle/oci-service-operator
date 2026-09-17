@@ -171,11 +171,10 @@ func TestPathRouteSetRequestFieldsKeepOperationsScopedToRecordedPath(t *testing.
 			got:  pathRouteSetCreateFields(),
 			want: []generatedruntime.RequestField{
 				{
-					FieldName:        "LoadBalancerId",
-					RequestName:      "loadBalancerId",
-					Contribution:     "path",
-					PreferResourceID: true,
-					LookupPaths:      []string{"status.status.ocid"},
+					FieldName:    "LoadBalancerId",
+					RequestName:  "loadBalancerId",
+					Contribution: "path",
+					LookupPaths:  []string{"status.loadBalancerId", "spec.loadBalancerId"},
 				},
 				{
 					FieldName:    "CreatePathRouteSetDetails",
@@ -189,17 +188,17 @@ func TestPathRouteSetRequestFieldsKeepOperationsScopedToRecordedPath(t *testing.
 			got:  pathRouteSetGetFields(),
 			want: []generatedruntime.RequestField{
 				{
-					FieldName:        "LoadBalancerId",
-					RequestName:      "loadBalancerId",
-					Contribution:     "path",
-					PreferResourceID: true,
-					LookupPaths:      []string{"status.status.ocid"},
+					FieldName:    "LoadBalancerId",
+					RequestName:  "loadBalancerId",
+					Contribution: "path",
+					LookupPaths:  []string{"status.loadBalancerId", "spec.loadBalancerId"},
 				},
 				{
-					FieldName:    "PathRouteSetName",
-					RequestName:  "pathRouteSetName",
-					Contribution: "path",
-					LookupPaths:  []string{"status.name", "spec.name", "name"},
+					FieldName:        "PathRouteSetName",
+					RequestName:      "pathRouteSetName",
+					Contribution:     "path",
+					PreferResourceID: true,
+					LookupPaths:      []string{"status.name", "spec.name", "name"},
 				},
 			},
 		},
@@ -208,11 +207,10 @@ func TestPathRouteSetRequestFieldsKeepOperationsScopedToRecordedPath(t *testing.
 			got:  pathRouteSetListFields(),
 			want: []generatedruntime.RequestField{
 				{
-					FieldName:        "LoadBalancerId",
-					RequestName:      "loadBalancerId",
-					Contribution:     "path",
-					PreferResourceID: true,
-					LookupPaths:      []string{"status.status.ocid"},
+					FieldName:    "LoadBalancerId",
+					RequestName:  "loadBalancerId",
+					Contribution: "path",
+					LookupPaths:  []string{"status.loadBalancerId", "spec.loadBalancerId"},
 				},
 			},
 		},
@@ -221,17 +219,17 @@ func TestPathRouteSetRequestFieldsKeepOperationsScopedToRecordedPath(t *testing.
 			got:  pathRouteSetUpdateFields(),
 			want: []generatedruntime.RequestField{
 				{
-					FieldName:        "LoadBalancerId",
-					RequestName:      "loadBalancerId",
-					Contribution:     "path",
-					PreferResourceID: true,
-					LookupPaths:      []string{"status.status.ocid"},
+					FieldName:    "LoadBalancerId",
+					RequestName:  "loadBalancerId",
+					Contribution: "path",
+					LookupPaths:  []string{"status.loadBalancerId", "spec.loadBalancerId"},
 				},
 				{
-					FieldName:    "PathRouteSetName",
-					RequestName:  "pathRouteSetName",
-					Contribution: "path",
-					LookupPaths:  []string{"status.name", "spec.name", "name"},
+					FieldName:        "PathRouteSetName",
+					RequestName:      "pathRouteSetName",
+					Contribution:     "path",
+					PreferResourceID: true,
+					LookupPaths:      []string{"status.name", "spec.name", "name"},
 				},
 				{
 					FieldName:    "UpdatePathRouteSetDetails",
@@ -245,17 +243,17 @@ func TestPathRouteSetRequestFieldsKeepOperationsScopedToRecordedPath(t *testing.
 			got:  pathRouteSetDeleteFields(),
 			want: []generatedruntime.RequestField{
 				{
-					FieldName:        "LoadBalancerId",
-					RequestName:      "loadBalancerId",
-					Contribution:     "path",
-					PreferResourceID: true,
-					LookupPaths:      []string{"status.status.ocid"},
+					FieldName:    "LoadBalancerId",
+					RequestName:  "loadBalancerId",
+					Contribution: "path",
+					LookupPaths:  []string{"status.loadBalancerId", "spec.loadBalancerId"},
 				},
 				{
-					FieldName:    "PathRouteSetName",
-					RequestName:  "pathRouteSetName",
-					Contribution: "path",
-					LookupPaths:  []string{"status.name", "spec.name", "name"},
+					FieldName:        "PathRouteSetName",
+					RequestName:      "pathRouteSetName",
+					Contribution:     "path",
+					PreferResourceID: true,
+					LookupPaths:      []string{"status.name", "spec.name", "name"},
 				},
 			},
 		},
@@ -277,6 +275,7 @@ func TestCreateOrUpdateRejectsMissingPathRouteSetLoadBalancerAnnotation(t *testi
 
 	resource := makeUntrackedPathRouteSetResource()
 	resource.Annotations = nil
+	resource.Spec.LoadBalancerId = ""
 	client := &fakeGeneratedPathRouteSetOCIClient{}
 
 	response, err := newTestPathRouteSetRuntimeClient(client).CreateOrUpdate(context.Background(), resource, ctrl.Request{})
@@ -365,10 +364,12 @@ func TestCreateOrUpdateBindsExistingPathRouteSet(t *testing.T) {
 	if len(client.updateRequests) != 0 {
 		t.Fatalf("update requests = %d, want 0 for no-drift bind path", len(client.updateRequests))
 	}
-	if len(client.getRequests) != 1 {
-		t.Fatalf("get requests = %d, want 1 for bind path", len(client.getRequests))
+	if len(client.getRequests) != 0 || len(client.listRequests) != 1 {
+		t.Fatalf("bind reads = get:%d list:%d, want list-only identity binding", len(client.getRequests), len(client.listRequests))
 	}
-	assertPathRouteSetPathIdentity(t, client.getRequests[0].LoadBalancerId, client.getRequests[0].PathRouteSetName, pathRouteSetLoadBalancerID, pathRouteSetNameValue)
+	if got := stringValue(client.listRequests[0].LoadBalancerId); got != pathRouteSetLoadBalancerID {
+		t.Fatalf("list loadBalancerId = %q, want %q", got, pathRouteSetLoadBalancerID)
+	}
 	assertPathRouteSetTrackedStatus(t, resource, pathRouteSetLoadBalancerID, pathRouteSetNameValue, resource.Spec.PathRoutes)
 }
 
@@ -440,7 +441,7 @@ func TestCreateOrUpdateRejectsPathRouteSetLoadBalancerAnnotationDrift(t *testing
 	client := &fakeGeneratedPathRouteSetOCIClient{}
 
 	response, err := newTestPathRouteSetRuntimeClient(client).CreateOrUpdate(context.Background(), resource, ctrl.Request{})
-	if err == nil || !strings.Contains(err.Error(), "changed from recorded loadBalancerId") {
+	if err == nil || !strings.Contains(err.Error(), "conflicts with") {
 		t.Fatalf("CreateOrUpdate() error = %v, want annotation drift error", err)
 	}
 	if response.IsSuccessful {
@@ -517,7 +518,8 @@ func makeUntrackedPathRouteSetResource() *loadbalancerv1beta1.PathRouteSet {
 			},
 		},
 		Spec: loadbalancerv1beta1.PathRouteSetSpec{
-			Name: pathRouteSetNameValue,
+			Name:           pathRouteSetNameValue,
+			LoadBalancerId: pathRouteSetLoadBalancerID,
 			PathRoutes: []loadbalancerv1beta1.PathRouteSetPathRoute{
 				pathRouteSetPathRoute("/example/video", "video_backend", "PREFIX_MATCH"),
 			},
@@ -528,10 +530,11 @@ func makeUntrackedPathRouteSetResource() *loadbalancerv1beta1.PathRouteSet {
 func makeTrackedPathRouteSetResource() *loadbalancerv1beta1.PathRouteSet {
 	resource := makeUntrackedPathRouteSetResource()
 	resource.Status = loadbalancerv1beta1.PathRouteSetStatus{
-		Name:       pathRouteSetNameValue,
-		PathRoutes: append([]loadbalancerv1beta1.PathRouteSetPathRoute(nil), resource.Spec.PathRoutes...),
+		Name:           pathRouteSetNameValue,
+		LoadBalancerId: pathRouteSetLoadBalancerID,
+		PathRoutes:     append([]loadbalancerv1beta1.PathRouteSetPathRoute(nil), resource.Spec.PathRoutes...),
 		OsokStatus: shared.OSOKStatus{
-			Ocid: shared.OCID(pathRouteSetLoadBalancerID),
+			Ocid: shared.OCID(pathRouteSetNameValue),
 		},
 	}
 	return resource
@@ -609,8 +612,11 @@ func assertPathRouteSetTrackedStatus(t *testing.T, resource *loadbalancerv1beta1
 	if resource == nil {
 		t.Fatal("resource = nil, want PathRouteSet")
 	}
-	if got := string(resource.Status.OsokStatus.Ocid); got != wantLoadBalancerID {
-		t.Fatalf("status.status.ocid = %q, want recorded loadBalancerId %q", got, wantLoadBalancerID)
+	if got := resource.Status.LoadBalancerId; got != wantLoadBalancerID {
+		t.Fatalf("status.loadBalancerId = %q, want %q", got, wantLoadBalancerID)
+	}
+	if got := string(resource.Status.OsokStatus.Ocid); got != wantPathRouteSetName {
+		t.Fatalf("status.status.ocid = %q, want tracked path route set name %q", got, wantPathRouteSetName)
 	}
 	if got := resource.Status.Name; got != wantPathRouteSetName {
 		t.Fatalf("status.name = %q, want %q", got, wantPathRouteSetName)

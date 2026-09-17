@@ -20,6 +20,12 @@ type TargetResponderRecipeSpec struct {
 	// List of overrides to be applied to responder rules associated with the target
 	// +kubebuilder:validation:Optional
 	ResponderRules []TargetResponderRecipeResponderRuleFields `json:"responderRules,omitempty"`
+	// The OCID of the Cloud Guard target receiving the responder recipe.
+	// +kubebuilder:validation:Required
+	TargetId string `json:"targetId"`
+	// The OCID of the compartment used to confirm the target responder recipe through its collection endpoint.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
 }
 
 // TargetResponderRecipeResponderRuleDetailsConditionFields defines nested fields for TargetResponderRecipe.ResponderRule.Details.Condition.
@@ -41,9 +47,9 @@ type TargetResponderRecipeResponderRuleDetailsConditionFields struct {
 	// +kubebuilder:validation:Optional
 	ValueType string `json:"valueType,omitempty"`
 	// +kubebuilder:validation:Optional
-	LeftOperand shared.JSONValue `json:"leftOperand,omitempty"`
+	LeftOperand shared.JSONValue `json:"leftOperand,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	RightOperand shared.JSONValue `json:"rightOperand,omitempty"`
+	RightOperand shared.JSONValue `json:"rightOperand,omitempty,omitzero"`
 	// Composite condition operator
 	// +kubebuilder:validation:Optional
 	CompositeOperator string `json:"compositeOperator,omitempty"`
@@ -65,7 +71,7 @@ type TargetResponderRecipeResponderRuleDetailsConfigurationFields struct {
 // TargetResponderRecipeResponderRuleDetailsFields defines nested fields for TargetResponderRecipe.ResponderRule.Details.
 type TargetResponderRecipeResponderRuleDetailsFields struct {
 	// +kubebuilder:validation:Optional
-	Condition TargetResponderRecipeResponderRuleDetailsConditionFields `json:"condition,omitempty"`
+	Condition TargetResponderRecipeResponderRuleDetailsConditionFields `json:"condition,omitempty,omitzero"`
 	// List of responder rule configurations
 	// +kubebuilder:validation:Optional
 	Configurations []TargetResponderRecipeResponderRuleDetailsConfigurationFields `json:"configurations,omitempty"`

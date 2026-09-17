@@ -50,50 +50,62 @@ func registerGovernanceRuleRuntimeHooksMutator(mutator GovernanceRuleRuntimeHook
 	}
 	governanceruleRuntimeHooksMutators = append(governanceruleRuntimeHooksMutators, mutator)
 }
-func newGovernanceRuleDefaultRuntimeHooks(sdkClient governancerulescontrolplanesdk.GovernanceRuleClient) GovernanceRuleRuntimeHooks {
+func newGovernanceRuleDefaultRuntimeHooks(sdkClient GovernanceRuleSDKClients) GovernanceRuleRuntimeHooks {
 	return GovernanceRuleRuntimeHooks{
 		Identity:        generatedruntime.IdentityHooks[*governancerulescontrolplanev1beta1.GovernanceRule]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*governancerulescontrolplanev1beta1.GovernanceRule]{},
 		StatusHooks:     generatedruntime.StatusHooks[*governancerulescontrolplanev1beta1.GovernanceRule]{},
 		ParityHooks:     generatedruntime.ParityHooks[*governancerulescontrolplanev1beta1.GovernanceRule]{},
-		Async:           generatedruntime.AsyncHooks[*governancerulescontrolplanev1beta1.GovernanceRule]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*governancerulescontrolplanev1beta1.GovernanceRule]{},
+		Async: generatedruntime.AsyncHooks[*governancerulescontrolplanev1beta1.GovernanceRule]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := governancerulescontrolplanesdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.workRequestClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*governancerulescontrolplanev1beta1.GovernanceRule]{},
 		Create: runtimeOperationHooks[governancerulescontrolplanesdk.CreateGovernanceRuleRequest, governancerulescontrolplanesdk.CreateGovernanceRuleResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateGovernanceRuleDetails", RequestName: "CreateGovernanceRuleDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request governancerulescontrolplanesdk.CreateGovernanceRuleRequest) (governancerulescontrolplanesdk.CreateGovernanceRuleResponse, error) {
-				return sdkClient.CreateGovernanceRule(ctx, request)
+				return sdkClient.governanceRuleClient.CreateGovernanceRule(ctx, request)
 			},
 		},
 		Get: runtimeOperationHooks[governancerulescontrolplanesdk.GetGovernanceRuleRequest, governancerulescontrolplanesdk.GetGovernanceRuleResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "GovernanceRuleId", RequestName: "governanceRuleId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request governancerulescontrolplanesdk.GetGovernanceRuleRequest) (governancerulescontrolplanesdk.GetGovernanceRuleResponse, error) {
-				return sdkClient.GetGovernanceRule(ctx, request)
+				return sdkClient.governanceRuleClient.GetGovernanceRule(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[governancerulescontrolplanesdk.ListGovernanceRulesRequest, governancerulescontrolplanesdk.ListGovernanceRulesResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "GovernanceRuleId", RequestName: "governanceRuleId", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "GovernanceRuleType", RequestName: "governanceRuleType", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request governancerulescontrolplanesdk.ListGovernanceRulesRequest) (governancerulescontrolplanesdk.ListGovernanceRulesResponse, error) {
-				return sdkClient.ListGovernanceRules(ctx, request)
+				return sdkClient.governanceRuleClient.ListGovernanceRules(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[governancerulescontrolplanesdk.UpdateGovernanceRuleRequest, governancerulescontrolplanesdk.UpdateGovernanceRuleResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "GovernanceRuleId", RequestName: "governanceRuleId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateGovernanceRuleDetails", RequestName: "UpdateGovernanceRuleDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request governancerulescontrolplanesdk.UpdateGovernanceRuleRequest) (governancerulescontrolplanesdk.UpdateGovernanceRuleResponse, error) {
-				return sdkClient.UpdateGovernanceRule(ctx, request)
+				return sdkClient.governanceRuleClient.UpdateGovernanceRule(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[governancerulescontrolplanesdk.DeleteGovernanceRuleRequest, governancerulescontrolplanesdk.DeleteGovernanceRuleResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "GovernanceRuleId", RequestName: "governanceRuleId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request governancerulescontrolplanesdk.DeleteGovernanceRuleRequest) (governancerulescontrolplanesdk.DeleteGovernanceRuleResponse, error) {
-				return sdkClient.DeleteGovernanceRule(ctx, request)
+				return sdkClient.governanceRuleClient.DeleteGovernanceRule(ctx, request)
 			},
 		},
 		WrapGeneratedClient: []func(GovernanceRuleServiceClient) GovernanceRuleServiceClient{},
 	}
 }
 
-func newGovernanceRuleRuntimeHooks(manager *GovernanceRuleServiceManager, sdkClient governancerulescontrolplanesdk.GovernanceRuleClient) GovernanceRuleRuntimeHooks {
+func newGovernanceRuleRuntimeHooks(manager *GovernanceRuleServiceManager, sdkClient GovernanceRuleSDKClients) GovernanceRuleRuntimeHooks {
 	hooks := newGovernanceRuleDefaultRuntimeHooks(sdkClient)
 	for _, mutator := range governanceruleRuntimeHooksMutators {
 		mutator(manager, &hooks)
@@ -106,10 +118,19 @@ func buildGovernanceRuleGeneratedRuntimeConfig(
 	hooks GovernanceRuleRuntimeHooks,
 ) generatedruntime.Config[*governancerulescontrolplanev1beta1.GovernanceRule] {
 	return generatedruntime.Config[*governancerulescontrolplanev1beta1.GovernanceRule]{
-		Kind:            "GovernanceRule",
-		SDKName:         "GovernanceRule",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "GovernanceRule",
+		SDKName:   "GovernanceRule",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

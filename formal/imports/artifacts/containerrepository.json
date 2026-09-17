@@ -1,0 +1,128 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "artifacts",
+  "slug": "containerrepository",
+  "kind": "ContainerRepository",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_artifacts_container_repository",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateContainerRepository",
+        "requestType": "artifacts.CreateContainerRepositoryRequest",
+        "responseType": "artifacts.CreateContainerRepositoryResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetContainerRepository",
+        "requestType": "artifacts.GetContainerRepositoryRequest",
+        "responseType": "artifacts.GetContainerRepositoryResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListContainerRepositories",
+        "requestType": "artifacts.ListContainerRepositoriesRequest",
+        "responseType": "artifacts.ListContainerRepositoriesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeContainerRepositoryCompartment",
+        "requestType": "artifacts.ChangeContainerRepositoryCompartmentRequest",
+        "responseType": "artifacts.ChangeContainerRepositoryCompartmentResponse"
+      },
+      {
+        "operation": "UpdateContainerRepository",
+        "requestType": "artifacts.UpdateContainerRepositoryRequest",
+        "responseType": "artifacts.UpdateContainerRepositoryResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteContainerRepository",
+        "requestType": "artifacts.DeleteContainerRepositoryRequest",
+        "responseType": "artifacts.DeleteContainerRepositoryResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "target": [
+        "AVAILABLE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "freeform_tags",
+      "is_immutable",
+      "is_public",
+      "readme.content",
+      "readme.format"
+    ],
+    "forceNew": [
+      "display_name"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_artifacts_container_repositories",
+    "collectionField": "container_repository_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "compartment_id_in_subtree",
+      "display_name",
+      "is_public",
+      "repository_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/artifacts/containerrepository/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/artifacts/containerrepository/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Refreshed from the pinned terraform-provider-oci Artifacts Container Repository resource; runtime lifecycle and deletion safeguards remain repo-authored."
+  ]
+}

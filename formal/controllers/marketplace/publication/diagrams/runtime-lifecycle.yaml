@@ -9,5 +9,21 @@ states:
   - active
   - updating
   - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending: ["CREATING"]
+    updatePending: []
+    deletePending: ["DELETING"]
+  listLookup:
+    filters: ["id","compartmentId","listingType","name"]
+    matchRule: exact publication identity match; duplicate matches fail
+  mutation:
+    mutable: ["definedTags","freeformTags","longDescription","name","shortDescription","supportContacts"]
+    forceNew: ["compartmentId","listingType"]
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
 notes:
-  - Scaffold metadata only; replace with controller-specific runtime states before promotion.
+  - "Package details and agreement acknowledgement are create inputs; the OCI update operation exposes only the reviewed mutable publication fields."
+  - "The runtime confirms create, update, and delete through GetPublication while retaining package identity from the observed publication."

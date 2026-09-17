@@ -32,8 +32,28 @@ type defaultPatchServiceClient struct {
 
 var _ PatchServiceClient = defaultPatchServiceClient{}
 
+type PatchSDKClients struct {
+	fleetAppsManagementOperationsClient  fleetappsmanagementsdk.FleetAppsManagementOperationsClient
+	fleetAppsManagementWorkRequestClient fleetappsmanagementsdk.FleetAppsManagementWorkRequestClient
+}
+
+func newPatchSDKClients(manager *PatchServiceManager) (PatchSDKClients, error) {
+	var clients PatchSDKClients
+	fleetAppsManagementOperationsClientClient, err := fleetappsmanagementsdk.NewFleetAppsManagementOperationsClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize Patch OCI client FleetAppsManagementOperationsClient: %w", err)
+	}
+	clients.fleetAppsManagementOperationsClient = fleetAppsManagementOperationsClientClient
+	fleetAppsManagementWorkRequestClientClient, err := fleetappsmanagementsdk.NewFleetAppsManagementWorkRequestClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize Patch OCI client FleetAppsManagementWorkRequestClient: %w", err)
+	}
+	clients.fleetAppsManagementWorkRequestClient = fleetAppsManagementWorkRequestClientClient
+	return clients, nil
+}
+
 var newPatchServiceClient = func(manager *PatchServiceManager) PatchServiceClient {
-	sdkClient, err := fleetappsmanagementsdk.NewFleetAppsManagementOperationsClientWithConfigurationProvider(manager.Provider)
+	sdkClient, err := newPatchSDKClients(manager)
 	hooks := newPatchRuntimeHooks(manager, sdkClient)
 	config := buildPatchGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {

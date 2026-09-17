@@ -30,7 +30,7 @@ type AgentSpec struct {
 	// +kubebuilder:validation:Optional
 	WelcomeMessage string `json:"welcomeMessage,omitempty"`
 	// +kubebuilder:validation:Optional
-	LlmConfig AgentLlmConfig `json:"llmConfig,omitempty"`
+	LlmConfig AgentLlmConfig `json:"llmConfig,omitempty,omitzero"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
 	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
@@ -60,7 +60,7 @@ type AgentLlmConfigRoutingLlmCustomizationLlmSelection struct {
 // AgentLlmConfigRoutingLlmCustomization defines nested fields for Agent.LlmConfig.RoutingLlmCustomization.
 type AgentLlmConfigRoutingLlmCustomization struct {
 	// +kubebuilder:validation:Optional
-	LlmSelection AgentLlmConfigRoutingLlmCustomizationLlmSelection `json:"llmSelection,omitempty"`
+	LlmSelection AgentLlmConfigRoutingLlmCustomizationLlmSelection `json:"llmSelection,omitempty,omitzero"`
 	// Hyper parameters for LLM configuration. Accepts Key-value pairs to configure various hyper parameters.
 	// Refer to the guide for examples and the JSON Schema documentation for details on the format.
 	// +kubebuilder:validation:Optional
@@ -73,7 +73,7 @@ type AgentLlmConfigRoutingLlmCustomization struct {
 // AgentLlmConfig defines nested fields for Agent.LlmConfig.
 type AgentLlmConfig struct {
 	// +kubebuilder:validation:Optional
-	RoutingLlmCustomization AgentLlmConfigRoutingLlmCustomization `json:"routingLlmCustomization,omitempty"`
+	RoutingLlmCustomization AgentLlmConfigRoutingLlmCustomization `json:"routingLlmCustomization,omitempty,omitzero"`
 	// The runtimeVersion of the system prompt.
 	// +kubebuilder:validation:Optional
 	RuntimeVersion string `json:"runtimeVersion,omitempty"`

@@ -456,7 +456,7 @@ func confirmManagementDashboardDeleteRead(
 		return nil, fmt.Errorf("confirm ManagementDashboard delete: runtime hooks are nil")
 	}
 	if currentID = strings.TrimSpace(currentID); currentID != "" {
-		return confirmManagementDashboardDeleteReadByID(ctx, hooks, currentID)
+		return confirmManagementDashboardDeleteReadByID(ctx, hooks, resource, currentID)
 	}
 	return confirmManagementDashboardDeleteReadByIdentity(ctx, hooks, resource)
 }
@@ -464,6 +464,7 @@ func confirmManagementDashboardDeleteRead(
 func confirmManagementDashboardDeleteReadByID(
 	ctx context.Context,
 	hooks *ManagementDashboardRuntimeHooks,
+	resource *managementdashboardv1beta1.ManagementDashboard,
 	currentID string,
 ) (any, error) {
 	if hooks.Get.Call == nil {
@@ -472,7 +473,13 @@ func confirmManagementDashboardDeleteReadByID(
 	response, err := hooks.Get.Call(ctx, managementdashboardsdk.GetManagementDashboardRequest{
 		ManagementDashboardId: managementDashboardStringPointer(currentID),
 	})
-	return managementDashboardDeleteConfirmReadResponse(response, err)
+	if err == nil {
+		return response, nil
+	}
+	if errorutil.ClassifyDeleteError(err).IsAuthShapedNotFound() {
+		return confirmManagementDashboardDeleteReadByIdentity(ctx, hooks, resource)
+	}
+	return nil, err
 }
 
 func confirmManagementDashboardDeleteReadByIdentity(
@@ -494,7 +501,7 @@ func confirmManagementDashboardDeleteReadByIdentity(
 	if err != nil {
 		if errorutil.ClassifyDeleteError(err).IsAuthShapedNotFound() {
 			servicemanager.RecordErrorOpcRequestID(&resource.Status.OsokStatus, err)
-			return nil, managementDashboardAuthShapedConfirmRead{err: err}
+			return managementDashboardAuthShapedConfirmRead{err: err}, nil
 		}
 		return nil, err
 	}
@@ -513,16 +520,6 @@ func confirmManagementDashboardDeleteReadByIdentity(
 	default:
 		return nil, fmt.Errorf("managementdashboard list response returned multiple matching resources for compartmentId %q and displayName %q", resource.Spec.CompartmentId, resource.Spec.DisplayName)
 	}
-}
-
-func managementDashboardDeleteConfirmReadResponse(response any, err error) (any, error) {
-	if err == nil {
-		return response, nil
-	}
-	if errorutil.ClassifyDeleteError(err).IsAuthShapedNotFound() {
-		return managementDashboardAuthShapedConfirmRead{err: err}, nil
-	}
-	return nil, err
 }
 
 func handleManagementDashboardDeleteError(resource *managementdashboardv1beta1.ManagementDashboard, err error) error {

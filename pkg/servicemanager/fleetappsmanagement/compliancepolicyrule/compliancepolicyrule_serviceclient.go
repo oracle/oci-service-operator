@@ -32,8 +32,28 @@ type defaultCompliancePolicyRuleServiceClient struct {
 
 var _ CompliancePolicyRuleServiceClient = defaultCompliancePolicyRuleServiceClient{}
 
+type CompliancePolicyRuleSDKClients struct {
+	fleetAppsManagementAdminClient       fleetappsmanagementsdk.FleetAppsManagementAdminClient
+	fleetAppsManagementWorkRequestClient fleetappsmanagementsdk.FleetAppsManagementWorkRequestClient
+}
+
+func newCompliancePolicyRuleSDKClients(manager *CompliancePolicyRuleServiceManager) (CompliancePolicyRuleSDKClients, error) {
+	var clients CompliancePolicyRuleSDKClients
+	fleetAppsManagementAdminClientClient, err := fleetappsmanagementsdk.NewFleetAppsManagementAdminClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize CompliancePolicyRule OCI client FleetAppsManagementAdminClient: %w", err)
+	}
+	clients.fleetAppsManagementAdminClient = fleetAppsManagementAdminClientClient
+	fleetAppsManagementWorkRequestClientClient, err := fleetappsmanagementsdk.NewFleetAppsManagementWorkRequestClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize CompliancePolicyRule OCI client FleetAppsManagementWorkRequestClient: %w", err)
+	}
+	clients.fleetAppsManagementWorkRequestClient = fleetAppsManagementWorkRequestClientClient
+	return clients, nil
+}
+
 var newCompliancePolicyRuleServiceClient = func(manager *CompliancePolicyRuleServiceManager) CompliancePolicyRuleServiceClient {
-	sdkClient, err := fleetappsmanagementsdk.NewFleetAppsManagementAdminClientWithConfigurationProvider(manager.Provider)
+	sdkClient, err := newCompliancePolicyRuleSDKClients(manager)
 	hooks := newCompliancePolicyRuleRuntimeHooks(manager, sdkClient)
 	config := buildCompliancePolicyRuleGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {

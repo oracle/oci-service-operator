@@ -204,11 +204,15 @@ func TestOdaInstanceAttachmentCreateTracksPendingWorkRequest(t *testing.T) {
 
 func TestOdaInstanceAttachmentCreateProjectsStatusAfterSucceededWorkRequest(t *testing.T) {
 	resource := makeOdaInstanceAttachmentResource()
+	resource.UID = "oda-attachment-uid"
 	fake := &fakeOdaInstanceAttachmentOCIClient{}
 	fake.listFunc = func(context.Context, odasdk.ListOdaInstanceAttachmentsRequest) (odasdk.ListOdaInstanceAttachmentsResponse, error) {
 		return odasdk.ListOdaInstanceAttachmentsResponse{}, nil
 	}
 	fake.createFunc = func(_ context.Context, request odasdk.CreateOdaInstanceAttachmentRequest) (odasdk.CreateOdaInstanceAttachmentResponse, error) {
+		if got := stringValue(request.OpcRetryToken); got != "oda-attachment-uid" {
+			t.Fatalf("create opcRetryToken = %q, want oda-attachment-uid", got)
+		}
 		if got := stringValue(request.OdaInstanceId); got != testOdaInstanceID {
 			t.Fatalf("create odaInstanceId = %q, want %q", got, testOdaInstanceID)
 		}

@@ -292,10 +292,14 @@ func (c *authenticationProviderRuntimeClient) Delete(ctx context.Context, resour
 }
 
 func (c *authenticationProviderRuntimeClient) create(ctx context.Context, resource *odav1beta1.AuthenticationProvider, odaInstanceID string) (servicemanager.OSOKResponse, error) {
-	response, err := c.hooks.Create.Call(ctx, odasdk.CreateAuthenticationProviderRequest{
+	request := odasdk.CreateAuthenticationProviderRequest{
 		OdaInstanceId:                       common.String(odaInstanceID),
 		CreateAuthenticationProviderDetails: buildAuthenticationProviderCreateDetails(resource.Spec),
-	})
+	}
+	if retryToken := strings.TrimSpace(string(resource.UID)); retryToken != "" {
+		request.OpcRetryToken = common.String(retryToken)
+	}
+	response, err := c.hooks.Create.Call(ctx, request)
 	if err != nil {
 		return c.fail(resource, err)
 	}

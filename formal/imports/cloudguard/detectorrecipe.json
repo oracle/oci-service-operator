@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "cloudguard",
+  "slug": "detectorrecipe",
+  "kind": "DetectorRecipe",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_cloudguard_detectorrecipe",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDetectorRecipe",
+        "requestType": "cloudguard.CreateDetectorRecipeRequest",
+        "responseType": "cloudguard.CreateDetectorRecipeResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDetectorRecipe",
+        "requestType": "cloudguard.GetDetectorRecipeRequest",
+        "responseType": "cloudguard.GetDetectorRecipeResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDetectorRecipe",
+        "requestType": "cloudguard.ListDetectorRecipeRequest",
+        "responseType": "cloudguard.ListDetectorRecipeResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDetectorRecipe",
+        "requestType": "cloudguard.UpdateDetectorRecipeRequest",
+        "responseType": "cloudguard.UpdateDetectorRecipeResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDetectorRecipe",
+        "requestType": "cloudguard.DeleteDetectorRecipeRequest",
+        "responseType": "cloudguard.DeleteDetectorRecipeResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_cloudguard_detectorrecipe",
+    "collectionField": "detectorrecipe",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/cloudguard/detectorrecipe/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/cloudguard/detectorrecipe/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "The pinned provider registers this resource, but formal-import cannot resolve its CRUD type; the row remains scaffolded."
+  ]
+}

@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "auditarchiveretrieval",
+  "kind": "AuditArchiveRetrieval",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_audit_archive_retrieval",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateAuditArchiveRetrieval",
+        "requestType": "datasafe.CreateAuditArchiveRetrievalRequest",
+        "responseType": "datasafe.CreateAuditArchiveRetrievalResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetAuditArchiveRetrieval",
+        "requestType": "datasafe.GetAuditArchiveRetrievalRequest",
+        "responseType": "datasafe.GetAuditArchiveRetrievalResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListAuditArchiveRetrievals",
+        "requestType": "datasafe.ListAuditArchiveRetrievalsRequest",
+        "responseType": "datasafe.ListAuditArchiveRetrievalsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeAuditArchiveRetrievalCompartment",
+        "requestType": "datasafe.ChangeAuditArchiveRetrievalCompartmentRequest",
+        "responseType": "datasafe.ChangeAuditArchiveRetrievalCompartmentResponse"
+      },
+      {
+        "operation": "UpdateAuditArchiveRetrieval",
+        "requestType": "datasafe.UpdateAuditArchiveRetrievalRequest",
+        "responseType": "datasafe.UpdateAuditArchiveRetrievalResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteAuditArchiveRetrieval",
+        "requestType": "datasafe.DeleteAuditArchiveRetrievalRequest",
+        "responseType": "datasafe.DeleteAuditArchiveRetrievalResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "NEEDS_ATTENTION"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags"
+    ],
+    "forceNew": [
+      "end_date",
+      "start_date",
+      "target_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_data_safe_audit_archive_retrievals",
+    "collectionField": "audit_archive_retrieval_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "access_level",
+      "audit_archive_retrieval_id",
+      "compartment_id",
+      "compartment_id_in_subtree",
+      "display_name",
+      "state",
+      "target_database_group_id",
+      "target_id",
+      "time_of_expiry"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/auditarchiveretrieval/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/auditarchiveretrieval/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts are imported from the pinned terraform-provider-oci revision; repo-authored runtime semantics remain authoritative."
+  ]
+}

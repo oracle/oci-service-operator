@@ -9,5 +9,14 @@ states:
   - active
   - updating
   - terminating
+repoAuthored:
+  providerLifecycle: {createPending: ["CREATING"], updatePending: ["UPDATING"], deletePending: ["DELETING"]}
+  listLookup:
+    filters: ["odaInstanceId","name"]
+    matchRule: exact parent and channel name match; duplicate matches fail
+  mutation:
+    mutable: ["name","description","sessionExpiryDurationInMilliseconds","freeformTags","definedTags","msaAppId","msaAppPassword","botId","isClientAuthenticationEnabled","maxTokenExpirationTimeInMinutes","allowedDomains","appSecret","pageAccessToken","isAuthenticatedUserId","outboundUrl","domainName","hostNamePrefix","userName","password","clientType","clientId","signingSecret","clientSecret","authSuccessUrl","authErrorUrl","host","port","totalSessionCount","authenticationProviderName","channelService","eventSinkBotIds","inboundMessageTopic","outboundMessageTopic","bootstrapServers","securityProtocol","saslMechanism","tenancyName","streamPoolId","authToken","accountSID","phoneNumber","isMmsEnabled","originalConnectorsUrl","payloadVersion"]
+    forceNew: ["odaInstanceId","type"]
+  followUp: {create: read-after-write, update: read-after-write, delete: confirm-delete}
 notes:
-  - Scaffold metadata only; replace with controller-specific runtime states before promotion.
+  - "The runtime selects the concrete channel subtype from spec.type and rejects subtype-only fields that cannot be represented by that type."

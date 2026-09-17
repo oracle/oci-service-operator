@@ -66,25 +66,25 @@ func newServiceDefaultRuntimeHooks(sdkClient networkfirewallsdk.NetworkFirewallC
 			},
 		},
 		Get: runtimeOperationHooks[networkfirewallsdk.GetServiceRequest, networkfirewallsdk.GetServiceResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "ServiceName", RequestName: "serviceName", Contribution: "path", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "ServiceName", RequestName: "serviceName", Contribution: "path", PreferResourceID: true}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request networkfirewallsdk.GetServiceRequest) (networkfirewallsdk.GetServiceResponse, error) {
 				return sdkClient.GetService(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[networkfirewallsdk.ListServicesRequest, networkfirewallsdk.ListServicesResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: true}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request networkfirewallsdk.ListServicesRequest) (networkfirewallsdk.ListServicesResponse, error) {
 				return sdkClient.ListServices(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[networkfirewallsdk.UpdateServiceRequest, networkfirewallsdk.UpdateServiceResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "ServiceName", RequestName: "serviceName", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdateServiceDetails", RequestName: "UpdateServiceDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "ServiceName", RequestName: "serviceName", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateServiceDetails", RequestName: "UpdateServiceDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request networkfirewallsdk.UpdateServiceRequest) (networkfirewallsdk.UpdateServiceResponse, error) {
 				return sdkClient.UpdateService(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[networkfirewallsdk.DeleteServiceRequest, networkfirewallsdk.DeleteServiceResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "ServiceName", RequestName: "serviceName", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "ServiceName", RequestName: "serviceName", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request networkfirewallsdk.DeleteServiceRequest) (networkfirewallsdk.DeleteServiceResponse, error) {
 				return sdkClient.DeleteService(ctx, request)
 			},

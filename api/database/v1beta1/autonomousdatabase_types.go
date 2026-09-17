@@ -75,7 +75,7 @@ type AutonomousDatabaseSpec struct {
 	// +kubebuilder:validation:Optional
 	VaultId string `json:"vaultId,omitempty"`
 	// +kubebuilder:validation:Optional
-	EncryptionKey AutonomousDatabaseEncryptionKey `json:"encryptionKey,omitempty"`
+	EncryptionKey AutonomousDatabaseEncryptionKey `json:"encryptionKey,omitempty,omitzero"`
 	// The administrative password sourced from a Kubernetes Secret in the same namespace.
 	// The referenced Secret must contain a `password` key. Use `secretId` and `secretVersionNumber` instead to reference an OCI Vault secret.
 	// +kubebuilder:validation:Optional
@@ -211,9 +211,9 @@ type AutonomousDatabaseSpec struct {
 	// +kubebuilder:validation:Optional
 	ResourcePoolLeaderId string `json:"resourcePoolLeaderId,omitempty"`
 	// +kubebuilder:validation:Optional
-	ResourcePoolSummary AutonomousDatabaseResourcePoolSummary `json:"resourcePoolSummary,omitempty"`
+	ResourcePoolSummary AutonomousDatabaseResourcePoolSummary `json:"resourcePoolSummary,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	AutonomousDatabaseMaintenanceWindow AutonomousDatabaseMaintenanceWindow `json:"autonomousDatabaseMaintenanceWindow,omitempty"`
+	AutonomousDatabaseMaintenanceWindow AutonomousDatabaseMaintenanceWindow `json:"autonomousDatabaseMaintenanceWindow,omitempty,omitzero"`
 	// The list of scheduled operations. Consists of values such as dayOfWeek, scheduledStartTime, scheduledStopTime.
 	// This cannot be updated in parallel with any of the following: licenseModel, dbEdition, cpuCoreCount, computeCount, computeModel, whitelistedIps, isMTLSConnectionRequired, openMode, permissionLevel, dbWorkload, privateEndpointLabel, nsgIds, dbVersion, isRefreshable, dbName, dbToolsDetails, isLocalDataGuardEnabled, or isFreeTier.
 	// +kubebuilder:validation:Optional
@@ -236,7 +236,7 @@ type AutonomousDatabaseSpec struct {
 	// +kubebuilder:validation:Optional
 	SecretVersionNumber int `json:"secretVersionNumber,omitempty"`
 	// +kubebuilder:validation:Optional
-	TransportableTablespace AutonomousDatabaseTransportableTablespace `json:"transportableTablespace,omitempty"`
+	TransportableTablespace AutonomousDatabaseTransportableTablespace `json:"transportableTablespace,omitempty,omitzero"`
 	// The Oracle AI Database Edition that applies to the Autonomous AI Databases. This parameter accepts options `STANDARD_EDITION` and `ENTERPRISE_EDITION`.
 	// +kubebuilder:validation:Optional
 	DatabaseEdition string `json:"databaseEdition,omitempty"`
@@ -269,7 +269,7 @@ type AutonomousDatabaseSpec struct {
 	// +kubebuilder:validation:Optional
 	LocalAdgAutoFailoverMaxDataLossLimit int `json:"localAdgAutoFailoverMaxDataLossLimit,omitempty"`
 	// +kubebuilder:validation:Optional
-	LongTermBackupSchedule AutonomousDatabaseLongTermBackupSchedule `json:"longTermBackupSchedule,omitempty"`
+	LongTermBackupSchedule AutonomousDatabaseLongTermBackupSchedule `json:"longTermBackupSchedule,omitempty,omitzero"`
 	// Indicates if the Autonomous AI Database is a refreshable clone.
 	// This cannot be updated in parallel with any of the following: cpuCoreCount, computeCount, computeModel, adminPassword, whitelistedIps, openMode, permissionLevel, dbWorkload, privateEndpointLabel, nsgIds, dbVersion, dbName, scheduledOperations, dbToolsDetails, isLocalDataGuardEnabled, or isFreeTier.
 	// +kubebuilder:validation:Optional
@@ -311,7 +311,7 @@ type AutonomousDatabaseSpec struct {
 	// +kubebuilder:validation:Optional
 	IsScheduleDbVersionUpgradeToEarliest bool `json:"isScheduleDbVersionUpgradeToEarliest,omitempty"`
 	// +kubebuilder:validation:Optional
-	VanityUrlDetails AutonomousDatabaseVanityUrlDetails `json:"vanityUrlDetails,omitempty"`
+	VanityUrlDetails AutonomousDatabaseVanityUrlDetails `json:"vanityUrlDetails,omitempty,omitzero"`
 	// If true, this will disconnect the Autonomous AI Database from its peer and the Autonomous AI Database can work permanently as a standalone database.
 	// To disconnect a cross region standby, please also provide the OCID of the standby database in the `peerDbId` parameter.
 	// +kubebuilder:validation:Optional

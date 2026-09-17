@@ -38,7 +38,7 @@ group Lookup and bind
 alt tracked or explicit OCI identity already exists
 ServiceManager -> OCI: GetAcceptedAgreement
 else tracked identity is missing
-ServiceManager -> OCI: ListAcceptedAgreements(filters:\nagreement_id, compartment_id,\ndisplay_name, listing_id (+1 more))
+ServiceManager -> OCI: ListAcceptedAgreements(filters:\nagreementId, compartmentId,\ndisplayName, listingId (+1 more))
 alt reusable OCI resource is not found
 ServiceManager -> OCI: CreateAcceptedAgreement
 else reusable OCI resource already exists
@@ -59,22 +59,25 @@ end
 else live state requires field-aware\ndrift evaluation
 group Drift handling
 note over ServiceManager,OCI
-Supported update surface: defined_tags,
-display_name, freeform_tags
+Supported update surface: definedTags,
+displayName, freeformTags
 Reject before mutate: force-new fields
-agreement_id, compartment_id,
-listing_id, package_version (+1 more)
-Lookup filters: agreement_id,
-compartment_id, display_name, listing_id
+agreementId, compartmentId, listingId,
+packageVersion (+1 more)
+Lookup filters: agreementId,
+compartmentId, displayName, listingId
 (+1 more)
+Lookup matching: exact agreement
+identity match; duplicate matches fail
 end note
 opt force-new or conflicting drift is detected
 ServiceManager --> BaseReconciler: reject before OCI mutation
 end
 opt supported mutable drift is detected
-ServiceManager -> OCI: Apply UpdateAcceptedAgreement only\nfor mutable fields defined_tags,\ndisplay_name, freeform_tags
+ServiceManager -> OCI: Apply UpdateAcceptedAgreement only\nfor mutable fields definedTags,\ndisplayName, freeformTags
 end
 ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource
+ServiceManager -> OCI: apply follow-up strategy\ncreate=read-after-write;\nupdate=read-after-write;\ndelete=confirm-delete
 end
 ServiceManager --> BaseReconciler: status=required,\nfinalizer=retain-until-confirmed-delete
 end
@@ -103,15 +106,18 @@ retain-until-confirmed-delete
 requeue: terminating
 provider states: create none; update none;
 delete none
-supported drift: defined_tags, display_name,
-freeform_tags
+follow-up: create=read-after-write;
+update=read-after-write; delete=confirm-delete
+supported drift: definedTags, displayName,
+freeformTags
 reject before mutate: force-new fields
-agreement_id, compartment_id, listing_id,
-package_version (+1 more)
+agreementId, compartmentId, listingId,
+packageVersion (+1 more)
 create-only fields: none
 list lookup: oci_marketplace_accepted_agreements
-filters agreement_id, compartment_id,
-display_name, listing_id (+1 more)
+filters agreementId, compartmentId, displayName,
+listingId (+1 more); exact agreement identity
+match; duplicate matches fail
 conflicts: none
 open gaps: none
 AcceptedAgreement reuses an existing OCI

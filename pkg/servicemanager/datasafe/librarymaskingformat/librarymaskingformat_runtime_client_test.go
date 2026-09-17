@@ -292,6 +292,46 @@ func TestLibraryMaskingFormatDeleteRetainsFinalizerUntilDeleteIsConfirmed(t *tes
 	}
 }
 
+func TestLibraryMaskingFormatDeleteAcceptsAuthShapedReadbackAfterAcceptedDelete(t *testing.T) {
+	t.Parallel()
+
+	resource := newLibraryMaskingFormatResource()
+	resource.Status.OsokStatus.Ocid = shared.OCID(testLibraryMaskingFormatID)
+
+	getCalls := 0
+	fake := &fakeLibraryMaskingFormatOCI{}
+	fake.get = func(context.Context, datasafesdk.GetLibraryMaskingFormatRequest) (datasafesdk.GetLibraryMaskingFormatResponse, error) {
+		getCalls++
+		if getCalls == 1 {
+			return datasafesdk.GetLibraryMaskingFormatResponse{
+				LibraryMaskingFormat: libraryMaskingFormatBody(t, resource, testLibraryMaskingFormatID, datasafesdk.MaskingLifecycleStateActive),
+			}, nil
+		}
+		return datasafesdk.GetLibraryMaskingFormatResponse{}, errortest.NewServiceError(
+			404,
+			errorutil.NotAuthorizedOrNotFound,
+			"not authorized or not found",
+		)
+	}
+	fake.delete = func(context.Context, datasafesdk.DeleteLibraryMaskingFormatRequest) (datasafesdk.DeleteLibraryMaskingFormatResponse, error) {
+		return datasafesdk.DeleteLibraryMaskingFormatResponse{OpcRequestId: common.String("opc-delete")}, nil
+	}
+
+	deleted, err := newTestLibraryMaskingFormatClient(fake).Delete(context.Background(), resource)
+	if err != nil {
+		t.Fatalf("Delete() error = %v", err)
+	}
+	if !deleted {
+		t.Fatal("Delete() deleted = false, want accepted delete plus auth-shaped readback to confirm deletion")
+	}
+	if len(fake.deleteRequests) != 1 {
+		t.Fatalf("delete calls = %d, want 1", len(fake.deleteRequests))
+	}
+	if getCalls != 3 {
+		t.Fatalf("get calls = %d, want wrapper pre-read, pending-delete check, and post-delete confirmation", getCalls)
+	}
+}
+
 func TestLibraryMaskingFormatDeleteKeepsFinalizerOnAuthShapedNotFound(t *testing.T) {
 	t.Parallel()
 

@@ -202,7 +202,6 @@ func containerRepositoryListFields() []generatedruntime.RequestField {
 	return []generatedruntime.RequestField{
 		{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", LookupPaths: []string{"status.compartmentId", "spec.compartmentId", "compartmentId"}},
 		{FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", LookupPaths: []string{"status.displayName", "spec.displayName", "displayName"}},
-		{FieldName: "RepositoryId", RequestName: "repositoryId", Contribution: "query", PreferResourceID: true},
 		{FieldName: "Page", RequestName: "page", Contribution: "query"},
 		{FieldName: "Limit", RequestName: "limit", Contribution: "query"},
 	}
@@ -425,7 +424,16 @@ func conservativeContainerRepositoryNotFoundError(err error, operation string) e
 	if err == nil {
 		return nil
 	}
-	if !errorutil.ClassifyDeleteError(err).IsAuthShapedNotFound() {
+	classification := errorutil.ClassifyDeleteError(err)
+	if classification.HTTPStatusCode == 404 && classification.ErrorCode == "REPO_ID_UNKNOWN" {
+		return errorutil.NotFoundOciError{
+			HTTPStatusCode: 404,
+			ErrorCode:      errorutil.NotFound,
+			OpcRequestID:   errorutil.OpcRequestID(err),
+			Description:    "Container repository does not exist",
+		}
+	}
+	if !classification.IsAuthShapedNotFound() {
 		return err
 	}
 	message := fmt.Sprintf("ContainerRepository %s returned ambiguous 404 NotAuthorizedOrNotFound: %s", strings.TrimSpace(operation), err.Error())
@@ -578,10 +586,7 @@ func desiredContainerRepositoryFreeformTagsForUpdate(spec map[string]string, cur
 	if spec != nil {
 		return cloneContainerRepositoryStringMap(spec)
 	}
-	if current != nil {
-		return map[string]string{}
-	}
-	return nil
+	return cloneContainerRepositoryStringMap(current)
 }
 
 func desiredContainerRepositoryDefinedTagsForUpdate(
@@ -591,10 +596,7 @@ func desiredContainerRepositoryDefinedTagsForUpdate(
 	if spec != nil {
 		return *util.ConvertToOciDefinedTags(&spec)
 	}
-	if current != nil {
-		return map[string]map[string]interface{}{}
-	}
-	return nil
+	return cloneContainerRepositoryDefinedTags(current)
 }
 
 func cloneContainerRepositoryStringMap(source map[string]string) map[string]string {

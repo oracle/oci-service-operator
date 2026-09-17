@@ -50,15 +50,84 @@ func registerBuildPipelineRuntimeHooksMutator(mutator BuildPipelineRuntimeHooksM
 	}
 	buildpipelineRuntimeHooksMutators = append(buildpipelineRuntimeHooksMutators, mutator)
 }
+func newBuildPipelineRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "devops",
+		FormalSlug:    "buildpipeline",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "displayName", "id", "projectId", "state"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"buildPipelineParameters", "definedTags", "description", "displayName", "freeformTags"},
+			ForceNew:      []string{"projectId"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newBuildPipelineDefaultRuntimeHooks(sdkClient devopssdk.DevopsClient) BuildPipelineRuntimeHooks {
 	return BuildPipelineRuntimeHooks{
+		Semantics:       newBuildPipelineRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*devopsv1beta1.BuildPipeline]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*devopsv1beta1.BuildPipeline]{},
 		StatusHooks:     generatedruntime.StatusHooks[*devopsv1beta1.BuildPipeline]{},
 		ParityHooks:     generatedruntime.ParityHooks[*devopsv1beta1.BuildPipeline]{},
-		Async:           generatedruntime.AsyncHooks[*devopsv1beta1.BuildPipeline]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*devopsv1beta1.BuildPipeline]{},
+		Async: generatedruntime.AsyncHooks[*devopsv1beta1.BuildPipeline]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := devopssdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*devopsv1beta1.BuildPipeline]{},
 		Create: runtimeOperationHooks[devopssdk.CreateBuildPipelineRequest, devopssdk.CreateBuildPipelineResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateBuildPipelineDetails", RequestName: "CreateBuildPipelineDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request devopssdk.CreateBuildPipelineRequest) (devopssdk.CreateBuildPipelineResponse, error) {
@@ -106,10 +175,19 @@ func buildBuildPipelineGeneratedRuntimeConfig(
 	hooks BuildPipelineRuntimeHooks,
 ) generatedruntime.Config[*devopsv1beta1.BuildPipeline] {
 	return generatedruntime.Config[*devopsv1beta1.BuildPipeline]{
-		Kind:            "BuildPipeline",
-		SDKName:         "BuildPipeline",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "BuildPipeline",
+		SDKName:   "BuildPipeline",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

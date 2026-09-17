@@ -39,6 +39,10 @@ func applyOpensearchClusterRuntimeHooks(
 	}
 
 	hooks.Semantics = newOpensearchClusterRuntimeSemantics()
+	hooks.Semantics.Mutation.ZeroValueNullEquivalent = []string{
+		"outboundClusterConfig",
+		"securitySamlConfig",
+	}
 	hooks.BuildCreateBody = func(ctx context.Context, resource *opensearchv1beta1.OpensearchCluster, namespace string) (any, error) {
 		return buildOpensearchCreateDetails(ctx, credentialClient, resource, namespace)
 	}

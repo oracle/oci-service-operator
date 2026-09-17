@@ -50,50 +50,119 @@ func registerTaskRecordRuntimeHooksMutator(mutator TaskRecordRuntimeHooksMutator
 	}
 	taskrecordRuntimeHooksMutators = append(taskrecordRuntimeHooksMutators, mutator)
 }
-func newTaskRecordDefaultRuntimeHooks(sdkClient fleetappsmanagementsdk.FleetAppsManagementRunbooksClient) TaskRecordRuntimeHooks {
+func newTaskRecordRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "fleetappsmanagement",
+		FormalSlug:    "taskrecord",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "displayName", "id", "operation", "platform", "state", "type"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"definedTags", "description", "details.executionDetails.catalogId", "details.executionDetails.command", "details.executionDetails.configFile", "details.executionDetails.content.bucket", "details.executionDetails.content.catalogId", "details.executionDetails.content.checksum", "details.executionDetails.content.namespace", "details.executionDetails.content.object", "details.executionDetails.content.sourceType", "details.executionDetails.credentials.displayName", "details.executionDetails.credentials.id", "details.executionDetails.endpoint", "details.executionDetails.executionType", "details.executionDetails.isExecutableContent", "details.executionDetails.isLocked", "details.executionDetails.isReadOutputVariableEnabled", "details.executionDetails.systemVariables", "details.executionDetails.targetCompartmentId", "details.executionDetails.variables.inputVariables.description", "details.executionDetails.variables.inputVariables.name", "details.executionDetails.variables.inputVariables.type", "details.executionDetails.variables.outputVariables", "details.isApplySubjectTask", "details.isDiscoveryOutputTask", "details.operation", "details.osType", "details.platform", "details.properties.numRetries", "details.properties.timeoutInSeconds", "details.scope", "displayName", "freeformTags"},
+			ForceNew:      []string{"compartmentId"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
+func newTaskRecordDefaultRuntimeHooks(sdkClient TaskRecordSDKClients) TaskRecordRuntimeHooks {
 	return TaskRecordRuntimeHooks{
+		Semantics:       newTaskRecordRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*fleetappsmanagementv1beta1.TaskRecord]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*fleetappsmanagementv1beta1.TaskRecord]{},
 		StatusHooks:     generatedruntime.StatusHooks[*fleetappsmanagementv1beta1.TaskRecord]{},
 		ParityHooks:     generatedruntime.ParityHooks[*fleetappsmanagementv1beta1.TaskRecord]{},
-		Async:           generatedruntime.AsyncHooks[*fleetappsmanagementv1beta1.TaskRecord]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*fleetappsmanagementv1beta1.TaskRecord]{},
+		Async: generatedruntime.AsyncHooks[*fleetappsmanagementv1beta1.TaskRecord]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := fleetappsmanagementsdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.fleetAppsManagementWorkRequestClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*fleetappsmanagementv1beta1.TaskRecord]{},
 		Create: runtimeOperationHooks[fleetappsmanagementsdk.CreateTaskRecordRequest, fleetappsmanagementsdk.CreateTaskRecordResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateTaskRecordDetails", RequestName: "CreateTaskRecordDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.CreateTaskRecordRequest) (fleetappsmanagementsdk.CreateTaskRecordResponse, error) {
-				return sdkClient.CreateTaskRecord(ctx, request)
+				return sdkClient.fleetAppsManagementRunbooksClient.CreateTaskRecord(ctx, request)
 			},
 		},
 		Get: runtimeOperationHooks[fleetappsmanagementsdk.GetTaskRecordRequest, fleetappsmanagementsdk.GetTaskRecordResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "TaskRecordId", RequestName: "taskRecordId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.GetTaskRecordRequest) (fleetappsmanagementsdk.GetTaskRecordResponse, error) {
-				return sdkClient.GetTaskRecord(ctx, request)
+				return sdkClient.fleetAppsManagementRunbooksClient.GetTaskRecord(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[fleetappsmanagementsdk.ListTaskRecordsRequest, fleetappsmanagementsdk.ListTaskRecordsResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "Platform", RequestName: "platform", Contribution: "query", PreferResourceID: false}, {FieldName: "Type", RequestName: "type", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "Operation", RequestName: "operation", Contribution: "query", PreferResourceID: false}, {FieldName: "Id", RequestName: "id", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.ListTaskRecordsRequest) (fleetappsmanagementsdk.ListTaskRecordsResponse, error) {
-				return sdkClient.ListTaskRecords(ctx, request)
+				return sdkClient.fleetAppsManagementRunbooksClient.ListTaskRecords(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[fleetappsmanagementsdk.UpdateTaskRecordRequest, fleetappsmanagementsdk.UpdateTaskRecordResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "TaskRecordId", RequestName: "taskRecordId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateTaskRecordDetails", RequestName: "UpdateTaskRecordDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.UpdateTaskRecordRequest) (fleetappsmanagementsdk.UpdateTaskRecordResponse, error) {
-				return sdkClient.UpdateTaskRecord(ctx, request)
+				return sdkClient.fleetAppsManagementRunbooksClient.UpdateTaskRecord(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[fleetappsmanagementsdk.DeleteTaskRecordRequest, fleetappsmanagementsdk.DeleteTaskRecordResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "TaskRecordId", RequestName: "taskRecordId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.DeleteTaskRecordRequest) (fleetappsmanagementsdk.DeleteTaskRecordResponse, error) {
-				return sdkClient.DeleteTaskRecord(ctx, request)
+				return sdkClient.fleetAppsManagementRunbooksClient.DeleteTaskRecord(ctx, request)
 			},
 		},
 		WrapGeneratedClient: []func(TaskRecordServiceClient) TaskRecordServiceClient{},
 	}
 }
 
-func newTaskRecordRuntimeHooks(manager *TaskRecordServiceManager, sdkClient fleetappsmanagementsdk.FleetAppsManagementRunbooksClient) TaskRecordRuntimeHooks {
+func newTaskRecordRuntimeHooks(manager *TaskRecordServiceManager, sdkClient TaskRecordSDKClients) TaskRecordRuntimeHooks {
 	hooks := newTaskRecordDefaultRuntimeHooks(sdkClient)
 	for _, mutator := range taskrecordRuntimeHooksMutators {
 		mutator(manager, &hooks)
@@ -106,10 +175,19 @@ func buildTaskRecordGeneratedRuntimeConfig(
 	hooks TaskRecordRuntimeHooks,
 ) generatedruntime.Config[*fleetappsmanagementv1beta1.TaskRecord] {
 	return generatedruntime.Config[*fleetappsmanagementv1beta1.TaskRecord]{
-		Kind:            "TaskRecord",
-		SDKName:         "TaskRecord",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "TaskRecord",
+		SDKName:   "TaskRecord",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

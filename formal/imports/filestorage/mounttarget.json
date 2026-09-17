@@ -1,0 +1,173 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "filestorage",
+  "slug": "mounttarget",
+  "kind": "MountTarget",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_file_storage_mount_target",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateMountTarget",
+        "requestType": "filestorage.CreateMountTargetRequest",
+        "responseType": "filestorage.CreateMountTargetResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetMountTarget",
+        "requestType": "filestorage.GetMountTargetRequest",
+        "responseType": "filestorage.GetMountTargetResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListMountTargets",
+        "requestType": "filestorage.ListMountTargetsRequest",
+        "responseType": "filestorage.ListMountTargetsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "CancelDowngradeShapeMountTarget",
+        "requestType": "filestorage.CancelDowngradeShapeMountTargetRequest",
+        "responseType": "filestorage.CancelDowngradeShapeMountTargetResponse"
+      },
+      {
+        "operation": "ChangeMountTargetCompartment",
+        "requestType": "filestorage.ChangeMountTargetCompartmentRequest",
+        "responseType": "filestorage.ChangeMountTargetCompartmentResponse"
+      },
+      {
+        "operation": "ScheduleDowngradeShapeMountTarget",
+        "requestType": "filestorage.ScheduleDowngradeShapeMountTargetRequest",
+        "responseType": "filestorage.ScheduleDowngradeShapeMountTargetResponse"
+      },
+      {
+        "operation": "UpdateMountTarget",
+        "requestType": "filestorage.UpdateMountTargetRequest",
+        "responseType": "filestorage.UpdateMountTargetResponse"
+      },
+      {
+        "operation": "UpgradeShapeMountTarget",
+        "requestType": "filestorage.UpgradeShapeMountTargetRequest",
+        "responseType": "filestorage.UpgradeShapeMountTargetResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteMountTarget",
+        "requestType": "filestorage.DeleteMountTargetRequest",
+        "responseType": "filestorage.DeleteMountTargetResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "FAILED"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "display_name",
+      "freeform_tags",
+      "idmap_type",
+      "is_lock_override",
+      "kerberos.backup_key_tab_secret_version",
+      "kerberos.current_key_tab_secret_version",
+      "kerberos.is_kerberos_enabled",
+      "kerberos.kerberos_realm",
+      "kerberos.key_tab_secret_id",
+      "ldap_idmap.cache_lifetime_seconds",
+      "ldap_idmap.cache_refresh_interval_seconds",
+      "ldap_idmap.group_search_base",
+      "ldap_idmap.negative_cache_lifetime_seconds",
+      "ldap_idmap.outbound_connector1id",
+      "ldap_idmap.outbound_connector2id",
+      "ldap_idmap.schema_type",
+      "ldap_idmap.user_search_base",
+      "nsg_ids",
+      "requested_throughput",
+      "security_attributes"
+    ],
+    "forceNew": [
+      "availability_domain",
+      "hostname_label",
+      "ip_address",
+      "locks",
+      "locks.message",
+      "locks.related_resource_id",
+      "locks.time_created",
+      "locks.type",
+      "subnet_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForCreatedState"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_file_storage_mount_targets",
+    "collectionField": "mount_targets",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "availability_domain",
+      "compartment_id",
+      "display_name",
+      "export_set_id",
+      "id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/filestorage/mounttarget/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/filestorage/mounttarget/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Refreshed from the pinned terraform-provider-oci File Storage Mount Target resource; lifecycle and status projection remain repo-authored."
+  ]
+}

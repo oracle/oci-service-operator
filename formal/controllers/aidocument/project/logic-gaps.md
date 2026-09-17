@@ -40,10 +40,11 @@ generated-runtime contract.
   request also exposes `lifecycleState`, `sortBy`, `sortOrder`, `limit`, and
   `page`, but reusable matching remains a repo-authored decision layered on top
   of those provider facts.
-- Mutation policy is explicit: only `displayName`, `description`,
-  `freeformTags`, and `definedTags` reconcile in place. `compartmentId` stays
-  replacement-only drift and the runtime skips `UpdateProject` when the mutable
-  surface already matches the live OCI response.
+- Mutation policy is explicit: only `displayName` and `description` reconcile
+  in place. Live OCI verification showed that `UpdateProject` accepts tag
+  fields but leaves them unchanged, so `freeformTags` and `definedTags` join
+  `compartmentId` as replacement-only drift. The runtime skips
+  `UpdateProject` when the mutable surface already matches the live response.
 - The refreshed lock surface stays explicit. OCI responses can now project
   `status.locks`, but the reviewed runtime intentionally omits
   `UpdateProject.isLockOverride` and `DeleteProject.isLockOverride` because the

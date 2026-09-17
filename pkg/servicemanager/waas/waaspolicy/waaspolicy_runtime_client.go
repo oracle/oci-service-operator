@@ -285,7 +285,7 @@ func waasPolicyWorkRequestActionMatchesPhase(action waassdk.WorkRequestResourceA
 
 func isWaasPolicyWorkRequestResource(resource waassdk.WorkRequestResource) bool {
 	token := normalizeWaasPolicyWorkRequestToken(waasPolicyStringValue(resource.EntityType))
-	return token == "waaspolicy" || token == "waaspolicies"
+	return token == "waas" || token == "waaspolicy" || token == "waaspolicies"
 }
 
 func normalizeWaasPolicyWorkRequestToken(value string) string {
@@ -359,6 +359,7 @@ func waasPolicyRuntimeSemantics() *generatedruntime.Semantics {
 			},
 			Update: []generatedruntime.Hook{
 				{Helper: "tfresource.UpdateResource", EntityType: "WaasPolicy", Action: "UpdateWaasPolicy"},
+				{Helper: "ChangeWaasPolicyCompartment"},
 				{Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "WorkRequest", Action: "GetWorkRequest"},
 			},
 			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "WaasPolicy", Action: "DeleteWaasPolicy"}},

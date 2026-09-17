@@ -428,6 +428,9 @@ func TestSoftwareSourceDeleteRejectsAuthShapedNotFound(t *testing.T) {
 	fake.deleteFunc = func(context.Context, osmanagementhubsdk.DeleteSoftwareSourceRequest) (osmanagementhubsdk.DeleteSoftwareSourceResponse, error) {
 		return osmanagementhubsdk.DeleteSoftwareSourceResponse{}, authErr
 	}
+	fake.listFunc = func(context.Context, osmanagementhubsdk.ListSoftwareSourcesRequest) (osmanagementhubsdk.ListSoftwareSourcesResponse, error) {
+		return osmanagementhubsdk.ListSoftwareSourcesResponse{SoftwareSourceCollection: osmanagementhubsdk.SoftwareSourceCollection{Items: []osmanagementhubsdk.SoftwareSourceSummary{customSoftwareSourceSummary(testSoftwareSourceID, testDisplayName, osmanagementhubsdk.SoftwareSourceLifecycleStateActive)}}}, nil
+	}
 
 	deleted, err := newSoftwareSourceServiceClientWithOCIClient(fake).Delete(context.Background(), resource)
 	if err == nil || !strings.Contains(err.Error(), "ambiguous 404 NotAuthorizedOrNotFound") {
@@ -456,6 +459,9 @@ func TestSoftwareSourceDeleteRejectsAuthShapedPreDeleteReadBeforeDelete(t *testi
 		t.Fatal("DeleteSoftwareSource() called after auth-shaped pre-delete read")
 		return osmanagementhubsdk.DeleteSoftwareSourceResponse{}, nil
 	}
+	fake.listFunc = func(context.Context, osmanagementhubsdk.ListSoftwareSourcesRequest) (osmanagementhubsdk.ListSoftwareSourcesResponse, error) {
+		return osmanagementhubsdk.ListSoftwareSourcesResponse{SoftwareSourceCollection: osmanagementhubsdk.SoftwareSourceCollection{Items: []osmanagementhubsdk.SoftwareSourceSummary{customSoftwareSourceSummary(testSoftwareSourceID, testDisplayName, osmanagementhubsdk.SoftwareSourceLifecycleStateActive)}}}, nil
+	}
 
 	deleted, err := newSoftwareSourceServiceClientWithOCIClient(fake).Delete(context.Background(), resource)
 	if err == nil || !strings.Contains(err.Error(), "ambiguous 404 NotAuthorizedOrNotFound") {
@@ -475,6 +481,39 @@ func TestSoftwareSourceDeleteRejectsAuthShapedPreDeleteReadBeforeDelete(t *testi
 	}
 	if got, want := resource.Status.OsokStatus.OpcRequestID, "opc-request-id"; got != want {
 		t.Fatalf("status.status.opcRequestId = %q, want %q", got, want)
+	}
+}
+
+func TestSoftwareSourceDeleteAcceptsAuthShapedNotFoundAfterScopedListAbsence(t *testing.T) {
+	resource := testSoftwareSource()
+	resource.Status.OsokStatus.Ocid = shared.OCID(testSoftwareSourceID)
+	authErr := errortest.NewServiceError(404, errorutil.NotAuthorizedOrNotFound, "not authorized or not found")
+	fake := &fakeSoftwareSourceOCIClient{}
+	fake.getFunc = func(context.Context, osmanagementhubsdk.GetSoftwareSourceRequest) (osmanagementhubsdk.GetSoftwareSourceResponse, error) {
+		return osmanagementhubsdk.GetSoftwareSourceResponse{SoftwareSource: customSoftwareSource(testSoftwareSourceID, testDisplayName, osmanagementhubsdk.SoftwareSourceLifecycleStateActive)}, nil
+	}
+	fake.deleteFunc = func(context.Context, osmanagementhubsdk.DeleteSoftwareSourceRequest) (osmanagementhubsdk.DeleteSoftwareSourceResponse, error) {
+		return osmanagementhubsdk.DeleteSoftwareSourceResponse{}, authErr
+	}
+	fake.listFunc = func(_ context.Context, request osmanagementhubsdk.ListSoftwareSourcesRequest) (osmanagementhubsdk.ListSoftwareSourcesResponse, error) {
+		if request.CompartmentId == nil || *request.CompartmentId != resource.Spec.CompartmentId {
+			t.Fatalf("list compartmentId = %#v, want %q", request.CompartmentId, resource.Spec.CompartmentId)
+		}
+		if request.DisplayName == nil || *request.DisplayName != resource.Spec.DisplayName {
+			t.Fatalf("list displayName = %#v, want %q", request.DisplayName, resource.Spec.DisplayName)
+		}
+		return osmanagementhubsdk.ListSoftwareSourcesResponse{}, nil
+	}
+
+	deleted, err := newSoftwareSourceServiceClientWithOCIClient(fake).Delete(context.Background(), resource)
+	if err != nil {
+		t.Fatalf("Delete() error = %v", err)
+	}
+	if !deleted {
+		t.Fatal("Delete() deleted = false, want true after scoped list absence")
+	}
+	if resource.Status.OsokStatus.DeletedAt == nil {
+		t.Fatal("status.status.deletedAt = nil, want deletion timestamp")
 	}
 }
 

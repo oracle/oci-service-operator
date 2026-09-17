@@ -50,50 +50,119 @@ func registerOracleDbAzureConnectorRuntimeHooksMutator(mutator OracleDbAzureConn
 	}
 	oracledbazureconnectorRuntimeHooksMutators = append(oracledbazureconnectorRuntimeHooksMutators, mutator)
 }
-func newOracleDbAzureConnectorDefaultRuntimeHooks(sdkClient dbmulticloudsdk.OracleDBAzureConnectorClient) OracleDbAzureConnectorRuntimeHooks {
+func newOracleDbAzureConnectorRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "dbmulticloud",
+		FormalSlug:    "oracledbazureconnector",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "dbClusterResourceId", "displayName", "oracleDbAzureConnectorId", "state"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"accessToken", "arcAgentNodes.currentArcAgentVersion", "arcAgentNodes.hostId", "arcAgentNodes.hostName", "arcAgentNodes.status", "arcAgentNodes.timeLastChecked", "azureIdentityMechanism", "azureResourceGroup", "azureSubscriptionId", "azureTenantId", "compartmentId", "dbClusterResourceId", "displayName", "lastModification", "lifecycleStateDetails"},
+			ForceNew:      []string{},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
+func newOracleDbAzureConnectorDefaultRuntimeHooks(sdkClient OracleDbAzureConnectorSDKClients) OracleDbAzureConnectorRuntimeHooks {
 	return OracleDbAzureConnectorRuntimeHooks{
+		Semantics:       newOracleDbAzureConnectorRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*dbmulticloudv1beta1.OracleDbAzureConnector]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*dbmulticloudv1beta1.OracleDbAzureConnector]{},
 		StatusHooks:     generatedruntime.StatusHooks[*dbmulticloudv1beta1.OracleDbAzureConnector]{},
 		ParityHooks:     generatedruntime.ParityHooks[*dbmulticloudv1beta1.OracleDbAzureConnector]{},
-		Async:           generatedruntime.AsyncHooks[*dbmulticloudv1beta1.OracleDbAzureConnector]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*dbmulticloudv1beta1.OracleDbAzureConnector]{},
+		Async: generatedruntime.AsyncHooks[*dbmulticloudv1beta1.OracleDbAzureConnector]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := dbmulticloudsdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.workRequestClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*dbmulticloudv1beta1.OracleDbAzureConnector]{},
 		Create: runtimeOperationHooks[dbmulticloudsdk.CreateOracleDbAzureConnectorRequest, dbmulticloudsdk.CreateOracleDbAzureConnectorResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateOracleDbAzureConnectorDetails", RequestName: "CreateOracleDbAzureConnectorDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dbmulticloudsdk.CreateOracleDbAzureConnectorRequest) (dbmulticloudsdk.CreateOracleDbAzureConnectorResponse, error) {
-				return sdkClient.CreateOracleDbAzureConnector(ctx, request)
+				return sdkClient.oracleDbAzureConnectorClient.CreateOracleDbAzureConnector(ctx, request)
 			},
 		},
 		Get: runtimeOperationHooks[dbmulticloudsdk.GetOracleDbAzureConnectorRequest, dbmulticloudsdk.GetOracleDbAzureConnectorResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OracleDbAzureConnectorId", RequestName: "oracleDbAzureConnectorId", Contribution: "path", PreferResourceID: true}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dbmulticloudsdk.GetOracleDbAzureConnectorRequest) (dbmulticloudsdk.GetOracleDbAzureConnectorResponse, error) {
-				return sdkClient.GetOracleDbAzureConnector(ctx, request)
+				return sdkClient.oracleDbAzureConnectorClient.GetOracleDbAzureConnector(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[dbmulticloudsdk.ListOracleDbAzureConnectorsRequest, dbmulticloudsdk.ListOracleDbAzureConnectorsResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "OracleDbAzureConnectorId", RequestName: "oracleDbAzureConnectorId", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "DbClusterResourceId", RequestName: "dbClusterResourceId", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dbmulticloudsdk.ListOracleDbAzureConnectorsRequest) (dbmulticloudsdk.ListOracleDbAzureConnectorsResponse, error) {
-				return sdkClient.ListOracleDbAzureConnectors(ctx, request)
+				return sdkClient.oracleDbAzureConnectorClient.ListOracleDbAzureConnectors(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[dbmulticloudsdk.UpdateOracleDbAzureConnectorRequest, dbmulticloudsdk.UpdateOracleDbAzureConnectorResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OracleDbAzureConnectorId", RequestName: "oracleDbAzureConnectorId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateOracleDbAzureConnectorDetails", RequestName: "UpdateOracleDbAzureConnectorDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dbmulticloudsdk.UpdateOracleDbAzureConnectorRequest) (dbmulticloudsdk.UpdateOracleDbAzureConnectorResponse, error) {
-				return sdkClient.UpdateOracleDbAzureConnector(ctx, request)
+				return sdkClient.oracleDbAzureConnectorClient.UpdateOracleDbAzureConnector(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[dbmulticloudsdk.DeleteOracleDbAzureConnectorRequest, dbmulticloudsdk.DeleteOracleDbAzureConnectorResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OracleDbAzureConnectorId", RequestName: "oracleDbAzureConnectorId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request dbmulticloudsdk.DeleteOracleDbAzureConnectorRequest) (dbmulticloudsdk.DeleteOracleDbAzureConnectorResponse, error) {
-				return sdkClient.DeleteOracleDbAzureConnector(ctx, request)
+				return sdkClient.oracleDbAzureConnectorClient.DeleteOracleDbAzureConnector(ctx, request)
 			},
 		},
 		WrapGeneratedClient: []func(OracleDbAzureConnectorServiceClient) OracleDbAzureConnectorServiceClient{},
 	}
 }
 
-func newOracleDbAzureConnectorRuntimeHooks(manager *OracleDbAzureConnectorServiceManager, sdkClient dbmulticloudsdk.OracleDBAzureConnectorClient) OracleDbAzureConnectorRuntimeHooks {
+func newOracleDbAzureConnectorRuntimeHooks(manager *OracleDbAzureConnectorServiceManager, sdkClient OracleDbAzureConnectorSDKClients) OracleDbAzureConnectorRuntimeHooks {
 	hooks := newOracleDbAzureConnectorDefaultRuntimeHooks(sdkClient)
 	for _, mutator := range oracledbazureconnectorRuntimeHooksMutators {
 		mutator(manager, &hooks)
@@ -106,10 +175,19 @@ func buildOracleDbAzureConnectorGeneratedRuntimeConfig(
 	hooks OracleDbAzureConnectorRuntimeHooks,
 ) generatedruntime.Config[*dbmulticloudv1beta1.OracleDbAzureConnector] {
 	return generatedruntime.Config[*dbmulticloudv1beta1.OracleDbAzureConnector]{
-		Kind:            "OracleDbAzureConnector",
-		SDKName:         "OracleDbAzureConnector",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "OracleDbAzureConnector",
+		SDKName:   "OracleDbAzureConnector",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

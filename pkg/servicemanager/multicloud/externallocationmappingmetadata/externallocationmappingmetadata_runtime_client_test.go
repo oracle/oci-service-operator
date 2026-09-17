@@ -465,6 +465,9 @@ func requireExternalLocationMappingMetadataObservedStatus(
 	if !strings.Contains(resource.Status.OsokStatus.Message, "us-ashburn-1") {
 		t.Fatalf("status.status.message = %q, want observed OCI region", resource.Status.OsokStatus.Message)
 	}
+	if resource.Status.OciRegion != "us-ashburn-1" || resource.Status.OciPhysicalAd != "phx-ad-1" {
+		t.Fatalf("projected ExternalLocationMappingMetadata status = %+v", resource.Status)
+	}
 }
 
 func makeExternalLocationMappingMetadataResource() *multicloudv1beta1.ExternalLocationMappingMetadata {

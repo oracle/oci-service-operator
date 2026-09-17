@@ -1,0 +1,29 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: networkfirewall
+slug: networkfirewall
+kind: NetworkFirewall
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending: ["CREATING"]
+    updatePending: ["UPDATING"]
+    deletePending: ["DELETING"]
+  listLookup:
+    filters: ["compartmentId","displayName"]
+    matchRule: exact resource identity match; duplicate matches fail
+  mutation:
+    mutable: ["definedTags","displayName","freeformTags","natConfiguration","networkFirewallPolicyId","networkSecurityGroupIds","shape"]
+    forceNew: ["availabilityDomain","compartmentId","ipv4Address","ipv6Address","subnetId"]
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - "The runtime uses its declared lifecycle-state contract for NetworkFirewall reconciliation."
+  - "The credential-free mock exercises SDK request serialization, response projection, mutation when supported, and confirmed deletion."

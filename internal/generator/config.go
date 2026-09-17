@@ -11,6 +11,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"sort"
 	"strings"
 	"unicode"
 
@@ -92,15 +93,16 @@ type GenerationSurfaceConfig struct {
 
 // ResourceGenerationOverride captures per-kind rollout and override metadata.
 type ResourceGenerationOverride struct {
-	Kind           string                           `yaml:"kind"`
-	FormalSpec     string                           `yaml:"formalSpec,omitempty"`
-	Async          AsyncConfig                      `yaml:"async,omitempty"`
-	Controller     ControllerGenerationOverride     `yaml:"controller,omitempty"`
-	ServiceManager ServiceManagerGenerationOverride `yaml:"serviceManager,omitempty"`
-	Webhooks       GenerationSurfaceConfig          `yaml:"webhooks,omitempty"`
-	SpecFields     []FieldOverride                  `yaml:"specFields,omitempty"`
-	StatusFields   []FieldOverride                  `yaml:"statusFields,omitempty"`
-	Sample         SampleOverride                   `yaml:"sample,omitempty"`
+	Kind                            string                           `yaml:"kind"`
+	FormalSpec                      string                           `yaml:"formalSpec,omitempty"`
+	PreserveOptionalBooleanPresence bool                             `yaml:"preserveOptionalBooleanPresence,omitempty"`
+	Async                           AsyncConfig                      `yaml:"async,omitempty"`
+	Controller                      ControllerGenerationOverride     `yaml:"controller,omitempty"`
+	ServiceManager                  ServiceManagerGenerationOverride `yaml:"serviceManager,omitempty"`
+	Webhooks                        GenerationSurfaceConfig          `yaml:"webhooks,omitempty"`
+	SpecFields                      []FieldOverride                  `yaml:"specFields,omitempty"`
+	StatusFields                    []FieldOverride                  `yaml:"statusFields,omitempty"`
+	Sample                          SampleOverride                   `yaml:"sample,omitempty"`
 }
 
 // ControllerGenerationOverride captures per-kind controller-specific settings.
@@ -175,6 +177,7 @@ type ServiceConfig struct {
 	Package        PackageConfig        `yaml:"package,omitempty"`
 	PackageSplits  []PackageSplitConfig `yaml:"packageSplits,omitempty"`
 	Selection      SelectionConfig      `yaml:"selection"`
+	KindAliases    map[string]string    `yaml:"kindAliases,omitempty"`
 	FormalSpec     string               `yaml:"formalSpec,omitempty"`
 	Async          AsyncConfig          `yaml:"async,omitempty"`
 	ObservedState  ObservedStateConfig  `yaml:"observedState,omitempty"`
@@ -259,6 +262,9 @@ func (c *Config) validateService(
 	if err := service.Selection.Validate(service.Service); err != nil {
 		return err
 	}
+	if err := validateKindAliases(service); err != nil {
+		return err
+	}
 	if err := validateFormalSpec(fmt.Sprintf("service %q formalSpec", service.Service), service.FormalSpec); err != nil {
 		return err
 	}
@@ -283,6 +289,37 @@ func (c *Config) validateService(
 	for _, split := range service.PackageSplits {
 		servicesByName[split.Name] = struct{}{}
 		groupsByName[split.Name] = struct{}{}
+	}
+	return nil
+}
+
+func validateKindAliases(service ServiceConfig) error {
+	apiKinds := make(map[string]string, len(service.KindAliases))
+	sdkKinds := make([]string, 0, len(service.KindAliases))
+	for sdkKind := range service.KindAliases {
+		sdkKinds = append(sdkKinds, sdkKind)
+	}
+	sort.Strings(sdkKinds)
+	for _, rawSDKKind := range sdkKinds {
+		rawAPIKind := service.KindAliases[rawSDKKind]
+		sdkKind := strings.TrimSpace(rawSDKKind)
+		apiKind := strings.TrimSpace(rawAPIKind)
+		if sdkKind == "" {
+			return fmt.Errorf("service %q kindAliases contains a blank SDK kind", service.Service)
+		}
+		if apiKind == "" {
+			return fmt.Errorf("service %q kindAliases[%q] contains a blank API kind", service.Service, sdkKind)
+		}
+		if previous, exists := apiKinds[apiKind]; exists {
+			return fmt.Errorf(
+				"service %q kindAliases maps both %q and %q to API kind %q",
+				service.Service,
+				previous,
+				sdkKind,
+				apiKind,
+			)
+		}
+		apiKinds[apiKind] = sdkKind
 	}
 	return nil
 }
@@ -884,6 +921,7 @@ func validateEffectiveAsyncConfig(field string, async AsyncConfig) error {
 
 func (r ResourceGenerationOverride) hasOverrides() bool {
 	return strings.TrimSpace(r.FormalSpec) != "" ||
+		r.PreserveOptionalBooleanPresence ||
 		r.Async.hasOverride() ||
 		r.Controller.hasOverrides() ||
 		r.ServiceManager.hasOverrides() ||
@@ -1164,6 +1202,20 @@ func (s ServiceConfig) SelectedKinds() []string {
 	return append([]string(nil), s.selectedKinds...)
 }
 
+// SelectedAPIKinds returns the stable OSOK API names for the SDK resource
+// families selected for the current generator run.
+func (s ServiceConfig) SelectedAPIKinds() []string {
+	selected := s.SelectedKinds()
+	if len(selected) == 0 {
+		return nil
+	}
+	apiKinds := make([]string, 0, len(selected))
+	for _, sdkKind := range selected {
+		apiKinds = append(apiKinds, s.APIKindFor(sdkKind))
+	}
+	return apiKinds
+}
+
 // HasSelectedKinds reports whether the current generator run narrowed this
 // service to an explicit kind subset.
 func (s ServiceConfig) HasSelectedKinds() bool {
@@ -1335,7 +1387,7 @@ func (s ServiceConfig) HasSelectedFormalSpecs() bool {
 		return true
 	}
 	for _, resource := range s.Generation.Resources {
-		if !s.includesSelectedKind(resource.Kind) {
+		if !s.includesSelectedKind(s.SDKKindFor(resource.Kind)) {
 			continue
 		}
 		if strings.TrimSpace(resource.FormalSpec) != "" {
@@ -1343,6 +1395,26 @@ func (s ServiceConfig) HasSelectedFormalSpecs() bool {
 		}
 	}
 	return false
+}
+
+// APIKindFor resolves the stable OSOK API kind for one discovered SDK resource family.
+func (s ServiceConfig) APIKindFor(sdkKind string) string {
+	sdkKind = strings.TrimSpace(sdkKind)
+	if alias := strings.TrimSpace(s.KindAliases[sdkKind]); alias != "" {
+		return alias
+	}
+	return sdkKind
+}
+
+// SDKKindFor resolves the discovered SDK resource family for one stable OSOK API kind.
+func (s ServiceConfig) SDKKindFor(apiKind string) string {
+	apiKind = strings.TrimSpace(apiKind)
+	for sdkKind, alias := range s.KindAliases {
+		if strings.TrimSpace(alias) == apiKind {
+			return strings.TrimSpace(sdkKind)
+		}
+	}
+	return apiKind
 }
 
 // RegistrationGenerationStrategy returns the runtime-registration rollout strategy for the service.
@@ -1367,6 +1439,14 @@ func (s ServiceConfig) resourceGenerationOverride(kind string) (ResourceGenerati
 	for _, override := range s.Generation.Resources {
 		if override.Kind == kind {
 			return override, true
+		}
+	}
+	apiKind := s.APIKindFor(kind)
+	if apiKind != kind {
+		for _, override := range s.Generation.Resources {
+			if override.Kind == apiKind {
+				return override, true
+			}
 		}
 	}
 	return ResourceGenerationOverride{}, false

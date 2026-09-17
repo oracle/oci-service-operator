@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "networkloadbalancer",
+  "slug": "networkloadbalancer",
+  "kind": "NetworkLoadBalancer",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_network_load_balancer_network_load_balancer",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateNetworkLoadBalancer",
+        "requestType": "networkloadbalancer.CreateNetworkLoadBalancerRequest",
+        "responseType": "networkloadbalancer.CreateNetworkLoadBalancerResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetNetworkLoadBalancer",
+        "requestType": "networkloadbalancer.GetNetworkLoadBalancerRequest",
+        "responseType": "networkloadbalancer.GetNetworkLoadBalancerResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListNetworkLoadBalancers",
+        "requestType": "networkloadbalancer.ListNetworkLoadBalancersRequest",
+        "responseType": "networkloadbalancer.ListNetworkLoadBalancersResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeNetworkLoadBalancerCompartment",
+        "requestType": "networkloadbalancer.ChangeNetworkLoadBalancerCompartmentRequest",
+        "responseType": "networkloadbalancer.ChangeNetworkLoadBalancerCompartmentResponse"
+      },
+      {
+        "operation": "UpdateNetworkLoadBalancer",
+        "requestType": "networkloadbalancer.UpdateNetworkLoadBalancerRequest",
+        "responseType": "networkloadbalancer.UpdateNetworkLoadBalancerResponse"
+      },
+      {
+        "operation": "UpdateNetworkSecurityGroups",
+        "requestType": "networkloadbalancer.UpdateNetworkSecurityGroupsRequest",
+        "responseType": "networkloadbalancer.UpdateNetworkSecurityGroupsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteNetworkLoadBalancer",
+        "requestType": "networkloadbalancer.DeleteNetworkLoadBalancerRequest",
+        "responseType": "networkloadbalancer.DeleteNetworkLoadBalancerResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "FAILED"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "display_name",
+      "freeform_tags",
+      "is_preserve_source_destination",
+      "is_symmetric_hash_enabled",
+      "network_security_group_ids",
+      "nlb_ip_version",
+      "security_attributes"
+    ],
+    "forceNew": [
+      "assigned_ipv6",
+      "assigned_private_ipv4",
+      "is_private",
+      "reserved_ips",
+      "reserved_ips.id",
+      "subnet_id",
+      "subnet_ipv6cidr"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_network_load_balancer_network_load_balancers",
+    "collectionField": "network_load_balancer_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/networkloadbalancer/networkloadbalancer/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/networkloadbalancer/networkloadbalancer/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from terraform-provider-oci for networkloadbalancer/networkloadbalancer."
+  ]
+}

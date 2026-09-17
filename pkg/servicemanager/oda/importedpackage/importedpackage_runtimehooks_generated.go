@@ -66,25 +66,25 @@ func newImportedPackageDefaultRuntimeHooks(sdkClient odasdk.OdapackageClient) Im
 			},
 		},
 		Get: runtimeOperationHooks[odasdk.GetImportedPackageRequest, odasdk.GetImportedPackageResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "OdaInstanceId", RequestName: "odaInstanceId", Contribution: "path", PreferResourceID: false}, {FieldName: "PackageId", RequestName: "packageId", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "OdaInstanceId", RequestName: "odaInstanceId", Contribution: "path", PreferResourceID: false}, {FieldName: "PackageId", RequestName: "packageId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request odasdk.GetImportedPackageRequest) (odasdk.GetImportedPackageResponse, error) {
 				return sdkClient.GetImportedPackage(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[odasdk.ListImportedPackagesRequest, odasdk.ListImportedPackagesResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "OdaInstanceId", RequestName: "odaInstanceId", Contribution: "path", PreferResourceID: true}, {FieldName: "Name", RequestName: "name", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "OdaInstanceId", RequestName: "odaInstanceId", Contribution: "path", PreferResourceID: false}, {FieldName: "Name", RequestName: "name", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request odasdk.ListImportedPackagesRequest) (odasdk.ListImportedPackagesResponse, error) {
 				return sdkClient.ListImportedPackages(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[odasdk.UpdateImportedPackageRequest, odasdk.UpdateImportedPackageResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "OdaInstanceId", RequestName: "odaInstanceId", Contribution: "path", PreferResourceID: false}, {FieldName: "PackageId", RequestName: "packageId", Contribution: "path", PreferResourceID: false}, {FieldName: "IsReplaceSkills", RequestName: "isReplaceSkills", Contribution: "query", PreferResourceID: false}, {FieldName: "UpdateImportedPackageDetails", RequestName: "UpdateImportedPackageDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "OdaInstanceId", RequestName: "odaInstanceId", Contribution: "path", PreferResourceID: false}, {FieldName: "PackageId", RequestName: "packageId", Contribution: "path", PreferResourceID: true}, {FieldName: "IsReplaceSkills", RequestName: "isReplaceSkills", Contribution: "query", PreferResourceID: false}, {FieldName: "UpdateImportedPackageDetails", RequestName: "UpdateImportedPackageDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request odasdk.UpdateImportedPackageRequest) (odasdk.UpdateImportedPackageResponse, error) {
 				return sdkClient.UpdateImportedPackage(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[odasdk.DeleteImportedPackageRequest, odasdk.DeleteImportedPackageResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "OdaInstanceId", RequestName: "odaInstanceId", Contribution: "path", PreferResourceID: false}, {FieldName: "PackageId", RequestName: "packageId", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "OdaInstanceId", RequestName: "odaInstanceId", Contribution: "path", PreferResourceID: false}, {FieldName: "PackageId", RequestName: "packageId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request odasdk.DeleteImportedPackageRequest) (odasdk.DeleteImportedPackageResponse, error) {
 				return sdkClient.DeleteImportedPackage(ctx, request)
 			},

@@ -32,8 +32,28 @@ type defaultPrivilegedApiControlServiceClient struct {
 
 var _ PrivilegedApiControlServiceClient = defaultPrivilegedApiControlServiceClient{}
 
+type PrivilegedApiControlSDKClients struct {
+	privilegedApiControlClient     apiaccesscontrolsdk.PrivilegedApiControlClient
+	privilegedApiWorkRequestClient apiaccesscontrolsdk.PrivilegedApiWorkRequestClient
+}
+
+func newPrivilegedApiControlSDKClients(manager *PrivilegedApiControlServiceManager) (PrivilegedApiControlSDKClients, error) {
+	var clients PrivilegedApiControlSDKClients
+	privilegedApiControlClientClient, err := apiaccesscontrolsdk.NewPrivilegedApiControlClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize PrivilegedApiControl OCI client PrivilegedApiControlClient: %w", err)
+	}
+	clients.privilegedApiControlClient = privilegedApiControlClientClient
+	privilegedApiWorkRequestClientClient, err := apiaccesscontrolsdk.NewPrivilegedApiWorkRequestClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize PrivilegedApiControl OCI client PrivilegedApiWorkRequestClient: %w", err)
+	}
+	clients.privilegedApiWorkRequestClient = privilegedApiWorkRequestClientClient
+	return clients, nil
+}
+
 var newPrivilegedApiControlServiceClient = func(manager *PrivilegedApiControlServiceManager) PrivilegedApiControlServiceClient {
-	sdkClient, err := apiaccesscontrolsdk.NewPrivilegedApiControlClientWithConfigurationProvider(manager.Provider)
+	sdkClient, err := newPrivilegedApiControlSDKClients(manager)
 	hooks := newPrivilegedApiControlRuntimeHooks(manager, sdkClient)
 	config := buildPrivilegedApiControlGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {

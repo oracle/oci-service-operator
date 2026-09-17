@@ -43,7 +43,7 @@ type InstanceSpec struct {
 	// +kubebuilder:validation:Optional
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// +kubebuilder:validation:Optional
-	AgentConfig InstanceAgentConfig `json:"agentConfig,omitempty"`
+	AgentConfig InstanceAgentConfig `json:"agentConfig,omitempty,omitzero"`
 	// Custom metadata key/value string pairs that you provide. Any set of key/value pairs
 	// provided here will completely replace the current set of key/value pairs in the `metadata`
 	// field on the instance.
@@ -84,9 +84,9 @@ type InstanceSpec struct {
 	// +kubebuilder:validation:Optional
 	Shape string `json:"shape,omitempty"`
 	// +kubebuilder:validation:Optional
-	ShapeConfig InstanceShapeConfig `json:"shapeConfig,omitempty"`
+	ShapeConfig InstanceShapeConfig `json:"shapeConfig,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	SourceDetails InstanceSourceDetails `json:"sourceDetails,omitempty"`
+	SourceDetails InstanceSourceDetails `json:"sourceDetails,omitempty,omitzero"`
 	// The parameter acts as a fail-safe to prevent unwanted downtime when updating a running instance.
 	// The default is ALLOW_DOWNTIME.
 	// * `ALLOW_DOWNTIME` - Compute might reboot the instance while updating the instance if a reboot is required.
@@ -96,7 +96,7 @@ type InstanceSpec struct {
 	// +kubebuilder:validation:Optional
 	UpdateOperationConstraint string `json:"updateOperationConstraint,omitempty"`
 	// +kubebuilder:validation:Optional
-	InstanceOptions InstanceOptions `json:"instanceOptions,omitempty"`
+	InstanceOptions InstanceOptions `json:"instanceOptions,omitempty,omitzero"`
 	// A fault domain is a grouping of hardware and infrastructure within an availability domain.
 	// Each availability domain contains three fault domains. Fault domains let you distribute your
 	// instances so that they are not on the same physical hardware within a single availability domain.
@@ -109,9 +109,9 @@ type InstanceSpec struct {
 	// +kubebuilder:validation:Optional
 	FaultDomain string `json:"faultDomain,omitempty"`
 	// +kubebuilder:validation:Optional
-	LaunchOptions InstanceLaunchOptions `json:"launchOptions,omitempty"`
+	LaunchOptions InstanceLaunchOptions `json:"launchOptions,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	AvailabilityConfig InstanceAvailabilityConfig `json:"availabilityConfig,omitempty"`
+	AvailabilityConfig InstanceAvailabilityConfig `json:"availabilityConfig,omitempty,omitzero"`
 	// For a VM instance, resets the scheduled time that the instance will be reboot migrated for
 	// infrastructure maintenance, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
 	// If the instance hasn't been rebooted after this date, Oracle reboots the instance within 24 hours of the time
@@ -133,7 +133,7 @@ type InstanceSpec struct {
 	// +kubebuilder:validation:Optional
 	DedicatedVmHostId string `json:"dedicatedVmHostId,omitempty"`
 	// +kubebuilder:validation:Optional
-	PlatformConfig InstancePlatformConfig `json:"platformConfig,omitempty"`
+	PlatformConfig InstancePlatformConfig `json:"platformConfig,omitempty,omitzero"`
 	// The list of liscensing configurations with target update values.
 	// +kubebuilder:validation:Optional
 	LicensingConfigs []InstanceLicensingConfig `json:"licensingConfigs,omitempty"`
@@ -145,7 +145,7 @@ type InstanceSpec struct {
 	// +kubebuilder:validation:Required
 	CompartmentId string `json:"compartmentId"`
 	// +kubebuilder:validation:Optional
-	CreateVnicDetails InstanceCreateVnicDetails `json:"createVnicDetails,omitempty"`
+	CreateVnicDetails InstanceCreateVnicDetails `json:"createVnicDetails,omitempty,omitzero"`
 	// The OCID of the cluster placement group of the instance.
 	// +kubebuilder:validation:Optional
 	ClusterPlacementGroupId string `json:"clusterPlacementGroupId,omitempty"`
@@ -189,7 +189,7 @@ type InstanceSpec struct {
 	// +kubebuilder:validation:Optional
 	IpxeScript string `json:"ipxeScript,omitempty"`
 	// +kubebuilder:validation:Optional
-	PreemptibleInstanceConfig InstancePreemptibleInstanceConfig `json:"preemptibleInstanceConfig,omitempty"`
+	PreemptibleInstanceConfig InstancePreemptibleInstanceConfig `json:"preemptibleInstanceConfig,omitempty,omitzero"`
 	// Deprecated. Instead use `subnetId` in
 	// CreateVnicDetails.
 	// At least one of them is required; if you provide both, the values must match.
@@ -202,7 +202,7 @@ type InstanceSpec struct {
 	// +kubebuilder:validation:Optional
 	IsPvEncryptionInTransitEnabled bool `json:"isPvEncryptionInTransitEnabled,omitempty"`
 	// +kubebuilder:validation:Optional
-	PlacementConstraintDetails InstancePlacementConstraintDetails `json:"placementConstraintDetails,omitempty"`
+	PlacementConstraintDetails InstancePlacementConstraintDetails `json:"placementConstraintDetails,omitempty,omitzero"`
 	// The OCID of the Instance Configuration containing instance launch details. Any other fields supplied in this instance launch request will override the details stored in the Instance Configuration for this instance launch.
 	// +kubebuilder:validation:Optional
 	InstanceConfigurationId string `json:"instanceConfigurationId,omitempty"`
@@ -638,7 +638,7 @@ type InstanceLaunchVolumeAttachment struct {
 	// +kubebuilder:validation:Optional
 	VolumeId string `json:"volumeId,omitempty"`
 	// +kubebuilder:validation:Optional
-	LaunchCreateVolumeDetails InstanceLaunchVolumeAttachmentLaunchCreateVolumeDetails `json:"launchCreateVolumeDetails,omitempty"`
+	LaunchCreateVolumeDetails InstanceLaunchVolumeAttachmentLaunchCreateVolumeDetails `json:"launchCreateVolumeDetails,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
 	Type string `json:"type,omitempty"`
 	// Whether to enable in-transit encryption for the data volume's paravirtualized attachment. The default value is false.

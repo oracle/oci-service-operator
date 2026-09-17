@@ -66,25 +66,25 @@ func newFunctionLibraryDefaultRuntimeHooks(sdkClient dataintegrationsdk.DataInte
 			},
 		},
 		Get: runtimeOperationHooks[dataintegrationsdk.GetFunctionLibraryRequest, dataintegrationsdk.GetFunctionLibraryResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "FunctionLibraryKey", RequestName: "functionLibraryKey", Contribution: "path", PreferResourceID: false}, {FieldName: "Projection", RequestName: "projection", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "FunctionLibraryKey", RequestName: "functionLibraryKey", Contribution: "path", PreferResourceID: true}, {FieldName: "Projection", RequestName: "projection", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dataintegrationsdk.GetFunctionLibraryRequest) (dataintegrationsdk.GetFunctionLibraryResponse, error) {
 				return sdkClient.GetFunctionLibrary(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[dataintegrationsdk.ListFunctionLibrariesRequest, dataintegrationsdk.ListFunctionLibrariesResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: true}, {FieldName: "AggregatorKey", RequestName: "aggregatorKey", Contribution: "query", PreferResourceID: false}, {FieldName: "Fields", RequestName: "fields", Contribution: "query", PreferResourceID: false}, {FieldName: "Name", RequestName: "name", Contribution: "query", PreferResourceID: false}, {FieldName: "Identifier", RequestName: "identifier", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "AggregatorKey", RequestName: "aggregatorKey", Contribution: "query", PreferResourceID: false}, {FieldName: "Fields", RequestName: "fields", Contribution: "query", PreferResourceID: false}, {FieldName: "Name", RequestName: "name", Contribution: "query", PreferResourceID: false}, {FieldName: "Identifier", RequestName: "identifier", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dataintegrationsdk.ListFunctionLibrariesRequest) (dataintegrationsdk.ListFunctionLibrariesResponse, error) {
 				return sdkClient.ListFunctionLibraries(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[dataintegrationsdk.UpdateFunctionLibraryRequest, dataintegrationsdk.UpdateFunctionLibraryResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "FunctionLibraryKey", RequestName: "functionLibraryKey", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdateFunctionLibraryDetails", RequestName: "UpdateFunctionLibraryDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "FunctionLibraryKey", RequestName: "functionLibraryKey", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateFunctionLibraryDetails", RequestName: "UpdateFunctionLibraryDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dataintegrationsdk.UpdateFunctionLibraryRequest) (dataintegrationsdk.UpdateFunctionLibraryResponse, error) {
 				return sdkClient.UpdateFunctionLibrary(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[dataintegrationsdk.DeleteFunctionLibraryRequest, dataintegrationsdk.DeleteFunctionLibraryResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "FunctionLibraryKey", RequestName: "functionLibraryKey", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "FunctionLibraryKey", RequestName: "functionLibraryKey", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request dataintegrationsdk.DeleteFunctionLibraryRequest) (dataintegrationsdk.DeleteFunctionLibraryResponse, error) {
 				return sdkClient.DeleteFunctionLibrary(ctx, request)
 			},

@@ -33,7 +33,7 @@ type RepositorySpec struct {
 	// +kubebuilder:validation:Optional
 	DefaultBranch string `json:"defaultBranch,omitempty"`
 	// +kubebuilder:validation:Optional
-	MirrorRepositoryConfig RepositoryMirrorRepositoryConfig `json:"mirrorRepositoryConfig,omitempty"`
+	MirrorRepositoryConfig RepositoryMirrorRepositoryConfig `json:"mirrorRepositoryConfig,omitempty,omitzero"`
 	// Details of the repository. Avoid entering confidential information.
 	// +kubebuilder:validation:Optional
 	Description string `json:"description,omitempty"`
@@ -69,7 +69,7 @@ type RepositoryMirrorRepositoryConfig struct {
 	// +kubebuilder:validation:Optional
 	RepositoryUrl string `json:"repositoryUrl,omitempty"`
 	// +kubebuilder:validation:Optional
-	TriggerSchedule RepositoryMirrorRepositoryConfigTriggerSchedule `json:"triggerSchedule,omitempty"`
+	TriggerSchedule RepositoryMirrorRepositoryConfigTriggerSchedule `json:"triggerSchedule,omitempty,omitzero"`
 }
 
 // RepositoryStatus defines the observed state of Repository.

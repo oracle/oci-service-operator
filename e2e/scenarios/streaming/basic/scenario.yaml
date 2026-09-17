@@ -1,0 +1,28 @@
+version: 1
+name: streaming-stream-basic-crud
+service: streaming
+namespace: default
+timeout: 20m
+pollInterval: 10s
+create: create.yaml
+update: update.yaml
+ready:
+  conditionTypes: [Active]
+  lifecycleStates: [ACTIVE]
+  requireOCID: true
+  fieldsEqual:
+    - desired: spec.name
+      observed: status.name
+    - desired: spec.freeformTags
+      observed: status.freeformTags
+failureConditionTypes: [Failed]
+relatedObjects:
+  - apiVersion: v1
+    kind: Secret
+    requiredDataKeys: [endpoint]
+    deleteWithResource: true
+delete:
+  enabled: true
+  timeout: 20m
+  cleanupDependencies: true
+cleanupOnFailure: true

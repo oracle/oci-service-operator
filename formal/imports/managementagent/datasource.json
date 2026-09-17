@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "managementagent",
+  "slug": "datasource",
+  "kind": "DataSource",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_management_agent_management_agent_data_source",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDataSource",
+        "requestType": "managementagent.CreateDataSourceRequest",
+        "responseType": "managementagent.CreateDataSourceResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDataSource",
+        "requestType": "managementagent.GetDataSourceRequest",
+        "responseType": "managementagent.GetDataSourceResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDataSource",
+        "requestType": "managementagent.UpdateDataSourceRequest",
+        "responseType": "managementagent.UpdateDataSourceResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDataSource",
+        "requestType": "managementagent.DeleteDataSourceRequest",
+        "responseType": "managementagent.DeleteDataSourceResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "S_CREATING"
+      ],
+      "target": [
+        "S_ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "allow_metrics",
+      "connection_timeout",
+      "metric_dimensions.name",
+      "metric_dimensions.value",
+      "proxy_url",
+      "read_data_limit_in_kilobytes",
+      "read_timeout",
+      "resource_group",
+      "schedule_mins",
+      "type",
+      "url"
+    ],
+    "forceNew": [
+      "compartment_id",
+      "management_agent_id",
+      "name",
+      "namespace"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/managementagent/datasource/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/managementagent/datasource/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from terraform-provider-oci for managementagent/datasource."
+  ]
+}

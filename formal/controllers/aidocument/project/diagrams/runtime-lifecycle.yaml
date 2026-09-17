@@ -12,12 +12,12 @@ states:
 repoAuthored:
   mutation:
     mutable:
-      - defined_tags
       - description
       - display_name
-      - freeform_tags
     forceNew:
       - compartment_id
+      - defined_tags
+      - freeform_tags
   hooks:
     create:
       - helper: tfresource.CreateResource
@@ -38,6 +38,7 @@ notes:
     `displayName`, and an optional tracked `id`; delete fallback can re-resolve
     the tracked project through `ListProjects` when `GetProject` returns
     NotFound.
-  - Only `displayName`, `description`, `freeformTags`, and `definedTags`
-    reconcile in place. `compartmentId` remains replacement-only drift and the
-    runtime has no secret side effects.
+  - Only `displayName` and `description` reconcile in place. Live OCI
+    `UpdateProject` accepts tag fields but does not change them, so
+    `freeformTags` and `definedTags` join `compartmentId` as replacement-only
+    drift. The runtime has no secret side effects.

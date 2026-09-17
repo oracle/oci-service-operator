@@ -38,10 +38,10 @@ group Lookup and bind
 alt tracked or explicit OCI identity already exists
 ServiceManager -> OCI: GetAuthenticationProvider
 else tracked identity is missing
-ServiceManager -> OCI: ListAuthenticationProvider(filters:\ncompartment_id, state)
+ServiceManager -> OCI: ListAuthenticationProvider(filters:\nodaInstanceId, identityProvider,\nname)
 alt reusable OCI resource is not found
 ServiceManager -> OCI: CreateAuthenticationProvider
-loop create pending PROVISIONING
+loop create pending CREATING
 ServiceManager -> OCI: GetAuthenticationProvider
 end
 else reusable OCI resource already exists
@@ -63,25 +63,33 @@ ServiceManager --> BaseReconciler: release finalizer after delete completion
 end
 end
 else OCI state is retryable
-ServiceManager --> BaseReconciler: requeue while OCI remains in\nPROVISIONING, UPDATING, DELETING
+ServiceManager --> BaseReconciler: requeue while OCI remains in\nCREATING, UPDATING, DELETING
 else live state requires field-aware\ndrift evaluation
 group Drift handling
 note over ServiceManager,OCI
-Supported update surface: display_name
+Supported update surface:
+authorizationEndpointUrl, clientId,
+definedTags, freeformTags (+7 more)
 Reject before mutate: force-new fields
-compartment_id
-Lookup filters: compartment_id, state
+grantType, identityProvider, name,
+isVisible
+Lookup filters: odaInstanceId,
+identityProvider, name
+Lookup matching: exact parent, provider
+type, and name match; duplicate matches
+fail
 end note
 opt force-new or conflicting drift is detected
 ServiceManager --> BaseReconciler: reject before OCI mutation
 end
 opt supported mutable drift is detected
-ServiceManager -> OCI: Apply UpdateAuthenticationProvider\nonly for mutable fields display_name
+ServiceManager -> OCI: Apply UpdateAuthenticationProvider\nonly for mutable fields\nauthorizationEndpointUrl, clientId,\ndefinedTags, freeformTags (+7 more)
 loop update pending UPDATING
 ServiceManager -> OCI: GetAuthenticationProvider
 end
 end
 ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=template action=CREATED;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource
+ServiceManager -> OCI: apply follow-up strategy\ncreate=read-after-write;\nupdate=read-after-write;\ndelete=confirm-delete
 end
 ServiceManager --> BaseReconciler: status=required,\nfinalizer=retain-until-confirmed-delete
 end
@@ -108,18 +116,23 @@ archetype: generated-service-manager
 status/finalizer: required /
 retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
-provider states: create PROVISIONING; update
+provider states: create CREATING; update
 UPDATING; delete DELETING
-supported drift: display_name
+follow-up: create=read-after-write;
+update=read-after-write; delete=confirm-delete
+supported drift: authorizationEndpointUrl,
+clientId, definedTags, freeformTags (+7 more)
 reject before mutate: force-new fields
-compartment_id
+grantType, identityProvider, name, isVisible
 create-only fields: none
 list lookup: scaffold_oda_authenticationprovider
-filters compartment_id, state
+filters odaInstanceId, identityProvider, name;
+exact parent, provider type, and name match;
+duplicate matches fail
 conflicts: none
 open gaps: none
-Scaffold metadata only; replace with
-controller-specific runtime states before
-promotion.
+clientSecret is write-only: it is sent on create
+or alongside another supported update, but
+cannot independently trigger drift correction.
 end note
 @enduml

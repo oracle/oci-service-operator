@@ -8,6 +8,7 @@ package managedinstancegroup
 import (
 	"context"
 	"crypto/sha256"
+	"errors"
 	"fmt"
 	"reflect"
 	"sort"
@@ -739,6 +740,9 @@ func managedInstanceGroupFromSummary(summary osmanagementhubsdk.ManagedInstanceG
 func managedInstanceGroupStatusSoftwareSourceIDs(status osmanagementhubv1beta1.ManagedInstanceGroupStatus) []string {
 	ids := make([]string, 0, len(status.SoftwareSourceIds)+len(status.SoftwareSources))
 	for _, source := range status.SoftwareSourceIds {
+		if source.IsMandatoryForAutonomousLinux {
+			continue
+		}
 		if id := strings.TrimSpace(source.Id); id != "" {
 			ids = append(ids, id)
 		}
@@ -747,6 +751,9 @@ func managedInstanceGroupStatusSoftwareSourceIDs(status osmanagementhubv1beta1.M
 		return ids
 	}
 	for _, source := range status.SoftwareSources {
+		if source.IsMandatoryForAutonomousLinux {
+			continue
+		}
 		if id := strings.TrimSpace(source.Id); id != "" {
 			ids = append(ids, id)
 		}
@@ -908,21 +915,24 @@ func handleManagedInstanceGroupDeleteError(
 }
 
 func wrapManagedInstanceGroupDeleteConfirmation(hooks *ManagedInstanceGroupRuntimeHooks) {
-	if hooks.Get.Call == nil {
+	if hooks.Get.Call == nil || hooks.List.Call == nil {
 		return
 	}
 	getManagedInstanceGroup := hooks.Get.Call
+	listManagedInstanceGroups := hooks.List.Call
 	hooks.WrapGeneratedClient = append(hooks.WrapGeneratedClient, func(delegate ManagedInstanceGroupServiceClient) ManagedInstanceGroupServiceClient {
 		return managedInstanceGroupDeleteConfirmationClient{
-			delegate:                delegate,
-			getManagedInstanceGroup: getManagedInstanceGroup,
+			delegate:                  delegate,
+			getManagedInstanceGroup:   getManagedInstanceGroup,
+			listManagedInstanceGroups: listManagedInstanceGroups,
 		}
 	})
 }
 
 type managedInstanceGroupDeleteConfirmationClient struct {
-	delegate                ManagedInstanceGroupServiceClient
-	getManagedInstanceGroup func(context.Context, osmanagementhubsdk.GetManagedInstanceGroupRequest) (osmanagementhubsdk.GetManagedInstanceGroupResponse, error)
+	delegate                  ManagedInstanceGroupServiceClient
+	getManagedInstanceGroup   func(context.Context, osmanagementhubsdk.GetManagedInstanceGroupRequest) (osmanagementhubsdk.GetManagedInstanceGroupResponse, error)
+	listManagedInstanceGroups func(context.Context, osmanagementhubsdk.ListManagedInstanceGroupsRequest) (osmanagementhubsdk.ListManagedInstanceGroupsResponse, error)
 }
 
 func (c managedInstanceGroupDeleteConfirmationClient) CreateOrUpdate(
@@ -938,9 +948,50 @@ func (c managedInstanceGroupDeleteConfirmationClient) Delete(
 	resource *osmanagementhubv1beta1.ManagedInstanceGroup,
 ) (bool, error) {
 	if err := c.rejectAuthShapedConfirmRead(ctx, resource); err != nil {
+		var ambiguous managedInstanceGroupAmbiguousNotFoundError
+		if errors.As(err, &ambiguous) {
+			return c.confirmAuthShapedAbsence(ctx, resource, err)
+		}
 		return false, err
 	}
-	return c.delegate.Delete(ctx, resource)
+	deleted, err := c.delegate.Delete(ctx, resource)
+	var ambiguous managedInstanceGroupAmbiguousNotFoundError
+	if errors.As(err, &ambiguous) {
+		return c.confirmAuthShapedAbsence(ctx, resource, err)
+	}
+	return deleted, err
+}
+
+func (c managedInstanceGroupDeleteConfirmationClient) confirmAuthShapedAbsence(ctx context.Context, resource *osmanagementhubv1beta1.ManagedInstanceGroup, ambiguousErr error) (bool, error) {
+	if c.listManagedInstanceGroups == nil || resource == nil {
+		return false, ambiguousErr
+	}
+	response, err := c.listManagedInstanceGroups(ctx, osmanagementhubsdk.ListManagedInstanceGroupsRequest{CompartmentId: common.String(strings.TrimSpace(resource.Spec.CompartmentId)), DisplayName: []string{strings.TrimSpace(resource.Spec.DisplayName)}})
+	if err != nil {
+		return false, fmt.Errorf("confirm ManagedInstanceGroup deletion by scoped list: %w", err)
+	}
+	trackedID := trackedManagedInstanceGroupID(resource)
+	for _, item := range response.Items {
+		if item.Id != nil && strings.TrimSpace(*item.Id) == trackedID {
+			return false, ambiguousErr
+		}
+	}
+	markManagedInstanceGroupDeleted(resource, "OCI managed instance group no longer exists")
+	return true, nil
+}
+
+func markManagedInstanceGroupDeleted(resource *osmanagementhubv1beta1.ManagedInstanceGroup, message string) {
+	if resource == nil {
+		return
+	}
+	now := metav1.Now()
+	status := &resource.Status.OsokStatus
+	status.DeletedAt = &now
+	status.UpdatedAt = &now
+	status.Message = message
+	status.Reason = string(shared.Terminating)
+	status.Async.Current = nil
+	*status = util.UpdateOSOKStatusCondition(*status, shared.Terminating, corev1.ConditionTrue, "", message, loggerutil.OSOKLogger{})
 }
 
 func (c managedInstanceGroupDeleteConfirmationClient) rejectAuthShapedConfirmRead(

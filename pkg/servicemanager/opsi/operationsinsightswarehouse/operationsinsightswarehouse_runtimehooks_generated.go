@@ -50,15 +50,84 @@ func registerOperationsInsightsWarehouseRuntimeHooksMutator(mutator OperationsIn
 	}
 	operationsinsightswarehouseRuntimeHooksMutators = append(operationsinsightswarehouseRuntimeHooksMutators, mutator)
 }
+func newOperationsInsightsWarehouseRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "opsi",
+		FormalSlug:    "operationsinsightswarehouse",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "displayName", "id", "state"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"computeModel", "cpuAllocated", "definedTags", "displayName", "freeformTags", "storageAllocatedInGBs"},
+			ForceNew:      []string{"compartmentId"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "operationsInsightsWarehouse", Action: "CREATE_OPSI_WAREHOUSE"}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "operationsInsightsWarehouse", Action: "UPDATE_OPSI_WAREHOUSE"}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "operationsInsightsWarehouse", Action: "DELETE_OPSI_WAREHOUSE"}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> GetOperationsInsightsWarehouse",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "operationsInsightsWarehouse", Action: "CREATE_OPSI_WAREHOUSE"}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> GetOperationsInsightsWarehouse",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "operationsInsightsWarehouse", Action: "UPDATE_OPSI_WAREHOUSE"}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "operationsInsightsWarehouse", Action: "DELETE_OPSI_WAREHOUSE"}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newOperationsInsightsWarehouseDefaultRuntimeHooks(sdkClient opsisdk.OperationsInsightsClient) OperationsInsightsWarehouseRuntimeHooks {
 	return OperationsInsightsWarehouseRuntimeHooks{
+		Semantics:       newOperationsInsightsWarehouseRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*opsiv1beta1.OperationsInsightsWarehouse]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*opsiv1beta1.OperationsInsightsWarehouse]{},
 		StatusHooks:     generatedruntime.StatusHooks[*opsiv1beta1.OperationsInsightsWarehouse]{},
 		ParityHooks:     generatedruntime.ParityHooks[*opsiv1beta1.OperationsInsightsWarehouse]{},
-		Async:           generatedruntime.AsyncHooks[*opsiv1beta1.OperationsInsightsWarehouse]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*opsiv1beta1.OperationsInsightsWarehouse]{},
+		Async: generatedruntime.AsyncHooks[*opsiv1beta1.OperationsInsightsWarehouse]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := opsisdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*opsiv1beta1.OperationsInsightsWarehouse]{},
 		Create: runtimeOperationHooks[opsisdk.CreateOperationsInsightsWarehouseRequest, opsisdk.CreateOperationsInsightsWarehouseResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateOperationsInsightsWarehouseDetails", RequestName: "CreateOperationsInsightsWarehouseDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request opsisdk.CreateOperationsInsightsWarehouseRequest) (opsisdk.CreateOperationsInsightsWarehouseResponse, error) {
@@ -106,10 +175,19 @@ func buildOperationsInsightsWarehouseGeneratedRuntimeConfig(
 	hooks OperationsInsightsWarehouseRuntimeHooks,
 ) generatedruntime.Config[*opsiv1beta1.OperationsInsightsWarehouse] {
 	return generatedruntime.Config[*opsiv1beta1.OperationsInsightsWarehouse]{
-		Kind:            "OperationsInsightsWarehouse",
-		SDKName:         "OperationsInsightsWarehouse",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "OperationsInsightsWarehouse",
+		SDKName:   "OperationsInsightsWarehouse",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

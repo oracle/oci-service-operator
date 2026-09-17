@@ -50,15 +50,80 @@ func registerRepositoryRuntimeHooksMutator(mutator RepositoryRuntimeHooksMutator
 	}
 	repositoryRuntimeHooksMutators = append(repositoryRuntimeHooksMutators, mutator)
 }
+func newRepositoryRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "devops",
+		FormalSlug:    "repository",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"defaultBranch", "definedTags", "description", "freeformTags", "mirrorRepositoryConfig", "name", "repositoryType"},
+			ForceNew:      []string{"parentRepositoryId", "projectId"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newRepositoryDefaultRuntimeHooks(sdkClient devopssdk.DevopsClient) RepositoryRuntimeHooks {
 	return RepositoryRuntimeHooks{
+		Semantics:       newRepositoryRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*devopsv1beta1.Repository]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*devopsv1beta1.Repository]{},
 		StatusHooks:     generatedruntime.StatusHooks[*devopsv1beta1.Repository]{},
 		ParityHooks:     generatedruntime.ParityHooks[*devopsv1beta1.Repository]{},
-		Async:           generatedruntime.AsyncHooks[*devopsv1beta1.Repository]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*devopsv1beta1.Repository]{},
+		Async: generatedruntime.AsyncHooks[*devopsv1beta1.Repository]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := devopssdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*devopsv1beta1.Repository]{},
 		Create: runtimeOperationHooks[devopssdk.CreateRepositoryRequest, devopssdk.CreateRepositoryResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateRepositoryDetails", RequestName: "CreateRepositoryDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request devopssdk.CreateRepositoryRequest) (devopssdk.CreateRepositoryResponse, error) {
@@ -106,10 +171,19 @@ func buildRepositoryGeneratedRuntimeConfig(
 	hooks RepositoryRuntimeHooks,
 ) generatedruntime.Config[*devopsv1beta1.Repository] {
 	return generatedruntime.Config[*devopsv1beta1.Repository]{
-		Kind:            "Repository",
-		SDKName:         "Repository",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "Repository",
+		SDKName:   "Repository",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

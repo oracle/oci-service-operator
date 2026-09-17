@@ -338,7 +338,7 @@ func (c *skillParameterRuntimeClient) createSkillParameter(
 	resource *odav1beta1.SkillParameter,
 	identity skillParameterIdentity,
 ) (servicemanager.OSOKResponse, error) {
-	response, err := c.client.CreateSkillParameter(ctx, odasdk.CreateSkillParameterRequest{
+	request := odasdk.CreateSkillParameterRequest{
 		OdaInstanceId: stringPtr(identity.odaInstanceID),
 		SkillId:       stringPtr(identity.skillID),
 		CreateSkillParameterDetails: odasdk.CreateSkillParameterDetails{
@@ -348,7 +348,11 @@ func (c *skillParameterRuntimeClient) createSkillParameter(
 			Value:       stringPtr(resource.Spec.Value),
 			Description: stringPtr(resource.Spec.Description),
 		},
-	})
+	}
+	if retryToken := strings.TrimSpace(string(resource.UID)); retryToken != "" {
+		request.OpcRetryToken = stringPtr(retryToken)
+	}
+	response, err := c.client.CreateSkillParameter(ctx, request)
 	if err != nil {
 		return c.fail(resource, fmt.Errorf("create SkillParameter %q: %w", identity.name, err))
 	}

@@ -67,12 +67,11 @@ ServiceManager --> BaseReconciler: requeue while OCI remains in\nCREATING, UPDAT
 else live state requires field-aware\ndrift evaluation
 group Drift handling
 note over ServiceManager,OCI
-Supported update surface: defined_tags,
-display_name, freeform_tags,
-request_state
+Supported update surface: definedTags,
+displayName, freeformTags, requestState
 Reject before mutate: force-new fields
-availability_domain, compartment_id,
-date_expected_capacity_handover,
+availabilityDomain, compartmentId,
+dateExpectedCapacityHandover,
 description (+5 more)
 Lookup filters: compartment_id,
 display_name, id, namespace (+2 more)
@@ -81,12 +80,13 @@ opt force-new or conflicting drift is detected
 ServiceManager --> BaseReconciler: reject before OCI mutation
 end
 opt supported mutable drift is detected
-ServiceManager -> OCI: Apply UpdateOccCapacityRequest only\nfor mutable fields defined_tags,\ndisplay_name, freeform_tags,\nrequest_state
+ServiceManager -> OCI: Apply UpdateOccCapacityRequest only\nfor mutable fields definedTags,\ndisplayName, freeformTags,\nrequestState
 loop update pending UPDATING
 ServiceManager -> OCI: GetOccCapacityRequest
 end
 end
 ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=template action=CREATED;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource
+ServiceManager -> OCI: apply follow-up strategy\ncreate=read-after-write;\nupdate=read-after-write;\ndelete=confirm-delete
 end
 ServiceManager --> BaseReconciler: status=required,\nfinalizer=retain-until-confirmed-delete
 end
@@ -115,11 +115,13 @@ retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
 provider states: create CREATING; update
 UPDATING; delete DELETING
-supported drift: defined_tags, display_name,
-freeform_tags, request_state
+follow-up: create=read-after-write;
+update=read-after-write; delete=confirm-delete
+supported drift: definedTags, displayName,
+freeformTags, requestState
 reject before mutate: force-new fields
-availability_domain, compartment_id,
-date_expected_capacity_handover, description (+5
+availabilityDomain, compartmentId,
+dateExpectedCapacityHandover, description (+5
 more)
 create-only fields: none
 list lookup:
@@ -128,8 +130,12 @@ filters compartment_id, display_name, id,
 namespace (+2 more)
 conflicts: none
 open gaps: none
-Scaffold metadata only; replace with
-controller-specific runtime states before
-promotion.
+The runtime intentionally disables
+list-before-create because a capacity request
+cannot be safely reused from a broad search.
+requestState supports the SUBMITTED and
+CANCELLED update values exposed by the OCI SDK;
+terminal server-managed request states are
+normalized out of desired state.
 end note
 @enduml

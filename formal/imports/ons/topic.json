@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "ons",
+  "slug": "topic",
+  "kind": "Topic",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_ons_notification_topic",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateTopic",
+        "requestType": "ons.CreateTopicRequest",
+        "responseType": "ons.CreateTopicResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetTopic",
+        "requestType": "ons.GetTopicRequest",
+        "responseType": "ons.GetTopicResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListTopics",
+        "requestType": "ons.ListTopicsRequest",
+        "responseType": "ons.ListTopicsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeTopicCompartment",
+        "requestType": "ons.ChangeTopicCompartmentRequest",
+        "responseType": "ons.ChangeTopicCompartmentResponse"
+      },
+      {
+        "operation": "UpdateTopic",
+        "requestType": "ons.UpdateTopicRequest",
+        "responseType": "ons.UpdateTopicResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteTopic",
+        "requestType": "ons.DeleteTopicRequest",
+        "responseType": "ons.DeleteTopicResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "description",
+      "freeform_tags"
+    ],
+    "forceNew": [
+      "name"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_ons_notification_topics",
+    "collectionField": "notification_topics",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "id",
+      "name",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/ons/topic/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/ons/topic/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Refreshed from the pinned terraform-provider-oci Notifications Topic resource; runtime binding and deletion safeguards remain repo-authored."
+  ]
+}

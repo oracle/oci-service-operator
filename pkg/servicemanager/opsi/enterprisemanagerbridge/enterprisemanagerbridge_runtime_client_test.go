@@ -152,6 +152,15 @@ func TestEnterpriseManagerBridgeCreateStartsWorkRequest(t *testing.T) {
 	requireEnterpriseManagerBridgeAsync(t, resource, shared.OSOKAsyncPhaseCreate, shared.OSOKAsyncClassPending, "wr-create")
 }
 
+func TestEnterpriseManagerBridgeListFieldsExcludeRepeatedResponseOnlyFilters(t *testing.T) {
+	t.Parallel()
+	for _, field := range enterpriseManagerBridgeListFields() {
+		if field.FieldName == "Id" || field.FieldName == "LifecycleState" {
+			t.Fatalf("list field %q maps a scalar observed value into a repeated OCI filter", field.FieldName)
+		}
+	}
+}
+
 func TestEnterpriseManagerBridgeCompletesCreateWorkRequestWithReadback(t *testing.T) {
 	resource := newEnterpriseManagerBridgeResource()
 	resource.Status.OsokStatus.Async.Current = &shared.OSOKAsyncOperation{

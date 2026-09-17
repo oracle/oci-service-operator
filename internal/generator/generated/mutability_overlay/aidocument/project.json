@@ -58,28 +58,27 @@
     },
     {
       "astFieldPath": "definedTags",
-      "terraformFieldPath": "defined_tags",
+      "terraformFieldPath": "definedTags",
       "canonicalJoinKey": "definedTags",
       "pathShape": "scalar",
       "ast": {
-        "updateCandidateState": "updateCandidate",
-        "forceNew": false,
+        "updateCandidateState": "notUpdateCandidate",
+        "forceNew": true,
         "conflictsWith": null
       },
       "docs": {
-        "evidenceState": "confirmedUpdatable",
-        "detail": "Argument Reference marks the field as updatable in place.",
-        "rawSignal": "(updatable)"
+        "evidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
       },
       "merge": {
         "joinStatus": "matched",
-        "mergeCase": "docsConfirmedCandidate",
-        "finalPolicy": "allowInPlaceUpdate"
+        "mergeCase": "replacementRequired",
+        "finalPolicy": "replacementRequired"
       },
       "provenance": {
         "formalImportPath": "imports/aidocument/project.json",
         "formalSourceRef": "terraform-provider-oci",
-        "astSourceBucket": "mutation.mutable",
+        "astSourceBucket": "mutation.forceNew",
         "terraformDocsPage": "ai_document_project#argument-reference",
         "terraformDocsSection": "Argument Reference"
       }
@@ -142,28 +141,27 @@
     },
     {
       "astFieldPath": "freeformTags",
-      "terraformFieldPath": "freeform_tags",
+      "terraformFieldPath": "freeformTags",
       "canonicalJoinKey": "freeformTags",
       "pathShape": "scalar",
       "ast": {
-        "updateCandidateState": "updateCandidate",
-        "forceNew": false,
+        "updateCandidateState": "notUpdateCandidate",
+        "forceNew": true,
         "conflictsWith": null
       },
       "docs": {
-        "evidenceState": "confirmedUpdatable",
-        "detail": "Argument Reference marks the field as updatable in place.",
-        "rawSignal": "(updatable)"
+        "evidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
       },
       "merge": {
         "joinStatus": "matched",
-        "mergeCase": "docsConfirmedCandidate",
-        "finalPolicy": "allowInPlaceUpdate"
+        "mergeCase": "replacementRequired",
+        "finalPolicy": "replacementRequired"
       },
       "provenance": {
         "formalImportPath": "imports/aidocument/project.json",
         "formalSourceRef": "terraform-provider-oci",
-        "astSourceBucket": "mutation.mutable",
+        "astSourceBucket": "mutation.forceNew",
         "terraformDocsPage": "ai_document_project#argument-reference",
         "terraformDocsSection": "Argument Reference"
       }

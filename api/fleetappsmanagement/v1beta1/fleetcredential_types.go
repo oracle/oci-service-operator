@@ -25,6 +25,9 @@ type FleetCredentialSpec struct {
 	User FleetCredentialUserFields `json:"user"`
 	// +kubebuilder:validation:Required
 	Password FleetCredentialPasswordFields `json:"password"`
+	// The OCID of the Fleet Application Management fleet containing this resource.
+	// +kubebuilder:validation:Required
+	FleetId string `json:"fleetId"`
 }
 
 // FleetCredentialEntitySpecificsVariableFields defines nested fields for FleetCredential.EntitySpecifics.Variable.

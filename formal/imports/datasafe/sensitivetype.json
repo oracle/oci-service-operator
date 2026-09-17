@@ -1,0 +1,147 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "sensitivetype",
+  "kind": "SensitiveType",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_sensitive_type",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateSensitiveType",
+        "requestType": "datasafe.CreateSensitiveTypeRequest",
+        "responseType": "datasafe.CreateSensitiveTypeResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetSensitiveType",
+        "requestType": "datasafe.GetSensitiveTypeRequest",
+        "responseType": "datasafe.GetSensitiveTypeResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListSensitiveTypes",
+        "requestType": "datasafe.ListSensitiveTypesRequest",
+        "responseType": "datasafe.ListSensitiveTypesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeSensitiveTypeCompartment",
+        "requestType": "datasafe.ChangeSensitiveTypeCompartmentRequest",
+        "responseType": "datasafe.ChangeSensitiveTypeCompartmentResponse"
+      },
+      {
+        "operation": "UpdateSensitiveType",
+        "requestType": "datasafe.UpdateSensitiveTypeRequest",
+        "responseType": "datasafe.UpdateSensitiveTypeResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteSensitiveType",
+        "requestType": "datasafe.DeleteSensitiveTypeRequest",
+        "responseType": "datasafe.DeleteSensitiveTypeResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "comment_pattern",
+      "data_pattern",
+      "default_masking_format_id",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags",
+      "name_pattern",
+      "parent_category_id",
+      "search_type",
+      "short_name"
+    ],
+    "forceNew": [
+      "compartment_id",
+      "entity_type"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_data_safe_sensitive_types",
+    "collectionField": "sensitive_type_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "entity_type",
+      "short_name"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/sensitivetype/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/sensitivetype/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "lifecycle-classification",
+      "list-lookup",
+      "mutation-policy",
+      "status-projection",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Recorded OCI behavior returns work-request IDs for create and update, but the published OSOK runtime binds from the create response and converges through GetSensitiveType lifecycle reads rather than polling GetWorkRequest.",
+    "CREATING and UPDATING are lifecycle-pending states, ACTIVE is steady success, and delete retains the finalizer through DELETING until DELETED or NotFound.",
+    "ChangeSensitiveTypeCompartment and cross-subtype entityType changes remain outside the published runtime; compartmentId and entityType are replacement-only."
+  ]
+}

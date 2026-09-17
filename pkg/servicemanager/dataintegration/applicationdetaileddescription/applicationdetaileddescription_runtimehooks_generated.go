@@ -65,19 +65,19 @@ func newApplicationDetailedDescriptionDefaultRuntimeHooks(sdkClient dataintegrat
 			},
 		},
 		Get: runtimeOperationHooks[dataintegrationsdk.GetApplicationDetailedDescriptionRequest, dataintegrationsdk.GetApplicationDetailedDescriptionResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "ApplicationKey", RequestName: "applicationKey", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "ApplicationKey", RequestName: "applicationKey", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request dataintegrationsdk.GetApplicationDetailedDescriptionRequest) (dataintegrationsdk.GetApplicationDetailedDescriptionResponse, error) {
 				return sdkClient.GetApplicationDetailedDescription(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[dataintegrationsdk.UpdateApplicationDetailedDescriptionRequest, dataintegrationsdk.UpdateApplicationDetailedDescriptionResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "ApplicationKey", RequestName: "applicationKey", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdateApplicationDetailedDescriptionDetails", RequestName: "updateApplicationDetailedDescriptionDetails", Contribution: "body", PreferResourceID: false}, {FieldName: "UpdateDetailedDescriptionDetails", RequestName: "UpdateDetailedDescriptionDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "ApplicationKey", RequestName: "applicationKey", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateApplicationDetailedDescriptionDetails", RequestName: "updateApplicationDetailedDescriptionDetails", Contribution: "body", PreferResourceID: false}, {FieldName: "UpdateDetailedDescriptionDetails", RequestName: "UpdateDetailedDescriptionDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dataintegrationsdk.UpdateApplicationDetailedDescriptionRequest) (dataintegrationsdk.UpdateApplicationDetailedDescriptionResponse, error) {
 				return sdkClient.UpdateApplicationDetailedDescription(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[dataintegrationsdk.DeleteApplicationDetailedDescriptionRequest, dataintegrationsdk.DeleteApplicationDetailedDescriptionResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "ApplicationKey", RequestName: "applicationKey", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "ApplicationKey", RequestName: "applicationKey", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request dataintegrationsdk.DeleteApplicationDetailedDescriptionRequest) (dataintegrationsdk.DeleteApplicationDetailedDescriptionResponse, error) {
 				return sdkClient.DeleteApplicationDetailedDescription(ctx, request)
 			},

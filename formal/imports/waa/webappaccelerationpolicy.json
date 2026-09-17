@@ -1,0 +1,124 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "waa",
+  "slug": "webappaccelerationpolicy",
+  "kind": "WebAppAccelerationPolicy",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_waa_web_app_acceleration_policy",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateWebAppAccelerationPolicy",
+        "requestType": "waa.CreateWebAppAccelerationPolicyRequest",
+        "responseType": "waa.CreateWebAppAccelerationPolicyResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetWebAppAccelerationPolicy",
+        "requestType": "waa.GetWebAppAccelerationPolicyRequest",
+        "responseType": "waa.GetWebAppAccelerationPolicyResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListWebAppAccelerationPolicies",
+        "requestType": "waa.ListWebAppAccelerationPoliciesRequest",
+        "responseType": "waa.ListWebAppAccelerationPoliciesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeWebAppAccelerationPolicyCompartment",
+        "requestType": "waa.ChangeWebAppAccelerationPolicyCompartmentRequest",
+        "responseType": "waa.ChangeWebAppAccelerationPolicyCompartmentResponse"
+      },
+      {
+        "operation": "UpdateWebAppAccelerationPolicy",
+        "requestType": "waa.UpdateWebAppAccelerationPolicyRequest",
+        "responseType": "waa.UpdateWebAppAccelerationPolicyResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteWebAppAccelerationPolicy",
+        "requestType": "waa.DeleteWebAppAccelerationPolicyRequest",
+        "responseType": "waa.DeleteWebAppAccelerationPolicyResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "display_name",
+      "freeform_tags",
+      "response_caching_policy.is_response_header_based_caching_enabled",
+      "response_compression_policy.gzip_compression.is_enabled",
+      "system_tags"
+    ],
+    "forceNew": null,
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_waa_web_app_acceleration_policies",
+    "collectionField": "web_app_acceleration_policy_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/waa/webappaccelerationpolicy/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/waa/webappaccelerationpolicy/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Pinned provider facts are paired with reviewed WebAppAccelerationPolicy service-manager semantics and sanitized live CRUD evidence."
+  ]
+}

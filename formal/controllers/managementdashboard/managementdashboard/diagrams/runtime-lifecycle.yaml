@@ -1,0 +1,14 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: managementdashboard
+slug: managementdashboard
+kind: ManagementDashboard
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+notes:
+  - "The pinned Terraform provider has no corresponding resource implementation."
+  - "The credential-free evidence mock still exercises the production service manager and real OCI SDK through the full CRUD lifecycle."

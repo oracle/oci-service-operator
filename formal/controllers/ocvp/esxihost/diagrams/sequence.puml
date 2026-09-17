@@ -38,10 +38,10 @@ group Lookup and bind
 alt tracked or explicit OCI identity already exists
 ServiceManager -> OCI: GetEsxiHost
 else tracked identity is missing
-ServiceManager -> OCI: ListEsxiHost(filters:\ncompartment_id, state)
+ServiceManager -> OCI: ListEsxiHost(filters: clusterId,\ndisplayName)
 alt reusable OCI resource is not found
 ServiceManager -> OCI: CreateEsxiHost
-loop create pending PROVISIONING
+loop create pending CREATING
 ServiceManager -> OCI: GetEsxiHost
 end
 else reusable OCI resource already exists
@@ -63,25 +63,33 @@ ServiceManager --> BaseReconciler: release finalizer after delete completion
 end
 end
 else OCI state is retryable
-ServiceManager --> BaseReconciler: requeue while OCI remains in\nPROVISIONING, UPDATING, DELETING
+ServiceManager --> BaseReconciler: requeue while OCI remains in\nCREATING, UPDATING, DELETING
 else live state requires field-aware\ndrift evaluation
 group Drift handling
 note over ServiceManager,OCI
-Supported update surface: display_name
+Supported update surface:
+billingDonorHostId, definedTags,
+displayName, freeformTags (+1 more)
 Reject before mutate: force-new fields
-compartment_id
-Lookup filters: compartment_id, state
+capacityReservationId, clusterId,
+computeAvailabilityDomain,
+currentCommitment (+3 more)
+Lookup filters: clusterId, displayName
+Lookup matching: exact clusterId plus
+displayName match; duplicate matches
+fail
 end note
 opt force-new or conflicting drift is detected
 ServiceManager --> BaseReconciler: reject before OCI mutation
 end
 opt supported mutable drift is detected
-ServiceManager -> OCI: Apply UpdateEsxiHost only for\nmutable fields display_name
+ServiceManager -> OCI: Apply UpdateEsxiHost only for\nmutable fields billingDonorHostId,\ndefinedTags, displayName,\nfreeformTags (+1 more)
 loop update pending UPDATING
 ServiceManager -> OCI: GetEsxiHost
 end
 end
 ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=template action=CREATED;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource
+ServiceManager -> OCI: apply follow-up strategy\ncreate=read-after-write;\nupdate=read-after-write;\ndelete=confirm-delete
 end
 ServiceManager --> BaseReconciler: status=required,\nfinalizer=retain-until-confirmed-delete
 end
@@ -108,18 +116,27 @@ archetype: generated-service-manager
 status/finalizer: required /
 retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
-provider states: create PROVISIONING; update
+provider states: create CREATING; update
 UPDATING; delete DELETING
-supported drift: display_name
+follow-up: create=read-after-write;
+update=read-after-write; delete=confirm-delete
+supported drift: billingDonorHostId,
+definedTags, displayName, freeformTags (+1 more)
 reject before mutate: force-new fields
-compartment_id
+capacityReservationId, clusterId,
+computeAvailabilityDomain, currentCommitment (+3
+more)
 create-only fields: none
 list lookup: scaffold_ocvp_esxihost filters
-compartment_id, state
+clusterId, displayName; exact clusterId plus
+displayName match; duplicate matches fail
 conflicts: none
 open gaps: none
-Scaffold metadata only; replace with
-controller-specific runtime states before
-promotion.
+The runtime updates billingDonorHostId only with
+a compatible nextCommitment and rejects
+create-only drift before mutation.
+Create and update settle only after GetEsxiHost
+reaches ACTIVE; delete retains the finalizer
+until absence is confirmed.
 end note
 @enduml

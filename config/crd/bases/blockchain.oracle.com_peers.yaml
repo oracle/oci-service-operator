@@ -58,6 +58,9 @@ spec:
               alias:
                 description: peer alias
                 type: string
+              blockchainPlatformId:
+                description: The OCID of the blockchain platform containing this node.
+                type: string
               ocpuAllocationParam:
                 description: PeerOcpuAllocationParam defines nested fields for Peer.OcpuAllocationParam.
                 properties:
@@ -72,6 +75,7 @@ spec:
                 type: string
             required:
             - ad
+            - blockchainPlatformId
             - ocpuAllocationParam
             - role
             type: object

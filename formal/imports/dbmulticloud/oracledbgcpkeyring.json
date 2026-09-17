@@ -1,0 +1,128 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "dbmulticloud",
+  "slug": "oracledbgcpkeyring",
+  "kind": "OracleDbGcpKeyRing",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_dbmulticloud_oracle_db_gcp_key_ring",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOracleDbGcpKeyRing",
+        "requestType": "dbmulticloud.CreateOracleDbGcpKeyRingRequest",
+        "responseType": "dbmulticloud.CreateOracleDbGcpKeyRingResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOracleDbGcpKeyRing",
+        "requestType": "dbmulticloud.GetOracleDbGcpKeyRingRequest",
+        "responseType": "dbmulticloud.GetOracleDbGcpKeyRingResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOracleDbGcpKeyRings",
+        "requestType": "dbmulticloud.ListOracleDbGcpKeyRingsRequest",
+        "responseType": "dbmulticloud.ListOracleDbGcpKeyRingsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeOracleDbGcpKeyRingCompartment",
+        "requestType": "dbmulticloud.ChangeOracleDbGcpKeyRingCompartmentRequest",
+        "responseType": "dbmulticloud.ChangeOracleDbGcpKeyRingCompartmentResponse"
+      },
+      {
+        "operation": "UpdateOracleDbGcpKeyRing",
+        "requestType": "dbmulticloud.UpdateOracleDbGcpKeyRingRequest",
+        "responseType": "dbmulticloud.UpdateOracleDbGcpKeyRingResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOracleDbGcpKeyRing",
+        "requestType": "dbmulticloud.DeleteOracleDbGcpKeyRingRequest",
+        "responseType": "dbmulticloud.DeleteOracleDbGcpKeyRingResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "display_name",
+      "freeform_tags"
+    ],
+    "forceNew": [
+      "gcp_key_ring_id",
+      "location",
+      "oracle_db_connector_id",
+      "properties",
+      "type"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_dbmulticloud_oracle_db_gcp_key_rings",
+    "collectionField": "oracle_db_gcp_key_ring_summary_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "oracle_db_gcp_connector_id",
+      "oracle_db_gcp_key_ring_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/dbmulticloud/oracledbgcpkeyring/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/dbmulticloud/oracledbgcpkeyring/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from the pinned terraform-provider-oci source revision."
+  ]
+}

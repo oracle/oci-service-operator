@@ -50,15 +50,84 @@ func registerOperationsInsightsPrivateEndpointRuntimeHooksMutator(mutator Operat
 	}
 	operationsinsightsprivateendpointRuntimeHooksMutators = append(operationsinsightsprivateendpointRuntimeHooksMutators, mutator)
 }
+func newOperationsInsightsPrivateEndpointRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "opsi",
+		FormalSlug:    "operationsinsightsprivateendpoint",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE", "NEEDS_ATTENTION"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "compartmentIdInSubtree", "displayName", "isUsedForRacDbs", "opsiPrivateEndpointId", "state", "vcnId"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"definedTags", "description", "displayName", "freeformTags", "nsgIds"},
+			ForceNew:      []string{"compartmentId", "isUsedForRacDbs", "subnetId", "vcnId"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "generatedruntime.Create", EntityType: "OperationsInsightsPrivateEndpoint", Action: "CREATE_PRIVATE_ENDPOINT"}},
+			Update: []generatedruntime.Hook{{Helper: "generatedruntime.Update", EntityType: "OperationsInsightsPrivateEndpoint", Action: "UPDATE_PRIVATE_ENDPOINT"}},
+			Delete: []generatedruntime.Hook{{Helper: "generatedruntime.Delete", EntityType: "OperationsInsightsPrivateEndpoint", Action: "DELETE_PRIVATE_ENDPOINT"}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> GetOperationsInsightsPrivateEndpoint",
+			Hooks:    []generatedruntime.Hook{{Helper: "generatedruntime.Create", EntityType: "OperationsInsightsPrivateEndpoint", Action: "CREATE_PRIVATE_ENDPOINT"}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> GetOperationsInsightsPrivateEndpoint",
+			Hooks:    []generatedruntime.Hook{{Helper: "generatedruntime.Update", EntityType: "OperationsInsightsPrivateEndpoint", Action: "UPDATE_PRIVATE_ENDPOINT"}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "generatedruntime.Delete", EntityType: "OperationsInsightsPrivateEndpoint", Action: "DELETE_PRIVATE_ENDPOINT"}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newOperationsInsightsPrivateEndpointDefaultRuntimeHooks(sdkClient opsisdk.OperationsInsightsClient) OperationsInsightsPrivateEndpointRuntimeHooks {
 	return OperationsInsightsPrivateEndpointRuntimeHooks{
+		Semantics:       newOperationsInsightsPrivateEndpointRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*opsiv1beta1.OperationsInsightsPrivateEndpoint]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*opsiv1beta1.OperationsInsightsPrivateEndpoint]{},
 		StatusHooks:     generatedruntime.StatusHooks[*opsiv1beta1.OperationsInsightsPrivateEndpoint]{},
 		ParityHooks:     generatedruntime.ParityHooks[*opsiv1beta1.OperationsInsightsPrivateEndpoint]{},
-		Async:           generatedruntime.AsyncHooks[*opsiv1beta1.OperationsInsightsPrivateEndpoint]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*opsiv1beta1.OperationsInsightsPrivateEndpoint]{},
+		Async: generatedruntime.AsyncHooks[*opsiv1beta1.OperationsInsightsPrivateEndpoint]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := opsisdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*opsiv1beta1.OperationsInsightsPrivateEndpoint]{},
 		Create: runtimeOperationHooks[opsisdk.CreateOperationsInsightsPrivateEndpointRequest, opsisdk.CreateOperationsInsightsPrivateEndpointResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateOperationsInsightsPrivateEndpointDetails", RequestName: "CreateOperationsInsightsPrivateEndpointDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request opsisdk.CreateOperationsInsightsPrivateEndpointRequest) (opsisdk.CreateOperationsInsightsPrivateEndpointResponse, error) {
@@ -106,10 +175,19 @@ func buildOperationsInsightsPrivateEndpointGeneratedRuntimeConfig(
 	hooks OperationsInsightsPrivateEndpointRuntimeHooks,
 ) generatedruntime.Config[*opsiv1beta1.OperationsInsightsPrivateEndpoint] {
 	return generatedruntime.Config[*opsiv1beta1.OperationsInsightsPrivateEndpoint]{
-		Kind:            "OperationsInsightsPrivateEndpoint",
-		SDKName:         "OperationsInsightsPrivateEndpoint",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "OperationsInsightsPrivateEndpoint",
+		SDKName:   "OperationsInsightsPrivateEndpoint",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

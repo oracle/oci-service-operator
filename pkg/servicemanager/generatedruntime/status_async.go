@@ -178,7 +178,7 @@ func responseID(response any) string {
 		return ""
 	}
 	values := jsonMap(body)
-	return firstNonEmpty(values, "id", "ocid")
+	return firstNonEmpty(values, "id", "ocid", "key")
 }
 
 func responseWorkRequestID(response any) string {
@@ -339,6 +339,8 @@ func classifyLifecycleAsyncSemantics(response any, status *shared.OSOKStatus, fa
 	}
 
 	switch {
+	case lifecycleState == "" && semantics.Async != nil && strings.TrimSpace(semantics.Async.Strategy) == asyncStrategyNone && len(semantics.Lifecycle.ActiveStates) == 0:
+		return lifecycleAsyncEvaluation{condition: shared.Active, shouldRequeue: false, message: message}
 	case lifecycleState == "":
 		return lifecycleAsyncEvaluation{
 			condition:     fallback,

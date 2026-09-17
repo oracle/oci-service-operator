@@ -1,0 +1,17 @@
+#
+# Copyright (c) 2026, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+#
+
+apiVersion: clusterplacementgroups.oracle.com/v1beta1
+kind: ClusterPlacementGroup
+metadata:
+  name: osok-cpg-${OSOK_E2E_SUFFIX}
+spec:
+  name: osok-cpg-${OSOK_E2E_SUFFIX}
+  clusterPlacementGroupType: STANDARD
+  description: OSOK E2E create ${OSOK_E2E_SUFFIX}
+  availabilityDomain: ${OCI_AVAILABILITY_DOMAIN}
+  compartmentId: ${OCI_COMPARTMENT_ID}
+  freeformTags:
+    osok-e2e-phase: create

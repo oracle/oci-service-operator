@@ -58,6 +58,56 @@ spec:
             description: ExternalLocationMappingMetadataStatus defines the observed
               state of ExternalLocationMappingMetadata.
             properties:
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              externalLocation:
+                description: ExternalLocationMappingMetadataExternalLocation defines
+                  nested fields for ExternalLocationMappingMetadata.ExternalLocation.
+                properties:
+                  cspPhysicalAz:
+                    description: A mapping of OCI site group name to CSP physical
+                      availability zone name
+                    type: string
+                  cspPhysicalAzDisplayName:
+                    description: User friendly display name for cspPhysicalAZ
+                    type: string
+                  cspRegion:
+                    description: CSP region corresponding to the given OCI region
+                    type: string
+                  cspRegionDisplayName:
+                    description: CSP region display Name corresponding to the given
+                      OCI region
+                    type: string
+                  serviceName:
+                    description: The serviceName that externalLocation map object
+                      belongs to
+                    type: string
+                type: object
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              ociLogicalAd:
+                description: OCI logical ad name
+                type: string
+              ociPhysicalAd:
+                description: OCI physical ad name
+                type: string
+              ociRegion:
+                description: OCI region identifier https://docs.oracle.com/en-us/iaas/Content/General/Concepts/regions.htm
+                type: string
               status:
                 properties:
                   async:
@@ -157,6 +207,15 @@ spec:
                   updatedAt:
                     format: date-time
                     type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  System tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
                 type: object
             required:
             - status

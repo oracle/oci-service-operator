@@ -1,0 +1,29 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: resourcescheduler
+slug: schedule
+kind: Schedule
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending: ["CREATING"]
+    updatePending: []
+    deletePending: ["DELETING"]
+  listLookup:
+    filters: ["compartmentId","displayName","resourceId","scheduleId","state"]
+    matchRule: exact resource identity match; duplicate matches fail
+  mutation:
+    mutable: ["action","compartmentId","definedTags","description","displayName","freeformTags","recurrenceDetails","recurrenceType","resourceFilters.attribute","resourceFilters.condition","resourceFilters.shouldIncludeChildCompartments","resourceFilters.value.namespace","resourceFilters.value.tagKey","resourceFilters.value.value","resources.id","resources.metadata","resources.parameters.parameterType","resources.parameters.value","state","timeEnds","timeStarts"]
+    forceNew: []
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - "The Schedule runtime retains package-local lifecycle, identity, mutation, and delete handling."
+  - "The credential-free evidence mock verifies the recorded create/update payloads, SDK response decoding, status projection, and delete confirmation."

@@ -485,7 +485,7 @@ func TestLogAnalyticsLogGroupServiceClientDeleteConfirmsUnambiguousNotFound(t *t
 	}
 }
 
-func TestLogAnalyticsLogGroupServiceClientDeleteTreatsAuthShapedNotFoundAsAmbiguous(t *testing.T) {
+func TestLogAnalyticsLogGroupServiceClientDeleteConfirmsAuthShapedNotFoundByScopedList(t *testing.T) {
 	t.Parallel()
 
 	resource := makeLogAnalyticsLogGroupResource()
@@ -505,24 +505,25 @@ func TestLogAnalyticsLogGroupServiceClientDeleteTreatsAuthShapedNotFoundAsAmbigu
 		deleteFn: func(context.Context, loganalyticssdk.DeleteLogAnalyticsLogGroupRequest) (loganalyticssdk.DeleteLogAnalyticsLogGroupResponse, error) {
 			return loganalyticssdk.DeleteLogAnalyticsLogGroupResponse{OpcRequestId: common.String("opc-delete")}, nil
 		},
+		listFn: func(_ context.Context, request loganalyticssdk.ListLogAnalyticsLogGroupsRequest) (loganalyticssdk.ListLogAnalyticsLogGroupsResponse, error) {
+			requireLogAnalyticsListRequest(t, request, resource)
+			return loganalyticssdk.ListLogAnalyticsLogGroupsResponse{}, nil
+		},
 	})
 
 	deleted, err := client.Delete(context.Background(), resource)
-	if err == nil || !strings.Contains(err.Error(), "ambiguous 404 NotAuthorizedOrNotFound") {
-		t.Fatalf("Delete() error = %v, want ambiguous auth-shaped 404 failure", err)
+	if err != nil {
+		t.Fatalf("Delete() error = %v", err)
 	}
-	if deleted {
-		t.Fatal("Delete() deleted = true, want finalizer retained")
+	if !deleted {
+		t.Fatal("Delete() deleted = false, want scoped absence confirmation")
 	}
-	if resource.Status.OsokStatus.OpcRequestID != "opc-request-id" {
-		t.Fatalf("status.status.opcRequestId = %q, want surfaced auth error request ID", resource.Status.OsokStatus.OpcRequestID)
-	}
-	if resource.Status.OsokStatus.DeletedAt != nil {
-		t.Fatalf("status.status.deletedAt = %v, want nil", resource.Status.OsokStatus.DeletedAt)
+	if resource.Status.Id != "" || resource.Status.OsokStatus.Ocid != "" {
+		t.Fatalf("tracked identity = %q/%q, want cleared", resource.Status.Id, resource.Status.OsokStatus.Ocid)
 	}
 }
 
-func TestLogAnalyticsLogGroupServiceClientDeleteFailsFastOnPreDeleteAuthShapedNotFound(t *testing.T) {
+func TestLogAnalyticsLogGroupServiceClientDeleteConfirmsPreDeleteAuthShapedNotFoundByScopedList(t *testing.T) {
 	t.Parallel()
 
 	resource := makeLogAnalyticsLogGroupResource()
@@ -539,20 +540,48 @@ func TestLogAnalyticsLogGroupServiceClientDeleteFailsFastOnPreDeleteAuthShapedNo
 			deleteCalls++
 			return loganalyticssdk.DeleteLogAnalyticsLogGroupResponse{}, nil
 		},
+		listFn: func(_ context.Context, request loganalyticssdk.ListLogAnalyticsLogGroupsRequest) (loganalyticssdk.ListLogAnalyticsLogGroupsResponse, error) {
+			requireLogAnalyticsListRequest(t, request, resource)
+			return loganalyticssdk.ListLogAnalyticsLogGroupsResponse{}, nil
+		},
 	})
 
 	deleted, err := client.Delete(context.Background(), resource)
-	if err == nil || !strings.Contains(err.Error(), "ambiguous 404 NotAuthorizedOrNotFound") {
-		t.Fatalf("Delete() error = %v, want pre-delete auth-shaped 404 failure", err)
+	if err != nil {
+		t.Fatalf("Delete() error = %v", err)
 	}
-	if deleted {
-		t.Fatal("Delete() deleted = true, want finalizer retained")
+	if !deleted {
+		t.Fatal("Delete() deleted = false, want scoped absence confirmation")
 	}
 	if getCalls != 1 || deleteCalls != 0 {
 		t.Fatalf("get/delete calls = %d/%d, want 1/0", getCalls, deleteCalls)
 	}
-	if resource.Status.OsokStatus.OpcRequestID != "opc-request-id" {
-		t.Fatalf("status.status.opcRequestId = %q, want surfaced auth error request ID", resource.Status.OsokStatus.OpcRequestID)
+	if resource.Status.Id != "" || resource.Status.OsokStatus.Ocid != "" {
+		t.Fatalf("tracked identity = %q/%q, want cleared", resource.Status.Id, resource.Status.OsokStatus.Ocid)
+	}
+}
+
+func TestLogAnalyticsLogGroupServiceClientRetainsFinalizerWhenScopedListFindsResource(t *testing.T) {
+	t.Parallel()
+
+	resource := makeLogAnalyticsLogGroupResource()
+	resource.Status.Id = testLogAnalyticsLogGroupID
+	resource.Status.OsokStatus.Ocid = shared.OCID(testLogAnalyticsLogGroupID)
+	client := testLogAnalyticsLogGroupClient(&fakeLogAnalyticsLogGroupOCIClient{
+		getFn: func(context.Context, loganalyticssdk.GetLogAnalyticsLogGroupRequest) (loganalyticssdk.GetLogAnalyticsLogGroupResponse, error) {
+			return loganalyticssdk.GetLogAnalyticsLogGroupResponse{}, errortest.NewServiceError(404, errorutil.NotAuthorizedOrNotFound, "not authorized or not found")
+		},
+		listFn: func(context.Context, loganalyticssdk.ListLogAnalyticsLogGroupsRequest) (loganalyticssdk.ListLogAnalyticsLogGroupsResponse, error) {
+			return loganalyticssdk.ListLogAnalyticsLogGroupsResponse{LogAnalyticsLogGroupSummaryCollection: loganalyticssdk.LogAnalyticsLogGroupSummaryCollection{Items: []loganalyticssdk.LogAnalyticsLogGroupSummary{{Id: common.String(testLogAnalyticsLogGroupID)}}}}, nil
+		},
+	})
+
+	deleted, err := client.Delete(context.Background(), resource)
+	if err == nil || !strings.Contains(err.Error(), "ambiguous 404 NotAuthorizedOrNotFound") {
+		t.Fatalf("Delete() error = %v, want conservative auth-shaped failure", err)
+	}
+	if deleted {
+		t.Fatal("Delete() deleted = true, want finalizer retained while scoped list finds resource")
 	}
 }
 

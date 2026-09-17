@@ -65,19 +65,19 @@ func newCertificateDefaultRuntimeHooks(sdkClient goldengatesdk.GoldenGateClient)
 			},
 		},
 		Get: runtimeOperationHooks[goldengatesdk.GetCertificateRequest, goldengatesdk.GetCertificateResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "DeploymentId", RequestName: "deploymentId", Contribution: "path", PreferResourceID: false}, {FieldName: "CertificateKey", RequestName: "certificateKey", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "DeploymentId", RequestName: "deploymentId", Contribution: "path", PreferResourceID: false}, {FieldName: "CertificateKey", RequestName: "certificateKey", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request goldengatesdk.GetCertificateRequest) (goldengatesdk.GetCertificateResponse, error) {
 				return sdkClient.GetCertificate(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[goldengatesdk.ListCertificatesRequest, goldengatesdk.ListCertificatesResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "DeploymentId", RequestName: "deploymentId", Contribution: "path", PreferResourceID: true}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "DeploymentId", RequestName: "deploymentId", Contribution: "path", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request goldengatesdk.ListCertificatesRequest) (goldengatesdk.ListCertificatesResponse, error) {
 				return sdkClient.ListCertificates(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[goldengatesdk.DeleteCertificateRequest, goldengatesdk.DeleteCertificateResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "DeploymentId", RequestName: "deploymentId", Contribution: "path", PreferResourceID: false}, {FieldName: "CertificateKey", RequestName: "certificateKey", Contribution: "path", PreferResourceID: false}, {FieldName: "IsLockOverride", RequestName: "isLockOverride", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "DeploymentId", RequestName: "deploymentId", Contribution: "path", PreferResourceID: false}, {FieldName: "CertificateKey", RequestName: "certificateKey", Contribution: "path", PreferResourceID: true}, {FieldName: "IsLockOverride", RequestName: "isLockOverride", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request goldengatesdk.DeleteCertificateRequest) (goldengatesdk.DeleteCertificateResponse, error) {
 				return sdkClient.DeleteCertificate(ctx, request)
 			},

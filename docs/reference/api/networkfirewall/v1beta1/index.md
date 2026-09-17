@@ -55,6 +55,7 @@ AddressListSpec defines the desired state of AddressList.
 | `description` | The description of the address list. This field can be used to add additional info. | `string` | No | - | - |
 | `jsonData` | - | `string` | No | - | - |
 | `name` | Unique name to identify the group of addresses to be used in the policy rules. | `string` | Yes | - | - |
+| `networkFirewallPolicyId` | The OCID of the Network Firewall policy that owns this resource. | `string` | Yes | - | - |
 | `type` | Type of address List. The accepted values are - * FQDN * IP | `string` | Yes | - | - |
 
 <a id="kind-addresslist-status"></a>
@@ -154,6 +155,7 @@ ApplicationSpec defines the desired state of Application.
 | `icmpType` | The value of the ICMP message Type field as defined by RFC 792 (https://www.rfc-editor.org/rfc/rfc792.html). | `integer` | No | - | - |
 | `jsonData` | - | `string` | No | - | - |
 | `name` | Name of the application | `string` | Yes | - | - |
+| `networkFirewallPolicyId` | The OCID of the Network Firewall policy that owns this resource. | `string` | Yes | - | - |
 | `type` | - | `string` | No | - | - |
 
 <a id="kind-application-status"></a>
@@ -252,6 +254,7 @@ ApplicationGroupSpec defines the desired state of ApplicationGroup.
 | `apps` | Collection of application names. | `list[string]` | Yes | - | - |
 | `description` | The description of the application list. This field can be used to add additional info. | `string` | No | - | - |
 | `name` | Name of the application Group. | `string` | Yes | - | - |
+| `networkFirewallPolicyId` | The OCID of the Network Firewall policy that owns this resource. | `string` | Yes | - | - |
 
 <a id="kind-applicationgroup-status"></a>
 ### Status
@@ -356,6 +359,7 @@ DecryptionProfileSpec defines the desired state of DecryptionProfile.
 | `isUntrustedIssuerBlocked` | Whether to block sessions if server's certificate is issued by an untrusted certificate authority (CA). | `boolean` | No | - | - |
 | `jsonData` | - | `string` | No | - | - |
 | `name` | Name of the decryption profile. | `string` | Yes | - | - |
+| `networkFirewallPolicyId` | The OCID of the Network Firewall policy that owns this resource. | `string` | Yes | - | - |
 | `type` | - | `string` | No | - | - |
 
 <a id="kind-decryptionprofile-status"></a>
@@ -463,6 +467,7 @@ DecryptionRuleSpec defines the desired state of DecryptionRule.
 | `decryptionProfile` | The name of the decryption profile to use. | `string` | No | - | - |
 | `description` | The description of the decryption rule. This field can be used to add additional info. | `string` | No | - | - |
 | `name` | Name for the decryption rule, must be unique within the policy. | `string` | Yes | - | - |
+| `networkFirewallPolicyId` | The OCID of the Network Firewall policy that owns this resource. | `string` | Yes | - | - |
 | [`position`](#kind-decryptionrule-spec-position) | DecryptionRulePosition defines nested fields for DecryptionRule.Position. | `object` | No | - | - |
 | `secret` | The name of a mapped secret. Its `type` must match that of the specified decryption profile. | `string` | No | - | - |
 
@@ -611,6 +616,7 @@ MappedSecretSpec defines the desired state of MappedSecret.
 | `description` | The description of the mapped secret. This field can be used to add additional info. | `string` | No | - | - |
 | `jsonData` | - | `string` | No | - | - |
 | `name` | Unique name to identify the group of urls to be used in the policy rules. | `string` | Yes | - | - |
+| `networkFirewallPolicyId` | The OCID of the Network Firewall policy that owns this resource. | `string` | Yes | - | - |
 | `source` | - | `string` | No | - | - |
 | `type` | Type of the secrets mapped based on the policy. * `SSL_INBOUND_INSPECTION`: For Inbound inspection of SSL traffic. * `SSL_FORWARD_PROXY`: For forward proxy certificates for SSL inspection. | `string` | Yes | - | - |
 | `vaultSecretId` | OCID for the Vault Secret to be used. | `string` | No | - | - |
@@ -715,6 +721,7 @@ NatRuleSpec defines the desired state of NatRule.
 | `description` | Description of a NAT rule. This field can be used to add additional info. | `string` | No | - | - |
 | `jsonData` | - | `string` | No | - | - |
 | `name` | Name for the NAT rule, must be unique within the policy. | `string` | Yes | - | - |
+| `networkFirewallPolicyId` | The OCID of the Network Firewall policy that owns this resource. | `string` | Yes | - | - |
 | [`position`](#kind-natrule-spec-position) | NatRulePosition defines nested fields for NatRule.Position. | `object` | No | - | - |
 | `type` | - | `string` | No | - | - |
 
@@ -1111,6 +1118,7 @@ SecurityRuleSpec defines the desired state of SecurityRule.
 | `description` | The description of the security rule. This field can be used to add additional info. | `string` | No | - | - |
 | `inspection` | Type of inspection to affect the Traffic flow. This is only applicable if action is INSPECT. * INTRUSION_DETECTION - Intrusion Detection. * INTRUSION_PREVENTION - Intrusion Detection and Prevention. Traffic classified as potentially malicious will be rejected as described in `type`. | `string` | No | - | - |
 | `name` | Name for the Security rule, must be unique within the policy. | `string` | Yes | - | - |
+| `networkFirewallPolicyId` | The OCID of the Network Firewall policy that owns this resource. | `string` | Yes | - | - |
 | [`position`](#kind-securityrule-spec-position) | SecurityRulePosition defines nested fields for SecurityRule.Position. | `object` | No | - | - |
 
 <a id="kind-securityrule-spec-condition"></a>
@@ -1264,6 +1272,7 @@ ServiceSpec defines the desired state of Service.
 | `description` | The description of the service. This field can be used to add additional info. | `string` | No | - | - |
 | `jsonData` | - | `string` | No | - | - |
 | `name` | Name of the service | `string` | Yes | - | - |
+| `networkFirewallPolicyId` | The OCID of the Network Firewall policy that owns this resource. | `string` | Yes | - | - |
 | [`portRanges`](#kind-service-spec-portranges) | List of port-ranges to be used. | `list[object]` | No | - | - |
 | `type` | - | `string` | No | - | - |
 
@@ -1385,6 +1394,7 @@ ServiceListSpec defines the desired state of ServiceList.
 | --- | --- | --- | --- | --- | --- |
 | `description` | The description of the service list. This field can be used to add additional info. | `string` | No | - | - |
 | `name` | Name of the service Group. | `string` | Yes | - | - |
+| `networkFirewallPolicyId` | The OCID of the Network Firewall policy that owns this resource. | `string` | Yes | - | - |
 | `services` | Collection of service names. | `list[string]` | Yes | - | - |
 
 <a id="kind-servicelist-status"></a>
@@ -1483,6 +1493,7 @@ TunnelInspectionRuleSpec defines the desired state of TunnelInspectionRule.
 | `description` | The description of the tunnel inspect rule. This field can be used to add additional info. | `string` | No | - | - |
 | `jsonData` | - | `string` | No | - | - |
 | `name` | Name for the Tunnel Inspection Rule, must be unique within the policy. | `string` | Yes | - | - |
+| `networkFirewallPolicyId` | The OCID of the Network Firewall policy that owns this resource. | `string` | Yes | - | - |
 | [`position`](#kind-tunnelinspectionrule-spec-position) | TunnelInspectionRulePosition defines nested fields for TunnelInspectionRule.Position. | `object` | No | - | - |
 | [`profile`](#kind-tunnelinspectionrule-spec-profile) | TunnelInspectionRuleProfile defines nested fields for TunnelInspectionRule.Profile. | `object` | No | - | - |
 | `protocol` | - | `string` | No | - | - |
@@ -1655,6 +1666,7 @@ UrlListSpec defines the desired state of UrlList.
 | --- | --- | --- | --- | --- | --- |
 | `description` | The description of the Url list. This field can be used to add additional info. | `string` | No | - | - |
 | `name` | Unique name to identify the group of urls to be used in the policy rules. | `string` | Yes | - | - |
+| `networkFirewallPolicyId` | The OCID of the Network Firewall policy that owns this resource. | `string` | Yes | - | - |
 | [`urls`](#kind-urllist-spec-urls) | List of urls. | `list[object]` | Yes | - | - |
 
 <a id="kind-urllist-spec-urls"></a>

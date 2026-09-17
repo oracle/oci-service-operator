@@ -1,0 +1,139 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Activity - devops/DeployArtifact
+skinparam activity {
+  backgroundColor #f8fafc
+  borderColor #0f172a
+  fontColor #0f172a
+  diamondBackgroundColor #e2e8f0
+  diamondBorderColor #1d4ed8
+  diamondFontColor #0f172a
+  startColor #1d4ed8
+  endColor #0f172a
+  barColor #1d4ed8
+}
+start
+partition "Observe and Bind" {
+:Start from shared flow\nshared/diagrams/shared-reconcile-activity.svg;
+:Read desired DeployArtifact spec, tracked\nstatus, and delete intent;
+if ("Tracked or explicit OCI identity present?") then (yes)
+:Get the current OCI resource via\nGetDeployArtifact;
+else (no)
+:Resolve an existing OCI resource through\nListDeployArtifacts using filters projectId,\ndisplayName, deployArtifactType,\nargumentSubstitutionMode (+13 more);
+:Create the OCI resource via\nCreateDeployArtifact when no reusable match is\nfound;
+:Persist the resolved or created OCI identity\ninto status;
+endif
+}
+if ("Delete requested?") then (yes)
+partition "Delete" {
+:Delete path uses DeleteDeployArtifact with\nrequired via GetDeployArtifact or\nListDeployArtifacts to DELETED confirmation;
+:Confirm deletion via GetDeployArtifact or\nListDeployArtifacts until OCI reaches DELETED;
+if ("Delete cleanup and finalizer release succeed?") then (yes)
+:Remove the finalizer after delete completion;
+else (no)
+:Stay blocked until cleanup or finalizer\nrelease succeeds;
+endif
+}
+stop
+else (no)
+partition "Lifecycle Classification" {
+if ("OCI state in retryable set?") then (yes)
+:Request requeue while OCI remains in CREATING,\nUPDATING, DELETING;
+stop
+endif
+if ("OCI state is outside success targets?") then (yes)
+:Return an unsuccessful reconcile result until\nOCI reaches ACTIVE;
+stop
+endif
+}
+partition "Ready and Drift Handling" {
+:Compare live OCI state against the\nrepo-authored mutation surface;
+if ("Force-new or conflicting drift detected?") then (yes)
+:Reject drift before OCI mutation for force-new\nfields projectId;
+stop
+endif
+if ("Supported mutable drift detected?") then (yes)
+:Apply UpdateDeployArtifact only for mutable\nfields deployArtifactType,\ndeployArtifactSource,\nargumentSubstitutionMode, description (+3\nmore);
+else (no)
+:Skip the no-op mutation path;
+endif
+:Run provider helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource when the\nmatching field-driven path executes;
+:Apply explicit follow-up semantics\ncreate=GetWorkRequest -> GetDeployArtifact;\nupdate=GetWorkRequest -> GetDeployArtifact;\ndelete=confirm-delete;
+:Return success for the ACTIVE success state;
+:Project required status and finalizer policy\nretain-until-confirmed-delete;
+:Requeue on provisioning, updating, terminating;
+}
+endif
+stop
+note right
+shared diagram:
+shared/diagrams/shared-reconcile-activity.svg
+Start from the shared reconcile activity and
+specialize provider-backed CRUD, wait, and
+status-projection details here.
+Controller-local activity diagrams add
+list-lookup hints, secret policies, delete
+handling, and open formal gaps.
+archetype batch: Generated service-manager
+controllers specialize the shared reconcile path
+with formal runtime ownership.
+service: devops
+slug: deployartifact
+kind: DeployArtifact
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: provisioning, updating, terminating
+provider states: create CREATING; update
+UPDATING; delete DELETING
+follow-up: create=GetWorkRequest ->
+GetDeployArtifact; update=GetWorkRequest ->
+GetDeployArtifact; delete=confirm-delete
+supported drift: deployArtifactType,
+deployArtifactSource, argumentSubstitutionMode,
+description (+3 more)
+reject before mutate: force-new fields projectId
+create-only fields: none
+list lookup: oci_devops_deploy_artifacts filters
+projectId, displayName, deployArtifactType,
+argumentSubstitutionMode (+13 more); exact
+projectId, displayName, deployArtifactType,
+argumentSubstitutionMode,
+deployArtifactSource.deployArtifactSourceType,
+deployArtifactSource.repositoryId,
+deployArtifactSource.deployArtifactPath,
+deployArtifactSource.deployArtifactVersion,
+deployArtifactSource.chartUrl,
+deployArtifactSource.imageUri,
+deployArtifactSource.imageDigest,
+deployArtifactSource.base64EncodedContent,
+deployArtifactSource.helmArtifactSourceType,
+deployArtifactSource.helmVerificationKeySource.verificationKeySourceType,
+deployArtifactSource.helmVerificationKeySource.currentPublicKey,
+deployArtifactSource.helmVerificationKeySource.previousPublicKey,
+deployArtifactSource.helmVerificationKeySource.vaultSecretId
+match within the resource scope; duplicate
+matches fail
+conflicts: none
+open gaps: none
+The production runtime uses
+generatedruntime/workrequest async handling for
+create, update, delete work-request phases.
+Lifecycle success states are ACTIVE; pending
+create, update, and delete states requeue until
+the corresponding follow-up converges.
+Status projection is required, Secret side
+effects are none, and the finalizer policy is
+retain-until-confirmed-delete.
+Delete policy required retains ownership until
+DELETED or confirmed absence.
+end note
+@enduml

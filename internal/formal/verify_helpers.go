@@ -937,6 +937,82 @@ func validateDiagramBinding(path string, diagram diagramSpec, binding *Controlle
 	if binding.Spec.DeleteConfirmation == "not-supported" && containsIgnoreCase(diagram.States, "terminating") {
 		problems = append(problems, fmt.Sprintf("%s: states must not include terminating when delete_confirmation is not-supported", filepath.ToSlash(path)))
 	}
+	problems = append(problems, validateRepoAuthoredOperations(path, diagram, "create", binding.Import.Operations.Create)...)
+	problems = append(problems, validateRepoAuthoredOperations(path, diagram, "update", binding.Import.Operations.Update)...)
+	problems = append(problems, validateRepoAuthoredOperations(path, diagram, "delete", binding.Import.Operations.Delete)...)
 
 	return problems
+}
+
+func validateRepoAuthoredOperations(path string, diagram diagramSpec, phase string, imported []operationBinding) []string {
+	if diagram.RepoAuthored == nil || diagram.RepoAuthored.Operations == nil {
+		return nil
+	}
+	subset := repoAuthoredOperationSubset(diagram.RepoAuthored.Operations, phase)
+	if subset == nil {
+		return nil
+	}
+
+	available := make(map[string]struct{}, len(imported))
+	for _, operation := range imported {
+		available[strings.TrimSpace(operation.Operation)] = struct{}{}
+	}
+
+	seen := make(map[string]struct{}, len(subset))
+	var problems []string
+	for index, rawName := range subset {
+		name := strings.TrimSpace(rawName)
+		switch {
+		case name == "":
+			problems = append(problems, fmt.Sprintf("%s: repoAuthored.operations.%s[%d] must not be empty", filepath.ToSlash(path), phase, index))
+		case hasStringKey(seen, name):
+			problems = append(problems, fmt.Sprintf("%s: repoAuthored.operations.%s contains duplicate operation %q", filepath.ToSlash(path), phase, name))
+		case !hasStringKey(available, name):
+			problems = append(problems, fmt.Sprintf("%s: repoAuthored.operations.%s[%d]=%q is not present in imported %s operations", filepath.ToSlash(path), phase, index, name, phase))
+		}
+		if name != "" {
+			seen[name] = struct{}{}
+		}
+	}
+	if primary := importedPrimaryOperation(diagram.Kind, phase, imported); primary != "" && !containsTrimmedString(subset, primary) {
+		problems = append(problems, fmt.Sprintf("%s: repoAuthored.operations.%s must include primary %s operation %q", filepath.ToSlash(path), phase, phase, primary))
+	}
+	return problems
+}
+
+func repoAuthoredOperationSubset(operations *diagramOperationSemantics, phase string) []string {
+	switch phase {
+	case "create":
+		return operations.Create
+	case "update":
+		return operations.Update
+	case "delete":
+		return operations.Delete
+	default:
+		return nil
+	}
+}
+
+func importedPrimaryOperation(kind, phase string, imported []operationBinding) string {
+	want := strings.ToUpper(phase[:1]) + phase[1:] + strings.TrimSpace(kind)
+	for _, operation := range imported {
+		if strings.TrimSpace(operation.Operation) == want {
+			return want
+		}
+	}
+	return ""
+}
+
+func containsTrimmedString(values []string, want string) bool {
+	for _, value := range values {
+		if strings.TrimSpace(value) == want {
+			return true
+		}
+	}
+	return false
+}
+
+func hasStringKey(values map[string]struct{}, key string) bool {
+	_, ok := values[key]
+	return ok
 }

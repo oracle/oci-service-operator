@@ -66,25 +66,25 @@ func newDataAssetDefaultRuntimeHooks(sdkClient dataintegrationsdk.DataIntegratio
 			},
 		},
 		Get: runtimeOperationHooks[dataintegrationsdk.GetDataAssetRequest, dataintegrationsdk.GetDataAssetResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "DataAssetKey", RequestName: "dataAssetKey", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "DataAssetKey", RequestName: "dataAssetKey", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request dataintegrationsdk.GetDataAssetRequest) (dataintegrationsdk.GetDataAssetResponse, error) {
 				return sdkClient.GetDataAsset(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[dataintegrationsdk.ListDataAssetsRequest, dataintegrationsdk.ListDataAssetsResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: true}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Fields", RequestName: "fields", Contribution: "query", PreferResourceID: false}, {FieldName: "Type", RequestName: "type", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "Name", RequestName: "name", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Fields", RequestName: "fields", Contribution: "query", PreferResourceID: false}, {FieldName: "Type", RequestName: "type", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "Name", RequestName: "name", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dataintegrationsdk.ListDataAssetsRequest) (dataintegrationsdk.ListDataAssetsResponse, error) {
 				return sdkClient.ListDataAssets(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[dataintegrationsdk.UpdateDataAssetRequest, dataintegrationsdk.UpdateDataAssetResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "DataAssetKey", RequestName: "dataAssetKey", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdateDataAssetDetails", RequestName: "UpdateDataAssetDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "DataAssetKey", RequestName: "dataAssetKey", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateDataAssetDetails", RequestName: "UpdateDataAssetDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dataintegrationsdk.UpdateDataAssetRequest) (dataintegrationsdk.UpdateDataAssetResponse, error) {
 				return sdkClient.UpdateDataAsset(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[dataintegrationsdk.DeleteDataAssetRequest, dataintegrationsdk.DeleteDataAssetResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "DataAssetKey", RequestName: "dataAssetKey", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "DataAssetKey", RequestName: "dataAssetKey", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request dataintegrationsdk.DeleteDataAssetRequest) (dataintegrationsdk.DeleteDataAssetResponse, error) {
 				return sdkClient.DeleteDataAsset(ctx, request)
 			},

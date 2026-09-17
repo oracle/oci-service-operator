@@ -33,14 +33,14 @@ state "DeleteCleanupBlocked" as delete_cleanup_blocked
 [*] --> observe : CreateImportedPackage
 observe --> resolve_by_lookup : tracked identity missing
 resolve_by_lookup --> evaluate_ready : lookup or create reaches\nACTIVE
-resolve_by_lookup --> retryable : OCI state in PROVISIONING,\nUPDATING, DELETING
+resolve_by_lookup --> retryable : OCI state in\nOPERATION_PENDING
 resolve_by_lookup --> failed : unresolved OCI error or non-success state
 observe --> evaluate_ready : OCI state in ACTIVE
-observe --> retryable : OCI state in PROVISIONING,\nUPDATING, DELETING
+observe --> retryable : OCI state in\nOPERATION_PENDING
 observe --> failed : unresolved OCI error or non-success state
 evaluate_ready --> reject_unsupported_drift : force-new or conflicting\ndrift detected
 reject_unsupported_drift --> ready : wait for spec or live state change
-evaluate_ready --> apply_update : supported mutable drift for\ndisplay_name
+evaluate_ready --> apply_update : supported mutable drift for\ncurrentPackageId,\nparameterValues,\nfreeformTags (+1 more)
 apply_update --> ready : update path completes
 evaluate_ready --> ready : no supported drift remains
 ready --> ready : no supported drift remains
@@ -69,19 +69,26 @@ archetype: generated-service-manager
 status/finalizer: required /
 retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
-provider states: create PROVISIONING; update
-UPDATING; delete DELETING
-supported drift: display_name
+provider states: create OPERATION_PENDING;
+update OPERATION_PENDING; delete
+OPERATION_PENDING
+follow-up: create=read-after-write;
+update=read-after-write; delete=confirm-delete
+supported drift: currentPackageId,
+parameterValues, freeformTags, definedTags
 reject before mutate: force-new fields
 compartment_id
 create-only fields: none
 list lookup: scaffold_oda_importedpackage
-filters compartment_id, state
+filters odaInstanceId, currentPackageId; exact
+parent and current package identity match;
+duplicate matches fail
 conflicts: none
 open gaps: none
-Scaffold metadata only; replace with
-controller-specific runtime states before
-promotion.
+The package ID is both the nested request
+identity and a mutable version target; status
+records the currently imported package after
+reread.
 end note
 note right of delete_pending
 delete policy: required

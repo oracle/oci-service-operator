@@ -462,22 +462,19 @@ func isRedisClusterWorkRequestResource(resource redissdk.WorkRequestResource) bo
 
 func desiredRedisFreeformTagsForUpdate(spec map[string]string, current map[string]string) map[string]string {
 	if spec != nil {
+		if len(spec) == 0 {
+			return map[string]string{}
+		}
 		return cloneStringMap(spec)
 	}
-	if current != nil {
-		return map[string]string{}
-	}
-	return nil
+	return current
 }
 
 func desiredRedisDefinedTagsForUpdate(spec map[string]shared.MapValue, current map[string]map[string]interface{}) map[string]map[string]interface{} {
 	if spec != nil {
 		return *util.ConvertToOciDefinedTags(&spec)
 	}
-	if current != nil {
-		return map[string]map[string]interface{}{}
-	}
-	return nil
+	return current
 }
 
 func convertRedisNodeCollection(input *redissdk.NodeCollection) redisv1beta1.RedisClusterNodeCollection {

@@ -1,0 +1,27 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: loganalytics
+slug: loganalyticsentitytype
+kind: LogAnalyticsEntityType
+archetype: generated-service-manager
+states:
+  - active
+  - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending: []
+    updatePending: []
+    deletePending: ["DELETING"]
+  listLookup:
+    filters: []
+    matchRule: exact parent path plus immutable child identity; duplicate matches fail
+  mutation:
+    mutable: []
+    forceNew: ["category","name","namespace","properties","properties.description","properties.name"]
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - "The OCI namespace or parent identifier remains part of every LogAnalyticsEntityType request path."
+  - "The recorded composite-path mock verifies request bodies, nested paths, status projection, and confirmed deletion."

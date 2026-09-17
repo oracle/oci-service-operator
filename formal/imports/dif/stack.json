@@ -1,0 +1,151 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "dif",
+  "slug": "stack",
+  "kind": "Stack",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_dif_stack",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateStack",
+        "requestType": "dif.CreateStackRequest",
+        "responseType": "dif.CreateStackResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetStack",
+        "requestType": "dif.GetStackRequest",
+        "responseType": "dif.GetStackResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListStacks",
+        "requestType": "dif.ListStacksRequest",
+        "responseType": "dif.ListStacksResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateStack",
+        "requestType": "dif.UpdateStackRequest",
+        "responseType": "dif.UpdateStackResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteStack",
+        "requestType": "dif.DeleteStackRequest",
+        "responseType": "dif.DeleteStackResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "stackTemplates",
+      "services",
+      "notificationEmail",
+      "adb",
+      "ggcs",
+      "dataflow",
+      "objectstorage",
+      "genai",
+      "freeformTags",
+      "definedTags"
+    ],
+    "forceNew": [
+      "displayName",
+      "compartmentId",
+      "aidataplatform",
+      "omk",
+      "oke"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "Stack",
+        "action": "CreateStack"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "Stack",
+        "action": "UpdateStack"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "Stack",
+        "action": "DeleteStack"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "unavailable",
+    "collectionField": "Items",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartmentId",
+      "lifecycleState",
+      "displayName",
+      "id",
+      "opc-request-id"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/dif/stack/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/dif/stack/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Terraform provider formal-import could not resolve oci_dif_stack; the vendored SDK, generated runtime, and package-owned typed OCI fixtures define this reviewed contract."
+  ]
+}

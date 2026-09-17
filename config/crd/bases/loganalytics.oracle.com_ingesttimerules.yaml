@@ -163,9 +163,8 @@ spec:
                   Example: `{"bar-key": "value"}`
                 type: object
               id:
-                description: |-
-                  The log analytics entity OCID. This ID is a reference used by log analytics features and it represents
-                  a resource that is provisioned and managed by the customer on their premises or on the cloud.
+                description: Optional existing ingest-time-rule identifier. Leave
+                  empty when creating a new rule.
                 type: string
               isEnabled:
                 description: A flag indicating whether or not the ingest time rule
@@ -187,7 +186,6 @@ spec:
             - compartmentId
             - conditions
             - displayName
-            - id
             type: object
           status:
             description: IngestTimeRuleStatus defines the observed state of IngestTimeRule.

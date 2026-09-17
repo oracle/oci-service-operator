@@ -75,7 +75,7 @@ type TargetDatabaseGroupMatchingCriteria struct {
 	// +kubebuilder:validation:Required
 	Include TargetDatabaseGroupMatchingCriteriaInclude `json:"include"`
 	// +kubebuilder:validation:Optional
-	Exclude TargetDatabaseGroupMatchingCriteriaExclude `json:"exclude,omitempty"`
+	Exclude TargetDatabaseGroupMatchingCriteriaExclude `json:"exclude,omitempty,omitzero"`
 }
 
 // TargetDatabaseGroupStatus defines the observed state of TargetDatabaseGroup.

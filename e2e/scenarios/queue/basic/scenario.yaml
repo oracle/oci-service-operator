@@ -1,0 +1,30 @@
+version: 1
+name: queue-basic-crud
+service: queue
+namespace: default
+timeout: 30m
+pollInterval: 10s
+create: create.yaml
+update: update.yaml
+ready:
+  conditionTypes: [Active]
+  lifecycleStates: [ACTIVE]
+  requireOCID: true
+  fieldsEqual:
+    - desired: spec.displayName
+      observed: status.displayName
+    - desired: spec.visibilityInSeconds
+      observed: status.visibilityInSeconds
+    - desired: spec.freeformTags
+      observed: status.freeformTags
+failureConditionTypes: [Failed]
+relatedObjects:
+  - apiVersion: v1
+    kind: Secret
+    requiredDataKeys: [endpoint]
+    deleteWithResource: true
+delete:
+  enabled: true
+  timeout: 30m
+  cleanupDependencies: true
+cleanupOnFailure: true

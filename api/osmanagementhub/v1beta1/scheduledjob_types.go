@@ -197,9 +197,9 @@ type ScheduledJobOperation struct {
 	// +kubebuilder:validation:Optional
 	WindowsUpdateNames []string `json:"windowsUpdateNames,omitempty"`
 	// +kubebuilder:validation:Optional
-	ManageModuleStreamsDetails ScheduledJobOperationManageModuleStreamsDetails `json:"manageModuleStreamsDetails,omitempty"`
+	ManageModuleStreamsDetails ScheduledJobOperationManageModuleStreamsDetails `json:"manageModuleStreamsDetails,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	SwitchModuleStreamsDetails ScheduledJobOperationSwitchModuleStreamsDetails `json:"switchModuleStreamsDetails,omitempty"`
+	SwitchModuleStreamsDetails ScheduledJobOperationSwitchModuleStreamsDetails `json:"switchModuleStreamsDetails,omitempty,omitzero"`
 	// The software source OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm).
 	// This parameter only applies when the scheduled job is for attaching or detaching software sources.
 	// +kubebuilder:validation:Optional

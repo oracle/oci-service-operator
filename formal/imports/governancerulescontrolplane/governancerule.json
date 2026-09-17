@@ -1,0 +1,138 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "governancerulescontrolplane",
+  "slug": "governancerule",
+  "kind": "GovernanceRule",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_governance_rules_control_plane_governance_rule",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateGovernanceRule",
+        "requestType": "governancerulescontrolplane.CreateGovernanceRuleRequest",
+        "responseType": "governancerulescontrolplane.CreateGovernanceRuleResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetGovernanceRule",
+        "requestType": "governancerulescontrolplane.GetGovernanceRuleRequest",
+        "responseType": "governancerulescontrolplane.GetGovernanceRuleResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListGovernanceRules",
+        "requestType": "governancerulescontrolplane.ListGovernanceRulesRequest",
+        "responseType": "governancerulescontrolplane.ListGovernanceRulesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateGovernanceRule",
+        "requestType": "governancerulescontrolplane.UpdateGovernanceRuleRequest",
+        "responseType": "governancerulescontrolplane.UpdateGovernanceRuleResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteGovernanceRule",
+        "requestType": "governancerulescontrolplane.DeleteGovernanceRuleRequest",
+        "responseType": "governancerulescontrolplane.DeleteGovernanceRuleResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "displayName",
+      "description",
+      "template",
+      "relatedResourceId",
+      "freeformTags",
+      "definedTags"
+    ],
+    "forceNew": [
+      "compartmentId",
+      "type",
+      "creationOption"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "governanceRule",
+        "action": "CREATE_GOVERNANCE_RULE"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "governanceRule",
+        "action": "UPDATE_GOVERNANCE_RULE"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "governanceRule",
+        "action": "DELETE_GOVERNANCE_RULE"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "unavailable",
+    "collectionField": "Items",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartmentId",
+      "displayName",
+      "type",
+      "id"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/governancerulescontrolplane/governancerule/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/governancerulescontrolplane/governancerule/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Terraform provider formal-import cannot resolve oci_governance_rules_control_plane_governance_rule; the vendored SDK, production runtime, and package-owned typed OCI fixtures define this contract."
+  ]
+}

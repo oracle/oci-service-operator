@@ -1,0 +1,29 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: cloudguard
+slug: detectorrecipe
+kind: DetectorRecipe
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending: ["CREATING"]
+    updatePending: ["UPDATING"]
+    deletePending: ["CREATING","DELETING","UPDATING"]
+  listLookup:
+    filters: ["compartmentId","detector","displayName","id","sourceDetectorRecipeId"]
+    matchRule: exact resource identity match; duplicate matches fail
+  mutation:
+    mutable: ["definedTags","description","detectorRules","displayName","freeformTags"]
+    forceNew: ["compartmentId","detector","sourceDetectorRecipeId"]
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - "The runtime uses its declared lifecycle-state contract for DetectorRecipe reconciliation."
+  - "The credential-free mock exercises SDK request serialization, response projection, mutation when supported, and confirmed deletion."

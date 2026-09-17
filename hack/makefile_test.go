@@ -227,11 +227,26 @@ func TestMakeEnvtestUsesTempBasedEnvtestRoot(t *testing.T) {
 	if !strings.Contains(output, filepath.Join(expectedRoot, "gopath")) {
 		t.Fatalf("make -n envtest output did not use temp-based setup-envtest GOPATH %q:\n%s", filepath.Join(expectedRoot, "gopath"), output)
 	}
-	if !strings.Contains(output, "setup-envtest@v0.0.0-20240812162837-9557f1031fe4") {
+	if !strings.Contains(output, "setup-envtest@v0.0.0-20260125163108-a19ec76a3c5d") {
 		t.Fatalf("make -n envtest output did not use the pinned setup-envtest revision:\n%s", output)
+	}
+	if strings.Contains(output, "--use-deprecated-gcs") {
+		t.Fatalf("make -n envtest output still uses the removed --use-deprecated-gcs flag:\n%s", output)
 	}
 	if !strings.Contains(output, filepath.Join(root, ".envtest-home", ".gomodcache")) {
 		t.Fatalf("make -n envtest output did not clean the legacy repo-local envtest GOMODCACHE path:\n%s", output)
+	}
+}
+
+func TestMakeEnvtestPropagatesSetupFailure(t *testing.T) {
+	root := findRepoRootForTest(t)
+	tmpDir := filepath.Join(t.TempDir(), "envtest-root")
+
+	cmd := exec.Command("make", "envtest", "SETUP_ENVTEST=false")
+	cmd.Dir = root
+	cmd.Env = append(os.Environ(), "TMPDIR="+tmpDir)
+	if output, err := cmd.CombinedOutput(); err == nil {
+		t.Fatalf("make envtest unexpectedly accepted a failed setup command:\n%s", output)
 	}
 }
 

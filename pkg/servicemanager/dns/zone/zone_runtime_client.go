@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/oracle/oci-go-sdk/v65/common"
@@ -43,6 +44,60 @@ type zoneOCIClient interface {
 type ambiguousZoneNotFoundError struct {
 	message      string
 	opcRequestID string
+}
+
+type zoneAcceptedDeleteEvidence struct {
+	mu  sync.Mutex
+	ids map[string]struct{}
+}
+
+func newZoneAcceptedDeleteEvidence() *zoneAcceptedDeleteEvidence {
+	return &zoneAcceptedDeleteEvidence{ids: map[string]struct{}{}}
+}
+
+func (e *zoneAcceptedDeleteEvidence) record(id string) {
+	id = strings.TrimSpace(id)
+	if e == nil || id == "" {
+		return
+	}
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	e.ids[id] = struct{}{}
+}
+
+func (e *zoneAcceptedDeleteEvidence) has(id string) bool {
+	id = strings.TrimSpace(id)
+	if e == nil || id == "" {
+		return false
+	}
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	_, ok := e.ids[id]
+	return ok
+}
+
+func (e *zoneAcceptedDeleteEvidence) consume(id string) bool {
+	id = strings.TrimSpace(id)
+	if e == nil || id == "" {
+		return false
+	}
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	if _, ok := e.ids[id]; !ok {
+		return false
+	}
+	delete(e.ids, id)
+	return true
+}
+
+func (e *zoneAcceptedDeleteEvidence) forget(id string) {
+	id = strings.TrimSpace(id)
+	if e == nil || id == "" {
+		return
+	}
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	delete(e.ids, id)
 }
 
 func (e ambiguousZoneNotFoundError) Error() string {
@@ -80,6 +135,7 @@ func applyZoneRuntimeHooks(
 	if hooks == nil {
 		return
 	}
+	acceptedDeletes := newZoneAcceptedDeleteEvidence()
 
 	hooks.Semantics = newZoneRuntimeSemantics()
 	hooks.BuildCreateBody = buildZoneCreateBody
@@ -104,6 +160,10 @@ func applyZoneRuntimeHooks(
 			return dnssdk.GetZoneResponse{}, err
 		}
 		response, err := client.GetZone(ctx, request)
+		if err != nil && errorutil.ClassifyDeleteError(err).IsAuthShapedNotFound() &&
+			acceptedDeletes.consume(stringValue(request.ZoneNameOrId)) {
+			return response, err
+		}
 		return response, conservativeZoneNotFoundError(err, "read")
 	}
 	hooks.List.Fields = zoneListFields()
@@ -123,6 +183,9 @@ func applyZoneRuntimeHooks(
 			return dnssdk.DeleteZoneResponse{}, err
 		}
 		response, err := client.DeleteZone(ctx, request)
+		if err == nil {
+			acceptedDeletes.record(stringValue(request.ZoneNameOrId))
+		}
 		return response, conservativeZoneNotFoundError(err, "delete")
 	}
 	hooks.DeleteHooks.HandleError = handleZoneDeleteError
@@ -132,10 +195,11 @@ func applyZoneRuntimeHooks(
 			log = manager.Log
 		}
 		return zoneRuntimeClient{
-			delegate: delegate,
-			client:   client,
-			initErr:  initErr,
-			log:      log,
+			delegate:        delegate,
+			client:          client,
+			initErr:         initErr,
+			log:             log,
+			acceptedDeletes: acceptedDeletes,
 		}
 	})
 }
@@ -200,10 +264,11 @@ func newZoneRuntimeHooksWithOCIClient(client zoneOCIClient) ZoneRuntimeHooks {
 }
 
 type zoneRuntimeClient struct {
-	delegate ZoneServiceClient
-	client   zoneOCIClient
-	initErr  error
-	log      loggerutil.OSOKLogger
+	delegate        ZoneServiceClient
+	client          zoneOCIClient
+	initErr         error
+	log             loggerutil.OSOKLogger
+	acceptedDeletes *zoneAcceptedDeleteEvidence
 }
 
 var _ ZoneServiceClient = zoneRuntimeClient{}
@@ -234,10 +299,15 @@ func (c zoneRuntimeClient) Delete(ctx context.Context, resource *dnsv1beta1.Zone
 	if c.delegate == nil {
 		return false, fmt.Errorf("zone generated runtime delegate is not configured")
 	}
+	currentID := currentZoneID(resource)
 	if err := c.rejectAuthShapedDeleteConfirmRead(ctx, resource); err != nil {
 		return false, err
 	}
-	return c.delegate.Delete(ctx, resource)
+	deleted, err := c.delegate.Delete(ctx, resource)
+	if deleted {
+		c.acceptedDeletes.forget(currentID)
+	}
+	return deleted, err
 }
 
 func (c zoneRuntimeClient) rejectAuthShapedDeleteConfirmRead(ctx context.Context, resource *dnsv1beta1.Zone) error {
@@ -261,6 +331,9 @@ func (c zoneRuntimeClient) rejectAuthShapedDeleteConfirmRead(ctx context.Context
 		return nil
 	}
 	if !errorutil.ClassifyDeleteError(err).IsAuthShapedNotFound() {
+		return nil
+	}
+	if c.acceptedDeletes.has(currentID) {
 		return nil
 	}
 	err = conservativeZoneNotFoundError(err, "delete confirmation")

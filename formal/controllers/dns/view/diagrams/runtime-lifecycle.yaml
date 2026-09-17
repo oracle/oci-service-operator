@@ -1,0 +1,33 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: dns
+slug: view
+kind: View
+archetype: generated-service-manager
+states:
+  - active
+  - updating
+  - terminating
+  - deleted
+repoAuthored:
+  listLookup:
+    filters:
+      - compartmentId
+      - displayName
+      - id
+    matchRule: Adopt only a unique view match in the requested compartment.
+  mutation:
+    mutable:
+      - displayName
+      - freeformTags
+      - definedTags
+    forceNew:
+      - compartmentId
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - Create can settle directly on ACTIVE; UPDATING requeues and ACTIVE is the steady state.
+  - Delete retains the finalizer through DELETING until DELETED or confirmed absence.
+  - Display name and tags update in place; compartmentId requires replacement, with no Kubernetes Secret side effects.

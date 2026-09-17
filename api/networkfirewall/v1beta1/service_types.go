@@ -27,6 +27,9 @@ type ServiceSpec struct {
 	// List of port-ranges to be used.
 	// +kubebuilder:validation:Optional
 	PortRanges []ServicePortRange `json:"portRanges,omitempty"`
+	// The OCID of the Network Firewall policy that owns this resource.
+	// +kubebuilder:validation:Required
+	NetworkFirewallPolicyId string `json:"networkFirewallPolicyId"`
 }
 
 // ServicePortRange defines nested fields for Service.PortRange.

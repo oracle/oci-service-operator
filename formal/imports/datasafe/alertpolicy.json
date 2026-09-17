@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "alertpolicy",
+  "kind": "AlertPolicy",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_alert_policy",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateAlertPolicy",
+        "requestType": "datasafe.CreateAlertPolicyRequest",
+        "responseType": "datasafe.CreateAlertPolicyResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetAlertPolicy",
+        "requestType": "datasafe.GetAlertPolicyRequest",
+        "responseType": "datasafe.GetAlertPolicyResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListAlertPolicies",
+        "requestType": "datasafe.ListAlertPoliciesRequest",
+        "responseType": "datasafe.ListAlertPoliciesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeAlertPolicyCompartment",
+        "requestType": "datasafe.ChangeAlertPolicyCompartmentRequest",
+        "responseType": "datasafe.ChangeAlertPolicyCompartmentResponse"
+      },
+      {
+        "operation": "UpdateAlertPolicy",
+        "requestType": "datasafe.UpdateAlertPolicyRequest",
+        "responseType": "datasafe.UpdateAlertPolicyResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteAlertPolicy",
+        "requestType": "datasafe.DeleteAlertPolicyRequest",
+        "responseType": "datasafe.DeleteAlertPolicyResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags",
+      "severity"
+    ],
+    "forceNew": [
+      "alert_policy_rule_details",
+      "alert_policy_rule_details.description",
+      "alert_policy_rule_details.display_name",
+      "alert_policy_rule_details.expression",
+      "alert_policy_type"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_data_safe_alert_policies",
+    "collectionField": "alert_policy_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "access_level",
+      "alert_policy_id",
+      "compartment_id",
+      "compartment_id_in_subtree",
+      "display_name",
+      "is_user_defined",
+      "state",
+      "time_created_greater_than_or_equal_to",
+      "time_created_less_than",
+      "type"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/alertpolicy/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/alertpolicy/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from terraform-provider-oci for datasafe/alertpolicy."
+  ]
+}

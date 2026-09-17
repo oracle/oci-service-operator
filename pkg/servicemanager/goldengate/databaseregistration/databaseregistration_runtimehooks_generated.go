@@ -50,15 +50,84 @@ func registerDatabaseRegistrationRuntimeHooksMutator(mutator DatabaseRegistratio
 	}
 	databaseregistrationRuntimeHooksMutators = append(databaseregistrationRuntimeHooksMutators, mutator)
 }
+func newDatabaseRegistrationRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "goldengate",
+		FormalSlug:    "databaseregistration",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{"UPDATING"},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "displayName", "lifecycleState", "opc-request-id"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"aliasName", "connectionString", "definedTags", "description", "displayName", "fqdn", "freeformTags", "password", "sessionMode", "username", "wallet"},
+			ForceNew:      []string{"compartmentId", "databaseId", "ipAddress", "keyId", "secretCompartmentId", "subnetId", "vaultId"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "DatabaseRegistration", Action: "CreateDatabaseRegistration"}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "DatabaseRegistration", Action: "UpdateDatabaseRegistration"}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "DatabaseRegistration", Action: "DeleteDatabaseRegistration"}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "DatabaseRegistration", Action: "CreateDatabaseRegistration"}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "DatabaseRegistration", Action: "UpdateDatabaseRegistration"}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "DatabaseRegistration", Action: "DeleteDatabaseRegistration"}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newDatabaseRegistrationDefaultRuntimeHooks(sdkClient goldengatesdk.GoldenGateClient) DatabaseRegistrationRuntimeHooks {
 	return DatabaseRegistrationRuntimeHooks{
+		Semantics:       newDatabaseRegistrationRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*goldengatev1beta1.DatabaseRegistration]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*goldengatev1beta1.DatabaseRegistration]{},
 		StatusHooks:     generatedruntime.StatusHooks[*goldengatev1beta1.DatabaseRegistration]{},
 		ParityHooks:     generatedruntime.ParityHooks[*goldengatev1beta1.DatabaseRegistration]{},
-		Async:           generatedruntime.AsyncHooks[*goldengatev1beta1.DatabaseRegistration]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*goldengatev1beta1.DatabaseRegistration]{},
+		Async: generatedruntime.AsyncHooks[*goldengatev1beta1.DatabaseRegistration]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := goldengatesdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*goldengatev1beta1.DatabaseRegistration]{},
 		Create: runtimeOperationHooks[goldengatesdk.CreateDatabaseRegistrationRequest, goldengatesdk.CreateDatabaseRegistrationResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateDatabaseRegistrationDetails", RequestName: "CreateDatabaseRegistrationDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request goldengatesdk.CreateDatabaseRegistrationRequest) (goldengatesdk.CreateDatabaseRegistrationResponse, error) {
@@ -106,10 +175,19 @@ func buildDatabaseRegistrationGeneratedRuntimeConfig(
 	hooks DatabaseRegistrationRuntimeHooks,
 ) generatedruntime.Config[*goldengatev1beta1.DatabaseRegistration] {
 	return generatedruntime.Config[*goldengatev1beta1.DatabaseRegistration]{
-		Kind:            "DatabaseRegistration",
-		SDKName:         "DatabaseRegistration",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "DatabaseRegistration",
+		SDKName:   "DatabaseRegistration",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

@@ -35,7 +35,7 @@ type LogSpec struct {
 	// +kubebuilder:validation:Optional
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// +kubebuilder:validation:Optional
-	Configuration LogConfiguration `json:"configuration,omitempty"`
+	Configuration LogConfiguration `json:"configuration,omitempty,omitzero"`
 	// Log retention duration in 30-day increments (30, 60, 90 and so on until 180).
 	// +kubebuilder:validation:Optional
 	RetentionDuration int `json:"retentionDuration,omitempty"`
@@ -79,7 +79,7 @@ type LogConfiguration struct {
 	// +kubebuilder:validation:Optional
 	CompartmentId string `json:"compartmentId,omitempty"`
 	// +kubebuilder:validation:Optional
-	Archiving LogConfigurationArchiving `json:"archiving,omitempty"`
+	Archiving LogConfigurationArchiving `json:"archiving,omitempty,omitzero"`
 }
 
 // LogStatus defines the observed state of Log.

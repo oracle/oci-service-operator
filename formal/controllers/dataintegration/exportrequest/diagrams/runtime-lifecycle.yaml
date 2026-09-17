@@ -1,0 +1,47 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: dataintegration
+slug: exportrequest
+kind: ExportRequest
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending:
+      - "IN_PROGRESS"
+      - "QUEUED"
+      - "PUBLISHING"
+      - "NOT_STARTED"
+      - "RUNNING"
+    deletePending:
+      - "DELETING"
+      - "TERMINATING"
+  listLookup:
+    filters:
+      - "bucketName"
+    matchRule: exact unique match on fields exposed by the scoped OCI list response
+  mutation:
+    mutable:
+      - "status"
+    forceNew:
+      - "bucketName"
+      - "fileName"
+      - "objectStorageTenancyId"
+      - "objectStorageRegion"
+      - "isObjectOverwriteEnabled"
+      - "objectKeys"
+      - "areReferencesIncluded"
+      - "filters"
+      - "workspaceId"
+  followUp:
+    create: "read-after-write"
+    update: "read-after-write"
+    delete: "confirm-delete"
+notes:
+  - "The runtime projects the vendored SDK lifecycle states and treats SUCCESS, SUCCESSFUL, TERMINATED as converged."
+  - "Parent identifiers scope composite OCI request paths and remain replacement-only unless the SDK update details explicitly expose them."
+  - "Create, get, list where available, update, and delete request shapes are exercised by the package-local typed OCI mock integration test."

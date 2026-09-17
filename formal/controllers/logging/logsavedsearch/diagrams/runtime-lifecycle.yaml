@@ -9,5 +9,34 @@ states:
   - active
   - updating
   - terminating
+repoAuthored:
+  listLookup:
+    filters:
+      - compartmentId
+      - lifecycleState
+      - name
+    matchRule: Adopt only a unique saved-search match in the requested compartment.
+  mutation:
+    mutable:
+      - definedTags
+      - description
+      - freeformTags
+      - name
+      - query
+    forceNew:
+      - compartmentId
+  hooks:
+    create:
+      - helper: tfresource.CreateResource
+    update:
+      - helper: tfresource.UpdateResource
+    delete:
+      - helper: tfresource.DeleteResource
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
 notes:
-  - Scaffold metadata only; replace with controller-specific runtime states before promotion.
+  - CREATING and UPDATING requeue, ACTIVE succeeds, and DELETING retains the finalizer until OCI reports the saved search absent.
+  - CompartmentId is replacement-only; name, query, description, and tag fields reconcile in place.
+  - The runtime projects the OCI saved-search status and has no Kubernetes Secret side effects.

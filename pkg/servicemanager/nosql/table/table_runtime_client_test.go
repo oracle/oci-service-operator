@@ -199,6 +199,54 @@ func TestExplicitTableServiceClientCreatesAndProjectsStatus(t *testing.T) {
 	}
 }
 
+func TestExplicitTableServiceClientRequeuesWhenCreateFollowUpIsCreating(t *testing.T) {
+	t.Parallel()
+
+	listCount := 0
+	client := testTableClient(&fakeTableOCIClient{
+		listTablesFn: func(_ context.Context, _ nosqlsdk.ListTablesRequest) (nosqlsdk.ListTablesResponse, error) {
+			listCount++
+			if listCount == 1 {
+				return nosqlsdk.ListTablesResponse{}, nil
+			}
+			return nosqlsdk.ListTablesResponse{
+				TableCollection: nosqlsdk.TableCollection{
+					Items: []nosqlsdk.TableSummary{makeSDKSummary(
+						"ocid1.table.oc1..creating",
+						"ocid1.compartment.oc1..example",
+						nosqlsdk.TableLifecycleStateCreating,
+					)},
+				},
+			}, nil
+		},
+		createTableFn: func(_ context.Context, _ nosqlsdk.CreateTableRequest) (nosqlsdk.CreateTableResponse, error) {
+			return nosqlsdk.CreateTableResponse{OpcRequestId: common.String("opc-create-pending")}, nil
+		},
+		getTableFn: func(_ context.Context, _ nosqlsdk.GetTableRequest) (nosqlsdk.GetTableResponse, error) {
+			return nosqlsdk.GetTableResponse{
+				Table: makeSDKTable(
+					"ocid1.table.oc1..creating",
+					"ocid1.compartment.oc1..example",
+					nosqlsdk.TableLifecycleStateCreating,
+				),
+			}, nil
+		},
+	})
+
+	resource := makeTableResource()
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful {
+		t.Fatal("CreateOrUpdate() should report successful pending create")
+	}
+	if !response.ShouldRequeue {
+		t.Fatal("CreateOrUpdate() should requeue while create follow-up is CREATING")
+	}
+	requireTableAsyncCurrent(t, resource, shared.OSOKAsyncPhaseCreate, string(nosqlsdk.TableLifecycleStateCreating), shared.OSOKAsyncClassPending)
+}
+
 func TestExplicitTableServiceClientCreateFailureCapturesOpcRequestID(t *testing.T) {
 	t.Parallel()
 
@@ -218,6 +266,66 @@ func TestExplicitTableServiceClientCreateFailureCapturesOpcRequestID(t *testing.
 	}
 	if resource.Status.OsokStatus.OpcRequestID != "opc-request-id" {
 		t.Fatalf("status.opcRequestId = %q, want %q", resource.Status.OsokStatus.OpcRequestID, "opc-request-id")
+	}
+}
+
+func TestTableLifecycleUsesProjectedStatusWhenCreateResponseHasNoBody(t *testing.T) {
+	t.Parallel()
+
+	client := testTableRuntimeClient(&fakeTableOCIClient{})
+	resource := makeTableResource()
+	resource.Status.Id = "ocid1.nosqltable.oc1..creating"
+	resource.Status.Name = resource.Spec.Name
+	resource.Status.LifecycleState = string(nosqlsdk.TableLifecycleStateCreating)
+
+	response, err := client.applyLifecycleFromResponse(resource, nosqlsdk.CreateTableResponse{})
+	if err != nil {
+		t.Fatalf("applyLifecycleFromResponse() error = %v", err)
+	}
+	if !response.IsSuccessful {
+		t.Fatal("applyLifecycleFromResponse() should report successful pending create")
+	}
+	if !response.ShouldRequeue {
+		t.Fatal("applyLifecycleFromResponse() should requeue while projected lifecycle is CREATING")
+	}
+	requireTableAsyncCurrent(t, resource, shared.OSOKAsyncPhaseCreate, string(nosqlsdk.TableLifecycleStateCreating), shared.OSOKAsyncClassPending)
+	if got := lastTableCondition(resource); got != shared.Provisioning {
+		t.Fatalf("last condition = %q, want %q", got, shared.Provisioning)
+	}
+}
+
+func TestTablePendingLifecycleRequeuesWhileCreateIsEventuallyConsistent(t *testing.T) {
+	t.Parallel()
+
+	client := testTableRuntimeClient(&fakeTableOCIClient{
+		getTableFn: func(_ context.Context, _ nosqlsdk.GetTableRequest) (nosqlsdk.GetTableResponse, error) {
+			return nosqlsdk.GetTableResponse{}, errortest.NewServiceError(404, "NotFound", "table not yet readable")
+		},
+		listTablesFn: func(_ context.Context, _ nosqlsdk.ListTablesRequest) (nosqlsdk.ListTablesResponse, error) {
+			return nosqlsdk.ListTablesResponse{}, nil
+		},
+	})
+	resource := makeTableResource()
+	resource.Status.Id = "ocid1.nosqltable.oc1..creating"
+	resource.Status.OsokStatus.Ocid = shared.OCID(resource.Status.Id)
+	resource.Status.OsokStatus.Async.Current = &shared.OSOKAsyncOperation{
+		Source:          shared.OSOKAsyncSourceLifecycle,
+		Phase:           shared.OSOKAsyncPhaseCreate,
+		RawStatus:       string(nosqlsdk.TableLifecycleStateCreating),
+		NormalizedClass: shared.OSOKAsyncClassPending,
+		Message:         "Creating resource is in-progress",
+	}
+
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful || !response.ShouldRequeue {
+		t.Fatalf("CreateOrUpdate() response = %#v, want successful eventual-consistency requeue", response)
+	}
+	requireTableAsyncCurrent(t, resource, shared.OSOKAsyncPhaseCreate, string(nosqlsdk.TableLifecycleStateCreating), shared.OSOKAsyncClassPending)
+	if got := currentTableID(resource); got != "ocid1.nosqltable.oc1..creating" {
+		t.Fatalf("currentTableID() = %q, want tracked creating ID", got)
 	}
 }
 
@@ -376,6 +484,89 @@ func TestExplicitTableServiceClientMovesCompartmentBeforeMutableUpdate(t *testin
 	if updateRequest.UpdateTableDetails.TableLimits == nil || *updateRequest.UpdateTableDetails.TableLimits.MaxReadUnits != 20 {
 		t.Fatalf("update table limits = %#v, want maxReadUnits=20", updateRequest.UpdateTableDetails.TableLimits)
 	}
+}
+
+func TestBuildUpdateDetailsSequencesTableLimitsBeforeTags(t *testing.T) {
+	t.Parallel()
+
+	resource := makeTableResource()
+	resource.Spec.TableLimits = nosqlv1beta1.TableLimits{
+		MaxReadUnits:    20,
+		MaxWriteUnits:   10,
+		MaxStorageInGBs: 10,
+	}
+	resource.Spec.FreeformTags = map[string]string{"phase": "updated"}
+	existing := &tableSnapshot{
+		tableLimits: &nosqlsdk.TableLimits{
+			MaxReadUnits:    common.Int(10),
+			MaxWriteUnits:   common.Int(10),
+			MaxStorageInGBs: common.Int(10),
+		},
+		freeformTags: map[string]string{"phase": "created"},
+	}
+
+	limitsUpdate, updateNeeded := buildUpdateDetails(resource, existing)
+	if !updateNeeded || limitsUpdate.TableLimits == nil {
+		t.Fatalf("first update = %#v, want table limits", limitsUpdate)
+	}
+	if limitsUpdate.FreeformTags != nil || limitsUpdate.DefinedTags != nil {
+		t.Fatalf("first update = %#v, must not combine tags with table limits", limitsUpdate)
+	}
+
+	existing.tableLimits = limitsUpdate.TableLimits
+	tagsUpdate, updateNeeded := buildUpdateDetails(resource, existing)
+	if !updateNeeded {
+		t.Fatal("second update should apply remaining tag drift")
+	}
+	if tagsUpdate.TableLimits != nil {
+		t.Fatalf("second update table limits = %#v, want nil", tagsUpdate.TableLimits)
+	}
+	if got := tagsUpdate.FreeformTags["phase"]; got != "updated" {
+		t.Fatalf("second update phase = %q, want updated", got)
+	}
+}
+
+func TestExplicitTableServiceClientKeepsUpdatePendingForStaleActiveRead(t *testing.T) {
+	t.Parallel()
+
+	getCount := 0
+	client := testTableClient(&fakeTableOCIClient{
+		getTableFn: func(_ context.Context, _ nosqlsdk.GetTableRequest) (nosqlsdk.GetTableResponse, error) {
+			getCount++
+			table := makeSDKTable("ocid1.table.oc1..existing", "ocid1.compartment.oc1..example", nosqlsdk.TableLifecycleStateActive)
+			table.TableLimits = &nosqlsdk.TableLimits{
+				MaxReadUnits:    common.Int(10),
+				MaxWriteUnits:   common.Int(10),
+				MaxStorageInGBs: common.Int(10),
+			}
+			return nosqlsdk.GetTableResponse{Table: table}, nil
+		},
+		updateTableFn: func(_ context.Context, req nosqlsdk.UpdateTableRequest) (nosqlsdk.UpdateTableResponse, error) {
+			if req.UpdateTableDetails.TableLimits == nil || *req.UpdateTableDetails.TableLimits.MaxReadUnits != 20 {
+				t.Fatalf("update table limits = %#v, want maxReadUnits=20", req.UpdateTableDetails.TableLimits)
+			}
+			return nosqlsdk.UpdateTableResponse{}, nil
+		},
+	})
+	resource := makeTableResource()
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.table.oc1..existing")
+	resource.Spec.TableLimits = nosqlv1beta1.TableLimits{
+		MaxReadUnits:    20,
+		MaxWriteUnits:   10,
+		MaxStorageInGBs: 10,
+	}
+
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful || !response.ShouldRequeue {
+		t.Fatalf("CreateOrUpdate() response = %#v, want pending update after stale Active read", response)
+	}
+	if getCount < 2 {
+		t.Fatalf("GetTable() calls = %d, want initial and post-update reads", getCount)
+	}
+	requireTableAsyncCurrent(t, resource, shared.OSOKAsyncPhaseUpdate, string(nosqlsdk.TableLifecycleStateActive), shared.OSOKAsyncClassPending)
 }
 
 func TestExplicitTableServiceClientDeleteConfirmsProgress(t *testing.T) {

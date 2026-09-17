@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "fleetsoftwareupdate",
+  "slug": "fsureadinesscheck",
+  "kind": "FsuReadinessCheck",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_fleet_software_update_fsu_readiness_check",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateFsuReadinessCheck",
+        "requestType": "fleetsoftwareupdate.CreateFsuReadinessCheckRequest",
+        "responseType": "fleetsoftwareupdate.CreateFsuReadinessCheckResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetFsuReadinessCheck",
+        "requestType": "fleetsoftwareupdate.GetFsuReadinessCheckRequest",
+        "responseType": "fleetsoftwareupdate.GetFsuReadinessCheckResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListFsuReadinessChecks",
+        "requestType": "fleetsoftwareupdate.ListFsuReadinessChecksRequest",
+        "responseType": "fleetsoftwareupdate.ListFsuReadinessChecksResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateFsuReadinessCheck",
+        "requestType": "fleetsoftwareupdate.UpdateFsuReadinessCheckRequest",
+        "responseType": "fleetsoftwareupdate.UpdateFsuReadinessCheckResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteFsuReadinessCheck",
+        "requestType": "fleetsoftwareupdate.DeleteFsuReadinessCheckRequest",
+        "responseType": "fleetsoftwareupdate.DeleteFsuReadinessCheckResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "displayName",
+      "freeformTags",
+      "definedTags"
+    ],
+    "forceNew": [
+      "jsonData",
+      "compartmentId",
+      "type",
+      "targets"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "FsuReadinessCheck",
+        "action": "CreateFsuReadinessCheck"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "FsuReadinessCheck",
+        "action": "DeleteFsuReadinessCheck"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "unavailable",
+    "collectionField": "Items",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartmentId",
+      "resourceId",
+      "lifecycleState",
+      "displayName",
+      "type",
+      "opc-request-id"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/fleetsoftwareupdate/fsureadinesscheck/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/fleetsoftwareupdate/fsureadinesscheck/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Terraform provider formal-import could not resolve oci_fleet_software_update_fsu_readiness_check; the vendored SDK, generated runtime, and package-owned typed OCI fixtures define this reviewed contract."
+  ]
+}

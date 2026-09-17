@@ -30,6 +30,7 @@ type compartmentOrphanDeleteClient struct {
 	delegate          CompartmentServiceClient
 	deleteCompartment func(context.Context, shared.OCID) error
 	loadCompartment   func(context.Context, shared.OCID) (*identitysdk.Compartment, error)
+	listCompartments  func(context.Context, shared.OCID, string) ([]identitysdk.Compartment, error)
 }
 
 var _ CompartmentServiceClient = compartmentOrphanDeleteClient{}
@@ -71,6 +72,29 @@ func newCompartmentOrphanDeleteClient(manager *CompartmentServiceManager, delega
 		}
 		return &response.Compartment, nil
 	}
+	client.listCompartments = func(ctx context.Context, parentID shared.OCID, name string) ([]identitysdk.Compartment, error) {
+		sdkClient, err := identitysdk.NewIdentityClientWithConfigurationProvider(manager.Provider)
+		if err != nil {
+			return nil, fmt.Errorf("initialize Compartment list OCI client: %w", err)
+		}
+
+		var compartments []identitysdk.Compartment
+		request := identitysdk.ListCompartmentsRequest{
+			CompartmentId: common.String(string(parentID)),
+			Name:          common.String(name),
+		}
+		for {
+			response, err := sdkClient.ListCompartments(ctx, request)
+			if err != nil {
+				return nil, err
+			}
+			compartments = append(compartments, response.Items...)
+			if response.OpcNextPage == nil || strings.TrimSpace(*response.OpcNextPage) == "" {
+				return compartments, nil
+			}
+			request.Page = response.OpcNextPage
+		}
+	}
 	return client
 }
 
@@ -101,13 +125,32 @@ func (c compartmentOrphanDeleteClient) Delete(ctx context.Context, resource *ide
 			return true, nil
 		}
 		if err != nil && compartmentDeleteIsNotFound(err) {
-			return true, nil
+			found, confirmErr := c.confirmCompartmentByScopedList(ctx, resource, compartmentID)
+			if confirmErr != nil {
+				return false, confirmErr
+			}
+			if found != nil && shouldOrphanCompartmentDelete(found.LifecycleState) {
+				return true, nil
+			}
 		}
 	}
 
 	err := c.deleteCompartment(ctx, shared.OCID(compartmentID))
-	if err == nil || compartmentDeleteIsNotFound(err) {
+	if err == nil {
 		return true, nil
+	}
+	if compartmentDeleteIsNotFound(err) {
+		found, confirmErr := c.confirmCompartmentByScopedList(ctx, resource, compartmentID)
+		if confirmErr != nil {
+			return false, confirmErr
+		}
+		if found != nil && shouldOrphanCompartmentDelete(found.LifecycleState) {
+			return true, nil
+		}
+		if found == nil {
+			return false, fmt.Errorf("Compartment delete returned ambiguous 404 and scoped list has not yet confirmed %s", compartmentID)
+		}
+		return false, fmt.Errorf("Compartment delete returned ambiguous 404 while scoped list still contains %s in state %s", compartmentID, found.LifecycleState)
 	}
 
 	if c.loadCompartment != nil {
@@ -124,6 +167,31 @@ func (c compartmentOrphanDeleteClient) Delete(ctx context.Context, resource *ide
 		return false, nil
 	}
 	return false, err
+}
+
+func (c compartmentOrphanDeleteClient) confirmCompartmentByScopedList(
+	ctx context.Context,
+	resource *identityv1beta1.Compartment,
+	compartmentID string,
+) (*identitysdk.Compartment, error) {
+	if c.listCompartments == nil || resource == nil {
+		return nil, fmt.Errorf("Compartment %s returned ambiguous 404 and scoped list confirmation is unavailable", compartmentID)
+	}
+	parentID := strings.TrimSpace(resource.Spec.CompartmentId)
+	name := strings.TrimSpace(resource.Spec.Name)
+	if parentID == "" || name == "" {
+		return nil, fmt.Errorf("Compartment %s returned ambiguous 404 without parent/name identity for scoped list confirmation", compartmentID)
+	}
+	items, err := c.listCompartments(ctx, shared.OCID(parentID), name)
+	if err != nil {
+		return nil, fmt.Errorf("confirm Compartment %s after ambiguous 404: %w", compartmentID, err)
+	}
+	for i := range items {
+		if items[i].Id != nil && strings.TrimSpace(*items[i].Id) == compartmentID {
+			return &items[i], nil
+		}
+	}
+	return nil, nil
 }
 
 func compartmentDeleteCurrentID(resource *identityv1beta1.Compartment) string {

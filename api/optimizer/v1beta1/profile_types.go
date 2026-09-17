@@ -43,9 +43,9 @@ type ProfileSpec struct {
 	// +kubebuilder:validation:Optional
 	SystemTags map[string]shared.MapValue `json:"systemTags,omitempty"`
 	// +kubebuilder:validation:Optional
-	TargetCompartments ProfileTargetCompartments `json:"targetCompartments,omitempty"`
+	TargetCompartments ProfileTargetCompartments `json:"targetCompartments,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	TargetTags ProfileTargetTags `json:"targetTags,omitempty"`
+	TargetTags ProfileTargetTags `json:"targetTags,omitempty,omitzero"`
 }
 
 // ProfileLevelsConfigurationItem defines nested fields for Profile.LevelsConfiguration.Item.

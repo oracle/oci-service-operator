@@ -29,7 +29,7 @@ type FleetSpec struct {
 	// +kubebuilder:validation:Optional
 	Description string `json:"description,omitempty"`
 	// +kubebuilder:validation:Optional
-	Details FleetDetails `json:"details,omitempty"`
+	Details FleetDetails `json:"details,omitempty,omitzero"`
 	// Products associated with the Fleet.
 	// Provide PlatformConfiguration Ids corresponding to all the Products that need to be managed.
 	// +kubebuilder:validation:Optional
@@ -131,7 +131,7 @@ type FleetResourceSelection struct {
 	// +kubebuilder:validation:Optional
 	ResourceSelectionType string `json:"resourceSelectionType,omitempty"`
 	// +kubebuilder:validation:Optional
-	RuleSelectionCriteria FleetResourceSelectionRuleSelectionCriteria `json:"ruleSelectionCriteria,omitempty"`
+	RuleSelectionCriteria FleetResourceSelectionRuleSelectionCriteria `json:"ruleSelectionCriteria,omitempty,omitzero"`
 }
 
 // FleetDetails defines nested fields for Fleet.Details.
@@ -155,7 +155,7 @@ type FleetNotificationPreferencePreferencesUpcomingSchedule struct {
 // FleetNotificationPreferencePreferences defines nested fields for Fleet.NotificationPreference.Preferences.
 type FleetNotificationPreferencePreferences struct {
 	// +kubebuilder:validation:Optional
-	UpcomingSchedule FleetNotificationPreferencePreferencesUpcomingSchedule `json:"upcomingSchedule,omitempty"`
+	UpcomingSchedule FleetNotificationPreferencePreferencesUpcomingSchedule `json:"upcomingSchedule,omitempty,omitzero"`
 	// Enables or disables notification on Job Failures.
 	// +kubebuilder:validation:Optional
 	OnJobFailure bool `json:"onJobFailure,omitempty"`
@@ -201,7 +201,7 @@ type FleetNotificationPreference struct {
 	// +kubebuilder:validation:Required
 	CompartmentId string `json:"compartmentId"`
 	// +kubebuilder:validation:Optional
-	Preferences FleetNotificationPreferencePreferences `json:"preferences,omitempty"`
+	Preferences FleetNotificationPreferencePreferences `json:"preferences,omitempty,omitzero"`
 }
 
 // FleetResourceFields defines nested fields for Fleet.Resource.

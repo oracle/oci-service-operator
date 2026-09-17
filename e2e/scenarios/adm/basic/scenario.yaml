@@ -1,0 +1,23 @@
+version: 1
+name: adm-knowledgebase-basic-crud
+service: adm
+namespace: default
+timeout: 20m
+pollInterval: 10s
+create: create.yaml
+update: update.yaml
+ready:
+  conditionTypes: [Active]
+  lifecycleStates: [ACTIVE]
+  requireOCID: true
+  fieldsEqual:
+    - desired: spec.displayName
+      observed: status.displayName
+    - desired: spec.freeformTags
+      observed: status.freeformTags
+failureConditionTypes: [Failed]
+delete:
+  enabled: true
+  timeout: 20m
+  cleanupDependencies: true
+cleanupOnFailure: true

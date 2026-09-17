@@ -1,0 +1,123 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "cloudmigrations",
+  "slug": "replicationschedule",
+  "kind": "ReplicationSchedule",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_cloud_migrations_replication_schedule",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateReplicationSchedule",
+        "requestType": "cloudmigrations.CreateReplicationScheduleRequest",
+        "responseType": "cloudmigrations.CreateReplicationScheduleResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetReplicationSchedule",
+        "requestType": "cloudmigrations.GetReplicationScheduleRequest",
+        "responseType": "cloudmigrations.GetReplicationScheduleResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListReplicationSchedules",
+        "requestType": "cloudmigrations.ListReplicationSchedulesRequest",
+        "responseType": "cloudmigrations.ListReplicationSchedulesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeReplicationScheduleCompartment",
+        "requestType": "cloudmigrations.ChangeReplicationScheduleCompartmentRequest",
+        "responseType": "cloudmigrations.ChangeReplicationScheduleCompartmentResponse"
+      },
+      {
+        "operation": "UpdateReplicationSchedule",
+        "requestType": "cloudmigrations.UpdateReplicationScheduleRequest",
+        "responseType": "cloudmigrations.UpdateReplicationScheduleResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteReplicationSchedule",
+        "requestType": "cloudmigrations.DeleteReplicationScheduleRequest",
+        "responseType": "cloudmigrations.DeleteReplicationScheduleResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "NEEDS_ATTENTION"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "display_name",
+      "execution_recurrences",
+      "freeform_tags"
+    ],
+    "forceNew": null,
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_cloud_migrations_replication_schedules",
+    "collectionField": "replication_schedule_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "replication_schedule_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/cloudmigrations/replicationschedule/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/cloudmigrations/replicationschedule/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from the pinned terraform-provider-oci source revision."
+  ]
+}

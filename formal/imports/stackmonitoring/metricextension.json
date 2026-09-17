@@ -1,0 +1,151 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "stackmonitoring",
+  "slug": "metricextension",
+  "kind": "MetricExtension",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_stack_monitoring_metric_extension",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateMetricExtension",
+        "requestType": "stackmonitoring.CreateMetricExtensionRequest",
+        "responseType": "stackmonitoring.CreateMetricExtensionResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetMetricExtension",
+        "requestType": "stackmonitoring.GetMetricExtensionRequest",
+        "responseType": "stackmonitoring.GetMetricExtensionResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListMetricExtensions",
+        "requestType": "stackmonitoring.ListMetricExtensionsRequest",
+        "responseType": "stackmonitoring.ListMetricExtensionsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeMetricExtensionCompartment",
+        "requestType": "stackmonitoring.ChangeMetricExtensionCompartmentRequest",
+        "responseType": "stackmonitoring.ChangeMetricExtensionCompartmentResponse"
+      },
+      {
+        "operation": "UpdateMetricExtension",
+        "requestType": "stackmonitoring.UpdateMetricExtensionRequest",
+        "responseType": "stackmonitoring.UpdateMetricExtensionResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteMetricExtension",
+        "requestType": "stackmonitoring.DeleteMetricExtensionRequest",
+        "responseType": "stackmonitoring.DeleteMetricExtensionResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "target": [
+        "S_ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "collection_recurrences",
+      "compartment_id",
+      "description",
+      "display_name",
+      "metric_list.compute_expression",
+      "metric_list.data_type",
+      "metric_list.display_name",
+      "metric_list.is_dimension",
+      "metric_list.is_hidden",
+      "metric_list.metric_category",
+      "metric_list.name",
+      "metric_list.unit",
+      "publish_trigger",
+      "query_properties.arguments",
+      "query_properties.auto_row_prefix",
+      "query_properties.collection_method",
+      "query_properties.command",
+      "query_properties.delimiter",
+      "query_properties.identity_metric",
+      "query_properties.in_param_details.in_param_position",
+      "query_properties.in_param_details.in_param_value",
+      "query_properties.is_metric_service_enabled",
+      "query_properties.jmx_attributes",
+      "query_properties.managed_bean_query",
+      "query_properties.out_param_details.out_param_name",
+      "query_properties.out_param_details.out_param_position",
+      "query_properties.out_param_details.out_param_type",
+      "query_properties.protocol_type",
+      "query_properties.response_content_type",
+      "query_properties.script_details.content",
+      "query_properties.script_details.name",
+      "query_properties.sql_details.content",
+      "query_properties.sql_details.script_file_name",
+      "query_properties.sql_type",
+      "query_properties.starts_with",
+      "query_properties.url"
+    ],
+    "forceNew": [
+      "name",
+      "resource_type"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "update": [
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_stack_monitoring_metric_extensions",
+    "collectionField": "metric_extension_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "enabled_on_resource_id",
+      "metric_extension_id",
+      "name",
+      "resource_type",
+      "state",
+      "status"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/stackmonitoring/metricextension/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/stackmonitoring/metricextension/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts refreshed from the pinned Terraform provider; repository-authored metric-extension semantics are reviewed separately."
+  ]
+}

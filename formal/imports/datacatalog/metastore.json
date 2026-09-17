@@ -1,0 +1,123 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datacatalog",
+  "slug": "metastore",
+  "kind": "Metastore",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_datacatalog_metastore",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateMetastore",
+        "requestType": "datacatalog.CreateMetastoreRequest",
+        "responseType": "datacatalog.CreateMetastoreResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetMetastore",
+        "requestType": "datacatalog.GetMetastoreRequest",
+        "responseType": "datacatalog.GetMetastoreResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListMetastores",
+        "requestType": "datacatalog.ListMetastoresRequest",
+        "responseType": "datacatalog.ListMetastoresResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeMetastoreCompartment",
+        "requestType": "datacatalog.ChangeMetastoreCompartmentRequest",
+        "responseType": "datacatalog.ChangeMetastoreCompartmentResponse"
+      },
+      {
+        "operation": "UpdateMetastore",
+        "requestType": "datacatalog.UpdateMetastoreRequest",
+        "responseType": "datacatalog.UpdateMetastoreResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteMetastore",
+        "requestType": "datacatalog.DeleteMetastoreRequest",
+        "responseType": "datacatalog.DeleteMetastoreResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "display_name",
+      "freeform_tags"
+    ],
+    "forceNew": [
+      "default_external_table_location",
+      "default_managed_table_location"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_datacatalog_metastores",
+    "collectionField": "metastores",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datacatalog/metastore/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datacatalog/metastore/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from the pinned terraform-provider-oci source revision."
+  ]
+}

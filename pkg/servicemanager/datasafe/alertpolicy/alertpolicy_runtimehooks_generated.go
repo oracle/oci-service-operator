@@ -50,15 +50,84 @@ func registerAlertPolicyRuntimeHooksMutator(mutator AlertPolicyRuntimeHooksMutat
 	}
 	alertpolicyRuntimeHooksMutators = append(alertpolicyRuntimeHooksMutators, mutator)
 }
+func newAlertPolicyRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "datasafe",
+		FormalSlug:    "alertpolicy",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"accessLevel", "alertPolicyId", "compartmentId", "compartmentIdInSubtree", "displayName", "isUserDefined", "state", "timeCreatedGreaterThanOrEqualTo", "timeCreatedLessThan", "type"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"definedTags", "description", "displayName", "freeformTags", "severity"},
+			ForceNew:      []string{"alertPolicyRuleDetails", "alertPolicyType", "compartmentId"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{},
+			Update: []generatedruntime.Hook{},
+			Delete: []generatedruntime.Hook{},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> GetAlertPolicy",
+			Hooks:    []generatedruntime.Hook{},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> GetAlertPolicy",
+			Hooks:    []generatedruntime.Hook{},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> confirm-delete",
+			Hooks:    []generatedruntime.Hook{},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newAlertPolicyDefaultRuntimeHooks(sdkClient datasafesdk.DataSafeClient) AlertPolicyRuntimeHooks {
 	return AlertPolicyRuntimeHooks{
+		Semantics:       newAlertPolicyRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*datasafev1beta1.AlertPolicy]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*datasafev1beta1.AlertPolicy]{},
 		StatusHooks:     generatedruntime.StatusHooks[*datasafev1beta1.AlertPolicy]{},
 		ParityHooks:     generatedruntime.ParityHooks[*datasafev1beta1.AlertPolicy]{},
-		Async:           generatedruntime.AsyncHooks[*datasafev1beta1.AlertPolicy]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*datasafev1beta1.AlertPolicy]{},
+		Async: generatedruntime.AsyncHooks[*datasafev1beta1.AlertPolicy]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := datasafesdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*datasafev1beta1.AlertPolicy]{},
 		Create: runtimeOperationHooks[datasafesdk.CreateAlertPolicyRequest, datasafesdk.CreateAlertPolicyResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateAlertPolicyDetails", RequestName: "CreateAlertPolicyDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request datasafesdk.CreateAlertPolicyRequest) (datasafesdk.CreateAlertPolicyResponse, error) {
@@ -106,10 +175,19 @@ func buildAlertPolicyGeneratedRuntimeConfig(
 	hooks AlertPolicyRuntimeHooks,
 ) generatedruntime.Config[*datasafev1beta1.AlertPolicy] {
 	return generatedruntime.Config[*datasafev1beta1.AlertPolicy]{
-		Kind:            "AlertPolicy",
-		SDKName:         "AlertPolicy",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "AlertPolicy",
+		SDKName:   "AlertPolicy",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

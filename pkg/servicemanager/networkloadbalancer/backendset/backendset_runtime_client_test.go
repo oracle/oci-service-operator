@@ -170,7 +170,7 @@ func (f *fakeGeneratedBackendSetOCIClient) ensureMaps() {
 func TestBackendSetRuntimeSemanticsUsesGeneratedWorkRequests(t *testing.T) {
 	t.Parallel()
 
-	got := newBackendSetRuntimeSemantics()
+	got := reviewedBackendSetRuntimeSemantics()
 	if got.FormalService != "networkloadbalancer" || got.FormalSlug != "backendset" {
 		t.Fatalf("formal identity = %s/%s, want networkloadbalancer/backendset", got.FormalService, got.FormalSlug)
 	}
@@ -192,6 +192,7 @@ func TestCreateOrUpdateRejectsMissingBackendSetNetworkLoadBalancerAnnotation(t *
 
 	resource := makeUntrackedBackendSetResource()
 	resource.Annotations = nil
+	resource.Spec.NetworkLoadBalancerId = ""
 	client := &fakeGeneratedBackendSetOCIClient{}
 
 	response, err := newTestBackendSetRuntimeClient(client).CreateOrUpdate(context.Background(), resource, ctrl.Request{})
@@ -236,7 +237,12 @@ func TestCreateOrUpdateCreatesBackendSetAndTracksPendingWorkRequest(t *testing.T
 		t.Fatalf("CreateBackendSetDetails.Policy = %q, want FIVE_TUPLE", got)
 	}
 	requireBackendSetAsyncCurrent(t, resource, shared.OSOKAsyncPhaseCreate, shared.OSOKAsyncClassPending, "wr-create-backendset")
-	assertBackendSetTrackedStatus(t, resource, backendSetNetworkLoadBalancerID, backendSetNameValue)
+	if got := resource.Status.NetworkLoadBalancerId; got != backendSetNetworkLoadBalancerID {
+		t.Fatalf("status.networkLoadBalancerId = %q, want %q", got, backendSetNetworkLoadBalancerID)
+	}
+	if got := string(resource.Status.OsokStatus.Ocid); got != backendSetNameValue {
+		t.Fatalf("status.status.ocid = %q, want identity recorded before create work request polling", got)
+	}
 
 	response, err = serviceClient.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
 	if err != nil {
@@ -352,6 +358,31 @@ func TestCreateOrUpdateSkipsUpdateForDefaultedBackendSetReadback(t *testing.T) {
 	}
 	if len(client.updateRequests) != 0 {
 		t.Fatalf("update requests = %d, want no update for OCI-defaulted readback", len(client.updateRequests))
+	}
+}
+
+func TestCreateOrUpdateSkipsUpdateForEmptyBackendAndTCPDefaults(t *testing.T) {
+	resource := makeTrackedBackendSetResource()
+	resource.Spec.Backends = nil
+	resource.Spec.HealthChecker = networkloadbalancerv1beta1.BackendSetHealthChecker{Protocol: "TCP", Port: 8080}
+	current := sdkDefaultedBackendSetReadback()
+	current.Backends = []networkloadbalancersdk.Backend{}
+	current.HealthChecker.Protocol = networkloadbalancersdk.HealthCheckProtocolsTcp
+	current.HealthChecker.UrlPath = common.String("")
+	current.HealthChecker.ReturnCode = nil
+	current.HealthChecker.RequestData = []byte{}
+	current.HealthChecker.ResponseData = []byte{}
+	client := &fakeGeneratedBackendSetOCIClient{backendSets: map[string]networkloadbalancersdk.BackendSet{backendSetNameValue: current}}
+
+	response, err := newTestBackendSetRuntimeClient(client).CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful || response.ShouldRequeue {
+		t.Fatalf("CreateOrUpdate() response = %#v, want stable observation", response)
+	}
+	if len(client.updateRequests) != 0 {
+		t.Fatalf("update requests = %d, want no update for empty/defaulted readback", len(client.updateRequests))
 	}
 }
 
@@ -559,13 +590,28 @@ func TestDeleteTreatsBackendSetAuthShapedNotFoundAsFatal(t *testing.T) {
 	}
 }
 
-func TestDeleteSucceededWorkRequestTreatsGetAuthShapedConfirmationNotFoundAsFatal(t *testing.T) {
+func TestDeleteSucceededWorkRequestConfirmsGetAuthShapedAbsenceByList(t *testing.T) {
 	t.Parallel()
 
 	client := &fakeGeneratedBackendSetOCIClient{
 		getErr: errortest.NewServiceError(404, errorutil.NotAuthorizedOrNotFound, "not authorized or not found"),
 	}
-	runBackendSetSucceededDeleteWorkRequestAuthShapedConfirmationTest(t, client, newTestBackendSetRuntimeClient, 1, 0)
+	resource := makeTrackedBackendSetResource()
+	resource.Status.OsokStatus.Async.Current = &shared.OSOKAsyncOperation{Source: shared.OSOKAsyncSourceWorkRequest, Phase: shared.OSOKAsyncPhaseDelete, WorkRequestID: "wr-delete-backendset", NormalizedClass: shared.OSOKAsyncClassPending}
+	client.workRequestByID = map[string]networkloadbalancersdk.WorkRequest{"wr-delete-backendset": backendSetWorkRequest("wr-delete-backendset", networkloadbalancersdk.OperationStatusSucceeded, networkloadbalancersdk.OperationTypeDeleteBackendset)}
+	deleted, err := newTestBackendSetRuntimeClient(client).Delete(context.Background(), resource)
+	if err != nil {
+		t.Fatalf("Delete() error = %v", err)
+	}
+	if !deleted {
+		t.Fatal("Delete() = false, want list-confirmed deletion")
+	}
+	if len(client.getRequests) != 1 || len(client.listRequests) != 1 {
+		t.Fatalf("confirmation requests = get:%d list:%d, want one each", len(client.getRequests), len(client.listRequests))
+	}
+	if resource.Status.OsokStatus.DeletedAt == nil {
+		t.Fatal("status.status.deletedAt = nil, want confirmed deletion timestamp")
+	}
 }
 
 func TestDeleteSucceededWorkRequestTreatsListAuthShapedConfirmationNotFoundAsFatal(t *testing.T) {
@@ -574,7 +620,7 @@ func TestDeleteSucceededWorkRequestTreatsListAuthShapedConfirmationNotFoundAsFat
 	client := &fakeGeneratedBackendSetOCIClient{
 		listErr: errortest.NewServiceError(404, errorutil.NotAuthorizedOrNotFound, "not authorized or not found"),
 	}
-	runBackendSetSucceededDeleteWorkRequestAuthShapedConfirmationTest(t, client, newTestBackendSetRuntimeClientWithoutGetHook, 0, 1)
+	runBackendSetSucceededDeleteWorkRequestAuthShapedConfirmationTest(t, client, newTestBackendSetRuntimeClientWithoutGetHook, 0, 2)
 }
 
 func runBackendSetSucceededDeleteWorkRequestAuthShapedConfirmationTest(
@@ -679,9 +725,10 @@ func makeUntrackedBackendSetResource() *networkloadbalancerv1beta1.BackendSet {
 			},
 		},
 		Spec: networkloadbalancerv1beta1.BackendSetSpec{
-			Name:      backendSetNameValue,
-			Policy:    string(networkloadbalancersdk.NetworkLoadBalancingPolicyFiveTuple),
-			IpVersion: string(networkloadbalancersdk.IpVersionIpv4),
+			Name:                  backendSetNameValue,
+			NetworkLoadBalancerId: backendSetNetworkLoadBalancerID,
+			Policy:                string(networkloadbalancersdk.NetworkLoadBalancingPolicyFiveTuple),
+			IpVersion:             string(networkloadbalancersdk.IpVersionIpv4),
 			HealthChecker: networkloadbalancerv1beta1.BackendSetHealthChecker{
 				Protocol:   string(networkloadbalancersdk.HealthCheckProtocolsHttp),
 				UrlPath:    "/healthz",
@@ -702,9 +749,10 @@ func makeUntrackedBackendSetResource() *networkloadbalancerv1beta1.BackendSet {
 func makeTrackedBackendSetResource() *networkloadbalancerv1beta1.BackendSet {
 	resource := makeUntrackedBackendSetResource()
 	resource.Status = networkloadbalancerv1beta1.BackendSetStatus{
-		Name:      backendSetNameValue,
-		Policy:    string(networkloadbalancersdk.NetworkLoadBalancingPolicyFiveTuple),
-		IpVersion: string(networkloadbalancersdk.IpVersionIpv4),
+		Name:                  backendSetNameValue,
+		NetworkLoadBalancerId: backendSetNetworkLoadBalancerID,
+		Policy:                string(networkloadbalancersdk.NetworkLoadBalancingPolicyFiveTuple),
+		IpVersion:             string(networkloadbalancersdk.IpVersionIpv4),
 		HealthChecker: networkloadbalancerv1beta1.BackendSetHealthChecker{
 			Protocol:   string(networkloadbalancersdk.HealthCheckProtocolsHttp),
 			UrlPath:    "/healthz",
@@ -720,7 +768,7 @@ func makeTrackedBackendSetResource() *networkloadbalancerv1beta1.BackendSet {
 			},
 		},
 		OsokStatus: shared.OSOKStatus{
-			Ocid: shared.OCID(backendSetNetworkLoadBalancerID),
+			Ocid: shared.OCID(backendSetNameValue),
 		},
 	}
 	return resource
@@ -870,8 +918,11 @@ func assertBackendSetPathIdentity(t *testing.T, networkLoadBalancerID, backendSe
 
 func assertBackendSetTrackedStatus(t *testing.T, resource *networkloadbalancerv1beta1.BackendSet, wantNetworkLoadBalancerID, wantBackendSetName string) {
 	t.Helper()
-	if got := string(resource.Status.OsokStatus.Ocid); got != wantNetworkLoadBalancerID {
-		t.Fatalf("status.status.ocid = %q, want %q", got, wantNetworkLoadBalancerID)
+	if got := resource.Status.NetworkLoadBalancerId; got != wantNetworkLoadBalancerID {
+		t.Fatalf("status.networkLoadBalancerId = %q, want %q", got, wantNetworkLoadBalancerID)
+	}
+	if got := string(resource.Status.OsokStatus.Ocid); got != wantBackendSetName {
+		t.Fatalf("status.status.ocid = %q, want tracked backend set name %q", got, wantBackendSetName)
 	}
 	if got := resource.Status.Name; got != wantBackendSetName {
 		t.Fatalf("status.name = %q, want %q", got, wantBackendSetName)

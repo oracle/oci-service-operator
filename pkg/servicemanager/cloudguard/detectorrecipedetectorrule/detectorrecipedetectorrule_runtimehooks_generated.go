@@ -66,25 +66,25 @@ func newDetectorRecipeDetectorRuleDefaultRuntimeHooks(sdkClient cloudguardsdk.Cl
 			},
 		},
 		Get: runtimeOperationHooks[cloudguardsdk.GetDetectorRecipeDetectorRuleRequest, cloudguardsdk.GetDetectorRecipeDetectorRuleResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "DetectorRecipeId", RequestName: "detectorRecipeId", Contribution: "path", PreferResourceID: false}, {FieldName: "DetectorRuleId", RequestName: "detectorRuleId", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "DetectorRecipeId", RequestName: "detectorRecipeId", Contribution: "path", PreferResourceID: false}, {FieldName: "DetectorRuleId", RequestName: "detectorRuleId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request cloudguardsdk.GetDetectorRecipeDetectorRuleRequest) (cloudguardsdk.GetDetectorRecipeDetectorRuleResponse, error) {
 				return sdkClient.GetDetectorRecipeDetectorRule(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[cloudguardsdk.ListDetectorRecipeDetectorRulesRequest, cloudguardsdk.ListDetectorRecipeDetectorRulesResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "DetectorRecipeId", RequestName: "detectorRecipeId", Contribution: "path", PreferResourceID: true}, {FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "DetectorRecipeId", RequestName: "detectorRecipeId", Contribution: "path", PreferResourceID: false}, {FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request cloudguardsdk.ListDetectorRecipeDetectorRulesRequest) (cloudguardsdk.ListDetectorRecipeDetectorRulesResponse, error) {
 				return sdkClient.ListDetectorRecipeDetectorRules(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[cloudguardsdk.UpdateDetectorRecipeDetectorRuleRequest, cloudguardsdk.UpdateDetectorRecipeDetectorRuleResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "DetectorRecipeId", RequestName: "detectorRecipeId", Contribution: "path", PreferResourceID: false}, {FieldName: "DetectorRuleId", RequestName: "detectorRuleId", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdateDetectorRecipeDetectorRuleDetails", RequestName: "UpdateDetectorRecipeDetectorRuleDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "DetectorRecipeId", RequestName: "detectorRecipeId", Contribution: "path", PreferResourceID: false}, {FieldName: "DetectorRuleId", RequestName: "detectorRuleId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateDetectorRecipeDetectorRuleDetails", RequestName: "UpdateDetectorRecipeDetectorRuleDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request cloudguardsdk.UpdateDetectorRecipeDetectorRuleRequest) (cloudguardsdk.UpdateDetectorRecipeDetectorRuleResponse, error) {
 				return sdkClient.UpdateDetectorRecipeDetectorRule(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[cloudguardsdk.DeleteDetectorRecipeDetectorRuleRequest, cloudguardsdk.DeleteDetectorRecipeDetectorRuleResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "DetectorRecipeId", RequestName: "detectorRecipeId", Contribution: "path", PreferResourceID: false}, {FieldName: "DetectorRuleId", RequestName: "detectorRuleId", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "DetectorRecipeId", RequestName: "detectorRecipeId", Contribution: "path", PreferResourceID: false}, {FieldName: "DetectorRuleId", RequestName: "detectorRuleId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request cloudguardsdk.DeleteDetectorRecipeDetectorRuleRequest) (cloudguardsdk.DeleteDetectorRecipeDetectorRuleResponse, error) {
 				return sdkClient.DeleteDetectorRecipeDetectorRule(ctx, request)
 			},

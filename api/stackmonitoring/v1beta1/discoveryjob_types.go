@@ -97,9 +97,9 @@ type DiscoveryJobDiscoveryDetails struct {
 	// +kubebuilder:validation:Optional
 	License string `json:"license,omitempty"`
 	// +kubebuilder:validation:Optional
-	Credentials DiscoveryJobDiscoveryDetailsCredentials `json:"credentials,omitempty"`
+	Credentials DiscoveryJobDiscoveryDetailsCredentials `json:"credentials,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	Tags DiscoveryJobDiscoveryDetailsTags `json:"tags,omitempty"`
+	Tags DiscoveryJobDiscoveryDetailsTags `json:"tags,omitempty,omitzero"`
 }
 
 // DiscoveryJobStatus defines the observed state of DiscoveryJob.

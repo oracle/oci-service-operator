@@ -1,0 +1,90 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: fleetappsmanagement
+slug: taskrecord
+kind: TaskRecord
+archetype: generated-service-manager
+states:
+- provisioning
+- active
+- updating
+- terminating
+repoAuthored:
+  operations:
+    create:
+    - CreateTaskRecord
+    update:
+    - UpdateTaskRecord
+    delete:
+    - DeleteTaskRecord
+  providerLifecycle:
+    createPending: []
+    updatePending: []
+    deletePending:
+    - DELETING
+  listLookup:
+    filters:
+    - compartmentId
+    - displayName
+    - id
+    - operation
+    - platform
+    - state
+    - type
+    matchRule: exact declared filters match within the resource scope; duplicate matches
+      fail
+  mutation:
+    mutable:
+    - definedTags
+    - description
+    - details.executionDetails.catalogId
+    - details.executionDetails.command
+    - details.executionDetails.configFile
+    - details.executionDetails.content.bucket
+    - details.executionDetails.content.catalogId
+    - details.executionDetails.content.checksum
+    - details.executionDetails.content.namespace
+    - details.executionDetails.content.object
+    - details.executionDetails.content.sourceType
+    - details.executionDetails.credentials.displayName
+    - details.executionDetails.credentials.id
+    - details.executionDetails.endpoint
+    - details.executionDetails.executionType
+    - details.executionDetails.isExecutableContent
+    - details.executionDetails.isLocked
+    - details.executionDetails.isReadOutputVariableEnabled
+    - details.executionDetails.systemVariables
+    - details.executionDetails.targetCompartmentId
+    - details.executionDetails.variables.inputVariables.description
+    - details.executionDetails.variables.inputVariables.name
+    - details.executionDetails.variables.inputVariables.type
+    - details.executionDetails.variables.outputVariables
+    - details.isApplySubjectTask
+    - details.isDiscoveryOutputTask
+    - details.operation
+    - details.osType
+    - details.platform
+    - details.properties.numRetries
+    - details.properties.timeoutInSeconds
+    - details.scope
+    - displayName
+    - freeformTags
+    forceNew:
+    - compartmentId
+  hooks:
+    create:
+    - helper: tfresource.CreateResource
+    update:
+    - helper: tfresource.UpdateResource
+    delete:
+    - helper: tfresource.DeleteResource
+  followUp:
+    create: read-after-write
+    update: GetWorkRequest -> read-after-write
+    delete: GetWorkRequest -> confirm-delete
+notes:
+- The generated service manager uses the reviewed CRUD request, response, lifecycle,
+  and status projection contract.
+- Work-request phases are declared per operation from the vendored SDK response surface.
+- Secret side effects are none and finalizer ownership is retained until confirmed
+  deletion.

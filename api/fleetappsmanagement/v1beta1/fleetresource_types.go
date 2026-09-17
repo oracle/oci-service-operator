@@ -29,6 +29,9 @@ type FleetResourceSpec struct {
 	// Type of the Resource.
 	// +kubebuilder:validation:Optional
 	ResourceType string `json:"resourceType,omitempty"`
+	// The OCID of the Fleet Application Management fleet containing this resource.
+	// +kubebuilder:validation:Required
+	FleetId string `json:"fleetId"`
 }
 
 // FleetResourceStatus defines the observed state of FleetResource.

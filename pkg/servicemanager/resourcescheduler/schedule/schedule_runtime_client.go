@@ -426,8 +426,8 @@ func scheduleApplyCollectionUpdates(
 		if err != nil {
 			return false, err
 		}
+		details.ResourceFilters = desired
 		if !scheduleJSONEqual(scheduleCanonicalResourceFilters(desired), scheduleCanonicalResourceFilters(current.ResourceFilters)) {
-			details.ResourceFilters = desired
 			updateNeeded = true
 		}
 	}
@@ -436,8 +436,8 @@ func scheduleApplyCollectionUpdates(
 		if err != nil {
 			return false, err
 		}
+		details.Resources = desired
 		if !scheduleJSONEqual(scheduleCanonicalResources(desired), scheduleCanonicalResources(current.Resources)) {
-			details.Resources = desired
 			updateNeeded = true
 		}
 	}

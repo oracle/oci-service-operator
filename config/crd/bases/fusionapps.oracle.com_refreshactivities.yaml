@@ -52,6 +52,10 @@ spec:
           spec:
             description: RefreshActivitySpec defines the desired state of RefreshActivity.
             properties:
+              fusionEnvironmentId:
+                description: The OCID of the Fusion environment receiving this refresh
+                  activity.
+                type: string
               isDataMaskingOpted:
                 description: Represents if the customer opted for Data Masking or
                   not during refreshActivity.
@@ -65,6 +69,7 @@ spec:
                   An RFC3339 formatted datetime string.
                 type: string
             required:
+            - fusionEnvironmentId
             - sourceFusionEnvironmentId
             type: object
           status:

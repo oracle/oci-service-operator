@@ -48,6 +48,99 @@ services:
 	}
 }
 
+func TestLoadConfigPreservesStableAPIKindAliases(t *testing.T) {
+	t.Parallel()
+
+	configPath := filepath.Join(t.TempDir(), "services.yaml")
+	content := `
+schemaVersion: v1alpha1
+domain: oracle.com
+defaultVersion: v1beta1
+generatorEntrypoint: ./cmd/generator
+packageProfiles:
+  controller-backed:
+    description: generated controllers
+services:
+  - service: apigateway
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/apigateway
+    group: apigateway
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds: [Deployment, Gateway]
+    kindAliases:
+      Deployment: ApiGatewayDeployment
+      Gateway: ApiGateway
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+`
+	if err := os.WriteFile(configPath, []byte(content), 0o644); err != nil {
+		t.Fatalf("write temp config: %v", err)
+	}
+
+	cfg, err := LoadConfig(configPath)
+	if err != nil {
+		t.Fatalf("LoadConfig() error = %v", err)
+	}
+	service := cfg.Services[0]
+	if got := service.APIKindFor("Gateway"); got != "ApiGateway" {
+		t.Fatalf("APIKindFor(Gateway) = %q, want ApiGateway", got)
+	}
+	if got := service.SDKKindFor("ApiGatewayDeployment"); got != "Deployment" {
+		t.Fatalf("SDKKindFor(ApiGatewayDeployment) = %q, want Deployment", got)
+	}
+	selectedServices, err := cfg.SelectDefaultActiveOrExplicitServices("", false)
+	if err != nil {
+		t.Fatalf("SelectDefaultActiveOrExplicitServices() error = %v", err)
+	}
+	selected := selectedServices[0]
+	if got := selected.SelectedAPIKinds(); !slices.Equal(got, []string{"ApiGatewayDeployment", "ApiGateway"}) {
+		t.Fatalf("SelectedAPIKinds() = %v, want stable API aliases", got)
+	}
+}
+
+func TestLoadConfigRejectsDuplicateAPIKindAliases(t *testing.T) {
+	t.Parallel()
+
+	configPath := filepath.Join(t.TempDir(), "services.yaml")
+	content := `
+schemaVersion: v1alpha1
+domain: oracle.com
+defaultVersion: v1beta1
+generatorEntrypoint: ./cmd/generator
+packageProfiles:
+  controller-backed:
+    description: generated controllers
+services:
+  - service: apigateway
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/apigateway
+    group: apigateway
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds: [Deployment, Gateway]
+    kindAliases:
+      Deployment: ApiGateway
+      Gateway: ApiGateway
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+`
+	if err := os.WriteFile(configPath, []byte(content), 0o644); err != nil {
+		t.Fatalf("write temp config: %v", err)
+	}
+
+	_, err := LoadConfig(configPath)
+	if err == nil || !strings.Contains(err.Error(), `both "Deployment" and "Gateway" to API kind "ApiGateway"`) {
+		t.Fatalf("LoadConfig() error = %v, want duplicate API kind alias failure", err)
+	}
+}
+
 func TestLoadConfigRejectsBlankObservedStateExcludedFieldPath(t *testing.T) {
 	t.Parallel()
 
@@ -1140,6 +1233,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"analytics",
 		"announcementsservice",
 		"apiaccesscontrol",
+		"apigateway",
 		"apiplatform",
 		"apmconfig",
 		"apmcontrolplane",
@@ -1291,6 +1385,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"analytics",
 		"announcementsservice",
 		"apiaccesscontrol",
+		"apigateway",
 		"apiplatform",
 		"apmconfig",
 		"apmcontrolplane",
@@ -1570,15 +1665,112 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	assertServiceSelection(t, services["zpr"], true, SelectionModeExplicit, []string{"Configuration", "ZprPolicy"})
 }
 
+func TestCheckedInVulnerabilityScanningKeepsOptionalApplicationSettingsNullable(t *testing.T) {
+	t.Parallel()
+
+	service := requireService(t, loadCheckedInConfig(t), "vulnerabilityscanning")
+	override := overridesByKind(service)["HostScanRecipe"]
+	if override.Kind == "" {
+		t.Fatal("vulnerabilityscanning HostScanRecipe override was not found")
+	}
+
+	assertNullable := func(surface string, fields []FieldOverride) {
+		t.Helper()
+		for _, field := range fields {
+			if field.Name != "ApplicationSettings" {
+				continue
+			}
+			if field.Type != "*HostScanRecipeApplicationSettings" {
+				t.Fatalf("%s ApplicationSettings type = %q, want nullable helper pointer", surface, field.Type)
+			}
+			if field.Tag != `json:"applicationSettings,omitempty"` {
+				t.Fatalf("%s ApplicationSettings tag = %q, want omitempty", surface, field.Tag)
+			}
+			return
+		}
+		t.Fatalf("%s ApplicationSettings override was not found", surface)
+	}
+
+	assertNullable("spec", override.SpecFields)
+	assertNullable("status", override.StatusFields)
+}
+
+func TestCheckedInAPMTracesRequiresScheduledQueryRetentionAndPublishesValidSample(t *testing.T) {
+	t.Parallel()
+
+	service := requireService(t, loadCheckedInConfig(t), "apmtraces")
+	override := overridesByKind(service)["ScheduledQuery"]
+	var retention *FieldOverride
+	for index := range override.SpecFields {
+		if override.SpecFields[index].Name == "ScheduledQueryRetentionCriteria" {
+			retention = &override.SpecFields[index]
+			break
+		}
+	}
+	if retention == nil || retention.Tag != `json:"scheduledQueryRetentionCriteria"` || !slices.Contains(retention.Markers, "+kubebuilder:validation:Required") {
+		t.Fatalf("apmtraces ScheduledQuery retention override = %#v, want required field", retention)
+	}
+	assertSampleOverrideContains(t, service, "ScheduledQuery", "scheduledQueryProcessingSubType: NONE", "KEEP_DATA_UNTIL_RETENTION_PERIOD", "EVERY 720 MINUTES")
+}
+
+func TestCheckedInLogAnalyticsMakesIngestTimeRuleIDOptional(t *testing.T) {
+	t.Parallel()
+
+	service := requireService(t, loadCheckedInConfig(t), "loganalytics")
+	override := overridesByKind(service)["IngestTimeRule"]
+	for _, field := range override.SpecFields {
+		if field.Name != "Id" {
+			continue
+		}
+		if field.Tag != `json:"id,omitempty"` || !slices.Contains(field.Markers, "+kubebuilder:validation:Optional") {
+			t.Fatalf("loganalytics IngestTimeRule Id override = %#v, want optional omitempty field", field)
+		}
+		return
+	}
+	t.Fatalf("loganalytics IngestTimeRule specFields = %#v, want Id override", override.SpecFields)
+}
+
+func TestCheckedInNetworkFirewallPublishesChildIdentityAndNullableNatConfiguration(t *testing.T) {
+	t.Parallel()
+
+	service := requireService(t, loadCheckedInConfig(t), "networkfirewall")
+	overrides := overridesByKind(service)
+	findField := func(kind, name string, fields []FieldOverride) FieldOverride {
+		t.Helper()
+		for _, field := range fields {
+			if field.Name == name {
+				return field
+			}
+		}
+		t.Fatalf("networkfirewall %s %s override was not found", kind, name)
+		return FieldOverride{}
+	}
+	for _, kind := range []string{"AddressList", "Application", "ApplicationGroup", "DecryptionProfile", "DecryptionRule", "MappedSecret", "NatRule", "SecurityRule", "Service", "ServiceList", "TunnelInspectionRule", "UrlList"} {
+		field := findField(kind, "NetworkFirewallPolicyId", overrides[kind].SpecFields)
+		if field.Type != "string" || field.Tag != `json:"networkFirewallPolicyId"` {
+			t.Fatalf("networkfirewall %s parent field = %#v", kind, field)
+		}
+	}
+	networkFirewall := overrides["NetworkFirewall"]
+	for surface, fields := range map[string][]FieldOverride{"spec": networkFirewall.SpecFields, "status": networkFirewall.StatusFields} {
+		field := findField("NetworkFirewall", "NatConfiguration", fields)
+		if field.Type != "*NetworkFirewallNatConfiguration" || field.Tag != `json:"natConfiguration,omitempty"` {
+			t.Fatalf("networkfirewall NetworkFirewall %s NatConfiguration = %#v", surface, field)
+		}
+	}
+}
+
 func TestCheckedInConfigIncludesRuntimeRolloutMetadata(t *testing.T) {
 	t.Parallel()
 
 	cfg := loadCheckedInConfig(t)
-	services := serviceConfigsByName(t, cfg, "aidocument", "ailanguage", "aispeech", "aivision", "bds", "containerengine", "containerinstances", "core", "dataflow", "database", "databasemigration", "databasetools", "datalabelingservice", "datascience", "disasterrecovery", "distributeddatabase", "functions", "generativeaiagent", "identity", "jms", "keymanagement", "mediaservices", "mysql", "nosql", "oce", "ocvp", "psql", "redis", "streaming", "tenantmanagercontrolplane")
+	services := serviceConfigsByName(t, cfg, "aidocument", "ailanguage", "aispeech", "aivision", "autoscaling", "bds", "cloudguard", "containerengine", "containerinstances", "core", "dataflow", "database", "databasemigration", "databasetools", "datalabelingservice", "datascience", "disasterrecovery", "distributeddatabase", "functions", "generativeaiagent", "healthchecks", "identity", "jms", "keymanagement", "mediaservices", "mysql", "nosql", "oce", "ocvp", "psql", "redis", "streaming", "tenantmanagercontrolplane")
 	assertAIDocumentRuntimeRolloutMetadata(t, services["aidocument"])
 	assertAILanguageRuntimeRolloutMetadata(t, services["ailanguage"])
 	assertAISpeechRuntimeRolloutMetadata(t, services["aispeech"])
 	assertAIVisionRuntimeRolloutMetadata(t, services["aivision"])
+	assertAsyncContract(t, services["autoscaling"], "AutoScalingConfiguration", AsyncStrategyNone, AsyncRuntimeGeneratedRuntime)
+	assertAsyncContract(t, services["cloudguard"], "WlpAgent", AsyncStrategyNone, AsyncRuntimeGeneratedRuntime)
 	assertBDSRuntimeRolloutMetadata(t, services["bds"])
 	assertDatabaseMigrationRuntimeRolloutMetadata(t, services["databasemigration"])
 	assertDatabaseToolsRuntimeRolloutMetadata(t, services["databasetools"])
@@ -1587,6 +1779,7 @@ func TestCheckedInConfigIncludesRuntimeRolloutMetadata(t *testing.T) {
 	assertAsyncContract(t, services["distributeddatabase"], "DistributedDatabase", AsyncStrategyLifecycle, AsyncRuntimeGeneratedRuntime)
 	assertAsyncContract(t, services["generativeaiagent"], "AgentEndpoint", AsyncStrategyWorkRequest, AsyncRuntimeGeneratedRuntime)
 	assertAsyncContract(t, services["generativeaiagent"], "DataSource", AsyncStrategyWorkRequest, AsyncRuntimeGeneratedRuntime)
+	assertAsyncContract(t, services["healthchecks"], "HttpMonitor", AsyncStrategyNone, AsyncRuntimeGeneratedRuntime)
 	assertAsyncContract(t, services["jms"], "JmsPlugin", AsyncStrategyLifecycle, AsyncRuntimeGeneratedRuntime)
 	assertAsyncContract(t, services["mediaservices"], "MediaWorkflowConfiguration", AsyncStrategyLifecycle, AsyncRuntimeGeneratedRuntime)
 	assertAsyncContract(t, services["tenantmanagercontrolplane"], "DomainGovernance", AsyncStrategyLifecycle, AsyncRuntimeGeneratedRuntime)
@@ -1676,18 +1869,47 @@ func TestCheckedInConfigSelectServicesPreservesCorePackageSplitKinds(t *testing.
 	})
 }
 
+func TestCheckedInAutoscalingPolicyEnabledPreservesPresence(t *testing.T) {
+	t.Parallel()
+
+	cfg := loadCheckedInConfig(t)
+	service := serviceConfigsByName(t, cfg, "autoscaling")["autoscaling"]
+	assertPointerBool := func(kind, name string) {
+		t.Helper()
+		override := overridesByKind(service)[kind]
+		for _, field := range override.SpecFields {
+			if field.Name != name {
+				continue
+			}
+			if field.Type != "*bool" || field.Tag != `json:"isEnabled,omitempty"` {
+				t.Fatalf("%s %s override = %#v, want pointer bool with optional JSON tag", kind, name, field)
+			}
+			return
+		}
+		t.Fatalf("autoscaling %s is missing %s presence override", kind, name)
+	}
+	assertPointerBool("AutoScalingConfiguration", "IsEnabled")
+	assertPointerBool("AutoScalingConfiguration", "Policies.IsEnabled")
+	assertPointerBool("AutoScalingPolicy", "IsEnabled")
+}
+
 func TestCheckedInConfigPromotesFormalSpecReferences(t *testing.T) {
 	t.Parallel()
 
 	cfg := loadCheckedInConfig(t)
-	services := serviceConfigsByName(t, cfg, "aidocument", "ailanguage", "aispeech", "aivision", "analytics", "apiaccesscontrol", "bds", "containerengine", "containerinstances", "core", "database", "databasemigration", "databasetools", "datalabelingservice", "datascience", "dataflow", "disasterrecovery", "distributeddatabase", "generativeaiagent", "identity", "jms", "mediaservices", "mysql", "objectstorage", "oce", "ocvp", "opa", "opensearch", "psql", "redis", "streaming", "tenantmanagercontrolplane")
+	services := serviceConfigsByName(t, cfg, "aidocument", "ailanguage", "aispeech", "aivision", "analytics", "apiaccesscontrol", "apigateway", "autoscaling", "bds", "cloudguard", "containerengine", "containerinstances", "core", "database", "databasemigration", "databasetools", "datalabelingservice", "datascience", "dataflow", "disasterrecovery", "distributeddatabase", "generativeaiagent", "healthchecks", "identity", "jms", "mediaservices", "mysql", "objectstorage", "oce", "ocvp", "opa", "opensearch", "psql", "redis", "streaming", "tenantmanagercontrolplane")
 	assertFormalSpecFor(t, services["aidocument"], "Project", "project")
 	assertFormalSpecFor(t, services["ailanguage"], "Project", "project")
 	assertFormalSpecFor(t, services["aispeech"], "TranscriptionJob", "transcriptionjob")
 	assertFormalSpecFor(t, services["aivision"], "Project", "project")
 	assertFormalSpecFor(t, services["analytics"], "AnalyticsInstance", "analyticsinstance")
 	assertFormalSpecFor(t, services["apiaccesscontrol"], "PrivilegedApiControl", "privilegedapicontrol")
+	assertFormalSpecFor(t, services["apigateway"], "ApiGateway", "gateway")
+	assertFormalSpecFor(t, services["apigateway"], "ApiGatewayDeployment", "deployment")
+	assertFormalSpecFor(t, services["autoscaling"], "AutoScalingConfiguration", "autoscalingconfiguration")
 	assertFormalSpecFor(t, services["bds"], "BdsInstance", "bdsinstance")
+	assertFormalSpecFor(t, services["cloudguard"], "SavedQuery", "savedquery")
+	assertFormalSpecFor(t, services["cloudguard"], "WlpAgent", "wlpagent")
 	assertFormalSpecFor(t, services["containerengine"], "Cluster", "cluster")
 	assertFormalSpecFor(t, services["containerengine"], "NodePool", "nodepool")
 	assertFormalSpecFor(t, services["containerinstances"], "ContainerInstance", "")
@@ -1700,6 +1922,7 @@ func TestCheckedInConfigPromotesFormalSpecReferences(t *testing.T) {
 	assertFormalSpecFor(t, services["distributeddatabase"], "DistributedDatabase", "distributeddatabase")
 	assertFormalSpecFor(t, services["generativeaiagent"], "AgentEndpoint", "agentendpoint")
 	assertFormalSpecFor(t, services["generativeaiagent"], "DataSource", "datasource")
+	assertFormalSpecFor(t, services["healthchecks"], "HttpMonitor", "httpmonitor")
 	assertFormalSpecFor(t, services["identity"], "Compartment", "compartment")
 	assertFormalSpecFor(t, services["jms"], "JmsPlugin", "jmsplugin")
 	assertFormalSpecFor(t, services["mediaservices"], "MediaWorkflowConfiguration", "mediaworkflowconfiguration")
@@ -2288,6 +2511,7 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 		"analytics":                    {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"announcementsservice":         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"apiaccesscontrol":             {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"apigateway":                   {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
 		"apiplatform":                  {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"apmconfig":                    {strategy: AsyncStrategyNone, runtime: AsyncRuntimeGeneratedRuntime},
 		"apmcontrolplane":              {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
@@ -2427,9 +2651,124 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 		strategy string
 		runtime  string
 	}{
-		"jms/JmsPlugin": {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"tenantmanagercontrolplane/DomainGovernance": {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"wlms/ManagedInstance":                       {strategy: AsyncStrategyNone, runtime: AsyncRuntimeGeneratedRuntime},
+		"autoscaling/AutoScalingConfiguration":        {strategy: AsyncStrategyNone, runtime: AsyncRuntimeGeneratedRuntime},
+		"aidataplatform/AiDataPlatform":               {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"cloudguard/DataSource":                       {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"datasafe/DataSafePrivateEndpoint":            {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"datasafe/MaskingColumn":                      {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"datasafe/SensitiveColumn":                    {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"datasafe/SensitiveTypeGroup":                 {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"datasafe/TargetAlertPolicyAssociation":       {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"governancerulescontrolplane/GovernanceRule":  {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"managedkafka/KafkaCluster":                   {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"managementagent/DataSource":                  {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeHandwritten},
+		"managementagent/NamedCredential":             {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"marketplacepublisher/Artifact":               {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"opsi/AwrHub":                                 {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"opsi/AwrHubSource":                           {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"opsi/ChargebackPlanReport":                   {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"opsi/EnterpriseManagerBridge":                {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"opsi/ExadataInsight":                         {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"opsi/HostInsight":                            {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"opsi/NewsReport":                             {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"opsi/OperationsInsightsPrivateEndpoint":      {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"opsi/OperationsInsightsWarehouse":            {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"opsi/OperationsInsightsWarehouseUser":        {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"opsi/OpsiConfiguration":                      {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"recovery/ProtectedDatabase":                  {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"resourceanalytics/ResourceAnalyticsInstance": {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"bastion/Bastion":                             {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"bastion/Session":                             {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"blockchain/Osn":                              {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"blockchain/Peer":                             {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"cloudguard/WlpAgent":                         {strategy: AsyncStrategyNone, runtime: AsyncRuntimeGeneratedRuntime},
+		"datasafe/AlertPolicy":                        {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"datasafe/AttributeSet":                       {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"datasafe/SecurityPolicyConfig":               {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"datasafe/SensitiveTypesExport":               {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"datasafe/TargetDatabaseGroup":                {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"devops/BuildPipeline":                        {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"devops/DeployArtifact":                       {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"devops/DeployPipeline":                       {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"devops/Project":                              {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"devops/Repository":                           {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"devops/Trigger":                              {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"fleetappsmanagement/FleetCredential":         {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"fleetappsmanagement/FleetResource":           {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"fusionapps/RefreshActivity":                  {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"healthchecks/HttpMonitor":                    {strategy: AsyncStrategyNone, runtime: AsyncRuntimeGeneratedRuntime},
+		"iot/IotDomain":                               {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"jms/JmsPlugin":                               {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"loadbalancer/Listener":                       {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"networkloadbalancer/Backend":                 {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"networkloadbalancer/BackendSet":              {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"networkloadbalancer/Listener":                {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"networkloadbalancer/NetworkLoadBalancer":     {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"recovery/ProtectionPolicy":                   {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"recovery/RecoveryServiceSubnet":              {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"sch/ServiceConnector":                        {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"tenantmanagercontrolplane/DomainGovernance":  {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"waas/HttpRedirect":                           {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"waas/WaasPolicy":                             {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"waf/WebAppFirewallPolicy":                    {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"wlms/ManagedInstance":                        {strategy: AsyncStrategyNone, runtime: AsyncRuntimeGeneratedRuntime},
+		"batch/BatchContext":                          {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"batch/BatchJobPool":                          {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"blockchain/BlockchainPlatform":               {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"cloudbridge/AgentDependency":                 {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"cloudbridge/AssetSource":                     {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"cloudbridge/Inventory":                       {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"cloudmigrations/Migration":                   {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"cloudmigrations/MigrationAsset":              {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"cloudmigrations/MigrationPlan":               {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"cloudmigrations/ReplicationSchedule":         {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"cloudmigrations/TargetAsset":                 {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"datacatalog/CatalogPrivateEndpoint":          {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"datacatalog/Metastore":                       {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"dataintegration/Workspace":                   {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"datasafe/SecurityAssessment":                 {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"datasafe/SecurityPolicyDeployment":           {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"datasafe/TargetDatabase":                     {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"datasafe/UserAssessment":                     {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"dbmulticloud/MultiCloudResourceDiscovery":    {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"dbmulticloud/OracleDbAwsIdentityConnector":   {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"dbmulticloud/OracleDbAwsKey":                 {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"dbmulticloud/OracleDbAzureBlobContainer":     {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"dbmulticloud/OracleDbAzureBlobMount":         {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"dbmulticloud/OracleDbAzureConnector":         {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"dbmulticloud/OracleDbAzureVault":             {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"dbmulticloud/OracleDbAzureVaultAssociation":  {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"dbmulticloud/OracleDbGcpIdentityConnector":   {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"dbmulticloud/OracleDbGcpKeyRing":             {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"desktops/DesktopPool":                        {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"dif/Stack":                                   {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"emwarehouse/EmWarehouse":                     {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"fleetappsmanagement/CatalogItem":             {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"fleetappsmanagement/CompliancePolicyRule":    {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"fleetappsmanagement/Fleet":                   {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"fleetappsmanagement/MaintenanceWindow":       {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"fleetappsmanagement/Onboarding":              {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"fleetappsmanagement/Patch":                   {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"fleetappsmanagement/PlatformConfiguration":   {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"fleetappsmanagement/Provision":               {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"fleetappsmanagement/Runbook":                 {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"fleetappsmanagement/RunbookVersion":          {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"fleetappsmanagement/SchedulerDefinition":     {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"fleetappsmanagement/TaskRecord":              {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"fleetsoftwareupdate/FsuAction":               {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"fleetsoftwareupdate/FsuCollection":           {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"fleetsoftwareupdate/FsuCycle":                {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"fleetsoftwareupdate/FsuDiscovery":            {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"fleetsoftwareupdate/FsuReadinessCheck":       {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"fusionapps/FusionEnvironment":                {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"fusionapps/FusionEnvironmentFamily":          {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"goldengate/Connection":                       {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"goldengate/DatabaseRegistration":             {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"goldengate/Deployment":                       {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"goldengate/DeploymentBackup":                 {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"goldengate/Pipeline":                         {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"stackmonitoring/MaintenanceWindow":           {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"stackmonitoring/MonitoredResource":           {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
 	}
 
 	targets := defaultActiveExplicitSelectedKindTargets(cfg)
@@ -2447,6 +2786,141 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 			t.Fatalf("missing async expectation for default-active service %q", target.Service)
 		}
 		assertAsyncContract(t, service, target.Kind, expected.strategy, expected.runtime)
+	}
+
+	for _, testCase := range []struct {
+		service string
+		kind    string
+		phases  []string
+	}{
+		{service: "bastion", kind: "Bastion", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "apigateway", kind: "Deployment", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "apigateway", kind: "Gateway", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "aidataplatform", kind: "AiDataPlatform", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "cloudguard", kind: "DataSource", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate}},
+		{service: "datasafe", kind: "DataSafePrivateEndpoint", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "datasafe", kind: "MaskingColumn", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate}},
+		{service: "datasafe", kind: "SensitiveColumn", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate}},
+		{service: "datasafe", kind: "SensitiveTypeGroup", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "datasafe", kind: "TargetAlertPolicyAssociation", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "governancerulescontrolplane", kind: "GovernanceRule", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "managedkafka", kind: "KafkaCluster", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "managementagent", kind: "NamedCredential", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "marketplacepublisher", kind: "Artifact", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "opsi", kind: "AwrHub", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "opsi", kind: "AwrHubSource", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "opsi", kind: "ChargebackPlanReport", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "opsi", kind: "EnterpriseManagerBridge", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "opsi", kind: "ExadataInsight", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "opsi", kind: "HostInsight", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "opsi", kind: "NewsReport", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "opsi", kind: "OperationsInsightsPrivateEndpoint", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "opsi", kind: "OperationsInsightsWarehouse", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "opsi", kind: "OperationsInsightsWarehouseUser", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "opsi", kind: "OpsiConfiguration", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "recovery", kind: "ProtectedDatabase", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "resourceanalytics", kind: "ResourceAnalyticsInstance", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "bastion", kind: "Session", phases: []string{AsyncPhaseCreate, AsyncPhaseDelete}},
+		{service: "blockchain", kind: "Osn", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "blockchain", kind: "Peer", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "datasafe", kind: "AlertPolicy", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "datasafe", kind: "AttributeSet", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "datasafe", kind: "SecurityPolicyConfig", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "datasafe", kind: "SensitiveTypesExport", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate}},
+		{service: "datasafe", kind: "TargetDatabaseGroup", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "devops", kind: "BuildPipeline", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "devops", kind: "DeployArtifact", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "devops", kind: "DeployPipeline", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "devops", kind: "Project", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "devops", kind: "Repository", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "devops", kind: "Trigger", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "fleetappsmanagement", kind: "FleetCredential", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "fleetappsmanagement", kind: "FleetResource", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "fusionapps", kind: "RefreshActivity", phases: []string{AsyncPhaseCreate, AsyncPhaseDelete}},
+		{service: "iot", kind: "IotDomain", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "networkloadbalancer", kind: "Backend", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "networkloadbalancer", kind: "BackendSet", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "networkloadbalancer", kind: "Listener", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "networkloadbalancer", kind: "NetworkLoadBalancer", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "recovery", kind: "ProtectionPolicy", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "recovery", kind: "RecoveryServiceSubnet", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "sch", kind: "ServiceConnector", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "waas", kind: "HttpRedirect", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "waas", kind: "WaasPolicy", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "waf", kind: "WebAppFirewallPolicy", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "batch", kind: "BatchContext", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "batch", kind: "BatchJobPool", phases: []string{AsyncPhaseUpdate}},
+		{service: "blockchain", kind: "BlockchainPlatform", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "cloudbridge", kind: "AgentDependency", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate}},
+		{service: "cloudbridge", kind: "AssetSource", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "cloudbridge", kind: "Inventory", phases: []string{AsyncPhaseCreate, AsyncPhaseDelete}},
+		{service: "cloudmigrations", kind: "Migration", phases: []string{AsyncPhaseDelete}},
+		{service: "cloudmigrations", kind: "MigrationAsset", phases: []string{AsyncPhaseCreate, AsyncPhaseDelete}},
+		{service: "cloudmigrations", kind: "MigrationPlan", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "cloudmigrations", kind: "ReplicationSchedule", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "cloudmigrations", kind: "TargetAsset", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "datacatalog", kind: "CatalogPrivateEndpoint", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "datacatalog", kind: "Metastore", phases: []string{AsyncPhaseCreate, AsyncPhaseDelete}},
+		{service: "dataintegration", kind: "Workspace", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "datasafe", kind: "SecurityAssessment", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "datasafe", kind: "SecurityPolicyDeployment", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "datasafe", kind: "TargetDatabase", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "datasafe", kind: "UserAssessment", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "dbmulticloud", kind: "MultiCloudResourceDiscovery", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "dbmulticloud", kind: "OracleDbAwsIdentityConnector", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "dbmulticloud", kind: "OracleDbAwsKey", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "dbmulticloud", kind: "OracleDbAzureBlobContainer", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "dbmulticloud", kind: "OracleDbAzureBlobMount", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "dbmulticloud", kind: "OracleDbAzureConnector", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "dbmulticloud", kind: "OracleDbAzureVault", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "dbmulticloud", kind: "OracleDbAzureVaultAssociation", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "dbmulticloud", kind: "OracleDbGcpIdentityConnector", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "dbmulticloud", kind: "OracleDbGcpKeyRing", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "desktops", kind: "DesktopPool", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "dif", kind: "Stack", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "emwarehouse", kind: "EmWarehouse", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "fleetappsmanagement", kind: "CatalogItem", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "fleetappsmanagement", kind: "CompliancePolicyRule", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "fleetappsmanagement", kind: "Fleet", phases: []string{AsyncPhaseCreate, AsyncPhaseDelete}},
+		{service: "fleetappsmanagement", kind: "MaintenanceWindow", phases: []string{AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "fleetappsmanagement", kind: "Onboarding", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "fleetappsmanagement", kind: "Patch", phases: []string{AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "fleetappsmanagement", kind: "PlatformConfiguration", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "fleetappsmanagement", kind: "Provision", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "fleetappsmanagement", kind: "Runbook", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "fleetappsmanagement", kind: "RunbookVersion", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "fleetappsmanagement", kind: "SchedulerDefinition", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate}},
+		{service: "fleetappsmanagement", kind: "TaskRecord", phases: []string{AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "fleetsoftwareupdate", kind: "FsuAction", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "fleetsoftwareupdate", kind: "FsuCollection", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "fleetsoftwareupdate", kind: "FsuCycle", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "fleetsoftwareupdate", kind: "FsuDiscovery", phases: []string{AsyncPhaseCreate, AsyncPhaseDelete}},
+		{service: "fleetsoftwareupdate", kind: "FsuReadinessCheck", phases: []string{AsyncPhaseCreate, AsyncPhaseDelete}},
+		{service: "fusionapps", kind: "FusionEnvironment", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "fusionapps", kind: "FusionEnvironmentFamily", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "goldengate", kind: "Connection", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "goldengate", kind: "DatabaseRegistration", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "goldengate", kind: "Deployment", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "goldengate", kind: "DeploymentBackup", phases: []string{AsyncPhaseCreate, AsyncPhaseDelete}},
+		{service: "goldengate", kind: "Pipeline", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "stackmonitoring", kind: "MaintenanceWindow", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+		{service: "stackmonitoring", kind: "MonitoredResource", phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}},
+	} {
+		async := assertAsyncContract(t, services[testCase.service], testCase.kind, AsyncStrategyWorkRequest, AsyncRuntimeGeneratedRuntime)
+		if async.WorkRequest.Source != AsyncWorkRequestSourceServiceSDK {
+			t.Fatalf("%s %s workRequest.source = %q, want %q", testCase.service, testCase.kind, async.WorkRequest.Source, AsyncWorkRequestSourceServiceSDK)
+		}
+		if !slices.Equal(async.WorkRequest.Phases, testCase.phases) {
+			t.Fatalf("%s %s workRequest.phases = %v, want %v", testCase.service, testCase.kind, async.WorkRequest.Phases, testCase.phases)
+		}
+	}
+
+	managementAgentDataSource := assertAsyncContract(t, services["managementagent"], "DataSource", AsyncStrategyWorkRequest, AsyncRuntimeHandwritten)
+	if managementAgentDataSource.WorkRequest.Source != AsyncWorkRequestSourceServiceSDK {
+		t.Fatalf("managementagent DataSource workRequest.source = %q, want %q", managementAgentDataSource.WorkRequest.Source, AsyncWorkRequestSourceServiceSDK)
+	}
+	if !slices.Equal(managementAgentDataSource.WorkRequest.Phases, []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}) {
+		t.Fatalf("managementagent DataSource workRequest.phases = %v", managementAgentDataSource.WorkRequest.Phases)
 	}
 
 	ailanguage := assertAsyncContract(t, services["ailanguage"], "Project", AsyncStrategyWorkRequest, AsyncRuntimeGeneratedRuntime)
@@ -3717,5 +4191,59 @@ func TestCheckedInConfigAddsODAChannelOdaInstanceIDSpecField(t *testing.T) {
 	}
 	if !slices.Contains(odaInstanceID.Markers, "+kubebuilder:validation:Required") {
 		t.Fatalf("oda Channel OdaInstanceId markers = %v, want required marker", odaInstanceID.Markers)
+	}
+}
+
+func TestCheckedInConfigPublishesNestedResourcePathIdentityFields(t *testing.T) {
+	t.Parallel()
+
+	cfgPath := filepath.Join(repoRoot(t), "internal", "generator", "config", "services.yaml")
+	cfg, err := LoadConfig(cfgPath)
+	if err != nil {
+		t.Fatalf("LoadConfig(%q) error = %v", cfgPath, err)
+	}
+
+	expected := map[string]map[string][]string{
+		"cloudguard": {
+			"DetectorRecipeDetectorRule": {"DetectorRecipeId", "CompartmentId"},
+			"TargetDetectorRecipe":       {"TargetId", "CompartmentId"},
+			"TargetResponderRecipe":      {"TargetId", "CompartmentId"},
+		},
+		"datacatalog": {
+			"AttributeTag":     {"CatalogId", "DataAssetKey", "EntityKey", "AttributeKey"},
+			"CustomProperty":   {"CatalogId", "NamespaceId"},
+			"DataAssetTag":     {"CatalogId", "DataAssetKey"},
+			"EntityTag":        {"CatalogId", "DataAssetKey", "EntityKey"},
+			"FolderTag":        {"CatalogId", "DataAssetKey", "FolderKey"},
+			"Glossary":         {"CatalogId"},
+			"Namespace":        {"CatalogId"},
+			"Pattern":          {"CatalogId"},
+			"Term":             {"CatalogId", "GlossaryKey"},
+			"TermRelationship": {"CatalogId", "GlossaryKey", "TermKey"},
+		},
+	}
+
+	for serviceName, kinds := range expected {
+		service := requireService(t, cfg, serviceName)
+		overrides := overridesByKind(service)
+		for kind, names := range kinds {
+			override, ok := overrides[kind]
+			if !ok {
+				t.Fatalf("%s/%s override was not found", serviceName, kind)
+			}
+			fields := make(map[string]FieldOverride, len(override.SpecFields))
+			for _, field := range override.SpecFields {
+				fields[field.Name] = field
+			}
+			for _, name := range names {
+				field, ok := fields[name]
+				if !ok {
+					t.Fatalf("%s/%s specFields = %#v, want %s", serviceName, kind, override.SpecFields, name)
+				}
+				if field.Type != "string" || !slices.Contains(field.Markers, "+kubebuilder:validation:Required") {
+					t.Fatalf("%s/%s %s override = %#v, want required string", serviceName, kind, name, field)
+				}
+			}
+		}
 	}
 }

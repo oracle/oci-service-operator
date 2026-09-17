@@ -1,0 +1,130 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "waas",
+  "slug": "certificate",
+  "kind": "Certificate",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_waas_certificate",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateCertificate",
+        "requestType": "waas.CreateCertificateRequest",
+        "responseType": "waas.CreateCertificateResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetCertificate",
+        "requestType": "waas.GetCertificateRequest",
+        "responseType": "waas.GetCertificateResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListCertificates",
+        "requestType": "waas.ListCertificatesRequest",
+        "responseType": "waas.ListCertificatesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeCertificateCompartment",
+        "requestType": "waas.ChangeCertificateCompartmentRequest",
+        "responseType": "waas.ChangeCertificateCompartmentResponse"
+      },
+      {
+        "operation": "UpdateCertificate",
+        "requestType": "waas.UpdateCertificateRequest",
+        "responseType": "waas.UpdateCertificateResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteCertificate",
+        "requestType": "waas.DeleteCertificateRequest",
+        "responseType": "waas.DeleteCertificateResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "display_name",
+      "freeform_tags"
+    ],
+    "forceNew": [
+      "certificate_data",
+      "is_trust_verification_disabled",
+      "private_key_data"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_waas_certificates",
+    "collectionField": "certificates",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_names",
+      "ids",
+      "states",
+      "time_created_greater_than_or_equal_to",
+      "time_created_less_than"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/waas/certificate/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/waas/certificate/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Pinned provider facts are paired with reviewed Certificate service-manager semantics and sanitized live CRUD evidence."
+  ]
+}

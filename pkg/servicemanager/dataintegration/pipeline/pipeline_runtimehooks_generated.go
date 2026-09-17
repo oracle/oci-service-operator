@@ -66,25 +66,25 @@ func newPipelineDefaultRuntimeHooks(sdkClient dataintegrationsdk.DataIntegration
 			},
 		},
 		Get: runtimeOperationHooks[dataintegrationsdk.GetPipelineRequest, dataintegrationsdk.GetPipelineResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "PipelineKey", RequestName: "pipelineKey", Contribution: "path", PreferResourceID: false}, {FieldName: "ExpandReferences", RequestName: "expandReferences", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "PipelineKey", RequestName: "pipelineKey", Contribution: "path", PreferResourceID: true}, {FieldName: "ExpandReferences", RequestName: "expandReferences", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dataintegrationsdk.GetPipelineRequest) (dataintegrationsdk.GetPipelineResponse, error) {
 				return sdkClient.GetPipeline(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[dataintegrationsdk.ListPipelinesRequest, dataintegrationsdk.ListPipelinesResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: true}, {FieldName: "AggregatorKey", RequestName: "aggregatorKey", Contribution: "query", PreferResourceID: false}, {FieldName: "Fields", RequestName: "fields", Contribution: "query", PreferResourceID: false}, {FieldName: "Name", RequestName: "name", Contribution: "query", PreferResourceID: false}, {FieldName: "Identifier", RequestName: "identifier", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "AggregatorKey", RequestName: "aggregatorKey", Contribution: "query", PreferResourceID: false}, {FieldName: "Fields", RequestName: "fields", Contribution: "query", PreferResourceID: false}, {FieldName: "Name", RequestName: "name", Contribution: "query", PreferResourceID: false}, {FieldName: "Identifier", RequestName: "identifier", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dataintegrationsdk.ListPipelinesRequest) (dataintegrationsdk.ListPipelinesResponse, error) {
 				return sdkClient.ListPipelines(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[dataintegrationsdk.UpdatePipelineRequest, dataintegrationsdk.UpdatePipelineResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "PipelineKey", RequestName: "pipelineKey", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdatePipelineDetails", RequestName: "UpdatePipelineDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "PipelineKey", RequestName: "pipelineKey", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdatePipelineDetails", RequestName: "UpdatePipelineDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dataintegrationsdk.UpdatePipelineRequest) (dataintegrationsdk.UpdatePipelineResponse, error) {
 				return sdkClient.UpdatePipeline(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[dataintegrationsdk.DeletePipelineRequest, dataintegrationsdk.DeletePipelineResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "PipelineKey", RequestName: "pipelineKey", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "PipelineKey", RequestName: "pipelineKey", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request dataintegrationsdk.DeletePipelineRequest) (dataintegrationsdk.DeletePipelineResponse, error) {
 				return sdkClient.DeletePipeline(ctx, request)
 			},

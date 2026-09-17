@@ -1295,6 +1295,42 @@ func TestZoneDeleteConfirmsUnambiguousNotFound(t *testing.T) {
 	assertLatestCondition(t, resource, shared.Terminating)
 }
 
+func TestZoneDeleteAcceptsAuthShapedConfirmationAfterAcknowledgedDelete(t *testing.T) {
+	resource := testZoneResource()
+	resource.Status.OsokStatus.Ocid = "ocid1.zone.oc1..tracked"
+
+	confirmationErr := errortest.NewServiceError(
+		404,
+		errorutil.NotAuthorizedOrNotFound,
+		"not authorized or not found",
+	)
+	confirmationErr.OpcRequestID = "opc-confirm-delete"
+	fake := &fakeZoneOCIClient{
+		getResults: []zoneGetResult{
+			{response: dnssdk.GetZoneResponse{Zone: testZoneSDK("ocid1.zone.oc1..tracked", resource.Spec.Name, dnssdk.ZoneLifecycleStateActive)}},
+			{response: dnssdk.GetZoneResponse{Zone: testZoneSDK("ocid1.zone.oc1..tracked", resource.Spec.Name, dnssdk.ZoneLifecycleStateActive)}},
+			{err: confirmationErr},
+		},
+		deleteResults: []zoneDeleteResult{{
+			response: dnssdk.DeleteZoneResponse{OpcRequestId: common.String("opc-delete")},
+		}},
+	}
+
+	deleted, err := newTestZoneServiceClient(fake).Delete(context.Background(), resource)
+	if err != nil {
+		t.Fatalf("Delete() error = %v, want acknowledged delete confirmation", err)
+	}
+	if !deleted {
+		t.Fatal("Delete() deleted = false, want acknowledged delete confirmation")
+	}
+	if len(fake.deleteRequests) != 1 {
+		t.Fatalf("DeleteZone calls = %d, want 1", len(fake.deleteRequests))
+	}
+	if resource.Status.OsokStatus.DeletedAt == nil {
+		t.Fatal("status.deletedAt = nil, want deletion timestamp")
+	}
+}
+
 func TestZoneDeleteTreatsAuthShapedNotFoundConservatively(t *testing.T) {
 	resource := testZoneResource()
 	resource.Status.OsokStatus.Ocid = "ocid1.zone.oc1..tracked"

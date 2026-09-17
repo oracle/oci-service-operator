@@ -114,8 +114,20 @@ func newApmDomainDefaultRuntimeHooks(sdkClient apmcontrolplanesdk.ApmDomainClien
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*apmcontrolplanev1beta1.ApmDomain]{},
 		StatusHooks:     generatedruntime.StatusHooks[*apmcontrolplanev1beta1.ApmDomain]{},
 		ParityHooks:     generatedruntime.ParityHooks[*apmcontrolplanev1beta1.ApmDomain]{},
-		Async:           generatedruntime.AsyncHooks[*apmcontrolplanev1beta1.ApmDomain]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*apmcontrolplanev1beta1.ApmDomain]{},
+		Async: generatedruntime.AsyncHooks[*apmcontrolplanev1beta1.ApmDomain]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := apmcontrolplanesdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*apmcontrolplanev1beta1.ApmDomain]{},
 		Create: runtimeOperationHooks[apmcontrolplanesdk.CreateApmDomainRequest, apmcontrolplanesdk.CreateApmDomainResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateApmDomainDetails", RequestName: "CreateApmDomainDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request apmcontrolplanesdk.CreateApmDomainRequest) (apmcontrolplanesdk.CreateApmDomainResponse, error) {
@@ -163,10 +175,19 @@ func buildApmDomainGeneratedRuntimeConfig(
 	hooks ApmDomainRuntimeHooks,
 ) generatedruntime.Config[*apmcontrolplanev1beta1.ApmDomain] {
 	return generatedruntime.Config[*apmcontrolplanev1beta1.ApmDomain]{
-		Kind:            "ApmDomain",
-		SDKName:         "ApmDomain",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "ApmDomain",
+		SDKName:   "ApmDomain",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

@@ -1,0 +1,59 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: networkloadbalancer
+slug: listener
+kind: Listener
+archetype: generated-service-manager
+states:
+    - provisioning
+    - active
+    - updating
+    - terminating
+repoAuthored:
+    providerLifecycle:
+        createPending:
+            - ACCEPTED
+            - IN_PROGRESS
+            - CANCELING
+        updatePending:
+            - ACCEPTED
+            - IN_PROGRESS
+            - CANCELING
+        deletePending:
+            - DELETING
+            - ACCEPTED
+            - IN_PROGRESS
+            - CANCELING
+    listLookup:
+        filters:
+            - name
+        matchRule: exact name match within the resource scope; duplicate matches fail
+    mutation:
+        mutable:
+            - defaultBackendSetName
+            - ipVersion
+            - isPpv2Enabled
+            - l3IpIdleTimeout
+            - port
+            - protocol
+            - tcpIdleTimeout
+            - udpIdleTimeout
+        forceNew:
+            - name
+            - networkLoadBalancerId
+    hooks:
+        create:
+            - helper: tfresource.CreateResource
+        update:
+            - helper: tfresource.UpdateResource
+        delete:
+            - helper: tfresource.DeleteResource
+    followUp:
+        create: workrequest
+        update: workrequest
+        delete: confirm-delete
+notes:
+    - The production runtime uses generatedruntime/workrequest async handling for create, update, delete work-request phases.
+    - Lifecycle success states are SUCCEEDED, ACTIVE; pending create, update, and delete states requeue until the corresponding follow-up converges.
+    - Status projection is required, Secret side effects are none, and the finalizer policy is retain-until-confirmed-delete.
+    - Delete policy required retains ownership until DELETED, SUCCEEDED or confirmed absence.

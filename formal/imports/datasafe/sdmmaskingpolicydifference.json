@@ -1,0 +1,130 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "sdmmaskingpolicydifference",
+  "kind": "SdmMaskingPolicyDifference",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_sdm_masking_policy_difference",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateSdmMaskingPolicyDifference",
+        "requestType": "datasafe.CreateSdmMaskingPolicyDifferenceRequest",
+        "responseType": "datasafe.CreateSdmMaskingPolicyDifferenceResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetSdmMaskingPolicyDifference",
+        "requestType": "datasafe.GetSdmMaskingPolicyDifferenceRequest",
+        "responseType": "datasafe.GetSdmMaskingPolicyDifferenceResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListSdmMaskingPolicyDifferences",
+        "requestType": "datasafe.ListSdmMaskingPolicyDifferencesRequest",
+        "responseType": "datasafe.ListSdmMaskingPolicyDifferencesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeSdmMaskingPolicyDifferenceCompartment",
+        "requestType": "datasafe.ChangeSdmMaskingPolicyDifferenceCompartmentRequest",
+        "responseType": "datasafe.ChangeSdmMaskingPolicyDifferenceCompartmentResponse"
+      },
+      {
+        "operation": "UpdateSdmMaskingPolicyDifference",
+        "requestType": "datasafe.UpdateSdmMaskingPolicyDifferenceRequest",
+        "responseType": "datasafe.UpdateSdmMaskingPolicyDifferenceResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteSdmMaskingPolicyDifference",
+        "requestType": "datasafe.DeleteSdmMaskingPolicyDifferenceRequest",
+        "responseType": "datasafe.DeleteSdmMaskingPolicyDifferenceResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "display_name",
+      "freeform_tags"
+    ],
+    "forceNew": [
+      "difference_type",
+      "masking_policy_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_data_safe_sdm_masking_policy_differences",
+    "collectionField": "sdm_masking_policy_difference_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "compartment_id_in_subtree",
+      "difference_access_level",
+      "display_name",
+      "masking_policy_id",
+      "sensitive_data_model_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/sdmmaskingpolicydifference/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/sdmmaskingpolicydifference/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts are imported from the pinned terraform-provider-oci revision; repo-authored runtime semantics remain authoritative."
+  ]
+}

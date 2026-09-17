@@ -50,15 +50,84 @@ func registerProtectedDatabaseRuntimeHooksMutator(mutator ProtectedDatabaseRunti
 	}
 	protecteddatabaseRuntimeHooksMutators = append(protecteddatabaseRuntimeHooksMutators, mutator)
 }
+func newProtectedDatabaseRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "recovery",
+		FormalSlug:    "protecteddatabase",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "ready-only",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "displayName", "id", "protectionPolicyId", "recoveryServiceSubnetId", "state"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"compartmentId", "databaseSize", "databaseSizeInGBs", "definedTags", "displayName", "freeformTags", "isRedoLogsShipped", "password", "protectionPolicyId", "recoveryServiceSubnets", "subscriptionId"},
+			ForceNew:      []string{"changeRate", "compressionRatio", "databaseId", "dbUniqueName"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "protectedDatabase", Action: "CREATED"}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "ChangeProtectedDatabaseCompartment", EntityType: "", Action: ""}, {Helper: "ChangeProtectedDatabaseSubscription", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "protectedDatabase", Action: "UPDATED"}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "protectedDatabase", Action: "DELETED"}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> GetProtectedDatabase",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "protectedDatabase", Action: "CREATED"}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> GetProtectedDatabase",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "ChangeProtectedDatabaseCompartment", EntityType: "", Action: ""}, {Helper: "ChangeProtectedDatabaseSubscription", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "protectedDatabase", Action: "UPDATED"}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "protectedDatabase", Action: "DELETED"}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newProtectedDatabaseDefaultRuntimeHooks(sdkClient recoverysdk.DatabaseRecoveryClient) ProtectedDatabaseRuntimeHooks {
 	return ProtectedDatabaseRuntimeHooks{
+		Semantics:       newProtectedDatabaseRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*recoveryv1beta1.ProtectedDatabase]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*recoveryv1beta1.ProtectedDatabase]{},
 		StatusHooks:     generatedruntime.StatusHooks[*recoveryv1beta1.ProtectedDatabase]{},
 		ParityHooks:     generatedruntime.ParityHooks[*recoveryv1beta1.ProtectedDatabase]{},
-		Async:           generatedruntime.AsyncHooks[*recoveryv1beta1.ProtectedDatabase]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*recoveryv1beta1.ProtectedDatabase]{},
+		Async: generatedruntime.AsyncHooks[*recoveryv1beta1.ProtectedDatabase]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := recoverysdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*recoveryv1beta1.ProtectedDatabase]{},
 		Create: runtimeOperationHooks[recoverysdk.CreateProtectedDatabaseRequest, recoverysdk.CreateProtectedDatabaseResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateProtectedDatabaseDetails", RequestName: "CreateProtectedDatabaseDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request recoverysdk.CreateProtectedDatabaseRequest) (recoverysdk.CreateProtectedDatabaseResponse, error) {
@@ -106,10 +175,19 @@ func buildProtectedDatabaseGeneratedRuntimeConfig(
 	hooks ProtectedDatabaseRuntimeHooks,
 ) generatedruntime.Config[*recoveryv1beta1.ProtectedDatabase] {
 	return generatedruntime.Config[*recoveryv1beta1.ProtectedDatabase]{
-		Kind:            "ProtectedDatabase",
-		SDKName:         "ProtectedDatabase",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "ProtectedDatabase",
+		SDKName:   "ProtectedDatabase",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

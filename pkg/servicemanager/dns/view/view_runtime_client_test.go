@@ -725,8 +725,8 @@ func TestViewServiceClientDeleteRejectsAuthShapedPreDeleteConfirmRead(t *testing
 	}
 }
 
-//nolint:gocognit,gocyclo // The post-delete read sequence keeps the delete/fatal-path assertions together.
-func TestViewServiceClientDeleteRejectsAuthShapedPostDeleteConfirmRead(t *testing.T) {
+//nolint:gocognit,gocyclo // The post-delete read sequence keeps the delete confirmation assertions together.
+func TestViewServiceClientDeleteAcceptsAuthShapedPostDeleteConfirmRead(t *testing.T) {
 	t.Parallel()
 
 	getCalls := 0
@@ -777,23 +777,20 @@ func TestViewServiceClientDeleteRejectsAuthShapedPostDeleteConfirmRead(t *testin
 	resource.Status.OsokStatus.Ocid = "ocid1.dnsview.oc1..existing"
 
 	deleted, err := client.Delete(context.Background(), resource)
-	if err == nil {
-		t.Fatal("Delete() error = nil, want post-delete auth-shaped GetView 404 to stay fatal")
+	if err != nil {
+		t.Fatalf("Delete() error = %v, want acknowledged delete confirmation", err)
 	}
-	if !strings.Contains(err.Error(), "ambiguous 404 NotAuthorizedOrNotFound") {
-		t.Fatalf("Delete() error = %v, want ambiguous auth-shaped not found", err)
-	}
-	if deleted {
-		t.Fatal("Delete() deleted = true, want false for auth-shaped post-delete confirm read")
+	if !deleted {
+		t.Fatal("Delete() deleted = false, want acknowledged delete confirmation")
 	}
 	if deleteCalls != 1 {
 		t.Fatalf("DeleteView() calls = %d, want 1 before post-delete confirm read", deleteCalls)
 	}
-	if resource.Status.OsokStatus.DeletedAt != nil {
-		t.Fatalf("status.deletedAt = %v, want nil for auth-shaped post-delete confirm read", resource.Status.OsokStatus.DeletedAt)
+	if resource.Status.OsokStatus.DeletedAt == nil {
+		t.Fatal("status.deletedAt = nil, want deletion timestamp")
 	}
-	if resource.Status.OsokStatus.OpcRequestID != "opc-confirm-post-error-1" {
-		t.Fatalf("status.opcRequestId = %q, want opc-confirm-post-error-1", resource.Status.OsokStatus.OpcRequestID)
+	if resource.Status.OsokStatus.OpcRequestID != "opc-delete-1" {
+		t.Fatalf("status.opcRequestId = %q, want opc-delete-1", resource.Status.OsokStatus.OpcRequestID)
 	}
 }
 

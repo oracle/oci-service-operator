@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "networkfirewall",
+  "slug": "servicelist",
+  "kind": "ServiceList",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_network_firewall_network_firewall_policy_service_list",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateServiceList",
+        "requestType": "networkfirewall.CreateServiceListRequest",
+        "responseType": "networkfirewall.CreateServiceListResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetServiceList",
+        "requestType": "networkfirewall.GetServiceListRequest",
+        "responseType": "networkfirewall.GetServiceListResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateServiceList",
+        "requestType": "networkfirewall.UpdateServiceListRequest",
+        "responseType": "networkfirewall.UpdateServiceListResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteServiceList",
+        "requestType": "networkfirewall.DeleteServiceListRequest",
+        "responseType": "networkfirewall.DeleteServiceListResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "services"
+    ],
+    "forceNew": [
+      "network_firewall_policy_id",
+      "name"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/networkfirewall/servicelist/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/networkfirewall/servicelist/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "delete-confirmation",
+      "lifecycle-classification",
+      "list-lookup",
+      "mutation-policy",
+      "secret-output"
+    ]
+  },
+  "notes": [
+    "Pinned provider operations are combined with reviewed composite parent/name identity and ServiceList runtime semantics."
+  ]
+}

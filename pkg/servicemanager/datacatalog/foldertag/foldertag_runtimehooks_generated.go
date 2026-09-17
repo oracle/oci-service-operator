@@ -65,7 +65,7 @@ func newFolderTagDefaultRuntimeHooks(sdkClient datacatalogsdk.DataCatalogClient)
 			},
 		},
 		Get: runtimeOperationHooks[datacatalogsdk.GetFolderTagRequest, datacatalogsdk.GetFolderTagResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "DataAssetKey", RequestName: "dataAssetKey", Contribution: "path", PreferResourceID: false}, {FieldName: "FolderKey", RequestName: "folderKey", Contribution: "path", PreferResourceID: false}, {FieldName: "TagKey", RequestName: "tagKey", Contribution: "path", PreferResourceID: false}, {FieldName: "Fields", RequestName: "fields", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "DataAssetKey", RequestName: "dataAssetKey", Contribution: "path", PreferResourceID: false}, {FieldName: "FolderKey", RequestName: "folderKey", Contribution: "path", PreferResourceID: false}, {FieldName: "TagKey", RequestName: "tagKey", Contribution: "path", PreferResourceID: true}, {FieldName: "Fields", RequestName: "fields", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request datacatalogsdk.GetFolderTagRequest) (datacatalogsdk.GetFolderTagResponse, error) {
 				return sdkClient.GetFolderTag(ctx, request)
 			},
@@ -77,7 +77,7 @@ func newFolderTagDefaultRuntimeHooks(sdkClient datacatalogsdk.DataCatalogClient)
 			},
 		},
 		Delete: runtimeOperationHooks[datacatalogsdk.DeleteFolderTagRequest, datacatalogsdk.DeleteFolderTagResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "DataAssetKey", RequestName: "dataAssetKey", Contribution: "path", PreferResourceID: false}, {FieldName: "FolderKey", RequestName: "folderKey", Contribution: "path", PreferResourceID: false}, {FieldName: "TagKey", RequestName: "tagKey", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "DataAssetKey", RequestName: "dataAssetKey", Contribution: "path", PreferResourceID: false}, {FieldName: "FolderKey", RequestName: "folderKey", Contribution: "path", PreferResourceID: false}, {FieldName: "TagKey", RequestName: "tagKey", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request datacatalogsdk.DeleteFolderTagRequest) (datacatalogsdk.DeleteFolderTagResponse, error) {
 				return sdkClient.DeleteFolderTag(ctx, request)
 			},

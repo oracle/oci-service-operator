@@ -52,6 +52,9 @@ type BackendSetSpec struct {
 	// An array of backends to be associated with the backend set.
 	// +kubebuilder:validation:Optional
 	Backends []BackendSetBackend `json:"backends,omitempty"`
+	// The OCID of the network load balancer that owns this backend set.
+	// +kubebuilder:validation:Optional
+	NetworkLoadBalancerId string `json:"networkLoadBalancerId,omitempty"`
 }
 
 // BackendSetHealthCheckerDns defines nested fields for BackendSet.HealthChecker.Dns.
@@ -123,7 +126,7 @@ type BackendSetHealthChecker struct {
 	// +kubebuilder:validation:Optional
 	ResponseData string `json:"responseData,omitempty"`
 	// +kubebuilder:validation:Optional
-	Dns BackendSetHealthCheckerDns `json:"dns,omitempty"`
+	Dns BackendSetHealthCheckerDns `json:"dns,omitempty,omitzero"`
 }
 
 // BackendSetBackend defines nested fields for BackendSet.Backend.
@@ -199,6 +202,8 @@ type BackendSetStatus struct {
 	IpVersion string `json:"ipVersion,omitempty"`
 	// An array of backends.
 	Backends []BackendSetBackend `json:"backends,omitempty"`
+	// The bound network load balancer OCID used to address this backend set.
+	NetworkLoadBalancerId string `json:"networkLoadBalancerId,omitempty"`
 }
 
 // +kubebuilder:object:root=true

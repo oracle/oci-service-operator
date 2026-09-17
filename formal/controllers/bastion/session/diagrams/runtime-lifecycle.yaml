@@ -1,0 +1,54 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: bastion
+slug: session
+kind: Session
+archetype: generated-service-manager
+states:
+    - provisioning
+    - active
+    - updating
+    - terminating
+repoAuthored:
+    providerLifecycle:
+        createPending:
+            - CREATING
+        deletePending:
+            - DELETING
+    listLookup:
+        filters:
+            - bastionId
+            - displayName
+            - id
+        matchRule: exact bastionId, displayName, id match within the resource scope; duplicate matches fail
+    mutation:
+        mutable:
+            - displayName
+        forceNew:
+            - bastionId
+            - targetResourceDetails
+            - keyDetails
+            - keyType
+            - sessionTtlInSeconds
+    hooks:
+        create:
+            - helper: tfresource.CreateResource
+            - helper: tfresource.WaitForWorkRequestWithErrorHandling
+              entityType: session
+              action: CREATED
+        update:
+            - helper: tfresource.UpdateResource
+        delete:
+            - helper: tfresource.DeleteResource
+            - helper: tfresource.WaitForWorkRequestWithErrorHandling
+              entityType: session
+              action: DELETED
+    followUp:
+        create: GetWorkRequest -> GetSession
+        update: read-after-write
+        delete: confirm-delete
+notes:
+    - The production runtime uses generatedruntime/workrequest async handling for create, delete work-request phases.
+    - Lifecycle success states are ACTIVE; pending create, update, and delete states requeue until the corresponding follow-up converges.
+    - Status projection is required, Secret side effects are none, and the finalizer policy is retain-until-confirmed-delete.
+    - Delete policy required retains ownership until DELETED or confirmed absence.

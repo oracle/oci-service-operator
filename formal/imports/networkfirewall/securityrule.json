@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "networkfirewall",
+  "slug": "securityrule",
+  "kind": "SecurityRule",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_network_firewall_network_firewall_policy_security_rule",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateSecurityRule",
+        "requestType": "networkfirewall.CreateSecurityRuleRequest",
+        "responseType": "networkfirewall.CreateSecurityRuleResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetSecurityRule",
+        "requestType": "networkfirewall.GetSecurityRuleRequest",
+        "responseType": "networkfirewall.GetSecurityRuleResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateSecurityRule",
+        "requestType": "networkfirewall.UpdateSecurityRuleRequest",
+        "responseType": "networkfirewall.UpdateSecurityRuleResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteSecurityRule",
+        "requestType": "networkfirewall.DeleteSecurityRuleRequest",
+        "responseType": "networkfirewall.DeleteSecurityRuleResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "condition",
+      "action",
+      "inspection",
+      "position"
+    ],
+    "forceNew": [
+      "network_firewall_policy_id",
+      "name"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/networkfirewall/securityrule/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/networkfirewall/securityrule/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "delete-confirmation",
+      "lifecycle-classification",
+      "list-lookup",
+      "mutation-policy",
+      "secret-output"
+    ]
+  },
+  "notes": [
+    "Pinned provider operations are combined with reviewed composite parent/name identity and SecurityRule runtime semantics."
+  ]
+}

@@ -114,8 +114,20 @@ func newMigrationDefaultRuntimeHooks(sdkClient databasemigrationsdk.DatabaseMigr
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*databasemigrationv1beta1.Migration]{},
 		StatusHooks:     generatedruntime.StatusHooks[*databasemigrationv1beta1.Migration]{},
 		ParityHooks:     generatedruntime.ParityHooks[*databasemigrationv1beta1.Migration]{},
-		Async:           generatedruntime.AsyncHooks[*databasemigrationv1beta1.Migration]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*databasemigrationv1beta1.Migration]{},
+		Async: generatedruntime.AsyncHooks[*databasemigrationv1beta1.Migration]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := databasemigrationsdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*databasemigrationv1beta1.Migration]{},
 		Create: runtimeOperationHooks[databasemigrationsdk.CreateMigrationRequest, databasemigrationsdk.CreateMigrationResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateMigrationDetails", RequestName: "CreateMigrationDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request databasemigrationsdk.CreateMigrationRequest) (databasemigrationsdk.CreateMigrationResponse, error) {
@@ -163,10 +175,19 @@ func buildMigrationGeneratedRuntimeConfig(
 	hooks MigrationRuntimeHooks,
 ) generatedruntime.Config[*databasemigrationv1beta1.Migration] {
 	return generatedruntime.Config[*databasemigrationv1beta1.Migration]{
-		Kind:            "Migration",
-		SDKName:         "Migration",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "Migration",
+		SDKName:   "Migration",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

@@ -29,7 +29,7 @@ type DataFlowSpec struct {
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef DataFlowParentRef `json:"parentRef,omitempty"`
+	ParentRef DataFlowParentRef `json:"parentRef,omitempty,omitzero"`
 	// An array of nodes.
 	// +kubebuilder:validation:Optional
 	Nodes []shared.JSONValue `json:"nodes,omitempty"`
@@ -50,6 +50,9 @@ type DataFlowSpec struct {
 	// The version of the object that is used to track changes in the object instance.
 	// +kubebuilder:validation:Required
 	ObjectVersion int `json:"objectVersion"`
+	// The OCID of the Data Integration workspace containing this resource.
+	// +kubebuilder:validation:Required
+	WorkspaceId string `json:"workspaceId"`
 }
 
 // DataFlowRegistryMetadata defines nested fields for DataFlow.RegistryMetadata.

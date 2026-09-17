@@ -26,7 +26,7 @@ type RecordSpec struct {
 	// +kubebuilder:validation:Required
 	SourceDetails RecordSourceDetails `json:"sourceDetails"`
 	// +kubebuilder:validation:Optional
-	RecordMetadata RecordMetadata `json:"recordMetadata,omitempty"`
+	RecordMetadata RecordMetadata `json:"recordMetadata,omitempty,omitzero"`
 	// A simple key-value pair that is applied without any predefined name, type, or scope. It exists for cross-compatibility only.
 	// For example: `{"bar-key": "value"}`
 	// +kubebuilder:validation:Optional

@@ -64,6 +64,10 @@ spec:
                 description: Unique name to identify the group of urls to be used
                   in the policy rules.
                 type: string
+              networkFirewallPolicyId:
+                description: The OCID of the Network Firewall policy that owns this
+                  resource.
+                type: string
               urls:
                 description: List of urls.
                 items:
@@ -85,6 +89,7 @@ spec:
                 type: array
             required:
             - name
+            - networkFirewallPolicyId
             - urls
             type: object
           status:

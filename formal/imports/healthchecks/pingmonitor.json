@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "healthchecks",
+  "slug": "pingmonitor",
+  "kind": "PingMonitor",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_health_checks_ping_monitor",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreatePingMonitor",
+        "requestType": "healthchecks.CreatePingMonitorRequest",
+        "responseType": "healthchecks.CreatePingMonitorResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetPingMonitor",
+        "requestType": "healthchecks.GetPingMonitorRequest",
+        "responseType": "healthchecks.GetPingMonitorResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListPingMonitors",
+        "requestType": "healthchecks.ListPingMonitorsRequest",
+        "responseType": "healthchecks.ListPingMonitorsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangePingMonitorCompartment",
+        "requestType": "healthchecks.ChangePingMonitorCompartmentRequest",
+        "responseType": "healthchecks.ChangePingMonitorCompartmentResponse"
+      },
+      {
+        "operation": "UpdatePingMonitor",
+        "requestType": "healthchecks.UpdatePingMonitorRequest",
+        "responseType": "healthchecks.UpdatePingMonitorResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeletePingMonitor",
+        "requestType": "healthchecks.DeletePingMonitorRequest",
+        "responseType": "healthchecks.DeletePingMonitorResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "targets",
+      "vantage_point_names",
+      "port",
+      "timeout_in_seconds",
+      "protocol",
+      "display_name",
+      "interval_in_seconds",
+      "is_enabled",
+      "freeform_tags",
+      "defined_tags"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_health_checks_ping_monitors",
+    "collectionField": "ping_monitors",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "protocol"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/healthchecks/pingmonitor/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/healthchecks/pingmonitor/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "delete-confirmation",
+      "lifecycle-classification",
+      "list-lookup",
+      "mutation-policy",
+      "secret-output"
+    ]
+  },
+  "notes": [
+    "Pinned provider facts are paired with reviewed PingMonitor service-manager semantics and sanitized live CRUD evidence."
+  ]
+}

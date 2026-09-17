@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "dbmulticloud",
+  "slug": "oracledbazureconnector",
+  "kind": "OracleDbAzureConnector",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_dbmulticloud_oracle_db_azure_connector",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOracleDbAzureConnector",
+        "requestType": "dbmulticloud.CreateOracleDbAzureConnectorRequest",
+        "responseType": "dbmulticloud.CreateOracleDbAzureConnectorResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOracleDbAzureConnector",
+        "requestType": "dbmulticloud.GetOracleDbAzureConnectorRequest",
+        "responseType": "dbmulticloud.GetOracleDbAzureConnectorResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOracleDbAzureConnectors",
+        "requestType": "dbmulticloud.ListOracleDbAzureConnectorsRequest",
+        "responseType": "dbmulticloud.ListOracleDbAzureConnectorsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeOracleDbAzureConnectorCompartment",
+        "requestType": "dbmulticloud.ChangeOracleDbAzureConnectorCompartmentRequest",
+        "responseType": "dbmulticloud.ChangeOracleDbAzureConnectorCompartmentResponse"
+      },
+      {
+        "operation": "UpdateOracleDbAzureConnector",
+        "requestType": "dbmulticloud.UpdateOracleDbAzureConnectorRequest",
+        "responseType": "dbmulticloud.UpdateOracleDbAzureConnectorResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOracleDbAzureConnector",
+        "requestType": "dbmulticloud.DeleteOracleDbAzureConnectorRequest",
+        "responseType": "dbmulticloud.DeleteOracleDbAzureConnectorResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "access_token",
+      "arc_agent_nodes.current_arc_agent_version",
+      "arc_agent_nodes.host_id",
+      "arc_agent_nodes.host_name",
+      "arc_agent_nodes.status",
+      "arc_agent_nodes.time_last_checked",
+      "azure_identity_mechanism",
+      "azure_resource_group",
+      "azure_subscription_id",
+      "azure_tenant_id",
+      "compartment_id",
+      "db_cluster_resource_id",
+      "display_name",
+      "last_modification",
+      "lifecycle_state_details"
+    ],
+    "forceNew": null,
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_dbmulticloud_oracle_db_azure_connectors",
+    "collectionField": "oracle_db_azure_connector_summary_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "db_cluster_resource_id",
+      "display_name",
+      "oracle_db_azure_connector_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/dbmulticloud/oracledbazureconnector/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/dbmulticloud/oracledbazureconnector/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from the pinned terraform-provider-oci source revision."
+  ]
+}

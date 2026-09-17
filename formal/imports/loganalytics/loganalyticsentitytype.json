@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "loganalytics",
+  "slug": "loganalyticsentitytype",
+  "kind": "LogAnalyticsEntityType",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_log_analytics_log_analytics_entity_type",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateLogAnalyticsEntityType",
+        "requestType": "loganalytics.CreateLogAnalyticsEntityTypeRequest",
+        "responseType": "loganalytics.CreateLogAnalyticsEntityTypeResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetLogAnalyticsEntityType",
+        "requestType": "loganalytics.GetLogAnalyticsEntityTypeRequest",
+        "responseType": "loganalytics.GetLogAnalyticsEntityTypeResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "target": [
+        "S_ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": null,
+    "forceNew": [
+      "category",
+      "name",
+      "namespace",
+      "properties",
+      "properties.description",
+      "properties.name"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/loganalytics/loganalyticsentitytype/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/loganalytics/loganalyticsentitytype/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Pinned provider operations are combined with reviewed composite-path LogAnalyticsEntityType runtime semantics."
+  ]
+}

@@ -1,0 +1,149 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "reportdefinition",
+  "kind": "ReportDefinition",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_report_definition",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateReportDefinition",
+        "requestType": "datasafe.CreateReportDefinitionRequest",
+        "responseType": "datasafe.CreateReportDefinitionResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetReportDefinition",
+        "requestType": "datasafe.GetReportDefinitionRequest",
+        "responseType": "datasafe.GetReportDefinitionResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListReportDefinitions",
+        "requestType": "datasafe.ListReportDefinitionsRequest",
+        "responseType": "datasafe.ListReportDefinitionsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeReportDefinitionCompartment",
+        "requestType": "datasafe.ChangeReportDefinitionCompartmentRequest",
+        "responseType": "datasafe.ChangeReportDefinitionCompartmentResponse"
+      },
+      {
+        "operation": "UpdateReportDefinition",
+        "requestType": "datasafe.UpdateReportDefinitionRequest",
+        "responseType": "datasafe.UpdateReportDefinitionResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteReportDefinition",
+        "requestType": "datasafe.DeleteReportDefinitionRequest",
+        "responseType": "datasafe.DeleteReportDefinitionResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "column_filters.expressions",
+      "column_filters.field_name",
+      "column_filters.is_enabled",
+      "column_filters.is_hidden",
+      "column_filters.operator",
+      "column_info.applicable_operators",
+      "column_info.data_type",
+      "column_info.display_name",
+      "column_info.display_order",
+      "column_info.field_name",
+      "column_info.is_hidden",
+      "column_info.is_virtual",
+      "column_sortings.field_name",
+      "column_sortings.is_ascending",
+      "column_sortings.sorting_order",
+      "compartment_id",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags",
+      "summary.count_of",
+      "summary.display_order",
+      "summary.group_by_field_name",
+      "summary.is_hidden",
+      "summary.name",
+      "summary.scim_filter"
+    ],
+    "forceNew": [
+      "parent_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_data_safe_report_definitions",
+    "collectionField": "report_definition_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "access_level",
+      "category",
+      "compartment_id",
+      "compartment_id_in_subtree",
+      "data_source",
+      "display_name",
+      "is_seeded",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/reportdefinition/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/reportdefinition/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts are imported from the pinned terraform-provider-oci revision; repo-authored runtime semantics remain authoritative."
+  ]
+}

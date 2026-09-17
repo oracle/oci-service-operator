@@ -163,10 +163,19 @@ func buildGdpPipelineGeneratedRuntimeConfig(
 	hooks GdpPipelineRuntimeHooks,
 ) generatedruntime.Config[*gdpv1beta1.GdpPipeline] {
 	return generatedruntime.Config[*gdpv1beta1.GdpPipeline]{
-		Kind:            "GdpPipeline",
-		SDKName:         "GdpPipeline",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "GdpPipeline",
+		SDKName:   "GdpPipeline",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

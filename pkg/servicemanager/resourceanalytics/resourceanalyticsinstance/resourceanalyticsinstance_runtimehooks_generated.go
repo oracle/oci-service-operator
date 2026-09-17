@@ -50,15 +50,84 @@ func registerResourceAnalyticsInstanceRuntimeHooksMutator(mutator ResourceAnalyt
 	}
 	resourceanalyticsinstanceRuntimeHooksMutators = append(resourceanalyticsinstanceRuntimeHooksMutators, mutator)
 }
+func newResourceAnalyticsInstanceRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "resourceanalytics",
+		FormalSlug:    "resourceanalyticsinstance",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE", "NEEDS_ATTENTION"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "displayName", "id", "state"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"definedTags", "description", "displayName", "freeformTags"},
+			ForceNew:      []string{"adwAdminPassword", "compartmentId", "isMutualTlsRequired", "licenseModel", "nsgIds", "subnetId"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "ResourceAnalyticsInstance", Action: "CreateResourceAnalyticsInstance"}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "ResourceAnalyticsInstance", Action: "UpdateResourceAnalyticsInstance"}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "ResourceAnalyticsInstance", Action: "DeleteResourceAnalyticsInstance"}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "ResourceAnalyticsInstance", Action: "CreateResourceAnalyticsInstance"}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "ResourceAnalyticsInstance", Action: "UpdateResourceAnalyticsInstance"}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "ResourceAnalyticsInstance", Action: "DeleteResourceAnalyticsInstance"}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newResourceAnalyticsInstanceDefaultRuntimeHooks(sdkClient resourceanalyticssdk.ResourceAnalyticsInstanceClient) ResourceAnalyticsInstanceRuntimeHooks {
 	return ResourceAnalyticsInstanceRuntimeHooks{
+		Semantics:       newResourceAnalyticsInstanceRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*resourceanalyticsv1beta1.ResourceAnalyticsInstance]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*resourceanalyticsv1beta1.ResourceAnalyticsInstance]{},
 		StatusHooks:     generatedruntime.StatusHooks[*resourceanalyticsv1beta1.ResourceAnalyticsInstance]{},
 		ParityHooks:     generatedruntime.ParityHooks[*resourceanalyticsv1beta1.ResourceAnalyticsInstance]{},
-		Async:           generatedruntime.AsyncHooks[*resourceanalyticsv1beta1.ResourceAnalyticsInstance]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*resourceanalyticsv1beta1.ResourceAnalyticsInstance]{},
+		Async: generatedruntime.AsyncHooks[*resourceanalyticsv1beta1.ResourceAnalyticsInstance]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := resourceanalyticssdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*resourceanalyticsv1beta1.ResourceAnalyticsInstance]{},
 		Create: runtimeOperationHooks[resourceanalyticssdk.CreateResourceAnalyticsInstanceRequest, resourceanalyticssdk.CreateResourceAnalyticsInstanceResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateResourceAnalyticsInstanceDetails", RequestName: "CreateResourceAnalyticsInstanceDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request resourceanalyticssdk.CreateResourceAnalyticsInstanceRequest) (resourceanalyticssdk.CreateResourceAnalyticsInstanceResponse, error) {
@@ -106,10 +175,19 @@ func buildResourceAnalyticsInstanceGeneratedRuntimeConfig(
 	hooks ResourceAnalyticsInstanceRuntimeHooks,
 ) generatedruntime.Config[*resourceanalyticsv1beta1.ResourceAnalyticsInstance] {
 	return generatedruntime.Config[*resourceanalyticsv1beta1.ResourceAnalyticsInstance]{
-		Kind:            "ResourceAnalyticsInstance",
-		SDKName:         "ResourceAnalyticsInstance",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "ResourceAnalyticsInstance",
+		SDKName:   "ResourceAnalyticsInstance",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

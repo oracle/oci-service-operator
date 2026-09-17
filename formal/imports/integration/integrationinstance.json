@@ -1,0 +1,151 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "integration",
+  "slug": "integrationinstance",
+  "kind": "IntegrationInstance",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_integration_integration_instance",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateIntegrationInstance",
+        "requestType": "integration.CreateIntegrationInstanceRequest",
+        "responseType": "integration.CreateIntegrationInstanceResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetIntegrationInstance",
+        "requestType": "integration.GetIntegrationInstanceRequest",
+        "responseType": "integration.GetIntegrationInstanceResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListIntegrationInstances",
+        "requestType": "integration.ListIntegrationInstancesRequest",
+        "responseType": "integration.ListIntegrationInstancesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeIntegrationInstanceCompartment",
+        "requestType": "integration.ChangeIntegrationInstanceCompartmentRequest",
+        "responseType": "integration.ChangeIntegrationInstanceCompartmentResponse"
+      },
+      {
+        "operation": "UpdateIntegrationInstance",
+        "requestType": "integration.UpdateIntegrationInstanceRequest",
+        "responseType": "integration.UpdateIntegrationInstanceResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteIntegrationInstance",
+        "requestType": "integration.DeleteIntegrationInstanceRequest",
+        "responseType": "integration.DeleteIntegrationInstanceResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "alternate_custom_endpoints.certificate_secret_id",
+      "alternate_custom_endpoints.hostname",
+      "compartment_id",
+      "convert_instance_trigger",
+      "custom_endpoint.certificate_secret_id",
+      "custom_endpoint.dns_type",
+      "custom_endpoint.dns_zone_name",
+      "custom_endpoint.hostname",
+      "data_retention_period",
+      "defined_tags",
+      "disable_process_automation_trigger",
+      "display_name",
+      "enable_process_automation_trigger",
+      "extend_data_retention_trigger",
+      "failover_trigger",
+      "freeform_tags",
+      "idcs_at",
+      "integration_instance_type",
+      "is_byol",
+      "is_file_server_enabled",
+      "is_visual_builder_enabled",
+      "log_group_id",
+      "message_packs",
+      "network_endpoint_details.allowlisted_http_ips",
+      "network_endpoint_details.allowlisted_http_vcns.allowlisted_ips",
+      "network_endpoint_details.is_integration_vcn_allowlisted",
+      "network_endpoint_details.network_endpoint_type",
+      "security_attributes",
+      "state"
+    ],
+    "forceNew": [
+      "consumption_model",
+      "domain_id",
+      "is_disaster_recovery_enabled",
+      "network_endpoint_details.allowlisted_http_vcns.id",
+      "network_endpoint_details.design_time",
+      "network_endpoint_details.design_time.allowlisted_http_ips",
+      "network_endpoint_details.design_time.allowlisted_http_vcns",
+      "network_endpoint_details.design_time.allowlisted_http_vcns.allowlisted_ips",
+      "network_endpoint_details.design_time.allowlisted_http_vcns.id",
+      "network_endpoint_details.runtime",
+      "network_endpoint_details.runtime.allowlisted_http_ips",
+      "network_endpoint_details.runtime.allowlisted_http_vcns",
+      "network_endpoint_details.runtime.allowlisted_http_vcns.allowlisted_ips",
+      "network_endpoint_details.runtime.allowlisted_http_vcns.id",
+      "shape"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_integration_integration_instances",
+    "collectionField": "integration_instances",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/integration/integrationinstance/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/integration/integrationinstance/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts are imported from the pinned terraform-provider-oci revision; repo-authored runtime semantics remain authoritative."
+  ]
+}

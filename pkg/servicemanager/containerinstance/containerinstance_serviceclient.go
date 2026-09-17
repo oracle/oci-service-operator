@@ -807,7 +807,7 @@ func validateContainerMatchesDesired(index int,
 			return fmt.Errorf("%s.healthChecks cannot be updated in place", prefix)
 		}
 	}
-	if hasDesiredSecurityContext(desired.SecurityContext) || observed.SecurityContext != nil {
+	if hasDesiredSecurityContext(desired.SecurityContext) {
 		if !reflect.DeepEqual(observedSecurityContext(observed.SecurityContext), desiredSecurityContext(desired.SecurityContext)) {
 			return fmt.Errorf("%s.securityContext cannot be updated in place", prefix)
 		}

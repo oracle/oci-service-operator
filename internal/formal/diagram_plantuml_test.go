@@ -214,6 +214,50 @@ notes:
 	}
 }
 
+func TestRenderDiagramsUseRepoAuthoredUpdateOperationSubset(t *testing.T) {
+	root := writeScaffold(t)
+	writeFile(t, filepath.Join(root, "imports", "template", "template.json"), testImportWithAuxiliaryUpdateOperation())
+	writeFile(t, filepath.Join(root, "controllers", "template", "diagrams", "runtime-lifecycle.yaml"), `schemaVersion: 1
+surface: repo-authored-semantics
+service: template
+slug: template
+kind: Template
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  operations:
+    update:
+      - UpdateTemplate
+  mutation:
+    mutable:
+      - display_name
+notes:
+  - Only the reviewed runtime update operation should be rendered.
+`)
+	if _, err := RenderDiagrams(RenderOptions{Root: root}); err != nil {
+		t.Fatalf("RenderDiagrams(%q) error = %v", root, err)
+	}
+
+	for _, relative := range []string{"activity.puml", "sequence.puml"} {
+		path := filepath.Join(root, "controllers", "template", "diagrams", relative)
+		data, err := os.ReadFile(path)
+		if err != nil {
+			t.Fatalf("ReadFile(%q) error = %v", path, err)
+		}
+		text := string(data)
+		if !strings.Contains(text, "UpdateTemplate") || !strings.Contains(text, "mutable fields") {
+			t.Fatalf("%s does not render only the repo-authored UpdateTemplate subset:\n%s", path, text)
+		}
+		if strings.Contains(text, "ChangeTemplateCompartment") {
+			t.Fatalf("%s unexpectedly renders excluded ChangeTemplateCompartment:\n%s", path, text)
+		}
+	}
+}
+
 func TestRenderDiagramsUseRepoAuthoredHookAndFollowUpOverridesWhenPresent(t *testing.T) {
 	root := writeScaffold(t)
 

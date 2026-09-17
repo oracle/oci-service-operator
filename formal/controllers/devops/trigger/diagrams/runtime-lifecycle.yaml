@@ -1,0 +1,57 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: devops
+slug: trigger
+kind: Trigger
+archetype: generated-service-manager
+states:
+    - provisioning
+    - active
+    - updating
+    - terminating
+repoAuthored:
+    providerLifecycle:
+        deletePending:
+            - DELETING
+    listLookup:
+        filters:
+            - projectId
+            - displayName
+            - triggerSource
+            - connectionId
+            - repositoryId
+        matchRule: exact projectId, displayName, triggerSource, connectionId, repositoryId match within the resource scope; duplicate matches fail
+    mutation:
+        mutable:
+            - jsonData
+            - displayName
+            - description
+            - freeformTags
+            - definedTags
+            - connectionId
+            - repositoryId
+        forceNew:
+            - projectId
+            - triggerSource
+    hooks:
+        create:
+            - helper: tfresource.CreateResource
+              entityType: Trigger
+              action: CreateTrigger
+        update:
+            - helper: tfresource.UpdateResource
+              entityType: Trigger
+              action: UpdateTrigger
+        delete:
+            - helper: tfresource.DeleteResource
+              entityType: Trigger
+              action: DeleteTrigger
+    followUp:
+        create: workrequest
+        update: workrequest
+        delete: confirm-delete
+notes:
+    - The production runtime uses generatedruntime/workrequest async handling for create, update, delete work-request phases.
+    - Lifecycle success states are ACTIVE; pending create, update, and delete states requeue until the corresponding follow-up converges.
+    - Status projection is required, Secret side effects are none, and the finalizer policy is retain-until-confirmed-delete.
+    - Delete policy required retains ownership until DELETED or confirmed absence.

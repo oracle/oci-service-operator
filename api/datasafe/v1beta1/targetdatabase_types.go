@@ -26,11 +26,11 @@ type TargetDatabaseSpec struct {
 	// +kubebuilder:validation:Optional
 	Description string `json:"description,omitempty"`
 	// +kubebuilder:validation:Optional
-	Credentials TargetDatabaseCredentials `json:"credentials,omitempty"`
+	Credentials TargetDatabaseCredentials `json:"credentials,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	TlsConfig TargetDatabaseTlsConfig `json:"tlsConfig,omitempty"`
+	TlsConfig TargetDatabaseTlsConfig `json:"tlsConfig,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	ConnectionOption TargetDatabaseConnectionOption `json:"connectionOption,omitempty"`
+	ConnectionOption TargetDatabaseConnectionOption `json:"connectionOption,omitempty,omitzero"`
 	// The details of the database to be registered as a peer target database.
 	// +kubebuilder:validation:Optional
 	PeerTargetDatabaseDetails []TargetDatabasePeerTargetDatabaseDetail `json:"peerTargetDatabaseDetails,omitempty"`
@@ -190,7 +190,7 @@ type TargetDatabasePeerTargetDatabaseDetail struct {
 	// +kubebuilder:validation:Optional
 	DataguardAssociationId string `json:"dataguardAssociationId,omitempty"`
 	// +kubebuilder:validation:Optional
-	TlsConfig TargetDatabasePeerTargetDatabaseDetailTlsConfig `json:"tlsConfig,omitempty"`
+	TlsConfig TargetDatabasePeerTargetDatabaseDetailTlsConfig `json:"tlsConfig,omitempty,omitzero"`
 }
 
 // TargetDatabaseCredentialsObservedState defines nested fields for TargetDatabase.Credentials.

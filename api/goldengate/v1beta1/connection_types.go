@@ -446,9 +446,9 @@ type ConnectionSpec struct {
 	// +kubebuilder:validation:Optional
 	Fingerprint string `json:"fingerprint,omitempty"`
 	// +kubebuilder:validation:Optional
-	Catalog ConnectionCatalog `json:"catalog,omitempty"`
+	Catalog ConnectionCatalog `json:"catalog,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	Storage ConnectionStorage `json:"storage,omitempty"`
+	Storage ConnectionStorage `json:"storage,omitempty,omitzero"`
 	// The wallet contents Oracle GoldenGate uses to make connections to a database.
 	// This attribute is expected to be base64 encoded.
 	// Deprecated: This field is deprecated and replaced by "walletSecretId". This field will be removed after February 15 2026.

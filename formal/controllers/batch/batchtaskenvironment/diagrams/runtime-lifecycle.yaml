@@ -1,0 +1,14 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: batch
+slug: batchtaskenvironment
+kind: BatchTaskEnvironment
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+notes:
+  - "The pinned Terraform resource uses nonstandard helpers that formal-import cannot resolve."
+  - "The credential-free evidence mock still exercises the production service manager and real OCI SDK through the full CRUD lifecycle."

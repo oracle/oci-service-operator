@@ -32,8 +32,28 @@ type defaultProvisionServiceClient struct {
 
 var _ ProvisionServiceClient = defaultProvisionServiceClient{}
 
+type ProvisionSDKClients struct {
+	fleetAppsManagementProvisionClient   fleetappsmanagementsdk.FleetAppsManagementProvisionClient
+	fleetAppsManagementWorkRequestClient fleetappsmanagementsdk.FleetAppsManagementWorkRequestClient
+}
+
+func newProvisionSDKClients(manager *ProvisionServiceManager) (ProvisionSDKClients, error) {
+	var clients ProvisionSDKClients
+	fleetAppsManagementProvisionClientClient, err := fleetappsmanagementsdk.NewFleetAppsManagementProvisionClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize Provision OCI client FleetAppsManagementProvisionClient: %w", err)
+	}
+	clients.fleetAppsManagementProvisionClient = fleetAppsManagementProvisionClientClient
+	fleetAppsManagementWorkRequestClientClient, err := fleetappsmanagementsdk.NewFleetAppsManagementWorkRequestClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize Provision OCI client FleetAppsManagementWorkRequestClient: %w", err)
+	}
+	clients.fleetAppsManagementWorkRequestClient = fleetAppsManagementWorkRequestClientClient
+	return clients, nil
+}
+
 var newProvisionServiceClient = func(manager *ProvisionServiceManager) ProvisionServiceClient {
-	sdkClient, err := fleetappsmanagementsdk.NewFleetAppsManagementProvisionClientWithConfigurationProvider(manager.Provider)
+	sdkClient, err := newProvisionSDKClients(manager)
 	hooks := newProvisionRuntimeHooks(manager, sdkClient)
 	config := buildProvisionGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {

@@ -294,6 +294,32 @@ func (c *tableRuntimeClient) CreateOrUpdate(
 	resource *nosqlv1beta1.Table,
 	req ctrl.Request,
 ) (servicemanager.OSOKResponse, error) {
+	if resource != nil {
+		current := resource.Status.OsokStatus.Async.Current
+		if current != nil &&
+			current.Source == shared.OSOKAsyncSourceLifecycle &&
+			current.NormalizedClass == shared.OSOKAsyncClassPending &&
+			current.Phase != shared.OSOKAsyncPhaseDelete {
+			if err := c.ensureClient(); err != nil {
+				return c.fail(resource, err)
+			}
+			snapshot, err := c.readTable(ctx, resource, currentTableID(resource))
+			if err != nil {
+				if errors.Is(err, errTableNotFound) {
+					return c.markPendingLifecycleOperation(resource, current.Phase, current.Message, current.RawStatus), nil
+				}
+				return c.fail(resource, err)
+			}
+			if err := c.projectPayload(resource, snapshot.payload); err != nil {
+				return c.fail(resource, err)
+			}
+			if current.Phase == shared.OSOKAsyncPhaseUpdate &&
+				normalizeLifecycle(snapshot.lifecycleState) == string(nosqlsdk.TableLifecycleStateActive) {
+				return c.applyParityUpdate(ctx, resource, snapshot.payload)
+			}
+			return c.finishWithLifecycle(resource, snapshot, current.Phase), nil
+		}
+	}
 	if c.delegate == nil {
 		return c.fail(resource, fmt.Errorf("Table generated delegate is not configured"))
 	}
@@ -302,7 +328,26 @@ func (c *tableRuntimeClient) CreateOrUpdate(
 	if err != nil || resource == nil {
 		return response, err
 	}
-	if !response.IsSuccessful || !response.ShouldRequeue || resource.Status.OsokStatus.Async.Current != nil {
+	if !response.IsSuccessful || resource.Status.OsokStatus.Async.Current != nil {
+		return response, nil
+	}
+	if lifecycleState := normalizeLifecycle(resource.Status.LifecycleState); lifecycleState != "" {
+		snapshot := &tableSnapshot{
+			id:               resource.Status.Id,
+			name:             resource.Status.Name,
+			lifecycleState:   lifecycleState,
+			lifecycleDetails: resource.Status.LifecycleDetails,
+		}
+		if current := servicemanager.NewLifecycleAsyncOperation(
+			&resource.Status.OsokStatus,
+			lifecycleState,
+			lifecycleMessage(snapshot.lifecycleDetails, snapshot.name, "OCI table lifecycle operation is in progress"),
+			currentTableAsyncPhase(resource, tableLifecyclePhase(lifecycleState)),
+		); current != nil {
+			return c.markAsyncOperation(resource, current), nil
+		}
+	}
+	if !response.ShouldRequeue {
 		return response, nil
 	}
 	if currentTableID(resource) != "" {
@@ -442,12 +487,24 @@ func (c *tableRuntimeClient) applyLifecycleFromResponse(
 	resource *nosqlv1beta1.Table,
 	response any,
 ) (servicemanager.OSOKResponse, error) {
+	if resource == nil {
+		return c.fail(resource, fmt.Errorf("Table resource is nil"))
+	}
 	snapshot, err := tableSnapshotFromResponse(response)
 	if err != nil {
 		return c.fail(resource, err)
 	}
 	if snapshot == nil {
-		return c.markCondition(resource, shared.Active, "OCI table is active", false), nil
+		lifecycleState := normalizeLifecycle(resource.Status.LifecycleState)
+		if lifecycleState == "" {
+			return c.markCondition(resource, shared.Active, "OCI table is active", false), nil
+		}
+		snapshot = &tableSnapshot{
+			id:               resource.Status.Id,
+			name:             resource.Status.Name,
+			lifecycleState:   lifecycleState,
+			lifecycleDetails: resource.Status.LifecycleDetails,
+		}
 	}
 
 	fallbackPhase := currentTableAsyncPhase(resource, tableLifecyclePhase(normalizeLifecycle(snapshot.lifecycleState)))
@@ -533,6 +590,16 @@ func (c *tableRuntimeClient) applyParityUpdate(
 	}
 	if err := c.projectPayload(resource, refreshed.payload); err != nil {
 		return c.fail(resource, err)
+	}
+	if normalizeLifecycle(refreshed.lifecycleState) == string(nosqlsdk.TableLifecycleStateActive) {
+		if _, stillDrifting := buildUpdateDetails(resource, refreshed); stillDrifting {
+			return c.markPendingLifecycleOperation(
+				resource,
+				shared.OSOKAsyncPhaseUpdate,
+				"OCI table update request accepted",
+				refreshed.lifecycleState,
+			), nil
+		}
 	}
 	return c.finishWithLifecycle(resource, refreshed, shared.OSOKAsyncPhaseUpdate), nil
 }
@@ -911,7 +978,7 @@ func buildUpdateDetails(resource *nosqlv1beta1.Table, existing *tableSnapshot) (
 
 	if limits := specTableLimits(resource.Spec.TableLimits); limits != nil && !sdkTableLimitsEqual(limits, existing.tableLimits) {
 		details.TableLimits = limits
-		needsUpdate = true
+		return details, true
 	}
 
 	if resource.Spec.FreeformTags != nil && !reflect.DeepEqual(existing.freeformTags, resource.Spec.FreeformTags) {

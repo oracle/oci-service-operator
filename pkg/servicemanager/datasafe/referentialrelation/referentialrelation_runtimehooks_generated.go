@@ -65,19 +65,19 @@ func newReferentialRelationDefaultRuntimeHooks(sdkClient datasafesdk.DataSafeCli
 			},
 		},
 		Get: runtimeOperationHooks[datasafesdk.GetReferentialRelationRequest, datasafesdk.GetReferentialRelationResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "SensitiveDataModelId", RequestName: "sensitiveDataModelId", Contribution: "path", PreferResourceID: false}, {FieldName: "ReferentialRelationKey", RequestName: "referentialRelationKey", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "SensitiveDataModelId", RequestName: "sensitiveDataModelId", Contribution: "path", PreferResourceID: false}, {FieldName: "ReferentialRelationKey", RequestName: "referentialRelationKey", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request datasafesdk.GetReferentialRelationRequest) (datasafesdk.GetReferentialRelationResponse, error) {
 				return sdkClient.GetReferentialRelation(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[datasafesdk.ListReferentialRelationsRequest, datasafesdk.ListReferentialRelationsResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "SensitiveDataModelId", RequestName: "sensitiveDataModelId", Contribution: "path", PreferResourceID: true}, {FieldName: "SchemaName", RequestName: "schemaName", Contribution: "query", PreferResourceID: false}, {FieldName: "ObjectName", RequestName: "objectName", Contribution: "query", PreferResourceID: false}, {FieldName: "ColumnName", RequestName: "columnName", Contribution: "query", PreferResourceID: false}, {FieldName: "IsSensitive", RequestName: "isSensitive", Contribution: "query", PreferResourceID: false}, {FieldName: "RelationType", RequestName: "relationType", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "SensitiveDataModelId", RequestName: "sensitiveDataModelId", Contribution: "path", PreferResourceID: false}, {FieldName: "SchemaName", RequestName: "schemaName", Contribution: "query", PreferResourceID: false}, {FieldName: "ObjectName", RequestName: "objectName", Contribution: "query", PreferResourceID: false}, {FieldName: "ColumnName", RequestName: "columnName", Contribution: "query", PreferResourceID: false}, {FieldName: "IsSensitive", RequestName: "isSensitive", Contribution: "query", PreferResourceID: false}, {FieldName: "RelationType", RequestName: "relationType", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request datasafesdk.ListReferentialRelationsRequest) (datasafesdk.ListReferentialRelationsResponse, error) {
 				return sdkClient.ListReferentialRelations(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[datasafesdk.DeleteReferentialRelationRequest, datasafesdk.DeleteReferentialRelationResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "SensitiveDataModelId", RequestName: "sensitiveDataModelId", Contribution: "path", PreferResourceID: false}, {FieldName: "ReferentialRelationKey", RequestName: "referentialRelationKey", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "SensitiveDataModelId", RequestName: "sensitiveDataModelId", Contribution: "path", PreferResourceID: false}, {FieldName: "ReferentialRelationKey", RequestName: "referentialRelationKey", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request datasafesdk.DeleteReferentialRelationRequest) (datasafesdk.DeleteReferentialRelationResponse, error) {
 				return sdkClient.DeleteReferentialRelation(ctx, request)
 			},

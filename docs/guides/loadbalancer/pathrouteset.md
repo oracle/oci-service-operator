@@ -32,6 +32,7 @@ This summary shows the top-level `spec` fields. Use [the full API reference](../
 
 | Field | Description | Type | Required |
 | --- | --- | --- | --- |
+| `loadBalancerId` | The OCID of the load balancer that owns this path route set. | `string` | No |
 | `name` | The name for this set of path route rules. It must be unique and it cannot be changed. Avoid entering confidential information. Example: `example_path_route_set` | `string` | Yes |
 | [`pathRoutes`](../../reference/api/loadbalancer/v1beta1/index.md#kind-pathrouteset-spec-pathroutes) | The set of path route rules. | `list[object]` | Yes |
 
@@ -42,6 +43,7 @@ This summary shows the top-level `status` fields. Use [the full API reference](.
 
 | Field | Description | Type | Required |
 | --- | --- | --- | --- |
+| `loadBalancerId` | The bound load balancer OCID used to address this path route set. | `string` | No |
 | `name` | The unique name for this set of path route rules. Avoid entering confidential information. Example: `example_path_route_set` | `string` | No |
 | [`pathRoutes`](../../reference/api/loadbalancer/v1beta1/index.md#kind-pathrouteset-status-pathroutes) | The set of path route rules. | `list[object]` | No |
 | [`status`](../../reference/api/loadbalancer/v1beta1/index.md#kind-pathrouteset-status-status) | - | `object` | Yes |

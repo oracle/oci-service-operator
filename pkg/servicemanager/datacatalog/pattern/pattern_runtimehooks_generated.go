@@ -66,25 +66,25 @@ func newPatternDefaultRuntimeHooks(sdkClient datacatalogsdk.DataCatalogClient) P
 			},
 		},
 		Get: runtimeOperationHooks[datacatalogsdk.GetPatternRequest, datacatalogsdk.GetPatternResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "PatternKey", RequestName: "patternKey", Contribution: "path", PreferResourceID: false}, {FieldName: "Fields", RequestName: "fields", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "PatternKey", RequestName: "patternKey", Contribution: "path", PreferResourceID: true}, {FieldName: "Fields", RequestName: "fields", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request datacatalogsdk.GetPatternRequest) (datacatalogsdk.GetPatternResponse, error) {
 				return sdkClient.GetPattern(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[datacatalogsdk.ListPatternsRequest, datacatalogsdk.ListPatternsResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: true}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayNameContains", RequestName: "displayNameContains", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "TimeCreated", RequestName: "timeCreated", Contribution: "query", PreferResourceID: false}, {FieldName: "TimeUpdated", RequestName: "timeUpdated", Contribution: "query", PreferResourceID: false}, {FieldName: "CreatedById", RequestName: "createdById", Contribution: "query", PreferResourceID: false}, {FieldName: "UpdatedById", RequestName: "updatedById", Contribution: "query", PreferResourceID: false}, {FieldName: "Fields", RequestName: "fields", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayNameContains", RequestName: "displayNameContains", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "TimeCreated", RequestName: "timeCreated", Contribution: "query", PreferResourceID: false}, {FieldName: "TimeUpdated", RequestName: "timeUpdated", Contribution: "query", PreferResourceID: false}, {FieldName: "CreatedById", RequestName: "createdById", Contribution: "query", PreferResourceID: false}, {FieldName: "UpdatedById", RequestName: "updatedById", Contribution: "query", PreferResourceID: false}, {FieldName: "Fields", RequestName: "fields", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request datacatalogsdk.ListPatternsRequest) (datacatalogsdk.ListPatternsResponse, error) {
 				return sdkClient.ListPatterns(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[datacatalogsdk.UpdatePatternRequest, datacatalogsdk.UpdatePatternResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "PatternKey", RequestName: "patternKey", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdatePatternDetails", RequestName: "UpdatePatternDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "PatternKey", RequestName: "patternKey", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdatePatternDetails", RequestName: "UpdatePatternDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request datacatalogsdk.UpdatePatternRequest) (datacatalogsdk.UpdatePatternResponse, error) {
 				return sdkClient.UpdatePattern(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[datacatalogsdk.DeletePatternRequest, datacatalogsdk.DeletePatternResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "PatternKey", RequestName: "patternKey", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "PatternKey", RequestName: "patternKey", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request datacatalogsdk.DeletePatternRequest) (datacatalogsdk.DeletePatternResponse, error) {
 				return sdkClient.DeletePattern(ctx, request)
 			},

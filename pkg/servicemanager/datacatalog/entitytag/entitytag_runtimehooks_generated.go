@@ -65,7 +65,7 @@ func newEntityTagDefaultRuntimeHooks(sdkClient datacatalogsdk.DataCatalogClient)
 			},
 		},
 		Get: runtimeOperationHooks[datacatalogsdk.GetEntityTagRequest, datacatalogsdk.GetEntityTagResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "DataAssetKey", RequestName: "dataAssetKey", Contribution: "path", PreferResourceID: false}, {FieldName: "EntityKey", RequestName: "entityKey", Contribution: "path", PreferResourceID: false}, {FieldName: "TagKey", RequestName: "tagKey", Contribution: "path", PreferResourceID: false}, {FieldName: "Fields", RequestName: "fields", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "DataAssetKey", RequestName: "dataAssetKey", Contribution: "path", PreferResourceID: false}, {FieldName: "EntityKey", RequestName: "entityKey", Contribution: "path", PreferResourceID: false}, {FieldName: "TagKey", RequestName: "tagKey", Contribution: "path", PreferResourceID: true}, {FieldName: "Fields", RequestName: "fields", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request datacatalogsdk.GetEntityTagRequest) (datacatalogsdk.GetEntityTagResponse, error) {
 				return sdkClient.GetEntityTag(ctx, request)
 			},
@@ -77,7 +77,7 @@ func newEntityTagDefaultRuntimeHooks(sdkClient datacatalogsdk.DataCatalogClient)
 			},
 		},
 		Delete: runtimeOperationHooks[datacatalogsdk.DeleteEntityTagRequest, datacatalogsdk.DeleteEntityTagResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "DataAssetKey", RequestName: "dataAssetKey", Contribution: "path", PreferResourceID: false}, {FieldName: "EntityKey", RequestName: "entityKey", Contribution: "path", PreferResourceID: false}, {FieldName: "TagKey", RequestName: "tagKey", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "DataAssetKey", RequestName: "dataAssetKey", Contribution: "path", PreferResourceID: false}, {FieldName: "EntityKey", RequestName: "entityKey", Contribution: "path", PreferResourceID: false}, {FieldName: "TagKey", RequestName: "tagKey", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request datacatalogsdk.DeleteEntityTagRequest) (datacatalogsdk.DeleteEntityTagResponse, error) {
 				return sdkClient.DeleteEntityTag(ctx, request)
 			},

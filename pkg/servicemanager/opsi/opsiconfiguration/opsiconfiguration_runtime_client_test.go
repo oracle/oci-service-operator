@@ -81,9 +81,9 @@ func (f *fakeOpsiConfigurationOCIClient) GetWorkRequest(ctx context.Context, req
 func TestOpsiConfigurationRuntimeSemantics(t *testing.T) {
 	t.Parallel()
 
-	got := newOpsiConfigurationRuntimeSemantics()
+	got := reviewedOpsiConfigurationRuntimeSemantics()
 	if got == nil {
-		t.Fatal("newOpsiConfigurationRuntimeSemantics() = nil")
+		t.Fatal("reviewedOpsiConfigurationRuntimeSemantics() = nil")
 	}
 	if got.FormalService != "opsi" {
 		t.Fatalf("FormalService = %q, want opsi", got.FormalService)

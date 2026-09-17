@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "filestorage",
+  "slug": "snapshot",
+  "kind": "Snapshot",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_file_storage_snapshot",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateSnapshot",
+        "requestType": "filestorage.CreateSnapshotRequest",
+        "responseType": "filestorage.CreateSnapshotResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetSnapshot",
+        "requestType": "filestorage.GetSnapshotRequest",
+        "responseType": "filestorage.GetSnapshotResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListSnapshots",
+        "requestType": "filestorage.ListSnapshotsRequest",
+        "responseType": "filestorage.ListSnapshotsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateSnapshot",
+        "requestType": "filestorage.UpdateSnapshotRequest",
+        "responseType": "filestorage.UpdateSnapshotResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteSnapshot",
+        "requestType": "filestorage.DeleteSnapshotRequest",
+        "responseType": "filestorage.DeleteSnapshotResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "defined_tags",
+      "expiration_time",
+      "freeform_tags",
+      "is_lock_override"
+    ],
+    "forceNew": [
+      "file_system_id",
+      "locks",
+      "locks.message",
+      "locks.related_resource_id",
+      "locks.time_created",
+      "locks.type",
+      "name"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForCreatedState"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_file_storage_snapshots",
+    "collectionField": "snapshots",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "file_system_id",
+      "name"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/filestorage/snapshot/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/filestorage/snapshot/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "lifecycle-classification",
+      "list-lookup",
+      "mutation-policy",
+      "status-projection",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Recorded OCI create and update responses are synchronous; the published OSOK runtime confirms convergence through GetSnapshot reads.",
+    "CREATING is lifecycle-pending, ACTIVE is steady success, and delete retains the finalizer through DELETING until DELETED or NotFound.",
+    "fileSystemId and immutable name form the stable pre-create identity."
+  ]
+}

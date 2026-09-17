@@ -1,0 +1,29 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: datasafe
+slug: unifiedauditpolicy
+kind: UnifiedAuditPolicy
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending: ["CREATING"]
+    updatePending: ["UPDATING"]
+    deletePending: ["DELETING"]
+  listLookup:
+    filters: ["compartmentId","securityPolicyId","unifiedAuditPolicyDefinitionId"]
+    matchRule: exact resource identity match; duplicate matches fail
+  mutation:
+    mutable: ["conditions","definedTags","description","displayName","freeformTags","status"]
+    forceNew: ["compartmentId","securityPolicyId","unifiedAuditPolicyDefinitionId"]
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - "The runtime uses its declared lifecycle-state contract for UnifiedAuditPolicy reconciliation."
+  - "The credential-free mock exercises SDK request serialization, response projection, mutation when supported, and confirmed deletion."

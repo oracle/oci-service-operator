@@ -32,8 +32,28 @@ type defaultFleetResourceServiceClient struct {
 
 var _ FleetResourceServiceClient = defaultFleetResourceServiceClient{}
 
+type FleetResourceSDKClients struct {
+	fleetAppsManagementClient            fleetappsmanagementsdk.FleetAppsManagementClient
+	fleetAppsManagementWorkRequestClient fleetappsmanagementsdk.FleetAppsManagementWorkRequestClient
+}
+
+func newFleetResourceSDKClients(manager *FleetResourceServiceManager) (FleetResourceSDKClients, error) {
+	var clients FleetResourceSDKClients
+	fleetAppsManagementClientClient, err := fleetappsmanagementsdk.NewFleetAppsManagementClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize FleetResource OCI client FleetAppsManagementClient: %w", err)
+	}
+	clients.fleetAppsManagementClient = fleetAppsManagementClientClient
+	fleetAppsManagementWorkRequestClientClient, err := fleetappsmanagementsdk.NewFleetAppsManagementWorkRequestClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize FleetResource OCI client FleetAppsManagementWorkRequestClient: %w", err)
+	}
+	clients.fleetAppsManagementWorkRequestClient = fleetAppsManagementWorkRequestClientClient
+	return clients, nil
+}
+
 var newFleetResourceServiceClient = func(manager *FleetResourceServiceManager) FleetResourceServiceClient {
-	sdkClient, err := fleetappsmanagementsdk.NewFleetAppsManagementClientWithConfigurationProvider(manager.Provider)
+	sdkClient, err := newFleetResourceSDKClients(manager)
 	hooks := newFleetResourceRuntimeHooks(manager, sdkClient)
 	config := buildFleetResourceGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {

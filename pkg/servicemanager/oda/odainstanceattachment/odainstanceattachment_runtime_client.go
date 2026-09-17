@@ -7,6 +7,7 @@ package odainstanceattachment
 
 import (
 	"context"
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"maps"
@@ -355,6 +356,7 @@ func (c *odaInstanceAttachmentRuntimeClient) create(
 	response, err := c.hooks.Create.Call(ctx, odasdk.CreateOdaInstanceAttachmentRequest{
 		OdaInstanceId:                      common.String(odaInstanceID),
 		CreateOdaInstanceAttachmentDetails: buildOdaInstanceAttachmentCreateDetails(resource.Spec),
+		OpcRetryToken:                      common.String(odaInstanceAttachmentRetryToken(resource, odaInstanceID)),
 	})
 	if err != nil {
 		return c.fail(resource, err)
@@ -366,6 +368,21 @@ func (c *odaInstanceAttachmentRuntimeClient) create(
 		return c.resolveAfterWrite(ctx, resource, odaInstanceID, shared.OSOKAsyncPhaseCreate, "")
 	}
 	return c.applyWorkRequest(ctx, resource, odaInstanceID, workRequestID, shared.OSOKAsyncPhaseCreate, "")
+}
+
+func odaInstanceAttachmentRetryToken(resource *odav1beta1.OdaInstanceAttachment, odaInstanceID string) string {
+	namespace := ""
+	name := ""
+	if resource != nil {
+		if uid := strings.TrimSpace(string(resource.UID)); uid != "" {
+			return uid
+		}
+		namespace = strings.TrimSpace(resource.Namespace)
+		name = strings.TrimSpace(resource.Name)
+	}
+	payload := strings.Join([]string{namespace, name, strings.TrimSpace(odaInstanceID)}, "/")
+	sum := sha256.Sum256([]byte(payload))
+	return fmt.Sprintf("%x", sum[:16])
 }
 
 func (c *odaInstanceAttachmentRuntimeClient) update(

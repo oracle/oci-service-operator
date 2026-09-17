@@ -50,15 +50,84 @@ func registerListenerRuntimeHooksMutator(mutator ListenerRuntimeHooksMutator) {
 	}
 	listenerRuntimeHooksMutators = append(listenerRuntimeHooksMutators, mutator)
 }
+func newListenerRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "networkloadbalancer",
+		FormalSlug:    "listener",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"networkLoadBalancerId"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"defaultBackendSetName", "ipVersion", "isPpv2Enabled", "l3IpIdleTimeout", "port", "protocol", "tcpIdleTimeout", "udpIdleTimeout"},
+			ForceNew:      []string{"name", "networkLoadBalancerId"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "workrequest",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "workrequest",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newListenerDefaultRuntimeHooks(sdkClient networkloadbalancersdk.NetworkLoadBalancerClient) ListenerRuntimeHooks {
 	return ListenerRuntimeHooks{
+		Semantics:       newListenerRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*networkloadbalancerv1beta1.Listener]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*networkloadbalancerv1beta1.Listener]{},
 		StatusHooks:     generatedruntime.StatusHooks[*networkloadbalancerv1beta1.Listener]{},
 		ParityHooks:     generatedruntime.ParityHooks[*networkloadbalancerv1beta1.Listener]{},
-		Async:           generatedruntime.AsyncHooks[*networkloadbalancerv1beta1.Listener]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*networkloadbalancerv1beta1.Listener]{},
+		Async: generatedruntime.AsyncHooks[*networkloadbalancerv1beta1.Listener]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := networkloadbalancersdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*networkloadbalancerv1beta1.Listener]{},
 		Create: runtimeOperationHooks[networkloadbalancersdk.CreateListenerRequest, networkloadbalancersdk.CreateListenerResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "NetworkLoadBalancerId", RequestName: "networkLoadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "CreateListenerDetails", RequestName: "CreateListenerDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request networkloadbalancersdk.CreateListenerRequest) (networkloadbalancersdk.CreateListenerResponse, error) {
@@ -66,25 +135,25 @@ func newListenerDefaultRuntimeHooks(sdkClient networkloadbalancersdk.NetworkLoad
 			},
 		},
 		Get: runtimeOperationHooks[networkloadbalancersdk.GetListenerRequest, networkloadbalancersdk.GetListenerResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NetworkLoadBalancerId", RequestName: "networkLoadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "ListenerName", RequestName: "listenerName", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NetworkLoadBalancerId", RequestName: "networkLoadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "ListenerName", RequestName: "listenerName", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request networkloadbalancersdk.GetListenerRequest) (networkloadbalancersdk.GetListenerResponse, error) {
 				return sdkClient.GetListener(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[networkloadbalancersdk.ListListenersRequest, networkloadbalancersdk.ListListenersResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NetworkLoadBalancerId", RequestName: "networkLoadBalancerId", Contribution: "path", PreferResourceID: true}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NetworkLoadBalancerId", RequestName: "networkLoadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request networkloadbalancersdk.ListListenersRequest) (networkloadbalancersdk.ListListenersResponse, error) {
 				return sdkClient.ListListeners(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[networkloadbalancersdk.UpdateListenerRequest, networkloadbalancersdk.UpdateListenerResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NetworkLoadBalancerId", RequestName: "networkLoadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "ListenerName", RequestName: "listenerName", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdateListenerDetails", RequestName: "UpdateListenerDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NetworkLoadBalancerId", RequestName: "networkLoadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "ListenerName", RequestName: "listenerName", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateListenerDetails", RequestName: "UpdateListenerDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request networkloadbalancersdk.UpdateListenerRequest) (networkloadbalancersdk.UpdateListenerResponse, error) {
 				return sdkClient.UpdateListener(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[networkloadbalancersdk.DeleteListenerRequest, networkloadbalancersdk.DeleteListenerResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NetworkLoadBalancerId", RequestName: "networkLoadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "ListenerName", RequestName: "listenerName", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NetworkLoadBalancerId", RequestName: "networkLoadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "ListenerName", RequestName: "listenerName", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request networkloadbalancersdk.DeleteListenerRequest) (networkloadbalancersdk.DeleteListenerResponse, error) {
 				return sdkClient.DeleteListener(ctx, request)
 			},
@@ -106,10 +175,19 @@ func buildListenerGeneratedRuntimeConfig(
 	hooks ListenerRuntimeHooks,
 ) generatedruntime.Config[*networkloadbalancerv1beta1.Listener] {
 	return generatedruntime.Config[*networkloadbalancerv1beta1.Listener]{
-		Kind:            "Listener",
-		SDKName:         "Listener",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "Listener",
+		SDKName:   "Listener",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

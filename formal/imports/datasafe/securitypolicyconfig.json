@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "securitypolicyconfig",
+  "kind": "SecurityPolicyConfig",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_security_policy_config",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateSecurityPolicyConfig",
+        "requestType": "datasafe.CreateSecurityPolicyConfigRequest",
+        "responseType": "datasafe.CreateSecurityPolicyConfigResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetSecurityPolicyConfig",
+        "requestType": "datasafe.GetSecurityPolicyConfigRequest",
+        "responseType": "datasafe.GetSecurityPolicyConfigResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListSecurityPolicyConfigs",
+        "requestType": "datasafe.ListSecurityPolicyConfigsRequest",
+        "responseType": "datasafe.ListSecurityPolicyConfigsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeSecurityPolicyConfigCompartment",
+        "requestType": "datasafe.ChangeSecurityPolicyConfigCompartmentRequest",
+        "responseType": "datasafe.ChangeSecurityPolicyConfigCompartmentResponse"
+      },
+      {
+        "operation": "UpdateSecurityPolicyConfig",
+        "requestType": "datasafe.UpdateSecurityPolicyConfigRequest",
+        "responseType": "datasafe.UpdateSecurityPolicyConfigResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteSecurityPolicyConfig",
+        "requestType": "datasafe.DeleteSecurityPolicyConfigRequest",
+        "responseType": "datasafe.DeleteSecurityPolicyConfigResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "NEEDS_ATTENTION"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "description",
+      "display_name",
+      "firewall_config.exclude_job",
+      "firewall_config.status",
+      "firewall_config.violation_log_auto_purge",
+      "freeform_tags",
+      "unified_audit_policy_config.exclude_datasafe_user"
+    ],
+    "forceNew": [
+      "security_policy_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_data_safe_security_policy_configs",
+    "collectionField": "security_policy_config_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "access_level",
+      "compartment_id",
+      "compartment_id_in_subtree",
+      "display_name",
+      "security_policy_config_id",
+      "security_policy_id",
+      "state",
+      "time_created_greater_than_or_equal_to",
+      "time_created_less_than"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/securitypolicyconfig/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/securitypolicyconfig/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from terraform-provider-oci for datasafe/securitypolicyconfig."
+  ]
+}

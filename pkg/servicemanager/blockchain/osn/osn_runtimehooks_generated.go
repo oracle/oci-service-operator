@@ -57,8 +57,20 @@ func newOsnDefaultRuntimeHooks(sdkClient blockchainsdk.BlockchainPlatformClient)
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*blockchainv1beta1.Osn]{},
 		StatusHooks:     generatedruntime.StatusHooks[*blockchainv1beta1.Osn]{},
 		ParityHooks:     generatedruntime.ParityHooks[*blockchainv1beta1.Osn]{},
-		Async:           generatedruntime.AsyncHooks[*blockchainv1beta1.Osn]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*blockchainv1beta1.Osn]{},
+		Async: generatedruntime.AsyncHooks[*blockchainv1beta1.Osn]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := blockchainsdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*blockchainv1beta1.Osn]{},
 		Create: runtimeOperationHooks[blockchainsdk.CreateOsnRequest, blockchainsdk.CreateOsnResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "BlockchainPlatformId", RequestName: "blockchainPlatformId", Contribution: "path", PreferResourceID: false}, {FieldName: "CreateOsnDetails", RequestName: "CreateOsnDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request blockchainsdk.CreateOsnRequest) (blockchainsdk.CreateOsnResponse, error) {
@@ -72,7 +84,7 @@ func newOsnDefaultRuntimeHooks(sdkClient blockchainsdk.BlockchainPlatformClient)
 			},
 		},
 		List: runtimeOperationHooks[blockchainsdk.ListOsnsRequest, blockchainsdk.ListOsnsResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "BlockchainPlatformId", RequestName: "blockchainPlatformId", Contribution: "path", PreferResourceID: true}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "BlockchainPlatformId", RequestName: "blockchainPlatformId", Contribution: "path", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request blockchainsdk.ListOsnsRequest) (blockchainsdk.ListOsnsResponse, error) {
 				return sdkClient.ListOsns(ctx, request)
 			},
@@ -106,10 +118,19 @@ func buildOsnGeneratedRuntimeConfig(
 	hooks OsnRuntimeHooks,
 ) generatedruntime.Config[*blockchainv1beta1.Osn] {
 	return generatedruntime.Config[*blockchainv1beta1.Osn]{
-		Kind:            "Osn",
-		SDKName:         "Osn",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "Osn",
+		SDKName:   "Osn",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

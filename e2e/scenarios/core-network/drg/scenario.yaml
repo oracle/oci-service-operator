@@ -1,0 +1,23 @@
+version: 1
+name: core-drg-basic-crud
+service: core-network
+namespace: default
+timeout: 30m
+pollInterval: 10s
+create: create.yaml
+update: update.yaml
+ready:
+  conditionTypes: [Active]
+  lifecycleStates: [AVAILABLE]
+  requireOCID: true
+  fieldsEqual:
+    - desired: spec.displayName
+      observed: status.displayName
+    - desired: spec.freeformTags
+      observed: status.freeformTags
+failureConditionTypes: [Failed]
+delete:
+  enabled: true
+  timeout: 30m
+  cleanupDependencies: true
+cleanupOnFailure: true

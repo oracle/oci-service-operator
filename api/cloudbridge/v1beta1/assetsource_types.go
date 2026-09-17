@@ -57,9 +57,9 @@ type AssetSourceSpec struct {
 	// +kubebuilder:validation:Optional
 	VcenterEndpoint string `json:"vcenterEndpoint,omitempty"`
 	// +kubebuilder:validation:Optional
-	DiscoveryCredentials AssetSourceDiscoveryCredentials `json:"discoveryCredentials,omitempty"`
+	DiscoveryCredentials AssetSourceDiscoveryCredentials `json:"discoveryCredentials,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	ReplicationCredentials AssetSourceReplicationCredentials `json:"replicationCredentials,omitempty"`
+	ReplicationCredentials AssetSourceReplicationCredentials `json:"replicationCredentials,omitempty,omitzero"`
 	// Flag indicating whether historical metrics are collected for assets, originating from this asset source.
 	// +kubebuilder:validation:Optional
 	AreHistoricalMetricsCollected bool `json:"areHistoricalMetricsCollected,omitempty"`

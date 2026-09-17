@@ -1,0 +1,109 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title State Machine - healthchecks/HttpMonitor
+skinparam state {
+  backgroundColor #f8fafc
+  borderColor #0f172a
+  fontColor #0f172a
+  startColor #1d4ed8
+  endColor #0f172a
+}
+left to right direction
+hide empty description
+state "Observe" as observe
+state "EvaluateReady" as evaluate_ready
+state "Ready" as ready
+state "Retryable" as retryable
+state "Failed" as failed
+observe : read spec, tracked status, delete intent,\nand current OCI lifecycle
+state "ResolveByLookup" as resolve_by_lookup
+state "RejectUnsupportedDrift" as reject_unsupported_drift
+state "ApplyUpdate" as apply_update
+state "DeletePending" as delete_pending
+state "Deleted" as deleted
+state "DeleteCleanupBlocked" as delete_cleanup_blocked
+[*] --> observe : CreateHttpMonitor
+observe --> resolve_by_lookup : tracked identity missing
+resolve_by_lookup --> evaluate_ready : lookup or create reaches\nACTIVE
+resolve_by_lookup --> failed : unresolved OCI error or non-success state
+observe --> evaluate_ready : OCI state in ACTIVE
+observe --> failed : unresolved OCI error or non-success state
+evaluate_ready --> reject_unsupported_drift : force-new or conflicting\ndrift detected
+reject_unsupported_drift --> ready : wait for spec or live state change
+evaluate_ready --> apply_update : supported mutable drift for\ndefinedTags, displayName,\nfreeformTags (+10 more)
+apply_update --> ready : update path completes
+evaluate_ready --> ready : no supported drift remains
+ready --> ready : no supported drift remains
+retryable --> retryable : OCI remains retryable
+failed --> failed : OCI remains terminal
+ready --> delete_pending : delete requested
+retryable --> delete_pending : delete requested
+failed --> delete_pending : delete requested
+delete_pending --> delete_cleanup_blocked : cleanup or finalizer release remains blocked
+delete_cleanup_blocked --> deleted : retry delete completion until allowed
+deleted --> deleted : terminal stutter
+note right of ready
+shared diagram:
+shared/diagrams/shared-controller-state-machine.svg
+Start from the shared controller phase model and
+specialize imported provider states, delete
+targets, and failure exits here.
+archetype batch: Generated service-manager
+controllers map provider states into the shared
+controller phases with explicit finalizer and
+requeue policies.
+service: healthchecks
+slug: httpmonitor
+kind: HttpMonitor
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: terminating
+provider states: create none; update none;
+delete none
+follow-up: create=read-after-write;
+update=read-after-write; delete=confirm-delete
+supported drift: definedTags, displayName,
+freeformTags, headers (+9 more)
+reject before mutate: force-new fields
+compartmentId
+create-only fields: none
+list lookup: oci_health_checks_http_monitors
+filters compartmentId, displayName, protocol,
+id; paginated exact compartmentId plus
+displayName and protocol match; tracked ID
+disambiguates existing resources
+conflicts: none
+open gaps: none
+HttpMonitor has no SDK lifecycle field. Create
+and update settle through a readable response,
+including correction of OCI's default isEnabled
+value when the desired CR explicitly carries
+false.
+All UpdateHttpMonitorDetails fields reconcile in
+place. The separate ChangeHttpMonitorCompartment
+action remains unpublished, so compartmentId is
+replacement-only.
+Pre-create reuse is paginated and bounded by
+compartmentId, displayName, protocol, and
+tracked ID.
+Delete is best-effort, but the retained
+resource-local guard treats an auth-shaped 404
+as ambiguous until a scoped list proves absence.
+There are no Secret side effects.
+end note
+note right of delete_pending
+delete policy: best-effort
+delete observe: GetHttpMonitor or
+ListHttpMonitors
+delete targets: NOT_FOUND
+end note
+@enduml

@@ -50,8 +50,61 @@ func registerAssetRuntimeHooksMutator(mutator AssetRuntimeHooksMutator) {
 	}
 	assetRuntimeHooksMutators = append(assetRuntimeHooksMutators, mutator)
 }
+func newAssetRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "cloudbridge",
+		FormalSlug:    "asset",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "lifecycle",
+			Runtime:              "generatedruntime",
+			FormalClassification: "lifecycle",
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"assetId", "assetType", "compartmentId", "displayName", "externalAssetKey", "inventoryId", "sourceKey", "state"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"assetSourceIds", "assetType", "compartmentId", "compute.connectedNetworks", "compute.coresCount", "compute.cpuModel", "compute.description", "compute.disks.bootOrder", "compute.disks.location", "compute.disks.name", "compute.disks.persistentMode", "compute.disks.sizeInMbs", "compute.disks.uuid", "compute.disks.uuidLun", "compute.disksCount", "compute.dnsName", "compute.firmware", "compute.gpuDevices.coresCount", "compute.gpuDevices.description", "compute.gpuDevices.manufacturer", "compute.gpuDevices.memoryInMbs", "compute.gpuDevices.name", "compute.gpuDevicesCount", "compute.guestState", "compute.hardwareVersion", "compute.hostName", "compute.isPmemEnabled", "compute.isTpmEnabled", "compute.latencySensitivity", "compute.memoryInMbs", "compute.nics.ipAddresses", "compute.nics.label", "compute.nics.macAddress", "compute.nics.macAddressType", "compute.nics.networkName", "compute.nics.switchName", "compute.nicsCount", "compute.nvdimmController.busNumber", "compute.nvdimmController.label", "compute.nvdimms.controllerKey", "compute.nvdimms.label", "compute.nvdimms.unitNumber", "compute.operatingSystem", "compute.operatingSystemVersion", "compute.pmemInMbs", "compute.powerState", "compute.primaryIp", "compute.scsiController.label", "compute.scsiController.sharedBus", "compute.scsiController.unitNumber", "compute.storageProvisionedInMbs", "compute.threadsPerCoreCount", "definedTags", "displayName", "freeformTags", "vm.hypervisorHost", "vm.hypervisorVendor", "vm.hypervisorVersion", "vmwareVcenter.dataCenter", "vmwareVcenter.vcenterKey", "vmwareVcenter.vcenterVersion", "vmwareVm.cluster", "vmwareVm.customerFields", "vmwareVm.customerTags.description", "vmwareVm.customerTags.name", "vmwareVm.faultToleranceBandwidth", "vmwareVm.faultToleranceSecondaryLatency", "vmwareVm.faultToleranceState", "vmwareVm.instanceUuid", "vmwareVm.isDisksCbtEnabled", "vmwareVm.isDisksUuidEnabled", "vmwareVm.path", "vmwareVm.vmwareToolsStatus"},
+			ForceNew:      []string{"externalAssetKey", "inventoryId", "sourceKey"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForUpdatedState", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForUpdatedState", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newAssetDefaultRuntimeHooks(sdkClient cloudbridgesdk.InventoryClient) AssetRuntimeHooks {
 	return AssetRuntimeHooks{
+		Semantics:       newAssetRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*cloudbridgev1beta1.Asset]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*cloudbridgev1beta1.Asset]{},

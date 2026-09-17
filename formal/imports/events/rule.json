@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "events",
+  "slug": "rule",
+  "kind": "Rule",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_events_rule",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateRule",
+        "requestType": "events.CreateRuleRequest",
+        "responseType": "events.CreateRuleResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetRule",
+        "requestType": "events.GetRuleRequest",
+        "responseType": "events.GetRuleResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListRules",
+        "requestType": "events.ListRulesRequest",
+        "responseType": "events.ListRulesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeRuleCompartment",
+        "requestType": "events.ChangeRuleCompartmentRequest",
+        "responseType": "events.ChangeRuleCompartmentResponse"
+      },
+      {
+        "operation": "UpdateRule",
+        "requestType": "events.UpdateRuleRequest",
+        "responseType": "events.UpdateRuleResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteRule",
+        "requestType": "events.DeleteRuleRequest",
+        "responseType": "events.DeleteRuleResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "INACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "actions.actions.action_type",
+      "actions.actions.description",
+      "actions.actions.function_id",
+      "actions.actions.is_enabled",
+      "actions.actions.stream_id",
+      "actions.actions.topic_id",
+      "compartment_id",
+      "condition",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags",
+      "is_enabled"
+    ],
+    "forceNew": null,
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_events_rules",
+    "collectionField": "rules",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/events/rule/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/events/rule/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Pinned provider facts are paired with reviewed Rule service-manager semantics and sanitized live CRUD evidence."
+  ]
+}

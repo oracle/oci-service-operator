@@ -66,25 +66,25 @@ func newExportRequestDefaultRuntimeHooks(sdkClient dataintegrationsdk.DataIntegr
 			},
 		},
 		Get: runtimeOperationHooks[dataintegrationsdk.GetExportRequestRequest, dataintegrationsdk.GetExportRequestResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "ExportRequestKey", RequestName: "exportRequestKey", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "ExportRequestKey", RequestName: "exportRequestKey", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request dataintegrationsdk.GetExportRequestRequest) (dataintegrationsdk.GetExportRequestResponse, error) {
 				return sdkClient.GetExportRequest(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[dataintegrationsdk.ListExportRequestsRequest, dataintegrationsdk.ListExportRequestsResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: true}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Name", RequestName: "name", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "ExportStatus", RequestName: "exportStatus", Contribution: "query", PreferResourceID: false}, {FieldName: "Projection", RequestName: "projection", Contribution: "query", PreferResourceID: false}, {FieldName: "TimeStartedInMillis", RequestName: "timeStartedInMillis", Contribution: "query", PreferResourceID: false}, {FieldName: "TimeEndedInMillis", RequestName: "timeEndedInMillis", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Name", RequestName: "name", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "ExportStatus", RequestName: "exportStatus", Contribution: "query", PreferResourceID: false}, {FieldName: "Projection", RequestName: "projection", Contribution: "query", PreferResourceID: false}, {FieldName: "TimeStartedInMillis", RequestName: "timeStartedInMillis", Contribution: "query", PreferResourceID: false}, {FieldName: "TimeEndedInMillis", RequestName: "timeEndedInMillis", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dataintegrationsdk.ListExportRequestsRequest) (dataintegrationsdk.ListExportRequestsResponse, error) {
 				return sdkClient.ListExportRequests(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[dataintegrationsdk.UpdateExportRequestRequest, dataintegrationsdk.UpdateExportRequestResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "ExportRequestKey", RequestName: "exportRequestKey", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdateExportRequestDetails", RequestName: "UpdateExportRequestDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "ExportRequestKey", RequestName: "exportRequestKey", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateExportRequestDetails", RequestName: "UpdateExportRequestDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dataintegrationsdk.UpdateExportRequestRequest) (dataintegrationsdk.UpdateExportRequestResponse, error) {
 				return sdkClient.UpdateExportRequest(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[dataintegrationsdk.DeleteExportRequestRequest, dataintegrationsdk.DeleteExportRequestResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "ExportRequestKey", RequestName: "exportRequestKey", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "ExportRequestKey", RequestName: "exportRequestKey", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request dataintegrationsdk.DeleteExportRequestRequest) (dataintegrationsdk.DeleteExportRequestResponse, error) {
 				return sdkClient.DeleteExportRequest(ctx, request)
 			},

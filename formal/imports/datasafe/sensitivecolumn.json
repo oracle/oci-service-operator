@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "sensitivecolumn",
+  "kind": "SensitiveColumn",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_sensitive_data_models_sensitive_column",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateSensitiveColumn",
+        "requestType": "datasafe.CreateSensitiveColumnRequest",
+        "responseType": "datasafe.CreateSensitiveColumnResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetSensitiveColumn",
+        "requestType": "datasafe.GetSensitiveColumnRequest",
+        "responseType": "datasafe.GetSensitiveColumnResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListSensitiveColumns",
+        "requestType": "datasafe.ListSensitiveColumnsRequest",
+        "responseType": "datasafe.ListSensitiveColumnsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateSensitiveColumn",
+        "requestType": "datasafe.UpdateSensitiveColumnRequest",
+        "responseType": "datasafe.UpdateSensitiveColumnResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteSensitiveColumn",
+        "requestType": "datasafe.DeleteSensitiveColumnRequest",
+        "responseType": "datasafe.DeleteSensitiveColumnResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "dataType",
+      "status",
+      "sensitiveTypeId",
+      "parentColumnKeys",
+      "relationType",
+      "appDefinedChildColumnKeys",
+      "dbDefinedChildColumnKeys"
+    ],
+    "forceNew": [
+      "sensitiveDataModelId",
+      "schemaName",
+      "objectName",
+      "columnName",
+      "appName",
+      "objectType"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource",
+        "entityType": "SensitiveColumn",
+        "action": "CreateSensitiveColumn"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource",
+        "entityType": "SensitiveColumn",
+        "action": "UpdateSensitiveColumn"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource",
+        "entityType": "SensitiveColumn",
+        "action": "DeleteSensitiveColumn"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "unavailable",
+    "collectionField": "Items",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "sensitiveDataModelId",
+      "schemaName",
+      "objectName",
+      "columnName"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/sensitivecolumn/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/sensitivecolumn/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Terraform provider formal-import cannot resolve oci_data_safe_sensitive_data_models_sensitive_column; the vendored SDK, production runtime, and package-owned typed OCI fixtures define this contract."
+  ]
+}

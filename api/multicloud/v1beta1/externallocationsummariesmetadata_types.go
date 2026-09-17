@@ -16,9 +16,37 @@ import (
 type ExternalLocationSummariesMetadataSpec struct {
 }
 
+// ExternalLocationSummariesMetadataItemExternalLocation defines nested fields for ExternalLocationSummariesMetadata.Item.ExternalLocation.
+type ExternalLocationSummariesMetadataItemExternalLocation struct {
+	// CSP region corresponding to the given OCI region
+	CspRegion string `json:"cspRegion,omitempty"`
+	// CSP region display Name corresponding to the given OCI region
+	CspRegionDisplayName string `json:"cspRegionDisplayName,omitempty"`
+}
+
+// ExternalLocationSummariesMetadataItem defines nested fields for ExternalLocationSummariesMetadata.Item.
+type ExternalLocationSummariesMetadataItem struct {
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// OCI region identifier https://docs.oracle.com/en-us/iaas/Content/General/Concepts/regions.htm
+	OciRegion string `json:"ociRegion,omitempty"`
+	// System tags for this resource. Each key is predefined and scoped to a namespace.
+	// Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+	SystemTags       map[string]shared.MapValue                            `json:"systemTags,omitempty"`
+	ExternalLocation ExternalLocationSummariesMetadataItemExternalLocation `json:"externalLocation,omitempty"`
+}
+
 // ExternalLocationSummariesMetadataStatus defines the observed state of ExternalLocationSummariesMetadata.
 type ExternalLocationSummariesMetadataStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// List of ExternalLocationSummariesMetadatumSummary
+	Items []ExternalLocationSummariesMetadataItem `json:"items,omitempty"`
 }
 
 // +kubebuilder:object:root=true

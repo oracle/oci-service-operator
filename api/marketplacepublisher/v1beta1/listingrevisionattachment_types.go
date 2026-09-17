@@ -57,7 +57,7 @@ type ListingRevisionAttachmentSpec struct {
 	// +kubebuilder:validation:Optional
 	TemplateCode string `json:"templateCode,omitempty"`
 	// +kubebuilder:validation:Optional
-	VideoAttachmentDetails ListingRevisionAttachmentVideoAttachmentDetails `json:"videoAttachmentDetails,omitempty"`
+	VideoAttachmentDetails ListingRevisionAttachmentVideoAttachmentDetails `json:"videoAttachmentDetails,omitempty,omitzero"`
 	// The document category of the listing revision attachment.
 	// +kubebuilder:validation:Optional
 	DocumentCategory string `json:"documentCategory,omitempty"`

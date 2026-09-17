@@ -7,6 +7,7 @@ package sslciphersuite
 
 import (
 	"context"
+	"crypto/sha256"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -31,9 +32,9 @@ var sslCipherSuiteWorkRequestAdapter = servicemanager.WorkRequestAsyncAdapter{
 	PendingStatusTokens:   []string{string(loadbalancersdk.WorkRequestLifecycleStateAccepted), string(loadbalancersdk.WorkRequestLifecycleStateInProgress)},
 	SucceededStatusTokens: []string{string(loadbalancersdk.WorkRequestLifecycleStateSucceeded)},
 	FailedStatusTokens:    []string{string(loadbalancersdk.WorkRequestLifecycleStateFailed)},
-	CreateActionTokens:    []string{"CreateSSLCipherSuite", "CreateSslCipherSuite"},
-	UpdateActionTokens:    []string{"UpdateSSLCipherSuite", "UpdateSslCipherSuite"},
-	DeleteActionTokens:    []string{"DeleteSSLCipherSuite", "DeleteSslCipherSuite"},
+	CreateActionTokens:    []string{"CreateSSLCipherSuite", "CreateSslCipherSuite", "CreateCipherSuite"},
+	UpdateActionTokens:    []string{"UpdateSSLCipherSuite", "UpdateSslCipherSuite", "UpdateCipherSuite"},
+	DeleteActionTokens:    []string{"DeleteSSLCipherSuite", "DeleteSslCipherSuite", "DeleteCipherSuite"},
 }
 
 type sslCipherSuiteRuntimeOCIClient interface {
@@ -85,6 +86,19 @@ func applySSLCipherSuiteRuntimeHooks(
 	}
 
 	hooks.Semantics = newSSLCipherSuiteRuntimeSemantics()
+	createCall := hooks.Create.Call
+	if createCall != nil {
+		hooks.Create.Call = func(ctx context.Context, request loadbalancersdk.CreateSSLCipherSuiteRequest) (loadbalancersdk.CreateSSLCipherSuiteResponse, error) {
+			if strings.TrimSpace(stringValue(request.OpcRetryToken)) == "" {
+				token, err := sslCipherSuiteCreateRetryToken(request)
+				if err != nil {
+					return loadbalancersdk.CreateSSLCipherSuiteResponse{}, err
+				}
+				request.OpcRetryToken = common.String(token)
+			}
+			return createCall(ctx, request)
+		}
+	}
 	hooks.BuildCreateBody = func(
 		_ context.Context,
 		resource *loadbalancerv1beta1.SSLCipherSuite,
@@ -149,6 +163,21 @@ func applySSLCipherSuiteRuntimeHooks(
 			log:      log,
 		}
 	})
+}
+
+func sslCipherSuiteCreateRetryToken(request loadbalancersdk.CreateSSLCipherSuiteRequest) (string, error) {
+	payload, err := json.Marshal(struct {
+		LoadBalancerID string                                      `json:"loadBalancerId"`
+		Details        loadbalancersdk.CreateSslCipherSuiteDetails `json:"details"`
+	}{
+		LoadBalancerID: stringValue(request.LoadBalancerId),
+		Details:        request.CreateSslCipherSuiteDetails,
+	})
+	if err != nil {
+		return "", fmt.Errorf("marshal SSLCipherSuite create retry-token payload: %w", err)
+	}
+	sum := sha256.Sum256(payload)
+	return fmt.Sprintf("%x", sum[:16]), nil
 }
 
 func (c *sslCipherSuiteReadbackActiveClient) CreateOrUpdate(

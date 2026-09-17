@@ -273,6 +273,7 @@ OsnSpec defines the desired state of Osn.
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `ad` | Availability Domain to place new OSN | `string` | Yes | - | - |
+| `blockchainPlatformId` | The OCID of the blockchain platform containing this node. | `string` | Yes | - | - |
 | [`ocpuAllocationParam`](#kind-osn-spec-ocpuallocationparam) | OsnOcpuAllocationParam defines nested fields for Osn.OcpuAllocationParam. | `object` | No | - | - |
 
 <a id="kind-osn-spec-ocpuallocationparam"></a>
@@ -389,6 +390,7 @@ PeerSpec defines the desired state of Peer.
 | --- | --- | --- | --- | --- | --- |
 | `ad` | Availability Domain to place new peer | `string` | Yes | - | - |
 | `alias` | peer alias | `string` | No | - | - |
+| `blockchainPlatformId` | The OCID of the blockchain platform containing this node. | `string` | Yes | - | - |
 | [`ocpuAllocationParam`](#kind-peer-spec-ocpuallocationparam) | PeerOcpuAllocationParam defines nested fields for Peer.OcpuAllocationParam. | `object` | Yes | - | - |
 | `role` | Peer role | `string` | Yes | - | - |
 

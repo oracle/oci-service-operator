@@ -698,6 +698,33 @@ func TestBuildPipelineServiceClientRejectsForceNewDriftBeforeUpdate(t *testing.T
 	}
 }
 
+func TestBuildPipelineServiceClientDeleteConfirmsAuthShapedNotFoundByScopedList(t *testing.T) {
+	t.Parallel()
+
+	resource := makeBuildPipelineResource()
+	resource.Status.Id = testBuildPipelineID
+	resource.Status.OsokStatus.Ocid = shared.OCID(testBuildPipelineID)
+	client := testBuildPipelineClient(&fakeBuildPipelineOCIClient{
+		getBuildPipelineFn: func(context.Context, devopssdk.GetBuildPipelineRequest) (devopssdk.GetBuildPipelineResponse, error) {
+			return devopssdk.GetBuildPipelineResponse{BuildPipeline: makeSDKBuildPipeline(testBuildPipelineID, testProjectID, resource.Spec.DisplayName, resource.Spec.Description, devopssdk.BuildPipelineLifecycleStateActive)}, nil
+		},
+		deleteBuildPipelineFn: func(context.Context, devopssdk.DeleteBuildPipelineRequest) (devopssdk.DeleteBuildPipelineResponse, error) {
+			return devopssdk.DeleteBuildPipelineResponse{}, errortest.NewServiceError(404, errorutil.NotAuthorizedOrNotFound, "not authorized or not found")
+		},
+		listBuildPipelinesFn: func(context.Context, devopssdk.ListBuildPipelinesRequest) (devopssdk.ListBuildPipelinesResponse, error) {
+			return devopssdk.ListBuildPipelinesResponse{}, nil
+		},
+	})
+
+	deleted, err := client.Delete(context.Background(), resource)
+	if err != nil {
+		t.Fatalf("Delete() error = %v", err)
+	}
+	if !deleted || resource.Status.OsokStatus.DeletedAt == nil {
+		t.Fatalf("Delete() deleted=%v deletedAt=%v, want scoped absence confirmation", deleted, resource.Status.OsokStatus.DeletedAt)
+	}
+}
+
 func TestBuildPipelineServiceClientDeleteRetainsFinalizerUntilReadbackConfirmed(t *testing.T) {
 	t.Parallel()
 
@@ -1117,6 +1144,9 @@ func TestBuildPipelineServiceClientDeleteTreatsAuthShapedNotFoundAsError(t *test
 	resource.Status.OsokStatus.Ocid = shared.OCID(testBuildPipelineID)
 
 	client := testBuildPipelineClient(&fakeBuildPipelineOCIClient{
+		listBuildPipelinesFn: func(context.Context, devopssdk.ListBuildPipelinesRequest) (devopssdk.ListBuildPipelinesResponse, error) {
+			return devopssdk.ListBuildPipelinesResponse{BuildPipelineCollection: devopssdk.BuildPipelineCollection{Items: []devopssdk.BuildPipelineSummary{makeSDKBuildPipelineSummary(testBuildPipelineID, testProjectID, resource.Spec.DisplayName, resource.Spec.Description, devopssdk.BuildPipelineLifecycleStateActive)}}}, nil
+		},
 		getBuildPipelineFn: func(context.Context, devopssdk.GetBuildPipelineRequest) (devopssdk.GetBuildPipelineResponse, error) {
 			return devopssdk.GetBuildPipelineResponse{
 				BuildPipeline: makeSDKBuildPipeline(testBuildPipelineID, testProjectID, resource.Spec.DisplayName, resource.Spec.Description, devopssdk.BuildPipelineLifecycleStateActive),

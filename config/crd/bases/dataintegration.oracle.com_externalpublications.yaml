@@ -2712,9 +2712,18 @@ spec:
                 - sparkVersion
                 - totalExecutors
                 type: object
+              taskKey:
+                description: The key of the task containing this external publication.
+                type: string
+              workspaceId:
+                description: The OCID of the Data Integration workspace containing
+                  this resource.
+                type: string
             required:
             - applicationCompartmentId
             - displayName
+            - taskKey
+            - workspaceId
             type: object
           status:
             description: ExternalPublicationStatus defines the observed state of ExternalPublication.

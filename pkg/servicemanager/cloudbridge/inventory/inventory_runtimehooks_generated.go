@@ -50,50 +50,119 @@ func registerInventoryRuntimeHooksMutator(mutator InventoryRuntimeHooksMutator) 
 	}
 	inventoryRuntimeHooksMutators = append(inventoryRuntimeHooksMutators, mutator)
 }
-func newInventoryDefaultRuntimeHooks(sdkClient cloudbridgesdk.InventoryClient) InventoryRuntimeHooks {
+func newInventoryRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "cloudbridge",
+		FormalSlug:    "inventory",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "state"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"definedTags", "displayName", "freeformTags"},
+			ForceNew:      []string{"compartmentId"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
+func newInventoryDefaultRuntimeHooks(sdkClient InventorySDKClients) InventoryRuntimeHooks {
 	return InventoryRuntimeHooks{
+		Semantics:       newInventoryRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*cloudbridgev1beta1.Inventory]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*cloudbridgev1beta1.Inventory]{},
 		StatusHooks:     generatedruntime.StatusHooks[*cloudbridgev1beta1.Inventory]{},
 		ParityHooks:     generatedruntime.ParityHooks[*cloudbridgev1beta1.Inventory]{},
-		Async:           generatedruntime.AsyncHooks[*cloudbridgev1beta1.Inventory]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*cloudbridgev1beta1.Inventory]{},
+		Async: generatedruntime.AsyncHooks[*cloudbridgev1beta1.Inventory]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := cloudbridgesdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.commonClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*cloudbridgev1beta1.Inventory]{},
 		Create: runtimeOperationHooks[cloudbridgesdk.CreateInventoryRequest, cloudbridgesdk.CreateInventoryResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateInventoryDetails", RequestName: "CreateInventoryDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request cloudbridgesdk.CreateInventoryRequest) (cloudbridgesdk.CreateInventoryResponse, error) {
-				return sdkClient.CreateInventory(ctx, request)
+				return sdkClient.inventoryClient.CreateInventory(ctx, request)
 			},
 		},
 		Get: runtimeOperationHooks[cloudbridgesdk.GetInventoryRequest, cloudbridgesdk.GetInventoryResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "InventoryId", RequestName: "inventoryId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request cloudbridgesdk.GetInventoryRequest) (cloudbridgesdk.GetInventoryResponse, error) {
-				return sdkClient.GetInventory(ctx, request)
+				return sdkClient.inventoryClient.GetInventory(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[cloudbridgesdk.ListInventoriesRequest, cloudbridgesdk.ListInventoriesResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request cloudbridgesdk.ListInventoriesRequest) (cloudbridgesdk.ListInventoriesResponse, error) {
-				return sdkClient.ListInventories(ctx, request)
+				return sdkClient.inventoryClient.ListInventories(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[cloudbridgesdk.UpdateInventoryRequest, cloudbridgesdk.UpdateInventoryResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "InventoryId", RequestName: "inventoryId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateInventoryDetails", RequestName: "UpdateInventoryDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request cloudbridgesdk.UpdateInventoryRequest) (cloudbridgesdk.UpdateInventoryResponse, error) {
-				return sdkClient.UpdateInventory(ctx, request)
+				return sdkClient.inventoryClient.UpdateInventory(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[cloudbridgesdk.DeleteInventoryRequest, cloudbridgesdk.DeleteInventoryResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "InventoryId", RequestName: "inventoryId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request cloudbridgesdk.DeleteInventoryRequest) (cloudbridgesdk.DeleteInventoryResponse, error) {
-				return sdkClient.DeleteInventory(ctx, request)
+				return sdkClient.inventoryClient.DeleteInventory(ctx, request)
 			},
 		},
 		WrapGeneratedClient: []func(InventoryServiceClient) InventoryServiceClient{},
 	}
 }
 
-func newInventoryRuntimeHooks(manager *InventoryServiceManager, sdkClient cloudbridgesdk.InventoryClient) InventoryRuntimeHooks {
+func newInventoryRuntimeHooks(manager *InventoryServiceManager, sdkClient InventorySDKClients) InventoryRuntimeHooks {
 	hooks := newInventoryDefaultRuntimeHooks(sdkClient)
 	for _, mutator := range inventoryRuntimeHooksMutators {
 		mutator(manager, &hooks)
@@ -106,10 +175,19 @@ func buildInventoryGeneratedRuntimeConfig(
 	hooks InventoryRuntimeHooks,
 ) generatedruntime.Config[*cloudbridgev1beta1.Inventory] {
 	return generatedruntime.Config[*cloudbridgev1beta1.Inventory]{
-		Kind:            "Inventory",
-		SDKName:         "Inventory",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "Inventory",
+		SDKName:   "Inventory",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

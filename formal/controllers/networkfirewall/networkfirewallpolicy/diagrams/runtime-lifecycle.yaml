@@ -1,0 +1,29 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: networkfirewall
+slug: networkfirewallpolicy
+kind: NetworkFirewallPolicy
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending: ["CREATING"]
+    updatePending: []
+    deletePending: ["DELETING"]
+  listLookup:
+    filters: ["compartmentId","displayName","id","state"]
+    matchRule: exact resource identity match; duplicate matches fail
+  mutation:
+    mutable: ["compartmentId","definedTags","description","displayName","freeformTags"]
+    forceNew: []
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - "The NetworkFirewallPolicy runtime retains package-local lifecycle, identity, mutation, and delete handling."
+  - "The credential-free evidence mock verifies the recorded create/update payloads, SDK response decoding, status projection, and delete confirmation."

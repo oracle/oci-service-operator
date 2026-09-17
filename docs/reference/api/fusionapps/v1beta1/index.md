@@ -423,6 +423,7 @@ RefreshActivitySpec defines the desired state of RefreshActivity.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| `fusionEnvironmentId` | The OCID of the Fusion environment receiving this refresh activity. | `string` | Yes | - | - |
 | `isDataMaskingOpted` | Represents if the customer opted for Data Masking or not during refreshActivity. | `boolean` | No | - | - |
 | `sourceFusionEnvironmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the source environment | `string` | Yes | - | - |
 | `timeScheduledStart` | Current time the refresh activity is scheduled to start. An RFC3339 formatted datetime string. | `string` | No | - | - |

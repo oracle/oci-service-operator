@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "networkfirewall",
+  "slug": "decryptionprofile",
+  "kind": "DecryptionProfile",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_network_firewall_network_firewall_policy_decryption_profile",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDecryptionProfile",
+        "requestType": "networkfirewall.CreateDecryptionProfileRequest",
+        "responseType": "networkfirewall.CreateDecryptionProfileResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDecryptionProfile",
+        "requestType": "networkfirewall.GetDecryptionProfileRequest",
+        "responseType": "networkfirewall.GetDecryptionProfileResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDecryptionProfile",
+        "requestType": "networkfirewall.UpdateDecryptionProfileRequest",
+        "responseType": "networkfirewall.UpdateDecryptionProfileResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDecryptionProfile",
+        "requestType": "networkfirewall.DeleteDecryptionProfileRequest",
+        "responseType": "networkfirewall.DeleteDecryptionProfileResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "description",
+      "type",
+      "is_unsupported_version_blocked",
+      "is_unsupported_cipher_blocked",
+      "is_out_of_capacity_blocked",
+      "is_expired_certificate_blocked",
+      "is_untrusted_issuer_blocked",
+      "is_revocation_status_timeout_blocked",
+      "is_unknown_revocation_status_blocked",
+      "are_certificate_extensions_restricted",
+      "is_auto_include_alt_name"
+    ],
+    "forceNew": [
+      "network_firewall_policy_id",
+      "name"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/networkfirewall/decryptionprofile/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/networkfirewall/decryptionprofile/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "delete-confirmation",
+      "lifecycle-classification",
+      "list-lookup",
+      "mutation-policy",
+      "secret-output"
+    ]
+  },
+  "notes": [
+    "Pinned provider operations are combined with reviewed composite parent/name identity and DecryptionProfile runtime semantics."
+  ]
+}

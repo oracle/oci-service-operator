@@ -26,7 +26,7 @@ type FleetSpec struct {
 	// +kubebuilder:validation:Optional
 	Description string `json:"description,omitempty"`
 	// +kubebuilder:validation:Optional
-	OperationLog FleetOperationLog `json:"operationLog,omitempty"`
+	OperationLog FleetOperationLog `json:"operationLog,omitempty,omitzero"`
 	// Whether or not advanced features are enabled in this Fleet.
 	// Deprecated, use `/fleets/{fleetId}/advanceFeatureConfiguration` API instead.
 	// +kubebuilder:validation:Optional

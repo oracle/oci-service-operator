@@ -50,15 +50,84 @@ func registerBlockchainPlatformRuntimeHooksMutator(mutator BlockchainPlatformRun
 	}
 	blockchainplatformRuntimeHooksMutators = append(blockchainplatformRuntimeHooksMutators, mutator)
 }
+func newBlockchainPlatformRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "blockchain",
+		FormalSlug:    "blockchainplatform",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING", "SCALING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "displayName", "state"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"compartmentId", "definedTags", "description", "freeformTags", "idcsAccessToken", "loadBalancerShape", "replicas.caCount", "replicas.consoleCount", "replicas.proxyCount", "storageSizeInTbs", "totalOcpuCapacity"},
+			ForceNew:      []string{"caCertArchiveText", "computeShape", "displayName", "federatedUserId", "isByol", "platformRole", "platformVersion"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newBlockchainPlatformDefaultRuntimeHooks(sdkClient blockchainsdk.BlockchainPlatformClient) BlockchainPlatformRuntimeHooks {
 	return BlockchainPlatformRuntimeHooks{
+		Semantics:       newBlockchainPlatformRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*blockchainv1beta1.BlockchainPlatform]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*blockchainv1beta1.BlockchainPlatform]{},
 		StatusHooks:     generatedruntime.StatusHooks[*blockchainv1beta1.BlockchainPlatform]{},
 		ParityHooks:     generatedruntime.ParityHooks[*blockchainv1beta1.BlockchainPlatform]{},
-		Async:           generatedruntime.AsyncHooks[*blockchainv1beta1.BlockchainPlatform]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*blockchainv1beta1.BlockchainPlatform]{},
+		Async: generatedruntime.AsyncHooks[*blockchainv1beta1.BlockchainPlatform]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := blockchainsdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*blockchainv1beta1.BlockchainPlatform]{},
 		Create: runtimeOperationHooks[blockchainsdk.CreateBlockchainPlatformRequest, blockchainsdk.CreateBlockchainPlatformResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateBlockchainPlatformDetails", RequestName: "CreateBlockchainPlatformDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request blockchainsdk.CreateBlockchainPlatformRequest) (blockchainsdk.CreateBlockchainPlatformResponse, error) {
@@ -106,10 +175,19 @@ func buildBlockchainPlatformGeneratedRuntimeConfig(
 	hooks BlockchainPlatformRuntimeHooks,
 ) generatedruntime.Config[*blockchainv1beta1.BlockchainPlatform] {
 	return generatedruntime.Config[*blockchainv1beta1.BlockchainPlatform]{
-		Kind:            "BlockchainPlatform",
-		SDKName:         "BlockchainPlatform",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "BlockchainPlatform",
+		SDKName:   "BlockchainPlatform",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

@@ -42,7 +42,7 @@ type AutoScalingConfigurationSpec struct {
 	CoolDownInSeconds int `json:"coolDownInSeconds,omitempty"`
 	// Whether the autoscaling configuration is enabled.
 	// +kubebuilder:validation:Optional
-	IsEnabled bool `json:"isEnabled,omitempty"`
+	IsEnabled *bool `json:"isEnabled,omitempty"`
 }
 
 // AutoScalingConfigurationPolicyCapacity defines nested fields for AutoScalingConfiguration.Policy.Capacity.
@@ -153,7 +153,7 @@ type AutoScalingConfigurationPolicyRuleMetric struct {
 	// +kubebuilder:validation:Optional
 	ResourceGroup string `json:"resourceGroup,omitempty"`
 	// +kubebuilder:validation:Optional
-	Threshold AutoScalingConfigurationPolicyRuleMetricThreshold `json:"threshold,omitempty"`
+	Threshold AutoScalingConfigurationPolicyRuleMetricThreshold `json:"threshold,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
 	MetricType string `json:"metricType,omitempty"`
 }
@@ -175,19 +175,19 @@ type AutoScalingConfigurationPolicy struct {
 	JsonData string `json:"jsonData,omitempty"`
 	// The capacity requirements of the autoscaling policy.
 	// +kubebuilder:validation:Optional
-	Capacity AutoScalingConfigurationPolicyCapacity `json:"capacity,omitempty"`
+	Capacity AutoScalingConfigurationPolicyCapacity `json:"capacity,omitempty,omitzero"`
 	// A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information.
 	// +kubebuilder:validation:Optional
 	DisplayName string `json:"displayName,omitempty"`
 	// Whether the autoscaling policy is enabled.
 	// +kubebuilder:validation:Optional
-	IsEnabled bool `json:"isEnabled,omitempty"`
+	IsEnabled *bool `json:"isEnabled,omitempty"`
 	// +kubebuilder:validation:Optional
 	PolicyType string `json:"policyType,omitempty"`
 	// +kubebuilder:validation:Optional
-	ExecutionSchedule AutoScalingConfigurationPolicyExecutionSchedule `json:"executionSchedule,omitempty"`
+	ExecutionSchedule AutoScalingConfigurationPolicyExecutionSchedule `json:"executionSchedule,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	ResourceAction AutoScalingConfigurationPolicyResourceAction `json:"resourceAction,omitempty"`
+	ResourceAction AutoScalingConfigurationPolicyResourceAction `json:"resourceAction,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
 	Rules []AutoScalingConfigurationPolicyRule `json:"rules,omitempty"`
 }

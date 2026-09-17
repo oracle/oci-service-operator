@@ -19,6 +19,60 @@ type fakeWorkRequest struct {
 	PercentComplete *float32
 }
 
+type fakeDefaultWorkRequestResource struct {
+	Identifier *string
+}
+
+type fakeDefaultWorkRequest struct {
+	Resources []fakeDefaultWorkRequestResource
+}
+
+func TestDefaultWorkRequestAsyncAdapterCoversCommonOCIStatuses(t *testing.T) {
+	t.Parallel()
+
+	adapter := DefaultWorkRequestAsyncAdapter()
+	for raw, want := range map[string]shared.OSOKAsyncNormalizedClass{
+		"ACCEPTED":        shared.OSOKAsyncClassPending,
+		"IN_PROGRESS":     shared.OSOKAsyncClassPending,
+		"SUCCEEDED":       shared.OSOKAsyncClassSucceeded,
+		"COMPLETED":       shared.OSOKAsyncClassSucceeded,
+		"FAILED":          shared.OSOKAsyncClassFailed,
+		"CANCELED":        shared.OSOKAsyncClassCanceled,
+		"NEEDS_ATTENTION": shared.OSOKAsyncClassAttention,
+	} {
+		got, err := adapter.Normalize(raw)
+		if err != nil {
+			t.Fatalf("Normalize(%q) error = %v", raw, err)
+		}
+		if got != want {
+			t.Fatalf("Normalize(%q) = %q, want %q", raw, got, want)
+		}
+	}
+}
+
+func TestRecoverSingleWorkRequestResourceID(t *testing.T) {
+	t.Parallel()
+
+	id := "ocid1.example.oc1..resource"
+	got, err := recoverSingleWorkRequestResourceID(fakeDefaultWorkRequest{
+		Resources: []fakeDefaultWorkRequestResource{{Identifier: &id}},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got != id {
+		t.Fatalf("recoverSingleWorkRequestResourceID() = %q, want %q", got, id)
+	}
+
+	other := "ocid1.example.oc1..other"
+	_, err = recoverSingleWorkRequestResourceID(fakeDefaultWorkRequest{
+		Resources: []fakeDefaultWorkRequestResource{{Identifier: &id}, {Identifier: &other}},
+	})
+	if err == nil {
+		t.Fatal("recoverSingleWorkRequestResourceID() error = nil for ambiguous resources")
+	}
+}
+
 func newFakeWorkRequestConfig(workRequests map[string]fakeWorkRequest) Config[*fakeResource] {
 	return Config[*fakeResource]{
 		Kind:    "Queue",
@@ -197,10 +251,20 @@ func TestServiceClientDeleteResumesGeneratedWorkRequestAndMarksDeleted(t *testin
 		},
 	}
 	config := newFakeWorkRequestConfig(workRequests)
+	confirmReadCalls := 0
+	config.DeleteHooks.UseConfirmReadAfterWorkRequest = true
+	config.DeleteHooks.ConfirmRead = func(_ context.Context, _ *fakeResource, currentID string) (any, error) {
+		confirmReadCalls++
+		if currentID != "ocid1.thing.oc1..delete" {
+			t.Fatalf("DeleteHooks.ConfirmRead() currentID = %q", currentID)
+		}
+		return nil, errResourceNotFound
+	}
 	config.Get = &Operation{
 		NewRequest: func() any { return &fakeGetThingRequest{} },
 		Call: func(_ context.Context, _ any) (any, error) {
-			return nil, errResourceNotFound
+			t.Fatal("Get operation called instead of DeleteHooks.ConfirmRead")
+			return nil, nil
 		},
 		Fields: []RequestField{
 			{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true},
@@ -240,5 +304,8 @@ func TestServiceClientDeleteResumesGeneratedWorkRequestAndMarksDeleted(t *testin
 	}
 	if resource.Status.OsokStatus.DeletedAt == nil {
 		t.Fatal("status.deletedAt = nil, want delete timestamp")
+	}
+	if confirmReadCalls != 1 {
+		t.Fatalf("DeleteHooks.ConfirmRead() calls = %d, want 1", confirmReadCalls)
 	}
 }

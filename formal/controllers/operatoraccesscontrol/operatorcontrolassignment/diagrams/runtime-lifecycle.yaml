@@ -1,0 +1,29 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: operatoraccesscontrol
+slug: operatorcontrolassignment
+kind: OperatorControlAssignment
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending: ["S_CREATED"]
+    updatePending: ["S_UPDATING"]
+    deletePending: ["S_DELETING"]
+  listLookup:
+    filters: ["compartmentId","operatorControlId","resourceId","resourceName","resourceType"]
+    matchRule: exact resource identity match; duplicate matches fail
+  mutation:
+    mutable: ["comment","definedTags","freeformTags","isAutoApproveDuringMaintenance","isEnforcedAlways","isHypervisorLogForwarded","isLogForwarded","remoteSyslogServerAddress","remoteSyslogServerCACert","remoteSyslogServerPort","timeAssignmentFrom","timeAssignmentTo"]
+    forceNew: ["compartmentId","operatorControlId","resourceCompartmentId","resourceId","resourceName","resourceType"]
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - "The runtime uses its declared lifecycle-state contract for OperatorControlAssignment reconciliation."
+  - "The credential-free mock exercises SDK request serialization, response projection, mutation when supported, and confirmed deletion."

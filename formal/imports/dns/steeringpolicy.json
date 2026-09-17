@@ -1,0 +1,157 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "dns",
+  "slug": "steeringpolicy",
+  "kind": "SteeringPolicy",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_dns_steering_policy",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateSteeringPolicy",
+        "requestType": "dns.CreateSteeringPolicyRequest",
+        "responseType": "dns.CreateSteeringPolicyResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetSteeringPolicy",
+        "requestType": "dns.GetSteeringPolicyRequest",
+        "responseType": "dns.GetSteeringPolicyResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListSteeringPolicies",
+        "requestType": "dns.ListSteeringPoliciesRequest",
+        "responseType": "dns.ListSteeringPoliciesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeSteeringPolicyCompartment",
+        "requestType": "dns.ChangeSteeringPolicyCompartmentRequest",
+        "responseType": "dns.ChangeSteeringPolicyCompartmentResponse"
+      },
+      {
+        "operation": "UpdateSteeringPolicy",
+        "requestType": "dns.UpdateSteeringPolicyRequest",
+        "responseType": "dns.UpdateSteeringPolicyResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteSteeringPolicy",
+        "requestType": "dns.DeleteSteeringPolicyRequest",
+        "responseType": "dns.DeleteSteeringPolicyResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "display_name",
+      "freeform_tags",
+      "health_check_monitor_id",
+      "template",
+      "ttl"
+    ],
+    "forceNew": [
+      "answers",
+      "answers.is_disabled",
+      "answers.name",
+      "answers.pool",
+      "answers.rdata",
+      "answers.rtype",
+      "rules",
+      "rules.cases",
+      "rules.cases.answer_data",
+      "rules.cases.answer_data.answer_condition",
+      "rules.cases.answer_data.should_keep",
+      "rules.cases.answer_data.value",
+      "rules.cases.case_condition",
+      "rules.cases.count",
+      "rules.default_answer_data",
+      "rules.default_answer_data.answer_condition",
+      "rules.default_answer_data.should_keep",
+      "rules.default_answer_data.value",
+      "rules.default_count",
+      "rules.description",
+      "rules.rule_type"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForCreatedState"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_dns_steering_policies",
+    "collectionField": "steering_policies",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "display_name_contains",
+      "health_check_monitor_id",
+      "id",
+      "state",
+      "template",
+      "time_created_greater_than_or_equal_to",
+      "time_created_less_than"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/dns/steeringpolicy/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/dns/steeringpolicy/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Refreshed from the pinned terraform-provider-oci DNS Steering Policy resource; observed lifecycle and polymorphic update behavior remain repo-authored."
+  ]
+}

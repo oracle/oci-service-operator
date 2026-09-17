@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "fleetappsmanagement",
+  "slug": "onboarding",
+  "kind": "Onboarding",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_fleet_apps_management_onboarding",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOnboarding",
+        "requestType": "fleetappsmanagement.CreateOnboardingRequest",
+        "responseType": "fleetappsmanagement.CreateOnboardingResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOnboarding",
+        "requestType": "fleetappsmanagement.GetOnboardingRequest",
+        "responseType": "fleetappsmanagement.GetOnboardingResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOnboardings",
+        "requestType": "fleetappsmanagement.ListOnboardingsRequest",
+        "responseType": "fleetappsmanagement.ListOnboardingsResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOnboarding",
+        "requestType": "fleetappsmanagement.DeleteOnboardingRequest",
+        "responseType": "fleetappsmanagement.DeleteOnboardingResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "NEEDS_ATTENTION"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": null,
+    "forceNew": [
+      "compartment_id",
+      "defined_tags",
+      "freeform_tags",
+      "is_cost_tracking_tag_enabled",
+      "is_fams_tag_enabled"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_fleet_apps_management_onboardings",
+    "collectionField": "onboarding_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/fleetappsmanagement/onboarding/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/fleetappsmanagement/onboarding/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from the pinned terraform-provider-oci source revision."
+  ]
+}

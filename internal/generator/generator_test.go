@@ -44,6 +44,50 @@ func TestMergeFieldOverridesCanDropFieldWithJSONIgnoreTag(t *testing.T) {
 	}
 }
 
+func TestApplyResourceGenerationOverridesAddsNestedSpecHelperFields(t *testing.T) {
+	t.Parallel()
+	resources := []ResourceModel{{
+		Kind:       "FsuCycle",
+		SpecFields: []FieldModel{{Name: "GoalVersionDetails", Type: "FsuCycleGoalVersionDetails", Tag: `json:"goalVersionDetails"`}},
+		HelperTypes: []TypeModel{{
+			Name:   "FsuCycleGoalVersionDetails",
+			Fields: []FieldModel{{Name: "Type", Type: "string", Tag: `json:"type,omitempty"`}},
+		}},
+	}}
+	service := ServiceConfig{
+		Service: "fleetsoftwareupdate",
+		Generation: GenerationConfig{Resources: []ResourceGenerationOverride{{
+			Kind: "FsuCycle",
+			SpecFields: []FieldOverride{{
+				Name: "GoalVersionDetails.Version", Type: "string", Tag: `json:"version,omitempty"`,
+			}},
+		}}},
+	}
+	updated, err := applyResourceGenerationOverrides(service, "v1beta1", resources)
+	if err != nil {
+		t.Fatal(err)
+	}
+	helper := findHelperType(t, updated[0].HelperTypes, "FsuCycleGoalVersionDetails")
+	assertFieldNamesPresent(t, helper.Name+" fields", helper.Fields, "Type", "Version")
+}
+
+func TestApplyResourceGenerationOverridesRejectsUnknownNestedSpecPath(t *testing.T) {
+	t.Parallel()
+	service := ServiceConfig{
+		Service: "example",
+		Generation: GenerationConfig{Resources: []ResourceGenerationOverride{{
+			Kind: "Thing",
+			SpecFields: []FieldOverride{{
+				Name: "Missing.Value", Type: "string", Tag: `json:"value,omitempty"`,
+			}},
+		}}},
+	}
+	_, err := applyResourceGenerationOverrides(service, "v1beta1", []ResourceModel{{Kind: "Thing"}})
+	if err == nil || !strings.Contains(err.Error(), `root field "Missing" was not found`) {
+		t.Fatalf("applyResourceGenerationOverrides() error = %v, want missing-root detail", err)
+	}
+}
+
 func TestBuildPackageModelDiscoversResources(t *testing.T) {
 	t.Parallel()
 
@@ -78,6 +122,40 @@ func TestBuildPackageModelDiscoversResources(t *testing.T) {
 	assertDiscoveredReport(t, findResource(t, pkg.Resources, "Report"))
 	assertDiscoveredReportByName(t, findResource(t, pkg.Resources, "ReportByName"))
 	assertDiscoveredOAuthClientCredential(t, findResource(t, pkg.Resources, "OAuthClientCredential"))
+}
+
+func TestResponseObservedStateFallbackUsesTypedOperationBodiesOnlyWhenNeeded(t *testing.T) {
+	t.Parallel()
+
+	index, err := ocisdk.NewIndex(func(context.Context, string) (string, error) {
+		return sampleSDKDir(t), nil
+	}).Package(context.Background(), "example.com/test/sdk")
+	if err != nil {
+		t.Fatal(err)
+	}
+	candidates := responseObservedStateStructCandidates(index, &RuntimeModel{
+		Get:  &RuntimeOperationModel{ResponseTypeName: "GetWidgetResponse"},
+		List: &RuntimeOperationModel{ResponseTypeName: "ListWidgetsResponse"},
+	})
+	if !slices.Equal(candidates, []string{"Widget"}) {
+		t.Fatalf("response candidates = %v, want singular Widget read model", candidates)
+	}
+
+	fallback := synthesizeResourceFieldSet(index, ServiceConfig{}, "MissingWidget", "MissingWidget", nil, candidates)
+	assertFieldNamesPresent(t, "fallback status", fallback.StatusFields, "LifecycleState")
+
+	listCandidates := responseObservedStateStructCandidates(index, &RuntimeModel{
+		List: &RuntimeOperationModel{ResponseTypeName: "ListWidgetsResponse"},
+	})
+	if !slices.Equal(listCandidates, []string{"ListWidgetsResponse"}) {
+		t.Fatalf("list response candidates = %v, want collection response model", listCandidates)
+	}
+	listFallback := synthesizeResourceFieldSet(index, ServiceConfig{}, "MissingWidgetList", "MissingWidgetList", nil, listCandidates)
+	assertFieldNamesPresent(t, "list fallback status", listFallback.StatusFields, "Items")
+
+	named := synthesizeResourceFieldSet(index, ServiceConfig{}, "Widget", "Widget", nil, []string{"DbSystem"})
+	assertFieldNamesPresent(t, "named status", named.StatusFields, "LifecycleState", "TimeUpdated")
+	assertFieldNamesAbsent(t, "named status", named.StatusFields, "Id", "DisplayName", "Port")
 }
 
 func TestAPIObjectListTypeNameAvoidsSelectedKindCollision(t *testing.T) {
@@ -631,6 +709,140 @@ func TestBuildPackageModelSynthesizesONSObservedStateFields(t *testing.T) {
 			t.Fatalf("ConfirmSubscription status fields = %#v, want %s", confirmSubscription.StatusFields, fieldName)
 		}
 	}
+}
+
+func TestBuildPackageModelPreservesAliasedAPIKinds(t *testing.T) {
+	t.Parallel()
+
+	cfg := &Config{
+		Domain:         "oracle.com",
+		DefaultVersion: "v1beta1",
+	}
+	service := ServiceConfig{
+		Service:        "apigateway",
+		SDKPackage:     "github.com/oracle/oci-go-sdk/v65/apigateway",
+		Group:          "apigateway",
+		PackageProfile: PackageProfileCRDOnly,
+		Selection:      selectionExplicit(true, "Deployment", "Gateway"),
+		KindAliases: map[string]string{
+			"Deployment": "ApiGatewayDeployment",
+			"Gateway":    "ApiGateway",
+		},
+	}.withSelectedKinds([]string{"Deployment", "Gateway"})
+
+	pkg, err := NewDiscoverer().BuildPackageModel(context.Background(), cfg, service)
+	if err != nil {
+		t.Fatalf("BuildPackageModel() error = %v", err)
+	}
+
+	gateway := findResource(t, pkg.Resources, "ApiGateway")
+	if gateway.SDKName != "Gateway" || gateway.FileStem != "apigateway" {
+		t.Fatalf("ApiGateway identity = SDKName %q, FileStem %q", gateway.SDKName, gateway.FileStem)
+	}
+	deployment := findResource(t, pkg.Resources, "ApiGatewayDeployment")
+	if deployment.SDKName != "Deployment" || deployment.FileStem != "apigatewaydeployment" {
+		t.Fatalf("ApiGatewayDeployment identity = SDKName %q, FileStem %q", deployment.SDKName, deployment.FileStem)
+	}
+	for _, field := range []string{"DisplayName", "Hostname", "LifecycleState", "FreeformTags"} {
+		if !hasField(gateway.StatusFields, field) {
+			t.Fatalf("ApiGateway status fields = %#v, want %s", gateway.StatusFields, field)
+		}
+	}
+	for _, field := range []string{"DisplayName", "Specification", "LifecycleState", "FreeformTags"} {
+		if !hasField(deployment.StatusFields, field) {
+			t.Fatalf("ApiGatewayDeployment status fields = %#v, want %s", deployment.StatusFields, field)
+		}
+	}
+}
+
+func TestCheckedInApiGatewayOptionalBooleansPreservePresence(t *testing.T) {
+	t.Parallel()
+
+	cfg := loadCheckedInConfig(t)
+	service := serviceConfigsByName(t, cfg, "apigateway")["apigateway"]
+	pkg, err := NewDiscoverer().BuildPackageModel(context.Background(), cfg, *service)
+	if err != nil {
+		t.Fatalf("BuildPackageModel() error = %v", err)
+	}
+
+	var violations []string
+	for _, kind := range []string{"ApiGateway", "ApiGatewayDeployment"} {
+		resource := findResource(t, pkg.Resources, kind)
+		for _, path := range optionalValueBoolPaths(resource) {
+			violations = append(violations, kind+"."+path)
+		}
+	}
+	if len(violations) != 0 {
+		t.Fatalf("API Gateway optional boolean fields lose absent-vs-false presence: %v", violations)
+	}
+}
+
+func TestOptionalBooleanPresencePolicyIsResourceScoped(t *testing.T) {
+	t.Parallel()
+
+	cfg := &Config{Domain: "oracle.com", DefaultVersion: "v1beta1"}
+	service := ServiceConfig{
+		Service:        "apigateway",
+		SDKPackage:     "github.com/oracle/oci-go-sdk/v65/apigateway",
+		Group:          "apigateway",
+		PackageProfile: PackageProfileCRDOnly,
+		Selection:      selectionExplicit(true, "Deployment", "Gateway"),
+		KindAliases: map[string]string{
+			"Deployment": "ApiGatewayDeployment",
+			"Gateway":    "ApiGateway",
+		},
+		Generation: GenerationConfig{Resources: []ResourceGenerationOverride{{
+			Kind:                            "ApiGateway",
+			PreserveOptionalBooleanPresence: true,
+		}}},
+	}.withSelectedKinds([]string{"Deployment", "Gateway"})
+
+	pkg, err := NewDiscoverer().BuildPackageModel(context.Background(), cfg, service)
+	if err != nil {
+		t.Fatalf("BuildPackageModel() error = %v", err)
+	}
+	if paths := optionalValueBoolPaths(findResource(t, pkg.Resources, "ApiGateway")); len(paths) != 0 {
+		t.Fatalf("opted-in ApiGateway optional boolean fields = %v, want presence-aware pointers", paths)
+	}
+	if paths := optionalValueBoolPaths(findResource(t, pkg.Resources, "ApiGatewayDeployment")); len(paths) == 0 {
+		t.Fatal("non-opted-in ApiGatewayDeployment unexpectedly changed optional boolean representation")
+	}
+}
+
+func optionalValueBoolPaths(resource ResourceModel) []string {
+	helperTypes := make(map[string]TypeModel, len(resource.HelperTypes))
+	for _, helperType := range resource.HelperTypes {
+		helperTypes[helperType.Name] = helperType
+	}
+
+	var paths []string
+	var walk func([]FieldModel, []string, map[string]struct{})
+	walk = func(fields []FieldModel, prefix []string, stack map[string]struct{}) {
+		for _, field := range fields {
+			path := append(append([]string(nil), prefix...), field.Name)
+			if field.Type == "bool" && slices.Contains(field.Markers, "+kubebuilder:validation:Optional") {
+				paths = append(paths, strings.Join(path, "."))
+			}
+
+			helperName := underlyingTypeName(field.Type)
+			helperType, ok := helperTypes[helperName]
+			if !ok {
+				continue
+			}
+			if _, recursive := stack[helperName]; recursive {
+				continue
+			}
+			nextStack := make(map[string]struct{}, len(stack)+1)
+			for name := range stack {
+				nextStack[name] = struct{}{}
+			}
+			nextStack[helperName] = struct{}{}
+			walk(helperType.Fields, path, nextStack)
+		}
+	}
+	walk(resource.SpecFields, nil, map[string]struct{}{})
+	slices.Sort(paths)
+	return paths
 }
 
 func TestBuildPackageModelSynthesizesWorkRequestsObservedStateAlias(t *testing.T) {
@@ -1947,6 +2159,49 @@ func TestRenderServiceRuntimeHooksFileRendersFormalSemanticsAndRequestFields(t *
 	})
 }
 
+func TestRenderServiceRuntimeHooksFileConfiguresDefaultWorkRequestPolling(t *testing.T) {
+	t.Parallel()
+
+	content, err := renderServiceRuntimeHooksFile(ServiceManagerModel{
+		Kind:                  "Thing",
+		SDKName:               "Thing",
+		PackageName:           "thing",
+		APIImportPath:         "github.com/oracle/oci-service-operator/api/example/v1beta1",
+		APIImportAlias:        "examplev1beta1",
+		SDKImportPath:         "github.com/oracle/oci-go-sdk/v65/example",
+		SDKImportAlias:        "examplesdk",
+		ManagerTypeName:       "ThingServiceManager",
+		ClientInterfaceName:   "ThingServiceClient",
+		DefaultClientTypeName: "defaultThingServiceClient",
+		SDKClientTypeName:     "ExampleClient",
+		Async: &RuntimeAsyncModel{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &RuntimeWorkRequestModel{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		WorkRequestOperation: &RuntimeOperationModel{
+			MethodName:       "GetWorkRequest",
+			RequestTypeName:  "GetWorkRequestRequest",
+			ResponseTypeName: "GetWorkRequestResponse",
+		},
+		WorkRequestIDFieldName: "WorkRequestId",
+	})
+	if err != nil {
+		t.Fatalf("renderServiceRuntimeHooksFile() error = %v", err)
+	}
+	assertContains(t, content, []string{
+		"AsyncSemantics: &generatedruntime.AsyncSemantics{",
+		"Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter()",
+		"WorkRequestId: &workRequestID",
+		"response, err := sdkClient.GetWorkRequest(ctx, request)",
+		"return response, nil",
+	})
+}
+
 func TestFilteredRuntimeHooksKeepsWorkRequestHelpersOnlyForExplicitWorkRequestAsync(t *testing.T) {
 	t.Parallel()
 
@@ -3150,6 +3405,7 @@ func TestCheckedInLifecycleAsyncContractsStripStaleWorkRequestHelpers(t *testing
 		serviceNames = append(serviceNames, serviceName)
 	}
 	slices.Sort(serviceNames)
+	pipeline := New()
 
 	for _, serviceName := range serviceNames {
 		targets := targetsByService[serviceName]
@@ -3166,7 +3422,7 @@ func TestCheckedInLifecycleAsyncContractsStripStaleWorkRequestHelpers(t *testing
 			outputRoot := t.TempDir()
 			seedSamplesKustomization(t, outputRoot)
 
-			result, err := New().Generate(context.Background(), cfg, []ServiceConfig{service}, Options{
+			result, err := pipeline.Generate(context.Background(), cfg, []ServiceConfig{service}, Options{
 				OutputRoot: outputRoot,
 			})
 			if err != nil {

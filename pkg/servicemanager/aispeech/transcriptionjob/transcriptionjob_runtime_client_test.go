@@ -666,6 +666,104 @@ func TestTranscriptionJobDeleteCallsDeleteForLiveCanceledJobWithoutPendingState(
 	requireTrailingCondition(t, resource, shared.Terminating)
 }
 
+func TestTranscriptionJobUnsupportedDriftEquivalent(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name       string
+		path       string
+		desired    any
+		observed   any
+		handled    bool
+		equivalent bool
+	}{
+		{name: "service job suffix", path: "outputLocation.prefix", desired: "transcripts", observed: "transcripts/job-123/", handled: true, equivalent: true},
+		{name: "trailing slash", path: "outputLocation.prefix", desired: "transcripts/", observed: "transcripts/job-123/", handled: true, equivalent: true},
+		{name: "changed base", path: "outputLocation.prefix", desired: "changed", observed: "transcripts/job-123/", handled: true, equivalent: false},
+		{name: "nested suffix", path: "outputLocation.prefix", desired: "transcripts", observed: "transcripts/job-123/nested/", handled: true, equivalent: false},
+		{name: "unrelated", path: "displayName", desired: "a", observed: "b", handled: false, equivalent: false},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			handled, equivalent := transcriptionJobUnsupportedDriftEquivalent(test.path, test.desired, test.observed)
+			if handled != test.handled || equivalent != test.equivalent {
+				t.Fatalf("transcriptionJobUnsupportedDriftEquivalent() = %t, %t; want %t, %t", handled, equivalent, test.handled, test.equivalent)
+			}
+		})
+	}
+}
+
+func TestTranscriptionJobCreateOrUpdateAcceptsServiceGeneratedOutputPrefix(t *testing.T) {
+	t.Parallel()
+
+	updateCalls := 0
+	resource := makeTranscriptionJobResource()
+	resource.Status.Id = "ocid1.transcriptionjob.oc1..existing"
+	current := makeSDKTranscriptionJob(
+		"ocid1.transcriptionjob.oc1..existing",
+		resource.Spec.CompartmentId,
+		resource.Spec.DisplayName,
+		resource.Spec.Description,
+		aispeech.TranscriptionJobLifecycleStateSucceeded,
+		"",
+	)
+	current.OutputLocation.Prefix = common.String("transcripts/job-123/")
+
+	client := testTranscriptionJobClient(&fakeTranscriptionJobOCIClient{
+		getTranscriptionJobFn: func(context.Context, aispeech.GetTranscriptionJobRequest) (aispeech.GetTranscriptionJobResponse, error) {
+			return aispeech.GetTranscriptionJobResponse{TranscriptionJob: current}, nil
+		},
+		updateTranscriptionJobFn: func(context.Context, aispeech.UpdateTranscriptionJobRequest) (aispeech.UpdateTranscriptionJobResponse, error) {
+			updateCalls++
+			return aispeech.UpdateTranscriptionJobResponse{}, nil
+		},
+	})
+
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful || response.ShouldRequeue {
+		t.Fatalf("CreateOrUpdate() response = %#v, want converged success", response)
+	}
+	if updateCalls != 0 {
+		t.Fatalf("UpdateTranscriptionJob() calls = %d, want 0", updateCalls)
+	}
+	if resource.Status.OutputLocation.Prefix != "transcripts/job-123/" {
+		t.Fatalf("status output prefix = %q, want observed service prefix", resource.Status.OutputLocation.Prefix)
+	}
+}
+
+func TestTranscriptionJobCreateOrUpdateRejectsChangedOutputPrefix(t *testing.T) {
+	t.Parallel()
+
+	resource := makeTranscriptionJobResource()
+	resource.Status.Id = "ocid1.transcriptionjob.oc1..existing"
+	resource.Spec.OutputLocation.Prefix = "changed/"
+	current := makeSDKTranscriptionJob(
+		"ocid1.transcriptionjob.oc1..existing",
+		resource.Spec.CompartmentId,
+		resource.Spec.DisplayName,
+		resource.Spec.Description,
+		aispeech.TranscriptionJobLifecycleStateSucceeded,
+		"",
+	)
+	current.OutputLocation.Prefix = common.String("transcripts/job-123/")
+
+	client := testTranscriptionJobClient(&fakeTranscriptionJobOCIClient{
+		getTranscriptionJobFn: func(context.Context, aispeech.GetTranscriptionJobRequest) (aispeech.GetTranscriptionJobResponse, error) {
+			return aispeech.GetTranscriptionJobResponse{TranscriptionJob: current}, nil
+		},
+	})
+
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err == nil || !strings.Contains(err.Error(), "outputLocation.prefix") {
+		t.Fatalf("CreateOrUpdate() error = %v, want output prefix drift rejection", err)
+	}
+	if response.IsSuccessful {
+		t.Fatalf("CreateOrUpdate() response = %#v, want failure", response)
+	}
+}
+
 func TestTranscriptionJobDeleteCallsDeleteAfterCancelingSettlesToCanceled(t *testing.T) {
 	t.Parallel()
 

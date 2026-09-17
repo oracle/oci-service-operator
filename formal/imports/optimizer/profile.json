@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "optimizer",
+  "slug": "profile",
+  "kind": "Profile",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_optimizer_profile",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateProfile",
+        "requestType": "optimizer.CreateProfileRequest",
+        "responseType": "optimizer.CreateProfileResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetProfile",
+        "requestType": "optimizer.GetProfileRequest",
+        "responseType": "optimizer.GetProfileResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListProfiles",
+        "requestType": "optimizer.ListProfilesRequest",
+        "responseType": "optimizer.ListProfilesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateProfile",
+        "requestType": "optimizer.UpdateProfileRequest",
+        "responseType": "optimizer.UpdateProfileResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteProfile",
+        "requestType": "optimizer.DeleteProfileRequest",
+        "responseType": "optimizer.DeleteProfileResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "ATTACHING",
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "aggregation_interval_in_days",
+      "defined_tags",
+      "description",
+      "freeform_tags",
+      "levels_configuration.items.level",
+      "levels_configuration.items.recommendation_id",
+      "name",
+      "target_compartments.items",
+      "target_tags.items.tag_definition_name",
+      "target_tags.items.tag_namespace_name",
+      "target_tags.items.tag_value_type",
+      "target_tags.items.tag_values"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_optimizer_profiles",
+    "collectionField": "profile_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "name",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/optimizer/profile/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/optimizer/profile/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts are imported from the pinned terraform-provider-oci revision; repo-authored runtime semantics remain authoritative."
+  ]
+}

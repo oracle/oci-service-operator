@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "cloudbridge",
+  "slug": "assetsource",
+  "kind": "AssetSource",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_cloud_bridge_asset_source",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateAssetSource",
+        "requestType": "cloudbridge.CreateAssetSourceRequest",
+        "responseType": "cloudbridge.CreateAssetSourceResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetAssetSource",
+        "requestType": "cloudbridge.GetAssetSourceRequest",
+        "responseType": "cloudbridge.GetAssetSourceResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListAssetSources",
+        "requestType": "cloudbridge.ListAssetSourcesRequest",
+        "responseType": "cloudbridge.ListAssetSourcesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeAssetSourceCompartment",
+        "requestType": "cloudbridge.ChangeAssetSourceCompartmentRequest",
+        "responseType": "cloudbridge.ChangeAssetSourceCompartmentResponse"
+      },
+      {
+        "operation": "UpdateAssetSource",
+        "requestType": "cloudbridge.UpdateAssetSourceRequest",
+        "responseType": "cloudbridge.UpdateAssetSourceResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteAssetSource",
+        "requestType": "cloudbridge.DeleteAssetSourceRequest",
+        "responseType": "cloudbridge.DeleteAssetSourceResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "NEEDS_ATTENTION"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "are_historical_metrics_collected",
+      "are_realtime_metrics_collected",
+      "assets_compartment_id",
+      "compartment_id",
+      "defined_tags",
+      "discovery_credentials.secret_id",
+      "discovery_credentials.type",
+      "discovery_schedule_id",
+      "display_name",
+      "freeform_tags",
+      "replication_credentials.secret_id",
+      "replication_credentials.type",
+      "system_tags",
+      "type",
+      "vcenter_endpoint"
+    ],
+    "forceNew": [
+      "environment_id",
+      "inventory_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_cloud_bridge_asset_sources",
+    "collectionField": "asset_source_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "asset_source_id",
+      "compartment_id",
+      "display_name",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/cloudbridge/assetsource/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/cloudbridge/assetsource/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from the pinned terraform-provider-oci source revision."
+  ]
+}

@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datalabelingservicedataplane",
+  "slug": "record",
+  "kind": "Record",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "unavailable",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateRecord",
+        "requestType": "datalabelingservicedataplane.CreateRecordRequest",
+        "responseType": "datalabelingservicedataplane.CreateRecordResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetRecord",
+        "requestType": "datalabelingservicedataplane.GetRecordRequest",
+        "responseType": "datalabelingservicedataplane.GetRecordResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListRecords",
+        "requestType": "datalabelingservicedataplane.ListRecordsRequest",
+        "responseType": "datalabelingservicedataplane.ListRecordsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateRecord",
+        "requestType": "datalabelingservicedataplane.UpdateRecordRequest",
+        "responseType": "datalabelingservicedataplane.UpdateRecordResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteRecord",
+        "requestType": "datalabelingservicedataplane.DeleteRecordRequest",
+        "responseType": "datalabelingservicedataplane.DeleteRecordResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "recordMetadata",
+      "freeformTags",
+      "definedTags"
+    ],
+    "forceNew": [
+      "name",
+      "datasetId",
+      "compartmentId",
+      "sourceDetails"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "unavailable",
+    "collectionField": "Items",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartmentId",
+      "datasetId",
+      "lifecycleState",
+      "name",
+      "id",
+      "isLabeled",
+      "annotationLabelsContains",
+      "opc-request-id"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datalabelingservicedataplane/record/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datalabelingservicedataplane/record/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Terraform provider formal-import could not resolve unavailable; the vendored SDK, generated runtime, and package-owned typed OCI fixtures define this reviewed contract."
+  ]
+}

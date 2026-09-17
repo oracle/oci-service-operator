@@ -1,0 +1,143 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "emwarehouse",
+  "slug": "emwarehouse",
+  "kind": "EmWarehouse",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "unavailable",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateEmWarehouse",
+        "requestType": "emwarehouse.CreateEmWarehouseRequest",
+        "responseType": "emwarehouse.CreateEmWarehouseResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetEmWarehouse",
+        "requestType": "emwarehouse.GetEmWarehouseRequest",
+        "responseType": "emwarehouse.GetEmWarehouseResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListEmWarehouses",
+        "requestType": "emwarehouse.ListEmWarehousesRequest",
+        "responseType": "emwarehouse.ListEmWarehousesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateEmWarehouse",
+        "requestType": "emwarehouse.UpdateEmWarehouseRequest",
+        "responseType": "emwarehouse.UpdateEmWarehouseResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteEmWarehouse",
+        "requestType": "emwarehouse.DeleteEmWarehouseRequest",
+        "responseType": "emwarehouse.DeleteEmWarehouseResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "emBridgeId",
+      "compartmentId",
+      "freeformTags",
+      "definedTags"
+    ],
+    "forceNew": [
+      "operationsInsightsWarehouseId",
+      "displayName"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "EmWarehouse",
+        "action": "CreateEmWarehouse"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "EmWarehouse",
+        "action": "UpdateEmWarehouse"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "EmWarehouse",
+        "action": "DeleteEmWarehouse"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "unavailable",
+    "collectionField": "Items",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartmentId",
+      "lifecycleState",
+      "displayName",
+      "operationsInsightsWarehouseId",
+      "id",
+      "opc-request-id"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/emwarehouse/emwarehouse/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/emwarehouse/emwarehouse/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Terraform provider formal-import could not resolve unavailable; the vendored SDK, generated runtime, and package-owned typed OCI fixtures define this reviewed contract."
+  ]
+}

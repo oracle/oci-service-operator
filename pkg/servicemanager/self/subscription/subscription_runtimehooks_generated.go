@@ -114,8 +114,20 @@ func newSubscriptionDefaultRuntimeHooks(sdkClient selfsdk.SubscriptionClient) Su
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*selfv1beta1.Subscription]{},
 		StatusHooks:     generatedruntime.StatusHooks[*selfv1beta1.Subscription]{},
 		ParityHooks:     generatedruntime.ParityHooks[*selfv1beta1.Subscription]{},
-		Async:           generatedruntime.AsyncHooks[*selfv1beta1.Subscription]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*selfv1beta1.Subscription]{},
+		Async: generatedruntime.AsyncHooks[*selfv1beta1.Subscription]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := selfsdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*selfv1beta1.Subscription]{},
 		Create: runtimeOperationHooks[selfsdk.CreateSubscriptionRequest, selfsdk.CreateSubscriptionResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateSubscriptionDetails", RequestName: "CreateSubscriptionDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request selfsdk.CreateSubscriptionRequest) (selfsdk.CreateSubscriptionResponse, error) {
@@ -163,10 +175,19 @@ func buildSubscriptionGeneratedRuntimeConfig(
 	hooks SubscriptionRuntimeHooks,
 ) generatedruntime.Config[*selfv1beta1.Subscription] {
 	return generatedruntime.Config[*selfv1beta1.Subscription]{
-		Kind:            "Subscription",
-		SDKName:         "Subscription",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "Subscription",
+		SDKName:   "Subscription",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

@@ -56,6 +56,18 @@ spec:
           spec:
             description: AttributeTagSpec defines the desired state of AttributeTag.
             properties:
+              attributeKey:
+                description: The key of the attribute receiving the tag.
+                type: string
+              catalogId:
+                description: The OCID of the catalog containing the tagged attribute.
+                type: string
+              dataAssetKey:
+                description: The key of the data asset containing the tagged attribute.
+                type: string
+              entityKey:
+                description: The key of the entity containing the tagged attribute.
+                type: string
               name:
                 description: |-
                   The name of the tag in the case of a free form tag.
@@ -65,6 +77,11 @@ spec:
                 description: Unique key of the related term or null in the case of
                   a free form tag.
                 type: string
+            required:
+            - attributeKey
+            - catalogId
+            - dataAssetKey
+            - entityKey
             type: object
           status:
             description: AttributeTagStatus defines the observed state of AttributeTag.

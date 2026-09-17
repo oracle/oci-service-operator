@@ -1,0 +1,16 @@
+#
+# Copyright (c) 2026, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+#
+
+apiVersion: ons.oracle.com/v1beta1
+kind: Subscription
+metadata:
+  name: osok-subscription-${OSOK_E2E_SUFFIX}
+spec:
+  topicId: ${OCI_NOTIFICATION_TOPIC_ID}
+  compartmentId: ${OCI_COMPARTMENT_ID}
+  protocol: ${OCI_NOTIFICATION_PROTOCOL}
+  endpoint: ${OCI_NOTIFICATION_ENDPOINT}
+  freeformTags:
+    osok-e2e-phase: create

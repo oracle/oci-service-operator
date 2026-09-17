@@ -50,15 +50,84 @@ func registerTargetDatabaseGroupRuntimeHooksMutator(mutator TargetDatabaseGroupR
 	}
 	targetdatabasegroupRuntimeHooksMutators = append(targetdatabasegroupRuntimeHooksMutators, mutator)
 }
+func newTargetDatabaseGroupRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "datasafe",
+		FormalSlug:    "targetdatabasegroup",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE", "NEEDS_ATTENTION"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"accessLevel", "compartmentId", "compartmentIdInSubtree", "displayName", "state", "targetDatabaseGroupFilter", "targetDatabaseGroupId", "timeCreatedGreaterThanOrEqualTo", "timeCreatedLessThan"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"definedTags", "description", "displayName", "freeformTags", "matchingCriteria"},
+			ForceNew:      []string{"compartmentId"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{},
+			Update: []generatedruntime.Hook{},
+			Delete: []generatedruntime.Hook{},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> GetTargetDatabaseGroup",
+			Hooks:    []generatedruntime.Hook{},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> GetTargetDatabaseGroup",
+			Hooks:    []generatedruntime.Hook{},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> confirm-delete",
+			Hooks:    []generatedruntime.Hook{},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newTargetDatabaseGroupDefaultRuntimeHooks(sdkClient datasafesdk.DataSafeClient) TargetDatabaseGroupRuntimeHooks {
 	return TargetDatabaseGroupRuntimeHooks{
+		Semantics:       newTargetDatabaseGroupRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*datasafev1beta1.TargetDatabaseGroup]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*datasafev1beta1.TargetDatabaseGroup]{},
 		StatusHooks:     generatedruntime.StatusHooks[*datasafev1beta1.TargetDatabaseGroup]{},
 		ParityHooks:     generatedruntime.ParityHooks[*datasafev1beta1.TargetDatabaseGroup]{},
-		Async:           generatedruntime.AsyncHooks[*datasafev1beta1.TargetDatabaseGroup]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*datasafev1beta1.TargetDatabaseGroup]{},
+		Async: generatedruntime.AsyncHooks[*datasafev1beta1.TargetDatabaseGroup]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := datasafesdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*datasafev1beta1.TargetDatabaseGroup]{},
 		Create: runtimeOperationHooks[datasafesdk.CreateTargetDatabaseGroupRequest, datasafesdk.CreateTargetDatabaseGroupResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateTargetDatabaseGroupDetails", RequestName: "CreateTargetDatabaseGroupDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request datasafesdk.CreateTargetDatabaseGroupRequest) (datasafesdk.CreateTargetDatabaseGroupResponse, error) {
@@ -106,10 +175,19 @@ func buildTargetDatabaseGroupGeneratedRuntimeConfig(
 	hooks TargetDatabaseGroupRuntimeHooks,
 ) generatedruntime.Config[*datasafev1beta1.TargetDatabaseGroup] {
 	return generatedruntime.Config[*datasafev1beta1.TargetDatabaseGroup]{
-		Kind:            "TargetDatabaseGroup",
-		SDKName:         "TargetDatabaseGroup",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "TargetDatabaseGroup",
+		SDKName:   "TargetDatabaseGroup",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

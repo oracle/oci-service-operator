@@ -1,0 +1,65 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: fleetsoftwareupdate
+slug: fsudiscovery
+kind: FsuDiscovery
+archetype: generated-service-manager
+states:
+- provisioning
+- active
+- updating
+- terminating
+repoAuthored:
+  operations:
+    create:
+    - CreateFsuDiscovery
+    update:
+    - UpdateFsuDiscovery
+    delete:
+    - DeleteFsuDiscovery
+  providerLifecycle:
+    createPending:
+    - CREATING
+    updatePending:
+    - UPDATING
+    deletePending:
+    - DELETING
+  listLookup:
+    filters:
+    - compartmentId
+    - lifecycleState
+    - displayName
+    - opc-request-id
+    matchRule: exact declared filters match within the resource scope; duplicate matches
+      fail
+  mutation:
+    mutable:
+    - displayName
+    - freeformTags
+    - definedTags
+    forceNew:
+    - compartmentId
+    - details
+  hooks:
+    create:
+    - helper: tfresource.CreateResource
+    - helper: tfresource.WaitForWorkRequestWithErrorHandling
+      entityType: FsuDiscovery
+      action: CreateFsuDiscovery
+    update:
+    - helper: tfresource.UpdateResource
+    delete:
+    - helper: tfresource.DeleteResource
+    - helper: tfresource.WaitForWorkRequestWithErrorHandling
+      entityType: FsuDiscovery
+      action: DeleteFsuDiscovery
+  followUp:
+    create: GetWorkRequest -> read-after-write
+    update: read-after-write
+    delete: GetWorkRequest -> confirm-delete
+notes:
+- The generated service manager uses the reviewed CRUD request, response, lifecycle,
+  and status projection contract.
+- Work-request phases are declared per operation from the vendored SDK response surface.
+- Secret side effects are none and finalizer ownership is retained until confirmed
+  deletion.

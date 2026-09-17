@@ -66,25 +66,25 @@ func newDecryptionProfileDefaultRuntimeHooks(sdkClient networkfirewallsdk.Networ
 			},
 		},
 		Get: runtimeOperationHooks[networkfirewallsdk.GetDecryptionProfileRequest, networkfirewallsdk.GetDecryptionProfileResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "DecryptionProfileName", RequestName: "decryptionProfileName", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "DecryptionProfileName", RequestName: "decryptionProfileName", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request networkfirewallsdk.GetDecryptionProfileRequest) (networkfirewallsdk.GetDecryptionProfileResponse, error) {
 				return sdkClient.GetDecryptionProfile(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[networkfirewallsdk.ListDecryptionProfilesRequest, networkfirewallsdk.ListDecryptionProfilesResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: true}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request networkfirewallsdk.ListDecryptionProfilesRequest) (networkfirewallsdk.ListDecryptionProfilesResponse, error) {
 				return sdkClient.ListDecryptionProfiles(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[networkfirewallsdk.UpdateDecryptionProfileRequest, networkfirewallsdk.UpdateDecryptionProfileResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "DecryptionProfileName", RequestName: "decryptionProfileName", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdateDecryptionProfileDetails", RequestName: "UpdateDecryptionProfileDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "DecryptionProfileName", RequestName: "decryptionProfileName", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateDecryptionProfileDetails", RequestName: "UpdateDecryptionProfileDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request networkfirewallsdk.UpdateDecryptionProfileRequest) (networkfirewallsdk.UpdateDecryptionProfileResponse, error) {
 				return sdkClient.UpdateDecryptionProfile(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[networkfirewallsdk.DeleteDecryptionProfileRequest, networkfirewallsdk.DeleteDecryptionProfileResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "DecryptionProfileName", RequestName: "decryptionProfileName", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "DecryptionProfileName", RequestName: "decryptionProfileName", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request networkfirewallsdk.DeleteDecryptionProfileRequest) (networkfirewallsdk.DeleteDecryptionProfileResponse, error) {
 				return sdkClient.DeleteDecryptionProfile(ctx, request)
 			},

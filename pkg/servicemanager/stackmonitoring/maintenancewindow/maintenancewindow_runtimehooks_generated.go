@@ -50,15 +50,80 @@ func registerMaintenanceWindowRuntimeHooksMutator(mutator MaintenanceWindowRunti
 	}
 	maintenancewindowRuntimeHooksMutators = append(maintenancewindowRuntimeHooksMutators, mutator)
 }
+func newMaintenanceWindowRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "stackmonitoring",
+		FormalSlug:    "maintenancewindow",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE", "NEEDS_ATTENTION"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"definedTags", "description", "freeformTags", "resources.resourceId", "schedule.maintenanceWindowDuration", "schedule.maintenanceWindowRecurrences", "schedule.scheduleType", "schedule.timeMaintenanceWindowEnd", "schedule.timeMaintenanceWindowStart"},
+			ForceNew:      []string{"compartmentId", "name", "resources.areMembersIncluded"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newMaintenanceWindowDefaultRuntimeHooks(sdkClient stackmonitoringsdk.StackMonitoringClient) MaintenanceWindowRuntimeHooks {
 	return MaintenanceWindowRuntimeHooks{
+		Semantics:       newMaintenanceWindowRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*stackmonitoringv1beta1.MaintenanceWindow]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*stackmonitoringv1beta1.MaintenanceWindow]{},
 		StatusHooks:     generatedruntime.StatusHooks[*stackmonitoringv1beta1.MaintenanceWindow]{},
 		ParityHooks:     generatedruntime.ParityHooks[*stackmonitoringv1beta1.MaintenanceWindow]{},
-		Async:           generatedruntime.AsyncHooks[*stackmonitoringv1beta1.MaintenanceWindow]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*stackmonitoringv1beta1.MaintenanceWindow]{},
+		Async: generatedruntime.AsyncHooks[*stackmonitoringv1beta1.MaintenanceWindow]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := stackmonitoringsdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*stackmonitoringv1beta1.MaintenanceWindow]{},
 		Create: runtimeOperationHooks[stackmonitoringsdk.CreateMaintenanceWindowRequest, stackmonitoringsdk.CreateMaintenanceWindowResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateMaintenanceWindowDetails", RequestName: "CreateMaintenanceWindowDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request stackmonitoringsdk.CreateMaintenanceWindowRequest) (stackmonitoringsdk.CreateMaintenanceWindowResponse, error) {
@@ -106,10 +171,19 @@ func buildMaintenanceWindowGeneratedRuntimeConfig(
 	hooks MaintenanceWindowRuntimeHooks,
 ) generatedruntime.Config[*stackmonitoringv1beta1.MaintenanceWindow] {
 	return generatedruntime.Config[*stackmonitoringv1beta1.MaintenanceWindow]{
-		Kind:            "MaintenanceWindow",
-		SDKName:         "MaintenanceWindow",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "MaintenanceWindow",
+		SDKName:   "MaintenanceWindow",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

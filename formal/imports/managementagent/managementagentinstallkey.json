@@ -1,0 +1,119 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "managementagent",
+  "slug": "managementagentinstallkey",
+  "kind": "ManagementAgentInstallKey",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_management_agent_management_agent_install_key",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateManagementAgentInstallKey",
+        "requestType": "managementagent.CreateManagementAgentInstallKeyRequest",
+        "responseType": "managementagent.CreateManagementAgentInstallKeyResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetManagementAgentInstallKey",
+        "requestType": "managementagent.GetManagementAgentInstallKeyRequest",
+        "responseType": "managementagent.GetManagementAgentInstallKeyResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListManagementAgentInstallKeys",
+        "requestType": "managementagent.ListManagementAgentInstallKeysRequest",
+        "responseType": "managementagent.ListManagementAgentInstallKeysResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateManagementAgentInstallKey",
+        "requestType": "managementagent.UpdateManagementAgentInstallKeyRequest",
+        "responseType": "managementagent.UpdateManagementAgentInstallKeyResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteManagementAgentInstallKey",
+        "requestType": "managementagent.DeleteManagementAgentInstallKeyRequest",
+        "responseType": "managementagent.DeleteManagementAgentInstallKeyResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "S_CREATING"
+      ],
+      "target": [
+        "S_ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "allowed_key_install_count",
+      "compartment_id",
+      "is_unlimited",
+      "time_expires"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_management_agent_management_agent_install_keys",
+    "collectionField": "management_agent_install_keys",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "access_level",
+      "compartment_id",
+      "compartment_id_in_subtree",
+      "display_name",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/managementagent/managementagentinstallkey/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/managementagent/managementagentinstallkey/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Pinned provider facts are paired with reviewed ManagementAgentInstallKey service-manager semantics and sanitized live CRUD evidence."
+  ]
+}

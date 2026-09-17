@@ -138,6 +138,7 @@ func buildAlarmSuppressionCreateBody(_ context.Context, resource *monitoringv1be
 	return monitoringsdk.CreateAlarmSuppressionDetails{
 		AlarmSuppressionTarget: target,
 		DisplayName:            common.String(resource.Spec.DisplayName),
+		Level:                  monitoringsdk.AlarmSuppressionLevelEnum(strings.ToUpper(strings.TrimSpace(resource.Spec.Level))),
 		Dimensions:             cloneStringMap(resource.Spec.Dimensions),
 		TimeSuppressFrom:       timeSuppressFrom,
 		TimeSuppressUntil:      timeSuppressUntil,

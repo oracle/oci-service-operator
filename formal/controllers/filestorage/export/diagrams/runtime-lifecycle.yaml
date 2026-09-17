@@ -1,0 +1,35 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: filestorage
+slug: export
+kind: Export
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - terminating
+  - deleted
+repoAuthored:
+  listLookup:
+    filters:
+      - exportSetId
+      - fileSystemId
+      - path
+    matchRule: Adopt only a unique export matching its export set, file system, and path.
+  mutation:
+    mutable:
+      - exportOptions
+      - isIdmapGroupsForSysAuth
+    forceNew:
+      - exportSetId
+      - fileSystemId
+      - path
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - CREATING requeues and ACTIVE succeeds; export updates return ACTIVE without a distinct updating state.
+  - OCI materializes omitted client-option booleans as explicit false, so one normalization update can precede steady state.
+  - Export options and ID-mapping behavior update in place; export-set, file-system, and path identity require replacement.
+  - Delete retains the finalizer through DELETING until DELETED or confirmed absence, with no Kubernetes Secret side effects.

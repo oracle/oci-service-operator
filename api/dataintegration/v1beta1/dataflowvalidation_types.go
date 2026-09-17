@@ -24,7 +24,7 @@ type DataFlowValidationSpec struct {
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef DataFlowValidationParentRef `json:"parentRef,omitempty"`
+	ParentRef DataFlowValidationParentRef `json:"parentRef,omitempty,omitzero"`
 	// Free form text without any restriction on permitted characters. Name can have letters, numbers, and special characters. The value is editable and is restricted to 1000 characters.
 	// +kubebuilder:validation:Optional
 	Name string `json:"name,omitempty"`
@@ -131,7 +131,7 @@ type DataFlowValidationMetadata struct {
 	// +kubebuilder:validation:Optional
 	AggregatorKey string `json:"aggregatorKey,omitempty"`
 	// +kubebuilder:validation:Optional
-	Aggregator DataFlowValidationMetadataAggregator `json:"aggregator,omitempty"`
+	Aggregator DataFlowValidationMetadataAggregator `json:"aggregator,omitempty,omitzero"`
 	// The full path to identify this object.
 	// +kubebuilder:validation:Optional
 	IdentifierPath string `json:"identifierPath,omitempty"`
@@ -148,7 +148,7 @@ type DataFlowValidationMetadata struct {
 	// +kubebuilder:validation:Optional
 	IsFavorite bool `json:"isFavorite,omitempty"`
 	// +kubebuilder:validation:Optional
-	CountStatistics DataFlowValidationMetadataCountStatistics `json:"countStatistics,omitempty"`
+	CountStatistics DataFlowValidationMetadataCountStatistics `json:"countStatistics,omitempty,omitzero"`
 }
 
 // DataFlowValidationValidationMessages defines nested fields for DataFlowValidation.ValidationMessages.

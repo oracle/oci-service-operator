@@ -114,8 +114,20 @@ func newKnowledgeBaseDefaultRuntimeHooks(sdkClient generativeaiagentsdk.Generati
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*generativeaiagentv1beta1.KnowledgeBase]{},
 		StatusHooks:     generatedruntime.StatusHooks[*generativeaiagentv1beta1.KnowledgeBase]{},
 		ParityHooks:     generatedruntime.ParityHooks[*generativeaiagentv1beta1.KnowledgeBase]{},
-		Async:           generatedruntime.AsyncHooks[*generativeaiagentv1beta1.KnowledgeBase]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*generativeaiagentv1beta1.KnowledgeBase]{},
+		Async: generatedruntime.AsyncHooks[*generativeaiagentv1beta1.KnowledgeBase]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := generativeaiagentsdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*generativeaiagentv1beta1.KnowledgeBase]{},
 		Create: runtimeOperationHooks[generativeaiagentsdk.CreateKnowledgeBaseRequest, generativeaiagentsdk.CreateKnowledgeBaseResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateKnowledgeBaseDetails", RequestName: "CreateKnowledgeBaseDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request generativeaiagentsdk.CreateKnowledgeBaseRequest) (generativeaiagentsdk.CreateKnowledgeBaseResponse, error) {
@@ -163,10 +175,19 @@ func buildKnowledgeBaseGeneratedRuntimeConfig(
 	hooks KnowledgeBaseRuntimeHooks,
 ) generatedruntime.Config[*generativeaiagentv1beta1.KnowledgeBase] {
 	return generatedruntime.Config[*generativeaiagentv1beta1.KnowledgeBase]{
-		Kind:            "KnowledgeBase",
-		SDKName:         "KnowledgeBase",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "KnowledgeBase",
+		SDKName:   "KnowledgeBase",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

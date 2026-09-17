@@ -659,7 +659,7 @@ func assertLifecycleEnvironmentListFallbackAuthDeleteBlocked(
 	if deleted {
 		t.Fatal("Delete() deleted = true, want false for auth-shaped list-fallback pre-read")
 	}
-	if got, want := len(fake.listRequests), 1; got != want {
+	if got, want := len(fake.listRequests), 2; got != want {
 		t.Fatalf("ListLifecycleEnvironments() calls = %d, want %d", got, want)
 	}
 	if got, want := len(fake.getRequests), 1; got != want {
@@ -705,12 +705,12 @@ func TestLifecycleEnvironmentDeleteConfirmsUnambiguousNotFound(t *testing.T) {
 	if resource.Status.OsokStatus.DeletedAt == nil {
 		t.Fatal("status.status.deletedAt = nil, want delete completion timestamp")
 	}
-	if got, want := resource.Status.OsokStatus.OpcRequestID, "opc-delete"; got != want {
+	if got, want := resource.Status.OsokStatus.OpcRequestID, "opc-request-id"; got != want {
 		t.Fatalf("status.status.opcRequestId = %q, want %q", got, want)
 	}
 }
 
-func TestLifecycleEnvironmentDeleteRejectsAuthShapedPreRead(t *testing.T) {
+func TestLifecycleEnvironmentDeleteAuthShapedPreReadUsesScopedListAbsence(t *testing.T) {
 	resource := newTestLifecycleEnvironment()
 	resource.Status.OsokStatus.Ocid = shared.OCID(testLifecycleEnvironmentID)
 	resource.Status.Id = testLifecycleEnvironmentID
@@ -724,21 +724,21 @@ func TestLifecycleEnvironmentDeleteRejectsAuthShapedPreRead(t *testing.T) {
 	}
 
 	deleted, err := testLifecycleEnvironmentClient(fake).Delete(context.Background(), resource)
-	if err == nil || !strings.Contains(err.Error(), "ambiguous 404 NotAuthorizedOrNotFound") {
-		t.Fatalf("Delete() error = %v, want ambiguous auth-shaped pre-read failure", err)
+	if err != nil {
+		t.Fatalf("Delete() error = %v", err)
 	}
-	if deleted {
-		t.Fatal("Delete() deleted = true, want false for auth-shaped pre-read")
+	if !deleted {
+		t.Fatal("Delete() deleted = false, want true after scoped list proves absence")
 	}
 	if got, want := len(fake.deleteRequests), 0; got != want {
 		t.Fatalf("DeleteLifecycleEnvironment() calls = %d, want %d", got, want)
 	}
-	if got, want := resource.Status.OsokStatus.OpcRequestID, "opc-request-id"; got != want {
-		t.Fatalf("status.status.opcRequestId = %q, want %q", got, want)
+	if resource.Status.OsokStatus.DeletedAt == nil {
+		t.Fatal("status.status.deletedAt = nil, want deletion timestamp")
 	}
 }
 
-func TestLifecycleEnvironmentDeleteRejectsAuthShapedPostDeleteConfirmRead(t *testing.T) {
+func TestLifecycleEnvironmentDeleteAuthShapedPostDeleteConfirmUsesScopedListAbsence(t *testing.T) {
 	resource := newTestLifecycleEnvironment()
 	resource.Status.OsokStatus.Ocid = shared.OCID(testLifecycleEnvironmentID)
 	resource.Status.Id = testLifecycleEnvironmentID
@@ -758,19 +758,19 @@ func TestLifecycleEnvironmentDeleteRejectsAuthShapedPostDeleteConfirmRead(t *tes
 	}
 
 	deleted, err := testLifecycleEnvironmentClient(fake).Delete(context.Background(), resource)
-	if err == nil || !strings.Contains(err.Error(), "ambiguous 404 NotAuthorizedOrNotFound") {
-		t.Fatalf("Delete() error = %v, want ambiguous auth-shaped post-delete confirmation failure", err)
+	if err != nil {
+		t.Fatalf("Delete() error = %v", err)
 	}
-	if deleted {
-		t.Fatal("Delete() deleted = true, want false for auth-shaped post-delete confirmation")
+	if !deleted {
+		t.Fatal("Delete() deleted = false, want true after scoped list proves absence")
 	}
 	if got, want := len(fake.deleteRequests), 1; got != want {
 		t.Fatalf("DeleteLifecycleEnvironment() calls = %d, want %d", got, want)
 	}
-	if resource.Status.OsokStatus.DeletedAt != nil {
-		t.Fatalf("status.status.deletedAt = %v, want nil after ambiguous confirmation", resource.Status.OsokStatus.DeletedAt)
+	if resource.Status.OsokStatus.DeletedAt == nil {
+		t.Fatal("status.status.deletedAt = nil, want deletion timestamp")
 	}
-	if got, want := resource.Status.OsokStatus.OpcRequestID, "opc-request-id"; got != want {
+	if got, want := resource.Status.OsokStatus.OpcRequestID, "opc-delete"; got != want {
 		t.Fatalf("status.status.opcRequestId = %q, want %q", got, want)
 	}
 }

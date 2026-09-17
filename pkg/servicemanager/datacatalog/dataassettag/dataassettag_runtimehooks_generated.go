@@ -65,7 +65,7 @@ func newDataAssetTagDefaultRuntimeHooks(sdkClient datacatalogsdk.DataCatalogClie
 			},
 		},
 		Get: runtimeOperationHooks[datacatalogsdk.GetDataAssetTagRequest, datacatalogsdk.GetDataAssetTagResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "DataAssetKey", RequestName: "dataAssetKey", Contribution: "path", PreferResourceID: false}, {FieldName: "TagKey", RequestName: "tagKey", Contribution: "path", PreferResourceID: false}, {FieldName: "Fields", RequestName: "fields", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "DataAssetKey", RequestName: "dataAssetKey", Contribution: "path", PreferResourceID: false}, {FieldName: "TagKey", RequestName: "tagKey", Contribution: "path", PreferResourceID: true}, {FieldName: "Fields", RequestName: "fields", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request datacatalogsdk.GetDataAssetTagRequest) (datacatalogsdk.GetDataAssetTagResponse, error) {
 				return sdkClient.GetDataAssetTag(ctx, request)
 			},
@@ -77,7 +77,7 @@ func newDataAssetTagDefaultRuntimeHooks(sdkClient datacatalogsdk.DataCatalogClie
 			},
 		},
 		Delete: runtimeOperationHooks[datacatalogsdk.DeleteDataAssetTagRequest, datacatalogsdk.DeleteDataAssetTagResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "DataAssetKey", RequestName: "dataAssetKey", Contribution: "path", PreferResourceID: false}, {FieldName: "TagKey", RequestName: "tagKey", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "DataAssetKey", RequestName: "dataAssetKey", Contribution: "path", PreferResourceID: false}, {FieldName: "TagKey", RequestName: "tagKey", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request datacatalogsdk.DeleteDataAssetTagRequest) (datacatalogsdk.DeleteDataAssetTagResponse, error) {
 				return sdkClient.DeleteDataAssetTag(ctx, request)
 			},

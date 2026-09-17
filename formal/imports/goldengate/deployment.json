@@ -1,0 +1,169 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "goldengate",
+  "slug": "deployment",
+  "kind": "Deployment",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_golden_gate_deployment",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDeployment",
+        "requestType": "goldengate.CreateDeploymentRequest",
+        "responseType": "goldengate.CreateDeploymentResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDeployment",
+        "requestType": "goldengate.GetDeploymentRequest",
+        "responseType": "goldengate.GetDeploymentResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDeployments",
+        "requestType": "goldengate.ListDeploymentsRequest",
+        "responseType": "goldengate.ListDeploymentsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDeployment",
+        "requestType": "goldengate.UpdateDeploymentRequest",
+        "responseType": "goldengate.UpdateDeploymentResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDeployment",
+        "requestType": "goldengate.DeleteDeploymentRequest",
+        "responseType": "goldengate.DeleteDeploymentResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "displayName",
+      "subnetId",
+      "licenseModel",
+      "isByolCpuCoreCountLimitEnabled",
+      "byolCpuCoreCountLimit",
+      "environmentType",
+      "description",
+      "placements",
+      "freeformTags",
+      "definedTags",
+      "loadBalancerSubnetId",
+      "fqdn",
+      "nsgIds",
+      "isPublic",
+      "cpuCoreCount",
+      "isAutoScalingEnabled",
+      "securityAttributes",
+      "oggData",
+      "maintenanceWindow",
+      "maintenanceConfiguration",
+      "backupSchedule"
+    ],
+    "forceNew": [
+      "compartmentId",
+      "sourceDeploymentId",
+      "availabilityDomain",
+      "faultDomain",
+      "locks",
+      "deploymentBackupId",
+      "deploymentType",
+      "subscriptionId",
+      "clusterPlacementGroupId"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "Deployment",
+        "action": "CreateDeployment"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "Deployment",
+        "action": "UpdateDeployment"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "Deployment",
+        "action": "DeleteDeployment"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "unavailable",
+    "collectionField": "Items",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartmentId",
+      "supportedConnectionType",
+      "assignedConnectionId",
+      "assignableConnectionId",
+      "lifecycleState",
+      "lifecycleSubState",
+      "deploymentType",
+      "displayName"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/goldengate/deployment/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/goldengate/deployment/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Terraform provider formal-import could not resolve oci_golden_gate_deployment; the vendored SDK, generated runtime, and package-owned typed OCI fixtures define this reviewed contract."
+  ]
+}

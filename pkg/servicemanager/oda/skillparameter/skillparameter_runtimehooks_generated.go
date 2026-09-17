@@ -66,7 +66,7 @@ func newSkillParameterDefaultRuntimeHooks(sdkClient odasdk.ManagementClient) Ski
 			},
 		},
 		Get: runtimeOperationHooks[odasdk.GetSkillParameterRequest, odasdk.GetSkillParameterResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "OdaInstanceId", RequestName: "odaInstanceId", Contribution: "path", PreferResourceID: false}, {FieldName: "SkillId", RequestName: "skillId", Contribution: "path", PreferResourceID: false}, {FieldName: "ParameterName", RequestName: "parameterName", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "OdaInstanceId", RequestName: "odaInstanceId", Contribution: "path", PreferResourceID: false}, {FieldName: "SkillId", RequestName: "skillId", Contribution: "path", PreferResourceID: false}, {FieldName: "ParameterName", RequestName: "parameterName", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request odasdk.GetSkillParameterRequest) (odasdk.GetSkillParameterResponse, error) {
 				return sdkClient.GetSkillParameter(ctx, request)
 			},
@@ -78,13 +78,13 @@ func newSkillParameterDefaultRuntimeHooks(sdkClient odasdk.ManagementClient) Ski
 			},
 		},
 		Update: runtimeOperationHooks[odasdk.UpdateSkillParameterRequest, odasdk.UpdateSkillParameterResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "OdaInstanceId", RequestName: "odaInstanceId", Contribution: "path", PreferResourceID: false}, {FieldName: "SkillId", RequestName: "skillId", Contribution: "path", PreferResourceID: false}, {FieldName: "ParameterName", RequestName: "parameterName", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdateSkillParameterDetails", RequestName: "UpdateSkillParameterDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "OdaInstanceId", RequestName: "odaInstanceId", Contribution: "path", PreferResourceID: false}, {FieldName: "SkillId", RequestName: "skillId", Contribution: "path", PreferResourceID: false}, {FieldName: "ParameterName", RequestName: "parameterName", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateSkillParameterDetails", RequestName: "UpdateSkillParameterDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request odasdk.UpdateSkillParameterRequest) (odasdk.UpdateSkillParameterResponse, error) {
 				return sdkClient.UpdateSkillParameter(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[odasdk.DeleteSkillParameterRequest, odasdk.DeleteSkillParameterResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "OdaInstanceId", RequestName: "odaInstanceId", Contribution: "path", PreferResourceID: false}, {FieldName: "SkillId", RequestName: "skillId", Contribution: "path", PreferResourceID: false}, {FieldName: "ParameterName", RequestName: "parameterName", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "OdaInstanceId", RequestName: "odaInstanceId", Contribution: "path", PreferResourceID: false}, {FieldName: "SkillId", RequestName: "skillId", Contribution: "path", PreferResourceID: false}, {FieldName: "ParameterName", RequestName: "parameterName", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request odasdk.DeleteSkillParameterRequest) (odasdk.DeleteSkillParameterResponse, error) {
 				return sdkClient.DeleteSkillParameter(ctx, request)
 			},

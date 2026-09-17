@@ -439,7 +439,7 @@ func TestSteeringPolicyDeleteAuthShapedNotFoundRemainsFatal(t *testing.T) {
 	}
 }
 
-func TestSteeringPolicyDeleteAuthShapedConfirmReadRemainsFatal(t *testing.T) {
+func TestSteeringPolicyDeleteAuthShapedConfirmReadUsesScopedListAbsence(t *testing.T) {
 	resource := newTestSteeringPolicy()
 	resource.Status.OsokStatus.Ocid = shared.OCID(testSteeringPolicyID)
 	client := &fakeSteeringPolicyOCIClient{
@@ -455,17 +455,34 @@ func TestSteeringPolicyDeleteAuthShapedConfirmReadRemainsFatal(t *testing.T) {
 	runtimeClient := newTestSteeringPolicyServiceClient(client)
 
 	deleted, err := runtimeClient.Delete(context.Background(), resource)
-	if err == nil {
-		t.Fatal("Delete() error = nil, want auth-shaped confirm read to remain fatal")
+	if err != nil {
+		t.Fatalf("Delete() error = %v", err)
+	}
+	if !deleted {
+		t.Fatal("Delete() deleted = false, want true after scoped list proves absence")
+	}
+	if resource.Status.OsokStatus.DeletedAt == nil {
+		t.Fatal("status.deletedAt = nil, want deletion timestamp")
+	}
+}
+
+func TestSteeringPolicyDeleteAuthShapedConfirmReadRetainsWhenScopedListMatches(t *testing.T) {
+	resource := newTestSteeringPolicy()
+	resource.Status.OsokStatus.Ocid = shared.OCID(testSteeringPolicyID)
+	client := &fakeSteeringPolicyOCIClient{
+		getResponses:    []dnssdk.GetSteeringPolicyResponse{{SteeringPolicy: sdkSteeringPolicyFromResource(resource, testSteeringPolicyID, dnssdk.SteeringPolicyLifecycleStateActive)}},
+		getErrors:       []error{nil, errortest.NewServiceError(404, errorutil.NotAuthorizedOrNotFound, "auth ambiguity")},
+		listResponses:   []dnssdk.ListSteeringPoliciesResponse{{Items: []dnssdk.SteeringPolicySummary{sdkSteeringPolicySummary(resource, testSteeringPolicyID, dnssdk.SteeringPolicySummaryLifecycleStateActive)}}},
+		deleteResponses: []dnssdk.DeleteSteeringPolicyResponse{{OpcRequestId: stringPointer("opc-delete-1")}},
+	}
+	runtimeClient := newTestSteeringPolicyServiceClient(client)
+
+	deleted, err := runtimeClient.Delete(context.Background(), resource)
+	if err == nil || !strings.Contains(err.Error(), "authorization-shaped not found") {
+		t.Fatalf("Delete() error = %v, want conservative auth-shaped ambiguity", err)
 	}
 	if deleted {
-		t.Fatal("Delete() deleted = true, want false for auth-shaped confirm read")
-	}
-	if !strings.Contains(err.Error(), "authorization-shaped not found") {
-		t.Fatalf("Delete() error = %v, want conservative auth-shaped message", err)
-	}
-	if got := resource.Status.OsokStatus.OpcRequestID; got != "opc-request-id" {
-		t.Fatalf("status.opcRequestId = %q, want surfaced error request id", got)
+		t.Fatal("Delete() deleted = true, want false while scoped list still matches")
 	}
 }
 

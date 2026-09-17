@@ -1,0 +1,127 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "waa",
+  "slug": "webappacceleration",
+  "kind": "WebAppAcceleration",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_waa_web_app_acceleration",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateWebAppAcceleration",
+        "requestType": "waa.CreateWebAppAccelerationRequest",
+        "responseType": "waa.CreateWebAppAccelerationResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetWebAppAcceleration",
+        "requestType": "waa.GetWebAppAccelerationRequest",
+        "responseType": "waa.GetWebAppAccelerationResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListWebAppAccelerations",
+        "requestType": "waa.ListWebAppAccelerationsRequest",
+        "responseType": "waa.ListWebAppAccelerationsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeWebAppAccelerationCompartment",
+        "requestType": "waa.ChangeWebAppAccelerationCompartmentRequest",
+        "responseType": "waa.ChangeWebAppAccelerationCompartmentResponse"
+      },
+      {
+        "operation": "UpdateWebAppAcceleration",
+        "requestType": "waa.UpdateWebAppAccelerationRequest",
+        "responseType": "waa.UpdateWebAppAccelerationResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteWebAppAcceleration",
+        "requestType": "waa.DeleteWebAppAccelerationRequest",
+        "responseType": "waa.DeleteWebAppAccelerationResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "display_name",
+      "freeform_tags",
+      "system_tags",
+      "web_app_acceleration_policy_id"
+    ],
+    "forceNew": [
+      "backend_type",
+      "load_balancer_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_waa_web_app_accelerations",
+    "collectionField": "web_app_acceleration_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "id",
+      "state",
+      "web_app_acceleration_policy_id"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/waa/webappacceleration/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/waa/webappacceleration/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Pinned provider facts are paired with reviewed WebAppAcceleration service-manager semantics and sanitized live CRUD evidence."
+  ]
+}

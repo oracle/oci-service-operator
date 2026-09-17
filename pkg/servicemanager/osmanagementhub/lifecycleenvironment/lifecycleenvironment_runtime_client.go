@@ -83,9 +83,30 @@ func applyLifecycleEnvironmentRuntimeHooks(hooks *LifecycleEnvironmentRuntimeHoo
 	hooks.ParityHooks.ValidateCreateOnlyDrift = validateLifecycleEnvironmentCreateOnlyDriftForResponse
 	hooks.DeleteHooks.HandleError = handleLifecycleEnvironmentDeleteError
 	wrapLifecycleEnvironmentReadListAndDeleteCalls(hooks)
+	hooks.DeleteHooks.ConfirmRead = lifecycleEnvironmentDeleteConfirmRead(hooks)
 	hooks.WrapGeneratedClient = append(hooks.WrapGeneratedClient, func(delegate LifecycleEnvironmentServiceClient) LifecycleEnvironmentServiceClient {
 		return &lifecycleEnvironmentRuntimeClient{delegate: delegate, hooks: *hooks}
 	})
+}
+
+func lifecycleEnvironmentDeleteConfirmRead(
+	hooks *LifecycleEnvironmentRuntimeHooks,
+) func(context.Context, *osmanagementhubv1beta1.LifecycleEnvironment, string) (any, error) {
+	return func(ctx context.Context, resource *osmanagementhubv1beta1.LifecycleEnvironment, currentID string) (any, error) {
+		response, err := hooks.Get.Call(ctx, osmanagementhubsdk.GetLifecycleEnvironmentRequest{LifecycleEnvironmentId: common.String(strings.TrimSpace(currentID))})
+		if err == nil || (!isLifecycleEnvironmentAmbiguousNotFound(err) && !errorutil.ClassifyDeleteError(err).IsAuthShapedNotFound()) {
+			return response, err
+		}
+		client := &lifecycleEnvironmentRuntimeClient{hooks: *hooks}
+		_, found, listErr := client.resolveLifecycleEnvironmentDeleteSummaryByList(ctx, resource)
+		if listErr != nil {
+			return nil, listErr
+		}
+		if found {
+			return nil, err
+		}
+		return osmanagementhubsdk.GetLifecycleEnvironmentResponse{LifecycleEnvironment: osmanagementhubsdk.LifecycleEnvironment{Id: common.String(strings.TrimSpace(currentID)), LifecycleState: osmanagementhubsdk.LifecycleEnvironmentLifecycleStateDeleted}}, nil
+	}
 }
 
 func newLifecycleEnvironmentServiceClientWithOCIClient(
@@ -635,36 +656,48 @@ func (c *lifecycleEnvironmentRuntimeClient) Delete(
 		markLifecycleEnvironmentDeleted(resource, "OCI resource no longer exists")
 		return true, nil
 	}
-	if err := c.rejectAuthShapedPreDeleteRead(ctx, resource, deleteID); err != nil {
+	confirmedDeleted, err := c.confirmAuthShapedPreDeleteRead(ctx, resource, deleteID)
+	if err != nil {
 		return false, err
+	}
+	if confirmedDeleted {
+		markLifecycleEnvironmentDeleted(resource, "OCI resource no longer exists")
+		return true, nil
 	}
 	recordResolvedLifecycleEnvironmentID(resource, deleteID)
 	return c.delegate.Delete(ctx, resource)
 }
 
-func (c *lifecycleEnvironmentRuntimeClient) rejectAuthShapedPreDeleteRead(
+func (c *lifecycleEnvironmentRuntimeClient) confirmAuthShapedPreDeleteRead(
 	ctx context.Context,
 	resource *osmanagementhubv1beta1.LifecycleEnvironment,
 	deleteID string,
-) error {
+) (bool, error) {
 	currentID := strings.TrimSpace(deleteID)
 	if currentID == "" {
 		currentID = currentLifecycleEnvironmentID(resource)
 	}
 	if currentID == "" || c.hooks.Get.Call == nil {
-		return nil
+		return false, nil
 	}
 	_, err := c.hooks.Get.Call(ctx, osmanagementhubsdk.GetLifecycleEnvironmentRequest{
 		LifecycleEnvironmentId: common.String(currentID),
 	})
 	if err == nil || (!isLifecycleEnvironmentAmbiguousNotFound(err) && !errorutil.ClassifyDeleteError(err).IsAuthShapedNotFound()) {
-		return nil
+		return false, nil
 	}
 	err = conservativeLifecycleEnvironmentNotFoundError(err, "delete confirmation")
 	if resource != nil {
 		servicemanager.RecordErrorOpcRequestID(&resource.Status.OsokStatus, err)
 	}
-	return fmt.Errorf("lifecycle environment delete confirmation returned ambiguous 404 NotAuthorizedOrNotFound; refusing to call delete: %v", err)
+	_, found, listErr := c.resolveLifecycleEnvironmentDeleteSummaryByList(ctx, resource)
+	if listErr != nil {
+		return false, listErr
+	}
+	if !found {
+		return true, nil
+	}
+	return false, fmt.Errorf("lifecycle environment delete confirmation returned ambiguous 404 NotAuthorizedOrNotFound; scoped list still matches the resource: %v", err)
 }
 
 func (c *lifecycleEnvironmentRuntimeClient) resolveLifecycleEnvironmentDeleteID(

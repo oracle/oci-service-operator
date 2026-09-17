@@ -50,15 +50,84 @@ func registerBastionRuntimeHooksMutator(mutator BastionRuntimeHooksMutator) {
 	}
 	bastionRuntimeHooksMutators = append(bastionRuntimeHooksMutators, mutator)
 }
+func newBastionRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "bastion",
+		FormalSlug:    "bastion",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"bastionId", "bastionLifecycleState", "compartmentId", "name"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"clientCidrBlockAllowList", "definedTags", "freeformTags", "maxSessionTtlInSeconds", "securityAttributes", "staticJumpHostIpAddresses"},
+			ForceNew:      []string{"bastionType", "compartmentId", "dnsProxyStatus", "name", "phoneBookEntry", "targetSubnetId"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newBastionDefaultRuntimeHooks(sdkClient bastionsdk.BastionClient) BastionRuntimeHooks {
 	return BastionRuntimeHooks{
+		Semantics:       newBastionRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*bastionv1beta1.Bastion]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*bastionv1beta1.Bastion]{},
 		StatusHooks:     generatedruntime.StatusHooks[*bastionv1beta1.Bastion]{},
 		ParityHooks:     generatedruntime.ParityHooks[*bastionv1beta1.Bastion]{},
-		Async:           generatedruntime.AsyncHooks[*bastionv1beta1.Bastion]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*bastionv1beta1.Bastion]{},
+		Async: generatedruntime.AsyncHooks[*bastionv1beta1.Bastion]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := bastionsdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*bastionv1beta1.Bastion]{},
 		Create: runtimeOperationHooks[bastionsdk.CreateBastionRequest, bastionsdk.CreateBastionResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateBastionDetails", RequestName: "CreateBastionDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request bastionsdk.CreateBastionRequest) (bastionsdk.CreateBastionResponse, error) {
@@ -106,10 +175,19 @@ func buildBastionGeneratedRuntimeConfig(
 	hooks BastionRuntimeHooks,
 ) generatedruntime.Config[*bastionv1beta1.Bastion] {
 	return generatedruntime.Config[*bastionv1beta1.Bastion]{
-		Kind:            "Bastion",
-		SDKName:         "Bastion",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "Bastion",
+		SDKName:   "Bastion",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

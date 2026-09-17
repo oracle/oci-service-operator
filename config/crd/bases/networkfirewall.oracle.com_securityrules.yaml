@@ -112,6 +112,10 @@ spec:
                 description: Name for the Security rule, must be unique within the
                   policy.
                 type: string
+              networkFirewallPolicyId:
+                description: The OCID of the Network Firewall policy that owns this
+                  resource.
+                type: string
               position:
                 description: SecurityRulePosition defines nested fields for SecurityRule.Position.
                 properties:
@@ -126,6 +130,7 @@ spec:
             - action
             - condition
             - name
+            - networkFirewallPolicyId
             type: object
           status:
             description: SecurityRuleStatus defines the observed state of SecurityRule.

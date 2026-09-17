@@ -71,7 +71,7 @@ func newOdaPrivateEndpointScanProxyDefaultRuntimeHooks(sdkClient odasdk.Manageme
 			},
 		},
 		List: runtimeOperationHooks[odasdk.ListOdaPrivateEndpointScanProxiesRequest, odasdk.ListOdaPrivateEndpointScanProxiesResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "OdaPrivateEndpointId", RequestName: "odaPrivateEndpointId", Contribution: "path", PreferResourceID: true}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "OdaPrivateEndpointId", RequestName: "odaPrivateEndpointId", Contribution: "path", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request odasdk.ListOdaPrivateEndpointScanProxiesRequest) (odasdk.ListOdaPrivateEndpointScanProxiesResponse, error) {
 				return sdkClient.ListOdaPrivateEndpointScanProxies(ctx, request)
 			},

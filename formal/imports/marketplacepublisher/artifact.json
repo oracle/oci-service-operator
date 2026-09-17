@@ -1,0 +1,130 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "marketplacepublisher",
+  "slug": "artifact",
+  "kind": "Artifact",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_marketplace_publisher_artifact",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateArtifact",
+        "requestType": "marketplacepublisher.CreateArtifactRequest",
+        "responseType": "marketplacepublisher.CreateArtifactResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetArtifact",
+        "requestType": "marketplacepublisher.GetArtifactRequest",
+        "responseType": "marketplacepublisher.GetArtifactResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListArtifacts",
+        "requestType": "marketplacepublisher.ListArtifactsRequest",
+        "responseType": "marketplacepublisher.ListArtifactsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateArtifact",
+        "requestType": "marketplacepublisher.UpdateArtifactRequest",
+        "responseType": "marketplacepublisher.UpdateArtifactResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteArtifact",
+        "requestType": "marketplacepublisher.DeleteArtifactRequest",
+        "responseType": "marketplacepublisher.DeleteArtifactResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "displayName",
+      "freeformTags",
+      "definedTags",
+      "helmChart",
+      "containerImageArtifactIds",
+      "stack",
+      "containerImage",
+      "machineImage"
+    ],
+    "forceNew": [
+      "compartmentId",
+      "artifactType"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "unavailable",
+    "collectionField": "Items",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartmentId",
+      "displayName",
+      "artifactType",
+      "id"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/marketplacepublisher/artifact/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/marketplacepublisher/artifact/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Terraform provider formal-import cannot resolve oci_marketplace_publisher_artifact; the vendored SDK, production runtime, and package-owned typed OCI fixtures define this contract."
+  ]
+}

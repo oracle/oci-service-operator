@@ -1,0 +1,27 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: networkfirewall
+slug: securityrule
+kind: SecurityRule
+archetype: generated-service-manager
+states:
+  - active
+  - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending: []
+    updatePending: []
+    deletePending: ["DELETING"]
+  listLookup:
+    filters: ["parentResourceId","name"]
+    matchRule: exact parent path plus immutable child identity; duplicate matches fail
+  mutation:
+    mutable: ["condition","action","inspection","position"]
+    forceNew: ["networkFirewallPolicyId","name"]
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - "The parent networkFirewallPolicyId and immutable child name address every SecurityRule request."
+  - "The recorded composite-path mock verifies request bodies, nested paths, status projection, and confirmed deletion."

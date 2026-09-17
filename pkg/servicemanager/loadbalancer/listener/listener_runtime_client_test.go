@@ -35,6 +35,7 @@ type fakeGeneratedListenerOCIClient struct {
 
 	lifecycleState loadbalancersdk.LoadBalancerLifecycleStateEnum
 	listeners      map[string]loadbalancersdk.Listener
+	workRequestOp  string
 }
 
 func (f *fakeGeneratedListenerOCIClient) CreateListener(_ context.Context, request loadbalancersdk.CreateListenerRequest) (loadbalancersdk.CreateListenerResponse, error) {
@@ -50,7 +51,8 @@ func (f *fakeGeneratedListenerOCIClient) CreateListener(_ context.Context, reque
 	if f.lifecycleState == "" {
 		f.lifecycleState = loadbalancersdk.LoadBalancerLifecycleStateActive
 	}
-	return loadbalancersdk.CreateListenerResponse{}, nil
+	f.workRequestOp = "CreateListener"
+	return loadbalancersdk.CreateListenerResponse{OpcWorkRequestId: common.String("listener-work-request")}, nil
 }
 
 func (f *fakeGeneratedListenerOCIClient) GetLoadBalancer(_ context.Context, request loadbalancersdk.GetLoadBalancerRequest) (loadbalancersdk.GetLoadBalancerResponse, error) {
@@ -86,7 +88,8 @@ func (f *fakeGeneratedListenerOCIClient) UpdateListener(_ context.Context, reque
 	if f.lifecycleState == "" {
 		f.lifecycleState = loadbalancersdk.LoadBalancerLifecycleStateActive
 	}
-	return loadbalancersdk.UpdateListenerResponse{}, nil
+	f.workRequestOp = "UpdateListener"
+	return loadbalancersdk.UpdateListenerResponse{OpcWorkRequestId: common.String("listener-work-request")}, nil
 }
 
 func (f *fakeGeneratedListenerOCIClient) DeleteListener(_ context.Context, request loadbalancersdk.DeleteListenerRequest) (loadbalancersdk.DeleteListenerResponse, error) {
@@ -98,7 +101,17 @@ func (f *fakeGeneratedListenerOCIClient) DeleteListener(_ context.Context, reque
 	if f.lifecycleState == "" {
 		f.lifecycleState = loadbalancersdk.LoadBalancerLifecycleStateDeleting
 	}
-	return loadbalancersdk.DeleteListenerResponse{}, nil
+	f.workRequestOp = "DeleteListener"
+	return loadbalancersdk.DeleteListenerResponse{OpcWorkRequestId: common.String("listener-work-request")}, nil
+}
+
+func (f *fakeGeneratedListenerOCIClient) GetWorkRequest(context.Context, loadbalancersdk.GetWorkRequestRequest) (loadbalancersdk.GetWorkRequestResponse, error) {
+	return loadbalancersdk.GetWorkRequestResponse{WorkRequest: loadbalancersdk.WorkRequest{
+		Id:             common.String("listener-work-request"),
+		LifecycleState: loadbalancersdk.WorkRequestLifecycleStateSucceeded,
+		Type:           common.String(f.workRequestOp),
+		LoadBalancerId: common.String(listenerLoadBalancerID),
+	}}, nil
 }
 
 func TestListenerRequestFieldsKeepTrackedOperationsScopedToRecordedPath(t *testing.T) {
@@ -449,6 +462,7 @@ func TestCreateOrUpdateRejectsUnsupportedNestedListenerClear(t *testing.T) {
 			DefaultBackendSetName: "example_backend_set",
 			Port:                  80,
 			Protocol:              "HTTP",
+			SslConfiguration:      loadbalancerv1beta1.ListenerSslConfiguration{VerifyDepth: 3},
 		},
 	}
 
@@ -464,6 +478,44 @@ func TestCreateOrUpdateRejectsUnsupportedNestedListenerClear(t *testing.T) {
 	}
 	if len(client.updateRequests) != 0 {
 		t.Fatalf("update requests = %d, want 0 when nested clear is rejected", len(client.updateRequests))
+	}
+}
+
+func TestCreateOrUpdatePreservesOmittedConnectionConfiguration(t *testing.T) {
+	t.Parallel()
+
+	client := &fakeGeneratedListenerOCIClient{
+		lifecycleState: loadbalancersdk.LoadBalancerLifecycleStateActive,
+		listeners: map[string]loadbalancersdk.Listener{
+			listenerNameValue: {
+				Name:                  common.String(listenerNameValue),
+				DefaultBackendSetName: common.String("example_backend_set"),
+				Port:                  common.Int(80),
+				Protocol:              common.String("HTTP"),
+				ConnectionConfiguration: &loadbalancersdk.ConnectionConfiguration{
+					IdleTimeout: common.Int64(60),
+				},
+			},
+		},
+	}
+	serviceClient := newGeneratedListenerServiceClient(client, loggerutil.OSOKLogger{}, nil, nil)
+	resource := &loadbalancerv1beta1.Listener{Spec: loadbalancerv1beta1.ListenerSpec{
+		LoadBalancerId:        listenerLoadBalancerID,
+		Name:                  listenerNameValue,
+		DefaultBackendSetName: "example_backend_set",
+		Port:                  80,
+		Protocol:              "HTTP",
+	}}
+
+	response, err := serviceClient.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful {
+		t.Fatalf("CreateOrUpdate() response = %+v, want success", response)
+	}
+	if len(client.updateRequests) != 0 {
+		t.Fatalf("update requests = %d, want 0 when connectionConfiguration is omitted", len(client.updateRequests))
 	}
 }
 

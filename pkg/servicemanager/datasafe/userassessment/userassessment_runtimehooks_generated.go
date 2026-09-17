@@ -50,15 +50,84 @@ func registerUserAssessmentRuntimeHooksMutator(mutator UserAssessmentRuntimeHook
 	}
 	userassessmentRuntimeHooksMutators = append(userassessmentRuntimeHooksMutators, mutator)
 }
+func newUserAssessmentRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "datasafe",
+		FormalSlug:    "userassessment",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"SUCCEEDED"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"accessLevel", "compartmentId", "compartmentIdInSubtree", "displayName", "isBaseline", "isScheduleAssessment", "scheduleUserAssessmentId", "state", "targetDatabaseGroupId", "targetId", "targetType", "timeCreatedGreaterThanOrEqualTo", "timeCreatedLessThan", "triggeredBy", "type"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"compartmentId", "definedTags", "description", "displayName", "freeformTags", "isAssessmentScheduled", "schedule"},
+			ForceNew:      []string{"targetId", "targetType"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newUserAssessmentDefaultRuntimeHooks(sdkClient datasafesdk.DataSafeClient) UserAssessmentRuntimeHooks {
 	return UserAssessmentRuntimeHooks{
+		Semantics:       newUserAssessmentRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*datasafev1beta1.UserAssessment]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*datasafev1beta1.UserAssessment]{},
 		StatusHooks:     generatedruntime.StatusHooks[*datasafev1beta1.UserAssessment]{},
 		ParityHooks:     generatedruntime.ParityHooks[*datasafev1beta1.UserAssessment]{},
-		Async:           generatedruntime.AsyncHooks[*datasafev1beta1.UserAssessment]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*datasafev1beta1.UserAssessment]{},
+		Async: generatedruntime.AsyncHooks[*datasafev1beta1.UserAssessment]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := datasafesdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*datasafev1beta1.UserAssessment]{},
 		Create: runtimeOperationHooks[datasafesdk.CreateUserAssessmentRequest, datasafesdk.CreateUserAssessmentResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateUserAssessmentDetails", RequestName: "CreateUserAssessmentDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request datasafesdk.CreateUserAssessmentRequest) (datasafesdk.CreateUserAssessmentResponse, error) {
@@ -106,10 +175,19 @@ func buildUserAssessmentGeneratedRuntimeConfig(
 	hooks UserAssessmentRuntimeHooks,
 ) generatedruntime.Config[*datasafev1beta1.UserAssessment] {
 	return generatedruntime.Config[*datasafev1beta1.UserAssessment]{
-		Kind:            "UserAssessment",
-		SDKName:         "UserAssessment",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "UserAssessment",
+		SDKName:   "UserAssessment",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

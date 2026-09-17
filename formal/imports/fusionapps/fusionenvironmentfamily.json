@@ -1,0 +1,127 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "fusionapps",
+  "slug": "fusionenvironmentfamily",
+  "kind": "FusionEnvironmentFamily",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_fusion_apps_fusion_environment_family",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateFusionEnvironmentFamily",
+        "requestType": "fusionapps.CreateFusionEnvironmentFamilyRequest",
+        "responseType": "fusionapps.CreateFusionEnvironmentFamilyResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetFusionEnvironmentFamily",
+        "requestType": "fusionapps.GetFusionEnvironmentFamilyRequest",
+        "responseType": "fusionapps.GetFusionEnvironmentFamilyResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListFusionEnvironmentFamilies",
+        "requestType": "fusionapps.ListFusionEnvironmentFamiliesRequest",
+        "responseType": "fusionapps.ListFusionEnvironmentFamiliesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeFusionEnvironmentFamilyCompartment",
+        "requestType": "fusionapps.ChangeFusionEnvironmentFamilyCompartmentRequest",
+        "responseType": "fusionapps.ChangeFusionEnvironmentFamilyCompartmentResponse"
+      },
+      {
+        "operation": "UpdateFusionEnvironmentFamily",
+        "requestType": "fusionapps.UpdateFusionEnvironmentFamilyRequest",
+        "responseType": "fusionapps.UpdateFusionEnvironmentFamilyResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteFusionEnvironmentFamily",
+        "requestType": "fusionapps.DeleteFusionEnvironmentFamilyRequest",
+        "responseType": "fusionapps.DeleteFusionEnvironmentFamilyResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "display_name",
+      "family_maintenance_policy.concurrent_maintenance",
+      "family_maintenance_policy.is_monthly_patching_enabled",
+      "freeform_tags",
+      "subscription_ids",
+      "time_updated"
+    ],
+    "forceNew": [
+      "family_maintenance_policy.quarterly_upgrade_begin_times"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_fusion_apps_fusion_environment_families",
+    "collectionField": "fusion_environment_family_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "fusion_environment_family_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/fusionapps/fusionenvironmentfamily/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/fusionapps/fusionenvironmentfamily/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from the pinned terraform-provider-oci source revision."
+  ]
+}

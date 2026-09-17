@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "networkfirewall",
+  "slug": "networkfirewallpolicy",
+  "kind": "NetworkFirewallPolicy",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_network_firewall_network_firewall_policy",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateNetworkFirewallPolicy",
+        "requestType": "networkfirewall.CreateNetworkFirewallPolicyRequest",
+        "responseType": "networkfirewall.CreateNetworkFirewallPolicyResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetNetworkFirewallPolicy",
+        "requestType": "networkfirewall.GetNetworkFirewallPolicyRequest",
+        "responseType": "networkfirewall.GetNetworkFirewallPolicyResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListNetworkFirewallPolicies",
+        "requestType": "networkfirewall.ListNetworkFirewallPoliciesRequest",
+        "responseType": "networkfirewall.ListNetworkFirewallPoliciesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeNetworkFirewallPolicyCompartment",
+        "requestType": "networkfirewall.ChangeNetworkFirewallPolicyCompartmentRequest",
+        "responseType": "networkfirewall.ChangeNetworkFirewallPolicyCompartmentResponse"
+      },
+      {
+        "operation": "UpdateNetworkFirewallPolicy",
+        "requestType": "networkfirewall.UpdateNetworkFirewallPolicyRequest",
+        "responseType": "networkfirewall.UpdateNetworkFirewallPolicyResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteNetworkFirewallPolicy",
+        "requestType": "networkfirewall.DeleteNetworkFirewallPolicyRequest",
+        "responseType": "networkfirewall.DeleteNetworkFirewallPolicyResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "NEEDS_ATTENTION"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags"
+    ],
+    "forceNew": null,
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "update": [
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_network_firewall_network_firewall_policies",
+    "collectionField": "network_firewall_policy_summary_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/networkfirewall/networkfirewallpolicy/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/networkfirewall/networkfirewallpolicy/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Pinned provider facts are paired with reviewed NetworkFirewallPolicy service-manager semantics and sanitized live CRUD evidence."
+  ]
+}

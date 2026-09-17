@@ -51,7 +51,7 @@ type PipelineSpec struct {
 	// +kubebuilder:validation:Optional
 	RecipeType string `json:"recipeType,omitempty"`
 	// +kubebuilder:validation:Optional
-	ProcessOptions PipelineProcessOptions `json:"processOptions,omitempty"`
+	ProcessOptions PipelineProcessOptions `json:"processOptions,omitempty,omitzero"`
 	// Mapping for source/target schema/tables for the pipeline data replication.
 	// +kubebuilder:validation:Optional
 	MappingRules []PipelineMappingRule `json:"mappingRules,omitempty"`

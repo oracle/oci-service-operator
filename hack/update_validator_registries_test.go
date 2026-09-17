@@ -285,6 +285,49 @@ func TestFilterConfiguredAPISpecsAppliesSelectedKinds(t *testing.T) {
 	}
 }
 
+func TestFilterConfiguredAPISpecsAppliesStableAPIKindAlias(t *testing.T) {
+	t.Parallel()
+
+	got, err := filterConfiguredAPISpecs(
+		configuredService{
+			Service:       "apigateway",
+			Group:         "apigateway",
+			Version:       "v1beta1",
+			SelectedKinds: []string{"ApiGateway"},
+			SDKKinds:      map[string]string{"ApiGateway": "Gateway"},
+		},
+		[]apiTypeInfo{{Spec: "ApiGateway", Status: "ApiGatewayStatus"}},
+	)
+	if err != nil {
+		t.Fatalf("filterConfiguredAPISpecs() error = %v", err)
+	}
+	if len(got) != 1 || got[0].Spec != "ApiGateway" {
+		t.Fatalf("filterConfiguredAPISpecs() = %#v", got)
+	}
+	service := configuredService{Service: "apigateway", SDKKinds: map[string]string{"ApiGateway": "Gateway"}}
+	candidates := sdkCandidatesForTarget(service, "ApiGateway", "ApiGatewayApiGateway", map[string]bool{
+		"CreateGatewayDetails": true,
+		"UpdateGatewayDetails": true,
+		"Gateway":              true,
+	}, specTarget{})
+	if !slices.Equal(candidates, []string{"CreateGatewayDetails", "UpdateGatewayDetails", "Gateway"}) {
+		t.Fatalf("sdkCandidatesForTarget() = %v", candidates)
+	}
+}
+
+func TestApplySDKMappingOverrideCanPromotePreviouslyExcludedStatus(t *testing.T) {
+	t.Parallel()
+
+	mapping := applySDKMappingOverride(
+		sdkMapping{SDKStruct: "ons.NotificationTopic", Exclude: true, Reason: noMeaningfulStatusExcludedReason},
+		apiTargetOverride{MappingOverrides: includedStatusMappingOverrides("NotificationTopic")},
+		"NotificationTopic",
+	)
+	if mapping.Exclude || mapping.Reason != "" || mapping.APISurface != "status" {
+		t.Fatalf("promoted mapping = %+v", mapping)
+	}
+}
+
 func TestFilterConfiguredAPISpecsRejectsMissingSelectedKinds(t *testing.T) {
 	t.Parallel()
 

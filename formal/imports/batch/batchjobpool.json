@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "batch",
+  "slug": "batchjobpool",
+  "kind": "BatchJobPool",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_batch_batch_job_pool",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateBatchJobPool",
+        "requestType": "batch.CreateBatchJobPoolRequest",
+        "responseType": "batch.CreateBatchJobPoolResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetBatchJobPool",
+        "requestType": "batch.GetBatchJobPoolRequest",
+        "responseType": "batch.GetBatchJobPoolResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListBatchJobPools",
+        "requestType": "batch.ListBatchJobPoolsRequest",
+        "responseType": "batch.ListBatchJobPoolsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateBatchJobPool",
+        "requestType": "batch.UpdateBatchJobPoolRequest",
+        "responseType": "batch.UpdateBatchJobPoolResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteBatchJobPool",
+        "requestType": "batch.DeleteBatchJobPoolRequest",
+        "responseType": "batch.DeleteBatchJobPoolResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "displayName",
+      "description",
+      "freeformTags",
+      "definedTags"
+    ],
+    "forceNew": [
+      "compartmentId",
+      "batchContextId"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "BatchJobPool",
+        "action": "UpdateBatchJobPool"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "unavailable",
+    "collectionField": "Items",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartmentId",
+      "lifecycleState",
+      "displayName",
+      "id",
+      "batchContextId",
+      "opc-request-id"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/batch/batchjobpool/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/batch/batchjobpool/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Terraform provider formal-import could not resolve oci_batch_batch_job_pool; the vendored SDK, generated runtime, and package-owned typed OCI fixtures define this reviewed contract."
+  ]
+}

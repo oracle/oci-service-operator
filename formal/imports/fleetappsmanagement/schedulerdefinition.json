@@ -1,0 +1,147 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "fleetappsmanagement",
+  "slug": "schedulerdefinition",
+  "kind": "SchedulerDefinition",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_fleet_apps_management_scheduler_definition",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateSchedulerDefinition",
+        "requestType": "fleetappsmanagement.CreateSchedulerDefinitionRequest",
+        "responseType": "fleetappsmanagement.CreateSchedulerDefinitionResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetSchedulerDefinition",
+        "requestType": "fleetappsmanagement.GetSchedulerDefinitionRequest",
+        "responseType": "fleetappsmanagement.GetSchedulerDefinitionResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListSchedulerDefinitions",
+        "requestType": "fleetappsmanagement.ListSchedulerDefinitionsRequest",
+        "responseType": "fleetappsmanagement.ListSchedulerDefinitionsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateSchedulerDefinition",
+        "requestType": "fleetappsmanagement.UpdateSchedulerDefinitionRequest",
+        "responseType": "fleetappsmanagement.UpdateSchedulerDefinitionResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteSchedulerDefinition",
+        "requestType": "fleetappsmanagement.DeleteSchedulerDefinitionRequest",
+        "responseType": "fleetappsmanagement.DeleteSchedulerDefinitionResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "action_groups.display_name",
+      "action_groups.fleet_id",
+      "action_groups.kind",
+      "action_groups.runbook_id",
+      "action_groups.runbook_version_name",
+      "action_groups.sequence",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags",
+      "run_books.input_parameters.arguments.content.bucket",
+      "run_books.input_parameters.arguments.content.checksum",
+      "run_books.input_parameters.arguments.content.namespace",
+      "run_books.input_parameters.arguments.content.object",
+      "run_books.input_parameters.arguments.content.source_type",
+      "run_books.input_parameters.arguments.kind",
+      "run_books.input_parameters.arguments.name",
+      "run_books.input_parameters.arguments.value",
+      "run_books.input_parameters.step_name",
+      "run_books.runbook_id",
+      "run_books.runbook_version_name",
+      "schedule.duration",
+      "schedule.execution_startdate",
+      "schedule.maintenance_window_id",
+      "schedule.recurrences",
+      "schedule.type"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_fleet_apps_management_scheduler_definitions",
+    "collectionField": "scheduler_definition_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "fleet_id",
+      "id",
+      "maintenance_window_id",
+      "product",
+      "runbook_id",
+      "runbook_version_name",
+      "state",
+      "time_scheduled_greater_than_or_equal_to",
+      "time_scheduled_less_than"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/fleetappsmanagement/schedulerdefinition/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/fleetappsmanagement/schedulerdefinition/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from the pinned terraform-provider-oci source revision."
+  ]
+}

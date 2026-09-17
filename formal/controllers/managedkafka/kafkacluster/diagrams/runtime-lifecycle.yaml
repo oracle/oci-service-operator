@@ -1,0 +1,71 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: managedkafka
+slug: kafkacluster
+kind: KafkaCluster
+archetype: generated-service-manager
+states:
+- provisioning
+- active
+- updating
+- terminating
+repoAuthored:
+  operations:
+    update:
+    - UpdateKafkaCluster
+  providerLifecycle:
+    createPending:
+    - CREATING
+    updatePending:
+    - UPDATING
+    deletePending:
+    - DELETING
+  listLookup:
+    filters:
+    - compartmentId
+    - displayName
+    - id
+    matchRule: exact compartmentId, displayName, id match within the resource scope;
+      duplicate matches fail
+  mutation:
+    mutable:
+    - accessSubnets
+    - brokerShape
+    - clientCertificateBundle
+    - clusterConfigId
+    - clusterConfigVersion
+    - coordinationType
+    - definedTags
+    - displayName
+    - freeformTags
+    forceNew:
+    - clusterType
+    - compartmentId
+    - kafkaVersion
+  hooks:
+    create:
+    - helper: tfresource.CreateResource
+    - helper: tfresource.WaitForWorkRequestWithErrorHandling
+      entityType: kafkaCluster
+      action: CREATED
+    update:
+    - helper: tfresource.UpdateResource
+    - helper: tfresource.WaitForWorkRequestWithErrorHandling
+      entityType: kafkaCluster
+      action: UPDATED
+    delete:
+    - helper: tfresource.DeleteResource
+    - helper: tfresource.WaitForWorkRequestWithErrorHandling
+      entityType: kafkaCluster
+      action: DELETED
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+- The production runtime uses the declared work-request phases and service-local async
+  adapter.
+- Lifecycle success and pending states mirror the production service-manager semantics.
+- Status projection is required, Secret side effects are none, and the finalizer policy
+  is retain-until-confirmed-delete.
+- Delete ownership is retained until a terminal lifecycle state or confirmed absence.

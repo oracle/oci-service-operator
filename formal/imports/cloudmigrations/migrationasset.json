@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "cloudmigrations",
+  "slug": "migrationasset",
+  "kind": "MigrationAsset",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_cloud_migrations_migration_asset",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateMigrationAsset",
+        "requestType": "cloudmigrations.CreateMigrationAssetRequest",
+        "responseType": "cloudmigrations.CreateMigrationAssetResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetMigrationAsset",
+        "requestType": "cloudmigrations.GetMigrationAssetRequest",
+        "responseType": "cloudmigrations.GetMigrationAssetResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListMigrationAssets",
+        "requestType": "cloudmigrations.ListMigrationAssetsRequest",
+        "responseType": "cloudmigrations.ListMigrationAssetsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateMigrationAsset",
+        "requestType": "cloudmigrations.UpdateMigrationAssetRequest",
+        "responseType": "cloudmigrations.UpdateMigrationAssetResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteMigrationAsset",
+        "requestType": "cloudmigrations.DeleteMigrationAssetRequest",
+        "responseType": "cloudmigrations.DeleteMigrationAssetResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "NEEDS_ATTENTION"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "display_name",
+      "migration_asset_depends_on",
+      "replication_schedule_id"
+    ],
+    "forceNew": [
+      "availability_domain",
+      "inventory_asset_id",
+      "migration_id",
+      "replication_compartment_id",
+      "snap_shot_bucket_name"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_cloud_migrations_migration_assets",
+    "collectionField": "migration_asset_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "display_name",
+      "migration_asset_id",
+      "migration_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/cloudmigrations/migrationasset/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/cloudmigrations/migrationasset/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from the pinned terraform-provider-oci source revision."
+  ]
+}

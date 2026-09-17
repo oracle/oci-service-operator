@@ -81,8 +81,8 @@ func newAgentEndpointRuntimeSemantics() *generatedruntime.Semantics {
 			MatchFields:        []string{"agentId", "compartmentId", "displayName", "lifecycleState"},
 		},
 		Mutation: generatedruntime.MutationSemantics{
-			Mutable:       []string{"compartmentId", "contentModerationConfig", "definedTags", "description", "displayName", "freeformTags", "guardrailConfig", "humanInputConfig", "metadata", "outputConfig", "provisionedCapacityConfig", "sessionConfig", "shouldEnableCitation", "shouldEnableMultiLanguage", "shouldEnableTrace"},
-			ForceNew:      []string{},
+			Mutable:       []string{"contentModerationConfig", "definedTags", "description", "displayName", "freeformTags", "guardrailConfig", "humanInputConfig", "metadata", "outputConfig", "provisionedCapacityConfig", "sessionConfig", "shouldEnableCitation", "shouldEnableMultiLanguage", "shouldEnableTrace"},
+			ForceNew:      []string{"agentId", "compartmentId", "shouldEnableSession"},
 			ConflictsWith: map[string][]string{},
 		},
 		Hooks: generatedruntime.HookSet{
@@ -102,7 +102,7 @@ func newAgentEndpointRuntimeSemantics() *generatedruntime.Semantics {
 			Strategy: "confirm-delete",
 			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "agentEndpoint", Action: "DELETED"}},
 		},
-		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{{Phase: "update", MethodName: "ChangeAgentEndpointCompartment", RequestTypeName: "generativeaiagent.ChangeAgentEndpointCompartmentRequest", ResponseTypeName: "generativeaiagent.ChangeAgentEndpointCompartmentResponse"}},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
 		Unsupported:         []generatedruntime.UnsupportedSemantic{},
 	}
 }
@@ -114,8 +114,20 @@ func newAgentEndpointDefaultRuntimeHooks(sdkClient generativeaiagentsdk.Generati
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*generativeaiagentv1beta1.AgentEndpoint]{},
 		StatusHooks:     generatedruntime.StatusHooks[*generativeaiagentv1beta1.AgentEndpoint]{},
 		ParityHooks:     generatedruntime.ParityHooks[*generativeaiagentv1beta1.AgentEndpoint]{},
-		Async:           generatedruntime.AsyncHooks[*generativeaiagentv1beta1.AgentEndpoint]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*generativeaiagentv1beta1.AgentEndpoint]{},
+		Async: generatedruntime.AsyncHooks[*generativeaiagentv1beta1.AgentEndpoint]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := generativeaiagentsdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*generativeaiagentv1beta1.AgentEndpoint]{},
 		Create: runtimeOperationHooks[generativeaiagentsdk.CreateAgentEndpointRequest, generativeaiagentsdk.CreateAgentEndpointResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateAgentEndpointDetails", RequestName: "CreateAgentEndpointDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request generativeaiagentsdk.CreateAgentEndpointRequest) (generativeaiagentsdk.CreateAgentEndpointResponse, error) {
@@ -163,10 +175,19 @@ func buildAgentEndpointGeneratedRuntimeConfig(
 	hooks AgentEndpointRuntimeHooks,
 ) generatedruntime.Config[*generativeaiagentv1beta1.AgentEndpoint] {
 	return generatedruntime.Config[*generativeaiagentv1beta1.AgentEndpoint]{
-		Kind:            "AgentEndpoint",
-		SDKName:         "AgentEndpoint",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "AgentEndpoint",
+		SDKName:   "AgentEndpoint",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

@@ -114,8 +114,20 @@ func newDataSourceDefaultRuntimeHooks(sdkClient generativeaiagentsdk.GenerativeA
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*generativeaiagentv1beta1.DataSource]{},
 		StatusHooks:     generatedruntime.StatusHooks[*generativeaiagentv1beta1.DataSource]{},
 		ParityHooks:     generatedruntime.ParityHooks[*generativeaiagentv1beta1.DataSource]{},
-		Async:           generatedruntime.AsyncHooks[*generativeaiagentv1beta1.DataSource]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*generativeaiagentv1beta1.DataSource]{},
+		Async: generatedruntime.AsyncHooks[*generativeaiagentv1beta1.DataSource]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := generativeaiagentsdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*generativeaiagentv1beta1.DataSource]{},
 		Create: runtimeOperationHooks[generativeaiagentsdk.CreateDataSourceRequest, generativeaiagentsdk.CreateDataSourceResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateDataSourceDetails", RequestName: "CreateDataSourceDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request generativeaiagentsdk.CreateDataSourceRequest) (generativeaiagentsdk.CreateDataSourceResponse, error) {
@@ -163,10 +175,19 @@ func buildDataSourceGeneratedRuntimeConfig(
 	hooks DataSourceRuntimeHooks,
 ) generatedruntime.Config[*generativeaiagentv1beta1.DataSource] {
 	return generatedruntime.Config[*generativeaiagentv1beta1.DataSource]{
-		Kind:            "DataSource",
-		SDKName:         "DataSource",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "DataSource",
+		SDKName:   "DataSource",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

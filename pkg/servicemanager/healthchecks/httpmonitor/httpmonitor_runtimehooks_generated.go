@@ -50,8 +50,61 @@ func registerHttpMonitorRuntimeHooksMutator(mutator HttpMonitorRuntimeHooksMutat
 	}
 	httpmonitorRuntimeHooksMutators = append(httpmonitorRuntimeHooksMutators, mutator)
 }
+func newHttpMonitorRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "healthchecks",
+		FormalSlug:    "httpmonitor",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "none",
+			Runtime:              "generatedruntime",
+			FormalClassification: "none",
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "best-effort",
+			PendingStates:  []string{},
+			TerminalStates: []string{"NOT_FOUND"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "displayName", "id", "protocol"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"definedTags", "displayName", "freeformTags", "headers", "intervalInSeconds", "isEnabled", "method", "path", "port", "protocol", "targets", "timeoutInSeconds", "vantagePointNames"},
+			ForceNew:      []string{"compartmentId"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newHttpMonitorDefaultRuntimeHooks(sdkClient healthcheckssdk.HealthChecksClient) HttpMonitorRuntimeHooks {
 	return HttpMonitorRuntimeHooks{
+		Semantics:       newHttpMonitorRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*healthchecksv1beta1.HttpMonitor]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*healthchecksv1beta1.HttpMonitor]{},

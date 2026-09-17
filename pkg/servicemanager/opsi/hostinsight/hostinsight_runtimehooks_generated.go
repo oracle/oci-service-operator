@@ -50,15 +50,84 @@ func registerHostInsightRuntimeHooksMutator(mutator HostInsightRuntimeHooksMutat
 	}
 	hostinsightRuntimeHooksMutators = append(hostinsightRuntimeHooksMutators, mutator)
 }
+func newHostInsightRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "opsi",
+		FormalSlug:    "hostinsight",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "compartmentIdInSubtree", "enterpriseManagerBridgeId", "exadataInsightId", "hostType", "id", "state", "status"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"definedTags", "freeformTags"},
+			ForceNew:      []string{"compartmentId", "computeId", "enterpriseManagerBridgeId", "enterpriseManagerEntityIdentifier", "enterpriseManagerIdentifier", "entitySource", "exadataInsightId", "managementAgentId"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "HostInsight", Action: "CreateHostInsight"}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "HostInsight", Action: "UpdateHostInsight"}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "HostInsight", Action: "DeleteHostInsight"}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> GetHostInsight",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "HostInsight", Action: "CreateHostInsight"}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> GetHostInsight",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "HostInsight", Action: "UpdateHostInsight"}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "HostInsight", Action: "DeleteHostInsight"}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newHostInsightDefaultRuntimeHooks(sdkClient opsisdk.OperationsInsightsClient) HostInsightRuntimeHooks {
 	return HostInsightRuntimeHooks{
+		Semantics:       newHostInsightRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*opsiv1beta1.HostInsight]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*opsiv1beta1.HostInsight]{},
 		StatusHooks:     generatedruntime.StatusHooks[*opsiv1beta1.HostInsight]{},
 		ParityHooks:     generatedruntime.ParityHooks[*opsiv1beta1.HostInsight]{},
-		Async:           generatedruntime.AsyncHooks[*opsiv1beta1.HostInsight]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*opsiv1beta1.HostInsight]{},
+		Async: generatedruntime.AsyncHooks[*opsiv1beta1.HostInsight]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := opsisdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*opsiv1beta1.HostInsight]{},
 		Create: runtimeOperationHooks[opsisdk.CreateHostInsightRequest, opsisdk.CreateHostInsightResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateHostInsightDetails", RequestName: "CreateHostInsightDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request opsisdk.CreateHostInsightRequest) (opsisdk.CreateHostInsightResponse, error) {
@@ -106,10 +175,19 @@ func buildHostInsightGeneratedRuntimeConfig(
 	hooks HostInsightRuntimeHooks,
 ) generatedruntime.Config[*opsiv1beta1.HostInsight] {
 	return generatedruntime.Config[*opsiv1beta1.HostInsight]{
-		Kind:            "HostInsight",
-		SDKName:         "HostInsight",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "HostInsight",
+		SDKName:   "HostInsight",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

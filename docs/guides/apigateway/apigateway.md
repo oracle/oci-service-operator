@@ -24,6 +24,7 @@ Manage OCI API Gateway gateway resources. This page is generated from checked-in
 - [API Reference](../../reference/api/apigateway/v1beta1/index.md#kind-apigateway)
 - [Spec Reference](../../reference/api/apigateway/v1beta1/index.md#kind-apigateway-spec)
 - [Status Reference](../../reference/api/apigateway/v1beta1/index.md#kind-apigateway-status)
+- [Rendered Sample](../../reference/samples/apigateway/v1beta1/apigateway.md) (`config/samples/apigateway_v1beta1_apigateway.yaml`)
 
 ## Spec Fields
 
@@ -31,15 +32,21 @@ This summary shows the top-level `spec` fields. Use [the full API reference](../
 
 | Field | Description | Type | Required |
 | --- | --- | --- | --- |
-| `certificateId` | CertificateId is the OCID of a certificate resource to use for HTTPS. | `string` | No |
-| `compartmentId` | CompartmentId is the OCID of the compartment in which to create the gateway. | `string` | Yes |
-| `definedTags` | - | `map[string, map[string, string]]` | No |
-| `displayName` | DisplayName is a user-friendly name for the gateway. | `string` | No |
-| `endpointType` | EndpointType is the gateway endpoint type. Validation: endpointType is immutable. | `string` | Yes |
-| `freeformTags` | - | `map[string, string]` | No |
-| `id` | The OCID of an existing ApiGateway to bind to. | `string` | No |
-| `networkSecurityGroupIds` | NetworkSecurityGroupIds is an optional list of NSG OCIDs associated with the gateway. | `list[string]` | No |
-| `subnetId` | SubnetId is the OCID of the subnet in which the gateway is created. Validation: subnetId is immutable. | `string` | Yes |
+| [`caBundles`](../../reference/api/apigateway/v1beta1/index.md#kind-apigateway-spec-cabundles) | An array of CA bundles that should be used on the Gateway for TLS validation. | `list[object]` | No |
+| `certificateId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the resource which can be empty string. | `string` | No |
+| `compartmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment in which the resource is created. | `string` | Yes |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No |
+| `displayName` | A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information. Example: `My new resource` | `string` | No |
+| `endpointType` | Gateway endpoint type. `PUBLIC` will have a public ip address assigned to it, while `PRIVATE` will only be accessible on a private IP address on the subnet. Example: `PUBLIC` or `PRIVATE` Validation: endpointType is immutable. | `string` | Yes |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No |
+| `id` | The OCID of an existing API Gateway to bind to. | `string` | No |
+| `ipMode` | Determines whether the gateway has an IPv4 or IPv6 address assigned to it, or both. `IPV4` means the gateway will only have an IPv4 address assigned to it, and `IPV6` means the gateway will only have an `IPv6` address assigned to it. `DUAL_STACK` means the gateway will have both an IPv4 and IPv6 address assigned to it. Example: `IPV4` or `IPV6` or `DUAL_STACK` | `string` | No |
+| [`ipv4AddressConfiguration`](../../reference/api/apigateway/v1beta1/index.md#kind-apigateway-spec-ipv4addressconfiguration) | ApiGatewayIpv4AddressConfiguration defines nested fields for ApiGateway.Ipv4AddressConfiguration. | `object` | No |
+| [`ipv6AddressConfiguration`](../../reference/api/apigateway/v1beta1/index.md#kind-apigateway-spec-ipv6addressconfiguration) | ApiGatewayIpv6AddressConfiguration defines nested fields for ApiGateway.Ipv6AddressConfiguration. | `object` | No |
+| [`locks`](../../reference/api/apigateway/v1beta1/index.md#kind-apigateway-spec-locks) | Locks associated with this resource. | `list[object]` | No |
+| `networkSecurityGroupIds` | An array of Network Security Groups OCIDs associated with this API Gateway. | `list[string]` | No |
+| [`responseCacheDetails`](../../reference/api/apigateway/v1beta1/index.md#kind-apigateway-spec-responsecachedetails) | ApiGatewayResponseCacheDetails defines nested fields for ApiGateway.ResponseCacheDetails. | `object` | No |
+| `subnetId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the subnet in which related resources are created. Validation: subnetId is immutable. | `string` | Yes |
 
 
 ## Status Fields
@@ -48,9 +55,53 @@ This summary shows the top-level `status` fields. Use [the full API reference](.
 
 | Field | Description | Type | Required |
 | --- | --- | --- | --- |
+| [`caBundles`](../../reference/api/apigateway/v1beta1/index.md#kind-apigateway-status-cabundles) | An array of CA bundles that should be used on the Gateway for TLS validation. | `list[object]` | No |
+| `certificateId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the resource. | `string` | No |
+| `compartmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment in which the resource is created. | `string` | No |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No |
+| `displayName` | A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information. Example: `My new resource` | `string` | No |
+| `endpointType` | Gateway endpoint type. `PUBLIC` will have a public ip address assigned to it, while `PRIVATE` will only be accessible on a private IP address on the subnet. Example: `PUBLIC` or `PRIVATE` | `string` | No |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No |
+| `hostname` | The hostname for APIs deployed on the gateway. | `string` | No |
+| `id` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the resource. | `string` | No |
+| [`ipAddresses`](../../reference/api/apigateway/v1beta1/index.md#kind-apigateway-status-ipaddresses) | An array of IP addresses associated with the gateway. | `list[object]` | No |
+| `ipMode` | Determines whether the gateway has an IPv4 or IPv6 address assigned to it, or both. `IPV4` means the gateway will only have an IPv4 address assigned to it, and `IPV6` means the gateway will only have an `IPv6` address assigned to it. `DUAL_STACK` means the gateway will have both an IPv4 and IPv6 address assigned to it. Example: `IPV4` or `IPV6` or `DUAL_STACK` | `string` | No |
+| [`ipv4AddressConfiguration`](../../reference/api/apigateway/v1beta1/index.md#kind-apigateway-status-ipv4addressconfiguration) | ApiGatewayIpv4AddressConfiguration defines nested fields for ApiGateway.Ipv4AddressConfiguration. | `object` | No |
+| [`ipv6AddressConfiguration`](../../reference/api/apigateway/v1beta1/index.md#kind-apigateway-status-ipv6addressconfiguration) | ApiGatewayIpv6AddressConfiguration defines nested fields for ApiGateway.Ipv6AddressConfiguration. | `object` | No |
+| `lifecycleDetails` | A message describing the current state in more detail. For example, can be used to provide actionable information for a resource in a Failed state. | `string` | No |
+| `lifecycleState` | The current state of the gateway. | `string` | No |
+| [`locks`](../../reference/api/apigateway/v1beta1/index.md#kind-apigateway-status-locks) | Locks associated with this resource. | `list[object]` | No |
+| `networkSecurityGroupIds` | An array of Network Security Groups OCIDs associated with this API Gateway. | `list[string]` | No |
+| [`responseCacheDetails`](../../reference/api/apigateway/v1beta1/index.md#kind-apigateway-status-responsecachedetails) | ApiGatewayResponseCacheDetails defines nested fields for ApiGateway.ResponseCacheDetails. | `object` | No |
 | [`status`](../../reference/api/apigateway/v1beta1/index.md#kind-apigateway-status-status) | - | `object` | Yes |
+| `subnetId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the subnet in which related resources are created. | `string` | No |
+| `systemTags` | System tags for this resource. Each key is predefined and scoped to a namespace. Example: `{"orcl-cloud": {"free-tier-retained": "true"}}` | `map[string, map[string, string]]` | No |
+| `timeCreated` | The time this resource was created. An RFC3339 formatted datetime string. | `string` | No |
+| `timeUpdated` | The time this resource was last updated. An RFC3339 formatted datetime string. | `string` | No |
 
 
 ## Sample Manifest
 
-No checked-in sample manifest currently exists for this resource.
+This example is generated from the checked-in sample manifest at `config/samples/apigateway_v1beta1_apigateway.yaml`. Replace placeholder values before applying it.
+
+[Open the rendered sample page](../../reference/samples/apigateway/v1beta1/apigateway.md)
+
+```yaml
+#
+# Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+#
+
+#
+# Replace the compartment and subnet OCIDs below before running e2e.
+#
+apiVersion: apigateway.oracle.com/v1beta1
+kind: ApiGateway
+metadata:
+  name: apigateway-sample
+spec:
+  compartmentId: ocid1.compartment.oc1..exampleuniqueID
+  displayName: apigateway-sample
+  endpointType: PRIVATE
+  subnetId: ocid1.subnet.oc1..exampleuniqueID
+```

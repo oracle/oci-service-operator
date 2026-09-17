@@ -50,7 +50,7 @@ func dkimRuntimeSemantics() *generatedruntime.Semantics {
 		Lifecycle: generatedruntime.LifecycleSemantics{
 			ProvisioningStates: []string{"CREATING"},
 			UpdatingStates:     []string{"UPDATING"},
-			ActiveStates:       []string{"ACTIVE"},
+			ActiveStates:       []string{"ACTIVE", "NEEDS_ATTENTION"},
 		},
 		Delete: generatedruntime.DeleteSemantics{
 			Policy:         "required",

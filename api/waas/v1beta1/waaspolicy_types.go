@@ -34,9 +34,9 @@ type WaasPolicySpec struct {
 	// +kubebuilder:validation:Optional
 	OriginGroups map[string]WaasPolicyOriginGroups `json:"originGroups,omitempty"`
 	// +kubebuilder:validation:Optional
-	PolicyConfig WaasPolicyPolicyConfig `json:"policyConfig,omitempty"`
+	PolicyConfig WaasPolicyPolicyConfig `json:"policyConfig,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	WafConfig WaasPolicyWafConfig `json:"wafConfig,omitempty"`
+	WafConfig WaasPolicyWafConfig `json:"wafConfig,omitempty,omitzero"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
 	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
@@ -202,7 +202,7 @@ type WaasPolicyPolicyConfig struct {
 	CipherGroup string `json:"cipherGroup,omitempty"`
 	// An object that represents a load balancing method and its properties.
 	// +kubebuilder:validation:Optional
-	LoadBalancingMethod WaasPolicyPolicyConfigLoadBalancingMethod `json:"loadBalancingMethod,omitempty"`
+	LoadBalancingMethod WaasPolicyPolicyConfigLoadBalancingMethod `json:"loadBalancingMethod,omitempty,omitzero"`
 	// ModSecurity is not capable to inspect WebSockets. Therefore paths specified here have WAF disabled if Connection request header from the client has the value Upgrade (case insensitive matching) and Upgrade request header has the value websocket (case insensitive matching). Paths matches if the concatenation of request URL path and query starts with the contents of the one of `websocketPathPrefixes` array value. In All other cases challenges, like JSC, HIC and etc., remain active.
 	// +kubebuilder:validation:Optional
 	WebsocketPathPrefixes []string `json:"websocketPathPrefixes,omitempty"`
@@ -210,7 +210,7 @@ type WaasPolicyPolicyConfig struct {
 	// +kubebuilder:validation:Optional
 	IsSniEnabled bool `json:"isSniEnabled,omitempty"`
 	// +kubebuilder:validation:Optional
-	HealthChecks WaasPolicyPolicyConfigHealthChecks `json:"healthChecks,omitempty"`
+	HealthChecks WaasPolicyPolicyConfigHealthChecks `json:"healthChecks,omitempty,omitzero"`
 }
 
 // WaasPolicyWafConfigAccessRuleCriteria defines nested fields for WaasPolicy.WafConfig.AccessRule.Criteria.
@@ -433,7 +433,7 @@ type WaasPolicyWafConfigDeviceFingerprintChallenge struct {
 	// +kubebuilder:validation:Optional
 	MaxAddressCountExpirationInSeconds int `json:"maxAddressCountExpirationInSeconds,omitempty"`
 	// +kubebuilder:validation:Optional
-	ChallengeSettings WaasPolicyWafConfigDeviceFingerprintChallengeChallengeSettings `json:"challengeSettings,omitempty"`
+	ChallengeSettings WaasPolicyWafConfigDeviceFingerprintChallengeChallengeSettings `json:"challengeSettings,omitempty,omitzero"`
 }
 
 // WaasPolicyWafConfigHumanInteractionChallengeSetHttpHeader defines nested fields for WaasPolicy.WafConfig.HumanInteractionChallenge.SetHttpHeader.
@@ -502,9 +502,9 @@ type WaasPolicyWafConfigHumanInteractionChallenge struct {
 	RecordingPeriodInSeconds int `json:"recordingPeriodInSeconds,omitempty"`
 	// Adds an additional HTTP header to requests that fail the challenge before being passed to the origin. Only applicable when the `action` is set to `DETECT`.
 	// +kubebuilder:validation:Optional
-	SetHttpHeader WaasPolicyWafConfigHumanInteractionChallengeSetHttpHeader `json:"setHttpHeader,omitempty"`
+	SetHttpHeader WaasPolicyWafConfigHumanInteractionChallengeSetHttpHeader `json:"setHttpHeader,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	ChallengeSettings WaasPolicyWafConfigHumanInteractionChallengeChallengeSettings `json:"challengeSettings,omitempty"`
+	ChallengeSettings WaasPolicyWafConfigHumanInteractionChallengeChallengeSettings `json:"challengeSettings,omitempty,omitzero"`
 	// When enabled, the user is identified not only by the IP address but also by an unique additional hash, which prevents blocking visitors with shared IP addresses.
 	// +kubebuilder:validation:Optional
 	IsNatEnabled bool `json:"isNatEnabled,omitempty"`
@@ -610,9 +610,9 @@ type WaasPolicyWafConfigJsChallenge struct {
 	ActionExpirationInSeconds int `json:"actionExpirationInSeconds,omitempty"`
 	// Adds an additional HTTP header to requests that fail the challenge before being passed to the origin. Only applicable when the `action` is set to `DETECT`.
 	// +kubebuilder:validation:Optional
-	SetHttpHeader WaasPolicyWafConfigJsChallengeSetHttpHeader `json:"setHttpHeader,omitempty"`
+	SetHttpHeader WaasPolicyWafConfigJsChallengeSetHttpHeader `json:"setHttpHeader,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	ChallengeSettings WaasPolicyWafConfigJsChallengeChallengeSettings `json:"challengeSettings,omitempty"`
+	ChallengeSettings WaasPolicyWafConfigJsChallengeChallengeSettings `json:"challengeSettings,omitempty,omitzero"`
 	// When enabled, redirect responses from the origin will also be challenged. This will change HTTP 301/302 responses from origin to HTTP 200 with an HTML body containing JavaScript page redirection.
 	// +kubebuilder:validation:Optional
 	AreRedirectsChallenged bool `json:"areRedirectsChallenged,omitempty"`
@@ -778,19 +778,19 @@ type WaasPolicyWafConfig struct {
 	AccessRules []WaasPolicyWafConfigAccessRule `json:"accessRules,omitempty"`
 	// The settings used to limit the number of requests from an IP address.
 	// +kubebuilder:validation:Optional
-	AddressRateLimiting WaasPolicyWafConfigAddressRateLimiting `json:"addressRateLimiting,omitempty"`
+	AddressRateLimiting WaasPolicyWafConfigAddressRateLimiting `json:"addressRateLimiting,omitempty,omitzero"`
 	// A list of CAPTCHA challenge settings. CAPTCHAs challenge requests to ensure a human is attempting to reach the specified URL and not a bot.
 	// +kubebuilder:validation:Optional
 	Captchas []WaasPolicyWafConfigCaptcha `json:"captchas,omitempty"`
 	// The device fingerprint challenge settings. Blocks bots based on unique device fingerprint information.
 	// +kubebuilder:validation:Optional
-	DeviceFingerprintChallenge WaasPolicyWafConfigDeviceFingerprintChallenge `json:"deviceFingerprintChallenge,omitempty"`
+	DeviceFingerprintChallenge WaasPolicyWafConfigDeviceFingerprintChallenge `json:"deviceFingerprintChallenge,omitempty,omitzero"`
 	// The human interaction challenge settings. Detects natural human interactions such as mouse movements, time on site, and page scrolling to identify bots.
 	// +kubebuilder:validation:Optional
-	HumanInteractionChallenge WaasPolicyWafConfigHumanInteractionChallenge `json:"humanInteractionChallenge,omitempty"`
+	HumanInteractionChallenge WaasPolicyWafConfigHumanInteractionChallenge `json:"humanInteractionChallenge,omitempty,omitzero"`
 	// The JavaScript challenge settings. Blocks bots by challenging requests from browsers that have no JavaScript support.
 	// +kubebuilder:validation:Optional
-	JsChallenge WaasPolicyWafConfigJsChallenge `json:"jsChallenge,omitempty"`
+	JsChallenge WaasPolicyWafConfigJsChallenge `json:"jsChallenge,omitempty,omitzero"`
 	// The key in the map of origins referencing the origin used for the Web Application Firewall. The origin must already be included in `Origins`. Required when creating the `WafConfig` resource, but is not required upon updating the configuration.
 	// +kubebuilder:validation:Optional
 	Origin string `json:"origin,omitempty"`
@@ -806,7 +806,7 @@ type WaasPolicyWafConfig struct {
 	OriginGroups []string `json:"originGroups,omitempty"`
 	// The settings applied to protection rules.
 	// +kubebuilder:validation:Optional
-	ProtectionSettings WaasPolicyWafConfigProtectionSettings `json:"protectionSettings,omitempty"`
+	ProtectionSettings WaasPolicyWafConfigProtectionSettings `json:"protectionSettings,omitempty,omitzero"`
 	// A list of IP addresses that bypass the Web Application Firewall.
 	// +kubebuilder:validation:Optional
 	Whitelists []WaasPolicyWafConfigWhitelist `json:"whitelists,omitempty"`

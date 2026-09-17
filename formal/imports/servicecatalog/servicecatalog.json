@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "servicecatalog",
+  "slug": "servicecatalog",
+  "kind": "ServiceCatalog",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_service_catalog_service_catalog",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateServiceCatalog",
+        "requestType": "servicecatalog.CreateServiceCatalogRequest",
+        "responseType": "servicecatalog.CreateServiceCatalogResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetServiceCatalog",
+        "requestType": "servicecatalog.GetServiceCatalogRequest",
+        "responseType": "servicecatalog.GetServiceCatalogResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListServiceCatalogs",
+        "requestType": "servicecatalog.ListServiceCatalogsRequest",
+        "responseType": "servicecatalog.ListServiceCatalogsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeServiceCatalogCompartment",
+        "requestType": "servicecatalog.ChangeServiceCatalogCompartmentRequest",
+        "responseType": "servicecatalog.ChangeServiceCatalogCompartmentResponse"
+      },
+      {
+        "operation": "UpdateServiceCatalog",
+        "requestType": "servicecatalog.UpdateServiceCatalogRequest",
+        "responseType": "servicecatalog.UpdateServiceCatalogResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteServiceCatalog",
+        "requestType": "servicecatalog.DeleteServiceCatalogRequest",
+        "responseType": "servicecatalog.DeleteServiceCatalogResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "display_name",
+      "freeform_tags",
+      "status"
+    ],
+    "forceNew": null,
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_service_catalog_service_catalogs",
+    "collectionField": "service_catalog_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "service_catalog_id",
+      "status"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/servicecatalog/servicecatalog/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/servicecatalog/servicecatalog/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts are imported from the pinned terraform-provider-oci revision; repo-authored runtime semantics remain authoritative."
+  ]
+}

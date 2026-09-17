@@ -66,7 +66,7 @@ func newCustomPropertyDefaultRuntimeHooks(sdkClient datacatalogsdk.DataCatalogCl
 			},
 		},
 		Get: runtimeOperationHooks[datacatalogsdk.GetCustomPropertyRequest, datacatalogsdk.GetCustomPropertyResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "NamespaceId", RequestName: "namespaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "CustomPropertyKey", RequestName: "customPropertyKey", Contribution: "path", PreferResourceID: false}, {FieldName: "Fields", RequestName: "fields", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "NamespaceId", RequestName: "namespaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "CustomPropertyKey", RequestName: "customPropertyKey", Contribution: "path", PreferResourceID: true}, {FieldName: "Fields", RequestName: "fields", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request datacatalogsdk.GetCustomPropertyRequest) (datacatalogsdk.GetCustomPropertyResponse, error) {
 				return sdkClient.GetCustomProperty(ctx, request)
 			},
@@ -78,13 +78,13 @@ func newCustomPropertyDefaultRuntimeHooks(sdkClient datacatalogsdk.DataCatalogCl
 			},
 		},
 		Update: runtimeOperationHooks[datacatalogsdk.UpdateCustomPropertyRequest, datacatalogsdk.UpdateCustomPropertyResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "NamespaceId", RequestName: "namespaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "CustomPropertyKey", RequestName: "customPropertyKey", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdateCustomPropertyDetails", RequestName: "UpdateCustomPropertyDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "NamespaceId", RequestName: "namespaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "CustomPropertyKey", RequestName: "customPropertyKey", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateCustomPropertyDetails", RequestName: "UpdateCustomPropertyDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request datacatalogsdk.UpdateCustomPropertyRequest) (datacatalogsdk.UpdateCustomPropertyResponse, error) {
 				return sdkClient.UpdateCustomProperty(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[datacatalogsdk.DeleteCustomPropertyRequest, datacatalogsdk.DeleteCustomPropertyResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "NamespaceId", RequestName: "namespaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "CustomPropertyKey", RequestName: "customPropertyKey", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "NamespaceId", RequestName: "namespaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "CustomPropertyKey", RequestName: "customPropertyKey", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request datacatalogsdk.DeleteCustomPropertyRequest) (datacatalogsdk.DeleteCustomPropertyResponse, error) {
 				return sdkClient.DeleteCustomProperty(ctx, request)
 			},

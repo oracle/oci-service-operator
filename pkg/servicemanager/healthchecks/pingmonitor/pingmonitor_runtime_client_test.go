@@ -278,8 +278,8 @@ func TestPingMonitorDeleteWaitsForConfirmedNotFound(t *testing.T) {
 	if !deleted {
 		t.Fatal("Delete() deleted = false, want true after unambiguous not-found confirmation")
 	}
-	if fake.deleteCalls != 1 {
-		t.Fatalf("DeletePingMonitor calls = %d, want 1", fake.deleteCalls)
+	if fake.deleteCalls != 0 {
+		t.Fatalf("DeletePingMonitor calls = %d, want 0 after pre-delete absence confirmation", fake.deleteCalls)
 	}
 	if resource.Status.OsokStatus.DeletedAt == nil {
 		t.Fatal("status.deletedAt = nil, want confirmed delete timestamp")
@@ -287,7 +287,7 @@ func TestPingMonitorDeleteWaitsForConfirmedNotFound(t *testing.T) {
 	assertTrailingCondition(t, resource, shared.Terminating)
 }
 
-func TestPingMonitorDeleteKeepsFinalizerOnAuthShapedNotFound(t *testing.T) {
+func TestPingMonitorDeleteConfirmsAuthShapedNotFoundByScopedList(t *testing.T) {
 	t.Parallel()
 
 	resource := newPingMonitorResource()
@@ -302,19 +302,28 @@ func TestPingMonitorDeleteKeepsFinalizerOnAuthShapedNotFound(t *testing.T) {
 	fake.deletePingMonitor = func(_ context.Context, _ healthcheckssdk.DeletePingMonitorRequest) (healthcheckssdk.DeletePingMonitorResponse, error) {
 		return healthcheckssdk.DeletePingMonitorResponse{}, errortest.NewServiceError(404, errorutil.NotAuthorizedOrNotFound, "ambiguous ping monitor miss")
 	}
+	fake.listPingMonitors = func(_ context.Context, request healthcheckssdk.ListPingMonitorsRequest) (healthcheckssdk.ListPingMonitorsResponse, error) {
+		if got, want := stringValue(request.CompartmentId), resource.Spec.CompartmentId; got != want {
+			t.Fatalf("ListPingMonitors compartmentId = %q, want %q", got, want)
+		}
+		if got, want := stringValue(request.DisplayName), resource.Spec.DisplayName; got != want {
+			t.Fatalf("ListPingMonitors displayName = %q, want %q", got, want)
+		}
+		return healthcheckssdk.ListPingMonitorsResponse{}, nil
+	}
 
 	deleted, err := newTestPingMonitorClient(fake).Delete(context.Background(), resource)
-	if err == nil {
-		t.Fatal("Delete() error = nil, want auth-shaped not-found to remain fatal")
+	if err != nil {
+		t.Fatalf("Delete() error = %v", err)
 	}
-	if deleted {
-		t.Fatal("Delete() deleted = true, want finalizer retained")
+	if !deleted {
+		t.Fatal("Delete() deleted = false, want scoped list absence confirmation")
 	}
-	if !strings.Contains(err.Error(), "keeping the finalizer") {
-		t.Fatalf("Delete() error = %q, want conservative finalizer message", err.Error())
+	if fake.listCalls != 1 {
+		t.Fatalf("ListPingMonitors calls = %d, want 1", fake.listCalls)
 	}
-	if resource.Status.OsokStatus.DeletedAt != nil {
-		t.Fatal("status.deletedAt set, want finalizer retained")
+	if resource.Status.Id != "" || resource.Status.OsokStatus.Ocid != "" {
+		t.Fatalf("tracked identity = %q/%q, want cleared", resource.Status.Id, resource.Status.OsokStatus.Ocid)
 	}
 	if got, want := resource.Status.OsokStatus.OpcRequestID, "opc-request-id"; got != want {
 		t.Fatalf("status.opcRequestId = %q, want %q", got, want)

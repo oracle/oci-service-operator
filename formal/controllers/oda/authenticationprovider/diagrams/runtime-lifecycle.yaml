@@ -9,5 +9,17 @@ states:
   - active
   - updating
   - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending: ["CREATING"]
+    updatePending: ["UPDATING"]
+    deletePending: ["DELETING"]
+  listLookup:
+    filters: ["odaInstanceId","identityProvider","name"]
+    matchRule: exact parent, provider type, and name match; duplicate matches fail
+  mutation:
+    mutable: ["authorizationEndpointUrl","clientId","definedTags","freeformTags","redirectUrl","refreshTokenRetentionPeriodInDays","revokeTokenEndpointUrl","scopes","shortAuthorizationCodeRequestUrl","subjectClaim","tokenEndpointUrl"]
+    forceNew: ["grantType","identityProvider","name","isVisible"]
+  followUp: {create: read-after-write, update: read-after-write, delete: confirm-delete}
 notes:
-  - Scaffold metadata only; replace with controller-specific runtime states before promotion.
+  - "clientSecret is write-only: it is sent on create or alongside another supported update, but cannot independently trigger drift correction."

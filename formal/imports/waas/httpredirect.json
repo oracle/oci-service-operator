@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "waas",
+  "slug": "httpredirect",
+  "kind": "HttpRedirect",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_waas_http_redirect",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateHttpRedirect",
+        "requestType": "waas.CreateHttpRedirectRequest",
+        "responseType": "waas.CreateHttpRedirectResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetHttpRedirect",
+        "requestType": "waas.GetHttpRedirectRequest",
+        "responseType": "waas.GetHttpRedirectResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListHttpRedirects",
+        "requestType": "waas.ListHttpRedirectsRequest",
+        "responseType": "waas.ListHttpRedirectsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeHttpRedirectCompartment",
+        "requestType": "waas.ChangeHttpRedirectCompartmentRequest",
+        "responseType": "waas.ChangeHttpRedirectCompartmentResponse"
+      },
+      {
+        "operation": "UpdateHttpRedirect",
+        "requestType": "waas.UpdateHttpRedirectRequest",
+        "responseType": "waas.UpdateHttpRedirectResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteHttpRedirect",
+        "requestType": "waas.DeleteHttpRedirectRequest",
+        "responseType": "waas.DeleteHttpRedirectResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "S_CREATING"
+      ],
+      "target": [
+        "S_ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "display_name",
+      "freeform_tags",
+      "response_code",
+      "target.host",
+      "target.path",
+      "target.port",
+      "target.protocol",
+      "target.query"
+    ],
+    "forceNew": [
+      "domain"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_waas_http_redirects",
+    "collectionField": "http_redirects",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_names",
+      "ids",
+      "states",
+      "time_created_greater_than_or_equal_to",
+      "time_created_less_than"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/waas/httpredirect/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/waas/httpredirect/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from terraform-provider-oci for waas/httpredirect."
+  ]
+}

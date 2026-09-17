@@ -38,7 +38,7 @@ group Lookup and bind
 alt tracked or explicit OCI identity already exists
 ServiceManager -> OCI: GetLogSavedSearch
 else tracked identity is missing
-ServiceManager -> OCI: ListLogSavedSearch(filters:\ncompartment_id, state)
+ServiceManager -> OCI: ListLogSavedSearch(filters:\ncompartmentId, lifecycleState, name)
 alt reusable OCI resource is not found
 ServiceManager -> OCI: CreateLogSavedSearch
 loop create pending PROVISIONING
@@ -67,21 +67,28 @@ ServiceManager --> BaseReconciler: requeue while OCI remains in\nPROVISIONING, U
 else live state requires field-aware\ndrift evaluation
 group Drift handling
 note over ServiceManager,OCI
-Supported update surface: display_name
+Supported update surface: definedTags,
+description, freeformTags, name (+1
+more)
 Reject before mutate: force-new fields
-compartment_id
-Lookup filters: compartment_id, state
+compartmentId
+Lookup filters: compartmentId,
+lifecycleState, name
+Lookup matching: Adopt only a unique
+saved-search match in the requested
+compartment.
 end note
 opt force-new or conflicting drift is detected
 ServiceManager --> BaseReconciler: reject before OCI mutation
 end
 opt supported mutable drift is detected
-ServiceManager -> OCI: Apply UpdateLogSavedSearch only for\nmutable fields display_name
+ServiceManager -> OCI: Apply UpdateLogSavedSearch only for\nmutable fields definedTags,\ndescription, freeformTags, name (+1\nmore)
 loop update pending UPDATING
 ServiceManager -> OCI: GetLogSavedSearch
 end
 end
-ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=template action=CREATED;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource
+ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource
+ServiceManager -> OCI: apply follow-up strategy\ncreate=read-after-write;\nupdate=read-after-write;\ndelete=confirm-delete
 end
 ServiceManager --> BaseReconciler: status=required,\nfinalizer=retain-until-confirmed-delete
 end
@@ -110,16 +117,25 @@ retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
 provider states: create PROVISIONING; update
 UPDATING; delete DELETING
-supported drift: display_name
+follow-up: create=read-after-write;
+update=read-after-write; delete=confirm-delete
+supported drift: definedTags, description,
+freeformTags, name (+1 more)
 reject before mutate: force-new fields
-compartment_id
+compartmentId
 create-only fields: none
 list lookup: scaffold_logging_logsavedsearch
-filters compartment_id, state
+filters compartmentId, lifecycleState, name;
+Adopt only a unique saved-search match in the
+requested compartment.
 conflicts: none
 open gaps: none
-Scaffold metadata only; replace with
-controller-specific runtime states before
-promotion.
+CREATING and UPDATING requeue, ACTIVE succeeds,
+and DELETING retains the finalizer until OCI
+reports the saved search absent.
+CompartmentId is replacement-only; name, query,
+description, and tag fields reconcile in place.
+The runtime projects the OCI saved-search status
+and has no Kubernetes Secret side effects.
 end note
 @enduml

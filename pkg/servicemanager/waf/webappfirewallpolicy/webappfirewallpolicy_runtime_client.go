@@ -297,6 +297,7 @@ func webAppFirewallPolicyRuntimeSemantics() *generatedruntime.Semantics {
 			},
 			Update: []generatedruntime.Hook{
 				{Helper: "tfresource.UpdateResource"},
+				{Helper: "ChangeWebAppFirewallPolicyCompartment"},
 				{Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: webAppFirewallPolicyWorkRequestEntityType, Action: "UPDATED"},
 			},
 			Delete: []generatedruntime.Hook{

@@ -20,18 +20,21 @@ type NatRuleSpec struct {
 	// +kubebuilder:validation:Optional
 	Description string `json:"description,omitempty"`
 	// +kubebuilder:validation:Optional
-	Position NatRulePosition `json:"position,omitempty"`
+	Position NatRulePosition `json:"position,omitempty,omitzero"`
 	// Name for the NAT rule, must be unique within the policy.
 	// +kubebuilder:validation:Required
 	Name string `json:"name"`
 	// +kubebuilder:validation:Optional
 	Type string `json:"type,omitempty"`
 	// +kubebuilder:validation:Optional
-	Condition NatRuleCondition `json:"condition,omitempty"`
+	Condition NatRuleCondition `json:"condition,omitempty,omitzero"`
 	// action:
 	// * DIPP_SRC_NAT - Dynamic-ip-port source NAT.
 	// +kubebuilder:validation:Optional
 	Action string `json:"action,omitempty"`
+	// The OCID of the Network Firewall policy that owns this resource.
+	// +kubebuilder:validation:Required
+	NetworkFirewallPolicyId string `json:"networkFirewallPolicyId"`
 }
 
 // NatRulePosition defines nested fields for NatRule.Position.

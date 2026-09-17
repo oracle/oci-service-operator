@@ -1,0 +1,165 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "fleetsoftwareupdate",
+  "slug": "fsucollection",
+  "kind": "FsuCollection",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_fleet_software_update_fsu_collection",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateFsuCollection",
+        "requestType": "fleetsoftwareupdate.CreateFsuCollectionRequest",
+        "responseType": "fleetsoftwareupdate.CreateFsuCollectionResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetFsuCollection",
+        "requestType": "fleetsoftwareupdate.GetFsuCollectionRequest",
+        "responseType": "fleetsoftwareupdate.GetFsuCollectionResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListFsuCollections",
+        "requestType": "fleetsoftwareupdate.ListFsuCollectionsRequest",
+        "responseType": "fleetsoftwareupdate.ListFsuCollectionsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeFsuCollectionCompartment",
+        "requestType": "fleetsoftwareupdate.ChangeFsuCollectionCompartmentRequest",
+        "responseType": "fleetsoftwareupdate.ChangeFsuCollectionCompartmentResponse"
+      },
+      {
+        "operation": "UpdateFsuCollection",
+        "requestType": "fleetsoftwareupdate.UpdateFsuCollectionRequest",
+        "responseType": "fleetsoftwareupdate.UpdateFsuCollectionResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteFsuCollection",
+        "requestType": "fleetsoftwareupdate.DeleteFsuCollectionRequest",
+        "responseType": "fleetsoftwareupdate.DeleteFsuCollectionResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "S_CREATING"
+      ],
+      "target": [
+        "S_ACTIVE",
+        "S_NEEDS_ATTENTION"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "display_name",
+      "freeform_tags",
+      "id"
+    ],
+    "forceNew": [
+      "components",
+      "components.component_type",
+      "components.fleet_discovery",
+      "components.fleet_discovery.filters",
+      "components.fleet_discovery.filters.entity_type",
+      "components.fleet_discovery.filters.exadata_releases",
+      "components.fleet_discovery.filters.identifiers",
+      "components.fleet_discovery.filters.mode",
+      "components.fleet_discovery.filters.operator",
+      "components.fleet_discovery.filters.tags",
+      "components.fleet_discovery.filters.tags.key",
+      "components.fleet_discovery.filters.tags.namespace",
+      "components.fleet_discovery.filters.tags.value",
+      "components.fleet_discovery.filters.type",
+      "components.fleet_discovery.filters.versions",
+      "components.fleet_discovery.fsu_discovery_id",
+      "components.fleet_discovery.query",
+      "components.fleet_discovery.strategy",
+      "components.fleet_discovery.targets",
+      "components.source_major_version",
+      "fleet_discovery",
+      "fleet_discovery.filters",
+      "fleet_discovery.filters.entity_type",
+      "fleet_discovery.filters.exadata_releases",
+      "fleet_discovery.filters.identifiers",
+      "fleet_discovery.filters.mode",
+      "fleet_discovery.filters.names",
+      "fleet_discovery.filters.operator",
+      "fleet_discovery.filters.tags",
+      "fleet_discovery.filters.tags.key",
+      "fleet_discovery.filters.tags.namespace",
+      "fleet_discovery.filters.tags.value",
+      "fleet_discovery.filters.type",
+      "fleet_discovery.filters.versions",
+      "fleet_discovery.fsu_discovery_id",
+      "fleet_discovery.query",
+      "fleet_discovery.strategy",
+      "fleet_discovery.targets",
+      "service_type",
+      "source_major_version",
+      "type"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_fleet_software_update_fsu_collections",
+    "collectionField": "fsu_collection_summary_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "state",
+      "type"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/fleetsoftwareupdate/fsucollection/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/fleetsoftwareupdate/fsucollection/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from the pinned terraform-provider-oci source revision."
+  ]
+}

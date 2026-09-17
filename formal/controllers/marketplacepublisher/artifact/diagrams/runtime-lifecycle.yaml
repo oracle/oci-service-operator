@@ -1,0 +1,61 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: marketplacepublisher
+slug: artifact
+kind: Artifact
+archetype: generated-service-manager
+states:
+- provisioning
+- active
+- updating
+- terminating
+repoAuthored:
+  operations:
+    update:
+    - UpdateArtifact
+  providerLifecycle:
+    createPending:
+    - CREATING
+    updatePending:
+    - UPDATING
+    deletePending:
+    - DELETING
+  listLookup:
+    filters:
+    - compartmentId
+    - displayName
+    - artifactType
+    - id
+    matchRule: exact compartmentId, displayName, artifactType, id match within the
+      resource scope; duplicate matches fail
+  mutation:
+    mutable:
+    - displayName
+    - freeformTags
+    - definedTags
+    - helmChart
+    - containerImageArtifactIds
+    - stack
+    - containerImage
+    - machineImage
+    forceNew:
+    - compartmentId
+    - artifactType
+  hooks:
+    create:
+    - helper: tfresource.CreateResource
+    update:
+    - helper: tfresource.UpdateResource
+    delete:
+    - helper: tfresource.DeleteResource
+  followUp:
+    create: GetWorkRequest -> GetArtifact
+    update: GetWorkRequest -> GetArtifact
+    delete: confirm-delete
+notes:
+- The production runtime uses the declared work-request phases and service-local async
+  adapter.
+- Lifecycle success and pending states mirror the production service-manager semantics.
+- Status projection is required, Secret side effects are none, and the finalizer policy
+  is retain-until-confirmed-delete.
+- Delete ownership is retained until a terminal lifecycle state or confirmed absence.

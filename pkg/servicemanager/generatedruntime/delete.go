@@ -237,6 +237,10 @@ func (c ServiceClient[T]) deleteWithSemantics(ctx context.Context, resource T) (
 }
 
 func (c ServiceClient[T]) confirmDeleteIfAlreadyPending(ctx context.Context, resource T, currentID string, semantics *Semantics) (bool, error, bool) {
+	// Preserve the established preflight behavior for the canonical strategy.
+	// Descriptive strategies apply their confirmation after an accepted delete;
+	// treating them as preflight strategies adds an unrequested read before the
+	// delete operation and can incorrectly short-circuit it on an ambiguous 404.
 	if semantics.DeleteFollowUp.Strategy != "confirm-delete" {
 		return false, nil, false
 	}
@@ -285,7 +289,7 @@ func (c ServiceClient[T]) shouldConfirmDeleteAfterError(err error) bool {
 	if err == nil || !isRetryableDeleteConflict(err) {
 		return false
 	}
-	if c.config.Semantics == nil || c.config.Semantics.DeleteFollowUp.Strategy != "confirm-delete" {
+	if c.config.Semantics == nil || !deleteFollowUpRequiresConfirmation(c.config.Semantics.DeleteFollowUp.Strategy) {
 		return false
 	}
 	return c.hasDeleteConfirmRead()
@@ -309,7 +313,7 @@ func (c ServiceClient[T]) confirmDeleteWithSemantics(
 	semantics *Semantics,
 	requeueDuration time.Duration,
 ) (servicemanager.OSOKDeleteResult, error) {
-	if semantics.DeleteFollowUp.Strategy != "confirm-delete" {
+	if !deleteFollowUpRequiresConfirmation(semantics.DeleteFollowUp.Strategy) {
 		c.markDeletedWithHooks(resource, "OCI delete request accepted")
 		return servicemanager.OSOKDeleteResult{Deleted: true}, nil
 	}
@@ -338,6 +342,10 @@ func (c ServiceClient[T]) confirmDeleteWithSemantics(
 		return servicemanager.OSOKDeleteResult{Deleted: outcome.Deleted}, nil
 	}
 	return c.applyDeletePolicy(resource, response, semantics, requeueDuration)
+}
+
+func deleteFollowUpRequiresConfirmation(strategy string) bool {
+	return strings.Contains(strings.ToLower(strings.TrimSpace(strategy)), "confirm-delete")
 }
 
 func (c ServiceClient[T]) applyDeletePolicy(

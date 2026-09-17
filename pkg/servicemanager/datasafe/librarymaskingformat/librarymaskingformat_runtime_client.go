@@ -8,6 +8,7 @@ package librarymaskingformat
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"reflect"
 	"strings"
@@ -49,6 +50,7 @@ func applyLibraryMaskingFormatRuntimeHooks(hooks *LibraryMaskingFormatRuntimeHoo
 	hooks.Identity.GuardExistingBeforeCreate = guardLibraryMaskingFormatExistingBeforeCreate
 	hooks.TrackedRecreate.ClearTrackedIdentity = clearTrackedLibraryMaskingFormatIdentity
 	hooks.DeleteHooks.HandleError = handleLibraryMaskingFormatDeleteError
+	wrapLibraryMaskingFormatDeleteCall(hooks)
 
 	list := hooks.List.Call
 	hooks.List.Call = func(ctx context.Context, request datasafesdk.ListLibraryMaskingFormatsRequest) (datasafesdk.ListLibraryMaskingFormatsResponse, error) {
@@ -61,6 +63,12 @@ type libraryMaskingFormatDeleteConfirmationClient struct {
 	delegate                LibraryMaskingFormatServiceClient
 	getLibraryMaskingFormat func(context.Context, datasafesdk.GetLibraryMaskingFormatRequest) (datasafesdk.GetLibraryMaskingFormatResponse, error)
 }
+
+type libraryMaskingFormatDeleteRecorder struct {
+	accepted bool
+}
+
+type libraryMaskingFormatDeleteRecorderKey struct{}
 
 func (c libraryMaskingFormatDeleteConfirmationClient) CreateOrUpdate(
 	ctx context.Context,
@@ -77,7 +85,39 @@ func (c libraryMaskingFormatDeleteConfirmationClient) Delete(
 	if err := c.rejectAuthShapedPreDeleteRead(ctx, resource); err != nil {
 		return false, err
 	}
-	return c.delegate.Delete(ctx, resource)
+	recorder := &libraryMaskingFormatDeleteRecorder{}
+	deleted, err := c.delegate.Delete(context.WithValue(ctx, libraryMaskingFormatDeleteRecorderKey{}, recorder), resource)
+	if err != nil && recorder.accepted && isLibraryMaskingFormatAuthShapedNotFound(err) {
+		servicemanager.RecordErrorOpcRequestID(&resource.Status.OsokStatus, err)
+		return true, nil
+	}
+	return deleted, err
+}
+
+func isLibraryMaskingFormatAuthShapedNotFound(err error) bool {
+	if errorutil.ClassifyDeleteError(err).IsAuthShapedNotFound() {
+		return true
+	}
+	var normalized errorutil.UnauthorizedAndNotFoundOciError
+	return errors.As(err, &normalized) &&
+		normalized.HTTPStatusCode == 404 &&
+		normalized.ErrorCode == errorutil.NotAuthorizedOrNotFound
+}
+
+func wrapLibraryMaskingFormatDeleteCall(hooks *LibraryMaskingFormatRuntimeHooks) {
+	if hooks == nil || hooks.Delete.Call == nil {
+		return
+	}
+	deleteCall := hooks.Delete.Call
+	hooks.Delete.Call = func(ctx context.Context, request datasafesdk.DeleteLibraryMaskingFormatRequest) (datasafesdk.DeleteLibraryMaskingFormatResponse, error) {
+		response, err := deleteCall(ctx, request)
+		if err == nil {
+			if recorder, _ := ctx.Value(libraryMaskingFormatDeleteRecorderKey{}).(*libraryMaskingFormatDeleteRecorder); recorder != nil {
+				recorder.accepted = true
+			}
+		}
+		return response, err
+	}
 }
 
 func wrapLibraryMaskingFormatDeleteConfirmation(hooks *LibraryMaskingFormatRuntimeHooks) {
@@ -395,7 +435,7 @@ func handleLibraryMaskingFormatDeleteError(resource *datasafev1beta1.LibraryMask
 	if resource != nil {
 		servicemanager.RecordErrorOpcRequestID(&resource.Status.OsokStatus, err)
 	}
-	return fmt.Errorf("LibraryMaskingFormat delete confirmation returned ambiguous 404 NotAuthorizedOrNotFound: %s", err.Error())
+	return fmt.Errorf("LibraryMaskingFormat delete confirmation returned ambiguous 404 NotAuthorizedOrNotFound: %w", err)
 }
 
 func libraryMaskingFormatEntriesForOCI(entries []datasafev1beta1.LibraryMaskingFormatFormatEntry) ([]datasafesdk.FormatEntry, error) {

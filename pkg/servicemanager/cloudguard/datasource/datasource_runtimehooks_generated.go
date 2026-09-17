@@ -50,15 +50,84 @@ func registerDataSourceRuntimeHooksMutator(mutator DataSourceRuntimeHooksMutator
 	}
 	datasourceRuntimeHooksMutators = append(datasourceRuntimeHooksMutators, mutator)
 }
+func newDataSourceRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "cloudguard",
+		FormalSlug:    "datasource",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{"UPDATING"},
+			ActiveStates:       []string{"ACTIVE", "INACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "dataSourceFeedProvider", "displayName"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"dataSourceDetails", "definedTags", "displayName", "freeformTags", "status"},
+			ForceNew:      []string{"compartmentId", "dataSourceFeedProvider"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "generatedruntime.Create", EntityType: "DataSource", Action: "CREATE"}},
+			Update: []generatedruntime.Hook{{Helper: "generatedruntime.Update", EntityType: "DataSource", Action: "UPDATE"}},
+			Delete: []generatedruntime.Hook{{Helper: "generatedruntime.Delete", EntityType: "DataSource", Action: "DELETE"}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "generatedruntime.Create", EntityType: "DataSource", Action: "CREATE"}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "generatedruntime.Update", EntityType: "DataSource", Action: "UPDATE"}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "generatedruntime.Delete", EntityType: "DataSource", Action: "DELETE"}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newDataSourceDefaultRuntimeHooks(sdkClient cloudguardsdk.CloudGuardClient) DataSourceRuntimeHooks {
 	return DataSourceRuntimeHooks{
+		Semantics:       newDataSourceRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*cloudguardv1beta1.DataSource]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*cloudguardv1beta1.DataSource]{},
 		StatusHooks:     generatedruntime.StatusHooks[*cloudguardv1beta1.DataSource]{},
 		ParityHooks:     generatedruntime.ParityHooks[*cloudguardv1beta1.DataSource]{},
-		Async:           generatedruntime.AsyncHooks[*cloudguardv1beta1.DataSource]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*cloudguardv1beta1.DataSource]{},
+		Async: generatedruntime.AsyncHooks[*cloudguardv1beta1.DataSource]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := cloudguardsdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*cloudguardv1beta1.DataSource]{},
 		Create: runtimeOperationHooks[cloudguardsdk.CreateDataSourceRequest, cloudguardsdk.CreateDataSourceResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateDataSourceDetails", RequestName: "CreateDataSourceDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request cloudguardsdk.CreateDataSourceRequest) (cloudguardsdk.CreateDataSourceResponse, error) {
@@ -106,10 +175,19 @@ func buildDataSourceGeneratedRuntimeConfig(
 	hooks DataSourceRuntimeHooks,
 ) generatedruntime.Config[*cloudguardv1beta1.DataSource] {
 	return generatedruntime.Config[*cloudguardv1beta1.DataSource]{
-		Kind:            "DataSource",
-		SDKName:         "DataSource",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "DataSource",
+		SDKName:   "DataSource",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

@@ -50,50 +50,119 @@ func registerHttpRedirectRuntimeHooksMutator(mutator HttpRedirectRuntimeHooksMut
 	}
 	httpredirectRuntimeHooksMutators = append(httpredirectRuntimeHooksMutators, mutator)
 }
-func newHttpRedirectDefaultRuntimeHooks(sdkClient waassdk.RedirectClient) HttpRedirectRuntimeHooks {
+func newHttpRedirectRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "waas",
+		FormalSlug:    "httpredirect",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"S_CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"S_ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "displayNames", "ids", "states", "timeCreatedGreaterThanOrEqualTo", "timeCreatedLessThan"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"definedTags", "displayName", "freeformTags", "responseCode", "target"},
+			ForceNew:      []string{"compartmentId", "domain"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "HttpRedirect", Action: "CreateHttpRedirect"}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "HttpRedirect", Action: "UpdateHttpRedirect"}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "HttpRedirect", Action: "DeleteHttpRedirect"}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "HttpRedirect", Action: "CreateHttpRedirect"}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "HttpRedirect", Action: "UpdateHttpRedirect"}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "HttpRedirect", Action: "DeleteHttpRedirect"}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
+func newHttpRedirectDefaultRuntimeHooks(sdkClient HttpRedirectSDKClients) HttpRedirectRuntimeHooks {
 	return HttpRedirectRuntimeHooks{
+		Semantics:       newHttpRedirectRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*waasv1beta1.HttpRedirect]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*waasv1beta1.HttpRedirect]{},
 		StatusHooks:     generatedruntime.StatusHooks[*waasv1beta1.HttpRedirect]{},
 		ParityHooks:     generatedruntime.ParityHooks[*waasv1beta1.HttpRedirect]{},
-		Async:           generatedruntime.AsyncHooks[*waasv1beta1.HttpRedirect]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*waasv1beta1.HttpRedirect]{},
+		Async: generatedruntime.AsyncHooks[*waasv1beta1.HttpRedirect]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := waassdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.waasClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*waasv1beta1.HttpRedirect]{},
 		Create: runtimeOperationHooks[waassdk.CreateHttpRedirectRequest, waassdk.CreateHttpRedirectResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateHttpRedirectDetails", RequestName: "CreateHttpRedirectDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request waassdk.CreateHttpRedirectRequest) (waassdk.CreateHttpRedirectResponse, error) {
-				return sdkClient.CreateHttpRedirect(ctx, request)
+				return sdkClient.redirectClient.CreateHttpRedirect(ctx, request)
 			},
 		},
 		Get: runtimeOperationHooks[waassdk.GetHttpRedirectRequest, waassdk.GetHttpRedirectResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "HttpRedirectId", RequestName: "httpRedirectId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request waassdk.GetHttpRedirectRequest) (waassdk.GetHttpRedirectResponse, error) {
-				return sdkClient.GetHttpRedirect(ctx, request)
+				return sdkClient.redirectClient.GetHttpRedirect(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[waassdk.ListHttpRedirectsRequest, waassdk.ListHttpRedirectsResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "Id", RequestName: "id", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "TimeCreatedGreaterThanOrEqualTo", RequestName: "timeCreatedGreaterThanOrEqualTo", Contribution: "query", PreferResourceID: false}, {FieldName: "TimeCreatedLessThan", RequestName: "timeCreatedLessThan", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request waassdk.ListHttpRedirectsRequest) (waassdk.ListHttpRedirectsResponse, error) {
-				return sdkClient.ListHttpRedirects(ctx, request)
+				return sdkClient.redirectClient.ListHttpRedirects(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[waassdk.UpdateHttpRedirectRequest, waassdk.UpdateHttpRedirectResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "HttpRedirectId", RequestName: "httpRedirectId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateHttpRedirectDetails", RequestName: "UpdateHttpRedirectDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request waassdk.UpdateHttpRedirectRequest) (waassdk.UpdateHttpRedirectResponse, error) {
-				return sdkClient.UpdateHttpRedirect(ctx, request)
+				return sdkClient.redirectClient.UpdateHttpRedirect(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[waassdk.DeleteHttpRedirectRequest, waassdk.DeleteHttpRedirectResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "HttpRedirectId", RequestName: "httpRedirectId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request waassdk.DeleteHttpRedirectRequest) (waassdk.DeleteHttpRedirectResponse, error) {
-				return sdkClient.DeleteHttpRedirect(ctx, request)
+				return sdkClient.redirectClient.DeleteHttpRedirect(ctx, request)
 			},
 		},
 		WrapGeneratedClient: []func(HttpRedirectServiceClient) HttpRedirectServiceClient{},
 	}
 }
 
-func newHttpRedirectRuntimeHooks(manager *HttpRedirectServiceManager, sdkClient waassdk.RedirectClient) HttpRedirectRuntimeHooks {
+func newHttpRedirectRuntimeHooks(manager *HttpRedirectServiceManager, sdkClient HttpRedirectSDKClients) HttpRedirectRuntimeHooks {
 	hooks := newHttpRedirectDefaultRuntimeHooks(sdkClient)
 	for _, mutator := range httpredirectRuntimeHooksMutators {
 		mutator(manager, &hooks)
@@ -106,10 +175,19 @@ func buildHttpRedirectGeneratedRuntimeConfig(
 	hooks HttpRedirectRuntimeHooks,
 ) generatedruntime.Config[*waasv1beta1.HttpRedirect] {
 	return generatedruntime.Config[*waasv1beta1.HttpRedirect]{
-		Kind:            "HttpRedirect",
-		SDKName:         "HttpRedirect",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "HttpRedirect",
+		SDKName:   "HttpRedirect",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

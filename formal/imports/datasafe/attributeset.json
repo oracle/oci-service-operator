@@ -1,0 +1,130 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "attributeset",
+  "kind": "AttributeSet",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_attribute_set",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateAttributeSet",
+        "requestType": "datasafe.CreateAttributeSetRequest",
+        "responseType": "datasafe.CreateAttributeSetResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetAttributeSet",
+        "requestType": "datasafe.GetAttributeSetRequest",
+        "responseType": "datasafe.GetAttributeSetResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListAttributeSets",
+        "requestType": "datasafe.ListAttributeSetsRequest",
+        "responseType": "datasafe.ListAttributeSetsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeAttributeSetCompartment",
+        "requestType": "datasafe.ChangeAttributeSetCompartmentRequest",
+        "responseType": "datasafe.ChangeAttributeSetCompartmentResponse"
+      },
+      {
+        "operation": "UpdateAttributeSet",
+        "requestType": "datasafe.UpdateAttributeSetRequest",
+        "responseType": "datasafe.UpdateAttributeSetResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteAttributeSet",
+        "requestType": "datasafe.DeleteAttributeSetRequest",
+        "responseType": "datasafe.DeleteAttributeSetResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "attribute_set_values",
+      "compartment_id",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags"
+    ],
+    "forceNew": [
+      "attribute_set_type"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_data_safe_attribute_sets",
+    "collectionField": "attribute_set_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "access_level",
+      "attribute_set_id",
+      "attribute_set_type",
+      "compartment_id",
+      "compartment_id_in_subtree",
+      "display_name",
+      "in_use",
+      "is_user_defined",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/attributeset/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/attributeset/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from terraform-provider-oci for datasafe/attributeset."
+  ]
+}

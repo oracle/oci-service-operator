@@ -1,0 +1,130 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "sensitivetypegroup",
+  "kind": "SensitiveTypeGroup",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_sensitive_type_group",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateSensitiveTypeGroup",
+        "requestType": "datasafe.CreateSensitiveTypeGroupRequest",
+        "responseType": "datasafe.CreateSensitiveTypeGroupResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetSensitiveTypeGroup",
+        "requestType": "datasafe.GetSensitiveTypeGroupRequest",
+        "responseType": "datasafe.GetSensitiveTypeGroupResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListSensitiveTypeGroups",
+        "requestType": "datasafe.ListSensitiveTypeGroupsRequest",
+        "responseType": "datasafe.ListSensitiveTypeGroupsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateSensitiveTypeGroup",
+        "requestType": "datasafe.UpdateSensitiveTypeGroupRequest",
+        "responseType": "datasafe.UpdateSensitiveTypeGroupResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteSensitiveTypeGroup",
+        "requestType": "datasafe.DeleteSensitiveTypeGroupRequest",
+        "responseType": "datasafe.DeleteSensitiveTypeGroupResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "displayName",
+      "description",
+      "freeformTags",
+      "definedTags"
+    ],
+    "forceNew": [
+      "compartmentId"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "generatedruntime.Create",
+        "entityType": "SensitiveTypeGroup",
+        "action": "CreateSensitiveTypeGroup"
+      }
+    ],
+    "update": [
+      {
+        "helper": "generatedruntime.Update",
+        "entityType": "SensitiveTypeGroup",
+        "action": "UpdateSensitiveTypeGroup"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "generatedruntime.Delete",
+        "entityType": "SensitiveTypeGroup",
+        "action": "DeleteSensitiveTypeGroup"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "unavailable",
+    "collectionField": "Items",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartmentId",
+      "displayName",
+      "id"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/sensitivetypegroup/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/sensitivetypegroup/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Terraform provider formal-import cannot resolve oci_data_safe_sensitive_type_group; the vendored SDK, production runtime, and package-owned typed OCI fixtures define this contract."
+  ]
+}

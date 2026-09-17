@@ -36,9 +36,9 @@ type FsuActionSpec struct {
 	// +kubebuilder:validation:Optional
 	FsuCycleId string `json:"fsuCycleId,omitempty"`
 	// +kubebuilder:validation:Optional
-	ScheduleDetails FsuActionScheduleDetails `json:"scheduleDetails,omitempty"`
+	ScheduleDetails FsuActionScheduleDetails `json:"scheduleDetails,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	Details FsuActionDetails `json:"details,omitempty"`
+	Details FsuActionDetails `json:"details,omitempty,omitzero"`
 }
 
 // FsuActionScheduleDetails defines nested fields for FsuAction.ScheduleDetails.

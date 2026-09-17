@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "dbmulticloud",
+  "slug": "multicloudresourcediscovery",
+  "kind": "MultiCloudResourceDiscovery",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_dbmulticloud_multi_cloud_resource_discovery",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateMultiCloudResourceDiscovery",
+        "requestType": "dbmulticloud.CreateMultiCloudResourceDiscoveryRequest",
+        "responseType": "dbmulticloud.CreateMultiCloudResourceDiscoveryResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetMultiCloudResourceDiscovery",
+        "requestType": "dbmulticloud.GetMultiCloudResourceDiscoveryRequest",
+        "responseType": "dbmulticloud.GetMultiCloudResourceDiscoveryResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListMultiCloudResourceDiscoveries",
+        "requestType": "dbmulticloud.ListMultiCloudResourceDiscoveriesRequest",
+        "responseType": "dbmulticloud.ListMultiCloudResourceDiscoveriesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeMultiCloudResourceDiscoveryCompartment",
+        "requestType": "dbmulticloud.ChangeMultiCloudResourceDiscoveryCompartmentRequest",
+        "responseType": "dbmulticloud.ChangeMultiCloudResourceDiscoveryCompartmentResponse"
+      },
+      {
+        "operation": "UpdateMultiCloudResourceDiscovery",
+        "requestType": "dbmulticloud.UpdateMultiCloudResourceDiscoveryRequest",
+        "responseType": "dbmulticloud.UpdateMultiCloudResourceDiscoveryResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteMultiCloudResourceDiscovery",
+        "requestType": "dbmulticloud.DeleteMultiCloudResourceDiscoveryRequest",
+        "responseType": "dbmulticloud.DeleteMultiCloudResourceDiscoveryResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "IN_PROGRESS"
+      ],
+      "target": [
+        "CANCELED",
+        "FAILED",
+        "NEEDS_ATTENTION",
+        "SUCCEEDED"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "display_name",
+      "freeform_tags",
+      "oracle_db_connector_id",
+      "resource_type"
+    ],
+    "forceNew": [
+      "resources_filter"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_dbmulticloud_multi_cloud_resource_discoveries",
+    "collectionField": "multi_cloud_resource_discovery_summary_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "multi_cloud_resource_discovery_id",
+      "oracle_db_azure_connector_id",
+      "resource_type",
+      "resources_filter",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/dbmulticloud/multicloudresourcediscovery/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/dbmulticloud/multicloudresourcediscovery/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from the pinned terraform-provider-oci source revision."
+  ]
+}

@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "bastion",
+  "slug": "session",
+  "kind": "Session",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_bastion_session",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateSession",
+        "requestType": "bastion.CreateSessionRequest",
+        "responseType": "bastion.CreateSessionResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetSession",
+        "requestType": "bastion.GetSessionRequest",
+        "responseType": "bastion.GetSessionResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListSessions",
+        "requestType": "bastion.ListSessionsRequest",
+        "responseType": "bastion.ListSessionsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateSession",
+        "requestType": "bastion.UpdateSessionRequest",
+        "responseType": "bastion.UpdateSessionResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteSession",
+        "requestType": "bastion.DeleteSessionRequest",
+        "responseType": "bastion.DeleteSessionResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "bastion_id",
+      "key_details",
+      "key_details.public_key_content",
+      "key_type",
+      "session_ttl_in_seconds",
+      "target_resource_details",
+      "target_resource_details.session_type",
+      "target_resource_details.target_resource_fqdn",
+      "target_resource_details.target_resource_id",
+      "target_resource_details.target_resource_operating_system_user_name",
+      "target_resource_details.target_resource_port",
+      "target_resource_details.target_resource_private_ip_address"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_bastion_sessions",
+    "collectionField": "sessions",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "bastion_id",
+      "display_name",
+      "session_id",
+      "session_lifecycle_state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/bastion/session/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/bastion/session/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from terraform-provider-oci for bastion/session."
+  ]
+}

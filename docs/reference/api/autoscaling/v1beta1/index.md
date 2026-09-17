@@ -400,6 +400,7 @@ AutoScalingPolicySpec defines the desired state of AutoScalingPolicy.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| `autoScalingConfigurationId` | The OCID of the autoscaling configuration containing this policy. | `string` | Yes | - | - |
 | [`capacity`](#kind-autoscalingpolicy-spec-capacity) | The capacity requirements of the autoscaling policy. | `object` | No | - | - |
 | `displayName` | A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information. | `string` | No | - | - |
 | [`executionSchedule`](#kind-autoscalingpolicy-spec-executionschedule) | AutoScalingPolicyExecutionSchedule defines nested fields for AutoScalingPolicy.ExecutionSchedule. | `object` | No | - | - |

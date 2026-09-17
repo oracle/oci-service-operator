@@ -1,0 +1,20 @@
+#
+# Copyright (c) 2026, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+#
+
+apiVersion: bastion.oracle.com/v1beta1
+kind: Bastion
+metadata:
+  name: osok-bastion-${OSOK_E2E_SUFFIX}
+spec:
+  bastionType: STANDARD
+  compartmentId: ${OCI_COMPARTMENT_ID}
+  targetSubnetId: ${OCI_SUBNET_ID}
+  name: osok-bastion-${OSOK_E2E_SUFFIX}
+  clientCidrBlockAllowList:
+    - 10.0.0.0/8
+  maxSessionTtlInSeconds: 1800
+  dnsProxyStatus: DISABLED
+  freeformTags:
+    osok-e2e-phase: create

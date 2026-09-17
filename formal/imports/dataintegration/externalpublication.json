@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "dataintegration",
+  "slug": "externalpublication",
+  "kind": "ExternalPublication",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_dataintegration_externalpublication",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateExternalPublication",
+        "requestType": "dataintegration.CreateExternalPublicationRequest",
+        "responseType": "dataintegration.CreateExternalPublicationResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetExternalPublication",
+        "requestType": "dataintegration.GetExternalPublicationRequest",
+        "responseType": "dataintegration.GetExternalPublicationResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListExternalPublication",
+        "requestType": "dataintegration.ListExternalPublicationRequest",
+        "responseType": "dataintegration.ListExternalPublicationResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateExternalPublication",
+        "requestType": "dataintegration.UpdateExternalPublicationRequest",
+        "responseType": "dataintegration.UpdateExternalPublicationResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteExternalPublication",
+        "requestType": "dataintegration.DeleteExternalPublicationRequest",
+        "responseType": "dataintegration.DeleteExternalPublicationResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_dataintegration_externalpublication",
+    "collectionField": "externalpublication",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/dataintegration/externalpublication/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/dataintegration/externalpublication/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for dataintegration/externalpublication; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

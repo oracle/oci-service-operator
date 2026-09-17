@@ -470,7 +470,7 @@ func TestAttributeSetDeleteWaitsForPendingLifecycleReadback(t *testing.T) {
 	}
 }
 
-func TestAttributeSetDeleteRetainsFinalizerForPendingWorkRequestAndAmbiguousReadback(t *testing.T) {
+func TestAttributeSetDeleteConfirmsAuthShapedReadbackAfterPendingWorkRequest(t *testing.T) {
 	resource := newExistingTestAttributeSet()
 	resource.Status.OsokStatus.Ocid = "ocid1.attributeset.oc1..delete"
 	resource.Status.Id = "ocid1.attributeset.oc1..delete"
@@ -506,10 +506,10 @@ func TestAttributeSetDeleteRetainsFinalizerForPendingWorkRequestAndAmbiguousRead
 	requireAttributeSetDeletePending(t, resource, client, deleted, err)
 
 	deleted, err = serviceClient.Delete(context.Background(), resource)
-	requireAttributeSetDeleteAmbiguous(t, resource, client, deleted, err)
+	requireAttributeSetDeleteConfirmed(t, resource, client, deleted, err)
 }
 
-func TestAttributeSetDeleteRejectsAmbiguousReadbackAfterInitialSucceededWorkRequest(t *testing.T) {
+func TestAttributeSetDeleteAcceptsAuthShapedReadbackAfterInitialSucceededWorkRequest(t *testing.T) {
 	resource := newExistingTestAttributeSet()
 	resource.Status.OsokStatus.Ocid = "ocid1.attributeset.oc1..delete"
 	resource.Status.Id = "ocid1.attributeset.oc1..delete"
@@ -532,21 +532,20 @@ func TestAttributeSetDeleteRejectsAmbiguousReadbackAfterInitialSucceededWorkRequ
 	}
 
 	deleted, err := newAttributeSetServiceClientForTest(client).Delete(context.Background(), resource)
-	if err == nil {
-		t.Fatal("Delete() error = nil, want ambiguous NotAuthorizedOrNotFound readback rejection")
+	if err != nil {
+		t.Fatalf("Delete() error = %v", err)
 	}
-	if deleted {
-		t.Fatal("Delete() deleted = true, want finalizer retained after ambiguous readback")
-	}
-	if !strings.Contains(err.Error(), "ambiguous 404 NotAuthorizedOrNotFound") {
-		t.Fatalf("Delete() error = %v, want ambiguous NotAuthorizedOrNotFound", err)
+	if !deleted {
+		t.Fatal("Delete() deleted = false, want completed work request and auth-shaped readback to confirm deletion")
 	}
 	requireRequestCount(t, "DeleteAttributeSet", len(client.deleteRequests), 1)
 	requireRequestCount(t, "GetWorkRequest", len(client.getWorkRequestRequests), 1)
 	requireRequestCount(t, "GetAttributeSet", len(client.getRequests), 2)
-	requireAttributeSetAsync(t, &resource.Status.OsokStatus, "wr-delete", shared.OSOKAsyncPhaseDelete)
-	if resource.Status.OsokStatus.DeletedAt != nil {
-		t.Fatalf("status.status.deletedAt = %v, want no confirmed deletion", resource.Status.OsokStatus.DeletedAt)
+	if resource.Status.OsokStatus.DeletedAt == nil {
+		t.Fatal("status.status.deletedAt = nil, want confirmed deletion")
+	}
+	if resource.Status.OsokStatus.Async.Current != nil {
+		t.Fatalf("status.status.async.current = %+v, want cleared after deletion", resource.Status.OsokStatus.Async.Current)
 	}
 }
 
@@ -568,7 +567,7 @@ func requireAttributeSetDeletePending(
 	requireAttributeSetAsync(t, &resource.Status.OsokStatus, "wr-delete", shared.OSOKAsyncPhaseDelete)
 }
 
-func requireAttributeSetDeleteAmbiguous(
+func requireAttributeSetDeleteConfirmed(
 	t *testing.T,
 	resource *datasafev1beta1.AttributeSet,
 	client *fakeAttributeSetOCIClient,
@@ -576,18 +575,18 @@ func requireAttributeSetDeleteAmbiguous(
 	err error,
 ) {
 	t.Helper()
-	if err == nil {
-		t.Fatal("Delete() second call error = nil, want ambiguous NotAuthorizedOrNotFound readback rejection")
+	if err != nil {
+		t.Fatalf("Delete() second call error = %v", err)
 	}
-	if deleted {
-		t.Fatal("Delete() second call deleted = true, want finalizer retained on ambiguous readback")
+	if !deleted {
+		t.Fatal("Delete() second call deleted = false, want confirmed deletion")
 	}
-	if !strings.Contains(err.Error(), "ambiguous 404 NotAuthorizedOrNotFound") {
-		t.Fatalf("Delete() second call error = %v, want ambiguous NotAuthorizedOrNotFound", err)
-	}
-	requireRequestCount(t, "DeleteAttributeSet after ambiguous readback", len(client.deleteRequests), 1)
+	requireRequestCount(t, "DeleteAttributeSet after confirmed readback", len(client.deleteRequests), 1)
 	if got, want := resource.Status.OsokStatus.OpcRequestID, "opc-request-id"; got != want {
-		t.Errorf("status.status.opcRequestId = %q, want %q from ambiguous service error", got, want)
+		t.Errorf("status.status.opcRequestId = %q, want %q from post-delete service response", got, want)
+	}
+	if resource.Status.OsokStatus.DeletedAt == nil {
+		t.Fatal("status.status.deletedAt = nil, want confirmed deletion")
 	}
 }
 

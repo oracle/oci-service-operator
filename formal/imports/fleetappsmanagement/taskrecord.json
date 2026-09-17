@@ -1,0 +1,153 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "fleetappsmanagement",
+  "slug": "taskrecord",
+  "kind": "TaskRecord",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_fleet_apps_management_task_record",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateTaskRecord",
+        "requestType": "fleetappsmanagement.CreateTaskRecordRequest",
+        "responseType": "fleetappsmanagement.CreateTaskRecordResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetTaskRecord",
+        "requestType": "fleetappsmanagement.GetTaskRecordRequest",
+        "responseType": "fleetappsmanagement.GetTaskRecordResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListTaskRecords",
+        "requestType": "fleetappsmanagement.ListTaskRecordsRequest",
+        "responseType": "fleetappsmanagement.ListTaskRecordsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeTaskRecordCompartment",
+        "requestType": "fleetappsmanagement.ChangeTaskRecordCompartmentRequest",
+        "responseType": "fleetappsmanagement.ChangeTaskRecordCompartmentResponse"
+      },
+      {
+        "operation": "UpdateTaskRecord",
+        "requestType": "fleetappsmanagement.UpdateTaskRecordRequest",
+        "responseType": "fleetappsmanagement.UpdateTaskRecordResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteTaskRecord",
+        "requestType": "fleetappsmanagement.DeleteTaskRecordRequest",
+        "responseType": "fleetappsmanagement.DeleteTaskRecordResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "defined_tags",
+      "description",
+      "details.execution_details.catalog_id",
+      "details.execution_details.command",
+      "details.execution_details.config_file",
+      "details.execution_details.content.bucket",
+      "details.execution_details.content.catalog_id",
+      "details.execution_details.content.checksum",
+      "details.execution_details.content.namespace",
+      "details.execution_details.content.object",
+      "details.execution_details.content.source_type",
+      "details.execution_details.credentials.display_name",
+      "details.execution_details.credentials.id",
+      "details.execution_details.endpoint",
+      "details.execution_details.execution_type",
+      "details.execution_details.is_executable_content",
+      "details.execution_details.is_locked",
+      "details.execution_details.is_read_output_variable_enabled",
+      "details.execution_details.system_variables",
+      "details.execution_details.target_compartment_id",
+      "details.execution_details.variables.input_variables.description",
+      "details.execution_details.variables.input_variables.name",
+      "details.execution_details.variables.input_variables.type",
+      "details.execution_details.variables.output_variables",
+      "details.is_apply_subject_task",
+      "details.is_discovery_output_task",
+      "details.operation",
+      "details.os_type",
+      "details.platform",
+      "details.properties.num_retries",
+      "details.properties.timeout_in_seconds",
+      "details.scope",
+      "display_name",
+      "freeform_tags"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_fleet_apps_management_task_records",
+    "collectionField": "task_record_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "id",
+      "operation",
+      "platform",
+      "state",
+      "type"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/fleetappsmanagement/taskrecord/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/fleetappsmanagement/taskrecord/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from the pinned terraform-provider-oci source revision."
+  ]
+}

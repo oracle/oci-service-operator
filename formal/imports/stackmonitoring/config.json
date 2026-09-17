@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "stackmonitoring",
+  "slug": "config",
+  "kind": "Config",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_stack_monitoring_config",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateConfig",
+        "requestType": "stackmonitoring.CreateConfigRequest",
+        "responseType": "stackmonitoring.CreateConfigResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetConfig",
+        "requestType": "stackmonitoring.GetConfigRequest",
+        "responseType": "stackmonitoring.GetConfigResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListConfigs",
+        "requestType": "stackmonitoring.ListConfigsRequest",
+        "responseType": "stackmonitoring.ListConfigsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeConfigCompartment",
+        "requestType": "stackmonitoring.ChangeConfigCompartmentRequest",
+        "responseType": "stackmonitoring.ChangeConfigCompartmentResponse"
+      },
+      {
+        "operation": "UpdateConfig",
+        "requestType": "stackmonitoring.UpdateConfigRequest",
+        "responseType": "stackmonitoring.UpdateConfigResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteConfig",
+        "requestType": "stackmonitoring.DeleteConfigRequest",
+        "responseType": "stackmonitoring.DeleteConfigResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "additional_configurations.properties_map",
+      "compartment_id",
+      "config_type",
+      "defined_tags",
+      "display_name",
+      "dynamic_groups.domain",
+      "dynamic_groups.name",
+      "dynamic_groups.stack_monitoring_assignment",
+      "freeform_tags",
+      "is_enabled",
+      "is_manually_onboarded",
+      "license",
+      "policy_names",
+      "user_groups.domain",
+      "user_groups.name",
+      "user_groups.stack_monitoring_role",
+      "version"
+    ],
+    "forceNew": [
+      "resource_type"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_stack_monitoring_configs",
+    "collectionField": "config_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "state",
+      "type"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/stackmonitoring/config/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/stackmonitoring/config/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts are imported from the pinned terraform-provider-oci revision; repo-authored runtime semantics remain authoritative."
+  ]
+}

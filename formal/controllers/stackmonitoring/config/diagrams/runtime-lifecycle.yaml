@@ -1,0 +1,29 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: stackmonitoring
+slug: config
+kind: Config
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending: ["CREATING"]
+    updatePending: ["UPDATING"]
+    deletePending: ["DELETING"]
+  listLookup:
+    filters: ["compartmentId","configType","id","resourceType"]
+    matchRule: exact resource identity match; duplicate matches fail
+  mutation:
+    mutable: ["additionalConfigurations","definedTags","displayName","dynamicGroups","freeformTags","isEnabled","isManuallyOnboarded","license","policyNames","userGroups","version"]
+    forceNew: ["compartmentId","configType","jsonData","resourceType"]
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - "The runtime uses its declared lifecycle-state contract for Config reconciliation."
+  - "The credential-free mock exercises SDK request serialization, response projection, mutation when supported, and confirmed deletion."

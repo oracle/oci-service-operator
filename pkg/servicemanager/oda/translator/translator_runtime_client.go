@@ -279,10 +279,14 @@ func (c *translatorRuntimeClient) Delete(ctx context.Context, resource *odav1bet
 }
 
 func (c *translatorRuntimeClient) create(ctx context.Context, resource *odav1beta1.Translator, odaInstanceID string) (servicemanager.OSOKResponse, error) {
-	response, err := c.hooks.Create.Call(ctx, odasdk.CreateTranslatorRequest{
+	request := odasdk.CreateTranslatorRequest{
 		OdaInstanceId:           common.String(odaInstanceID),
 		CreateTranslatorDetails: buildTranslatorCreateDetails(resource),
-	})
+	}
+	if retryToken := strings.TrimSpace(string(resource.UID)); retryToken != "" {
+		request.OpcRetryToken = common.String(retryToken)
+	}
+	response, err := c.hooks.Create.Call(ctx, request)
 	if err != nil {
 		return c.fail(resource, err)
 	}

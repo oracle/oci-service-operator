@@ -114,8 +114,20 @@ func newObjectStorageLinkDefaultRuntimeHooks(sdkClient lustrefilestoragesdk.Lust
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*lustrefilestoragev1beta1.ObjectStorageLink]{},
 		StatusHooks:     generatedruntime.StatusHooks[*lustrefilestoragev1beta1.ObjectStorageLink]{},
 		ParityHooks:     generatedruntime.ParityHooks[*lustrefilestoragev1beta1.ObjectStorageLink]{},
-		Async:           generatedruntime.AsyncHooks[*lustrefilestoragev1beta1.ObjectStorageLink]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*lustrefilestoragev1beta1.ObjectStorageLink]{},
+		Async: generatedruntime.AsyncHooks[*lustrefilestoragev1beta1.ObjectStorageLink]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := lustrefilestoragesdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*lustrefilestoragev1beta1.ObjectStorageLink]{},
 		Create: runtimeOperationHooks[lustrefilestoragesdk.CreateObjectStorageLinkRequest, lustrefilestoragesdk.CreateObjectStorageLinkResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateObjectStorageLinkDetails", RequestName: "CreateObjectStorageLinkDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request lustrefilestoragesdk.CreateObjectStorageLinkRequest) (lustrefilestoragesdk.CreateObjectStorageLinkResponse, error) {
@@ -163,10 +175,19 @@ func buildObjectStorageLinkGeneratedRuntimeConfig(
 	hooks ObjectStorageLinkRuntimeHooks,
 ) generatedruntime.Config[*lustrefilestoragev1beta1.ObjectStorageLink] {
 	return generatedruntime.Config[*lustrefilestoragev1beta1.ObjectStorageLink]{
-		Kind:            "ObjectStorageLink",
-		SDKName:         "ObjectStorageLink",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "ObjectStorageLink",
+		SDKName:   "ObjectStorageLink",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

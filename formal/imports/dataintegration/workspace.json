@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "dataintegration",
+  "slug": "workspace",
+  "kind": "Workspace",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_dataintegration_workspace",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateWorkspace",
+        "requestType": "dataintegration.CreateWorkspaceRequest",
+        "responseType": "dataintegration.CreateWorkspaceResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetWorkspace",
+        "requestType": "dataintegration.GetWorkspaceRequest",
+        "responseType": "dataintegration.GetWorkspaceResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListWorkspaces",
+        "requestType": "dataintegration.ListWorkspacesRequest",
+        "responseType": "dataintegration.ListWorkspacesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeCompartment",
+        "requestType": "dataintegration.ChangeCompartmentRequest",
+        "responseType": "dataintegration.ChangeCompartmentResponse"
+      },
+      {
+        "operation": "UpdateWorkspace",
+        "requestType": "dataintegration.UpdateWorkspaceRequest",
+        "responseType": "dataintegration.UpdateWorkspaceResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteWorkspace",
+        "requestType": "dataintegration.DeleteWorkspaceRequest",
+        "responseType": "dataintegration.DeleteWorkspaceResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING",
+        "STARTING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags",
+      "is_force_operation"
+    ],
+    "forceNew": [
+      "dns_server_ip",
+      "dns_server_zone",
+      "endpoint_compartment_id",
+      "endpoint_id",
+      "endpoint_name",
+      "is_private_network_enabled",
+      "quiesce_timeout",
+      "registry_compartment_id",
+      "registry_id",
+      "registry_name",
+      "subnet_id",
+      "vcn_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_dataintegration_workspaces",
+    "collectionField": "workspaces",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "name",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/dataintegration/workspace/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/dataintegration/workspace/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from the pinned terraform-provider-oci source revision."
+  ]
+}

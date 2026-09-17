@@ -32,8 +32,28 @@ type defaultOracleDbGcpKeyRingServiceClient struct {
 
 var _ OracleDbGcpKeyRingServiceClient = defaultOracleDbGcpKeyRingServiceClient{}
 
+type OracleDbGcpKeyRingSDKClients struct {
+	dbMulticloudGcpProviderClient dbmulticloudsdk.DbMulticloudGCPProviderClient
+	workRequestClient             dbmulticloudsdk.WorkRequestClient
+}
+
+func newOracleDbGcpKeyRingSDKClients(manager *OracleDbGcpKeyRingServiceManager) (OracleDbGcpKeyRingSDKClients, error) {
+	var clients OracleDbGcpKeyRingSDKClients
+	dbMulticloudGcpProviderClientClient, err := dbmulticloudsdk.NewDbMulticloudGCPProviderClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize OracleDbGcpKeyRing OCI client DbMulticloudGCPProviderClient: %w", err)
+	}
+	clients.dbMulticloudGcpProviderClient = dbMulticloudGcpProviderClientClient
+	workRequestClientClient, err := dbmulticloudsdk.NewWorkRequestClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize OracleDbGcpKeyRing OCI client WorkRequestClient: %w", err)
+	}
+	clients.workRequestClient = workRequestClientClient
+	return clients, nil
+}
+
 var newOracleDbGcpKeyRingServiceClient = func(manager *OracleDbGcpKeyRingServiceManager) OracleDbGcpKeyRingServiceClient {
-	sdkClient, err := dbmulticloudsdk.NewDbMulticloudGCPProviderClientWithConfigurationProvider(manager.Provider)
+	sdkClient, err := newOracleDbGcpKeyRingSDKClients(manager)
 	hooks := newOracleDbGcpKeyRingRuntimeHooks(manager, sdkClient)
 	config := buildOracleDbGcpKeyRingGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {

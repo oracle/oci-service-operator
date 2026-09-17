@@ -16,9 +16,67 @@ import (
 type ExternalLocationDetailsMetadataSpec struct {
 }
 
+// ExternalLocationDetailsMetadataExternalLocationCspZoneKeyReferenceId defines nested fields for ExternalLocationDetailsMetadata.ExternalLocation.CspZoneKeyReferenceId.
+type ExternalLocationDetailsMetadataExternalLocationCspZoneKeyReferenceId struct {
+	// Value of keyName
+	//    GcpProjectName: A human-readable name for your project. The project name isn't used by any Google APIs. You can edit the project name at any time during or after project creation. Project names do not need to be unique.
+	//    AzureSubscriptionId: A unique alphanumeric string that identifies your Azure subscription.
+	//    AwsAccountId: a unique 12-digit number that identifies an Amazon Web Services (AWS) account
+	KeyValue string `json:"keyValue,omitempty"`
+	// KeyName for Azure=AzureSubscriptionId Aws=AwsAccountId GCP=GcpProjectName
+	KeyName string `json:"keyName,omitempty"`
+}
+
+// ExternalLocationDetailsMetadataExternalLocation defines nested fields for ExternalLocationDetailsMetadata.ExternalLocation.
+type ExternalLocationDetailsMetadataExternalLocation struct {
+	// CSP region corresponding to the given OCI region
+	CspRegion string `json:"cspRegion,omitempty"`
+	// CSP region display Name corresponding to the given OCI region
+	CspRegionDisplayName string `json:"cspRegionDisplayName,omitempty"`
+	// A mapping of OCI site group name to CSP physical availability zone name
+	CspPhysicalAz string `json:"cspPhysicalAz,omitempty"`
+	// User friendly display name for cspPhysicalAZ
+	CspPhysicalAzDisplayName string `json:"cspPhysicalAzDisplayName,omitempty"`
+	// User friendly display name for cspLogicalAZ
+	CspLogicalAzDisplayName string                                                               `json:"cspLogicalAzDisplayName,omitempty"`
+	CspZoneKeyReferenceId   ExternalLocationDetailsMetadataExternalLocationCspZoneKeyReferenceId `json:"cspZoneKeyReferenceId,omitempty"`
+	// A mapping of CSP physical availability zone to CSP logical availability zone.
+	CspLogicalAz string `json:"cspLogicalAz,omitempty"`
+	// The serviceName that externalLocation map object belongs to.
+	ServiceName string `json:"serviceName,omitempty"`
+}
+
 // ExternalLocationDetailsMetadataStatus defines the observed state of ExternalLocationDetailsMetadata.
 type ExternalLocationDetailsMetadataStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags      map[string]shared.MapValue                      `json:"definedTags,omitempty"`
+	ExternalLocation ExternalLocationDetailsMetadataExternalLocation `json:"externalLocation,omitempty"`
+	// OCI physical ad name
+	OciPhysicalAd string `json:"ociPhysicalAd,omitempty"`
+	// OCI region identifier https://docs.oracle.com/en-us/iaas/Content/General/Concepts/regions.htm
+	OciRegion string `json:"ociRegion,omitempty"`
+	// Cluster Placement Group OCID (deprecated representation)
+	CpgId string `json:"cpgId,omitempty"`
+	// Cluster Placement Group OCID
+	ClusterPlacementGroupId string `json:"clusterPlacementGroupId,omitempty"`
+	// System tags for this resource. Each key is predefined and scoped to a namespace.
+	// Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+	SystemTags map[string]shared.MapValue `json:"systemTags,omitempty"`
+	// OCI logical ad name
+	OciLogicalAd string `json:"ociLogicalAd,omitempty"`
+	// Partner Cloud Name based on service name
+	PartnerCloudName string `json:"partnerCloudName,omitempty"`
+	// User friendly name of account name for customer's subscription
+	PartnerCloudAccountName string `json:"partnerCloudAccountName,omitempty"`
+	// Direct URL to partner cloud for customer's account
+	PartnerCloudAccountUrl string `json:"partnerCloudAccountUrl,omitempty"`
 }
 
 // +kubebuilder:object:root=true

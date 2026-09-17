@@ -180,6 +180,57 @@ func TestSSLCipherSuiteRuntimeSemanticsEncodesWorkRequestLifecycleContract(t *te
 	assertSSLCipherSuiteStringSliceEqual(t, "Mutation.ForceNew", got.Mutation.ForceNew, []string{"name"})
 }
 
+func TestSSLCipherSuiteCreateRetryTokenIsStablePerPayload(t *testing.T) {
+	t.Parallel()
+
+	request := loadbalancersdk.CreateSSLCipherSuiteRequest{
+		LoadBalancerId: common.String("ocid1.loadbalancer.oc1..example"),
+		CreateSslCipherSuiteDetails: loadbalancersdk.CreateSslCipherSuiteDetails{
+			Name: common.String("suite-v1"), Ciphers: []string{"cipher-a"},
+		},
+	}
+	first, err := sslCipherSuiteCreateRetryToken(request)
+	if err != nil {
+		t.Fatal(err)
+	}
+	second, err := sslCipherSuiteCreateRetryToken(request)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if first != second || len(first) != 32 {
+		t.Fatalf("stable tokens = %q/%q, want same 128-bit digest", first, second)
+	}
+	request.CreateSslCipherSuiteDetails.Name = common.String("suite-v2")
+	changed, err := sslCipherSuiteCreateRetryToken(request)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if changed == first {
+		t.Fatalf("changed payload token = %q, want different from %q", changed, first)
+	}
+}
+
+func TestSSLCipherSuiteCreatePreservesGeneratedRetryToken(t *testing.T) {
+	t.Parallel()
+
+	fake := &fakeGeneratedSSLCipherSuiteOCIClient{}
+	hooks := newSSLCipherSuiteRuntimeHooksWithOCIClient(fake)
+	applySSLCipherSuiteRuntimeHooks(&hooks, fake, nil, loggerutil.OSOKLogger{})
+	_, err := hooks.Create.Call(context.Background(), loadbalancersdk.CreateSSLCipherSuiteRequest{
+		LoadBalancerId: common.String("ocid1.loadbalancer.oc1..example"),
+		OpcRetryToken:  common.String("resource-uid"),
+		CreateSslCipherSuiteDetails: loadbalancersdk.CreateSslCipherSuiteDetails{
+			Name: common.String("suite-v1"), Ciphers: []string{"cipher-a"},
+		},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(fake.createRequests) != 1 || stringValue(fake.createRequests[0].OpcRetryToken) != "resource-uid" {
+		t.Fatalf("create retry token = %q, want resource-uid", stringValue(fake.createRequests[0].OpcRetryToken))
+	}
+}
+
 func TestSSLCipherSuiteRequestFieldsKeepOperationsScopedToRecordedPath(t *testing.T) {
 	t.Parallel()
 
@@ -320,7 +371,7 @@ func TestCreateOrUpdateCreatesThenObservesSSLCipherSuiteWorkRequest(t *testing.T
 		createWorkRequestID: "wr-create-1",
 		sslCipherSuites:     map[string]loadbalancersdk.SslCipherSuite{},
 		workRequests: map[string]loadbalancersdk.WorkRequest{
-			"wr-create-1": sslCipherSuiteWorkRequest("wr-create-1", "CreateSSLCipherSuite", loadbalancersdk.WorkRequestLifecycleStateInProgress),
+			"wr-create-1": sslCipherSuiteWorkRequest("wr-create-1", "CreateCipherSuite", loadbalancersdk.WorkRequestLifecycleStateInProgress),
 		},
 	}
 	serviceClient := newTestSSLCipherSuiteRuntimeClient(client)
@@ -346,7 +397,7 @@ func TestCreateOrUpdateCreatesThenObservesSSLCipherSuiteWorkRequest(t *testing.T
 	assertSSLCipherSuiteStringSliceEqual(t, "create ciphers", client.createRequests[0].CreateSslCipherSuiteDetails.Ciphers, []string{"ECDHE-RSA-AES256-GCM-SHA384"})
 	requireSSLCipherSuiteAsync(t, resource, shared.OSOKAsyncPhaseCreate, "wr-create-1", shared.OSOKAsyncClassPending)
 
-	client.workRequests["wr-create-1"] = sslCipherSuiteWorkRequest("wr-create-1", "CreateSSLCipherSuite", loadbalancersdk.WorkRequestLifecycleStateSucceeded)
+	client.workRequests["wr-create-1"] = sslCipherSuiteWorkRequest("wr-create-1", "CreateCipherSuite", loadbalancersdk.WorkRequestLifecycleStateSucceeded)
 	response, err = serviceClient.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
 	if err != nil {
 		t.Fatalf("observe CreateOrUpdate() error = %v", err)

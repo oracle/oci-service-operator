@@ -1,0 +1,27 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: healthchecks
+slug: pingmonitor
+kind: PingMonitor
+archetype: generated-service-manager
+states:
+  - active
+  - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending: []
+    updatePending: []
+    deletePending: ["DELETING"]
+  listLookup:
+    filters: ["compartmentId","displayName","protocol"]
+    matchRule: exact resource identity match; duplicate matches fail
+  mutation:
+    mutable: ["targets","vantagePointNames","port","timeoutInSeconds","protocol","displayName","intervalInSeconds","isEnabled","freeformTags","definedTags"]
+    forceNew: ["compartmentId"]
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - "The PingMonitor runtime retains package-local lifecycle, identity, mutation, and delete handling."
+  - "The credential-free evidence mock verifies the recorded create/update payloads, SDK response decoding, status projection, and delete confirmation."

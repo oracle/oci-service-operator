@@ -53,6 +53,12 @@ type ConnectionSpec struct {
 	// need to be updated not to be the default and then the new connection can then be created as the default.
 	// +kubebuilder:validation:Optional
 	IsDefault bool `json:"isDefault,omitempty"`
+	// The OCID of the catalog containing this resource.
+	// +kubebuilder:validation:Required
+	CatalogId string `json:"catalogId"`
+	// The key of the data asset containing this resource.
+	// +kubebuilder:validation:Required
+	DataAssetKey string `json:"dataAssetKey"`
 }
 
 // ConnectionCustomPropertyMember defines nested fields for Connection.CustomPropertyMember.

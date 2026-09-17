@@ -36,9 +36,9 @@ type DatabaseInsightSpec struct {
 	// +kubebuilder:validation:Optional
 	ManagementAgentId string `json:"managementAgentId,omitempty"`
 	// +kubebuilder:validation:Optional
-	ConnectionDetails DatabaseInsightConnectionDetails `json:"connectionDetails,omitempty"`
+	ConnectionDetails DatabaseInsightConnectionDetails `json:"connectionDetails,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	ConnectionCredentialDetails DatabaseInsightConnectionCredentialDetails `json:"connectionCredentialDetails,omitempty"`
+	ConnectionCredentialDetails DatabaseInsightConnectionCredentialDetails `json:"connectionCredentialDetails,omitempty,omitzero"`
 	// OCI database resource type
 	// +kubebuilder:validation:Optional
 	DatabaseResourceType string `json:"databaseResourceType,omitempty"`
@@ -56,7 +56,7 @@ type DatabaseInsightSpec struct {
 	// +kubebuilder:validation:Optional
 	IsAdvancedFeaturesEnabled bool `json:"isAdvancedFeaturesEnabled,omitempty"`
 	// +kubebuilder:validation:Optional
-	CredentialDetails DatabaseInsightCredentialDetails `json:"credentialDetails,omitempty"`
+	CredentialDetails DatabaseInsightCredentialDetails `json:"credentialDetails,omitempty,omitzero"`
 	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the OPSI private endpoint
 	// +kubebuilder:validation:Optional
 	OpsiPrivateEndpointId string `json:"opsiPrivateEndpointId,omitempty"`

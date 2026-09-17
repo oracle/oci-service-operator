@@ -14,10 +14,10 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	}
 
 	byKey := inventoryByKey(inventory)
-	if got, want := len(inventory), 594; got != want {
+	if got, want := len(inventory), 596; got != want {
 		t.Fatalf("len(inventory) = %d, want %d", got, want)
 	}
-	if got, want := countRegistrations(inventory), 473; got != want {
+	if got, want := countRegistrations(inventory), 475; got != want {
 		t.Fatalf("registration inventory count = %d, want %d", got, want)
 	}
 	if got, want := countExceptions(inventory), 121; got != want {
@@ -32,6 +32,8 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventorySelectionSource(t, byKey, "aivision/Project", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "analytics/AnalyticsInstance", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "apiaccesscontrol/PrivilegedApiControl", "selection.includeKinds")
+	assertInventorySelectionSource(t, byKey, "apigateway/ApiGateway", "selection.includeKinds")
+	assertInventorySelectionSource(t, byKey, "apigateway/ApiGatewayDeployment", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "apiplatform/ApiPlatformInstance", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "apmconfig/Config", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "apmcontrolplane/ApmDomain", "selection.includeKinds")
@@ -116,6 +118,8 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventoryRegistration(t, byKey, "analytics/AnalyticsInstance")
 	assertInventoryException(t, byKey, "analytics/PrivateAccessChannel", `controller.strategy="none"`)
 	assertInventoryRegistration(t, byKey, "apiaccesscontrol/PrivilegedApiControl")
+	assertInventoryRegistration(t, byKey, "apigateway/ApiGateway")
+	assertInventoryRegistration(t, byKey, "apigateway/ApiGatewayDeployment")
 	assertInventoryException(t, byKey, "apiaccesscontrol/ApiMetadata", `controller.strategy="none"`)
 	assertInventoryException(t, byKey, "apiaccesscontrol/ApiMetadataByEntityType", `controller.strategy="none"`)
 	assertInventoryException(t, byKey, "apiaccesscontrol/PrivilegedApiRequest", `controller.strategy="none"`)
@@ -232,6 +236,8 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedFamily(t, "aivision/Project", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "analytics/AnalyticsInstance", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "apiaccesscontrol/PrivilegedApiControl", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
+	assertReviewedFamily(t, "apigateway/ApiGateway", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
+	assertReviewedFamily(t, "apigateway/ApiGatewayDeployment", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "apiplatform/ApiPlatformInstance", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "apmconfig/Config", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "apmcontrolplane/ApmDomain", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)

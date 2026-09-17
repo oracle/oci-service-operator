@@ -516,6 +516,63 @@ func TestContainerRepositoryServiceClientUpdatesMutableFields(t *testing.T) {
 	requireLastCondition(t, resource, shared.Active)
 }
 
+func TestContainerRepositoryUpdateTagsDistinguishOmittedFromExplicitEmpty(t *testing.T) {
+	t.Parallel()
+
+	current := makeSDKContainerRepository(
+		testContainerRepositoryID,
+		testContainerRepositoryCompID,
+		"repo-alpha",
+		false,
+		false,
+		artifactssdk.ContainerRepositoryLifecycleStateAvailable,
+	)
+	resource := makeContainerRepositoryResource()
+	resource.Spec.IsImmutable = false
+	resource.Spec.IsPublic = false
+	resource.Spec.Readme = artifactsv1beta1.ContainerRepositoryReadme{}
+	resource.Spec.FreeformTags = nil
+	resource.Spec.DefinedTags = nil
+
+	omitted, updateNeeded, err := buildContainerRepositoryUpdateBody(
+		context.Background(),
+		resource,
+		"",
+		artifactssdk.GetContainerRepositoryResponse{ContainerRepository: current},
+	)
+	if err != nil {
+		t.Fatalf("build omitted-tag update: %v", err)
+	}
+	if updateNeeded {
+		t.Fatalf("omitted tags updateNeeded = true; details = %#v", omitted)
+	}
+
+	resource.Spec.FreeformTags = map[string]string{}
+	resource.Spec.DefinedTags = map[string]shared.MapValue{}
+	explicitEmpty, updateNeeded, err := buildContainerRepositoryUpdateBody(
+		context.Background(),
+		resource,
+		"",
+		artifactssdk.GetContainerRepositoryResponse{ContainerRepository: current},
+	)
+	if err != nil {
+		t.Fatalf("build explicit-empty-tag update: %v", err)
+	}
+	if !updateNeeded {
+		t.Fatal("explicit empty tags updateNeeded = false, want true")
+	}
+	details, ok := explicitEmpty.(artifactssdk.UpdateContainerRepositoryDetails)
+	if !ok {
+		t.Fatalf("explicit empty tags details type = %T", explicitEmpty)
+	}
+	if details.FreeformTags == nil || len(details.FreeformTags) != 0 {
+		t.Fatalf("explicit empty freeformTags = %#v, want non-nil empty map", details.FreeformTags)
+	}
+	if details.DefinedTags == nil || len(details.DefinedTags) != 0 {
+		t.Fatalf("explicit empty definedTags = %#v, want non-nil empty map", details.DefinedTags)
+	}
+}
+
 func TestContainerRepositoryServiceClientRejectsCreateOnlyDriftBeforeUpdate(t *testing.T) {
 	t.Parallel()
 
@@ -646,6 +703,30 @@ func TestContainerRepositoryServiceClientMarksDeletedAfterUnambiguousNotFound(t 
 		t.Fatal("status.status.deletedAt = nil, want deletion timestamp")
 	}
 	requireLastCondition(t, resource, shared.Terminating)
+}
+
+func TestContainerRepositoryServiceClientMarksDeletedAfterRepoIDUnknown(t *testing.T) {
+	resource := makeContainerRepositoryResource()
+	resource.Status.Id = testContainerRepositoryID
+	resource.Status.OsokStatus.Ocid = shared.OCID(testContainerRepositoryID)
+
+	client := testContainerRepositoryClient(&fakeContainerRepositoryOCIClient{
+		getFn: func(context.Context, artifactssdk.GetContainerRepositoryRequest) (artifactssdk.GetContainerRepositoryResponse, error) {
+			return artifactssdk.GetContainerRepositoryResponse{}, errortest.NewServiceError(
+				404,
+				"REPO_ID_UNKNOWN",
+				"Repository Id Unknown",
+			)
+		},
+	})
+
+	deleted, err := client.Delete(context.Background(), resource)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !deleted {
+		t.Fatal("Delete() deleted = false, want true after REPO_ID_UNKNOWN")
+	}
 }
 
 func TestContainerRepositoryServiceClientTreatsAuthShapedDeleteNotFoundConservatively(t *testing.T) {

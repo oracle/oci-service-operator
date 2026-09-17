@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "opsi",
+  "slug": "awrhubsource",
+  "kind": "AwrHubSource",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_opsi_awr_hub_source",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateAwrHubSource",
+        "requestType": "opsi.CreateAwrHubSourceRequest",
+        "responseType": "opsi.CreateAwrHubSourceResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetAwrHubSource",
+        "requestType": "opsi.GetAwrHubSourceRequest",
+        "responseType": "opsi.GetAwrHubSourceResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListAwrHubSources",
+        "requestType": "opsi.ListAwrHubSourcesRequest",
+        "responseType": "opsi.ListAwrHubSourcesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeAwrHubSourceCompartment",
+        "requestType": "opsi.ChangeAwrHubSourceCompartmentRequest",
+        "responseType": "opsi.ChangeAwrHubSourceCompartmentResponse"
+      },
+      {
+        "operation": "UpdateAwrHubSource",
+        "requestType": "opsi.UpdateAwrHubSourceRequest",
+        "responseType": "opsi.UpdateAwrHubSourceResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteAwrHubSource",
+        "requestType": "opsi.DeleteAwrHubSourceRequest",
+        "responseType": "opsi.DeleteAwrHubSourceResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "freeform_tags",
+      "type"
+    ],
+    "forceNew": [
+      "associated_opsi_id",
+      "associated_resource_id",
+      "awr_hub_id",
+      "name"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_opsi_awr_hub_sources",
+    "collectionField": "awr_hub_source_summary_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "awr_hub_id",
+      "awr_hub_source_id",
+      "compartment_id",
+      "name",
+      "source_type",
+      "state",
+      "status"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/opsi/awrhubsource/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/opsi/awrhubsource/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from terraform-provider-oci for opsi/awrhubsource."
+  ]
+}

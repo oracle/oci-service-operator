@@ -80,6 +80,10 @@ func TestExternalLocationSummariesMetadataCreateOrUpdateListsAllPagesAndProjects
 	if got := resource.Status.OsokStatus.Message; got != "observed 2 ExternalLocationSummariesMetadata item(s)" {
 		t.Fatalf("status.status.message = %q, want observed count", got)
 	}
+	if len(resource.Status.Items) != 2 || resource.Status.Items[0].OciRegion != "us-ashburn-1" ||
+		resource.Status.Items[1].OciRegion != "us-phoenix-1" {
+		t.Fatalf("projected ExternalLocationSummariesMetadata items = %+v", resource.Status.Items)
+	}
 	assertExternalLocationSummariesMetadataCondition(t, resource, shared.Active)
 }
 

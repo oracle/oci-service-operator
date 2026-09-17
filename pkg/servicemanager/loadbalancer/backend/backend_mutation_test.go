@@ -133,6 +133,9 @@ func TestCreateOrUpdateExecutesMutableBackendUpdate(t *testing.T) {
 	if got := intValue(updateRequest.UpdateBackendDetails.Weight); got != resource.Spec.Weight {
 		t.Fatalf("UpdateBackendRequest.Weight = %d, want %d", got, resource.Spec.Weight)
 	}
+	if updateRequest.UpdateBackendDetails.Backup == nil || updateRequest.UpdateBackendDetails.Drain == nil || updateRequest.UpdateBackendDetails.Offline == nil {
+		t.Fatalf("UpdateBackendRequest mandatory booleans = backup:%v drain:%v offline:%v, want explicit values", updateRequest.UpdateBackendDetails.Backup, updateRequest.UpdateBackendDetails.Drain, updateRequest.UpdateBackendDetails.Offline)
+	}
 	if got := boolValue(updateRequest.UpdateBackendDetails.Backup); got != resource.Spec.Backup {
 		t.Fatalf("UpdateBackendRequest.Backup = %t, want %t", got, resource.Spec.Backup)
 	}
@@ -141,6 +144,9 @@ func TestCreateOrUpdateExecutesMutableBackendUpdate(t *testing.T) {
 	}
 	if got := boolValue(updateRequest.UpdateBackendDetails.Offline); got != resource.Spec.Offline {
 		t.Fatalf("UpdateBackendRequest.Offline = %t, want %t", got, resource.Spec.Offline)
+	}
+	if updateRequest.UpdateBackendDetails.MaxConnections != nil {
+		t.Fatalf("UpdateBackendRequest.MaxConnections = %v, want omitted zero value", *updateRequest.UpdateBackendDetails.MaxConnections)
 	}
 	if got := resource.Status.Weight; got != resource.Spec.Weight {
 		t.Fatalf("status.weight = %d, want %d", got, resource.Spec.Weight)

@@ -38,7 +38,7 @@ group Lookup and bind
 alt tracked or explicit OCI identity already exists
 ServiceManager -> OCI: GetAssessment
 else tracked identity is missing
-ServiceManager -> OCI: ListAssessments(filters:\ncompartment_id, display_name,\nlifecycle_details, lifecycle_state)
+ServiceManager -> OCI: ListAssessments(filters:\ncompartmentId, displayName)
 alt reusable OCI resource is not found
 ServiceManager -> OCI: CreateAssessment
 loop create pending CREATING, IN_PROGRESS
@@ -68,27 +68,32 @@ else live state requires field-aware\ndrift evaluation
 group Drift handling
 note over ServiceManager,OCI
 Supported update surface:
-acceptable_downtime, creation_type,
-database_data_size, ddl_expectation (+7
+acceptableDowntime, creationType,
+databaseDataSize, ddlExpectation (+7
 more)
 Reject before mutate: force-new fields
-bulk_include_exclude_data,
-compartment_id, database_combination,
-exclude_objects (+1 more)
-Lookup filters: compartment_id,
-display_name, lifecycle_details,
-lifecycle_state
+bulkIncludeExcludeData, compartmentId,
+databaseCombination, excludeObjects (+1
+more)
+Lookup filters: compartmentId,
+displayName
+Lookup matching: exact compartmentId,
+displayName, databaseCombination,
+connection identity, network, downtime,
+data-size, DDL, and creation-type match;
+duplicate matches fail
 end note
 opt force-new or conflicting drift is detected
 ServiceManager --> BaseReconciler: reject before OCI mutation
 end
 opt supported mutable drift is detected
-ServiceManager -> OCI: Apply UpdateAssessment only for\nmutable fields acceptable_downtime,\ncreation_type, database_data_size,\nddl_expectation (+7 more)
-loop update pending UPDATING, IN_PROGRESS
+ServiceManager -> OCI: Apply UpdateAssessment only for\nmutable fields acceptableDowntime,\ncreationType, databaseDataSize,\nddlExpectation (+7 more)
+loop update pending UPDATING
 ServiceManager -> OCI: GetAssessment
 end
 end
 ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=assessment action=CREATED;\nupdate=tfresource.UpdateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=assessment action=UPDATED;\ndelete=tfresource.DeleteResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=assessment action=DELETED
+ServiceManager -> OCI: apply follow-up strategy\ncreate=GetWorkRequest ->\nGetAssessment; update=GetWorkRequest\n-> GetAssessment;\ndelete=GetWorkRequest ->\nGetAssessment/ListAssessments\nconfirm-delete
 end
 ServiceManager --> BaseReconciler: status=required,\nfinalizer=retain-until-confirmed-delete
 end
@@ -116,21 +121,44 @@ status/finalizer: required /
 retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
 provider states: create CREATING, IN_PROGRESS;
-update UPDATING, IN_PROGRESS; delete DELETING
-supported drift: acceptable_downtime,
-creation_type, database_data_size,
-ddl_expectation (+7 more)
+update UPDATING; delete DELETING
+follow-up: create=GetWorkRequest ->
+GetAssessment; update=GetWorkRequest ->
+GetAssessment; delete=GetWorkRequest ->
+GetAssessment/ListAssessments confirm-delete
+supported drift: acceptableDowntime,
+creationType, databaseDataSize, ddlExpectation
+(+7 more)
 reject before mutate: force-new fields
-bulk_include_exclude_data, compartment_id,
-database_combination, exclude_objects (+1 more)
+bulkIncludeExcludeData, compartmentId,
+databaseCombination, excludeObjects (+1 more)
 create-only fields: none
 list lookup: oci_database_migration_assessments
-filters compartment_id, display_name,
-lifecycle_details, lifecycle_state
+filters compartmentId, displayName; exact
+compartmentId, displayName, databaseCombination,
+connection identity, network, downtime,
+data-size, DDL, and creation-type match;
+duplicate matches fail
 conflicts: none
 open gaps: none
-Scaffold metadata only; replace with
-controller-specific runtime states before
-promotion.
+The reviewed runtime selects the concrete MYSQL
+or ORACLE request type from databaseCombination
+before calling OCI; unsupported object-helper
+fields are rejected rather than partially
+published.
+CREATING and IN_PROGRESS requeue as
+provisioning, UPDATING requeues as updating,
+ACTIVE and SUCCEEDED settle success, and
+DELETING retains the finalizer until DELETED or
+confirmed absence.
+Create, update, and delete persist and poll the
+Database Migration work request, recover the
+Assessment identifier, and reread the concrete
+Assessment subtype before projecting status.
+Pre-create reuse is bounded to the complete
+reviewed identity. Only the published
+update-detail fields reconcile in place;
+compartment, discriminator, and object-helper
+drift require replacement.
 end note
 @enduml

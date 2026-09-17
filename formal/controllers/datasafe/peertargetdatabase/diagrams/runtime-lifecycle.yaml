@@ -1,0 +1,22 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: datasafe
+slug: peertargetdatabase
+kind: PeerTargetDatabase
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  providerLifecycle: {createPending: ["CREATING"], updatePending: ["UPDATING"], deletePending: ["DELETING"]}
+  listLookup:
+    filters: ["targetDatabaseId","dataguardAssociationId","displayName"]
+    matchRule: exact target database, Data Guard association, and display name match; duplicate matches fail
+  mutation:
+    mutable: ["displayName","description","databaseDetails","tlsConfig"]
+    forceNew: ["targetDatabaseId","dataguardAssociationId"]
+  followUp: {create: create-response, update: read-after-write, delete: confirm-delete}
+notes:
+  - "Peer identity is the integer key returned by Data Safe and is scoped to the parent target database."

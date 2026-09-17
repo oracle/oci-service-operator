@@ -1,0 +1,130 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "computecloudatcustomer",
+  "slug": "cccupgradeschedule",
+  "kind": "CccUpgradeSchedule",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_compute_cloud_at_customer_ccc_upgrade_schedule",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateCccUpgradeSchedule",
+        "requestType": "computecloudatcustomer.CreateCccUpgradeScheduleRequest",
+        "responseType": "computecloudatcustomer.CreateCccUpgradeScheduleResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetCccUpgradeSchedule",
+        "requestType": "computecloudatcustomer.GetCccUpgradeScheduleRequest",
+        "responseType": "computecloudatcustomer.GetCccUpgradeScheduleResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListCccUpgradeSchedules",
+        "requestType": "computecloudatcustomer.ListCccUpgradeSchedulesRequest",
+        "responseType": "computecloudatcustomer.ListCccUpgradeSchedulesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeCccUpgradeScheduleCompartment",
+        "requestType": "computecloudatcustomer.ChangeCccUpgradeScheduleCompartmentRequest",
+        "responseType": "computecloudatcustomer.ChangeCccUpgradeScheduleCompartmentResponse"
+      },
+      {
+        "operation": "UpdateCccUpgradeSchedule",
+        "requestType": "computecloudatcustomer.UpdateCccUpgradeScheduleRequest",
+        "responseType": "computecloudatcustomer.UpdateCccUpgradeScheduleResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteCccUpgradeSchedule",
+        "requestType": "computecloudatcustomer.DeleteCccUpgradeScheduleRequest",
+        "responseType": "computecloudatcustomer.DeleteCccUpgradeScheduleResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "target": [
+        "ACTIVE",
+        "NEEDS_ATTENTION"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "description",
+      "display_name",
+      "events.description",
+      "events.schedule_event_duration",
+      "events.schedule_event_recurrences",
+      "events.time_start",
+      "freeform_tags"
+    ],
+    "forceNew": null,
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_compute_cloud_at_customer_ccc_upgrade_schedules",
+    "collectionField": "ccc_upgrade_schedule_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "access_level",
+      "ccc_upgrade_schedule_id",
+      "compartment_id",
+      "compartment_id_in_subtree",
+      "display_name",
+      "display_name_contains",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/computecloudatcustomer/cccupgradeschedule/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/computecloudatcustomer/cccupgradeschedule/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Pinned provider facts are paired with reviewed CccUpgradeSchedule service-manager semantics and sanitized live CRUD evidence."
+  ]
+}

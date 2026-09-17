@@ -1,0 +1,148 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "loganalytics",
+  "slug": "loganalyticsentity",
+  "kind": "LogAnalyticsEntity",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_log_analytics_log_analytics_entity",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateLogAnalyticsEntity",
+        "requestType": "loganalytics.CreateLogAnalyticsEntityRequest",
+        "responseType": "loganalytics.CreateLogAnalyticsEntityResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetLogAnalyticsEntity",
+        "requestType": "loganalytics.GetLogAnalyticsEntityRequest",
+        "responseType": "loganalytics.GetLogAnalyticsEntityResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListLogAnalyticsEntities",
+        "requestType": "loganalytics.ListLogAnalyticsEntitiesRequest",
+        "responseType": "loganalytics.ListLogAnalyticsEntitiesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeLogAnalyticsEntityCompartment",
+        "requestType": "loganalytics.ChangeLogAnalyticsEntityCompartmentRequest",
+        "responseType": "loganalytics.ChangeLogAnalyticsEntityCompartmentResponse"
+      },
+      {
+        "operation": "UpdateLogAnalyticsEntity",
+        "requestType": "loganalytics.UpdateLogAnalyticsEntityRequest",
+        "responseType": "loganalytics.UpdateLogAnalyticsEntityResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteLogAnalyticsEntity",
+        "requestType": "loganalytics.DeleteLogAnalyticsEntityRequest",
+        "responseType": "loganalytics.DeleteLogAnalyticsEntityResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "target": [
+        "S_ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "cloud_resource_id",
+      "compartment_id",
+      "defined_tags",
+      "freeform_tags",
+      "hostname",
+      "management_agent_id",
+      "metadata.items.name",
+      "metadata.items.type",
+      "metadata.items.value",
+      "name",
+      "properties",
+      "time_last_discovered",
+      "timezone_region"
+    ],
+    "forceNew": [
+      "entity_type_name",
+      "namespace",
+      "source_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_log_analytics_log_analytics_entities",
+    "collectionField": "log_analytics_entity_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "cloud_resource_id",
+      "compartment_id",
+      "defined_tag_equals",
+      "defined_tag_exists",
+      "entity_type_name",
+      "freeform_tag_equals",
+      "freeform_tag_exists",
+      "hostname",
+      "hostname_contains",
+      "is_management_agent_id_null",
+      "is_show_associated_sources_count",
+      "lifecycle_details_contains",
+      "metadata_equals",
+      "name",
+      "name_contains",
+      "namespace",
+      "source_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/loganalytics/loganalyticsentity/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/loganalytics/loganalyticsentity/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Pinned provider operations are combined with reviewed composite-path LogAnalyticsEntity runtime semantics."
+  ]
+}

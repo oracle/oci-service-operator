@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "artifacts",
+  "slug": "containerimagesignature",
+  "kind": "ContainerImageSignature",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_artifacts_container_image_signature",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateContainerImageSignature",
+        "requestType": "artifacts.CreateContainerImageSignatureRequest",
+        "responseType": "artifacts.CreateContainerImageSignatureResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetContainerImageSignature",
+        "requestType": "artifacts.GetContainerImageSignatureRequest",
+        "responseType": "artifacts.GetContainerImageSignatureResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListContainerImageSignatures",
+        "requestType": "artifacts.ListContainerImageSignaturesRequest",
+        "responseType": "artifacts.ListContainerImageSignaturesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateContainerImageSignature",
+        "requestType": "artifacts.UpdateContainerImageSignatureRequest",
+        "responseType": "artifacts.UpdateContainerImageSignatureResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteContainerImageSignature",
+        "requestType": "artifacts.DeleteContainerImageSignatureRequest",
+        "responseType": "artifacts.DeleteContainerImageSignatureResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "target": [
+        "AVAILABLE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "defined_tags",
+      "freeform_tags"
+    ],
+    "forceNew": [
+      "compartment_id",
+      "image_id",
+      "kms_key_id",
+      "kms_key_version_id",
+      "message",
+      "signature",
+      "signing_algorithm"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_artifacts_container_image_signatures",
+    "collectionField": "container_image_signature_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "compartment_id_in_subtree",
+      "display_name",
+      "image_digest",
+      "image_id",
+      "kms_key_id",
+      "kms_key_version_id",
+      "repository_id",
+      "repository_name",
+      "signing_algorithm"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/artifacts/containerimagesignature/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/artifacts/containerimagesignature/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts are imported from the pinned terraform-provider-oci revision; repo-authored runtime semantics remain authoritative."
+  ]
+}

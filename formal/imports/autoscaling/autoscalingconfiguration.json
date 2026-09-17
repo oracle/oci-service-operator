@@ -1,0 +1,160 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "autoscaling",
+  "slug": "autoscalingconfiguration",
+  "kind": "AutoScalingConfiguration",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_autoscaling_auto_scaling_configuration",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateAutoScalingConfiguration",
+        "requestType": "autoscaling.CreateAutoScalingConfigurationRequest",
+        "responseType": "autoscaling.CreateAutoScalingConfigurationResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetAutoScalingConfiguration",
+        "requestType": "autoscaling.GetAutoScalingConfigurationRequest",
+        "responseType": "autoscaling.GetAutoScalingConfigurationResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListAutoScalingConfigurations",
+        "requestType": "autoscaling.ListAutoScalingConfigurationsRequest",
+        "responseType": "autoscaling.ListAutoScalingConfigurationsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeAutoScalingConfigurationCompartment",
+        "requestType": "autoscaling.ChangeAutoScalingConfigurationCompartmentRequest",
+        "responseType": "autoscaling.ChangeAutoScalingConfigurationCompartmentResponse"
+      },
+      {
+        "operation": "UpdateAutoScalingConfiguration",
+        "requestType": "autoscaling.UpdateAutoScalingConfigurationRequest",
+        "responseType": "autoscaling.UpdateAutoScalingConfigurationResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteAutoScalingConfiguration",
+        "requestType": "autoscaling.DeleteAutoScalingConfigurationRequest",
+        "responseType": "autoscaling.DeleteAutoScalingConfigurationResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "cool_down_in_seconds",
+      "defined_tags",
+      "display_name",
+      "freeform_tags",
+      "is_enabled"
+    ],
+    "forceNew": [
+      "auto_scaling_resources",
+      "auto_scaling_resources.id",
+      "auto_scaling_resources.type",
+      "policies",
+      "policies.capacity",
+      "policies.capacity.initial",
+      "policies.capacity.max",
+      "policies.capacity.min",
+      "policies.display_name",
+      "policies.execution_schedule",
+      "policies.execution_schedule.expression",
+      "policies.execution_schedule.timezone",
+      "policies.execution_schedule.type",
+      "policies.is_enabled",
+      "policies.policy_type",
+      "policies.resource_action",
+      "policies.resource_action.action",
+      "policies.resource_action.action_type",
+      "policies.rules",
+      "policies.rules.action",
+      "policies.rules.action.type",
+      "policies.rules.action.value",
+      "policies.rules.display_name",
+      "policies.rules.metric",
+      "policies.rules.metric.metric_compartment_id",
+      "policies.rules.metric.metric_source",
+      "policies.rules.metric.metric_type",
+      "policies.rules.metric.namespace",
+      "policies.rules.metric.pending_duration",
+      "policies.rules.metric.query",
+      "policies.rules.metric.resource_group",
+      "policies.rules.metric.threshold",
+      "policies.rules.metric.threshold.operator",
+      "policies.rules.metric.threshold.value"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "target": [
+      "NOT_FOUND"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_autoscaling_auto_scaling_configurations",
+    "collectionField": "auto_scaling_configurations",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/autoscaling/autoscalingconfiguration/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/autoscaling/autoscalingconfiguration/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation",
+      "lifecycle-classification"
+    ]
+  },
+  "notes": [
+    "The OCI SDK response has no lifecycle-state field or work-request handle; ACTIVE is the repo-authored immediate steady-state abstraction for synchronous create and update.",
+    "The provider exposes ChangeAutoScalingConfigurationCompartment separately, but the published OSOK runtime does not invoke that auxiliary action and therefore treats compartmentId as replacement-only.",
+    "Delete confirmation is repo-authored and completes only after GetAutoScalingConfiguration returns NotFound."
+  ]
+}

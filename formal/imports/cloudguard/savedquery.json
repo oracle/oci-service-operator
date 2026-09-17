@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "cloudguard",
+  "slug": "savedquery",
+  "kind": "SavedQuery",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_cloud_guard_saved_query",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateSavedQuery",
+        "requestType": "cloudguard.CreateSavedQueryRequest",
+        "responseType": "cloudguard.CreateSavedQueryResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetSavedQuery",
+        "requestType": "cloudguard.GetSavedQueryRequest",
+        "responseType": "cloudguard.GetSavedQueryResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListSavedQueries",
+        "requestType": "cloudguard.ListSavedQueriesRequest",
+        "responseType": "cloudguard.ListSavedQueriesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeSavedQueryCompartment",
+        "requestType": "cloudguard.ChangeSavedQueryCompartmentRequest",
+        "responseType": "cloudguard.ChangeSavedQueryCompartmentResponse"
+      },
+      {
+        "operation": "UpdateSavedQuery",
+        "requestType": "cloudguard.UpdateSavedQueryRequest",
+        "responseType": "cloudguard.UpdateSavedQueryResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteSavedQuery",
+        "requestType": "cloudguard.DeleteSavedQueryRequest",
+        "responseType": "cloudguard.DeleteSavedQueryResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags",
+      "query"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED",
+      "NOT_FOUND"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_cloud_guard_saved_queries",
+    "collectionField": "saved_query_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/cloudguard/savedquery/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/cloudguard/savedquery/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "lifecycle-classification",
+      "list-lookup",
+      "mutation-policy",
+      "status-projection",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Pinned provider boundary: formal-import cannot resolve the provider's CloudGuardSavedQueryResource CRUD type, so this row records reviewed provider and SDK facts directly at the sources.lock revision.",
+    "The provider classifies CREATING as create-pending, ACTIVE as create success, and DELETING/DELETED as delete progress and completion; the reviewed OCI API behavior observed ACTIVE writes and a 404 confirmation after a 202 delete.",
+    "The provider implements compartment movement through ChangeSavedQueryCompartment, but the published OSOK runtime does not expose that auxiliary action and keeps compartmentId replacement-only."
+  ]
+}

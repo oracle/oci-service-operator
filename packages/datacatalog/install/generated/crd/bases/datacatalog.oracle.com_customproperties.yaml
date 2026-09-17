@@ -61,6 +61,9 @@ spec:
                 items:
                   type: string
                 type: array
+              catalogId:
+                description: The OCID of the catalog containing the custom property.
+                type: string
               dataType:
                 description: The data type of the custom property
                 type: string
@@ -99,6 +102,9 @@ spec:
               isSortable:
                 description: If this field allows to sort from UI
                 type: boolean
+              namespaceId:
+                description: The key of the namespace containing the custom property.
+                type: string
               properties:
                 additionalProperties:
                   additionalProperties:
@@ -115,7 +121,9 @@ spec:
                   Example: `{"properties": { "default": { "host": "host1", "port": "1521", "database": "orcl"}}}`
                 type: object
             required:
+            - catalogId
             - displayName
+            - namespaceId
             type: object
           status:
             description: CustomPropertyStatus defines the observed state of CustomProperty.

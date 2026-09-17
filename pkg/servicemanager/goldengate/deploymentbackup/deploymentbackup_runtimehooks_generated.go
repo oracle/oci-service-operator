@@ -50,15 +50,84 @@ func registerDeploymentBackupRuntimeHooksMutator(mutator DeploymentBackupRuntime
 	}
 	deploymentbackupRuntimeHooksMutators = append(deploymentbackupRuntimeHooksMutators, mutator)
 }
+func newDeploymentBackupRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "goldengate",
+		FormalSlug:    "deploymentbackup",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{"UPDATING"},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "deploymentId", "displayName", "lifecycleState", "opc-request-id"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"definedTags", "freeformTags"},
+			ForceNew:      []string{"bucketName", "compartmentId", "deploymentId", "displayName", "isMetadataOnly", "jsonData", "locks", "namespaceName", "objectName", "type"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "DeploymentBackup", Action: "CreateDeploymentBackup"}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "DeploymentBackup", Action: "DeleteDeploymentBackup"}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "DeploymentBackup", Action: "CreateDeploymentBackup"}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "DeploymentBackup", Action: "DeleteDeploymentBackup"}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newDeploymentBackupDefaultRuntimeHooks(sdkClient goldengatesdk.GoldenGateClient) DeploymentBackupRuntimeHooks {
 	return DeploymentBackupRuntimeHooks{
+		Semantics:       newDeploymentBackupRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*goldengatev1beta1.DeploymentBackup]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*goldengatev1beta1.DeploymentBackup]{},
 		StatusHooks:     generatedruntime.StatusHooks[*goldengatev1beta1.DeploymentBackup]{},
 		ParityHooks:     generatedruntime.ParityHooks[*goldengatev1beta1.DeploymentBackup]{},
-		Async:           generatedruntime.AsyncHooks[*goldengatev1beta1.DeploymentBackup]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*goldengatev1beta1.DeploymentBackup]{},
+		Async: generatedruntime.AsyncHooks[*goldengatev1beta1.DeploymentBackup]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := goldengatesdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*goldengatev1beta1.DeploymentBackup]{},
 		Create: runtimeOperationHooks[goldengatesdk.CreateDeploymentBackupRequest, goldengatesdk.CreateDeploymentBackupResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateDeploymentBackupDetails", RequestName: "CreateDeploymentBackupDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request goldengatesdk.CreateDeploymentBackupRequest) (goldengatesdk.CreateDeploymentBackupResponse, error) {
@@ -106,10 +175,19 @@ func buildDeploymentBackupGeneratedRuntimeConfig(
 	hooks DeploymentBackupRuntimeHooks,
 ) generatedruntime.Config[*goldengatev1beta1.DeploymentBackup] {
 	return generatedruntime.Config[*goldengatev1beta1.DeploymentBackup]{
-		Kind:            "DeploymentBackup",
-		SDKName:         "DeploymentBackup",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "DeploymentBackup",
+		SDKName:   "DeploymentBackup",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

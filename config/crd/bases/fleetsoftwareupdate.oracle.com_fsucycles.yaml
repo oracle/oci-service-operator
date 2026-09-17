@@ -115,13 +115,56 @@ spec:
                 description: FsuCycleGoalVersionDetails defines nested fields for
                   FsuCycle.GoalVersionDetails.
                 properties:
+                  components:
+                    items:
+                      description: FsuCycleGoalVersionDetailsComponent defines nested
+                        fields for FsuCycle.GoalVersionDetails.Component.
+                      properties:
+                        componentType:
+                          type: string
+                        goalVersionDetails:
+                          description: FsuCycleGoalVersionDetailsComponentGoalVersionDetails
+                            defines nested fields for FsuCycle.GoalVersionDetails.Component.GoalVersionDetails.
+                          properties:
+                            goalType:
+                              type: string
+                            goalVersion:
+                              description: Goal version string matching an Oracle
+                                released 'GUEST_OS' software image.
+                              type: string
+                            jsonData:
+                              type: string
+                          type: object
+                        homePolicy:
+                          description: |-
+                            Goal home policy to use when Staging the Goal Version during patching.
+                            CREATE_NEW: Create a new DBHome (for Database Collections) for the specified image or version.
+                            USE_EXISTING: All database targets in the same VMCluster or CloudVmCluster will be moved to a shared database home.
+                              If an existing home for the selected image or version is not found in the VM Cluster for a target database, then a new home will be created.
+                              If more than one existing home for the selected image is found, then the home with the least number of databases will be used.
+                              If multiple homes have the least number of databases, then a home will be selected at random.
+                          type: string
+                        jsonData:
+                          type: string
+                        newHomePrefix:
+                          description: |-
+                            Prefix name used for new DB home resources created as part of the Stage Action.
+                            Format: <specified_prefix>_<timestamp>
+                            If not specified, a default OCI DB home resource will be generated for the new DB home resources created.
+                          type: string
+                      type: object
+                    type: array
                   homePolicy:
                     type: string
                   jsonData:
                     type: string
                   newHomePrefix:
                     type: string
+                  softwareImageId:
+                    type: string
                   type:
+                    type: string
+                  version:
                     type: string
                 type: object
               isIgnoreMissingPatches:
@@ -259,13 +302,56 @@ spec:
                 description: FsuCycleGoalVersionDetails defines nested fields for
                   FsuCycle.GoalVersionDetails.
                 properties:
+                  components:
+                    items:
+                      description: FsuCycleGoalVersionDetailsComponent defines nested
+                        fields for FsuCycle.GoalVersionDetails.Component.
+                      properties:
+                        componentType:
+                          type: string
+                        goalVersionDetails:
+                          description: FsuCycleGoalVersionDetailsComponentGoalVersionDetails
+                            defines nested fields for FsuCycle.GoalVersionDetails.Component.GoalVersionDetails.
+                          properties:
+                            goalType:
+                              type: string
+                            goalVersion:
+                              description: Goal version string matching an Oracle
+                                released 'GUEST_OS' software image.
+                              type: string
+                            jsonData:
+                              type: string
+                          type: object
+                        homePolicy:
+                          description: |-
+                            Goal home policy to use when Staging the Goal Version during patching.
+                            CREATE_NEW: Create a new DBHome (for Database Collections) for the specified image or version.
+                            USE_EXISTING: All database targets in the same VMCluster or CloudVmCluster will be moved to a shared database home.
+                              If an existing home for the selected image or version is not found in the VM Cluster for a target database, then a new home will be created.
+                              If more than one existing home for the selected image is found, then the home with the least number of databases will be used.
+                              If multiple homes have the least number of databases, then a home will be selected at random.
+                          type: string
+                        jsonData:
+                          type: string
+                        newHomePrefix:
+                          description: |-
+                            Prefix name used for new DB home resources created as part of the Stage Action.
+                            Format: <specified_prefix>_<timestamp>
+                            If not specified, a default OCI DB home resource will be generated for the new DB home resources created.
+                          type: string
+                      type: object
+                    type: array
                   homePolicy:
                     type: string
                   jsonData:
                     type: string
                   newHomePrefix:
                     type: string
+                  softwareImageId:
+                    type: string
                   type:
+                    type: string
+                  version:
                     type: string
                 type: object
               id:

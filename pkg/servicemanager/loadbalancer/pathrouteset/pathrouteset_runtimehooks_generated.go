@@ -66,25 +66,25 @@ func newPathRouteSetDefaultRuntimeHooks(sdkClient loadbalancersdk.LoadBalancerCl
 			},
 		},
 		Get: runtimeOperationHooks[loadbalancersdk.GetPathRouteSetRequest, loadbalancersdk.GetPathRouteSetResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "PathRouteSetName", RequestName: "pathRouteSetName", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "PathRouteSetName", RequestName: "pathRouteSetName", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request loadbalancersdk.GetPathRouteSetRequest) (loadbalancersdk.GetPathRouteSetResponse, error) {
 				return sdkClient.GetPathRouteSet(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[loadbalancersdk.ListPathRouteSetsRequest, loadbalancersdk.ListPathRouteSetsResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: true}},
+			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loadbalancersdk.ListPathRouteSetsRequest) (loadbalancersdk.ListPathRouteSetsResponse, error) {
 				return sdkClient.ListPathRouteSets(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[loadbalancersdk.UpdatePathRouteSetRequest, loadbalancersdk.UpdatePathRouteSetResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "PathRouteSetName", RequestName: "pathRouteSetName", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdatePathRouteSetDetails", RequestName: "UpdatePathRouteSetDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "PathRouteSetName", RequestName: "pathRouteSetName", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdatePathRouteSetDetails", RequestName: "UpdatePathRouteSetDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loadbalancersdk.UpdatePathRouteSetRequest) (loadbalancersdk.UpdatePathRouteSetResponse, error) {
 				return sdkClient.UpdatePathRouteSet(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[loadbalancersdk.DeletePathRouteSetRequest, loadbalancersdk.DeletePathRouteSetResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "PathRouteSetName", RequestName: "pathRouteSetName", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "PathRouteSetName", RequestName: "pathRouteSetName", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request loadbalancersdk.DeletePathRouteSetRequest) (loadbalancersdk.DeletePathRouteSetResponse, error) {
 				return sdkClient.DeletePathRouteSet(ctx, request)
 			},

@@ -18,7 +18,10 @@ func buildPackageModel(cfg *Config, service ServiceConfig, discovered []Resource
 	resources := discovered
 	resources = assignHelperTypeNames(resources)
 	resources = assignStatusTypeNames(resources)
-	resources = applyResourceGenerationOverrides(service, version, resources)
+	resources, err := applyResourceGenerationOverrides(service, version, resources)
+	if err != nil {
+		return nil, err
+	}
 	resources = applyDefaultSamples(service, version, resources)
 	controllerOutput := buildControllerOutputModel(service, cfg.Domain, resources)
 	serviceManagers, err := buildServiceManagerModels(service, version, resources)
@@ -414,9 +417,45 @@ func buildServiceManagerModels(service ServiceConfig, version string, resources 
 		}
 
 		packagePath := service.ServiceManagerPackagePathFor(resource.Kind, resource.FileStem)
+		asyncModel := buildRuntimeAsyncModel(service.AsyncConfigFor(resource.Kind))
+		workRequestIDFieldName := ""
+		if resource.Runtime.WorkRequest != nil {
+			for _, field := range resource.Runtime.WorkRequest.RequestFields {
+				if field.Contribution == "path" {
+					workRequestIDFieldName = field.FieldName
+					break
+				}
+			}
+		}
+		allSDKClients := append([]SDKClientModel(nil), resource.Runtime.Clients...)
+		if asyncModel != nil && asyncModel.WorkRequest != nil && resource.Runtime.WorkRequest != nil {
+			workRequestClientFound := false
+			for _, client := range allSDKClients {
+				if client.TypeName == resource.Runtime.WorkRequest.ClientType {
+					resource.Runtime.WorkRequest.ClientFieldName = client.FieldName
+					workRequestClientFound = true
+					break
+				}
+			}
+			if !workRequestClientFound {
+				usedFieldNames := make(map[string]struct{}, len(allSDKClients))
+				for _, client := range allSDKClients {
+					usedFieldNames[client.FieldName] = struct{}{}
+				}
+				fieldName := uniqueRuntimeClientFieldName(resource.Runtime.WorkRequest.ClientType, usedFieldNames)
+				resource.Runtime.WorkRequest.ClientFieldName = fieldName
+				allSDKClients = append(allSDKClients, SDKClientModel{
+					TypeName:        resource.Runtime.WorkRequest.ClientType,
+					Constructor:     resource.Runtime.WorkRequest.ClientConstructor,
+					ConstructorKind: resource.Runtime.WorkRequest.ClientConstructorKind,
+					FieldName:       fieldName,
+					VarName:         fieldName + "Client",
+				})
+			}
+		}
 		var sdkClients []SDKClientModel
-		if len(resource.Runtime.Clients) > 1 {
-			sdkClients = append([]SDKClientModel(nil), resource.Runtime.Clients...)
+		if len(allSDKClients) > 1 {
+			sdkClients = allSDKClients
 		}
 		serviceManagers = append(serviceManagers, ServiceManagerModel{
 			Kind:                     resource.Kind,
@@ -424,6 +463,7 @@ func buildServiceManagerModels(service ServiceConfig, version string, resources 
 			FileStem:                 resource.FileStem,
 			Formal:                   resource.Formal,
 			Semantics:                resource.Runtime.Semantics,
+			Async:                    asyncModel,
 			PackagePath:              packagePath,
 			PackageName:              safeGoIdentifier(path.Base(packagePath)),
 			APIImportPath:            fmt.Sprintf("github.com/oracle/oci-service-operator/api/%s/%s", service.Group, version),
@@ -446,6 +486,8 @@ func buildServiceManagerModels(service ServiceConfig, version string, resources 
 			ListOperation:            resource.Runtime.List,
 			UpdateOperation:          resource.Runtime.Update,
 			DeleteOperation:          resource.Runtime.Delete,
+			WorkRequestOperation:     resource.Runtime.WorkRequest,
+			WorkRequestIDFieldName:   workRequestIDFieldName,
 			RuntimeHooksFileName:     fmt.Sprintf("%s_runtimehooks_generated.go", resource.FileStem),
 			ServiceClientFileName:    fmt.Sprintf("%s_serviceclient.go", resource.FileStem),
 			ServiceManagerFileName:   fmt.Sprintf("%s_servicemanager.go", resource.FileStem),
@@ -462,12 +504,18 @@ func buildServiceManagerModels(service ServiceConfig, version string, resources 
 	return serviceManagers, nil
 }
 
-func applyResourceGenerationOverrides(service ServiceConfig, version string, resources []ResourceModel) []ResourceModel {
+func applyResourceGenerationOverrides(service ServiceConfig, version string, resources []ResourceModel) ([]ResourceModel, error) {
 	updated := make([]ResourceModel, 0, len(resources))
 	for _, resource := range resources {
 		override, ok := service.resourceGenerationOverride(resource.Kind)
 		if ok {
-			resource.SpecFields = mergeFieldOverrides(resource.SpecFields, override.SpecFields)
+			topLevelSpecFields, nestedSpecFields := partitionNestedFieldOverrides(override.SpecFields)
+			resource.SpecFields = mergeFieldOverrides(resource.SpecFields, topLevelSpecFields)
+			var err error
+			resource.HelperTypes, err = applyNestedFieldOverrides(resource.SpecFields, resource.HelperTypes, nestedSpecFields)
+			if err != nil {
+				return nil, fmt.Errorf("service %q kind %q specFields: %w", service.Service, resource.Kind, err)
+			}
 			resource.StatusFields = mergeFieldOverrides(resource.StatusFields, override.StatusFields)
 			if len(override.SpecFields) > 0 || len(override.StatusFields) > 0 {
 				resource.HelperTypes = reachableHelperTypes(resource)
@@ -476,7 +524,69 @@ func applyResourceGenerationOverrides(service ServiceConfig, version string, res
 		}
 		updated = append(updated, resource)
 	}
-	return updated
+	return updated, nil
+}
+
+func partitionNestedFieldOverrides(overrides []FieldOverride) ([]FieldOverride, []FieldOverride) {
+	var topLevel, nested []FieldOverride
+	for _, override := range overrides {
+		if strings.Contains(strings.TrimSpace(override.Name), ".") {
+			nested = append(nested, override)
+		} else {
+			topLevel = append(topLevel, override)
+		}
+	}
+	return topLevel, nested
+}
+
+func applyNestedFieldOverrides(specFields []FieldModel, helperTypes []TypeModel, overrides []FieldOverride) ([]TypeModel, error) {
+	if len(overrides) == 0 {
+		return append([]TypeModel(nil), helperTypes...), nil
+	}
+	updated := append([]TypeModel(nil), helperTypes...)
+	helperIndex := make(map[string]int, len(updated))
+	for index := range updated {
+		updated[index].Fields = append([]FieldModel(nil), updated[index].Fields...)
+		helperIndex[updated[index].Name] = index
+	}
+	for _, override := range overrides {
+		segments := strings.Split(strings.TrimSpace(override.Name), ".")
+		if len(segments) < 2 {
+			return nil, fmt.Errorf("nested override %q must contain a field path", override.Name)
+		}
+		field, ok := findGeneratedFieldByPathSegment(specFields, segments[0])
+		if !ok {
+			return nil, fmt.Errorf("nested override %q root field %q was not found", override.Name, segments[0])
+		}
+		for index := 1; index < len(segments); index++ {
+			helperName := underlyingTypeName(field.Type)
+			helperPosition, found := helperIndex[helperName]
+			if !found {
+				return nil, fmt.Errorf("nested override %q field %q does not resolve to a generated helper", override.Name, strings.Join(segments[:index], "."))
+			}
+			if index == len(segments)-1 {
+				leaf := override
+				leaf.Name = segments[index]
+				updated[helperPosition].Fields = mergeFieldOverrides(updated[helperPosition].Fields, []FieldOverride{leaf})
+				break
+			}
+			field, ok = findGeneratedFieldByPathSegment(updated[helperPosition].Fields, segments[index])
+			if !ok {
+				return nil, fmt.Errorf("nested override %q intermediate field %q was not found", override.Name, strings.Join(segments[:index+1], "."))
+			}
+		}
+	}
+	return updated, nil
+}
+
+func findGeneratedFieldByPathSegment(fields []FieldModel, segment string) (FieldModel, bool) {
+	for _, field := range fields {
+		if strings.EqualFold(strings.TrimSpace(field.Name), strings.TrimSpace(segment)) ||
+			strings.EqualFold(strings.TrimSpace(tagJSONName(field.Tag)), strings.TrimSpace(segment)) {
+			return field, true
+		}
+	}
+	return FieldModel{}, false
 }
 
 func reachableHelperTypes(resource ResourceModel) []TypeModel {

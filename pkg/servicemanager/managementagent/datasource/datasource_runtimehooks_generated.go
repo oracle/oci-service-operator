@@ -50,15 +50,80 @@ func registerDataSourceRuntimeHooksMutator(mutator DataSourceRuntimeHooksMutator
 	}
 	datasourceRuntimeHooksMutators = append(datasourceRuntimeHooksMutators, mutator)
 }
+func newDataSourceRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "managementagent",
+		FormalSlug:    "datasource",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "handwritten",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"S_CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"S_ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"allowMetrics", "connectionTimeout", "metricDimensions", "proxyUrl", "readDataLimitInKilobytes", "readTimeout", "resourceGroup", "scheduleMins", "url"},
+			ForceNew:      []string{"compartmentId", "managementAgentId", "name", "namespace", "type"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "resource-local DataSource runtime", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "resource-local DataSource runtime", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "resource-local DataSource runtime", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> paginated ListDataSources/GetDataSource readback",
+			Hooks:    []generatedruntime.Hook{{Helper: "resource-local DataSource runtime", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> GetDataSource readback",
+			Hooks:    []generatedruntime.Hook{{Helper: "resource-local DataSource runtime", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> conservative confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "resource-local DataSource runtime", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newDataSourceDefaultRuntimeHooks(sdkClient managementagentsdk.ManagementAgentClient) DataSourceRuntimeHooks {
 	return DataSourceRuntimeHooks{
+		Semantics:       newDataSourceRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*managementagentv1beta1.DataSource]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*managementagentv1beta1.DataSource]{},
 		StatusHooks:     generatedruntime.StatusHooks[*managementagentv1beta1.DataSource]{},
 		ParityHooks:     generatedruntime.ParityHooks[*managementagentv1beta1.DataSource]{},
-		Async:           generatedruntime.AsyncHooks[*managementagentv1beta1.DataSource]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*managementagentv1beta1.DataSource]{},
+		Async: generatedruntime.AsyncHooks[*managementagentv1beta1.DataSource]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := managementagentsdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*managementagentv1beta1.DataSource]{},
 		Create: runtimeOperationHooks[managementagentsdk.CreateDataSourceRequest, managementagentsdk.CreateDataSourceResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "ManagementAgentId", RequestName: "managementAgentId", Contribution: "path", PreferResourceID: false}, {FieldName: "CreateDataSourceDetails", RequestName: "CreateDataSourceDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request managementagentsdk.CreateDataSourceRequest) (managementagentsdk.CreateDataSourceResponse, error) {
@@ -66,25 +131,25 @@ func newDataSourceDefaultRuntimeHooks(sdkClient managementagentsdk.ManagementAge
 			},
 		},
 		Get: runtimeOperationHooks[managementagentsdk.GetDataSourceRequest, managementagentsdk.GetDataSourceResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "ManagementAgentId", RequestName: "managementAgentId", Contribution: "path", PreferResourceID: false}, {FieldName: "DataSourceKey", RequestName: "dataSourceKey", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "ManagementAgentId", RequestName: "managementAgentId", Contribution: "path", PreferResourceID: false}, {FieldName: "DataSourceKey", RequestName: "dataSourceKey", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request managementagentsdk.GetDataSourceRequest) (managementagentsdk.GetDataSourceResponse, error) {
 				return sdkClient.GetDataSource(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[managementagentsdk.ListDataSourcesRequest, managementagentsdk.ListDataSourcesResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "ManagementAgentId", RequestName: "managementAgentId", Contribution: "path", PreferResourceID: true}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "Name", RequestName: "name", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "ManagementAgentId", RequestName: "managementAgentId", Contribution: "path", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "Name", RequestName: "name", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request managementagentsdk.ListDataSourcesRequest) (managementagentsdk.ListDataSourcesResponse, error) {
 				return sdkClient.ListDataSources(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[managementagentsdk.UpdateDataSourceRequest, managementagentsdk.UpdateDataSourceResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "ManagementAgentId", RequestName: "managementAgentId", Contribution: "path", PreferResourceID: false}, {FieldName: "DataSourceKey", RequestName: "dataSourceKey", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdateDataSourceDetails", RequestName: "UpdateDataSourceDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "ManagementAgentId", RequestName: "managementAgentId", Contribution: "path", PreferResourceID: false}, {FieldName: "DataSourceKey", RequestName: "dataSourceKey", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateDataSourceDetails", RequestName: "UpdateDataSourceDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request managementagentsdk.UpdateDataSourceRequest) (managementagentsdk.UpdateDataSourceResponse, error) {
 				return sdkClient.UpdateDataSource(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[managementagentsdk.DeleteDataSourceRequest, managementagentsdk.DeleteDataSourceResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "ManagementAgentId", RequestName: "managementAgentId", Contribution: "path", PreferResourceID: false}, {FieldName: "DataSourceKey", RequestName: "dataSourceKey", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "ManagementAgentId", RequestName: "managementAgentId", Contribution: "path", PreferResourceID: false}, {FieldName: "DataSourceKey", RequestName: "dataSourceKey", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request managementagentsdk.DeleteDataSourceRequest) (managementagentsdk.DeleteDataSourceResponse, error) {
 				return sdkClient.DeleteDataSource(ctx, request)
 			},
@@ -106,10 +171,19 @@ func buildDataSourceGeneratedRuntimeConfig(
 	hooks DataSourceRuntimeHooks,
 ) generatedruntime.Config[*managementagentv1beta1.DataSource] {
 	return generatedruntime.Config[*managementagentv1beta1.DataSource]{
-		Kind:            "DataSource",
-		SDKName:         "DataSource",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "DataSource",
+		SDKName:   "DataSource",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "handwritten",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

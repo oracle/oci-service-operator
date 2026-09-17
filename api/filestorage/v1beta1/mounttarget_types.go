@@ -67,7 +67,7 @@ type MountTargetSpec struct {
 	// +kubebuilder:validation:Optional
 	IdmapType string `json:"idmapType,omitempty"`
 	// +kubebuilder:validation:Optional
-	LdapIdmap MountTargetLdapIdmap `json:"ldapIdmap,omitempty"`
+	LdapIdmap MountTargetLdapIdmap `json:"ldapIdmap,omitempty,omitzero"`
 	// A list of Network Security Group OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) associated with this mount target.
 	// A maximum of 5 is allowed.
 	// Setting this to an empty array after the list is created removes the mount target from all NSGs.
@@ -75,7 +75,7 @@ type MountTargetSpec struct {
 	// +kubebuilder:validation:Optional
 	NsgIds []string `json:"nsgIds,omitempty"`
 	// +kubebuilder:validation:Optional
-	Kerberos MountTargetKerberos `json:"kerberos,omitempty"`
+	Kerberos MountTargetKerberos `json:"kerberos,omitempty,omitzero"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair
 	//  with no predefined name, type, or namespace.
 	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).

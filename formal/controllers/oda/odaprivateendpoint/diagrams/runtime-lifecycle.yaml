@@ -9,5 +9,21 @@ states:
   - active
   - updating
   - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending: ["CREATING"]
+    updatePending: ["UPDATING"]
+    deletePending: ["DELETING"]
+  listLookup:
+    filters: ["displayName","compartmentId"]
+    matchRule: exact compartmentId plus displayName match; duplicate matches fail
+  mutation:
+    mutable: ["displayName","description","nsgIds","freeformTags","definedTags"]
+    forceNew: ["compartmentId","subnetId"]
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
 notes:
-  - Scaffold metadata only; replace with controller-specific runtime states before promotion.
+  - "The ODA update operation reconciles display metadata, NSGs, and tags in place; compartmentId and subnetId require replacement."
+  - "Create, update, and delete converge through GetOdaPrivateEndpoint lifecycle reads."

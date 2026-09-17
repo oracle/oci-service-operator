@@ -84,12 +84,14 @@ Because OCI exposes no standalone GetListener or
 ListListeners API, read, bind, and delete
 confirmation all project the named listener from
 GetLoadBalancer on the owning load balancer.
-Create and update use read-after-write
-follow-up, then settle through the next observe
-because Listener payloads do not expose a
-standalone lifecycle field. Delete retains the
-finalizer until the named listener disappears
-from the parent listeners map.
+Create, update, and delete track the service
+work request before GetLoadBalancer-backed
+follow-up. Listener payloads do not expose a
+standalone lifecycle field, so a listener found
+on its ACTIVE parent is projected as ACTIVE.
+Delete retains the finalizer until the work
+request succeeds and the named listener
+disappears from the parent listeners map.
 end note
 note right of delete_pending
 delete policy: required

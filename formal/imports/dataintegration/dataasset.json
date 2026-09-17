@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "dataintegration",
+  "slug": "dataasset",
+  "kind": "DataAsset",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_dataintegration_dataasset",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDataAsset",
+        "requestType": "dataintegration.CreateDataAssetRequest",
+        "responseType": "dataintegration.CreateDataAssetResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDataAsset",
+        "requestType": "dataintegration.GetDataAssetRequest",
+        "responseType": "dataintegration.GetDataAssetResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDataAsset",
+        "requestType": "dataintegration.ListDataAssetRequest",
+        "responseType": "dataintegration.ListDataAssetResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDataAsset",
+        "requestType": "dataintegration.UpdateDataAssetRequest",
+        "responseType": "dataintegration.UpdateDataAssetResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDataAsset",
+        "requestType": "dataintegration.DeleteDataAssetRequest",
+        "responseType": "dataintegration.DeleteDataAssetResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_dataintegration_dataasset",
+    "collectionField": "dataasset",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/dataintegration/dataasset/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/dataintegration/dataasset/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for dataintegration/dataasset; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

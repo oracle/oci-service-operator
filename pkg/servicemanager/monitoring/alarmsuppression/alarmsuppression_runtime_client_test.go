@@ -134,6 +134,21 @@ func newTestAlarmSuppressionClient(client alarmSuppressionOCIClient) AlarmSuppre
 	return wrapAlarmSuppressionCanonicalizingClient(delegate)
 }
 
+func TestBuildAlarmSuppressionCreateBodyPreservesLevel(t *testing.T) {
+	t.Parallel()
+
+	resource := makeAlarmSuppressionResource()
+	resource.Spec.Level = "ALARM"
+	body, err := buildAlarmSuppressionCreateBody(context.Background(), resource, "")
+	if err != nil {
+		t.Fatalf("buildAlarmSuppressionCreateBody() error = %v", err)
+	}
+	details := body.(monitoringsdk.CreateAlarmSuppressionDetails)
+	if details.Level != monitoringsdk.AlarmSuppressionLevelAlarm {
+		t.Fatalf("create level = %q, want ALARM", details.Level)
+	}
+}
+
 func makeAlarmSuppressionResource() *monitoringv1beta1.AlarmSuppression {
 	return &monitoringv1beta1.AlarmSuppression{
 		ObjectMeta: metav1.ObjectMeta{Name: "sample-alarm-suppression", Namespace: "default"},

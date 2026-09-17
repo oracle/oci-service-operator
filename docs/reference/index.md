@@ -67,8 +67,8 @@ Notes:
 
 | Package | Group/Kind | API Version | Support Status | Latest Released Version | Guide | Sample | API Spec |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [API Gateway](packages/apigateway/index.md) | `apigateway/ApiGateway` | `apigateway.oracle.com/v1beta1` | Preview | `v2.1.0-alpha` | [Guide](../guides/apigateway/apigateway.md) | — | [Reference](api/apigateway/v1beta1/index.md#kind-apigateway) |
-| [API Gateway](packages/apigateway/index.md) | `apigateway/ApiGatewayDeployment` | `apigateway.oracle.com/v1beta1` | Preview | `v2.1.0-alpha` | [Guide](../guides/apigateway/apigatewaydeployment.md) | — | [Reference](api/apigateway/v1beta1/index.md#kind-apigatewaydeployment) |
+| [API Gateway](packages/apigateway/index.md) | `apigateway/ApiGateway` | `apigateway.oracle.com/v1beta1` | Preview | `v2.1.0-alpha` | [Guide](../guides/apigateway/apigateway.md) | [Sample](samples/apigateway/v1beta1/apigateway.md) | [Reference](api/apigateway/v1beta1/index.md#kind-apigateway) |
+| [API Gateway](packages/apigateway/index.md) | `apigateway/ApiGatewayDeployment` | `apigateway.oracle.com/v1beta1` | Preview | `v2.1.0-alpha` | [Guide](../guides/apigateway/apigatewaydeployment.md) | [Sample](samples/apigateway/v1beta1/apigatewaydeployment.md) | [Reference](api/apigateway/v1beta1/index.md#kind-apigatewaydeployment) |
 
 ## Big Data Service
 

@@ -38,10 +38,10 @@ group Lookup and bind
 alt tracked or explicit OCI identity already exists
 ServiceManager -> OCI: GetSkillParameter
 else tracked identity is missing
-ServiceManager -> OCI: ListSkillParameter(filters:\ncompartment_id, state)
+ServiceManager -> OCI: ListSkillParameter(filters:\nodaInstanceId, skillId, name)
 alt reusable OCI resource is not found
 ServiceManager -> OCI: CreateSkillParameter
-loop create pending PROVISIONING
+loop create pending CREATING
 ServiceManager -> OCI: GetSkillParameter
 end
 else reusable OCI resource already exists
@@ -63,25 +63,31 @@ ServiceManager --> BaseReconciler: release finalizer after delete completion
 end
 end
 else OCI state is retryable
-ServiceManager --> BaseReconciler: requeue while OCI remains in\nPROVISIONING, UPDATING, DELETING
+ServiceManager --> BaseReconciler: requeue while OCI remains in\nCREATING, UPDATING, DELETING
 else live state requires field-aware\ndrift evaluation
 group Drift handling
 note over ServiceManager,OCI
-Supported update surface: display_name
+Supported update surface: description,
+displayName, value
 Reject before mutate: force-new fields
-compartment_id
-Lookup filters: compartment_id, state
+name, type
+Lookup filters: odaInstanceId, skillId,
+name
+Lookup matching: exact parent skill and
+parameter name match; duplicate matches
+fail
 end note
 opt force-new or conflicting drift is detected
 ServiceManager --> BaseReconciler: reject before OCI mutation
 end
 opt supported mutable drift is detected
-ServiceManager -> OCI: Apply UpdateSkillParameter only for\nmutable fields display_name
+ServiceManager -> OCI: Apply UpdateSkillParameter only for\nmutable fields description,\ndisplayName, value
 loop update pending UPDATING
 ServiceManager -> OCI: GetSkillParameter
 end
 end
 ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=template action=CREATED;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource
+ServiceManager -> OCI: apply follow-up strategy\ncreate=read-after-write;\nupdate=read-after-write;\ndelete=confirm-delete
 end
 ServiceManager --> BaseReconciler: status=required,\nfinalizer=retain-until-confirmed-delete
 end
@@ -108,18 +114,22 @@ archetype: generated-service-manager
 status/finalizer: required /
 retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
-provider states: create PROVISIONING; update
+provider states: create CREATING; update
 UPDATING; delete DELETING
-supported drift: display_name
-reject before mutate: force-new fields
-compartment_id
+follow-up: create=read-after-write;
+update=read-after-write; delete=confirm-delete
+supported drift: description, displayName, value
+reject before mutate: force-new fields name,
+type
 create-only fields: none
 list lookup: scaffold_oda_skillparameter filters
-compartment_id, state
+odaInstanceId, skillId, name; exact parent skill
+and parameter name match; duplicate matches fail
 conflicts: none
 open gaps: none
-Scaffold metadata only; replace with
-controller-specific runtime states before
-promotion.
+Parameter name is the nested item identity;
+parent ODA instance and skill IDs are retained
+outside the OCI response for all follow-up
+calls.
 end note
 @enduml

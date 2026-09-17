@@ -114,8 +114,20 @@ func newVbsInstanceDefaultRuntimeHooks(sdkClient vbsinstsdk.VbsInstanceClient) V
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*vbsinstv1beta1.VbsInstance]{},
 		StatusHooks:     generatedruntime.StatusHooks[*vbsinstv1beta1.VbsInstance]{},
 		ParityHooks:     generatedruntime.ParityHooks[*vbsinstv1beta1.VbsInstance]{},
-		Async:           generatedruntime.AsyncHooks[*vbsinstv1beta1.VbsInstance]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*vbsinstv1beta1.VbsInstance]{},
+		Async: generatedruntime.AsyncHooks[*vbsinstv1beta1.VbsInstance]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := vbsinstsdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*vbsinstv1beta1.VbsInstance]{},
 		Create: runtimeOperationHooks[vbsinstsdk.CreateVbsInstanceRequest, vbsinstsdk.CreateVbsInstanceResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateVbsInstanceDetails", RequestName: "CreateVbsInstanceDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request vbsinstsdk.CreateVbsInstanceRequest) (vbsinstsdk.CreateVbsInstanceResponse, error) {
@@ -163,10 +175,19 @@ func buildVbsInstanceGeneratedRuntimeConfig(
 	hooks VbsInstanceRuntimeHooks,
 ) generatedruntime.Config[*vbsinstv1beta1.VbsInstance] {
 	return generatedruntime.Config[*vbsinstv1beta1.VbsInstance]{
-		Kind:            "VbsInstance",
-		SDKName:         "VbsInstance",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "VbsInstance",
+		SDKName:   "VbsInstance",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

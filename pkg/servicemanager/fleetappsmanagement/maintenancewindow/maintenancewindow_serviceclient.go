@@ -32,8 +32,28 @@ type defaultMaintenanceWindowServiceClient struct {
 
 var _ MaintenanceWindowServiceClient = defaultMaintenanceWindowServiceClient{}
 
+type MaintenanceWindowSDKClients struct {
+	fleetAppsManagementMaintenanceWindowClient fleetappsmanagementsdk.FleetAppsManagementMaintenanceWindowClient
+	fleetAppsManagementWorkRequestClient       fleetappsmanagementsdk.FleetAppsManagementWorkRequestClient
+}
+
+func newMaintenanceWindowSDKClients(manager *MaintenanceWindowServiceManager) (MaintenanceWindowSDKClients, error) {
+	var clients MaintenanceWindowSDKClients
+	fleetAppsManagementMaintenanceWindowClientClient, err := fleetappsmanagementsdk.NewFleetAppsManagementMaintenanceWindowClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize MaintenanceWindow OCI client FleetAppsManagementMaintenanceWindowClient: %w", err)
+	}
+	clients.fleetAppsManagementMaintenanceWindowClient = fleetAppsManagementMaintenanceWindowClientClient
+	fleetAppsManagementWorkRequestClientClient, err := fleetappsmanagementsdk.NewFleetAppsManagementWorkRequestClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize MaintenanceWindow OCI client FleetAppsManagementWorkRequestClient: %w", err)
+	}
+	clients.fleetAppsManagementWorkRequestClient = fleetAppsManagementWorkRequestClientClient
+	return clients, nil
+}
+
 var newMaintenanceWindowServiceClient = func(manager *MaintenanceWindowServiceManager) MaintenanceWindowServiceClient {
-	sdkClient, err := fleetappsmanagementsdk.NewFleetAppsManagementMaintenanceWindowClientWithConfigurationProvider(manager.Provider)
+	sdkClient, err := newMaintenanceWindowSDKClients(manager)
 	hooks := newMaintenanceWindowRuntimeHooks(manager, sdkClient)
 	config := buildMaintenanceWindowGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {

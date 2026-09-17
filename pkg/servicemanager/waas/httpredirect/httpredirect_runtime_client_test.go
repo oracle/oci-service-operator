@@ -886,6 +886,10 @@ func TestHttpRedirectDeleteRejectsAuthShapedPreDeleteReadBeforeOCIRequest(t *tes
 			requireStringPtr(t, "GetHttpRedirectRequest.HttpRedirectId", req.HttpRedirectId, testHttpRedirectID)
 			return waassdk.GetHttpRedirectResponse{}, errortest.NewServiceError(404, errorutil.NotAuthorizedOrNotFound, "not authorized or not found")
 		},
+		listFn: func(_ context.Context, req waassdk.ListHttpRedirectsRequest) (waassdk.ListHttpRedirectsResponse, error) {
+			requireStringPtr(t, "ListHttpRedirectsRequest.CompartmentId", req.CompartmentId, testHttpRedirectCompartment)
+			return waassdk.ListHttpRedirectsResponse{Items: []waassdk.HttpRedirectSummary{{Id: common.String(testHttpRedirectID)}}}, nil
+		},
 		deleteFn: func(context.Context, waassdk.DeleteHttpRedirectRequest) (waassdk.DeleteHttpRedirectResponse, error) {
 			deleteCalled = true
 			return waassdk.DeleteHttpRedirectResponse{}, nil

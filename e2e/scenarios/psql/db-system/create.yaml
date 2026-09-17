@@ -1,0 +1,34 @@
+#
+# Copyright (c) 2026, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+#
+
+apiVersion: psql.oracle.com/v1beta1
+kind: DbSystem
+metadata:
+  name: osok-psql-${OSOK_E2E_SUFFIX}
+spec:
+  displayName: osok-psql-${OSOK_E2E_SUFFIX}
+  description: OSOK live lifecycle create
+  compartmentId: ${OCI_COMPARTMENT_ID}
+  dbVersion: "${OCI_PSQL_DB_VERSION}"
+  shape: ${OCI_PSQL_SHAPE}
+  instanceOcpuCount: 2
+  instanceMemorySizeInGBs: 32
+  instanceCount: 1
+  storageDetails:
+    systemType: OCI_OPTIMIZED_STORAGE
+    isRegionallyDurable: true
+  credentials:
+    username: ""
+    passwordDetails: {}
+  networkDetails:
+    subnetId: ${OCI_SUBNET_ID}
+  adminUsername:
+    secret:
+      secretName: osok-psql-admin-${OSOK_E2E_SUFFIX}
+  adminPassword:
+    secret:
+      secretName: osok-psql-admin-${OSOK_E2E_SUFFIX}
+  freeformTags:
+    osok-e2e-phase: create

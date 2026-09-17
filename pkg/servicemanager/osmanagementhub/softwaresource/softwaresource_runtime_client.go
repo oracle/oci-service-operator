@@ -8,17 +8,22 @@ package softwaresource
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"reflect"
 	"strings"
 
+	"github.com/oracle/oci-go-sdk/v65/common"
 	osmanagementhubsdk "github.com/oracle/oci-go-sdk/v65/osmanagementhub"
 	osmanagementhubv1beta1 "github.com/oracle/oci-service-operator/api/osmanagementhub/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/errorutil"
+	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	"github.com/oracle/oci-service-operator/pkg/util"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
@@ -40,6 +45,7 @@ type softwareSourceResourceContextKey struct{}
 
 type softwareSourceResourceContextClient struct {
 	delegate SoftwareSourceServiceClient
+	list     func(context.Context, osmanagementhubsdk.ListSoftwareSourcesRequest) (osmanagementhubsdk.ListSoftwareSourcesResponse, error)
 }
 
 type softwareSourceAmbiguousNotFoundError struct {
@@ -91,7 +97,7 @@ func applySoftwareSourceRuntimeHookSettings(hooks *SoftwareSourceRuntimeHooks) {
 	}
 	hooks.DeleteHooks.HandleError = handleSoftwareSourceDeleteError
 	hooks.WrapGeneratedClient = append(hooks.WrapGeneratedClient, func(delegate SoftwareSourceServiceClient) SoftwareSourceServiceClient {
-		return softwareSourceResourceContextClient{delegate: delegate}
+		return softwareSourceResourceContextClient{delegate: delegate, list: hooks.List.Call}
 	})
 }
 
@@ -328,7 +334,67 @@ func (c softwareSourceResourceContextClient) Delete(
 	if c.delegate == nil {
 		return false, fmt.Errorf("SoftwareSource runtime client is not configured")
 	}
-	return c.delegate.Delete(ctx, resource)
+	deleted, err := c.delegate.Delete(ctx, resource)
+	if err == nil {
+		return deleted, nil
+	}
+	var ambiguous softwareSourceAmbiguousNotFoundError
+	if !errors.As(err, &ambiguous) {
+		return false, err
+	}
+	found, listErr := c.existsByScopedList(ctx, resource)
+	if listErr != nil {
+		return false, listErr
+	}
+	if found {
+		return false, err
+	}
+	c.markDeleted(resource, "OCI SoftwareSource no longer exists")
+	return true, nil
+}
+
+func (c softwareSourceResourceContextClient) existsByScopedList(
+	ctx context.Context,
+	resource *osmanagementhubv1beta1.SoftwareSource,
+) (bool, error) {
+	if c.list == nil || resource == nil {
+		return false, fmt.Errorf("SoftwareSource scoped list confirmation is not configured")
+	}
+	currentID := strings.TrimSpace(string(resource.Status.OsokStatus.Ocid))
+	if currentID == "" {
+		currentID = strings.TrimSpace(resource.Status.Id)
+	}
+	if currentID == "" {
+		return false, fmt.Errorf("SoftwareSource scoped list confirmation requires a tracked OCI identity")
+	}
+	response, err := c.list(ctx, osmanagementhubsdk.ListSoftwareSourcesRequest{
+		CompartmentId: common.String(strings.TrimSpace(resource.Spec.CompartmentId)),
+		DisplayName:   common.String(strings.TrimSpace(resource.Spec.DisplayName)),
+	})
+	if err != nil {
+		return false, fmt.Errorf("confirm SoftwareSource deletion by scoped list: %w", err)
+	}
+	for _, candidate := range response.Items {
+		if candidate != nil && candidate.GetId() != nil && strings.TrimSpace(*candidate.GetId()) == currentID {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
+func (c softwareSourceResourceContextClient) markDeleted(resource *osmanagementhubv1beta1.SoftwareSource, message string) {
+	if resource == nil {
+		return
+	}
+	status := &resource.Status.OsokStatus
+	now := metav1.Now()
+	status.DeletedAt = &now
+	status.UpdatedAt = &now
+	status.Message = message
+	status.Reason = string(shared.Terminating)
+	servicemanager.ClearAsyncOperation(status)
+	log := loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("softwaresource-runtime")}
+	*status = util.UpdateOSOKStatusCondition(*status, shared.Terminating, corev1.ConditionTrue, "", message, log)
 }
 
 func softwareSourceResourceFromContext(ctx context.Context) (*osmanagementhubv1beta1.SoftwareSource, error) {
@@ -1229,13 +1295,12 @@ func newSoftwareSourceServiceClientWithOCIClient(client softwareSourceOCIClient)
 	hooks := newSoftwareSourceRuntimeHooksWithOCIClient(client)
 	applySoftwareSourceRuntimeHookSettings(&hooks)
 	manager := &SoftwareSourceServiceManager{}
-	return softwareSourceResourceContextClient{
-		delegate: defaultSoftwareSourceServiceClient{
-			ServiceClient: generatedruntime.NewServiceClient[*osmanagementhubv1beta1.SoftwareSource](
-				buildSoftwareSourceGeneratedRuntimeConfig(manager, hooks),
-			),
-		},
+	delegate := defaultSoftwareSourceServiceClient{
+		ServiceClient: generatedruntime.NewServiceClient[*osmanagementhubv1beta1.SoftwareSource](
+			buildSoftwareSourceGeneratedRuntimeConfig(manager, hooks),
+		),
 	}
+	return wrapSoftwareSourceGeneratedClient(hooks, delegate)
 }
 
 func newSoftwareSourceRuntimeHooksWithOCIClient(client softwareSourceOCIClient) SoftwareSourceRuntimeHooks {

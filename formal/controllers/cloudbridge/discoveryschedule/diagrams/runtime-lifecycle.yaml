@@ -1,0 +1,59 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: cloudbridge
+slug: discoveryschedule
+kind: DiscoverySchedule
+archetype: generated-service-manager
+states:
+- provisioning
+- active
+- updating
+- terminating
+repoAuthored:
+  operations:
+    create:
+    - CreateDiscoverySchedule
+    update:
+    - UpdateDiscoverySchedule
+    delete:
+    - DeleteDiscoverySchedule
+  providerLifecycle:
+    createPending: []
+    updatePending: []
+    deletePending:
+    - DELETING
+  listLookup:
+    filters:
+    - compartmentId
+    - discoveryScheduleId
+    - displayName
+    - state
+    matchRule: exact declared filters match within the resource scope; duplicate matches
+      fail
+  mutation:
+    mutable:
+    - compartmentId
+    - definedTags
+    - displayName
+    - executionRecurrences
+    - freeformTags
+    forceNew: []
+  hooks:
+    create:
+    - helper: tfresource.CreateResource
+    update:
+    - helper: tfresource.UpdateResource
+    - helper: tfresource.WaitForUpdatedState
+    delete:
+    - helper: tfresource.DeleteResource
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+- The generated service manager uses the reviewed CRUD request, response, lifecycle,
+  and status projection contract.
+- CRUD responses use lifecycle/read-after-write convergence without a work-request
+  tracker.
+- Secret side effects are none and finalizer ownership is retained until confirmed
+  deletion.

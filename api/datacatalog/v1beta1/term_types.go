@@ -36,6 +36,12 @@ type TermSpec struct {
 	// The list of customized properties along with the values for this object
 	// +kubebuilder:validation:Optional
 	CustomPropertyMembers []TermCustomPropertyMember `json:"customPropertyMembers,omitempty"`
+	// The OCID of the catalog containing the term.
+	// +kubebuilder:validation:Required
+	CatalogId string `json:"catalogId"`
+	// The key of the glossary containing the term.
+	// +kubebuilder:validation:Required
+	GlossaryKey string `json:"glossaryKey"`
 }
 
 // TermCustomPropertyMember defines nested fields for Term.CustomPropertyMember.

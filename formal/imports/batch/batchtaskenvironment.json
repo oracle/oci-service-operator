@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "batch",
+  "slug": "batchtaskenvironment",
+  "kind": "BatchTaskEnvironment",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_batch_batch_task_environment",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateBatchTaskEnvironment",
+        "requestType": "batch.CreateBatchTaskEnvironmentRequest",
+        "responseType": "batch.CreateBatchTaskEnvironmentResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetBatchTaskEnvironment",
+        "requestType": "batch.GetBatchTaskEnvironmentRequest",
+        "responseType": "batch.GetBatchTaskEnvironmentResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListBatchTaskEnvironment",
+        "requestType": "batch.ListBatchTaskEnvironmentRequest",
+        "responseType": "batch.ListBatchTaskEnvironmentResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateBatchTaskEnvironment",
+        "requestType": "batch.UpdateBatchTaskEnvironmentRequest",
+        "responseType": "batch.UpdateBatchTaskEnvironmentResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteBatchTaskEnvironment",
+        "requestType": "batch.DeleteBatchTaskEnvironmentRequest",
+        "responseType": "batch.DeleteBatchTaskEnvironmentResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_batch_batchtaskenvironment",
+    "collectionField": "batchtaskenvironment",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/batch/batchtaskenvironment/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/batch/batchtaskenvironment/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "The pinned Terraform resource uses nonstandard helpers that formal-import cannot resolve. The formal row remains scaffolded while the recorded SDK lifecycle supplies integration evidence."
+  ]
+}

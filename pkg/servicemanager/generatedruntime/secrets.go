@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/oracle/oci-service-operator/pkg/credhelper"
+	shared "github.com/oracle/oci-service-operator/pkg/shared"
 )
 
 // ResolveSpecValue rewrites secret-backed spec inputs and omits zero-value nested
@@ -106,6 +107,9 @@ func rewriteSecretSources(value reflect.Value, decoded any, options requestBuild
 
 func rewriteSharedSecretSource(value reflect.Value, options requestBuildOptions) (any, bool, bool, error) {
 	switch value.Type() {
+	case reflect.TypeOf(shared.JSONValue{}):
+		decoded, err := decodedJSONValue(value.Interface())
+		return decoded, decoded != nil, true, err
 	case passwordSourceType:
 		rewritten, include, err := resolveSecretSourceValue(options.Context, options.CredentialClient, options.Namespace, value.FieldByName("Secret"), "SecretName", "password")
 		return rewritten, include, true, err

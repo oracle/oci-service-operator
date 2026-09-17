@@ -1,0 +1,29 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: events
+slug: rule
+kind: Rule
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending: ["CREATING"]
+    updatePending: []
+    deletePending: ["DELETING"]
+  listLookup:
+    filters: ["compartmentId","displayName","state"]
+    matchRule: exact resource identity match; duplicate matches fail
+  mutation:
+    mutable: ["actions.actions.actionType","actions.actions.description","actions.actions.functionId","actions.actions.isEnabled","actions.actions.streamId","actions.actions.topicId","compartmentId","condition","definedTags","description","displayName","freeformTags","isEnabled"]
+    forceNew: []
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - "The Rule runtime retains package-local lifecycle, identity, mutation, and delete handling."
+  - "The credential-free evidence mock verifies the recorded create/update payloads, SDK response decoding, status projection, and delete confirmation."

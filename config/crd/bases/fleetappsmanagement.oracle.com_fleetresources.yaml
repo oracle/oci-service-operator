@@ -56,6 +56,10 @@ spec:
                 description: OCID of the compartment to which the resource belongs
                   to.
                 type: string
+              fleetId:
+                description: The OCID of the Fleet Application Management fleet containing
+                  this resource.
+                type: string
               resourceId:
                 description: The OCID of the resource.
                 type: string
@@ -70,6 +74,7 @@ spec:
                 type: string
             required:
             - compartmentId
+            - fleetId
             - resourceId
             - tenancyId
             type: object

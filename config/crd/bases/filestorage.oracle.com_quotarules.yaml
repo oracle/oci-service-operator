@@ -62,6 +62,9 @@ spec:
                   Avoid entering confidential information.
                   Example: `UserXYZ's quota`
                 type: string
+              fileSystemId:
+                description: The OCID of the file system containing this quota rule.
+                type: string
               isHardQuota:
                 description: |-
                   Whether the quota rule will be enforced.
@@ -81,6 +84,7 @@ spec:
                 description: The value of the quota rule in gigabytes.
                 type: integer
             required:
+            - fileSystemId
             - isHardQuota
             - principalType
             - quotaLimitInGigabytes

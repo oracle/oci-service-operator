@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "maskingcolumn",
+  "kind": "MaskingColumn",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_masking_policies_masking_column",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateMaskingColumn",
+        "requestType": "datasafe.CreateMaskingColumnRequest",
+        "responseType": "datasafe.CreateMaskingColumnResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetMaskingColumn",
+        "requestType": "datasafe.GetMaskingColumnRequest",
+        "responseType": "datasafe.GetMaskingColumnResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListMaskingColumns",
+        "requestType": "datasafe.ListMaskingColumnsRequest",
+        "responseType": "datasafe.ListMaskingColumnsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateMaskingColumn",
+        "requestType": "datasafe.UpdateMaskingColumnRequest",
+        "responseType": "datasafe.UpdateMaskingColumnResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteMaskingColumn",
+        "requestType": "datasafe.DeleteMaskingColumnRequest",
+        "responseType": "datasafe.DeleteMaskingColumnResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "objectType",
+      "maskingColumnGroup",
+      "sensitiveTypeId",
+      "isMaskingEnabled",
+      "maskingFormats"
+    ],
+    "forceNew": [
+      "maskingPolicyId",
+      "schemaName",
+      "objectName",
+      "columnName"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource",
+        "entityType": "MaskingColumn",
+        "action": "CreateMaskingColumn"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource",
+        "entityType": "MaskingColumn",
+        "action": "UpdateMaskingColumn"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource",
+        "entityType": "MaskingColumn",
+        "action": "DeleteMaskingColumn"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "unavailable",
+    "collectionField": "Items",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "maskingPolicyId",
+      "schemaName",
+      "objectName",
+      "columnName"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/maskingcolumn/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/maskingcolumn/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Terraform provider formal-import cannot resolve oci_data_safe_masking_policies_masking_column; the vendored SDK, production runtime, and package-owned typed OCI fixtures define this contract."
+  ]
+}

@@ -56,9 +56,9 @@ type DbSystemSpec struct {
 	// +kubebuilder:validation:Optional
 	InstancesDetails []DbSystemInstancesDetail `json:"instancesDetails,omitempty"`
 	// +kubebuilder:validation:Optional
-	ManagementPolicy DbSystemManagementPolicy `json:"managementPolicy,omitempty"`
+	ManagementPolicy DbSystemManagementPolicy `json:"managementPolicy,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	Source DbSystemSource `json:"source,omitempty"`
+	Source DbSystemSource `json:"source,omitempty,omitzero"`
 	// Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
 	// Example: `{"bar-key": "value"}`
 	// +kubebuilder:validation:Optional
@@ -68,7 +68,7 @@ type DbSystemSpec struct {
 	// +kubebuilder:validation:Optional
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 	// +kubebuilder:validation:Optional
-	DbConfigurationParams DbSystemDbConfigurationParams `json:"dbConfigurationParams,omitempty"`
+	DbConfigurationParams DbSystemDbConfigurationParams `json:"dbConfigurationParams,omitempty,omitzero"`
 	// The administrative username sourced from a Kubernetes Secret in the same namespace.
 	// The referenced Secret must contain a `username` key. If omitted, `spec.credentials.username` remains available for direct credential input.
 	// +kubebuilder:validation:Optional
@@ -179,7 +179,7 @@ type DbSystemManagementPolicyBackupPolicy struct {
 	// +kubebuilder:validation:Optional
 	RetentionDays int `json:"retentionDays,omitempty"`
 	// +kubebuilder:validation:Optional
-	CopyPolicy DbSystemManagementPolicyBackupPolicyCopyPolicy `json:"copyPolicy,omitempty"`
+	CopyPolicy DbSystemManagementPolicyBackupPolicyCopyPolicy `json:"copyPolicy,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
 	Kind string `json:"kind,omitempty"`
 	// Hour of the day when the backup starts.
@@ -203,7 +203,7 @@ type DbSystemManagementPolicy struct {
 	// +kubebuilder:validation:Optional
 	MaintenanceWindowStart string `json:"maintenanceWindowStart,omitempty"`
 	// +kubebuilder:validation:Optional
-	BackupPolicy DbSystemManagementPolicyBackupPolicy `json:"backupPolicy,omitempty"`
+	BackupPolicy DbSystemManagementPolicyBackupPolicy `json:"backupPolicy,omitempty,omitzero"`
 }
 
 // DbSystemSource defines nested fields for DbSystem.Source.

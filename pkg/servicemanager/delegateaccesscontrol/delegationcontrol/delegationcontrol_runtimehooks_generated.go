@@ -106,7 +106,7 @@ func newDelegationControlRuntimeSemantics() *generatedruntime.Semantics {
 		Unsupported:         []generatedruntime.UnsupportedSemantic{},
 	}
 }
-func newDelegationControlDefaultRuntimeHooks(sdkClient delegateaccesscontrolsdk.DelegateAccessControlClient) DelegationControlRuntimeHooks {
+func newDelegationControlDefaultRuntimeHooks(sdkClient DelegationControlSDKClients) DelegationControlRuntimeHooks {
 	return DelegationControlRuntimeHooks{
 		Semantics:       newDelegationControlRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*delegateaccesscontrolv1beta1.DelegationControl]{},
@@ -114,43 +114,55 @@ func newDelegationControlDefaultRuntimeHooks(sdkClient delegateaccesscontrolsdk.
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*delegateaccesscontrolv1beta1.DelegationControl]{},
 		StatusHooks:     generatedruntime.StatusHooks[*delegateaccesscontrolv1beta1.DelegationControl]{},
 		ParityHooks:     generatedruntime.ParityHooks[*delegateaccesscontrolv1beta1.DelegationControl]{},
-		Async:           generatedruntime.AsyncHooks[*delegateaccesscontrolv1beta1.DelegationControl]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*delegateaccesscontrolv1beta1.DelegationControl]{},
+		Async: generatedruntime.AsyncHooks[*delegateaccesscontrolv1beta1.DelegationControl]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := delegateaccesscontrolsdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.workRequestClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*delegateaccesscontrolv1beta1.DelegationControl]{},
 		Create: runtimeOperationHooks[delegateaccesscontrolsdk.CreateDelegationControlRequest, delegateaccesscontrolsdk.CreateDelegationControlResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateDelegationControlDetails", RequestName: "CreateDelegationControlDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request delegateaccesscontrolsdk.CreateDelegationControlRequest) (delegateaccesscontrolsdk.CreateDelegationControlResponse, error) {
-				return sdkClient.CreateDelegationControl(ctx, request)
+				return sdkClient.delegateAccessControlClient.CreateDelegationControl(ctx, request)
 			},
 		},
 		Get: runtimeOperationHooks[delegateaccesscontrolsdk.GetDelegationControlRequest, delegateaccesscontrolsdk.GetDelegationControlResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "DelegationControlId", RequestName: "delegationControlId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request delegateaccesscontrolsdk.GetDelegationControlRequest) (delegateaccesscontrolsdk.GetDelegationControlResponse, error) {
-				return sdkClient.GetDelegationControl(ctx, request)
+				return sdkClient.delegateAccessControlClient.GetDelegationControl(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[delegateaccesscontrolsdk.ListDelegationControlsRequest, delegateaccesscontrolsdk.ListDelegationControlsResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "ResourceType", RequestName: "resourceType", Contribution: "query", PreferResourceID: false}, {FieldName: "ResourceId", RequestName: "resourceId", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request delegateaccesscontrolsdk.ListDelegationControlsRequest) (delegateaccesscontrolsdk.ListDelegationControlsResponse, error) {
-				return sdkClient.ListDelegationControls(ctx, request)
+				return sdkClient.delegateAccessControlClient.ListDelegationControls(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[delegateaccesscontrolsdk.UpdateDelegationControlRequest, delegateaccesscontrolsdk.UpdateDelegationControlResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "DelegationControlId", RequestName: "delegationControlId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateDelegationControlDetails", RequestName: "UpdateDelegationControlDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request delegateaccesscontrolsdk.UpdateDelegationControlRequest) (delegateaccesscontrolsdk.UpdateDelegationControlResponse, error) {
-				return sdkClient.UpdateDelegationControl(ctx, request)
+				return sdkClient.delegateAccessControlClient.UpdateDelegationControl(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[delegateaccesscontrolsdk.DeleteDelegationControlRequest, delegateaccesscontrolsdk.DeleteDelegationControlResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "DelegationControlId", RequestName: "delegationControlId", Contribution: "path", PreferResourceID: true}, {FieldName: "Description", RequestName: "description", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request delegateaccesscontrolsdk.DeleteDelegationControlRequest) (delegateaccesscontrolsdk.DeleteDelegationControlResponse, error) {
-				return sdkClient.DeleteDelegationControl(ctx, request)
+				return sdkClient.delegateAccessControlClient.DeleteDelegationControl(ctx, request)
 			},
 		},
 		WrapGeneratedClient: []func(DelegationControlServiceClient) DelegationControlServiceClient{},
 	}
 }
 
-func newDelegationControlRuntimeHooks(manager *DelegationControlServiceManager, sdkClient delegateaccesscontrolsdk.DelegateAccessControlClient) DelegationControlRuntimeHooks {
+func newDelegationControlRuntimeHooks(manager *DelegationControlServiceManager, sdkClient DelegationControlSDKClients) DelegationControlRuntimeHooks {
 	hooks := newDelegationControlDefaultRuntimeHooks(sdkClient)
 	for _, mutator := range delegationcontrolRuntimeHooksMutators {
 		mutator(manager, &hooks)
@@ -163,10 +175,19 @@ func buildDelegationControlGeneratedRuntimeConfig(
 	hooks DelegationControlRuntimeHooks,
 ) generatedruntime.Config[*delegateaccesscontrolv1beta1.DelegationControl] {
 	return generatedruntime.Config[*delegateaccesscontrolv1beta1.DelegationControl]{
-		Kind:            "DelegationControl",
-		SDKName:         "DelegationControl",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "DelegationControl",
+		SDKName:   "DelegationControl",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

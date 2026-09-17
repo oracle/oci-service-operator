@@ -50,15 +50,84 @@ func registerSensitiveTypeGroupRuntimeHooksMutator(mutator SensitiveTypeGroupRun
 	}
 	sensitivetypegroupRuntimeHooksMutators = append(sensitivetypegroupRuntimeHooksMutators, mutator)
 }
+func newSensitiveTypeGroupRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "datasafe",
+		FormalSlug:    "sensitivetypegroup",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{"UPDATING"},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "displayName", "id"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"definedTags", "description", "displayName", "freeformTags"},
+			ForceNew:      []string{"compartmentId"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "generatedruntime.Create", EntityType: "SensitiveTypeGroup", Action: "CreateSensitiveTypeGroup"}},
+			Update: []generatedruntime.Hook{{Helper: "generatedruntime.Update", EntityType: "SensitiveTypeGroup", Action: "UpdateSensitiveTypeGroup"}},
+			Delete: []generatedruntime.Hook{{Helper: "generatedruntime.Delete", EntityType: "SensitiveTypeGroup", Action: "DeleteSensitiveTypeGroup"}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> GetSensitiveTypeGroup",
+			Hooks:    []generatedruntime.Hook{{Helper: "generatedruntime.Create", EntityType: "SensitiveTypeGroup", Action: "CreateSensitiveTypeGroup"}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> GetSensitiveTypeGroup",
+			Hooks:    []generatedruntime.Hook{{Helper: "generatedruntime.Update", EntityType: "SensitiveTypeGroup", Action: "UpdateSensitiveTypeGroup"}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "generatedruntime.Delete", EntityType: "SensitiveTypeGroup", Action: "DeleteSensitiveTypeGroup"}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newSensitiveTypeGroupDefaultRuntimeHooks(sdkClient datasafesdk.DataSafeClient) SensitiveTypeGroupRuntimeHooks {
 	return SensitiveTypeGroupRuntimeHooks{
+		Semantics:       newSensitiveTypeGroupRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*datasafev1beta1.SensitiveTypeGroup]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*datasafev1beta1.SensitiveTypeGroup]{},
 		StatusHooks:     generatedruntime.StatusHooks[*datasafev1beta1.SensitiveTypeGroup]{},
 		ParityHooks:     generatedruntime.ParityHooks[*datasafev1beta1.SensitiveTypeGroup]{},
-		Async:           generatedruntime.AsyncHooks[*datasafev1beta1.SensitiveTypeGroup]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*datasafev1beta1.SensitiveTypeGroup]{},
+		Async: generatedruntime.AsyncHooks[*datasafev1beta1.SensitiveTypeGroup]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := datasafesdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*datasafev1beta1.SensitiveTypeGroup]{},
 		Create: runtimeOperationHooks[datasafesdk.CreateSensitiveTypeGroupRequest, datasafesdk.CreateSensitiveTypeGroupResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateSensitiveTypeGroupDetails", RequestName: "CreateSensitiveTypeGroupDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request datasafesdk.CreateSensitiveTypeGroupRequest) (datasafesdk.CreateSensitiveTypeGroupResponse, error) {
@@ -106,10 +175,19 @@ func buildSensitiveTypeGroupGeneratedRuntimeConfig(
 	hooks SensitiveTypeGroupRuntimeHooks,
 ) generatedruntime.Config[*datasafev1beta1.SensitiveTypeGroup] {
 	return generatedruntime.Config[*datasafev1beta1.SensitiveTypeGroup]{
-		Kind:            "SensitiveTypeGroup",
-		SDKName:         "SensitiveTypeGroup",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "SensitiveTypeGroup",
+		SDKName:   "SensitiveTypeGroup",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

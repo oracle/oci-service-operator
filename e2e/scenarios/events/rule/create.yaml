@@ -1,0 +1,23 @@
+#
+# Copyright (c) 2026, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+#
+
+apiVersion: events.oracle.com/v1beta1
+kind: Rule
+metadata:
+  name: osok-event-rule-${OSOK_E2E_SUFFIX}
+spec:
+  compartmentId: ${OCI_COMPARTMENT_ID}
+  displayName: osok-event-rule-${OSOK_E2E_SUFFIX}
+  description: OSOK lifecycle test event rule
+  isEnabled: false
+  condition: '{"eventType":"com.oraclecloud.objectstorage.createbucket"}'
+  actions:
+    actions:
+      - actionType: ONS
+        isEnabled: false
+        description: Disabled OSOK lifecycle notification
+        topicId: ${OCI_NOTIFICATION_TOPIC_ID}
+  freeformTags:
+    osok-e2e-phase: create

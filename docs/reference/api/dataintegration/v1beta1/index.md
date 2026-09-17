@@ -82,6 +82,7 @@ ApplicationSpec defines the desired state of Application.
 | [`parentRef`](#kind-application-spec-parentref) | ApplicationParentRef defines nested fields for Application.ParentRef. | `object` | No | - | - |
 | [`registryMetadata`](#kind-application-spec-registrymetadata) | ApplicationRegistryMetadata defines nested fields for Application.RegistryMetadata. | `object` | No | - | - |
 | [`sourceApplicationInfo`](#kind-application-spec-sourceapplicationinfo) | ApplicationSourceApplicationInfo defines nested fields for Application.SourceApplicationInfo. | `object` | No | - | - |
+| `workspaceId` | The OCID of the Data Integration workspace containing this resource. | `string` | Yes | - | - |
 
 <a id="kind-application-spec-metadata"></a>
 #### Spec.metadata
@@ -416,8 +417,10 @@ ApplicationDetailedDescriptionSpec defines the desired state of ApplicationDetai
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| `applicationKey` | The key of the application containing this resource. | `string` | Yes | - | - |
 | `detailedDescription` | Base64 encoded rich text description of the object. | `string` | No | - | - |
 | `logo` | Base64 encoded image to represent logo of the object. | `string` | No | - | - |
+| `workspaceId` | The OCID of the Data Integration workspace containing this resource. | `string` | Yes | - | - |
 
 <a id="kind-applicationdetaileddescription-status"></a>
 ### Status
@@ -426,7 +429,92 @@ ApplicationDetailedDescriptionStatus defines the observed state of ApplicationDe
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| `detailedDescription` | Base64 encoded rich text description of the object. | `string` | No | - | - |
+| `identifier` | Value can only contain upper case letters, underscore, and numbers. It should begin with upper case letter or underscore. The value can be modified. | `string` | No | - | - |
+| `key` | Generated key that can be used in API calls to identify task. On scenarios where reference to the task is needed, a value can be passed in create. | `string` | No | - | - |
+| `logo` | Base64 encoded image to represent logo of the object. | `string` | No | - | - |
+| [`metadata`](#kind-applicationdetaileddescription-status-metadata) | ApplicationDetailedDescriptionMetadata defines nested fields for ApplicationDetailedDescription.Metadata. | `object` | No | - | - |
+| `modelType` | The type of the published object. | `string` | No | - | - |
+| `modelVersion` | The object's model version. | `string` | No | - | - |
+| `name` | Free form text without any restriction on permitted characters. Name can have letters, numbers, and special characters. The value is editable and is restricted to 1000 characters. | `string` | No | - | - |
+| `objectStatus` | The status of an object that can be set to value 1 for shallow references across objects, other values reserved. | `integer` | No | - | - |
+| `objectVersion` | The version of the object that is used to track changes in the object instance. | `integer` | No | - | - |
+| [`parentRef`](#kind-applicationdetaileddescription-status-parentref) | ApplicationDetailedDescriptionParentRef defines nested fields for ApplicationDetailedDescription.ParentRef. | `object` | No | - | - |
 | [`status`](#kind-applicationdetaileddescription-status-status) | - | `object` | Yes | - | - |
+
+<a id="kind-applicationdetaileddescription-status-metadata"></a>
+#### Status.metadata
+
+[Back to ApplicationDetailedDescription status](#kind-applicationdetaileddescription-status)
+
+ApplicationDetailedDescriptionMetadata defines nested fields for ApplicationDetailedDescription.Metadata.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`aggregator`](#kind-applicationdetaileddescription-status-metadata-aggregator) | ApplicationDetailedDescriptionMetadataAggregator defines nested fields for ApplicationDetailedDescription.Metadata.Aggregator. | `object` | No | - | - |
+| `aggregatorKey` | The owning object key for this object. | `string` | No | - | - |
+| [`countStatistics`](#kind-applicationdetaileddescription-status-metadata-countstatistics) | ApplicationDetailedDescriptionMetadataCountStatistics defines nested fields for ApplicationDetailedDescription.Metadata.CountStatistics. | `object` | No | - | - |
+| `createdBy` | The user that created the object. | `string` | No | - | - |
+| `createdByName` | The user that created the object. | `string` | No | - | - |
+| `identifierPath` | The full path to identify this object. | `string` | No | - | - |
+| `infoFields` | Information property fields. | `map[string, string]` | No | - | - |
+| `isFavorite` | Specifies whether this object is a favorite or not. | `boolean` | No | - | - |
+| `labels` | Labels are keywords or tags that you can add to data assets, dataflows and so on. You can define your own labels and use them to categorize content. | `list[string]` | No | - | - |
+| `registryVersion` | The registry version of the object. | `integer` | No | - | - |
+| `timeCreated` | The date and time that the object was created. | `string` | No | - | - |
+| `timeUpdated` | The date and time that the object was updated. | `string` | No | - | - |
+| `updatedBy` | The user that updated the object. | `string` | No | - | - |
+| `updatedByName` | The user that updated the object. | `string` | No | - | - |
+
+<a id="kind-applicationdetaileddescription-status-metadata-aggregator"></a>
+##### Status.metadata.aggregator
+
+[Back to ApplicationDetailedDescription status](#kind-applicationdetaileddescription-status)
+
+ApplicationDetailedDescriptionMetadataAggregator defines nested fields for ApplicationDetailedDescription.Metadata.Aggregator.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `description` | The description of the aggregator. | `string` | No | - | - |
+| `identifier` | The identifier of the aggregator. | `string` | No | - | - |
+| `key` | The key of the aggregator object. | `string` | No | - | - |
+| `name` | The name of the aggregator. | `string` | No | - | - |
+| `type` | The type of the aggregator. | `string` | No | - | - |
+
+<a id="kind-applicationdetaileddescription-status-metadata-countstatistics"></a>
+##### Status.metadata.countStatistics
+
+[Back to ApplicationDetailedDescription status](#kind-applicationdetaileddescription-status)
+
+ApplicationDetailedDescriptionMetadataCountStatistics defines nested fields for ApplicationDetailedDescription.Metadata.CountStatistics.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`objectTypeCountList`](#kind-applicationdetaileddescription-status-metadata-countstatistics-objecttypecountlist) | The array of statistics. | `list[object]` | No | - | - |
+
+<a id="kind-applicationdetaileddescription-status-metadata-countstatistics-objecttypecountlist"></a>
+###### Status.metadata.countStatistics.objectTypeCountList[]
+
+[Back to ApplicationDetailedDescription status](#kind-applicationdetaileddescription-status)
+
+ApplicationDetailedDescriptionMetadataCountStatisticsObjectTypeCountList defines nested fields for ApplicationDetailedDescription.Metadata.CountStatistics.ObjectTypeCountList.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `objectCount` | The value for the count statistic object. | `integer (int64)` | No | - | - |
+| `objectType` | The type of object for the count statistic object. | `string` | No | - | - |
+
+<a id="kind-applicationdetaileddescription-status-parentref"></a>
+#### Status.parentRef
+
+[Back to ApplicationDetailedDescription status](#kind-applicationdetaileddescription-status)
+
+ApplicationDetailedDescriptionParentRef defines nested fields for ApplicationDetailedDescription.ParentRef.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `parent` | Key of the parent object. | `string` | No | - | - |
+| `rootDocId` | Key of the root document object. | `string` | No | - | - |
 
 <a id="kind-applicationdetaileddescription-status-status"></a>
 #### Status.status
@@ -512,6 +600,7 @@ ConnectionSpec defines the desired state of Connection.
 | [`clientSecret`](#kind-connection-spec-clientsecret) | ConnectionClientSecret defines nested fields for Connection.ClientSecret. | `object` | No | - | - |
 | [`connectionProperties`](#kind-connection-spec-connectionproperties) | The properties for the connection. | `list[object]` | No | - | - |
 | `credentialFileContent` | The credential file content from an Oracle Object Storage wallet. | `string` | No | - | - |
+| `dataAssetKey` | The data asset key required by the connection collection lookup. | `string` | Yes | - | - |
 | `dataNodePrincipal` | The HDFS Data Node principal. | `string` | No | - | - |
 | [`defaultExternalStorage`](#kind-connection-spec-defaultexternalstorage) | ConnectionDefaultExternalStorage defines nested fields for Connection.DefaultExternalStorage. | `object` | No | - | - |
 | `description` | User-defined description for the connection. | `string` | No | - | - |
@@ -541,6 +630,7 @@ ConnectionSpec defines the desired state of Connection.
 | `tnsNames` | Array of service names that are available for selection in the tnsAlias property. | `list[string]` | No | - | - |
 | `userId` | The OCI user OCID for the user to connect to. | `string` | No | - | - |
 | `username` | The user name for the connection. | `string` | No | - | - |
+| `workspaceId` | The OCID of the Data Integration workspace containing this resource. | `string` | Yes | - | - |
 
 <a id="kind-connection-spec-accesskey"></a>
 #### Spec.accessKey
@@ -3499,6 +3589,7 @@ CopyObjectRequestSpec defines the desired state of CopyObjectRequest.
 | `objectKeys` | The list of the objects to be copied. | `list[string]` | Yes | - | - |
 | `sourceWorkspaceId` | The workspace id of the source from where we need to copy object. | `string` | Yes | - | - |
 | `status` | The status of the object. | `string` | No | - | - |
+| `workspaceId` | The OCID of the Data Integration workspace containing this resource. | `string` | Yes | - | - |
 
 <a id="kind-copyobjectrequest-spec-copyconflictresolution"></a>
 #### Spec.copyConflictResolution
@@ -3707,6 +3798,7 @@ DataAssetSpec defines the desired state of DataAsset.
 | `validateCertificate` | Specifies whether certificate validation is needed | `boolean` | No | - | - |
 | [`walletPasswordSecret`](#kind-dataasset-spec-walletpasswordsecret) | DataAssetWalletPasswordSecret defines nested fields for DataAsset.WalletPasswordSecret. | `object` | No | - | - |
 | [`walletSecret`](#kind-dataasset-spec-walletsecret) | DataAssetWalletSecret defines nested fields for DataAsset.WalletSecret. | `object` | No | - | - |
+| `workspaceId` | The OCID of the Data Integration workspace containing this resource. | `string` | Yes | - | - |
 
 <a id="kind-dataasset-spec-bucketschema"></a>
 #### Spec.bucketSchema
@@ -6744,6 +6836,7 @@ DataFlowSpec defines the desired state of DataFlow.
 | `parameters` | An array of parameters. | `list[object (preserves unknown fields)]` | No | - | - |
 | [`parentRef`](#kind-dataflow-spec-parentref) | DataFlowParentRef defines nested fields for DataFlow.ParentRef. | `object` | No | - | - |
 | [`registryMetadata`](#kind-dataflow-spec-registrymetadata) | DataFlowRegistryMetadata defines nested fields for DataFlow.RegistryMetadata. | `object` | Yes | - | - |
+| `workspaceId` | The OCID of the Data Integration workspace containing this resource. | `string` | Yes | - | - |
 
 <a id="kind-dataflow-spec-parentref"></a>
 #### Spec.parentRef
@@ -7098,7 +7191,7 @@ DisApplicationSpec defines the desired state of DisApplication.
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `applicationVersion` | version | `integer` | No | - | - |
-| `compartmentId` | OCID of the compartment that this resource belongs to. Defaults to compartment of the Workspace. | `string` | No | - | - |
+| `compartmentId` | The compartment OCID required by the DIS application collection lookup. | `string` | Yes | - | - |
 | `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. See Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
 | `description` | Detailed description for the object. | `string` | No | - | - |
 | `displayName` | Free form text without any restriction on permitted characters. Name can have letters, numbers, and special characters. The value is editable and is restricted to 1000 characters. | `string` | No | - | - |
@@ -7115,6 +7208,7 @@ DisApplicationSpec defines the desired state of DisApplication.
 | [`parentRef`](#kind-disapplication-spec-parentref) | DisApplicationParentRef defines nested fields for DisApplication.ParentRef. | `object` | No | - | - |
 | [`registryMetadata`](#kind-disapplication-spec-registrymetadata) | DisApplicationRegistryMetadata defines nested fields for DisApplication.RegistryMetadata. | `object` | No | - | - |
 | [`sourceApplicationInfo`](#kind-disapplication-spec-sourceapplicationinfo) | DisApplicationSourceApplicationInfo defines nested fields for DisApplication.SourceApplicationInfo. | `object` | No | - | - |
+| `workspaceId` | The OCID of the Data Integration workspace containing this resource. | `string` | Yes | - | - |
 
 <a id="kind-disapplication-spec-metadata"></a>
 #### Spec.metadata
@@ -7449,8 +7543,10 @@ DisApplicationDetailedDescriptionSpec defines the desired state of DisApplicatio
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| `applicationKey` | The key of the application containing this resource. | `string` | Yes | - | - |
 | `detailedDescription` | Base64 encoded rich text description of the object. | `string` | No | - | - |
 | `logo` | Base64 encoded image to represent logo of the object. | `string` | No | - | - |
+| `workspaceId` | The OCID of the Data Integration workspace containing this resource. | `string` | Yes | - | - |
 
 <a id="kind-disapplicationdetaileddescription-status"></a>
 ### Status
@@ -7459,7 +7555,92 @@ DisApplicationDetailedDescriptionStatus defines the observed state of DisApplica
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| `detailedDescription` | Base64 encoded rich text description of the object. | `string` | No | - | - |
+| `identifier` | Value can only contain upper case letters, underscore, and numbers. It should begin with upper case letter or underscore. The value can be modified. | `string` | No | - | - |
+| `key` | Generated key that can be used in API calls to identify task. On scenarios where reference to the task is needed, a value can be passed in create. | `string` | No | - | - |
+| `logo` | Base64 encoded image to represent logo of the object. | `string` | No | - | - |
+| [`metadata`](#kind-disapplicationdetaileddescription-status-metadata) | DisApplicationDetailedDescriptionMetadata defines nested fields for DisApplicationDetailedDescription.Metadata. | `object` | No | - | - |
+| `modelType` | The type of the published object. | `string` | No | - | - |
+| `modelVersion` | The object's model version. | `string` | No | - | - |
+| `name` | Free form text without any restriction on permitted characters. Name can have letters, numbers, and special characters. The value is editable and is restricted to 1000 characters. | `string` | No | - | - |
+| `objectStatus` | The status of an object that can be set to value 1 for shallow references across objects, other values reserved. | `integer` | No | - | - |
+| `objectVersion` | The version of the object that is used to track changes in the object instance. | `integer` | No | - | - |
+| [`parentRef`](#kind-disapplicationdetaileddescription-status-parentref) | DisApplicationDetailedDescriptionParentRef defines nested fields for DisApplicationDetailedDescription.ParentRef. | `object` | No | - | - |
 | [`status`](#kind-disapplicationdetaileddescription-status-status) | - | `object` | Yes | - | - |
+
+<a id="kind-disapplicationdetaileddescription-status-metadata"></a>
+#### Status.metadata
+
+[Back to DisApplicationDetailedDescription status](#kind-disapplicationdetaileddescription-status)
+
+DisApplicationDetailedDescriptionMetadata defines nested fields for DisApplicationDetailedDescription.Metadata.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`aggregator`](#kind-disapplicationdetaileddescription-status-metadata-aggregator) | DisApplicationDetailedDescriptionMetadataAggregator defines nested fields for DisApplicationDetailedDescription.Metadata.Aggregator. | `object` | No | - | - |
+| `aggregatorKey` | The owning object key for this object. | `string` | No | - | - |
+| [`countStatistics`](#kind-disapplicationdetaileddescription-status-metadata-countstatistics) | DisApplicationDetailedDescriptionMetadataCountStatistics defines nested fields for DisApplicationDetailedDescription.Metadata.CountStatistics. | `object` | No | - | - |
+| `createdBy` | The user that created the object. | `string` | No | - | - |
+| `createdByName` | The user that created the object. | `string` | No | - | - |
+| `identifierPath` | The full path to identify this object. | `string` | No | - | - |
+| `infoFields` | Information property fields. | `map[string, string]` | No | - | - |
+| `isFavorite` | Specifies whether this object is a favorite or not. | `boolean` | No | - | - |
+| `labels` | Labels are keywords or tags that you can add to data assets, dataflows and so on. You can define your own labels and use them to categorize content. | `list[string]` | No | - | - |
+| `registryVersion` | The registry version of the object. | `integer` | No | - | - |
+| `timeCreated` | The date and time that the object was created. | `string` | No | - | - |
+| `timeUpdated` | The date and time that the object was updated. | `string` | No | - | - |
+| `updatedBy` | The user that updated the object. | `string` | No | - | - |
+| `updatedByName` | The user that updated the object. | `string` | No | - | - |
+
+<a id="kind-disapplicationdetaileddescription-status-metadata-aggregator"></a>
+##### Status.metadata.aggregator
+
+[Back to DisApplicationDetailedDescription status](#kind-disapplicationdetaileddescription-status)
+
+DisApplicationDetailedDescriptionMetadataAggregator defines nested fields for DisApplicationDetailedDescription.Metadata.Aggregator.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `description` | The description of the aggregator. | `string` | No | - | - |
+| `identifier` | The identifier of the aggregator. | `string` | No | - | - |
+| `key` | The key of the aggregator object. | `string` | No | - | - |
+| `name` | The name of the aggregator. | `string` | No | - | - |
+| `type` | The type of the aggregator. | `string` | No | - | - |
+
+<a id="kind-disapplicationdetaileddescription-status-metadata-countstatistics"></a>
+##### Status.metadata.countStatistics
+
+[Back to DisApplicationDetailedDescription status](#kind-disapplicationdetaileddescription-status)
+
+DisApplicationDetailedDescriptionMetadataCountStatistics defines nested fields for DisApplicationDetailedDescription.Metadata.CountStatistics.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`objectTypeCountList`](#kind-disapplicationdetaileddescription-status-metadata-countstatistics-objecttypecountlist) | The array of statistics. | `list[object]` | No | - | - |
+
+<a id="kind-disapplicationdetaileddescription-status-metadata-countstatistics-objecttypecountlist"></a>
+###### Status.metadata.countStatistics.objectTypeCountList[]
+
+[Back to DisApplicationDetailedDescription status](#kind-disapplicationdetaileddescription-status)
+
+DisApplicationDetailedDescriptionMetadataCountStatisticsObjectTypeCountList defines nested fields for DisApplicationDetailedDescription.Metadata.CountStatistics.ObjectTypeCountList.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `objectCount` | The value for the count statistic object. | `integer (int64)` | No | - | - |
+| `objectType` | The type of object for the count statistic object. | `string` | No | - | - |
+
+<a id="kind-disapplicationdetaileddescription-status-parentref"></a>
+#### Status.parentRef
+
+[Back to DisApplicationDetailedDescription status](#kind-disapplicationdetaileddescription-status)
+
+DisApplicationDetailedDescriptionParentRef defines nested fields for DisApplicationDetailedDescription.ParentRef.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `parent` | Key of the parent object. | `string` | No | - | - |
+| `rootDocId` | Key of the root document object. | `string` | No | - | - |
 
 <a id="kind-disapplicationdetaileddescription-status-status"></a>
 #### Status.status
@@ -7547,6 +7728,7 @@ ExportRequestSpec defines the desired state of ExportRequest.
 | `objectStorageRegion` | Region of the object storage (if using object storage of different region) | `string` | No | - | - |
 | `objectStorageTenancyId` | Optional parameter to point to object storage tenancy (if using Object Storage of different tenancy) | `string` | No | - | - |
 | `status` | The status of the object. | `string` | No | - | - |
+| `workspaceId` | The OCID of the Data Integration workspace containing this resource. | `string` | Yes | - | - |
 
 <a id="kind-exportrequest-status"></a>
 ### Status
@@ -7676,6 +7858,8 @@ ExternalPublicationSpec defines the desired state of ExternalPublication.
 | `description` | The details of the data flow or the application. | `string` | No | - | - |
 | `displayName` | The name of the application. | `string` | Yes | - | - |
 | [`resourceConfiguration`](#kind-externalpublication-spec-resourceconfiguration) | ExternalPublicationResourceConfiguration defines nested fields for ExternalPublication.ResourceConfiguration. | `object` | No | - | - |
+| `taskKey` | The key of the task containing this external publication. | `string` | Yes | - | - |
+| `workspaceId` | The OCID of the Data Integration workspace containing this resource. | `string` | Yes | - | - |
 
 <a id="kind-externalpublication-spec-configurationdetails"></a>
 #### Spec.configurationDetails
@@ -11394,6 +11578,7 @@ FolderSpec defines the desired state of Folder.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| `aggregatorKey` | The aggregator key required by the collection lookup. | `string` | Yes | - | - |
 | `categoryName` | The category name. | `string` | No | - | - |
 | `description` | A user defined description for the folder. | `string` | No | - | - |
 | `identifier` | Value can only contain upper case letters, underscore, and numbers. It should begin with upper case letter or underscore. The value can be modified. | `string` | Yes | - | - |
@@ -11405,6 +11590,7 @@ FolderSpec defines the desired state of Folder.
 | `objectVersion` | The version of the object that is used to track changes in the object instance. | `integer` | Yes | - | - |
 | [`parentRef`](#kind-folder-spec-parentref) | FolderParentRef defines nested fields for Folder.ParentRef. | `object` | No | - | - |
 | [`registryMetadata`](#kind-folder-spec-registrymetadata) | FolderRegistryMetadata defines nested fields for Folder.RegistryMetadata. | `object` | Yes | - | - |
+| `workspaceId` | The OCID of the Data Integration workspace containing this resource. | `string` | Yes | - | - |
 
 <a id="kind-folder-spec-parentref"></a>
 #### Spec.parentRef
@@ -11605,6 +11791,7 @@ FunctionLibrarySpec defines the desired state of FunctionLibrary.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| `aggregatorKey` | The aggregator key required by the collection lookup. | `string` | Yes | - | - |
 | `categoryName` | The category name. | `string` | No | - | - |
 | `description` | A user defined description for the FunctionLibrary. | `string` | No | - | - |
 | `identifier` | Value can only contain upper case letters, underscore, and numbers. It should begin with upper case letter or underscore. The value can be modified. | `string` | Yes | - | - |
@@ -11614,6 +11801,7 @@ FunctionLibrarySpec defines the desired state of FunctionLibrary.
 | `objectStatus` | The status of an object that can be set to value 1 for shallow references across objects, other values reserved. | `integer` | No | - | - |
 | `objectVersion` | The version of the object that is used to track changes in the object instance. | `integer` | No | - | - |
 | [`registryMetadata`](#kind-functionlibrary-spec-registrymetadata) | FunctionLibraryRegistryMetadata defines nested fields for FunctionLibrary.RegistryMetadata. | `object` | Yes | - | - |
+| `workspaceId` | The OCID of the Data Integration workspace containing this resource. | `string` | Yes | - | - |
 
 <a id="kind-functionlibrary-spec-registrymetadata"></a>
 #### Spec.registryMetadata
@@ -11810,6 +11998,7 @@ ImportRequestSpec defines the desired state of ImportRequest.
 | `objectStorageRegion` | Region of the object storage (if using object storage of different region) | `string` | No | - | - |
 | `objectStorageTenancyId` | Optional parameter to point to object storage tenancy (if using Object Storage of different tenancy) | `string` | No | - | - |
 | `status` | The status of the object. | `string` | No | - | - |
+| `workspaceId` | The OCID of the Data Integration workspace containing this resource. | `string` | Yes | - | - |
 
 <a id="kind-importrequest-spec-importconflictresolution"></a>
 #### Spec.importConflictResolution
@@ -12196,6 +12385,7 @@ PipelineSpec defines the desired state of Pipeline.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| `aggregatorKey` | The aggregator key required by the collection lookup. | `string` | Yes | - | - |
 | `description` | Detailed description for the object. | `string` | No | - | - |
 | `flowConfigValues` | JSONValue preserves arbitrary JSON values inside generated CRD fields. Unknown nested fields are preserved. | `object (preserves unknown fields)` | No | - | - |
 | `identifier` | Value can only contain upper case letters, underscore, and numbers. It should begin with upper case letter or underscore. The value can be modified. | `string` | Yes | - | - |
@@ -12210,6 +12400,7 @@ PipelineSpec defines the desired state of Pipeline.
 | [`parentRef`](#kind-pipeline-spec-parentref) | PipelineParentRef defines nested fields for Pipeline.ParentRef. | `object` | No | - | - |
 | [`registryMetadata`](#kind-pipeline-spec-registrymetadata) | PipelineRegistryMetadata defines nested fields for Pipeline.RegistryMetadata. | `object` | Yes | - | - |
 | `variables` | The list of variables required in pipeline. | `list[object (preserves unknown fields)]` | No | - | - |
+| `workspaceId` | The OCID of the Data Integration workspace containing this resource. | `string` | Yes | - | - |
 
 <a id="kind-pipeline-spec-parentref"></a>
 #### Spec.parentRef
@@ -12569,6 +12760,7 @@ ProjectSpec defines the desired state of Project.
 | `objectVersion` | The version of the object that is used to track changes in the object instance. | `integer` | Yes | - | - |
 | [`parentRef`](#kind-project-spec-parentref) | ProjectParentRef defines nested fields for Project.ParentRef. | `object` | No | - | - |
 | [`registryMetadata`](#kind-project-spec-registrymetadata) | ProjectRegistryMetadata defines nested fields for Project.RegistryMetadata. | `object` | No | - | - |
+| `workspaceId` | The OCID of the Data Integration workspace containing this resource. | `string` | Yes | - | - |
 
 <a id="kind-project-spec-parentref"></a>
 #### Spec.parentRef
@@ -12768,6 +12960,7 @@ ScheduleSpec defines the desired state of Schedule.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| `applicationKey` | The key of the application containing this resource. | `string` | Yes | - | - |
 | `description` | Detailed description for the object. | `string` | No | - | - |
 | [`frequencyDetails`](#kind-schedule-spec-frequencydetails) | ScheduleFrequencyDetails defines nested fields for Schedule.FrequencyDetails. | `object` | No | - | - |
 | `identifier` | Value can only contain upper case letters, underscore, and numbers. It should begin with upper case letter or underscore. The value can be modified. | `string` | Yes | - | - |
@@ -12781,6 +12974,7 @@ ScheduleSpec defines the desired state of Schedule.
 | [`parentRef`](#kind-schedule-spec-parentref) | ScheduleParentRef defines nested fields for Schedule.ParentRef. | `object` | No | - | - |
 | [`registryMetadata`](#kind-schedule-spec-registrymetadata) | ScheduleRegistryMetadata defines nested fields for Schedule.RegistryMetadata. | `object` | No | - | - |
 | `timezone` | The timezone for the schedule. | `string` | No | - | - |
+| `workspaceId` | The OCID of the Data Integration workspace containing this resource. | `string` | Yes | - | - |
 
 <a id="kind-schedule-spec-frequencydetails"></a>
 #### Spec.frequencyDetails
@@ -13087,6 +13281,7 @@ TaskSpec defines the desired state of Task.
 | `script` | JSONValue preserves arbitrary JSON values inside generated CRD fields. Unknown nested fields are preserved. | `object (preserves unknown fields)` | No | - | - |
 | `sqlScriptType` | Indicates whether the task is invoking a custom SQL script or stored procedure. | `string` | No | - | - |
 | `typedExpressions` | List of typed expressions. | `list[object (preserves unknown fields)]` | No | - | - |
+| `workspaceId` | The OCID of the Data Integration workspace containing this resource. | `string` | Yes | - | - |
 
 <a id="kind-task-spec-parentref"></a>
 #### Spec.parentRef
@@ -13240,6 +13435,8 @@ TaskRunSpec defines the desired state of TaskRun.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| `aggregatorKey` | The aggregator key required by the collection lookup. | `string` | Yes | - | - |
+| `applicationKey` | The key of the application containing this resource. | `string` | Yes | - | - |
 | [`configProvider`](#kind-taskrun-spec-configprovider) | TaskRunConfigProvider defines nested fields for TaskRun.ConfigProvider. | `object` | No | - | - |
 | `description` | Detailed description for the object. | `string` | No | - | - |
 | `identifier` | Value can only contain upper case letters, underscore, and numbers. It should begin with upper case letter or underscore. The value can be modified. | `string` | No | - | - |
@@ -13254,6 +13451,7 @@ TaskRunSpec defines the desired state of TaskRun.
 | `status` | The status of the object. | `string` | No | - | - |
 | `stepId` | Step Id for running from a certain step. | `string` | No | - | - |
 | `taskScheduleKey` | Optional task schedule key reference. | `string` | No | - | - |
+| `workspaceId` | The OCID of the Data Integration workspace containing this resource. | `string` | Yes | - | - |
 
 <a id="kind-taskrun-spec-configprovider"></a>
 #### Spec.configProvider
@@ -13829,6 +14027,7 @@ TaskScheduleSpec defines the desired state of TaskSchedule.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| `applicationKey` | The key of the application containing this resource. | `string` | Yes | - | - |
 | `authMode` | The authorization mode for the task. | `string` | No | - | - |
 | [`configProviderDelegate`](#kind-taskschedule-spec-configproviderdelegate) | TaskScheduleConfigProviderDelegate defines nested fields for TaskSchedule.ConfigProviderDelegate. | `object` | No | - | - |
 | `description` | Detailed description for the object. | `string` | No | - | - |
@@ -13852,6 +14051,7 @@ TaskScheduleSpec defines the desired state of TaskSchedule.
 | `retryDelayUnit` | The unit for the retry delay. | `string` | No | - | - |
 | [`scheduleRef`](#kind-taskschedule-spec-scheduleref) | TaskScheduleScheduleRef defines nested fields for TaskSchedule.ScheduleRef. | `object` | No | - | - |
 | `startTimeMillis` | The start time in milliseconds. | `integer (int64)` | No | - | - |
+| `workspaceId` | The OCID of the Data Integration workspace containing this resource. | `string` | Yes | - | - |
 
 <a id="kind-taskschedule-spec-configproviderdelegate"></a>
 #### Spec.configProviderDelegate
@@ -16914,6 +17114,7 @@ UserDefinedFunctionSpec defines the desired state of UserDefinedFunction.
 | [`parentRef`](#kind-userdefinedfunction-spec-parentref) | UserDefinedFunctionParentRef defines nested fields for UserDefinedFunction.ParentRef. | `object` | No | - | - |
 | [`registryMetadata`](#kind-userdefinedfunction-spec-registrymetadata) | UserDefinedFunctionRegistryMetadata defines nested fields for UserDefinedFunction.RegistryMetadata. | `object` | Yes | - | - |
 | [`signatures`](#kind-userdefinedfunction-spec-signatures) | An array of function signature. | `list[object]` | No | - | - |
+| `workspaceId` | The OCID of the Data Integration workspace containing this resource. | `string` | Yes | - | - |
 
 <a id="kind-userdefinedfunction-spec-expr"></a>
 #### Spec.expr

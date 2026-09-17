@@ -360,11 +360,12 @@ ENVTEST_USE_ENV ?=
 ENVTEST_LEGACY_GOMODCACHE ?= $(CURDIR)/.envtest-home/.gomodcache
 SETUP_ENVTEST_GOPATH ?= $(ENVTEST_ROOT)/gopath
 SETUP_ENVTEST_ENV ?= env -u GOMODCACHE $(ENVTEST_ENV) GOPATH=$(SETUP_ENVTEST_GOPATH)
-# setup-envtest is published from a separate tool module; pin the release-0.17-compatible revision.
-SETUP_ENVTEST_VERSION ?= v0.0.0-20240812162837-9557f1031fe4
+# setup-envtest is published from a separate tool module. Pin an immutable
+# release-0.22 revision whose Go 1.24 minimum remains compatible with this repo.
+SETUP_ENVTEST_VERSION ?= v0.0.0-20260125163108-a19ec76a3c5d
 SETUP_ENVTEST_GOFLAGS ?= $(strip $(filter-out -mod=%,$(GOFLAGS)) -mod=mod)
 SETUP_ENVTEST_RUN ?= $(SETUP_ENVTEST_ENV) GOFLAGS="$(SETUP_ENVTEST_GOFLAGS)" go run sigs.k8s.io/controller-runtime/tools/setup-envtest@$(SETUP_ENVTEST_VERSION)
-SETUP_ENVTEST ?= $(SETUP_ENVTEST_RUN) use $(ENVTEST_K8S_VERSION) -p path --bin-dir $(ENVTEST_ASSETS_DIR) --use-deprecated-gcs=false
+SETUP_ENVTEST ?= $(SETUP_ENVTEST_RUN) use $(ENVTEST_K8S_VERSION) -p path --bin-dir $(ENVTEST_ASSETS_DIR)
 ENVTEST_PREPARE_DIRS = rm -rf $(ENVTEST_LEGACY_GOMODCACHE); mkdir -p $(ENVTEST_ASSETS_DIR) $(ENVTEST_CACHE_DIR) $(ENVTEST_CONFIG_DIR) $(SETUP_ENVTEST_GOPATH)
 
 define ENVTEST_RESOLVE_ASSETS
@@ -397,7 +398,8 @@ endef
 
 envtest: ## Download and cache the pinned envtest assets for later installed-only test runs.
 	$(ENVTEST_PREPARE_DIRS)
-	@envtest_assets="$$( $(SETUP_ENVTEST) )"; \
+	@set -e; \
+		envtest_assets="$$( $(SETUP_ENVTEST) )"; \
 		echo "Envtest assets available at $$envtest_assets"
 
 test: manifests generate fmt vet ## Run tests.
@@ -407,8 +409,46 @@ test: manifests generate fmt vet ## Run tests.
 		$(ENVTEST_ENV) KUBEBUILDER_ASSETS="$$envtest_assets" go test ./... -coverprofile cover.out | tee unittests.cover'
 	go tool cover -func cover.out | grep total | awk '{print substr($$3, 1, length($$3)-1)}' > unittests.percent
 
-functionaltest: ## Run functionaltest (placeholder — no functional tests yet).
-	@echo "No functional tests available."
+MOCK_INTEGRATION_PACKAGES := $(sort $(shell find pkg/servicemanager -type f -name '*_mock_integration_test.go' -exec dirname {} \;))
+
+mock-integration-inventory: ## Classify generated CRUD resources for OCI mock integration coverage.
+	go run ./cmd/osok-mock-integration-inventory
+
+mock-integration-coverage: ## Require completed S1 and S2 resources to retain their dynamic and formal coverage.
+	go run ./cmd/osok-mock-integration-inventory --check-immediate --check-lifecycle
+
+mockintegrationtest: mock-integration-coverage ## Run typed service-manager integration tests against the in-memory OCI HTTP mock.
+	go test ./internal/integration/ocimock
+	@[ -n "$(MOCK_INTEGRATION_PACKAGES)" ] || { echo "No OCI mock integration tests found"; exit 1; }
+	go test $(addprefix ./,$(MOCK_INTEGRATION_PACKAGES)) -run '^TestMockIntegration' -count=1
+
+integrationtest: mockintegrationtest e2e-composite-lint ## Run credential-free OCI service-manager and lifecycle integration tests.
+	go test ./internal/e2e/lifecycle
+
+functionaltest: integrationtest ## Run deterministic controller integration tests.
+
+E2E_SERVICE ?= objectstorage
+E2E_SCENARIO ?= e2e/scenarios/$(E2E_SERVICE)/basic/scenario.yaml
+E2E_COMPOSITE ?= e2e/composite/$(E2E_SERVICE)/basic
+
+e2e-live: ## Run one real OCI create/update/delete lifecycle through a local Kind controller.
+	@[ -n "$(E2E_SERVICE)" ] || { echo "E2E_SERVICE must be set"; exit 1; }
+	@[ -f "$(E2E_SCENARIO)" ] || { echo "E2E_SCENARIO not found: $(E2E_SCENARIO)"; exit 1; }
+	SKIP_OLM=true ./e2e/e2e-lite-local test --service "$(E2E_SERVICE)" --scenario "$(E2E_SCENARIO)"
+
+e2e-composite-lint: ## Validate all checked-in Chainsaw composite test definitions.
+	@set -e; \
+		found=false; \
+		for test_file in $$(find e2e/composite -type f -name chainsaw-test.yaml | sort); do \
+			found=true; \
+			./e2e/chainsaw lint test --file "$$test_file"; \
+		done; \
+		$$found || { echo "No Chainsaw composite tests found"; exit 1; }
+
+e2e-composite: ## Run one real OCI dependency graph through a local Kind controller.
+	@[ -n "$(E2E_SERVICE)" ] || { echo "E2E_SERVICE must be set"; exit 1; }
+	@[ -d "$(E2E_COMPOSITE)" ] || { echo "E2E_COMPOSITE not found: $(E2E_COMPOSITE)"; exit 1; }
+	SKIP_OLM=true ./e2e/e2e-lite-local test --service "$(E2E_SERVICE)" --composite "$(E2E_COMPOSITE)"
 
 ##@ Build Service
 

@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "fleetappsmanagement",
+  "slug": "provision",
+  "kind": "Provision",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_fleet_apps_management_provision",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateProvision",
+        "requestType": "fleetappsmanagement.CreateProvisionRequest",
+        "responseType": "fleetappsmanagement.CreateProvisionResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetProvision",
+        "requestType": "fleetappsmanagement.GetProvisionRequest",
+        "responseType": "fleetappsmanagement.GetProvisionResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListProvisions",
+        "requestType": "fleetappsmanagement.ListProvisionsRequest",
+        "responseType": "fleetappsmanagement.ListProvisionsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeProvisionCompartment",
+        "requestType": "fleetappsmanagement.ChangeProvisionCompartmentRequest",
+        "responseType": "fleetappsmanagement.ChangeProvisionCompartmentResponse"
+      },
+      {
+        "operation": "UpdateProvision",
+        "requestType": "fleetappsmanagement.UpdateProvisionRequest",
+        "responseType": "fleetappsmanagement.UpdateProvisionResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteProvision",
+        "requestType": "fleetappsmanagement.DeleteProvisionRequest",
+        "responseType": "fleetappsmanagement.DeleteProvisionResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "deployed_resources.resource_instance_list.compartment_id",
+      "display_name",
+      "freeform_tags",
+      "provision_description"
+    ],
+    "forceNew": [
+      "config_catalog_item_id",
+      "fleet_id",
+      "package_catalog_item_id",
+      "tf_variable_compartment_id",
+      "tf_variable_current_user_id",
+      "tf_variable_region_id",
+      "tf_variable_tenancy_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_fleet_apps_management_provisions",
+    "collectionField": "provision_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "fleet_id",
+      "id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/fleetappsmanagement/provision/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/fleetappsmanagement/provision/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from the pinned terraform-provider-oci source revision."
+  ]
+}

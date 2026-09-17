@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "stackmonitoring",
+  "slug": "alarmcondition",
+  "kind": "AlarmCondition",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_stackmonitoring_alarmcondition",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateAlarmCondition",
+        "requestType": "stackmonitoring.CreateAlarmConditionRequest",
+        "responseType": "stackmonitoring.CreateAlarmConditionResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetAlarmCondition",
+        "requestType": "stackmonitoring.GetAlarmConditionRequest",
+        "responseType": "stackmonitoring.GetAlarmConditionResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListAlarmCondition",
+        "requestType": "stackmonitoring.ListAlarmConditionRequest",
+        "responseType": "stackmonitoring.ListAlarmConditionResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateAlarmCondition",
+        "requestType": "stackmonitoring.UpdateAlarmConditionRequest",
+        "responseType": "stackmonitoring.UpdateAlarmConditionResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteAlarmCondition",
+        "requestType": "stackmonitoring.DeleteAlarmConditionRequest",
+        "responseType": "stackmonitoring.DeleteAlarmConditionResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_stackmonitoring_alarmcondition",
+    "collectionField": "alarmcondition",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/stackmonitoring/alarmcondition/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/stackmonitoring/alarmcondition/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for stackmonitoring/alarmcondition; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

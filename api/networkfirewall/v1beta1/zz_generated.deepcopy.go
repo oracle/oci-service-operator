@@ -992,7 +992,11 @@ func (in *NetworkFirewallSpec) DeepCopyInto(out *NetworkFirewallSpec) {
 		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}
-	out.NatConfiguration = in.NatConfiguration
+	if in.NatConfiguration != nil {
+		in, out := &in.NatConfiguration, &out.NatConfiguration
+		*out = new(NetworkFirewallNatConfiguration)
+		**out = **in
+	}
 	if in.FreeformTags != nil {
 		in, out := &in.FreeformTags, &out.FreeformTags
 		*out = make(map[string]string, len(*in))
@@ -1059,7 +1063,11 @@ func (in *NetworkFirewallStatus) DeepCopyInto(out *NetworkFirewallStatus) {
 			(*out)[key] = outVal
 		}
 	}
-	out.NatConfiguration = in.NatConfiguration
+	if in.NatConfiguration != nil {
+		in, out := &in.NatConfiguration, &out.NatConfiguration
+		*out = new(NetworkFirewallNatConfiguration)
+		**out = **in
+	}
 	if in.NetworkSecurityGroupIds != nil {
 		in, out := &in.NetworkSecurityGroupIds, &out.NetworkSecurityGroupIds
 		*out = make([]string, len(*in))

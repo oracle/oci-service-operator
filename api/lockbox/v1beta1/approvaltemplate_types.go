@@ -21,7 +21,7 @@ type ApprovalTemplateSpec struct {
 	// +kubebuilder:validation:Optional
 	DisplayName string `json:"displayName,omitempty"`
 	// +kubebuilder:validation:Optional
-	ApproverLevels ApprovalTemplateApproverLevels `json:"approverLevels,omitempty"`
+	ApproverLevels ApprovalTemplateApproverLevels `json:"approverLevels,omitempty,omitzero"`
 	// The auto approval state of the lockbox.
 	// +kubebuilder:validation:Optional
 	AutoApprovalState string `json:"autoApprovalState,omitempty"`
@@ -79,9 +79,9 @@ type ApprovalTemplateApproverLevels struct {
 	// +kubebuilder:validation:Required
 	Level1 ApprovalTemplateApproverLevelsLevel1 `json:"level1"`
 	// +kubebuilder:validation:Optional
-	Level2 ApprovalTemplateApproverLevelsLevel2 `json:"level2,omitempty"`
+	Level2 ApprovalTemplateApproverLevelsLevel2 `json:"level2,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	Level3 ApprovalTemplateApproverLevelsLevel3 `json:"level3,omitempty"`
+	Level3 ApprovalTemplateApproverLevelsLevel3 `json:"level3,omitempty,omitzero"`
 }
 
 // ApprovalTemplateStatus defines the observed state of ApprovalTemplate.

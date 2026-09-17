@@ -297,6 +297,55 @@ func TestCertificatePrivateKeyDriftIsRejectedBeforeUpdate(t *testing.T) {
 	}
 }
 
+func TestCertificateDataDriftIsRejectedBeforeUpdate(t *testing.T) {
+	resource := trackedTestCertificate("ocid1.waascertificate.oc1..existing")
+	resource.Spec.CertificateData = "replacement-certificate-data"
+	currentSpec := testCertificate().Spec
+	current := sdkCertificateFromSpec(resource.Status.Id, currentSpec, waassdk.LifecycleStatesActive)
+	client := &fakeCertificateOCIClient{
+		getFunc: func(context.Context, waassdk.GetCertificateRequest) (waassdk.GetCertificateResponse, error) {
+			return waassdk.GetCertificateResponse{Certificate: current}, nil
+		},
+	}
+
+	response, err := newCertificateServiceClientWithOCIClient(client).CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err == nil {
+		t.Fatal("CreateOrUpdate() error = nil, want create-only certificate drift rejection")
+	}
+	if response.IsSuccessful {
+		t.Fatalf("CreateOrUpdate() response = %#v, want unsuccessful response", response)
+	}
+	if !strings.Contains(err.Error(), "create-only fields change") {
+		t.Fatalf("CreateOrUpdate() error = %q, want create-only drift message", err.Error())
+	}
+	if len(client.updateRequests) != 0 {
+		t.Fatalf("UpdateCertificate calls = %d, want 0 after certificate drift rejection", len(client.updateRequests))
+	}
+}
+
+func TestCertificateNormalizedPEMReadbackDoesNotRequireReplacement(t *testing.T) {
+	resource := trackedTestCertificate("ocid1.waascertificate.oc1..existing")
+	currentSpec := resource.Spec
+	currentSpec.CertificateData = strings.TrimSpace(currentSpec.CertificateData) + "\n"
+	current := sdkCertificateFromSpec(resource.Status.Id, currentSpec, waassdk.LifecycleStatesActive)
+	client := &fakeCertificateOCIClient{
+		getFunc: func(context.Context, waassdk.GetCertificateRequest) (waassdk.GetCertificateResponse, error) {
+			return waassdk.GetCertificateResponse{Certificate: current}, nil
+		},
+	}
+
+	response, err := newCertificateServiceClientWithOCIClient(client).CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful || response.ShouldRequeue {
+		t.Fatalf("CreateOrUpdate() response = %#v, want converged success", response)
+	}
+	if len(client.updateRequests) != 0 {
+		t.Fatalf("UpdateCertificate calls = %d, want 0 for normalized PEM readback", len(client.updateRequests))
+	}
+}
+
 func TestCertificateDeleteKeepsFinalizerUntilLifecycleIsDeleted(t *testing.T) {
 	tests := []struct {
 		name        string

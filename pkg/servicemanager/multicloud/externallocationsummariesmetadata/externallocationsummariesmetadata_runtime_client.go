@@ -16,6 +16,7 @@ import (
 	multicloudv1beta1 "github.com/oracle/oci-service-operator/api/multicloud/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
+	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	"github.com/oracle/oci-service-operator/pkg/util"
 	v1 "k8s.io/api/core/v1"
@@ -132,6 +133,9 @@ func (c *externalLocationSummariesMetadataRuntimeClient) CreateOrUpdate(
 	}
 	response, err := c.list(ctx, request)
 	if err != nil {
+		return c.fail(resource, err)
+	}
+	if err := generatedruntime.ProjectResponseBodyWithAliases(resource, response, nil); err != nil {
 		return c.fail(resource, err)
 	}
 	return c.markActive(resource, response), nil

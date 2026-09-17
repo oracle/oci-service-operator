@@ -50,15 +50,84 @@ func registerMetastoreRuntimeHooksMutator(mutator MetastoreRuntimeHooksMutator) 
 	}
 	metastoreRuntimeHooksMutators = append(metastoreRuntimeHooksMutators, mutator)
 }
+func newMetastoreRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "datacatalog",
+		FormalSlug:    "metastore",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "displayName", "state"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"compartmentId", "definedTags", "displayName", "freeformTags"},
+			ForceNew:      []string{"defaultExternalTableLocation", "defaultManagedTableLocation"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newMetastoreDefaultRuntimeHooks(sdkClient datacatalogsdk.DataCatalogClient) MetastoreRuntimeHooks {
 	return MetastoreRuntimeHooks{
+		Semantics:       newMetastoreRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*datacatalogv1beta1.Metastore]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*datacatalogv1beta1.Metastore]{},
 		StatusHooks:     generatedruntime.StatusHooks[*datacatalogv1beta1.Metastore]{},
 		ParityHooks:     generatedruntime.ParityHooks[*datacatalogv1beta1.Metastore]{},
-		Async:           generatedruntime.AsyncHooks[*datacatalogv1beta1.Metastore]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*datacatalogv1beta1.Metastore]{},
+		Async: generatedruntime.AsyncHooks[*datacatalogv1beta1.Metastore]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := datacatalogsdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*datacatalogv1beta1.Metastore]{},
 		Create: runtimeOperationHooks[datacatalogsdk.CreateMetastoreRequest, datacatalogsdk.CreateMetastoreResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateMetastoreDetails", RequestName: "CreateMetastoreDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request datacatalogsdk.CreateMetastoreRequest) (datacatalogsdk.CreateMetastoreResponse, error) {
@@ -106,10 +175,19 @@ func buildMetastoreGeneratedRuntimeConfig(
 	hooks MetastoreRuntimeHooks,
 ) generatedruntime.Config[*datacatalogv1beta1.Metastore] {
 	return generatedruntime.Config[*datacatalogv1beta1.Metastore]{
-		Kind:            "Metastore",
-		SDKName:         "Metastore",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "Metastore",
+		SDKName:   "Metastore",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

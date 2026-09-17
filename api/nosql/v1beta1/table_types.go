@@ -24,7 +24,7 @@ type TableSpec struct {
 	// +kubebuilder:validation:Required
 	DdlStatement string `json:"ddlStatement"`
 	// +kubebuilder:validation:Optional
-	TableLimits TableLimits `json:"tableLimits,omitempty"`
+	TableLimits TableLimits `json:"tableLimits,omitempty,omitzero"`
 	// True if table can be reclaimed after an idle period.
 	// +kubebuilder:validation:Optional
 	IsAutoReclaimable bool `json:"isAutoReclaimable,omitempty"`

@@ -1,0 +1,170 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "desktops",
+  "slug": "desktoppool",
+  "kind": "DesktopPool",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_desktops_desktop_pool",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDesktopPool",
+        "requestType": "desktops.CreateDesktopPoolRequest",
+        "responseType": "desktops.CreateDesktopPoolResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDesktopPool",
+        "requestType": "desktops.GetDesktopPoolRequest",
+        "responseType": "desktops.GetDesktopPoolResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDesktopPools",
+        "requestType": "desktops.ListDesktopPoolsRequest",
+        "responseType": "desktops.ListDesktopPoolsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeDesktopPoolCompartment",
+        "requestType": "desktops.ChangeDesktopPoolCompartmentRequest",
+        "responseType": "desktops.ChangeDesktopPoolCompartmentResponse"
+      },
+      {
+        "operation": "UpdateDesktopPool",
+        "requestType": "desktops.UpdateDesktopPoolRequest",
+        "responseType": "desktops.UpdateDesktopPoolResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDesktopPool",
+        "requestType": "desktops.DeleteDesktopPoolRequest",
+        "responseType": "desktops.DeleteDesktopPoolResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "are_volumes_preserved",
+      "availability_policy.start_schedule.cron_expression",
+      "availability_policy.start_schedule.timezone",
+      "availability_policy.stop_schedule.cron_expression",
+      "availability_policy.stop_schedule.timezone",
+      "boot_volume_size_in_gbs",
+      "compartment_id",
+      "contact_details",
+      "defined_tags",
+      "description",
+      "device_policy.audio_mode",
+      "device_policy.cdm_mode",
+      "device_policy.clipboard_mode",
+      "device_policy.is_display_enabled",
+      "device_policy.is_keyboard_enabled",
+      "device_policy.is_pointer_enabled",
+      "device_policy.is_printing_enabled",
+      "device_policy.is_video_input_enabled",
+      "display_name",
+      "freeform_tags",
+      "image.image_id",
+      "image.image_name",
+      "image.operating_system",
+      "maximum_size",
+      "session_lifecycle_actions.disconnect.action",
+      "session_lifecycle_actions.disconnect.grace_period_in_minutes",
+      "session_lifecycle_actions.inactivity.action",
+      "session_lifecycle_actions.inactivity.grace_period_in_minutes",
+      "standby_size",
+      "time_start_scheduled",
+      "time_stop_scheduled"
+    ],
+    "forceNew": [
+      "are_privileged_users",
+      "availability_domain",
+      "is_storage_enabled",
+      "network_configuration",
+      "network_configuration.subnet_id",
+      "network_configuration.vcn_id",
+      "nsg_ids",
+      "private_access_details",
+      "private_access_details.nsg_ids",
+      "private_access_details.private_ip",
+      "private_access_details.subnet_id",
+      "session_lifecycle_actions",
+      "shape_config",
+      "shape_config.baseline_ocpu_utilization",
+      "shape_config.memory_in_gbs",
+      "shape_config.ocpus",
+      "shape_name",
+      "storage_backup_policy_id",
+      "storage_size_in_gbs",
+      "use_dedicated_vm_host"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_desktops_desktop_pools",
+    "collectionField": "desktop_pool_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "availability_domain",
+      "compartment_id",
+      "display_name",
+      "id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/desktops/desktoppool/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/desktops/desktoppool/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from the pinned terraform-provider-oci source revision."
+  ]
+}

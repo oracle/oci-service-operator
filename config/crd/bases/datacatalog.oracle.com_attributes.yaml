@@ -60,6 +60,9 @@ spec:
                 description: Optional user friendly business name of the attribute.
                   If set, this supplements the harvested display name of the object.
                 type: string
+              catalogId:
+                description: The OCID of the catalog containing this resource.
+                type: string
               customPropertyMembers:
                 description: The list of customized properties along with the values
                   for this object
@@ -81,6 +84,9 @@ spec:
                       type: string
                   type: object
                 type: array
+              dataAssetKey:
+                description: The key of the data asset containing this resource.
+                type: string
               description:
                 description: Detailed description of the attribute.
                 type: string
@@ -88,6 +94,9 @@ spec:
                 description: |-
                   A user-friendly display name. Does not have to be unique, and it's changeable.
                   Avoid entering confidential information.
+                type: string
+              entityKey:
+                description: The key of the entity containing this resource.
                 type: string
               externalDataType:
                 description: Data type of the attribute as defined in the external
@@ -160,7 +169,10 @@ spec:
                   '/types' endpoint.
                 type: string
             required:
+            - catalogId
+            - dataAssetKey
             - displayName
+            - entityKey
             - externalDataType
             - timeExternal
             type: object

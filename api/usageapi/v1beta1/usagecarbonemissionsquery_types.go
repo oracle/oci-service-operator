@@ -109,7 +109,7 @@ type UsageCarbonEmissionsQueryQueryDefinitionReportQuery struct {
 	// +kubebuilder:validation:Optional
 	CompartmentDepth int `json:"compartmentDepth,omitempty"`
 	// +kubebuilder:validation:Optional
-	Filter UsageCarbonEmissionsQueryQueryDefinitionReportQueryFilter `json:"filter,omitempty"`
+	Filter UsageCarbonEmissionsQueryQueryDefinitionReportQueryFilter `json:"filter,omitempty,omitzero"`
 	// The user interface date range, for example, LAST_THREE_MONTHS. Overrides the timeUsageStarted and timeUsageEnded properties.
 	// +kubebuilder:validation:Optional
 	DateRangeName string `json:"dateRangeName,omitempty"`

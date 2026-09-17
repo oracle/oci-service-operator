@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "opsi",
+  "slug": "operationsinsightsprivateendpoint",
+  "kind": "OperationsInsightsPrivateEndpoint",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_opsi_operations_insights_private_endpoint",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOperationsInsightsPrivateEndpoint",
+        "requestType": "opsi.CreateOperationsInsightsPrivateEndpointRequest",
+        "responseType": "opsi.CreateOperationsInsightsPrivateEndpointResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOperationsInsightsPrivateEndpoint",
+        "requestType": "opsi.GetOperationsInsightsPrivateEndpointRequest",
+        "responseType": "opsi.GetOperationsInsightsPrivateEndpointResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOperationsInsightsPrivateEndpoints",
+        "requestType": "opsi.ListOperationsInsightsPrivateEndpointsRequest",
+        "responseType": "opsi.ListOperationsInsightsPrivateEndpointsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeOperationsInsightsPrivateEndpointCompartment",
+        "requestType": "opsi.ChangeOperationsInsightsPrivateEndpointCompartmentRequest",
+        "responseType": "opsi.ChangeOperationsInsightsPrivateEndpointCompartmentResponse"
+      },
+      {
+        "operation": "UpdateOperationsInsightsPrivateEndpoint",
+        "requestType": "opsi.UpdateOperationsInsightsPrivateEndpointRequest",
+        "responseType": "opsi.UpdateOperationsInsightsPrivateEndpointResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOperationsInsightsPrivateEndpoint",
+        "requestType": "opsi.DeleteOperationsInsightsPrivateEndpointRequest",
+        "responseType": "opsi.DeleteOperationsInsightsPrivateEndpointResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "NEEDS_ATTENTION"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags",
+      "nsg_ids",
+      "private_endpoint_status_details"
+    ],
+    "forceNew": [
+      "is_used_for_rac_dbs",
+      "subnet_id",
+      "vcn_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_opsi_operations_insights_private_endpoints",
+    "collectionField": "operations_insights_private_endpoint_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "compartment_id_in_subtree",
+      "display_name",
+      "is_used_for_rac_dbs",
+      "opsi_private_endpoint_id",
+      "state",
+      "vcn_id"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/opsi/operationsinsightsprivateendpoint/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/opsi/operationsinsightsprivateendpoint/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from terraform-provider-oci for opsi/operationsinsightsprivateendpoint."
+  ]
+}

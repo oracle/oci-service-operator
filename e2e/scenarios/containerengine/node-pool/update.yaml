@@ -1,0 +1,36 @@
+#
+# Copyright (c) 2026, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+#
+
+apiVersion: containerengine.oracle.com/v1beta1
+kind: NodePool
+metadata:
+  name: osok-oke-np-${OSOK_E2E_SUFFIX}
+spec:
+  compartmentId: ${OCI_COMPARTMENT_ID}
+  clusterId: ${OCI_CLUSTER_ID}
+  name: osok-oke-np-${OSOK_E2E_SUFFIX}
+  nodeShape: ${OCI_COMPUTE_SHAPE}
+  kubernetesVersion: ${OCI_KUBERNETES_VERSION}
+  nodeMetadata:
+    areLegacyImdsEndpointsDisabled: "true"
+  nodeSourceDetails:
+    sourceType: IMAGE
+    imageId: ${OCI_IMAGE_ID}
+    bootVolumeSizeInGBs: 50
+  nodeShapeConfig:
+    ocpus: 1
+    memoryInGBs: 16
+  nodeConfigDetails:
+    size: 1
+    placementConfigs:
+      - availabilityDomain: ${OCI_AVAILABILITY_DOMAIN}
+        subnetId: ${OCI_SUBNET_ID}
+    nodePoolPodNetworkOptionDetails:
+      cniType: OCI_VCN_IP_NATIVE
+      maxPodsPerNode: 31
+      podSubnetIds:
+        - ${OCI_POD_SUBNET_ID}
+  freeformTags:
+    osok-e2e-phase: update

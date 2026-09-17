@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "dataintegration",
+  "slug": "functionlibrary",
+  "kind": "FunctionLibrary",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_dataintegration_functionlibrary",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateFunctionLibrary",
+        "requestType": "dataintegration.CreateFunctionLibraryRequest",
+        "responseType": "dataintegration.CreateFunctionLibraryResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetFunctionLibrary",
+        "requestType": "dataintegration.GetFunctionLibraryRequest",
+        "responseType": "dataintegration.GetFunctionLibraryResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListFunctionLibrary",
+        "requestType": "dataintegration.ListFunctionLibraryRequest",
+        "responseType": "dataintegration.ListFunctionLibraryResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateFunctionLibrary",
+        "requestType": "dataintegration.UpdateFunctionLibraryRequest",
+        "responseType": "dataintegration.UpdateFunctionLibraryResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteFunctionLibrary",
+        "requestType": "dataintegration.DeleteFunctionLibraryRequest",
+        "responseType": "dataintegration.DeleteFunctionLibraryResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_dataintegration_functionlibrary",
+    "collectionField": "functionlibrary",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/dataintegration/functionlibrary/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/dataintegration/functionlibrary/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for dataintegration/functionlibrary; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

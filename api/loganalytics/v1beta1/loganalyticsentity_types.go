@@ -56,7 +56,7 @@ type LogAnalyticsEntitySpec struct {
 	// +kubebuilder:validation:Optional
 	TimeLastDiscovered string `json:"timeLastDiscovered,omitempty"`
 	// +kubebuilder:validation:Optional
-	Metadata LogAnalyticsEntityMetadata `json:"metadata,omitempty"`
+	Metadata LogAnalyticsEntityMetadata `json:"metadata,omitempty,omitzero"`
 }
 
 // LogAnalyticsEntityMetadataItem defines nested fields for LogAnalyticsEntity.Metadata.Item.

@@ -203,7 +203,10 @@ func newDomainServiceClientWithClients(
 
 func newDomainRuntimeHooksWithClients(domainClient domainOCIClient) DomainRuntimeHooks {
 	_ = domainClient
-	return newDomainDefaultRuntimeHooks(tenantmanagercontrolplanesdk.DomainClient{})
+	return newDomainDefaultRuntimeHooks(DomainSDKClients{
+		domainClient:      tenantmanagercontrolplanesdk.DomainClient{},
+		workRequestClient: tenantmanagercontrolplanesdk.WorkRequestClient{},
+	})
 }
 
 func domainListFields() []generatedruntime.RequestField {

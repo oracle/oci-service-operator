@@ -1,0 +1,198 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "fleetappsmanagement",
+  "slug": "runbookversion",
+  "kind": "RunbookVersion",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_fleet_apps_management_runbook_version",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateRunbookVersion",
+        "requestType": "fleetappsmanagement.CreateRunbookVersionRequest",
+        "responseType": "fleetappsmanagement.CreateRunbookVersionResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetRunbookVersion",
+        "requestType": "fleetappsmanagement.GetRunbookVersionRequest",
+        "responseType": "fleetappsmanagement.GetRunbookVersionResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListRunbookVersions",
+        "requestType": "fleetappsmanagement.ListRunbookVersionsRequest",
+        "responseType": "fleetappsmanagement.ListRunbookVersionsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateRunbookVersion",
+        "requestType": "fleetappsmanagement.UpdateRunbookVersionRequest",
+        "responseType": "fleetappsmanagement.UpdateRunbookVersionResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteRunbookVersion",
+        "requestType": "fleetappsmanagement.DeleteRunbookVersionRequest",
+        "responseType": "fleetappsmanagement.DeleteRunbookVersionResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "INACTIVE",
+        "NEEDS_ATTENTION"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "execution_workflow_details.workflow.group_name",
+      "execution_workflow_details.workflow.steps.group_name",
+      "execution_workflow_details.workflow.steps.step_name",
+      "execution_workflow_details.workflow.steps.steps",
+      "execution_workflow_details.workflow.steps.type",
+      "execution_workflow_details.workflow.type",
+      "groups.name",
+      "groups.properties.action_on_failure",
+      "groups.properties.notification_preferences.should_notify_on_pause",
+      "groups.properties.notification_preferences.should_notify_on_task_failure",
+      "groups.properties.notification_preferences.should_notify_on_task_success",
+      "groups.properties.pause_details.duration_in_minutes",
+      "groups.properties.pause_details.kind",
+      "groups.properties.pre_condition",
+      "groups.properties.run_on.condition",
+      "groups.properties.run_on.host",
+      "groups.properties.run_on.kind",
+      "groups.properties.run_on.previous_task_instance_details.output_variable_details.output_variable_name",
+      "groups.properties.run_on.previous_task_instance_details.output_variable_details.step_name",
+      "groups.properties.run_on.previous_task_instance_details.resource_id",
+      "groups.properties.run_on.previous_task_instance_details.resource_type",
+      "groups.type",
+      "rollback_workflow_details.scope",
+      "rollback_workflow_details.workflow.group_name",
+      "rollback_workflow_details.workflow.steps.group_name",
+      "rollback_workflow_details.workflow.steps.step_name",
+      "rollback_workflow_details.workflow.steps.steps",
+      "rollback_workflow_details.workflow.steps.type",
+      "rollback_workflow_details.workflow.type",
+      "tasks.output_variable_mappings.name",
+      "tasks.output_variable_mappings.output_variable_details.output_variable_name",
+      "tasks.output_variable_mappings.output_variable_details.step_name",
+      "tasks.step_name",
+      "tasks.step_properties.action_on_failure",
+      "tasks.step_properties.notification_preferences.should_notify_on_pause",
+      "tasks.step_properties.notification_preferences.should_notify_on_task_failure",
+      "tasks.step_properties.notification_preferences.should_notify_on_task_success",
+      "tasks.step_properties.pause_details.duration_in_minutes",
+      "tasks.step_properties.pause_details.kind",
+      "tasks.step_properties.pre_condition",
+      "tasks.step_properties.run_on.condition",
+      "tasks.step_properties.run_on.host",
+      "tasks.step_properties.run_on.kind",
+      "tasks.step_properties.run_on.previous_task_instance_details.output_variable_details.output_variable_name",
+      "tasks.step_properties.run_on.previous_task_instance_details.output_variable_details.step_name",
+      "tasks.step_properties.run_on.previous_task_instance_details.resource_id",
+      "tasks.step_properties.run_on.previous_task_instance_details.resource_type",
+      "tasks.task_record_details.description",
+      "tasks.task_record_details.execution_details.catalog_id",
+      "tasks.task_record_details.execution_details.command",
+      "tasks.task_record_details.execution_details.config_file",
+      "tasks.task_record_details.execution_details.content.bucket",
+      "tasks.task_record_details.execution_details.content.catalog_id",
+      "tasks.task_record_details.execution_details.content.checksum",
+      "tasks.task_record_details.execution_details.content.namespace",
+      "tasks.task_record_details.execution_details.content.object",
+      "tasks.task_record_details.execution_details.content.source_type",
+      "tasks.task_record_details.execution_details.credentials.display_name",
+      "tasks.task_record_details.execution_details.credentials.id",
+      "tasks.task_record_details.execution_details.endpoint",
+      "tasks.task_record_details.execution_details.execution_type",
+      "tasks.task_record_details.execution_details.is_executable_content",
+      "tasks.task_record_details.execution_details.is_locked",
+      "tasks.task_record_details.execution_details.is_read_output_variable_enabled",
+      "tasks.task_record_details.execution_details.target_compartment_id",
+      "tasks.task_record_details.execution_details.variables.input_variables.description",
+      "tasks.task_record_details.execution_details.variables.input_variables.name",
+      "tasks.task_record_details.execution_details.variables.input_variables.type",
+      "tasks.task_record_details.execution_details.variables.output_variables",
+      "tasks.task_record_details.is_apply_subject_task",
+      "tasks.task_record_details.is_copy_to_library_enabled",
+      "tasks.task_record_details.is_discovery_output_task",
+      "tasks.task_record_details.name",
+      "tasks.task_record_details.os_type",
+      "tasks.task_record_details.platform",
+      "tasks.task_record_details.properties.num_retries",
+      "tasks.task_record_details.properties.timeout_in_seconds",
+      "tasks.task_record_details.scope",
+      "tasks.task_record_details.task_record_id"
+    ],
+    "forceNew": [
+      "defined_tags",
+      "freeform_tags",
+      "runbook_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_fleet_apps_management_runbook_versions",
+    "collectionField": "runbook_version_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "id",
+      "name",
+      "runbook_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/fleetappsmanagement/runbookversion/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/fleetappsmanagement/runbookversion/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from the pinned terraform-provider-oci source revision."
+  ]
+}

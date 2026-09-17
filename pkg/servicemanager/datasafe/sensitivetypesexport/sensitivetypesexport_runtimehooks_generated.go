@@ -50,15 +50,84 @@ func registerSensitiveTypesExportRuntimeHooksMutator(mutator SensitiveTypesExpor
 	}
 	sensitivetypesexportRuntimeHooksMutators = append(sensitivetypesexportRuntimeHooksMutators, mutator)
 }
+func newSensitiveTypesExportRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "datasafe",
+		FormalSlug:    "sensitivetypesexport",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"accessLevel", "compartmentId", "compartmentIdInSubtree", "displayName", "sensitiveTypesExportId", "state", "timeCreatedGreaterThanOrEqualTo", "timeCreatedLessThan"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"definedTags", "description", "displayName", "freeformTags"},
+			ForceNew:      []string{"compartmentId", "isIncludeAllSensitiveTypes", "sensitiveTypeIdsForExport"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{},
+			Update: []generatedruntime.Hook{},
+			Delete: []generatedruntime.Hook{},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> GetSensitiveTypesExport",
+			Hooks:    []generatedruntime.Hook{},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> GetSensitiveTypesExport",
+			Hooks:    []generatedruntime.Hook{},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newSensitiveTypesExportDefaultRuntimeHooks(sdkClient datasafesdk.DataSafeClient) SensitiveTypesExportRuntimeHooks {
 	return SensitiveTypesExportRuntimeHooks{
+		Semantics:       newSensitiveTypesExportRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*datasafev1beta1.SensitiveTypesExport]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*datasafev1beta1.SensitiveTypesExport]{},
 		StatusHooks:     generatedruntime.StatusHooks[*datasafev1beta1.SensitiveTypesExport]{},
 		ParityHooks:     generatedruntime.ParityHooks[*datasafev1beta1.SensitiveTypesExport]{},
-		Async:           generatedruntime.AsyncHooks[*datasafev1beta1.SensitiveTypesExport]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*datasafev1beta1.SensitiveTypesExport]{},
+		Async: generatedruntime.AsyncHooks[*datasafev1beta1.SensitiveTypesExport]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := datasafesdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*datasafev1beta1.SensitiveTypesExport]{},
 		Create: runtimeOperationHooks[datasafesdk.CreateSensitiveTypesExportRequest, datasafesdk.CreateSensitiveTypesExportResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateSensitiveTypesExportDetails", RequestName: "CreateSensitiveTypesExportDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request datasafesdk.CreateSensitiveTypesExportRequest) (datasafesdk.CreateSensitiveTypesExportResponse, error) {
@@ -106,10 +175,19 @@ func buildSensitiveTypesExportGeneratedRuntimeConfig(
 	hooks SensitiveTypesExportRuntimeHooks,
 ) generatedruntime.Config[*datasafev1beta1.SensitiveTypesExport] {
 	return generatedruntime.Config[*datasafev1beta1.SensitiveTypesExport]{
-		Kind:            "SensitiveTypesExport",
-		SDKName:         "SensitiveTypesExport",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "SensitiveTypesExport",
+		SDKName:   "SensitiveTypesExport",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

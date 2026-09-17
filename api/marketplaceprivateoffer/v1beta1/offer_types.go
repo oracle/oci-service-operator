@@ -39,11 +39,11 @@ type OfferSpec struct {
 	// +kubebuilder:validation:Optional
 	TimeAcceptBy string `json:"timeAcceptBy,omitempty"`
 	// +kubebuilder:validation:Optional
-	Pricing OfferPricing `json:"pricing,omitempty"`
+	Pricing OfferPricing `json:"pricing,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	BuyerInformation OfferBuyerInformation `json:"buyerInformation,omitempty"`
+	BuyerInformation OfferBuyerInformation `json:"buyerInformation,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	SellerInformation OfferSellerInformation `json:"sellerInformation,omitempty"`
+	SellerInformation OfferSellerInformation `json:"sellerInformation,omitempty,omitzero"`
 	// A list of Resource Bundles associated with an Offer.
 	// +kubebuilder:validation:Optional
 	ResourceBundles []OfferResourceBundle `json:"resourceBundles,omitempty"`
@@ -108,7 +108,7 @@ type OfferBuyerInformation struct {
 	// +kubebuilder:validation:Optional
 	NoteToBuyer string `json:"noteToBuyer,omitempty"`
 	// +kubebuilder:validation:Optional
-	PrimaryContact OfferBuyerInformationPrimaryContact `json:"primaryContact,omitempty"`
+	PrimaryContact OfferBuyerInformationPrimaryContact `json:"primaryContact,omitempty,omitzero"`
 	// the additional contacts associated with the buyer
 	// +kubebuilder:validation:Optional
 	AdditionalContacts []OfferBuyerInformationAdditionalContact `json:"additionalContacts,omitempty"`
@@ -143,7 +143,7 @@ type OfferSellerInformationAdditionalContact struct {
 // OfferSellerInformation defines nested fields for Offer.SellerInformation.
 type OfferSellerInformation struct {
 	// +kubebuilder:validation:Optional
-	PrimaryContact OfferSellerInformationPrimaryContact `json:"primaryContact,omitempty"`
+	PrimaryContact OfferSellerInformationPrimaryContact `json:"primaryContact,omitempty,omitzero"`
 	// the additional contacts associated with the seller
 	// +kubebuilder:validation:Optional
 	AdditionalContacts []OfferSellerInformationAdditionalContact `json:"additionalContacts,omitempty"`

@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"maps"
+	"net/http"
 	"strings"
 
 	"github.com/oracle/oci-go-sdk/v65/common"
@@ -48,10 +49,51 @@ type ingestTimeRuleDeleteGuardReader interface {
 	GetIngestTimeRule(context.Context, loganalyticssdk.GetIngestTimeRuleRequest) (loganalyticssdk.GetIngestTimeRuleResponse, error)
 }
 
+type ingestTimeRuleHTTPCaller interface {
+	Call(context.Context, *http.Request) (*http.Response, error)
+}
+
+type updateIngestTimeRuleMutableDetails struct {
+	Id            *string                           `json:"id"`
+	CompartmentId *string                           `json:"compartmentId"`
+	DisplayName   *string                           `json:"displayName"`
+	Description   *string                           `json:"description,omitempty"`
+	FreeformTags  map[string]string                 `json:"freeformTags,omitempty"`
+	DefinedTags   map[string]map[string]interface{} `json:"definedTags,omitempty"`
+}
+
+type updateIngestTimeRuleMutableRequest struct {
+	NamespaceName    *string                            `mandatory:"true" contributesTo:"path" name:"namespaceName"`
+	IngestTimeRuleId *string                            `mandatory:"true" contributesTo:"path" name:"ingestTimeRuleId"`
+	Details          updateIngestTimeRuleMutableDetails `contributesTo:"body"`
+	IfMatch          *string                            `mandatory:"false" contributesTo:"header" name:"if-match"`
+	OpcRequestId     *string                            `mandatory:"false" contributesTo:"header" name:"opc-request-id"`
+	RequestMetadata  common.RequestMetadata
+}
+
+func (request updateIngestTimeRuleMutableRequest) HTTPRequest(
+	method string,
+	path string,
+	binaryRequestBody *common.OCIReadSeekCloser,
+	extraHeaders map[string]string,
+) (http.Request, error) {
+	return common.MakeDefaultHTTPRequestWithTaggedStructAndExtraHeaders(method, path, request, extraHeaders)
+}
+
+func (request updateIngestTimeRuleMutableRequest) BinaryRequestBody() (*common.OCIReadSeekCloser, bool) {
+	return nil, false
+}
+
+func (request updateIngestTimeRuleMutableRequest) RetryPolicy() *common.RetryPolicy {
+	return request.RequestMetadata.RetryPolicy
+}
+
 type namespaceResolvingIngestTimeRuleServiceClient struct {
-	delegate        IngestTimeRuleServiceClient
-	namespaceLister ingestTimeRuleNamespaceLister
-	deleteReader    ingestTimeRuleDeleteGuardReader
+	delegate               IngestTimeRuleServiceClient
+	namespaceLister        ingestTimeRuleNamespaceLister
+	deleteReader           ingestTimeRuleDeleteGuardReader
+	namespaceProvider      common.ConfigurationProvider
+	namespaceCompartmentID string
 }
 
 func init() {
@@ -89,7 +131,10 @@ func appendIngestTimeRuleNamespaceRuntimeWrapper(manager *IngestTimeRuleServiceM
 	}
 
 	hooks.WrapGeneratedClient = append(hooks.WrapGeneratedClient, func(delegate IngestTimeRuleServiceClient) IngestTimeRuleServiceClient {
-		client := &namespaceResolvingIngestTimeRuleServiceClient{delegate: delegate}
+		client := &namespaceResolvingIngestTimeRuleServiceClient{
+			delegate:          delegate,
+			namespaceProvider: manager.Provider,
+		}
 		sdkClient, err := loganalyticssdk.NewLogAnalyticsClientWithConfigurationProvider(manager.Provider)
 		if err == nil {
 			client.namespaceLister = sdkClient
@@ -102,6 +147,7 @@ func appendIngestTimeRuleNamespaceRuntimeWrapper(manager *IngestTimeRuleServiceM
 func newIngestTimeRuleServiceClientWithOCIClient(
 	log loggerutil.OSOKLogger,
 	client ingestTimeRuleOCIClient,
+	namespaceCompartmentID ...string,
 ) IngestTimeRuleServiceClient {
 	hooks := newIngestTimeRuleRuntimeHooksWithOCIClient(client)
 	applyIngestTimeRuleRuntimeHooks(&hooks)
@@ -111,11 +157,15 @@ func newIngestTimeRuleServiceClientWithOCIClient(
 			buildIngestTimeRuleGeneratedRuntimeConfig(manager, hooks),
 		),
 	}
-	return &namespaceResolvingIngestTimeRuleServiceClient{
+	wrapped := &namespaceResolvingIngestTimeRuleServiceClient{
 		delegate:        wrapIngestTimeRuleGeneratedClient(hooks, delegate),
 		namespaceLister: client,
 		deleteReader:    client,
 	}
+	if len(namespaceCompartmentID) > 0 {
+		wrapped.namespaceCompartmentID = strings.TrimSpace(namespaceCompartmentID[0])
+	}
+	return wrapped
 }
 
 func newIngestTimeRuleRuntimeHooksWithOCIClient(client ingestTimeRuleOCIClient) IngestTimeRuleRuntimeHooks {
@@ -160,6 +210,9 @@ func newIngestTimeRuleRuntimeHooksWithOCIClient(client ingestTimeRuleOCIClient) 
 				if client == nil {
 					return loganalyticssdk.UpdateIngestTimeRuleResponse{}, fmt.Errorf("IngestTimeRule OCI client is nil")
 				}
+				if caller, ok := client.(ingestTimeRuleHTTPCaller); ok {
+					return updateIngestTimeRuleMutableFields(ctx, caller, request)
+				}
 				return client.UpdateIngestTimeRule(ctx, request)
 			},
 		},
@@ -174,6 +227,80 @@ func newIngestTimeRuleRuntimeHooksWithOCIClient(client ingestTimeRuleOCIClient) 
 		},
 		WrapGeneratedClient: []func(IngestTimeRuleServiceClient) IngestTimeRuleServiceClient{},
 	}
+}
+
+func updateIngestTimeRuleMutableFields(
+	ctx context.Context,
+	caller ingestTimeRuleHTTPCaller,
+	request loganalyticssdk.UpdateIngestTimeRuleRequest,
+) (loganalyticssdk.UpdateIngestTimeRuleResponse, error) {
+	mutableRequest := updateIngestTimeRuleMutableRequest{
+		NamespaceName:    request.NamespaceName,
+		IngestTimeRuleId: request.IngestTimeRuleId,
+		Details: updateIngestTimeRuleMutableDetails{
+			Id:            request.UpdateIngestTimeRuleDetails.Id,
+			CompartmentId: request.UpdateIngestTimeRuleDetails.CompartmentId,
+			DisplayName:   request.UpdateIngestTimeRuleDetails.DisplayName,
+			Description:   request.UpdateIngestTimeRuleDetails.Description,
+			FreeformTags:  request.UpdateIngestTimeRuleDetails.FreeformTags,
+			DefinedTags:   request.UpdateIngestTimeRuleDetails.DefinedTags,
+		},
+		IfMatch:         request.IfMatch,
+		OpcRequestId:    request.OpcRequestId,
+		RequestMetadata: request.RequestMetadata,
+	}
+	policy := common.DefaultRetryPolicy()
+	if retryProvider, ok := caller.(interface{ RetryPolicy() *common.RetryPolicy }); ok && retryProvider.RetryPolicy() != nil {
+		policy = *retryProvider.RetryPolicy()
+	}
+	if mutableRequest.RetryPolicy() != nil {
+		policy = *mutableRequest.RetryPolicy()
+	}
+
+	operation := func(
+		ctx context.Context,
+		request common.OCIRequest,
+		binaryRequestBody *common.OCIReadSeekCloser,
+		extraHeaders map[string]string,
+	) (common.OCIResponse, error) {
+		httpRequest, err := request.HTTPRequest(
+			http.MethodPut,
+			"/namespaces/{namespaceName}/ingestTimeRules/{ingestTimeRuleId}",
+			binaryRequestBody,
+			extraHeaders,
+		)
+		if err != nil {
+			return nil, err
+		}
+		httpResponse, err := caller.Call(ctx, &httpRequest)
+		defer common.CloseBodyIfValid(httpResponse)
+		response := loganalyticssdk.UpdateIngestTimeRuleResponse{RawResponse: httpResponse}
+		if err != nil {
+			return response, common.PostProcessServiceError(
+				err,
+				"LogAnalytics",
+				"UpdateIngestTimeRule",
+				"https://docs.oracle.com/iaas/api/#/en/logan-api-spec/20200601/IngestTimeRule/UpdateIngestTimeRule",
+			)
+		}
+		if err := common.UnmarshalResponse(httpResponse, &response); err != nil {
+			return response, err
+		}
+		return response, nil
+	}
+
+	ociResponse, err := common.Retry(ctx, mutableRequest, operation, policy)
+	if err != nil {
+		if response, ok := ociResponse.(loganalyticssdk.UpdateIngestTimeRuleResponse); ok {
+			return response, err
+		}
+		return loganalyticssdk.UpdateIngestTimeRuleResponse{}, err
+	}
+	response, ok := ociResponse.(loganalyticssdk.UpdateIngestTimeRuleResponse)
+	if !ok {
+		return loganalyticssdk.UpdateIngestTimeRuleResponse{}, fmt.Errorf("failed to convert OCIResponse into UpdateIngestTimeRuleResponse")
+	}
+	return response, nil
 }
 
 func ingestTimeRuleRuntimeSemantics() *generatedruntime.Semantics {
@@ -209,18 +336,11 @@ func ingestTimeRuleRuntimeSemantics() *generatedruntime.Semantics {
 		Mutation: generatedruntime.MutationSemantics{
 			Mutable: []string{
 				"id",
-				"displayName",
 				"description",
 				"freeformTags",
 				"definedTags",
-				"conditions",
-				"actions",
-				"isEnabled",
-				"timeCreated",
-				"timeUpdated",
-				"lifecycleState",
 			},
-			ForceNew:      []string{"compartmentId"},
+			ForceNew:      []string{"compartmentId", "displayName", "isEnabled", "conditions", "actions"},
 			ConflictsWith: map[string][]string{},
 		},
 		Hooks: generatedruntime.HookSet{
@@ -339,22 +459,45 @@ func (c *namespaceResolvingIngestTimeRuleServiceClient) resolveNamespace(
 	if c.namespaceLister == nil {
 		return strings.TrimSpace(resource.Namespace), nil
 	}
-	compartmentID := strings.TrimSpace(resource.Spec.CompartmentId)
-	if compartmentID == "" {
+	namespaceCompartmentID, err := c.resolveNamespaceCompartmentID()
+	if err != nil {
+		return "", err
+	}
+	if namespaceCompartmentID == "" {
+		namespaceCompartmentID = strings.TrimSpace(resource.Spec.CompartmentId)
+	}
+	if namespaceCompartmentID == "" {
 		return "", nil
 	}
 
 	response, err := c.namespaceLister.ListNamespaces(ctx, loganalyticssdk.ListNamespacesRequest{
-		CompartmentId: common.String(compartmentID),
+		CompartmentId: common.String(namespaceCompartmentID),
 	})
 	if err != nil {
 		return "", fmt.Errorf("lookup IngestTimeRule namespace: %w", err)
 	}
 	namespace := selectIngestTimeRuleNamespace(response.Items)
 	if namespace == "" {
-		return "", fmt.Errorf("lookup IngestTimeRule namespace: OCI returned no namespace for compartment %q", compartmentID)
+		return "", fmt.Errorf("lookup IngestTimeRule namespace: OCI returned no namespace for compartment %q", namespaceCompartmentID)
 	}
 	return namespace, nil
+}
+
+func (c *namespaceResolvingIngestTimeRuleServiceClient) resolveNamespaceCompartmentID() (string, error) {
+	if c == nil {
+		return "", nil
+	}
+	if compartmentID := strings.TrimSpace(c.namespaceCompartmentID); compartmentID != "" {
+		return compartmentID, nil
+	}
+	if c.namespaceProvider == nil {
+		return "", nil
+	}
+	tenancyID, err := c.namespaceProvider.TenancyOCID()
+	if err != nil {
+		return "", fmt.Errorf("resolve Log Analytics namespace tenancy: %w", err)
+	}
+	return strings.TrimSpace(tenancyID), nil
 }
 
 func selectIngestTimeRuleNamespace(items []loganalyticssdk.NamespaceSummary) string {
@@ -576,34 +719,13 @@ func desiredIngestTimeRule(
 	spec loganalyticsv1beta1.IngestTimeRuleSpec,
 	current loganalyticssdk.IngestTimeRule,
 ) (loganalyticssdk.IngestTimeRule, error) {
-	conditions, err := ingestTimeRuleConditionFromSpec(spec.Conditions)
-	if err != nil {
-		return loganalyticssdk.IngestTimeRule{}, err
-	}
-	actions, err := ingestTimeRuleActionsFromSpec(spec.Actions)
-	if err != nil {
-		return loganalyticssdk.IngestTimeRule{}, err
-	}
-
-	id := stringPtrValue(current.Id)
-	if id == "" {
-		id = strings.TrimSpace(spec.Id)
-	}
-	compartmentID := stringPtrValue(current.CompartmentId)
-	if compartmentID == "" {
-		compartmentID = strings.TrimSpace(spec.CompartmentId)
-	}
 	desired := loganalyticssdk.IngestTimeRule{
-		Id:             optionalString(id),
-		CompartmentId:  common.String(compartmentID),
-		DisplayName:    common.String(strings.TrimSpace(spec.DisplayName)),
-		Description:    current.Description,
-		FreeformTags:   current.FreeformTags,
-		DefinedTags:    current.DefinedTags,
-		LifecycleState: current.LifecycleState,
-		IsEnabled:      common.Bool(spec.IsEnabled),
-		Conditions:     conditions,
-		Actions:        actions,
+		Id:            current.Id,
+		CompartmentId: current.CompartmentId,
+		DisplayName:   current.DisplayName,
+		Description:   current.Description,
+		FreeformTags:  current.FreeformTags,
+		DefinedTags:   current.DefinedTags,
 	}
 	if strings.TrimSpace(spec.Description) != "" {
 		desired.Description = common.String(strings.TrimSpace(spec.Description))
@@ -623,13 +745,9 @@ func ingestTimeRuleUpdateNeeded(
 	desired loganalyticssdk.IngestTimeRule,
 ) bool {
 	checks := []func() bool{
-		func() bool { return stringPtrValue(current.DisplayName) != stringPtrValue(desired.DisplayName) },
 		func() bool { return ingestTimeRuleDescriptionUpdateNeeded(spec, current, desired) },
 		func() bool { return ingestTimeRuleFreeformTagUpdateNeeded(spec, current, desired) },
 		func() bool { return ingestTimeRuleDefinedTagUpdateNeeded(spec, current, desired) },
-		func() bool { return ingestTimeRuleBoolUpdateNeeded(spec.IsEnabled, current.IsEnabled) },
-		func() bool { return !jsonEqual(current.Conditions, desired.Conditions) },
-		func() bool { return !jsonEqual(current.Actions, desired.Actions) },
 	}
 	for _, check := range checks {
 		if check() {
@@ -662,10 +780,6 @@ func ingestTimeRuleDefinedTagUpdateNeeded(
 	desired loganalyticssdk.IngestTimeRule,
 ) bool {
 	return spec.DefinedTags != nil && !jsonEqual(current.DefinedTags, desired.DefinedTags)
-}
-
-func ingestTimeRuleBoolUpdateNeeded(spec bool, current *bool) bool {
-	return current == nil || spec != *current
 }
 
 func validateIngestTimeRuleSpec(spec loganalyticsv1beta1.IngestTimeRuleSpec) error {

@@ -853,8 +853,7 @@ func methodClosure(methods map[string]*providerFuncContext, root string) []*prov
 func collectOperationBindings(closures []*providerFuncContext) []operationBinding {
 	var bindings []operationBinding
 	for _, closure := range closures {
-		requestTypes := requestVars(closure)
-		if len(requestTypes) == 0 || closure.Decl.Body == nil {
+		if closure == nil || closure.Decl.Body == nil {
 			continue
 		}
 		ast.Inspect(closure.Decl.Body, func(node ast.Node) bool {
@@ -871,6 +870,7 @@ func collectOperationBindings(closures []*providerFuncContext) []operationBindin
 				return true
 			}
 
+			requestTypes := requestVarsBefore(closure, call.Pos())
 			requestVarName := requestArgName(call.Args, requestTypes)
 			if requestVarName == "" {
 				return true
@@ -890,12 +890,15 @@ func collectOperationBindings(closures []*providerFuncContext) []operationBindin
 	return uniqueOperationBindings(bindings)
 }
 
-func requestVars(fn *providerFuncContext) map[string]string {
+func requestVarsBefore(fn *providerFuncContext, before token.Pos) map[string]string {
 	requests := map[string]string{}
 	if fn == nil || fn.Decl.Body == nil {
 		return requests
 	}
 	ast.Inspect(fn.Decl.Body, func(node ast.Node) bool {
+		if node == nil || node.Pos() >= before {
+			return false
+		}
 		switch typed := node.(type) {
 		case *ast.AssignStmt:
 			for i := range typed.Lhs {

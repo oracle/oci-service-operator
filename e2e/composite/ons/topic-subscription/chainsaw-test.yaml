@@ -1,0 +1,162 @@
+# Copyright (c) 2026, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+# yaml-language-server: $schema=https://raw.githubusercontent.com/kyverno/chainsaw/v0.2.15/.schemas/json/test-chainsaw-v1alpha1.json
+
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: Test
+metadata:
+  name: ons-topic-subscription
+spec:
+  concurrent: false
+  timeouts:
+    apply: 2m
+    assert: 20m
+    cleanup: 30m
+    delete: 30m
+    exec: 2m
+  bindings:
+    - name: suffix
+      value: (env('OSOK_E2E_SUFFIX'))
+    - name: compartmentId
+      value: (env('OCI_COMPARTMENT_ID'))
+    - name: protocol
+      value: (env('OCI_NOTIFICATION_PROTOCOL'))
+    - name: endpoint
+      value: (env('OCI_NOTIFICATION_ENDPOINT'))
+    - name: topicName
+      value: (join('-', ['osok-chain-topic', $suffix]))
+    - name: topicUpdatedDescription
+      value: OSOK composite lifecycle update
+    - name: subscriptionName
+      value: (join('-', ['osok-chain-subscription', $suffix]))
+  steps:
+    - name: exercise-topic-subscription-chain
+      description: Create and update a topic, inject its observed OCID into a subscription, verify the subscription update, and clean up.
+      try:
+        - script:
+            env:
+              - name: OCI_COMPARTMENT_ID
+                value: ($compartmentId)
+              - name: OCI_NOTIFICATION_PROTOCOL
+                value: ($protocol)
+              - name: OCI_NOTIFICATION_ENDPOINT
+                value: ($endpoint)
+            content: |
+              set -eu
+              test -n "$OCI_COMPARTMENT_ID" || { echo "OCI_COMPARTMENT_ID is required" >&2; exit 2; }
+              test -n "$OCI_NOTIFICATION_PROTOCOL" || { echo "OCI_NOTIFICATION_PROTOCOL is required" >&2; exit 2; }
+              test -n "$OCI_NOTIFICATION_ENDPOINT" || { echo "OCI_NOTIFICATION_ENDPOINT is required" >&2; exit 2; }
+        - apply:
+            resource:
+              apiVersion: ons.oracle.com/v1beta1
+              kind: Topic
+              metadata:
+                name: ($topicName)
+                namespace: ($namespace)
+              spec:
+                name: ($topicName)
+                compartmentId: ($compartmentId)
+                description: OSOK composite lifecycle create
+                freeformTags:
+                  osok-e2e-phase: create
+        - assert:
+            resource:
+              apiVersion: ons.oracle.com/v1beta1
+              kind: Topic
+              metadata:
+                name: ($topicName)
+              status:
+                name: ($topicName)
+                description: OSOK composite lifecycle create
+                lifecycleState: ACTIVE
+                freeformTags:
+                  osok-e2e-phase: create
+                status:
+                  (conditions[?type == 'Active' && status == 'True'] | length(@) > `0`): true
+                  (ocid != null && length(ocid) > `0`): true
+        - apply:
+            resource:
+              apiVersion: ons.oracle.com/v1beta1
+              kind: Topic
+              metadata:
+                name: ($topicName)
+                namespace: ($namespace)
+              spec:
+                name: ($topicName)
+                compartmentId: ($compartmentId)
+                description: ($topicUpdatedDescription)
+                freeformTags:
+                  osok-e2e-phase: update
+        - assert:
+            resource:
+              apiVersion: ons.oracle.com/v1beta1
+              kind: Topic
+              metadata:
+                name: ($topicName)
+              status:
+                name: ($topicName)
+                description: ($topicUpdatedDescription)
+                lifecycleState: ACTIVE
+                freeformTags:
+                  osok-e2e-phase: update
+                status:
+                  (conditions[?type == 'Active' && status == 'True'] | length(@) > `0`): true
+                  (ocid != null && length(ocid) > `0`): true
+        - script:
+            env:
+              - name: RESOURCE_NAME
+                value: ($topicName)
+            content: kubectl get topic.ons.oracle.com "$RESOURCE_NAME" -n "$NAMESPACE" -o json
+            outputs:
+              - name: topic
+                value: (json_parse($stdout))
+        - apply:
+            resource:
+              apiVersion: ons.oracle.com/v1beta1
+              kind: Subscription
+              metadata:
+                name: ($subscriptionName)
+                namespace: ($namespace)
+              spec:
+                topicId: ($topic.status.status.ocid)
+                compartmentId: ($compartmentId)
+                protocol: ($protocol)
+                endpoint: ($endpoint)
+                freeformTags:
+                  osok-e2e-phase: create
+        - assert:
+            resource:
+              apiVersion: ons.oracle.com/v1beta1
+              kind: Subscription
+              metadata:
+                name: ($subscriptionName)
+              status:
+                lifecycleState: ACTIVE
+                (topicId == $topic.status.status.ocid): true
+                status:
+                  (conditions[?type == 'Active' && status == 'True'] | length(@) > `0`): true
+                  (ocid != null && length(ocid) > `0`): true
+        - apply:
+            resource:
+              apiVersion: ons.oracle.com/v1beta1
+              kind: Subscription
+              metadata:
+                name: ($subscriptionName)
+                namespace: ($namespace)
+              spec:
+                topicId: ($topic.status.status.ocid)
+                compartmentId: ($compartmentId)
+                protocol: ($protocol)
+                endpoint: ($endpoint)
+                freeformTags:
+                  osok-e2e-phase: update
+        - assert:
+            resource:
+              apiVersion: ons.oracle.com/v1beta1
+              kind: Subscription
+              metadata:
+                name: ($subscriptionName)
+              status:
+                lifecycleState: ACTIVE
+                freeformTags:
+                  osok-e2e-phase: update

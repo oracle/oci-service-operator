@@ -24,6 +24,8 @@ import (
 	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
 	"github.com/oracle/oci-service-operator/pkg/shared"
 	"github.com/oracle/oci-service-operator/pkg/util"
+	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
@@ -38,6 +40,7 @@ type managementSavedSearchOCIClient interface {
 type managementSavedSearchRuntimeClient struct {
 	delegate ManagementSavedSearchServiceClient
 	hooks    ManagementSavedSearchRuntimeHooks
+	log      loggerutil.OSOKLogger
 }
 
 var _ ManagementSavedSearchServiceClient = (*managementSavedSearchRuntimeClient)(nil)
@@ -48,7 +51,7 @@ func init() {
 	})
 }
 
-func applyManagementSavedSearchRuntimeHooks(_ *ManagementSavedSearchServiceManager, hooks *ManagementSavedSearchRuntimeHooks) {
+func applyManagementSavedSearchRuntimeHooks(manager *ManagementSavedSearchServiceManager, hooks *ManagementSavedSearchRuntimeHooks) {
 	if hooks == nil {
 		return
 	}
@@ -62,9 +65,33 @@ func applyManagementSavedSearchRuntimeHooks(_ *ManagementSavedSearchServiceManag
 	hooks.ParityHooks.ValidateCreateOnlyDrift = validateManagementSavedSearchCreateOnlyDriftForResponse
 	hooks.DeleteHooks.HandleError = handleManagementSavedSearchDeleteError
 	wrapManagementSavedSearchReadAndDeleteCalls(hooks)
+	hooks.DeleteHooks.ConfirmRead = managementSavedSearchDeleteConfirmRead(hooks)
 	hooks.WrapGeneratedClient = append(hooks.WrapGeneratedClient, func(delegate ManagementSavedSearchServiceClient) ManagementSavedSearchServiceClient {
-		return &managementSavedSearchRuntimeClient{delegate: delegate, hooks: *hooks}
+		runtimeClient := &managementSavedSearchRuntimeClient{delegate: delegate, hooks: *hooks}
+		if manager != nil {
+			runtimeClient.log = manager.Log
+		}
+		return runtimeClient
 	})
+}
+
+func managementSavedSearchDeleteConfirmRead(
+	hooks *ManagementSavedSearchRuntimeHooks,
+) func(context.Context, *managementdashboardv1beta1.ManagementSavedSearch, string) (any, error) {
+	return func(ctx context.Context, resource *managementdashboardv1beta1.ManagementSavedSearch, currentID string) (any, error) {
+		response, err := hooks.Get.Call(ctx, managementdashboardsdk.GetManagementSavedSearchRequest{ManagementSavedSearchId: stringPointer(strings.TrimSpace(currentID))})
+		if err == nil || !isManagementSavedSearchAmbiguousNotFound(err) {
+			return response, err
+		}
+		found, listErr := managementSavedSearchExistsByList(ctx, hooks, resource, currentID)
+		if listErr != nil {
+			return nil, listErr
+		}
+		if found {
+			return nil, err
+		}
+		return managementdashboardsdk.GetManagementSavedSearchResponse{}, nil
+	}
 }
 
 func newManagementSavedSearchServiceClientWithOCIClient(
@@ -461,28 +488,78 @@ func (c *managementSavedSearchRuntimeClient) Delete(
 	if c == nil || c.delegate == nil {
 		return false, fmt.Errorf("ManagementSavedSearch runtime client is not configured")
 	}
-	if err := c.rejectAuthShapedPreDeleteRead(ctx, resource); err != nil {
+	confirmedDeleted, err := c.confirmAuthShapedPreDeleteRead(ctx, resource)
+	if err != nil {
 		return false, err
+	}
+	if confirmedDeleted {
+		c.markDeleted(resource, "OCI ManagementSavedSearch no longer exists")
+		return true, nil
 	}
 	return c.delegate.Delete(ctx, resource)
 }
 
-func (c *managementSavedSearchRuntimeClient) rejectAuthShapedPreDeleteRead(
+func (c *managementSavedSearchRuntimeClient) confirmAuthShapedPreDeleteRead(
 	ctx context.Context,
 	resource *managementdashboardv1beta1.ManagementSavedSearch,
-) error {
+) (bool, error) {
 	currentID := currentManagementSavedSearchID(resource)
 	if currentID == "" || c.hooks.Get.Call == nil {
-		return nil
+		return false, nil
 	}
 	_, err := c.hooks.Get.Call(ctx, managementdashboardsdk.GetManagementSavedSearchRequest{ManagementSavedSearchId: stringPointer(currentID)})
 	if err == nil || !isManagementSavedSearchAmbiguousNotFound(err) {
-		return nil
+		return false, nil
 	}
 	if resource != nil {
 		servicemanager.RecordErrorOpcRequestID(&resource.Status.OsokStatus, err)
 	}
-	return fmt.Errorf("ManagementSavedSearch delete confirmation returned ambiguous 404 NotAuthorizedOrNotFound; refusing to call delete: %v", err)
+	found, listErr := managementSavedSearchExistsByList(ctx, &c.hooks, resource, currentID)
+	if listErr != nil {
+		return false, listErr
+	}
+	if found {
+		return false, fmt.Errorf("ManagementSavedSearch delete confirmation returned ambiguous 404 NotAuthorizedOrNotFound while scoped list still contains the resource: %v", err)
+	}
+	return true, nil
+}
+
+func managementSavedSearchExistsByList(
+	ctx context.Context,
+	hooks *ManagementSavedSearchRuntimeHooks,
+	resource *managementdashboardv1beta1.ManagementSavedSearch,
+	currentID string,
+) (bool, error) {
+	if hooks == nil || hooks.List.Call == nil || resource == nil {
+		return false, fmt.Errorf("ManagementSavedSearch scoped list confirmation is not configured")
+	}
+	response, err := hooks.List.Call(ctx, managementdashboardsdk.ListManagementSavedSearchesRequest{
+		CompartmentId: stringPointer(strings.TrimSpace(resource.Spec.CompartmentId)),
+		DisplayName:   stringPointer(strings.TrimSpace(resource.Spec.DisplayName)),
+	})
+	if err != nil {
+		return false, err
+	}
+	for _, candidate := range response.Items {
+		if strings.TrimSpace(stringPointerValue(candidate.Id)) == strings.TrimSpace(currentID) {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
+func (c *managementSavedSearchRuntimeClient) markDeleted(resource *managementdashboardv1beta1.ManagementSavedSearch, message string) {
+	if resource == nil {
+		return
+	}
+	status := &resource.Status.OsokStatus
+	now := metav1.Now()
+	status.DeletedAt = &now
+	status.UpdatedAt = &now
+	status.Message = message
+	status.Reason = string(shared.Terminating)
+	servicemanager.ClearAsyncOperation(status)
+	*status = util.UpdateOSOKStatusCondition(*status, shared.Terminating, v1.ConditionTrue, "", message, c.log)
 }
 
 func currentManagementSavedSearchID(resource *managementdashboardv1beta1.ManagementSavedSearch) string {

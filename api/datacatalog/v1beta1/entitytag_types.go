@@ -21,6 +21,15 @@ type EntityTagSpec struct {
 	// Unique key of the related term or null in the case of a free form tag.
 	// +kubebuilder:validation:Optional
 	TermKey string `json:"termKey,omitempty"`
+	// The OCID of the catalog containing the tagged entity.
+	// +kubebuilder:validation:Required
+	CatalogId string `json:"catalogId"`
+	// The key of the data asset containing the tagged entity.
+	// +kubebuilder:validation:Required
+	DataAssetKey string `json:"dataAssetKey"`
+	// The key of the entity receiving the tag.
+	// +kubebuilder:validation:Required
+	EntityKey string `json:"entityKey"`
 }
 
 // EntityTagStatus defines the observed state of EntityTag.

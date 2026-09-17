@@ -27,7 +27,7 @@ type DataSourceSpec struct {
 	// +kubebuilder:validation:Optional
 	Status string `json:"status,omitempty"`
 	// +kubebuilder:validation:Optional
-	DataSourceDetails DataSourceDetails `json:"dataSourceDetails,omitempty"`
+	DataSourceDetails DataSourceDetails `json:"dataSourceDetails,omitempty,omitzero"`
 	// Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
 	// Example: `{"bar-key": "value"}`
 	// Avoid entering confidential information.
@@ -102,12 +102,12 @@ type DataSourceDetails struct {
 	// +kubebuilder:validation:Optional
 	Threshold int `json:"threshold,omitempty"`
 	// +kubebuilder:validation:Optional
-	QueryStartTime DataSourceDetailsQueryStartTime `json:"queryStartTime,omitempty"`
+	QueryStartTime DataSourceDetailsQueryStartTime `json:"queryStartTime,omitempty,omitzero"`
 	// The additional entities count used for data source query
 	// +kubebuilder:validation:Optional
 	AdditionalEntitiesCount int `json:"additionalEntitiesCount,omitempty"`
 	// +kubebuilder:validation:Optional
-	LoggingQueryDetails DataSourceDetailsLoggingQueryDetails `json:"loggingQueryDetails,omitempty"`
+	LoggingQueryDetails DataSourceDetailsLoggingQueryDetails `json:"loggingQueryDetails,omitempty,omitzero"`
 	// Operator used in data source
 	// +kubebuilder:validation:Optional
 	Operator string `json:"operator,omitempty"`

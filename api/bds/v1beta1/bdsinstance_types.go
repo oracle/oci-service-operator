@@ -45,7 +45,7 @@ type BdsInstanceSpec struct {
 	// +kubebuilder:validation:Optional
 	IsSecretReused bool `json:"isSecretReused,omitempty"`
 	// +kubebuilder:validation:Optional
-	NetworkConfig BdsInstanceNetworkConfig `json:"networkConfig,omitempty"`
+	NetworkConfig BdsInstanceNetworkConfig `json:"networkConfig,omitempty,omitzero"`
 	// Pre-authenticated URL of the script in Object Store that is downloaded and executed.
 	// +kubebuilder:validation:Optional
 	BootstrapScriptUrl string `json:"bootstrapScriptUrl,omitempty"`
@@ -67,7 +67,7 @@ type BdsInstanceSpec struct {
 	// +kubebuilder:validation:Optional
 	ClusterProfile string `json:"clusterProfile,omitempty"`
 	// +kubebuilder:validation:Optional
-	BdsClusterVersionSummary BdsInstanceBdsClusterVersionSummary `json:"bdsClusterVersionSummary,omitempty"`
+	BdsClusterVersionSummary BdsInstanceBdsClusterVersionSummary `json:"bdsClusterVersionSummary,omitempty,omitzero"`
 }
 
 // BdsInstanceNodeShapeConfig defines nested fields for BdsInstance.Node.ShapeConfig.
@@ -99,7 +99,7 @@ type BdsInstanceNode struct {
 	// +kubebuilder:validation:Required
 	SubnetId string `json:"subnetId"`
 	// +kubebuilder:validation:Optional
-	ShapeConfig BdsInstanceNodeShapeConfig `json:"shapeConfig,omitempty"`
+	ShapeConfig BdsInstanceNodeShapeConfig `json:"shapeConfig,omitempty,omitzero"`
 }
 
 // BdsInstanceNetworkConfig defines nested fields for BdsInstance.NetworkConfig.

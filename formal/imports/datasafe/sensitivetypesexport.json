@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "sensitivetypesexport",
+  "kind": "SensitiveTypesExport",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_sensitive_types_export",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateSensitiveTypesExport",
+        "requestType": "datasafe.CreateSensitiveTypesExportRequest",
+        "responseType": "datasafe.CreateSensitiveTypesExportResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetSensitiveTypesExport",
+        "requestType": "datasafe.GetSensitiveTypesExportRequest",
+        "responseType": "datasafe.GetSensitiveTypesExportResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListSensitiveTypesExports",
+        "requestType": "datasafe.ListSensitiveTypesExportsRequest",
+        "responseType": "datasafe.ListSensitiveTypesExportsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeSensitiveTypesExportCompartment",
+        "requestType": "datasafe.ChangeSensitiveTypesExportCompartmentRequest",
+        "responseType": "datasafe.ChangeSensitiveTypesExportCompartmentResponse"
+      },
+      {
+        "operation": "UpdateSensitiveTypesExport",
+        "requestType": "datasafe.UpdateSensitiveTypesExportRequest",
+        "responseType": "datasafe.UpdateSensitiveTypesExportResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteSensitiveTypesExport",
+        "requestType": "datasafe.DeleteSensitiveTypesExportRequest",
+        "responseType": "datasafe.DeleteSensitiveTypesExportResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags"
+    ],
+    "forceNew": [
+      "is_include_all_sensitive_types",
+      "sensitive_type_ids_for_export"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_data_safe_sensitive_types_exports",
+    "collectionField": "sensitive_types_export_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "access_level",
+      "compartment_id",
+      "compartment_id_in_subtree",
+      "display_name",
+      "sensitive_types_export_id",
+      "state",
+      "time_created_greater_than_or_equal_to",
+      "time_created_less_than"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/sensitivetypesexport/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/sensitivetypesexport/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from terraform-provider-oci for datasafe/sensitivetypesexport."
+  ]
+}

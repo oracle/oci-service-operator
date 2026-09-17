@@ -66,7 +66,7 @@ func newConnectionDefaultRuntimeHooks(sdkClient datacatalogsdk.DataCatalogClient
 			},
 		},
 		Get: runtimeOperationHooks[datacatalogsdk.GetConnectionRequest, datacatalogsdk.GetConnectionResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "DataAssetKey", RequestName: "dataAssetKey", Contribution: "path", PreferResourceID: false}, {FieldName: "ConnectionKey", RequestName: "connectionKey", Contribution: "path", PreferResourceID: false}, {FieldName: "Fields", RequestName: "fields", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "DataAssetKey", RequestName: "dataAssetKey", Contribution: "path", PreferResourceID: false}, {FieldName: "ConnectionKey", RequestName: "connectionKey", Contribution: "path", PreferResourceID: true}, {FieldName: "Fields", RequestName: "fields", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request datacatalogsdk.GetConnectionRequest) (datacatalogsdk.GetConnectionResponse, error) {
 				return sdkClient.GetConnection(ctx, request)
 			},
@@ -78,13 +78,13 @@ func newConnectionDefaultRuntimeHooks(sdkClient datacatalogsdk.DataCatalogClient
 			},
 		},
 		Update: runtimeOperationHooks[datacatalogsdk.UpdateConnectionRequest, datacatalogsdk.UpdateConnectionResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "DataAssetKey", RequestName: "dataAssetKey", Contribution: "path", PreferResourceID: false}, {FieldName: "ConnectionKey", RequestName: "connectionKey", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdateConnectionDetails", RequestName: "UpdateConnectionDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "DataAssetKey", RequestName: "dataAssetKey", Contribution: "path", PreferResourceID: false}, {FieldName: "ConnectionKey", RequestName: "connectionKey", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateConnectionDetails", RequestName: "UpdateConnectionDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request datacatalogsdk.UpdateConnectionRequest) (datacatalogsdk.UpdateConnectionResponse, error) {
 				return sdkClient.UpdateConnection(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[datacatalogsdk.DeleteConnectionRequest, datacatalogsdk.DeleteConnectionResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "DataAssetKey", RequestName: "dataAssetKey", Contribution: "path", PreferResourceID: false}, {FieldName: "ConnectionKey", RequestName: "connectionKey", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "DataAssetKey", RequestName: "dataAssetKey", Contribution: "path", PreferResourceID: false}, {FieldName: "ConnectionKey", RequestName: "connectionKey", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request datacatalogsdk.DeleteConnectionRequest) (datacatalogsdk.DeleteConnectionResponse, error) {
 				return sdkClient.DeleteConnection(ctx, request)
 			},

@@ -61,12 +61,12 @@ type DesktopPoolSpec struct {
 	// +kubebuilder:validation:Optional
 	Description string `json:"description,omitempty"`
 	// +kubebuilder:validation:Optional
-	ShapeConfig DesktopPoolShapeConfig `json:"shapeConfig,omitempty"`
+	ShapeConfig DesktopPoolShapeConfig `json:"shapeConfig,omitempty,omitzero"`
 	// Indicates whether the desktop pool uses dedicated virtual machine hosts.
 	// +kubebuilder:validation:Optional
 	UseDedicatedVmHost string `json:"useDedicatedVmHost,omitempty"`
 	// +kubebuilder:validation:Optional
-	SessionLifecycleActions DesktopPoolSessionLifecycleActions `json:"sessionLifecycleActions,omitempty"`
+	SessionLifecycleActions DesktopPoolSessionLifecycleActions `json:"sessionLifecycleActions,omitempty,omitzero"`
 	// The start time of the desktop pool.
 	// +kubebuilder:validation:Optional
 	TimeStartScheduled string `json:"timeStartScheduled,omitempty"`
@@ -86,7 +86,7 @@ type DesktopPoolSpec struct {
 	// +kubebuilder:validation:Optional
 	NsgIds []string `json:"nsgIds,omitempty"`
 	// +kubebuilder:validation:Optional
-	PrivateAccessDetails DesktopPoolPrivateAccessDetails `json:"privateAccessDetails,omitempty"`
+	PrivateAccessDetails DesktopPoolPrivateAccessDetails `json:"privateAccessDetails,omitempty,omitzero"`
 	// The size in GBs of the boot volume for the desktop pool.
 	// +kubebuilder:validation:Optional
 	BootVolumeSizeInGBs int `json:"bootVolumeSizeInGBs,omitempty"`
@@ -229,9 +229,9 @@ type DesktopPoolSessionLifecycleActionsDisconnect struct {
 // DesktopPoolSessionLifecycleActions defines nested fields for DesktopPool.SessionLifecycleActions.
 type DesktopPoolSessionLifecycleActions struct {
 	// +kubebuilder:validation:Optional
-	Inactivity DesktopPoolSessionLifecycleActionsInactivity `json:"inactivity,omitempty"`
+	Inactivity DesktopPoolSessionLifecycleActionsInactivity `json:"inactivity,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	Disconnect DesktopPoolSessionLifecycleActionsDisconnect `json:"disconnect,omitempty"`
+	Disconnect DesktopPoolSessionLifecycleActionsDisconnect `json:"disconnect,omitempty,omitzero"`
 }
 
 // DesktopPoolPrivateAccessDetails defines nested fields for DesktopPool.PrivateAccessDetails.

@@ -119,7 +119,7 @@ func newBackendDefaultRuntimeHooks(sdkClient loadbalancersdk.LoadBalancerClient)
 			},
 		},
 		Get: runtimeOperationHooks[loadbalancersdk.GetBackendRequest, loadbalancersdk.GetBackendResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "BackendSetName", RequestName: "backendSetName", Contribution: "path", PreferResourceID: false}, {FieldName: "BackendName", RequestName: "backendName", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "BackendSetName", RequestName: "backendSetName", Contribution: "path", PreferResourceID: false}, {FieldName: "BackendName", RequestName: "backendName", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request loadbalancersdk.GetBackendRequest) (loadbalancersdk.GetBackendResponse, error) {
 				return sdkClient.GetBackend(ctx, request)
 			},
@@ -131,13 +131,13 @@ func newBackendDefaultRuntimeHooks(sdkClient loadbalancersdk.LoadBalancerClient)
 			},
 		},
 		Update: runtimeOperationHooks[loadbalancersdk.UpdateBackendRequest, loadbalancersdk.UpdateBackendResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "BackendSetName", RequestName: "backendSetName", Contribution: "path", PreferResourceID: false}, {FieldName: "BackendName", RequestName: "backendName", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdateBackendDetails", RequestName: "UpdateBackendDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "BackendSetName", RequestName: "backendSetName", Contribution: "path", PreferResourceID: false}, {FieldName: "BackendName", RequestName: "backendName", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateBackendDetails", RequestName: "UpdateBackendDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loadbalancersdk.UpdateBackendRequest) (loadbalancersdk.UpdateBackendResponse, error) {
 				return sdkClient.UpdateBackend(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[loadbalancersdk.DeleteBackendRequest, loadbalancersdk.DeleteBackendResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "BackendSetName", RequestName: "backendSetName", Contribution: "path", PreferResourceID: false}, {FieldName: "BackendName", RequestName: "backendName", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "BackendSetName", RequestName: "backendSetName", Contribution: "path", PreferResourceID: false}, {FieldName: "BackendName", RequestName: "backendName", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request loadbalancersdk.DeleteBackendRequest) (loadbalancersdk.DeleteBackendResponse, error) {
 				return sdkClient.DeleteBackend(ctx, request)
 			},

@@ -65,19 +65,19 @@ func newPipelineValidationDefaultRuntimeHooks(sdkClient dataintegrationsdk.DataI
 			},
 		},
 		Get: runtimeOperationHooks[dataintegrationsdk.GetPipelineValidationRequest, dataintegrationsdk.GetPipelineValidationResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "PipelineValidationKey", RequestName: "pipelineValidationKey", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "PipelineValidationKey", RequestName: "pipelineValidationKey", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request dataintegrationsdk.GetPipelineValidationRequest) (dataintegrationsdk.GetPipelineValidationResponse, error) {
 				return sdkClient.GetPipelineValidation(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[dataintegrationsdk.ListPipelineValidationsRequest, dataintegrationsdk.ListPipelineValidationsResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: true}, {FieldName: "Key", RequestName: "key", Contribution: "query", PreferResourceID: false}, {FieldName: "Name", RequestName: "name", Contribution: "query", PreferResourceID: false}, {FieldName: "Identifier", RequestName: "identifier", Contribution: "query", PreferResourceID: false}, {FieldName: "Fields", RequestName: "fields", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "Key", RequestName: "key", Contribution: "query", PreferResourceID: false}, {FieldName: "Name", RequestName: "name", Contribution: "query", PreferResourceID: false}, {FieldName: "Identifier", RequestName: "identifier", Contribution: "query", PreferResourceID: false}, {FieldName: "Fields", RequestName: "fields", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dataintegrationsdk.ListPipelineValidationsRequest) (dataintegrationsdk.ListPipelineValidationsResponse, error) {
 				return sdkClient.ListPipelineValidations(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[dataintegrationsdk.DeletePipelineValidationRequest, dataintegrationsdk.DeletePipelineValidationResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "PipelineValidationKey", RequestName: "pipelineValidationKey", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "PipelineValidationKey", RequestName: "pipelineValidationKey", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request dataintegrationsdk.DeletePipelineValidationRequest) (dataintegrationsdk.DeletePipelineValidationResponse, error) {
 				return sdkClient.DeletePipelineValidation(ctx, request)
 			},

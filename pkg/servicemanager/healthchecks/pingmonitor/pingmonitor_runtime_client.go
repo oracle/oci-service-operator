@@ -7,15 +7,18 @@ package pingmonitor
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
+	"github.com/oracle/oci-go-sdk/v65/common"
 	healthcheckssdk "github.com/oracle/oci-go-sdk/v65/healthchecks"
 	healthchecksv1beta1 "github.com/oracle/oci-service-operator/api/healthchecks/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/errorutil"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
+	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 type pingMonitorOCIClient interface {
@@ -41,6 +44,13 @@ func applyPingMonitorRuntimeHooks(hooks *PingMonitorRuntimeHooks) {
 	hooks.DeleteHooks.HandleError = handlePingMonitorDeleteError
 	if hooks.List.Call != nil {
 		hooks.List.Call = listPingMonitorsAllPages(hooks.List.Call)
+	}
+	if hooks.Get.Call != nil && hooks.List.Call != nil {
+		get := hooks.Get.Call
+		list := hooks.List.Call
+		hooks.WrapGeneratedClient = append(hooks.WrapGeneratedClient, func(delegate PingMonitorServiceClient) PingMonitorServiceClient {
+			return pingMonitorDeleteGuardClient{delegate: delegate, get: get, list: list}
+		})
 	}
 }
 
@@ -129,6 +139,81 @@ func handlePingMonitorDeleteError(resource *healthchecksv1beta1.PingMonitor, err
 type pingMonitorAmbiguousNotFoundError struct {
 	message      string
 	opcRequestID string
+}
+
+type pingMonitorDeleteGuardClient struct {
+	delegate PingMonitorServiceClient
+	get      func(context.Context, healthcheckssdk.GetPingMonitorRequest) (healthcheckssdk.GetPingMonitorResponse, error)
+	list     func(context.Context, healthcheckssdk.ListPingMonitorsRequest) (healthcheckssdk.ListPingMonitorsResponse, error)
+}
+
+func (c pingMonitorDeleteGuardClient) CreateOrUpdate(
+	ctx context.Context,
+	resource *healthchecksv1beta1.PingMonitor,
+	req ctrl.Request,
+) (servicemanager.OSOKResponse, error) {
+	return c.delegate.CreateOrUpdate(ctx, resource, req)
+}
+
+func (c pingMonitorDeleteGuardClient) Delete(ctx context.Context, resource *healthchecksv1beta1.PingMonitor) (bool, error) {
+	currentID := pingMonitorTrackedID(resource)
+	if currentID == "" {
+		return c.delegate.Delete(ctx, resource)
+	}
+	_, err := c.get(ctx, healthcheckssdk.GetPingMonitorRequest{MonitorId: common.String(currentID)})
+	if isPingMonitorAuthShapedNotFound(err) {
+		return c.confirmAuthShapedAbsence(ctx, resource, currentID, err)
+	}
+	deleted, err := c.delegate.Delete(ctx, resource)
+	if isPingMonitorAuthShapedNotFound(err) {
+		return c.confirmAuthShapedAbsence(ctx, resource, currentID, err)
+	}
+	return deleted, err
+}
+
+func isPingMonitorAuthShapedNotFound(err error) bool {
+	if err == nil {
+		return false
+	}
+	if errorutil.ClassifyDeleteError(err).IsAuthShapedNotFound() {
+		return true
+	}
+	var ambiguous pingMonitorAmbiguousNotFoundError
+	return errors.As(err, &ambiguous)
+}
+
+func (c pingMonitorDeleteGuardClient) confirmAuthShapedAbsence(
+	ctx context.Context,
+	resource *healthchecksv1beta1.PingMonitor,
+	currentID string,
+	authShapedErr error,
+) (bool, error) {
+	servicemanager.RecordErrorOpcRequestID(&resource.Status.OsokStatus, authShapedErr)
+	response, err := c.list(ctx, healthcheckssdk.ListPingMonitorsRequest{
+		CompartmentId: common.String(resource.Spec.CompartmentId),
+		DisplayName:   common.String(resource.Spec.DisplayName),
+	})
+	if err != nil {
+		return false, fmt.Errorf("confirm PingMonitor deletion by list: %w", err)
+	}
+	for _, item := range response.Items {
+		if item.Id != nil && strings.TrimSpace(*item.Id) == currentID {
+			return false, handlePingMonitorDeleteError(resource, authShapedErr)
+		}
+	}
+	resource.Status.OsokStatus.Ocid = ""
+	resource.Status.Id = ""
+	return true, nil
+}
+
+func pingMonitorTrackedID(resource *healthchecksv1beta1.PingMonitor) string {
+	if resource == nil {
+		return ""
+	}
+	if id := strings.TrimSpace(string(resource.Status.OsokStatus.Ocid)); id != "" {
+		return id
+	}
+	return strings.TrimSpace(resource.Status.Id)
 }
 
 func (e pingMonitorAmbiguousNotFoundError) Error() string {

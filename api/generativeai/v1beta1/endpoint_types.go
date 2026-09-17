@@ -33,11 +33,11 @@ type EndpointSpec struct {
 	// +kubebuilder:validation:Optional
 	GenerativeAiPrivateEndpointId string `json:"generativeAiPrivateEndpointId,omitempty"`
 	// +kubebuilder:validation:Optional
-	ContentModerationConfig EndpointContentModerationConfig `json:"contentModerationConfig,omitempty"`
+	ContentModerationConfig EndpointContentModerationConfig `json:"contentModerationConfig,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	PromptInjectionConfig EndpointPromptInjectionConfig `json:"promptInjectionConfig,omitempty"`
+	PromptInjectionConfig EndpointPromptInjectionConfig `json:"promptInjectionConfig,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	PiiDetectionConfig EndpointPiiDetectionConfig `json:"piiDetectionConfig,omitempty"`
+	PiiDetectionConfig EndpointPiiDetectionConfig `json:"piiDetectionConfig,omitempty,omitzero"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
 	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`

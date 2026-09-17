@@ -400,6 +400,114 @@ func TestBuildClusterUpdateBodySkipsExplicitEmptyRefreshedMutableDriftWhenAlread
 	}
 }
 
+func TestBuildClusterUpdateBodyIgnoresAbsentOptionalFalseBlocks(t *testing.T) {
+	t.Parallel()
+
+	resource := &containerenginev1beta1.Cluster{
+		Spec: containerenginev1beta1.ClusterSpec{
+			Name:              "cluster-sample",
+			CompartmentId:     "ocid1.compartment.oc1..example",
+			VcnId:             "ocid1.vcn.oc1..example",
+			KubernetesVersion: "v1.36.1",
+			Options: containerenginev1beta1.ClusterOptions{
+				ServiceLbSubnetIds: []string{"ocid1.subnet.oc1..service"},
+			},
+			Type: "BASIC_CLUSTER",
+		},
+	}
+	current := containerenginesdk.GetClusterResponse{Cluster: containerenginesdk.Cluster{
+		Id:                common.String("ocid1.cluster.oc1..existing"),
+		Name:              common.String(resource.Spec.Name),
+		CompartmentId:     common.String(resource.Spec.CompartmentId),
+		VcnId:             common.String(resource.Spec.VcnId),
+		KubernetesVersion: common.String(resource.Spec.KubernetesVersion),
+		LifecycleState:    containerenginesdk.ClusterLifecycleStateActive,
+		Type:              containerenginesdk.ClusterTypeBasicCluster,
+		Options: &containerenginesdk.ClusterCreateOptions{
+			ServiceLbSubnetIds: resource.Spec.Options.ServiceLbSubnetIds,
+			AdmissionControllerOptions: &containerenginesdk.AdmissionControllerOptions{
+				IsPodSecurityPolicyEnabled: common.Bool(false),
+			},
+			PersistentVolumeConfig: &containerenginesdk.PersistentVolumeConfigDetails{},
+			ServiceLbConfig:        &containerenginesdk.ServiceLbConfigDetails{},
+		},
+		ImagePolicyConfig: &containerenginesdk.ImagePolicyConfig{
+			IsPolicyEnabled: common.Bool(false),
+			KeyDetails:      []containerenginesdk.KeyDetails{},
+		},
+	}}
+
+	details, needed, err := buildClusterUpdateBody(context.Background(), nil, resource, "", current)
+	if err != nil {
+		t.Fatalf("buildClusterUpdateBody() error = %v", err)
+	}
+	if needed {
+		t.Fatalf("buildClusterUpdateBody() needed = true, body = %+v", details)
+	}
+	if details.Options != nil {
+		t.Fatalf("buildClusterUpdateBody() Options = %+v, want absent optional zero-value blocks", details.Options)
+	}
+	if details.ImagePolicyConfig != nil {
+		t.Fatalf("buildClusterUpdateBody() ImagePolicyConfig = %+v, want absent optional zero-value block", details.ImagePolicyConfig)
+	}
+}
+
+func TestBuildClusterUpdateBodyPreservesExplicitFalseAgainstEnabledBlocks(t *testing.T) {
+	t.Parallel()
+
+	resource := newClusterTestResource()
+	current := observedClusterFromSpec("ocid1.cluster.oc1..existing", resource.Spec, "ACTIVE")
+	current.Options = &containerenginesdk.ClusterCreateOptions{
+		AdmissionControllerOptions: &containerenginesdk.AdmissionControllerOptions{
+			IsPodSecurityPolicyEnabled: common.Bool(true),
+		},
+		OpenIdConnectTokenAuthenticationConfig: &containerenginesdk.OpenIdConnectTokenAuthenticationConfig{
+			IsOpenIdConnectAuthEnabled: common.Bool(true),
+		},
+		OpenIdConnectDiscovery: &containerenginesdk.OpenIdConnectDiscovery{
+			IsOpenIdConnectDiscoveryEnabled: common.Bool(true),
+		},
+	}
+	current.ImagePolicyConfig = &containerenginesdk.ImagePolicyConfig{
+		IsPolicyEnabled: common.Bool(true),
+	}
+
+	details, needed, err := buildClusterUpdateBody(
+		context.Background(),
+		nil,
+		resource,
+		resource.Namespace,
+		containerenginesdk.GetClusterResponse{Cluster: current},
+	)
+	if err != nil {
+		t.Fatalf("buildClusterUpdateBody() error = %v", err)
+	}
+	if !needed {
+		t.Fatal("buildClusterUpdateBody() needed = false, want enabled optional blocks disabled")
+	}
+	if details.Options == nil ||
+		details.Options.AdmissionControllerOptions == nil ||
+		details.Options.AdmissionControllerOptions.IsPodSecurityPolicyEnabled == nil ||
+		*details.Options.AdmissionControllerOptions.IsPodSecurityPolicyEnabled {
+		t.Fatalf("admission-controller update = %+v, want explicit false", details.Options)
+	}
+	if details.Options.OpenIdConnectTokenAuthenticationConfig == nil ||
+		details.Options.OpenIdConnectTokenAuthenticationConfig.IsOpenIdConnectAuthEnabled == nil ||
+		*details.Options.OpenIdConnectTokenAuthenticationConfig.IsOpenIdConnectAuthEnabled {
+		t.Fatalf("OIDC-auth update = %+v, want explicit false", details.Options)
+	}
+	if details.Options.OpenIdConnectDiscovery == nil ||
+		details.Options.OpenIdConnectDiscovery.IsOpenIdConnectDiscoveryEnabled == nil ||
+		*details.Options.OpenIdConnectDiscovery.IsOpenIdConnectDiscoveryEnabled {
+		t.Fatalf("OIDC-discovery update = %+v, want explicit false", details.Options)
+	}
+	if details.ImagePolicyConfig == nil ||
+		details.ImagePolicyConfig.IsPolicyEnabled == nil ||
+		*details.ImagePolicyConfig.IsPolicyEnabled {
+		t.Fatalf("image-policy update = %+v, want explicit false", details.ImagePolicyConfig)
+	}
+}
+
 func TestApplyClusterRuntimeHooksInstallsCustomBodyBuilders(t *testing.T) {
 	t.Parallel()
 

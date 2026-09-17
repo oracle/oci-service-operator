@@ -16,6 +16,9 @@ import (
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
+	shared "github.com/oracle/oci-service-operator/pkg/shared"
+	"github.com/oracle/oci-service-operator/pkg/util"
+	corev1 "k8s.io/api/core/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
@@ -882,6 +885,18 @@ func (c configStatusMirrorClient) CreateOrUpdate(
 	response, err := c.delegate.CreateOrUpdate(ctx, resource, req)
 	if err == nil && response.IsSuccessful {
 		projectConfigRequestContext(resource)
+		response.ShouldRequeue = false
+		if resource != nil {
+			servicemanager.ClearAsyncOperation(&resource.Status.OsokStatus)
+			resource.Status.OsokStatus = util.UpdateOSOKStatusCondition(
+				resource.Status.OsokStatus,
+				shared.Active,
+				corev1.ConditionTrue,
+				"",
+				"OCI APM configuration is ready",
+				loggerutil.OSOKLogger{},
+			)
+		}
 	}
 	return response, err
 }

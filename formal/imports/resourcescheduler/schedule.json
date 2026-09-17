@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "resourcescheduler",
+  "slug": "schedule",
+  "kind": "Schedule",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_resource_scheduler_schedule",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateSchedule",
+        "requestType": "resourcescheduler.CreateScheduleRequest",
+        "responseType": "resourcescheduler.CreateScheduleResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetSchedule",
+        "requestType": "resourcescheduler.GetScheduleRequest",
+        "responseType": "resourcescheduler.GetScheduleResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListSchedules",
+        "requestType": "resourcescheduler.ListSchedulesRequest",
+        "responseType": "resourcescheduler.ListSchedulesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeScheduleCompartment",
+        "requestType": "resourcescheduler.ChangeScheduleCompartmentRequest",
+        "responseType": "resourcescheduler.ChangeScheduleCompartmentResponse"
+      },
+      {
+        "operation": "UpdateSchedule",
+        "requestType": "resourcescheduler.UpdateScheduleRequest",
+        "responseType": "resourcescheduler.UpdateScheduleResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteSchedule",
+        "requestType": "resourcescheduler.DeleteScheduleRequest",
+        "responseType": "resourcescheduler.DeleteScheduleResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "action",
+      "compartment_id",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags",
+      "recurrence_details",
+      "recurrence_type",
+      "resource_filters.attribute",
+      "resource_filters.condition",
+      "resource_filters.should_include_child_compartments",
+      "resource_filters.value.namespace",
+      "resource_filters.value.tag_key",
+      "resource_filters.value.value",
+      "resources.id",
+      "resources.metadata",
+      "resources.parameters.parameter_type",
+      "resources.parameters.value",
+      "state",
+      "time_ends",
+      "time_starts"
+    ],
+    "forceNew": null,
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_resource_scheduler_schedules",
+    "collectionField": "schedule_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "resource_id",
+      "schedule_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/resourcescheduler/schedule/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/resourcescheduler/schedule/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Pinned provider facts are paired with reviewed Schedule service-manager semantics and sanitized live CRUD evidence."
+  ]
+}

@@ -114,8 +114,20 @@ func newDrProtectionGroupDefaultRuntimeHooks(sdkClient disasterrecoverysdk.Disas
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*disasterrecoveryv1beta1.DrProtectionGroup]{},
 		StatusHooks:     generatedruntime.StatusHooks[*disasterrecoveryv1beta1.DrProtectionGroup]{},
 		ParityHooks:     generatedruntime.ParityHooks[*disasterrecoveryv1beta1.DrProtectionGroup]{},
-		Async:           generatedruntime.AsyncHooks[*disasterrecoveryv1beta1.DrProtectionGroup]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*disasterrecoveryv1beta1.DrProtectionGroup]{},
+		Async: generatedruntime.AsyncHooks[*disasterrecoveryv1beta1.DrProtectionGroup]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := disasterrecoverysdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*disasterrecoveryv1beta1.DrProtectionGroup]{},
 		Create: runtimeOperationHooks[disasterrecoverysdk.CreateDrProtectionGroupRequest, disasterrecoverysdk.CreateDrProtectionGroupResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateDrProtectionGroupDetails", RequestName: "CreateDrProtectionGroupDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request disasterrecoverysdk.CreateDrProtectionGroupRequest) (disasterrecoverysdk.CreateDrProtectionGroupResponse, error) {
@@ -163,10 +175,19 @@ func buildDrProtectionGroupGeneratedRuntimeConfig(
 	hooks DrProtectionGroupRuntimeHooks,
 ) generatedruntime.Config[*disasterrecoveryv1beta1.DrProtectionGroup] {
 	return generatedruntime.Config[*disasterrecoveryv1beta1.DrProtectionGroup]{
-		Kind:            "DrProtectionGroup",
-		SDKName:         "DrProtectionGroup",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "DrProtectionGroup",
+		SDKName:   "DrProtectionGroup",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

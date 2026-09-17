@@ -1,0 +1,141 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "cloudmigrations",
+  "slug": "migrationplan",
+  "kind": "MigrationPlan",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_cloud_migrations_migration_plan",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateMigrationPlan",
+        "requestType": "cloudmigrations.CreateMigrationPlanRequest",
+        "responseType": "cloudmigrations.CreateMigrationPlanResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetMigrationPlan",
+        "requestType": "cloudmigrations.GetMigrationPlanRequest",
+        "responseType": "cloudmigrations.GetMigrationPlanResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListMigrationPlans",
+        "requestType": "cloudmigrations.ListMigrationPlansRequest",
+        "responseType": "cloudmigrations.ListMigrationPlansResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeMigrationPlanCompartment",
+        "requestType": "cloudmigrations.ChangeMigrationPlanCompartmentRequest",
+        "responseType": "cloudmigrations.ChangeMigrationPlanCompartmentResponse"
+      },
+      {
+        "operation": "UpdateMigrationPlan",
+        "requestType": "cloudmigrations.UpdateMigrationPlanRequest",
+        "responseType": "cloudmigrations.UpdateMigrationPlanResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteMigrationPlan",
+        "requestType": "cloudmigrations.DeleteMigrationPlanRequest",
+        "responseType": "cloudmigrations.DeleteMigrationPlanResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "NEEDS_ATTENTION"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "display_name",
+      "freeform_tags",
+      "strategies.adjustment_multiplier",
+      "strategies.metric_time_window",
+      "strategies.metric_type",
+      "strategies.percentile",
+      "strategies.resource_type",
+      "strategies.strategy_type",
+      "target_environments.availability_domain",
+      "target_environments.dedicated_vm_host",
+      "target_environments.fault_domain",
+      "target_environments.ms_license",
+      "target_environments.preferred_shape_type",
+      "target_environments.subnet",
+      "target_environments.target_compartment_id",
+      "target_environments.target_environment_type",
+      "target_environments.vcn"
+    ],
+    "forceNew": [
+      "migration_id",
+      "source_migration_plan_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_cloud_migrations_migration_plans",
+    "collectionField": "migration_plan_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "migration_id",
+      "migration_plan_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/cloudmigrations/migrationplan/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/cloudmigrations/migrationplan/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from the pinned terraform-provider-oci source revision."
+  ]
+}

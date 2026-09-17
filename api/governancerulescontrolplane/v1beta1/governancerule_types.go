@@ -70,7 +70,7 @@ type GovernanceRuleTemplateTag struct {
 	// +kubebuilder:validation:Optional
 	IsCostTracking bool `json:"isCostTracking,omitempty"`
 	// +kubebuilder:validation:Optional
-	Validator GovernanceRuleTemplateTagValidator `json:"validator,omitempty"`
+	Validator GovernanceRuleTemplateTagValidator `json:"validator,omitempty,omitzero"`
 }
 
 // GovernanceRuleTemplateTagDefault defines nested fields for GovernanceRule.Template.TagDefault.

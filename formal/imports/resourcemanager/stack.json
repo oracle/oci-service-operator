@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "resourcemanager",
+  "slug": "stack",
+  "kind": "Stack",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_resourcemanager_stack",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateStack",
+        "requestType": "resourcemanager.CreateStackRequest",
+        "responseType": "resourcemanager.CreateStackResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetStack",
+        "requestType": "resourcemanager.GetStackRequest",
+        "responseType": "resourcemanager.GetStackResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListStack",
+        "requestType": "resourcemanager.ListStackRequest",
+        "responseType": "resourcemanager.ListStackResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateStack",
+        "requestType": "resourcemanager.UpdateStackRequest",
+        "responseType": "resourcemanager.UpdateStackResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteStack",
+        "requestType": "resourcemanager.DeleteStackRequest",
+        "responseType": "resourcemanager.DeleteStackResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_resourcemanager_stack",
+    "collectionField": "stack",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/resourcemanager/stack/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/resourcemanager/stack/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "The pinned Terraform provider has no corresponding resource implementation. The formal row remains scaffolded while the recorded SDK lifecycle supplies integration evidence."
+  ]
+}

@@ -27,7 +27,7 @@ type ConfigurationSourceProviderSpec struct {
 	// +kubebuilder:validation:Optional
 	Description string `json:"description,omitempty"`
 	// +kubebuilder:validation:Optional
-	PrivateServerConfigDetails ConfigurationSourceProviderPrivateServerConfigDetails `json:"privateServerConfigDetails,omitempty"`
+	PrivateServerConfigDetails ConfigurationSourceProviderPrivateServerConfigDetails `json:"privateServerConfigDetails,omitempty,omitzero"`
 	// Free-form tags associated with the resource. Each tag is a key-value pair with no predefined name, type, or namespace.
 	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`

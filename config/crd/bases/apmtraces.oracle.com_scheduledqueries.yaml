@@ -155,7 +155,8 @@ spec:
                 description: Type of the scheduled query.
                 type: string
               scheduledQueryRetentionCriteria:
-                description: Retention criteria for the scheduled query.
+                description: Retention criteria for the scheduled query. The live
+                  service rejects create requests when this value is omitted.
                 type: string
               scheduledQueryRetentionPeriodInMs:
                 description: Retention period for the scheduled query in milliseconds.
@@ -169,6 +170,7 @@ spec:
                 type: string
             required:
             - apmDomainId
+            - scheduledQueryRetentionCriteria
             type: object
           status:
             description: ScheduledQueryStatus defines the observed state of ScheduledQuery.

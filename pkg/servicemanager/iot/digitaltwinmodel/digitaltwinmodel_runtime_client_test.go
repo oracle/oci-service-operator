@@ -195,6 +195,30 @@ func testDigitalTwinModelSpecObject(t *testing.T) map[string]interface{} {
 	return spec
 }
 
+func TestDigitalTwinModelSpecsEqualAllowsServerGeneratedNestedIDs(t *testing.T) {
+	desired := testDigitalTwinModelSpecObject(t)
+	observed := testDigitalTwinModelSpecObject(t)
+	contents := observed["contents"].([]interface{})
+	contents[0].(map[string]interface{})["@id"] = testDigitalTwinModelSpecURI + ":_contents:__temperature;1"
+
+	if !digitalTwinModelSpecsEqual(desired, observed) {
+		t.Fatal("digitalTwinModelSpecsEqual() = false for server-generated nested @id")
+	}
+}
+
+func TestDigitalTwinModelSpecsEqualRejectsChangedAuthoredNestedID(t *testing.T) {
+	desired := testDigitalTwinModelSpecObject(t)
+	desiredContents := desired["contents"].([]interface{})
+	desiredContents[0].(map[string]interface{})["@id"] = "dtmi:com:oracle:osok:Temperature;1"
+	observed := testDigitalTwinModelSpecObject(t)
+	observedContents := observed["contents"].([]interface{})
+	observedContents[0].(map[string]interface{})["@id"] = "dtmi:com:oracle:osok:OtherTemperature;1"
+
+	if digitalTwinModelSpecsEqual(desired, observed) {
+		t.Fatal("digitalTwinModelSpecsEqual() = true for changed authored nested @id")
+	}
+}
+
 func makeSDKDigitalTwinModel(
 	t *testing.T,
 	id string,

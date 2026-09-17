@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "cloudguard",
+  "slug": "detectorrecipedetectorrule",
+  "kind": "DetectorRecipeDetectorRule",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_cloudguard_detectorrecipedetectorrule",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDetectorRecipeDetectorRule",
+        "requestType": "cloudguard.CreateDetectorRecipeDetectorRuleRequest",
+        "responseType": "cloudguard.CreateDetectorRecipeDetectorRuleResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDetectorRecipeDetectorRule",
+        "requestType": "cloudguard.GetDetectorRecipeDetectorRuleRequest",
+        "responseType": "cloudguard.GetDetectorRecipeDetectorRuleResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDetectorRecipeDetectorRule",
+        "requestType": "cloudguard.ListDetectorRecipeDetectorRuleRequest",
+        "responseType": "cloudguard.ListDetectorRecipeDetectorRuleResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDetectorRecipeDetectorRule",
+        "requestType": "cloudguard.UpdateDetectorRecipeDetectorRuleRequest",
+        "responseType": "cloudguard.UpdateDetectorRecipeDetectorRuleResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDetectorRecipeDetectorRule",
+        "requestType": "cloudguard.DeleteDetectorRecipeDetectorRuleRequest",
+        "responseType": "cloudguard.DeleteDetectorRecipeDetectorRuleResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_cloudguard_detectorrecipedetectorrule",
+    "collectionField": "detectorrecipedetectorrule",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/cloudguard/detectorrecipedetectorrule/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/cloudguard/detectorrecipedetectorrule/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for cloudguard/detectorrecipedetectorrule; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

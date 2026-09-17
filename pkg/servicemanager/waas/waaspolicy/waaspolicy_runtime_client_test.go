@@ -883,7 +883,7 @@ func sdkWaasPolicyWorkRequest(
 func sdkWaasPolicyWorkRequestResource(id string, action waassdk.WorkRequestResourceActionTypeEnum) waassdk.WorkRequestResource {
 	return waassdk.WorkRequestResource{
 		ActionType: action,
-		EntityType: common.String("WaasPolicy"),
+		EntityType: common.String("waas"),
 		Identifier: common.String(id),
 	}
 }

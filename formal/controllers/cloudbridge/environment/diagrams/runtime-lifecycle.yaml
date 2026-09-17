@@ -1,0 +1,41 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: cloudbridge
+slug: environment
+kind: Environment
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  listLookup:
+    filters:
+      - compartment_id
+      - display_name
+      - environment_id
+    matchRule: Adopt only a unique environment match in the requested compartment.
+  mutation:
+    mutable:
+      - defined_tags
+      - display_name
+      - freeform_tags
+    forceNew:
+      - compartment_id
+  hooks:
+    create:
+      - helper: CreateEnvironment
+    update:
+      - helper: UpdateEnvironment
+    delete:
+      - helper: DeleteEnvironment
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - Live create, update, and delete verification established `CREATING`,
+    `UPDATING`, `ACTIVE`, `DELETING`, and `DELETED` as the lifecycle contract.
+  - The controller projects endpoint-free resource status and has no Secret or
+    external side effects.

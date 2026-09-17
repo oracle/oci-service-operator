@@ -35,7 +35,7 @@ type VaultSpec struct {
 	// +kubebuilder:validation:Optional
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// +kubebuilder:validation:Optional
-	ExternalKeyManagerMetadata VaultExternalKeyManagerMetadata `json:"externalKeyManagerMetadata,omitempty"`
+	ExternalKeyManagerMetadata VaultExternalKeyManagerMetadata `json:"externalKeyManagerMetadata,omitempty,omitzero"`
 	// The number of days to retain the Vault after OCI deletion has been scheduled.
 	// Set a value from 7 to 30 to control the retention window used when Vault deletion is scheduled.
 	// +kubebuilder:validation:Optional

@@ -1,0 +1,58 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: filestorage
+slug: filesystem
+kind: FileSystem
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+  - deleted
+repoAuthored:
+  providerLifecycle:
+    createPending:
+      - CREATING
+    updatePending:
+      - UPDATING
+    deletePending:
+      - DELETING
+  listLookup:
+    filters:
+      - availabilityDomain
+      - compartmentId
+      - displayName
+    matchRule: exact availabilityDomain, compartmentId, and displayName match
+  mutation:
+    mutable:
+      - definedTags
+      - displayName
+      - filesystemSnapshotPolicyId
+      - freeformTags
+      - kmsKeyId
+    forceNew:
+      - availabilityDomain
+      - cloneAttachStatus
+      - compartmentId
+      - locks
+      - sourceSnapshotId
+    createOnly:
+      - areQuotaRulesEnabled
+  operations:
+    update:
+      - UpdateFileSystem
+  hooks:
+    create: []
+    update:
+      - helper: tfresource.WaitForUpdatedState
+    delete:
+      - helper: tfresource.DeleteResource
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - Recorded OCI create and update responses include the resource body; generatedruntime confirms lifecycle through explicit GetFileSystem follow-up reads rather than the provider-local WaitForCreatedState helper.
+  - ChangeFileSystemCompartment and clone-detach behavior are outside the published generic runtime, so their fields are replacement-only. areQuotaRulesEnabled is accepted only when creating through this runtime because ToggleQuotaRules is not published.
+  - Delete retains the finalizer through DELETING until DELETED or NotFound. There are no Secret side effects.

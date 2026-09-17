@@ -1,0 +1,62 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: cloudguard
+slug: securityrecipe
+kind: SecurityRecipe
+archetype: generated-service-manager
+states:
+- provisioning
+- active
+- updating
+- terminating
+repoAuthored:
+  operations:
+    create:
+    - CreateSecurityRecipe
+    update:
+    - UpdateSecurityRecipe
+    delete:
+    - DeleteSecurityRecipe
+  providerLifecycle:
+    createPending:
+    - CREATING
+    updatePending:
+    - UPDATING
+    deletePending:
+    - DELETING
+  listLookup:
+    filters:
+    - compartmentId
+    - lifecycleState
+    - displayName
+    - id
+    - opc-request-id
+    matchRule: exact declared filters match within the resource scope; duplicate matches
+      fail
+  mutation:
+    mutable:
+    - displayName
+    - securityPolicies
+    - description
+    - freeformTags
+    - definedTags
+    forceNew:
+    - compartmentId
+  hooks:
+    create:
+    - helper: tfresource.CreateResource
+    update:
+    - helper: tfresource.UpdateResource
+    delete:
+    - helper: tfresource.DeleteResource
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+- The generated service manager uses the reviewed CRUD request, response, lifecycle,
+  and status projection contract.
+- CRUD responses use lifecycle/read-after-write convergence without a work-request
+  tracker.
+- Secret side effects are none and finalizer ownership is retained until confirmed
+  deletion.

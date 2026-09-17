@@ -163,10 +163,19 @@ func buildPrivateServiceAccessGeneratedRuntimeConfig(
 	hooks PrivateServiceAccessRuntimeHooks,
 ) generatedruntime.Config[*psav1beta1.PrivateServiceAccess] {
 	return generatedruntime.Config[*psav1beta1.PrivateServiceAccess]{
-		Kind:            "PrivateServiceAccess",
-		SDKName:         "PrivateServiceAccess",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "PrivateServiceAccess",
+		SDKName:   "PrivateServiceAccess",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

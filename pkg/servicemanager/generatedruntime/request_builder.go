@@ -15,10 +15,15 @@ import (
 	"unicode"
 
 	apmconfigsdk "github.com/oracle/oci-go-sdk/v65/apmconfig"
+	autoscalingsdk "github.com/oracle/oci-go-sdk/v65/autoscaling"
+	"github.com/oracle/oci-go-sdk/v65/common"
 	dashboardservicesdk "github.com/oracle/oci-go-sdk/v65/dashboardservice"
 	databasesdk "github.com/oracle/oci-go-sdk/v65/database"
 	databasemigrationsdk "github.com/oracle/oci-go-sdk/v65/databasemigration"
 	databasetoolssdk "github.com/oracle/oci-go-sdk/v65/databasetools"
+	dataintegrationsdk "github.com/oracle/oci-go-sdk/v65/dataintegration"
+	datasafesdk "github.com/oracle/oci-go-sdk/v65/datasafe"
+	networkfirewallsdk "github.com/oracle/oci-go-sdk/v65/networkfirewall"
 	"github.com/oracle/oci-service-operator/pkg/credhelper"
 )
 
@@ -100,6 +105,7 @@ type requestBuildOptions struct {
 	CredentialClient credhelper.CredentialClient
 	Namespace        string
 	CurrentResponse  any
+	DisableRetries   bool
 }
 
 func buildRequest(
@@ -140,6 +146,7 @@ func buildRequest(
 			return err
 		}
 		assignDeterministicRetryToken(requestStruct, resource)
+		applyRequestRetryPolicy(requestStruct, options)
 		return nil
 	}
 
@@ -147,7 +154,26 @@ func buildRequest(
 		return err
 	}
 	assignDeterministicRetryToken(requestStruct, resource)
+	applyRequestRetryPolicy(requestStruct, options)
 	return nil
+}
+
+func applyRequestRetryPolicy(requestStruct reflect.Value, options requestBuildOptions) {
+	if !options.DisableRetries {
+		return
+	}
+	metadata, ok := fieldValue(requestStruct, "RequestMetadata")
+	if !ok || metadata.Kind() != reflect.Struct {
+		return
+	}
+	retryPolicy := metadata.FieldByName("RetryPolicy")
+	if !retryPolicy.IsValid() || !retryPolicy.CanSet() || retryPolicy.Kind() != reflect.Pointer {
+		return
+	}
+	policy := common.NoRetryPolicy()
+	if reflect.TypeOf(&policy).AssignableTo(retryPolicy.Type()) {
+		retryPolicy.Set(reflect.ValueOf(&policy))
+	}
 }
 
 func buildExplicitRequest(requestStruct reflect.Value, values map[string]any, preferredID string, fields []RequestField, resolvedSpec any) error {
@@ -519,6 +545,16 @@ func convertValue(raw any, targetType reflect.Type) (reflect.Value, error) {
 	if raw == nil {
 		return reflect.Zero(targetType), nil
 	}
+	rawValue := reflect.ValueOf(raw)
+	if targetType.Kind() == reflect.Slice && targetType.Elem().Kind() != reflect.Uint8 && rawValue.Kind() != reflect.Slice && rawValue.Kind() != reflect.Array {
+		item, err := convertValue(raw, targetType.Elem())
+		if err != nil {
+			return reflect.Value{}, err
+		}
+		converted := reflect.MakeSlice(targetType, 1, 1)
+		converted.Index(0).Set(item)
+		return converted, nil
+	}
 	payload, err := json.Marshal(raw)
 	if err != nil {
 		return reflect.Value{}, fmt.Errorf("marshal source value: %w", err)
@@ -537,6 +573,18 @@ func convertValue(raw any, targetType reflect.Type) (reflect.Value, error) {
 
 func convertPolymorphicInterfaceValue(payload []byte, targetType reflect.Type) (reflect.Value, bool, error) {
 	switch targetType {
+	case autoScalingPolicyCreateDetailsType:
+		body, err := convertDiscriminatedInterface[autoscalingsdk.CreateAutoScalingPolicyDetails](payload, "Autoscaling policy", "policyType", map[string]reflect.Type{
+			"SCHEDULED": reflect.TypeOf(autoscalingsdk.CreateScheduledPolicyDetails{}),
+			"THRESHOLD": reflect.TypeOf(autoscalingsdk.CreateThresholdPolicyDetails{}),
+		})
+		return interfaceValue(targetType, body, err)
+	case autoScalingPolicyUpdateDetailsType:
+		body, err := convertDiscriminatedInterface[autoscalingsdk.UpdateAutoScalingPolicyDetails](payload, "Autoscaling policy", "policyType", map[string]reflect.Type{
+			"SCHEDULED": reflect.TypeOf(autoscalingsdk.UpdateScheduledPolicyDetails{}),
+			"THRESHOLD": reflect.TypeOf(autoscalingsdk.UpdateThresholdPolicyDetails{}),
+		})
+		return interfaceValue(targetType, body, err)
 	case autonomousDatabaseBaseType:
 		body, err := convertAutonomousDatabaseBase(payload)
 		if err != nil {
@@ -593,6 +641,108 @@ func convertPolymorphicInterfaceValue(payload []byte, targetType reflect.Type) (
 		converted := reflect.New(targetType).Elem()
 		converted.Set(reflect.ValueOf(body))
 		return converted, true, nil
+	case dataIntegrationConnectionCreateType:
+		body, err := convertDiscriminatedInterface[dataintegrationsdk.CreateConnectionDetails](payload, "Data Integration connection", "modelType", map[string]reflect.Type{
+			"AMAZON_S3_CONNECTION":             reflect.TypeOf(dataintegrationsdk.CreateConnectionFromAmazonS3{}),
+			"BICC_CONNECTION":                  reflect.TypeOf(dataintegrationsdk.CreateConnectionFromBicc{}),
+			"BIP_CONNECTION":                   reflect.TypeOf(dataintegrationsdk.CreateConnectionFromBip{}),
+			"GENERIC_JDBC_CONNECTION":          reflect.TypeOf(dataintegrationsdk.CreateConnectionFromJdbc{}),
+			"HDFS_CONNECTION":                  reflect.TypeOf(dataintegrationsdk.CreateConnectionFromHdfs{}),
+			"LAKE_CONNECTION":                  reflect.TypeOf(dataintegrationsdk.CreateConnectionFromLake{}),
+			"MYSQL_CONNECTION":                 reflect.TypeOf(dataintegrationsdk.CreateConnectionFromMySql{}),
+			"MYSQL_HEATWAVE_CONNECTION":        reflect.TypeOf(dataintegrationsdk.CreateConnectionFromMySqlHeatWave{}),
+			"OAUTH2_CONNECTION":                reflect.TypeOf(dataintegrationsdk.CreateConnectionFromOAuth2{}),
+			"ORACLE_ADWC_CONNECTION":           reflect.TypeOf(dataintegrationsdk.CreateConnectionFromAdwc{}),
+			"ORACLE_ATP_CONNECTION":            reflect.TypeOf(dataintegrationsdk.CreateConnectionFromAtp{}),
+			"ORACLE_EBS_CONNECTION":            reflect.TypeOf(dataintegrationsdk.CreateConnectionFromOracleEbs{}),
+			"ORACLE_OBJECT_STORAGE_CONNECTION": reflect.TypeOf(dataintegrationsdk.CreateConnectionFromObjectStorage{}),
+			"ORACLE_PEOPLESOFT_CONNECTION":     reflect.TypeOf(dataintegrationsdk.CreateConnectionFromOraclePeopleSoft{}),
+			"ORACLE_SIEBEL_CONNECTION":         reflect.TypeOf(dataintegrationsdk.CreateConnectionFromOracleSiebel{}),
+			"ORACLEDB_CONNECTION":              reflect.TypeOf(dataintegrationsdk.CreateConnectionFromOracle{}),
+			"REST_BASIC_AUTH_CONNECTION":       reflect.TypeOf(dataintegrationsdk.CreateConnectionFromRestBasicAuth{}),
+			"REST_NO_AUTH_CONNECTION":          reflect.TypeOf(dataintegrationsdk.CreateConnectionFromRestNoAuth{}),
+		})
+		return interfaceValue(targetType, body, err)
+	case dataIntegrationConnectionUpdateType:
+		body, err := convertDiscriminatedInterface[dataintegrationsdk.UpdateConnectionDetails](payload, "Data Integration connection", "modelType", map[string]reflect.Type{
+			"AMAZON_S3_CONNECTION":             reflect.TypeOf(dataintegrationsdk.UpdateConnectionFromAmazonS3{}),
+			"BICC_CONNECTION":                  reflect.TypeOf(dataintegrationsdk.UpdateConnectionFromBicc{}),
+			"BIP_CONNECTION":                   reflect.TypeOf(dataintegrationsdk.UpdateConnectionFromBip{}),
+			"GENERIC_JDBC_CONNECTION":          reflect.TypeOf(dataintegrationsdk.UpdateConnectionFromJdbc{}),
+			"HDFS_CONNECTION":                  reflect.TypeOf(dataintegrationsdk.UpdateConnectionFromHdfs{}),
+			"LAKE_CONNECTION":                  reflect.TypeOf(dataintegrationsdk.UpdateConnectionFromLake{}),
+			"MYSQL_CONNECTION":                 reflect.TypeOf(dataintegrationsdk.UpdateConnectionFromMySql{}),
+			"MYSQL_HEATWAVE_CONNECTION":        reflect.TypeOf(dataintegrationsdk.UpdateConnectionFromMySqlHeatWave{}),
+			"OAUTH2_CONNECTION":                reflect.TypeOf(dataintegrationsdk.UpdateConnectionFromOAuth2{}),
+			"ORACLE_ADWC_CONNECTION":           reflect.TypeOf(dataintegrationsdk.UpdateConnectionFromAdwc{}),
+			"ORACLE_ATP_CONNECTION":            reflect.TypeOf(dataintegrationsdk.UpdateConnectionFromAtp{}),
+			"ORACLE_EBS_CONNECTION":            reflect.TypeOf(dataintegrationsdk.UpdateConnectionFromOracleEbs{}),
+			"ORACLE_OBJECT_STORAGE_CONNECTION": reflect.TypeOf(dataintegrationsdk.UpdateConnectionFromObjectStorage{}),
+			"ORACLE_PEOPLESOFT_CONNECTION":     reflect.TypeOf(dataintegrationsdk.UpdateConnectionFromOraclePeopleSoft{}),
+			"ORACLE_SIEBEL_CONNECTION":         reflect.TypeOf(dataintegrationsdk.UpdateConnectionFromOracleSiebel{}),
+			"ORACLEDB_CONNECTION":              reflect.TypeOf(dataintegrationsdk.UpdateConnectionFromOracle{}),
+			"REST_BASIC_AUTH_CONNECTION":       reflect.TypeOf(dataintegrationsdk.UpdateConnectionFromRestBasicAuth{}),
+			"REST_NO_AUTH_CONNECTION":          reflect.TypeOf(dataintegrationsdk.UpdateConnectionFromRestNoAuth{}),
+		})
+		return interfaceValue(targetType, body, err)
+	case dataIntegrationDataAssetCreateType:
+		body, err := convertDiscriminatedInterface[dataintegrationsdk.CreateDataAssetDetails](payload, "Data Integration data asset", "modelType", map[string]reflect.Type{
+			"AMAZON_S3_DATA_ASSET":             reflect.TypeOf(dataintegrationsdk.CreateDataAssetFromAmazonS3{}),
+			"FUSION_APP_DATA_ASSET":            reflect.TypeOf(dataintegrationsdk.CreateDataAssetFromFusionApp{}),
+			"GENERIC_JDBC_DATA_ASSET":          reflect.TypeOf(dataintegrationsdk.CreateDataAssetFromJdbc{}),
+			"HDFS_DATA_ASSET":                  reflect.TypeOf(dataintegrationsdk.CreateDataAssetFromHdfs{}),
+			"LAKE_DATA_ASSET":                  reflect.TypeOf(dataintegrationsdk.CreateDataAssetFromLake{}),
+			"MYSQL_DATA_ASSET":                 reflect.TypeOf(dataintegrationsdk.CreateDataAssetFromMySql{}),
+			"MYSQL_HEATWAVE_DATA_ASSET":        reflect.TypeOf(dataintegrationsdk.CreateDataAssetFromMySqlHeatWave{}),
+			"ORACLE_ADWC_DATA_ASSET":           reflect.TypeOf(dataintegrationsdk.CreateDataAssetFromAdwc{}),
+			"ORACLE_ATP_DATA_ASSET":            reflect.TypeOf(dataintegrationsdk.CreateDataAssetFromAtp{}),
+			"ORACLE_DATA_ASSET":                reflect.TypeOf(dataintegrationsdk.CreateDataAssetFromOracle{}),
+			"ORACLE_EBS_DATA_ASSET":            reflect.TypeOf(dataintegrationsdk.CreateDataAssetFromOracleEbs{}),
+			"ORACLE_OBJECT_STORAGE_DATA_ASSET": reflect.TypeOf(dataintegrationsdk.CreateDataAssetFromObjectStorage{}),
+			"ORACLE_PEOPLESOFT_DATA_ASSET":     reflect.TypeOf(dataintegrationsdk.CreateDataAssetFromOraclePeopleSoft{}),
+			"ORACLE_SIEBEL_DATA_ASSET":         reflect.TypeOf(dataintegrationsdk.CreateDataAssetFromOracleSiebel{}),
+			"REST_DATA_ASSET":                  reflect.TypeOf(dataintegrationsdk.CreateDataAssetFromRest{}),
+		})
+		return interfaceValue(targetType, body, err)
+	case dataIntegrationDataAssetUpdateType:
+		body, err := convertDiscriminatedInterface[dataintegrationsdk.UpdateDataAssetDetails](payload, "Data Integration data asset", "modelType", map[string]reflect.Type{
+			"AMAZON_S3_DATA_ASSET":             reflect.TypeOf(dataintegrationsdk.UpdateDataAssetFromAmazonS3{}),
+			"FUSION_APP_DATA_ASSET":            reflect.TypeOf(dataintegrationsdk.UpdateDataAssetFromFusionApp{}),
+			"GENERIC_JDBC_DATA_ASSET":          reflect.TypeOf(dataintegrationsdk.UpdateDataAssetFromJdbc{}),
+			"HDFS_DATA_ASSET":                  reflect.TypeOf(dataintegrationsdk.UpdateDataAssetFromHdfs{}),
+			"LAKE_DATA_ASSET":                  reflect.TypeOf(dataintegrationsdk.UpdateDataAssetFromLake{}),
+			"MYSQL_DATA_ASSET":                 reflect.TypeOf(dataintegrationsdk.UpdateDataAssetFromMySql{}),
+			"MYSQL_HEATWAVE_DATA_ASSET":        reflect.TypeOf(dataintegrationsdk.UpdateDataAssetFromMySqlHeatWave{}),
+			"ORACLE_ADWC_DATA_ASSET":           reflect.TypeOf(dataintegrationsdk.UpdateDataAssetFromAdwc{}),
+			"ORACLE_ATP_DATA_ASSET":            reflect.TypeOf(dataintegrationsdk.UpdateDataAssetFromAtp{}),
+			"ORACLE_DATA_ASSET":                reflect.TypeOf(dataintegrationsdk.UpdateDataAssetFromOracle{}),
+			"ORACLE_EBS_DATA_ASSET":            reflect.TypeOf(dataintegrationsdk.UpdateDataAssetFromOracleEbs{}),
+			"ORACLE_OBJECT_STORAGE_DATA_ASSET": reflect.TypeOf(dataintegrationsdk.UpdateDataAssetFromObjectStorage{}),
+			"ORACLE_PEOPLESOFT_DATA_ASSET":     reflect.TypeOf(dataintegrationsdk.UpdateDataAssetFromOraclePeopleSoft{}),
+			"ORACLE_SIEBEL_DATA_ASSET":         reflect.TypeOf(dataintegrationsdk.UpdateDataAssetFromOracleSiebel{}),
+			"REST_DATA_ASSET":                  reflect.TypeOf(dataintegrationsdk.UpdateDataAssetFromRest{}),
+		})
+		return interfaceValue(targetType, body, err)
+	case dataIntegrationTaskCreateType:
+		body, err := convertDiscriminatedInterface[dataintegrationsdk.CreateTaskDetails](payload, "Data Integration task", "modelType", map[string]reflect.Type{
+			"DATA_LOADER_TASK":  reflect.TypeOf(dataintegrationsdk.CreateTaskFromDataLoaderTask{}),
+			"INTEGRATION_TASK":  reflect.TypeOf(dataintegrationsdk.CreateTaskFromIntegrationTask{}),
+			"OCI_DATAFLOW_TASK": reflect.TypeOf(dataintegrationsdk.CreateTaskFromOciDataflowTask{}),
+			"PIPELINE_TASK":     reflect.TypeOf(dataintegrationsdk.CreateTaskFromPipelineTask{}),
+			"REST_TASK":         reflect.TypeOf(dataintegrationsdk.CreateTaskFromRestTask{}),
+			"SQL_TASK":          reflect.TypeOf(dataintegrationsdk.CreateTaskFromSqlTask{}),
+		})
+		return interfaceValue(targetType, body, err)
+	case dataIntegrationTaskUpdateType:
+		body, err := convertDiscriminatedInterface[dataintegrationsdk.UpdateTaskDetails](payload, "Data Integration task", "modelType", map[string]reflect.Type{
+			"DATA_LOADER_TASK":  reflect.TypeOf(dataintegrationsdk.UpdateTaskFromDataLoaderTask{}),
+			"INTEGRATION_TASK":  reflect.TypeOf(dataintegrationsdk.UpdateTaskFromIntegrationTask{}),
+			"OCI_DATAFLOW_TASK": reflect.TypeOf(dataintegrationsdk.UpdateTaskFromOciDataflowTask{}),
+			"PIPELINE_TASK":     reflect.TypeOf(dataintegrationsdk.UpdateTaskFromPipelineTask{}),
+			"REST_TASK":         reflect.TypeOf(dataintegrationsdk.UpdateTaskFromRestTask{}),
+			"SQL_TASK":          reflect.TypeOf(dataintegrationsdk.UpdateTaskFromSqlTask{}),
+		})
+		return interfaceValue(targetType, body, err)
 	case dashboardCreateDetailsType:
 		body, err := convertDashboardCreateDetails(payload)
 		if err != nil {
@@ -609,9 +759,148 @@ func convertPolymorphicInterfaceValue(payload []byte, targetType reflect.Type) (
 		converted := reflect.New(targetType).Elem()
 		converted.Set(reflect.ValueOf(body))
 		return converted, true, nil
+	case sensitiveTypeCreateDetailsType:
+		body, err := convertSensitiveTypePolymorphic[datasafesdk.CreateSensitiveTypeDetails](payload, map[string]reflect.Type{
+			"SENSITIVE_TYPE":     reflect.TypeOf(datasafesdk.CreateSensitiveTypePatternDetails{}),
+			"SENSITIVE_CATEGORY": reflect.TypeOf(datasafesdk.CreateSensitiveCategoryDetails{}),
+		})
+		return interfaceValue(targetType, body, err)
+	case sensitiveTypeUpdateDetailsType:
+		body, err := convertSensitiveTypePolymorphic[datasafesdk.UpdateSensitiveTypeDetails](payload, map[string]reflect.Type{
+			"SENSITIVE_TYPE":     reflect.TypeOf(datasafesdk.UpdateSensitiveTypePatternDetails{}),
+			"SENSITIVE_CATEGORY": reflect.TypeOf(datasafesdk.UpdateSensitiveCategoryDetails{}),
+		})
+		return interfaceValue(targetType, body, err)
+	case networkFirewallUpdateAddressListType:
+		body, err := convertNetworkFirewallPolymorphic[networkfirewallsdk.UpdateAddressListDetails](payload, "type", map[string]reflect.Type{
+			"FQDN": reflect.TypeOf(networkfirewallsdk.UpdateFqdnAddressListDetails{}),
+			"IP":   reflect.TypeOf(networkfirewallsdk.UpdateIpAddressListDetails{}),
+		})
+		return interfaceValue(targetType, body, err)
+	case networkFirewallCreateApplicationType:
+		body, err := convertNetworkFirewallPolymorphic[networkfirewallsdk.CreateApplicationDetails](payload, "type", map[string]reflect.Type{
+			"ICMP":    reflect.TypeOf(networkfirewallsdk.CreateIcmpApplicationDetails{}),
+			"ICMP_V6": reflect.TypeOf(networkfirewallsdk.CreateIcmp6ApplicationDetails{}),
+		})
+		return interfaceValue(targetType, body, err)
+	case networkFirewallUpdateApplicationType:
+		body, err := convertNetworkFirewallPolymorphic[networkfirewallsdk.UpdateApplicationDetails](payload, "type", map[string]reflect.Type{
+			"ICMP":    reflect.TypeOf(networkfirewallsdk.UpdateIcmpApplicationDetails{}),
+			"ICMP_V6": reflect.TypeOf(networkfirewallsdk.UpdateIcmp6ApplicationDetails{}),
+		})
+		return interfaceValue(targetType, body, err)
+	case networkFirewallCreateDecryptionType:
+		body, err := convertNetworkFirewallPolymorphic[networkfirewallsdk.CreateDecryptionProfileDetails](payload, "type", map[string]reflect.Type{
+			"SSL_FORWARD_PROXY":      reflect.TypeOf(networkfirewallsdk.CreateSslForwardProxyProfileDetails{}),
+			"SSL_INBOUND_INSPECTION": reflect.TypeOf(networkfirewallsdk.CreateSslInboundInspectionProfileDetails{}),
+		})
+		return interfaceValue(targetType, body, err)
+	case networkFirewallUpdateDecryptionType:
+		body, err := convertNetworkFirewallPolymorphic[networkfirewallsdk.UpdateDecryptionProfileDetails](payload, "type", map[string]reflect.Type{
+			"SSL_FORWARD_PROXY":      reflect.TypeOf(networkfirewallsdk.UpdateSslForwardProxyProfileDetails{}),
+			"SSL_INBOUND_INSPECTION": reflect.TypeOf(networkfirewallsdk.UpdateSslInboundInspectionProfileDetails{}),
+		})
+		return interfaceValue(targetType, body, err)
+	case networkFirewallCreateMappedSecretType:
+		body, err := convertNetworkFirewallPolymorphic[networkfirewallsdk.CreateMappedSecretDetails](payload, "source", map[string]reflect.Type{
+			"OCI_VAULT": reflect.TypeOf(networkfirewallsdk.CreateVaultMappedSecretDetails{}),
+		})
+		return interfaceValue(targetType, body, err)
+	case networkFirewallUpdateMappedSecretType:
+		body, err := convertNetworkFirewallPolymorphic[networkfirewallsdk.UpdateMappedSecretDetails](payload, "source", map[string]reflect.Type{
+			"OCI_VAULT": reflect.TypeOf(networkfirewallsdk.UpdateVaultMappedSecretDetails{}),
+		})
+		return interfaceValue(targetType, body, err)
+	case networkFirewallCreateNatRuleType:
+		body, err := convertNetworkFirewallPolymorphic[networkfirewallsdk.CreateNatRuleDetails](payload, "type", map[string]reflect.Type{
+			"NATV4": reflect.TypeOf(networkfirewallsdk.CreateNatV4RuleDetails{}),
+		})
+		return interfaceValue(targetType, body, err)
+	case networkFirewallUpdateNatRuleType:
+		body, err := convertNetworkFirewallPolymorphic[networkfirewallsdk.UpdateNatRuleDetails](payload, "type", map[string]reflect.Type{
+			"NATV4": reflect.TypeOf(networkfirewallsdk.UpdateNatV4RuleDetails{}),
+		})
+		return interfaceValue(targetType, body, err)
+	case networkFirewallCreateServiceType:
+		body, err := convertNetworkFirewallPolymorphic[networkfirewallsdk.CreateServiceDetails](payload, "type", map[string]reflect.Type{
+			"TCP_SERVICE": reflect.TypeOf(networkfirewallsdk.CreateTcpServiceDetails{}),
+			"UDP_SERVICE": reflect.TypeOf(networkfirewallsdk.CreateUdpServiceDetails{}),
+		})
+		return interfaceValue(targetType, body, err)
+	case networkFirewallUpdateServiceType:
+		body, err := convertNetworkFirewallPolymorphic[networkfirewallsdk.UpdateServiceDetails](payload, "type", map[string]reflect.Type{
+			"TCP_SERVICE": reflect.TypeOf(networkfirewallsdk.UpdateTcpServiceDetails{}),
+			"UDP_SERVICE": reflect.TypeOf(networkfirewallsdk.UpdateUdpServiceDetails{}),
+		})
+		return interfaceValue(targetType, body, err)
+	case networkFirewallCreateTunnelRuleType:
+		body, err := convertNetworkFirewallPolymorphic[networkfirewallsdk.CreateTunnelInspectionRuleDetails](payload, "protocol", map[string]reflect.Type{
+			"VXLAN": reflect.TypeOf(networkfirewallsdk.CreateVxlanInspectionRuleDetails{}),
+		})
+		return interfaceValue(targetType, body, err)
+	case networkFirewallUpdateTunnelRuleType:
+		body, err := convertNetworkFirewallPolymorphic[networkfirewallsdk.UpdateTunnelInspectionRuleDetails](payload, "protocol", map[string]reflect.Type{
+			"VXLAN": reflect.TypeOf(networkfirewallsdk.UpdateVxlanInspectionRuleDetails{}),
+		})
+		return interfaceValue(targetType, body, err)
 	default:
-		return reflect.Value{}, false, nil
+		return convertAdditionalPolymorphicInterfaceValue(payload, targetType)
 	}
+}
+
+func convertSensitiveTypePolymorphic[T any](payload []byte, concreteTypes map[string]reflect.Type) (T, error) {
+	var zero T
+	entityType, err := jsonFieldString(payload, "entityType")
+	if err != nil {
+		return zero, fmt.Errorf("decode Data Safe SensitiveType entityType discriminator: %w", err)
+	}
+	concreteType, ok := concreteTypes[strings.ToUpper(strings.TrimSpace(entityType))]
+	if !ok {
+		return zero, fmt.Errorf("unsupported Data Safe SensitiveType entityType discriminator %q", entityType)
+	}
+	converted := reflect.New(concreteType)
+	if err := json.Unmarshal(payload, converted.Interface()); err != nil {
+		return zero, fmt.Errorf("unmarshal into %s: %w", concreteType, err)
+	}
+	body, ok := converted.Elem().Interface().(T)
+	if !ok {
+		return zero, fmt.Errorf("resolved Data Safe SensitiveType type %s does not implement %s", concreteType, reflect.TypeOf((*T)(nil)).Elem())
+	}
+	return body, nil
+}
+
+func convertNetworkFirewallPolymorphic[T any](payload []byte, discriminator string, concreteTypes map[string]reflect.Type) (T, error) {
+	return convertDiscriminatedInterface[T](payload, "Network Firewall", discriminator, concreteTypes)
+}
+
+func convertDiscriminatedInterface[T any](payload []byte, subject string, discriminator string, concreteTypes map[string]reflect.Type) (T, error) {
+	var zero T
+	value, err := jsonFieldString(payload, discriminator)
+	if err != nil {
+		return zero, fmt.Errorf("decode %s %s discriminator: %w", subject, discriminator, err)
+	}
+	concreteType, ok := concreteTypes[strings.ToUpper(strings.TrimSpace(value))]
+	if !ok {
+		return zero, fmt.Errorf("unsupported %s %s discriminator %q", subject, discriminator, value)
+	}
+	converted := reflect.New(concreteType)
+	if err := json.Unmarshal(payload, converted.Interface()); err != nil {
+		return zero, fmt.Errorf("unmarshal into %s: %w", concreteType, err)
+	}
+	body, ok := converted.Elem().Interface().(T)
+	if !ok {
+		return zero, fmt.Errorf("resolved Network Firewall type %s does not implement %s", concreteType, reflect.TypeOf((*T)(nil)).Elem())
+	}
+	return body, nil
+}
+
+func interfaceValue(targetType reflect.Type, body any, err error) (reflect.Value, bool, error) {
+	if err != nil {
+		return reflect.Value{}, true, err
+	}
+	converted := reflect.New(targetType).Elem()
+	converted.Set(reflect.ValueOf(body))
+	return converted, true, nil
 }
 
 // OCI models CreateAutonomousDatabase with a polymorphic interface body. Resolve the CR spec into
@@ -980,11 +1269,25 @@ func assignDeterministicRetryToken(requestStruct reflect.Value, resource any) {
 		return
 	}
 
-	token := resourceRetryToken(resource)
+	token := requestRetryToken(resource, requestStruct.Type())
 	if token == "" {
 		return
 	}
 	_ = assignField(field, token)
+}
+
+func requestRetryToken(resource any, requestType reflect.Type) string {
+	token := resourceRetryToken(resource)
+	if token == "" || isCreateRequestType(requestType) {
+		return token
+	}
+
+	operation := ""
+	if requestType != nil {
+		operation = requestType.PkgPath() + "." + requestType.Name()
+	}
+	sum := sha256.Sum256([]byte(token + "\x00" + operation))
+	return fmt.Sprintf("%x", sum[:16])
 }
 
 func resourceRetryToken(resource any) string {
@@ -1001,9 +1304,16 @@ func resourceRetryToken(resource any) string {
 	if namespace == "" && name == "" {
 		return ""
 	}
-
 	sum := sha256.Sum256([]byte(namespace + "/" + name))
 	return fmt.Sprintf("%x", sum[:16])
+}
+
+func isCreateRequestType(requestType reflect.Type) bool {
+	if requestType == nil {
+		return false
+	}
+	name := strings.ToLower(requestType.Name())
+	return strings.HasPrefix(name, "create") || strings.HasPrefix(name, "launch")
 }
 
 func resourceNamespace(resource any, fallback string) string {

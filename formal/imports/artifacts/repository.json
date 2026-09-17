@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "artifacts",
+  "slug": "repository",
+  "kind": "Repository",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_artifacts_repository",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateRepository",
+        "requestType": "artifacts.CreateRepositoryRequest",
+        "responseType": "artifacts.CreateRepositoryResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetRepository",
+        "requestType": "artifacts.GetRepositoryRequest",
+        "responseType": "artifacts.GetRepositoryResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListRepositories",
+        "requestType": "artifacts.ListRepositoriesRequest",
+        "responseType": "artifacts.ListRepositoriesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeRepositoryCompartment",
+        "requestType": "artifacts.ChangeRepositoryCompartmentRequest",
+        "responseType": "artifacts.ChangeRepositoryCompartmentResponse"
+      },
+      {
+        "operation": "UpdateRepository",
+        "requestType": "artifacts.UpdateRepositoryRequest",
+        "responseType": "artifacts.UpdateRepositoryResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteRepository",
+        "requestType": "artifacts.DeleteRepositoryRequest",
+        "responseType": "artifacts.DeleteRepositoryResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "target": [
+        "AVAILABLE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags",
+      "repository_type"
+    ],
+    "forceNew": [
+      "is_immutable"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_artifacts_repositories",
+    "collectionField": "repository_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "id",
+      "is_immutable",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/artifacts/repository/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/artifacts/repository/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Refreshed from the pinned terraform-provider-oci Artifacts Repository resource; polymorphic runtime and deletion safeguards remain repo-authored."
+  ]
+}

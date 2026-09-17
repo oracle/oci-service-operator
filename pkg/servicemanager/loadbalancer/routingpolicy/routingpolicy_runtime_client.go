@@ -9,6 +9,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/oracle/oci-go-sdk/v65/common"
@@ -30,6 +31,7 @@ var routingPolicyWorkRequestAsyncAdapter = servicemanager.WorkRequestAsyncAdapte
 	SucceededStatusTokens: []string{string(loadbalancersdk.WorkRequestLifecycleStateSucceeded)},
 	FailedStatusTokens:    []string{string(loadbalancersdk.WorkRequestLifecycleStateFailed)},
 	CreateActionTokens: []string{
+		"AddRoutingPolicy",
 		"CreateRoutingPolicy",
 		"CREATE_ROUTING_POLICY",
 	},
@@ -38,6 +40,7 @@ var routingPolicyWorkRequestAsyncAdapter = servicemanager.WorkRequestAsyncAdapte
 		"UPDATE_ROUTING_POLICY",
 	},
 	DeleteActionTokens: []string{
+		"RemoveRoutingPolicy",
 		"DeleteRoutingPolicy",
 		"DELETE_ROUTING_POLICY",
 	},
@@ -60,6 +63,8 @@ type routingPolicyIdentity struct {
 	loadBalancerID    string
 	routingPolicyName string
 }
+
+var routingPolicyRuleNamePattern = regexp.MustCompile(`^[A-Za-z_][A-Za-z_0-9]*$`)
 
 type routingPolicyGeneratedWorkRequest struct {
 	Id             string
@@ -124,6 +129,7 @@ func applyRoutingPolicyRuntimeHooks(
 		return buildRoutingPolicyUpdateBody(resource, currentResponse)
 	}
 	hooks.Identity = generatedruntime.IdentityHooks[*loadbalancerv1beta1.RoutingPolicy]{
+		RecordBeforeCreateFollowUp: true,
 		Resolve: func(resource *loadbalancerv1beta1.RoutingPolicy) (any, error) {
 			return resolveRoutingPolicyIdentity(resource)
 		},
@@ -135,6 +141,9 @@ func applyRoutingPolicyRuntimeHooks(
 		},
 		LookupExisting: func(context.Context, *loadbalancerv1beta1.RoutingPolicy, any) (any, error) {
 			return nil, nil
+		},
+		SeedSyntheticTrackedID: func(resource *loadbalancerv1beta1.RoutingPolicy, identity any) func() {
+			return seedSyntheticRoutingPolicyID(resource, identity.(routingPolicyIdentity).routingPolicyName)
 		},
 	}
 	hooks.Create.Fields = routingPolicyCreateFields()
@@ -410,20 +419,20 @@ func routingPolicyDeleteFields() []generatedruntime.RequestField {
 
 func routingPolicyLoadBalancerIDField() generatedruntime.RequestField {
 	return generatedruntime.RequestField{
-		FieldName:        "LoadBalancerId",
-		RequestName:      "loadBalancerId",
-		Contribution:     "path",
-		PreferResourceID: true,
-		LookupPaths:      []string{"status.status.ocid"},
+		FieldName:    "LoadBalancerId",
+		RequestName:  "loadBalancerId",
+		Contribution: "path",
+		LookupPaths:  []string{"status.loadBalancerId", "spec.loadBalancerId"},
 	}
 }
 
 func routingPolicyNameField() generatedruntime.RequestField {
 	return generatedruntime.RequestField{
-		FieldName:    "RoutingPolicyName",
-		RequestName:  "routingPolicyName",
-		Contribution: "path",
-		LookupPaths:  []string{"status.name", "spec.name", "name"},
+		FieldName:        "RoutingPolicyName",
+		RequestName:      "routingPolicyName",
+		Contribution:     "path",
+		PreferResourceID: true,
+		LookupPaths:      []string{"status.name", "spec.name", "name"},
 	}
 }
 
@@ -537,12 +546,16 @@ func routingPolicySDKRules(rules []loadbalancerv1beta1.RoutingPolicyRule) ([]loa
 
 	converted := make([]loadbalancersdk.RoutingRule, 0, len(rules))
 	for index, rule := range rules {
+		name := strings.TrimSpace(rule.Name)
+		if !routingPolicyRuleNamePattern.MatchString(name) {
+			return nil, fmt.Errorf("routing policy rule %d name %q must match %s", index, rule.Name, routingPolicyRuleNamePattern.String())
+		}
 		actions, err := routingPolicySDKActions(rule.Actions)
 		if err != nil {
 			return nil, fmt.Errorf("convert routing policy rule %d actions: %w", index, err)
 		}
 		converted = append(converted, loadbalancersdk.RoutingRule{
-			Name:      stringPointer(rule.Name),
+			Name:      stringPointer(name),
 			Condition: stringPointer(rule.Condition),
 			Actions:   actions,
 		})
@@ -609,23 +622,27 @@ func resolveRoutingPolicyIdentity(resource *loadbalancerv1beta1.RoutingPolicy) (
 		return routingPolicyIdentity{}, fmt.Errorf("resolve RoutingPolicy identity: resource is nil")
 	}
 
-	statusLoadBalancerID := strings.TrimSpace(string(resource.Status.OsokStatus.Ocid))
+	statusLoadBalancerID := strings.TrimSpace(resource.Status.LoadBalancerId)
+	specLoadBalancerID := strings.TrimSpace(resource.Spec.LoadBalancerId)
 	annotationLoadBalancerID := strings.TrimSpace(resource.Annotations[routingPolicyLoadBalancerIDAnnotation])
-	if statusLoadBalancerID != "" && annotationLoadBalancerID != "" && statusLoadBalancerID != annotationLoadBalancerID {
+	if specLoadBalancerID != "" && annotationLoadBalancerID != "" && specLoadBalancerID != annotationLoadBalancerID {
+		return routingPolicyIdentity{}, fmt.Errorf("resolve RoutingPolicy identity: spec.loadBalancerId %q conflicts with %s annotation %q", specLoadBalancerID, routingPolicyLoadBalancerIDAnnotation, annotationLoadBalancerID)
+	}
+	desiredLoadBalancerID := firstNonEmptyTrim(specLoadBalancerID, annotationLoadBalancerID)
+	if statusLoadBalancerID != "" && desiredLoadBalancerID != "" && statusLoadBalancerID != desiredLoadBalancerID {
 		return routingPolicyIdentity{}, fmt.Errorf(
-			"resolve RoutingPolicy identity: %s changed from recorded loadBalancerId %q to %q",
-			routingPolicyLoadBalancerIDAnnotation,
+			"resolve RoutingPolicy identity: loadBalancerId changed from recorded value %q to %q",
 			statusLoadBalancerID,
-			annotationLoadBalancerID,
+			desiredLoadBalancerID,
 		)
 	}
 
 	identity := routingPolicyIdentity{
-		loadBalancerID:    firstNonEmptyTrim(statusLoadBalancerID, annotationLoadBalancerID),
+		loadBalancerID:    firstNonEmptyTrim(statusLoadBalancerID, desiredLoadBalancerID),
 		routingPolicyName: firstNonEmptyTrim(resource.Status.Name, resource.Spec.Name, resource.Name),
 	}
 	if identity.loadBalancerID == "" {
-		return routingPolicyIdentity{}, fmt.Errorf("resolve RoutingPolicy identity: %s annotation is required", routingPolicyLoadBalancerIDAnnotation)
+		return routingPolicyIdentity{}, fmt.Errorf("resolve RoutingPolicy identity: spec.loadBalancerId or %s annotation is required", routingPolicyLoadBalancerIDAnnotation)
 	}
 	if identity.routingPolicyName == "" {
 		return routingPolicyIdentity{}, fmt.Errorf("resolve RoutingPolicy identity: routing policy name is empty")
@@ -637,14 +654,19 @@ func recordRoutingPolicyPathIdentity(resource *loadbalancerv1beta1.RoutingPolicy
 	if resource == nil {
 		return
 	}
+	resource.Status.LoadBalancerId = identity.loadBalancerID
 	resource.Status.Name = identity.routingPolicyName
-	// RoutingPolicy has no child OCID in the Load Balancer API, so the runtime records
-	// the parent loadBalancerId as the stable path identity used for Get/Update/Delete.
-	resource.Status.OsokStatus.Ocid = shared.OCID(identity.loadBalancerID)
 }
 
 func recordRoutingPolicyTrackedIdentity(resource *loadbalancerv1beta1.RoutingPolicy, identity routingPolicyIdentity) {
 	recordRoutingPolicyPathIdentity(resource, identity)
+	resource.Status.OsokStatus.Ocid = shared.OCID(identity.routingPolicyName)
+}
+
+func seedSyntheticRoutingPolicyID(resource *loadbalancerv1beta1.RoutingPolicy, name string) func() {
+	previous := resource.Status.OsokStatus.Ocid
+	resource.Status.OsokStatus.Ocid = shared.OCID(name)
+	return func() { resource.Status.OsokStatus.Ocid = previous }
 }
 
 func firstNonEmptyTrim(values ...string) string {

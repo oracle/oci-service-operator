@@ -53,6 +53,10 @@ spec:
           spec:
             description: TargetDetectorRecipeSpec defines the desired state of TargetDetectorRecipe.
             properties:
+              compartmentId:
+                description: The OCID of the compartment used to confirm the target
+                  detector recipe through its collection endpoint.
+                type: string
               detectorRecipeId:
                 description: Unique identifier for the target detector recipe
                 type: string
@@ -128,8 +132,14 @@ spec:
                 description: Is validation to be performed for attaching the detector
                   recipe?
                 type: boolean
+              targetId:
+                description: The OCID of the Cloud Guard target receiving the detector
+                  recipe.
+                type: string
             required:
+            - compartmentId
             - detectorRecipeId
+            - targetId
             type: object
           status:
             description: TargetDetectorRecipeStatus defines the observed state of

@@ -40,7 +40,7 @@ type VbInstanceSpec struct {
 	// +kubebuilder:validation:Optional
 	IsVisualBuilderEnabled bool `json:"isVisualBuilderEnabled,omitempty"`
 	// +kubebuilder:validation:Optional
-	CustomEndpoint VbInstanceCustomEndpoint `json:"customEndpoint,omitempty"`
+	CustomEndpoint VbInstanceCustomEndpoint `json:"customEndpoint,omitempty,omitzero"`
 	// A list of alternate custom endpoints to be used for the vb instance URL
 	// (contact Oracle for alternateCustomEndpoints availability for a specific instance).
 	// +kubebuilder:validation:Optional
@@ -49,7 +49,7 @@ type VbInstanceSpec struct {
 	// +kubebuilder:validation:Optional
 	ConsumptionModel string `json:"consumptionModel,omitempty"`
 	// +kubebuilder:validation:Optional
-	NetworkEndpointDetails VbInstanceNetworkEndpointDetails `json:"networkEndpointDetails,omitempty"`
+	NetworkEndpointDetails VbInstanceNetworkEndpointDetails `json:"networkEndpointDetails,omitempty,omitzero"`
 }
 
 // VbInstanceCustomEndpoint defines nested fields for VbInstance.CustomEndpoint.

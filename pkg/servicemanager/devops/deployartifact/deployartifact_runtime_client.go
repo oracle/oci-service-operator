@@ -99,7 +99,7 @@ func applyDeployArtifactRuntimeHooks(
 		return
 	}
 
-	hooks.Semantics = newDeployArtifactRuntimeSemantics()
+	hooks.Semantics = reviewedDeployArtifactRuntimeSemantics()
 	hooks.BuildCreateBody = func(_ context.Context, resource *devopsv1beta1.DeployArtifact, _ string) (any, error) {
 		return buildDeployArtifactCreateBody(resource)
 	}
@@ -139,6 +139,7 @@ func applyDeployArtifactRuntimeHooks(
 	hooks.StatusHooks.ProjectStatus = deployArtifactStatusFromResponse
 	hooks.ParityHooks.ValidateCreateOnlyDrift = validateDeployArtifactCreateOnlyDriftForResponse
 	hooks.DeleteHooks.ConfirmRead = deployArtifactDeleteConfirmRead(hooks.Get.Call, hooks.List.Call)
+	hooks.DeleteHooks.UseConfirmReadAfterWorkRequest = true
 	hooks.DeleteHooks.HandleError = handleDeployArtifactDeleteError
 	hooks.DeleteHooks.ApplyOutcome = applyDeployArtifactDeleteOutcome
 	hooks.Async.Adapter = deployArtifactWorkRequestAsyncAdapter
@@ -209,7 +210,7 @@ func newDeployArtifactRuntimeHooksWithOCIClient(client deployArtifactOCIClient) 
 	}
 }
 
-func newDeployArtifactRuntimeSemantics() *generatedruntime.Semantics {
+func reviewedDeployArtifactRuntimeSemantics() *generatedruntime.Semantics {
 	return &generatedruntime.Semantics{
 		FormalService: "devops",
 		FormalSlug:    "deployartifact",
@@ -921,17 +922,28 @@ func deployArtifactDeleteConfirmRead(
 		if !isDeployArtifactAmbiguousNotFound(err) && !errorutil.ClassifyDeleteError(err).IsAuthShapedNotFound() {
 			return nil, err
 		}
+		listed, listErr := deployArtifactDeleteConfirmReadByList(ctx, resource, listDeployArtifacts)
+		if listErr != nil {
+			return nil, listErr
+		}
 		handledErr := handleDeployArtifactDeleteError(resource, err)
 		if handledErr == nil {
 			handledErr = err
 		}
 		return deployArtifactAmbiguousDeleteConfirmResponse{
-			DeployArtifact: devopssdk.DeployArtifact{
-				Id:             common.String(currentID),
-				LifecycleState: devopssdk.DeployArtifactLifecycleStateActive,
-			},
-			err: handledErr,
+			DeployArtifact: deployArtifactFromDeleteConfirmation(listed, currentID),
+			err:            handledErr,
 		}, nil
+	}
+}
+
+func deployArtifactFromDeleteConfirmation(response any, currentID string) devopssdk.DeployArtifact {
+	if typed, ok := response.(devopssdk.GetDeployArtifactResponse); ok {
+		return typed.DeployArtifact
+	}
+	return devopssdk.DeployArtifact{
+		Id:             common.String(strings.TrimSpace(currentID)),
+		LifecycleState: devopssdk.DeployArtifactLifecycleStateActive,
 	}
 }
 

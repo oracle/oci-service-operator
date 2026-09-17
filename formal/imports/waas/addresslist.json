@@ -1,0 +1,127 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "waas",
+  "slug": "addresslist",
+  "kind": "AddressList",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_waas_address_list",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateAddressList",
+        "requestType": "waas.CreateAddressListRequest",
+        "responseType": "waas.CreateAddressListResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetAddressList",
+        "requestType": "waas.GetAddressListRequest",
+        "responseType": "waas.GetAddressListResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListAddressLists",
+        "requestType": "waas.ListAddressListsRequest",
+        "responseType": "waas.ListAddressListsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeAddressListCompartment",
+        "requestType": "waas.ChangeAddressListCompartmentRequest",
+        "responseType": "waas.ChangeAddressListCompartmentResponse"
+      },
+      {
+        "operation": "UpdateAddressList",
+        "requestType": "waas.UpdateAddressListRequest",
+        "responseType": "waas.UpdateAddressListResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteAddressList",
+        "requestType": "waas.DeleteAddressListRequest",
+        "responseType": "waas.DeleteAddressListResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "S_CREATING"
+      ],
+      "target": [
+        "S_ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "addresses",
+      "compartment_id",
+      "defined_tags",
+      "display_name",
+      "freeform_tags"
+    ],
+    "forceNew": null,
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_waas_address_lists",
+    "collectionField": "address_lists",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "ids",
+      "names",
+      "states",
+      "time_created_greater_than_or_equal_to",
+      "time_created_less_than"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/waas/addresslist/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/waas/addresslist/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Pinned provider facts are paired with reviewed AddressList service-manager semantics and sanitized live CRUD evidence."
+  ]
+}

@@ -50,15 +50,84 @@ func registerFusionEnvironmentFamilyRuntimeHooksMutator(mutator FusionEnvironmen
 	}
 	fusionenvironmentfamilyRuntimeHooksMutators = append(fusionenvironmentfamilyRuntimeHooksMutators, mutator)
 }
+func newFusionEnvironmentFamilyRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "fusionapps",
+		FormalSlug:    "fusionenvironmentfamily",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "displayName", "fusionEnvironmentFamilyId", "state"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"compartmentId", "definedTags", "displayName", "familyMaintenancePolicy.concurrentMaintenance", "familyMaintenancePolicy.isMonthlyPatchingEnabled", "freeformTags", "subscriptionIds", "timeUpdated"},
+			ForceNew:      []string{"familyMaintenancePolicy.quarterlyUpgradeBeginTimes"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newFusionEnvironmentFamilyDefaultRuntimeHooks(sdkClient fusionappssdk.FusionApplicationsClient) FusionEnvironmentFamilyRuntimeHooks {
 	return FusionEnvironmentFamilyRuntimeHooks{
+		Semantics:       newFusionEnvironmentFamilyRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*fusionappsv1beta1.FusionEnvironmentFamily]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*fusionappsv1beta1.FusionEnvironmentFamily]{},
 		StatusHooks:     generatedruntime.StatusHooks[*fusionappsv1beta1.FusionEnvironmentFamily]{},
 		ParityHooks:     generatedruntime.ParityHooks[*fusionappsv1beta1.FusionEnvironmentFamily]{},
-		Async:           generatedruntime.AsyncHooks[*fusionappsv1beta1.FusionEnvironmentFamily]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*fusionappsv1beta1.FusionEnvironmentFamily]{},
+		Async: generatedruntime.AsyncHooks[*fusionappsv1beta1.FusionEnvironmentFamily]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := fusionappssdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*fusionappsv1beta1.FusionEnvironmentFamily]{},
 		Create: runtimeOperationHooks[fusionappssdk.CreateFusionEnvironmentFamilyRequest, fusionappssdk.CreateFusionEnvironmentFamilyResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateFusionEnvironmentFamilyDetails", RequestName: "CreateFusionEnvironmentFamilyDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request fusionappssdk.CreateFusionEnvironmentFamilyRequest) (fusionappssdk.CreateFusionEnvironmentFamilyResponse, error) {
@@ -106,10 +175,19 @@ func buildFusionEnvironmentFamilyGeneratedRuntimeConfig(
 	hooks FusionEnvironmentFamilyRuntimeHooks,
 ) generatedruntime.Config[*fusionappsv1beta1.FusionEnvironmentFamily] {
 	return generatedruntime.Config[*fusionappsv1beta1.FusionEnvironmentFamily]{
-		Kind:            "FusionEnvironmentFamily",
-		SDKName:         "FusionEnvironmentFamily",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "FusionEnvironmentFamily",
+		SDKName:   "FusionEnvironmentFamily",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

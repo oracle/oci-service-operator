@@ -50,50 +50,119 @@ func registerAssetSourceRuntimeHooksMutator(mutator AssetSourceRuntimeHooksMutat
 	}
 	assetsourceRuntimeHooksMutators = append(assetsourceRuntimeHooksMutators, mutator)
 }
-func newAssetSourceDefaultRuntimeHooks(sdkClient cloudbridgesdk.DiscoveryClient) AssetSourceRuntimeHooks {
+func newAssetSourceRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "cloudbridge",
+		FormalSlug:    "assetsource",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE", "NEEDS_ATTENTION"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"assetSourceId", "compartmentId", "displayName", "state"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"areHistoricalMetricsCollected", "areRealtimeMetricsCollected", "assetsCompartmentId", "compartmentId", "definedTags", "discoveryCredentials.secretId", "discoveryCredentials.type", "discoveryScheduleId", "displayName", "freeformTags", "replicationCredentials.secretId", "replicationCredentials.type", "systemTags", "type", "vcenterEndpoint"},
+			ForceNew:      []string{"environmentId", "inventoryId"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForUpdatedState", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForUpdatedState", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
+func newAssetSourceDefaultRuntimeHooks(sdkClient AssetSourceSDKClients) AssetSourceRuntimeHooks {
 	return AssetSourceRuntimeHooks{
+		Semantics:       newAssetSourceRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*cloudbridgev1beta1.AssetSource]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*cloudbridgev1beta1.AssetSource]{},
 		StatusHooks:     generatedruntime.StatusHooks[*cloudbridgev1beta1.AssetSource]{},
 		ParityHooks:     generatedruntime.ParityHooks[*cloudbridgev1beta1.AssetSource]{},
-		Async:           generatedruntime.AsyncHooks[*cloudbridgev1beta1.AssetSource]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*cloudbridgev1beta1.AssetSource]{},
+		Async: generatedruntime.AsyncHooks[*cloudbridgev1beta1.AssetSource]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := cloudbridgesdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.commonClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*cloudbridgev1beta1.AssetSource]{},
 		Create: runtimeOperationHooks[cloudbridgesdk.CreateAssetSourceRequest, cloudbridgesdk.CreateAssetSourceResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateAssetSourceDetails", RequestName: "CreateAssetSourceDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request cloudbridgesdk.CreateAssetSourceRequest) (cloudbridgesdk.CreateAssetSourceResponse, error) {
-				return sdkClient.CreateAssetSource(ctx, request)
+				return sdkClient.discoveryClient.CreateAssetSource(ctx, request)
 			},
 		},
 		Get: runtimeOperationHooks[cloudbridgesdk.GetAssetSourceRequest, cloudbridgesdk.GetAssetSourceResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "AssetSourceId", RequestName: "assetSourceId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request cloudbridgesdk.GetAssetSourceRequest) (cloudbridgesdk.GetAssetSourceResponse, error) {
-				return sdkClient.GetAssetSource(ctx, request)
+				return sdkClient.discoveryClient.GetAssetSource(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[cloudbridgesdk.ListAssetSourcesRequest, cloudbridgesdk.ListAssetSourcesResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "AssetSourceId", RequestName: "assetSourceId", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request cloudbridgesdk.ListAssetSourcesRequest) (cloudbridgesdk.ListAssetSourcesResponse, error) {
-				return sdkClient.ListAssetSources(ctx, request)
+				return sdkClient.discoveryClient.ListAssetSources(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[cloudbridgesdk.UpdateAssetSourceRequest, cloudbridgesdk.UpdateAssetSourceResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "AssetSourceId", RequestName: "assetSourceId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateAssetSourceDetails", RequestName: "UpdateAssetSourceDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request cloudbridgesdk.UpdateAssetSourceRequest) (cloudbridgesdk.UpdateAssetSourceResponse, error) {
-				return sdkClient.UpdateAssetSource(ctx, request)
+				return sdkClient.discoveryClient.UpdateAssetSource(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[cloudbridgesdk.DeleteAssetSourceRequest, cloudbridgesdk.DeleteAssetSourceResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "AssetSourceId", RequestName: "assetSourceId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request cloudbridgesdk.DeleteAssetSourceRequest) (cloudbridgesdk.DeleteAssetSourceResponse, error) {
-				return sdkClient.DeleteAssetSource(ctx, request)
+				return sdkClient.discoveryClient.DeleteAssetSource(ctx, request)
 			},
 		},
 		WrapGeneratedClient: []func(AssetSourceServiceClient) AssetSourceServiceClient{},
 	}
 }
 
-func newAssetSourceRuntimeHooks(manager *AssetSourceServiceManager, sdkClient cloudbridgesdk.DiscoveryClient) AssetSourceRuntimeHooks {
+func newAssetSourceRuntimeHooks(manager *AssetSourceServiceManager, sdkClient AssetSourceSDKClients) AssetSourceRuntimeHooks {
 	hooks := newAssetSourceDefaultRuntimeHooks(sdkClient)
 	for _, mutator := range assetsourceRuntimeHooksMutators {
 		mutator(manager, &hooks)
@@ -106,10 +175,19 @@ func buildAssetSourceGeneratedRuntimeConfig(
 	hooks AssetSourceRuntimeHooks,
 ) generatedruntime.Config[*cloudbridgev1beta1.AssetSource] {
 	return generatedruntime.Config[*cloudbridgev1beta1.AssetSource]{
-		Kind:            "AssetSource",
-		SDKName:         "AssetSource",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "AssetSource",
+		SDKName:   "AssetSource",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

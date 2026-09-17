@@ -27,7 +27,7 @@ partition "Observe and Bind" {
 if ("Tracked or explicit OCI identity present?") then (yes)
 :Get the current OCI resource via\nGetSSLCipherSuite;
 else (no)
-:Resolve an existing OCI resource through\nListSSLCipherSuite using filters\ncompartment_id, state;
+:Resolve an existing OCI resource through\nListSSLCipherSuite using filters name;
 :Create the OCI resource via\nCreateSSLCipherSuite when no reusable match is\nfound;
 :Persist the resolved or created OCI identity\ninto status;
 endif
@@ -55,17 +55,18 @@ stop
 endif
 }
 partition "Ready and Drift Handling" {
-:Compare live OCI state against the imported\nfield surface;
+:Compare live OCI state against the\nrepo-authored mutation surface;
 if ("Force-new or conflicting drift detected?") then (yes)
-:Reject drift before OCI mutation for force-new\nfields compartment_id;
+:Reject drift before OCI mutation for force-new\nfields name;
 stop
 endif
 if ("Supported mutable drift detected?") then (yes)
-:Apply UpdateSSLCipherSuite only for mutable\nfields display_name;
+:Apply UpdateSSLCipherSuite only for mutable\nfields ciphers;
 else (no)
 :Skip the no-op mutation path;
 endif
-:Run provider helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=template action=CREATED;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource when the\nmatching field-driven path executes;
+:Run provider helper hooks\ncreate=CreateSSLCipherSuite;\nupdate=UpdateSSLCipherSuite;\ndelete=DeleteSSLCipherSuite when the matching\nfield-driven path executes;
+:Apply explicit follow-up semantics\ncreate=GetWorkRequest -> GetSSLCipherSuite;\nupdate=GetWorkRequest -> GetSSLCipherSuite;\ndelete=GetWorkRequest -> confirm-delete;
 :Return success for the ACTIVE success state;
 :Project required status and finalizer policy\nretain-until-confirmed-delete;
 :Requeue on provisioning, updating, terminating;
@@ -93,17 +94,31 @@ retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
 provider states: create PROVISIONING; update
 UPDATING; delete DELETING
-supported drift: display_name
-reject before mutate: force-new fields
-compartment_id
+follow-up: create=GetWorkRequest ->
+GetSSLCipherSuite; update=GetWorkRequest ->
+GetSSLCipherSuite; delete=GetWorkRequest ->
+confirm-delete
+supported drift: ciphers
+reject before mutate: force-new fields name
 create-only fields: none
 list lookup:
 scaffold_loadbalancer_sslciphersuite filters
-compartment_id, state
+name; Resolve the named cipher suite only
+beneath the annotated load balancer.
 conflicts: none
 open gaps: none
-Scaffold metadata only; replace with
-controller-specific runtime states before
-promotion.
+Live Load Balancer work requests report
+`CreateCipherSuite`, `UpdateCipherSuite`, and
+`DeleteCipherSuite`; the runtime accepts those
+observed operation names as well as the SDK's
+SSLCipherSuite spellings.
+`ACCEPTED` and `IN_PROGRESS` remain pending,
+`SUCCEEDED` transitions to a child readback, and
+failed work requests retain actionable async
+status.
+The child has no independent OCI OCID. Runtime
+identity is the annotated load balancer plus
+immutable cipher-suite `name`; only `ciphers`
+update.
 end note
 @enduml

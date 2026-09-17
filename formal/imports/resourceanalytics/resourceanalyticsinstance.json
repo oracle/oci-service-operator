@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "resourceanalytics",
+  "slug": "resourceanalyticsinstance",
+  "kind": "ResourceAnalyticsInstance",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_resource_analytics_resource_analytics_instance",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateResourceAnalyticsInstance",
+        "requestType": "resourceanalytics.CreateResourceAnalyticsInstanceRequest",
+        "responseType": "resourceanalytics.CreateResourceAnalyticsInstanceResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetResourceAnalyticsInstance",
+        "requestType": "resourceanalytics.GetResourceAnalyticsInstanceRequest",
+        "responseType": "resourceanalytics.GetResourceAnalyticsInstanceResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListResourceAnalyticsInstances",
+        "requestType": "resourceanalytics.ListResourceAnalyticsInstancesRequest",
+        "responseType": "resourceanalytics.ListResourceAnalyticsInstancesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeResourceAnalyticsInstanceCompartment",
+        "requestType": "resourceanalytics.ChangeResourceAnalyticsInstanceCompartmentRequest",
+        "responseType": "resourceanalytics.ChangeResourceAnalyticsInstanceCompartmentResponse"
+      },
+      {
+        "operation": "UpdateResourceAnalyticsInstance",
+        "requestType": "resourceanalytics.UpdateResourceAnalyticsInstanceRequest",
+        "responseType": "resourceanalytics.UpdateResourceAnalyticsInstanceResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteResourceAnalyticsInstance",
+        "requestType": "resourceanalytics.DeleteResourceAnalyticsInstanceRequest",
+        "responseType": "resourceanalytics.DeleteResourceAnalyticsInstanceResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "NEEDS_ATTENTION"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags"
+    ],
+    "forceNew": [
+      "adw_admin_password",
+      "adw_admin_password.password",
+      "adw_admin_password.password_type",
+      "adw_admin_password.secret_id",
+      "is_mutual_tls_required",
+      "license_model",
+      "nsg_ids",
+      "subnet_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_resource_analytics_resource_analytics_instances",
+    "collectionField": "resource_analytics_instance_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/resourceanalytics/resourceanalyticsinstance/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/resourceanalytics/resourceanalyticsinstance/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from terraform-provider-oci for resourceanalytics/resourceanalyticsinstance."
+  ]
+}

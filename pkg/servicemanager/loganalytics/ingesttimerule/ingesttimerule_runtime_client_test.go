@@ -7,6 +7,8 @@ package ingesttimerule
 
 import (
 	"context"
+	"io"
+	"net/http"
 	"strings"
 	"testing"
 
@@ -47,6 +49,31 @@ func TestIngestTimeRuleRuntimeCreateResolvesNamespaceAndBuildsPolymorphicBody(t 
 	response, err = client.CreateOrUpdate(context.Background(), resource, testRequest())
 	assertSuccessfulIngestTimeRuleOperation(t, "second CreateOrUpdate()", response.IsSuccessful, err)
 	assertIngestTimeRuleSecondCreateReconcile(t, fake, resource)
+}
+
+func TestIngestTimeRuleNamespaceLookupUsesTenancyCompartment(t *testing.T) {
+	resource := newTestIngestTimeRule()
+	fake := &fakeIngestTimeRuleOCIClient{
+		namespaces: []loganalyticssdk.NamespaceSummary{testNamespace("tenantnamespace")},
+	}
+	client := &namespaceResolvingIngestTimeRuleServiceClient{
+		namespaceLister:        fake,
+		namespaceCompartmentID: "ocid1.tenancy.oc1..example",
+	}
+
+	got, err := client.resolveNamespace(context.Background(), resource)
+	if err != nil {
+		t.Fatalf("resolveNamespace() error = %v", err)
+	}
+	if got != "tenantnamespace" {
+		t.Fatalf("resolveNamespace() = %q, want tenantnamespace", got)
+	}
+	if len(fake.namespaceRequests) != 1 {
+		t.Fatalf("namespace requests = %d, want 1", len(fake.namespaceRequests))
+	}
+	if got := stringPtrValue(fake.namespaceRequests[0].CompartmentId); got != "ocid1.tenancy.oc1..example" {
+		t.Fatalf("namespace lookup compartment = %q, want tenancy OCID", got)
+	}
 }
 
 func TestIngestTimeRuleRuntimeBindsExistingFromPaginatedList(t *testing.T) {
@@ -126,11 +153,8 @@ func TestIngestTimeRuleRuntimeNoOpSkipsUpdate(t *testing.T) {
 func TestIngestTimeRuleRuntimeMutableUpdate(t *testing.T) {
 	resource := newTestIngestTimeRule()
 	resource.Status.OsokStatus.Ocid = shared.OCID("existing-id")
-	resource.Spec.IsEnabled = false
 	currentSpec := resource.Spec
-	currentSpec.DisplayName = "old-name"
 	currentSpec.Description = "old description"
-	currentSpec.IsEnabled = true
 	updatedSpec := resource.Spec
 	fake := &fakeIngestTimeRuleOCIClient{
 		namespaces: []loganalyticssdk.NamespaceSummary{testNamespace("tenantnamespace")},
@@ -173,6 +197,28 @@ func TestIngestTimeRuleRuntimeRejectsCreateOnlyDriftBeforeUpdate(t *testing.T) {
 	}
 }
 
+func TestIngestTimeRuleRuntimeRejectsConditionDriftBeforeUpdate(t *testing.T) {
+	resource := newTestIngestTimeRule()
+	resource.Status.OsokStatus.Ocid = shared.OCID("existing-id")
+	currentSpec := resource.Spec
+	currentSpec.Conditions.FieldValue = "previous-value"
+	fake := &fakeIngestTimeRuleOCIClient{
+		namespaces: []loganalyticssdk.NamespaceSummary{testNamespace("tenantnamespace")},
+		getResults: []fakeIngestTimeRuleGetResult{{
+			response: getIngestTimeRuleResponse(testSDKIngestTimeRule("existing-id", currentSpec), "get-opc"),
+		}},
+	}
+
+	_, err := newIngestTimeRuleServiceClientWithOCIClient(testLogger(), fake).
+		CreateOrUpdate(context.Background(), resource, testRequest())
+	if err == nil || !strings.Contains(err.Error(), "replacement when conditions changes") {
+		t.Fatalf("CreateOrUpdate() error = %v, want create-only conditions rejection", err)
+	}
+	if len(fake.updateRequests) != 0 {
+		t.Fatalf("update requests = %d, want 0", len(fake.updateRequests))
+	}
+}
+
 func TestIngestTimeRuleRuntimeUsesStatusIDWhenSpecIDDiffers(t *testing.T) {
 	resource := newTestIngestTimeRule()
 	resource.Status.OsokStatus.Ocid = shared.OCID("existing-id")
@@ -201,41 +247,57 @@ func TestIngestTimeRuleRuntimeUsesStatusIDWhenSpecIDDiffers(t *testing.T) {
 	}
 }
 
-func TestIngestTimeRuleRuntimeUpdatesIsEnabledOnlyDrift(t *testing.T) {
+func TestIngestTimeRuleRuntimeRejectsIsEnabledDrift(t *testing.T) {
 	resource := newTestIngestTimeRule()
 	resource.Status.OsokStatus.Ocid = shared.OCID("existing-id")
 	resource.Spec.IsEnabled = false
 	currentSpec := resource.Spec
 	currentSpec.IsEnabled = true
-	updatedSpec := resource.Spec
 	fake := &fakeIngestTimeRuleOCIClient{
 		namespaces: []loganalyticssdk.NamespaceSummary{testNamespace("tenantnamespace")},
 		getResults: []fakeIngestTimeRuleGetResult{
 			{response: getIngestTimeRuleResponse(testSDKIngestTimeRule("existing-id", currentSpec), "get-before-update")},
-			{response: getIngestTimeRuleResponse(testSDKIngestTimeRule("existing-id", updatedSpec), "get-after-update")},
 		},
-		updateResponse: updateIngestTimeRuleResponse(testSDKIngestTimeRule("existing-id", updatedSpec), "update-opc"),
 	}
 
-	response, err := newIngestTimeRuleServiceClientWithOCIClient(testLogger(), fake).
+	_, err := newIngestTimeRuleServiceClientWithOCIClient(testLogger(), fake).
 		CreateOrUpdate(context.Background(), resource, testRequest())
+	if err == nil || !strings.Contains(err.Error(), "replacement when isEnabled changes") {
+		t.Fatalf("CreateOrUpdate() error = %v, want isEnabled replacement rejection", err)
+	}
+	if got := len(fake.updateRequests); got != 0 {
+		t.Fatalf("update requests = %d, want 0", got)
+	}
+}
+
+func TestUpdateIngestTimeRuleMutableRequestOmitsCreateOnlyFields(t *testing.T) {
+	request := updateIngestTimeRuleMutableRequest{
+		NamespaceName:    common.String("namespace"),
+		IngestTimeRuleId: common.String("ocid1.loganalyticsingesttimerule.oc1..example"),
+		Details: updateIngestTimeRuleMutableDetails{
+			Id:            common.String("ocid1.loganalyticsingesttimerule.oc1..example"),
+			CompartmentId: common.String("ocid1.compartment.oc1..example"),
+			DisplayName:   common.String("rule"),
+			Description:   common.String("updated"),
+			FreeformTags:  map[string]string{"env": "test"},
+		},
+	}
+
+	httpRequest, err := request.HTTPRequest(http.MethodPut, "/namespaces/{namespaceName}/ingestTimeRules/{ingestTimeRuleId}", nil, map[string]string{})
 	if err != nil {
-		t.Fatalf("CreateOrUpdate() error = %v", err)
+		t.Fatalf("HTTPRequest() error = %v", err)
 	}
-	if !response.IsSuccessful {
-		t.Fatalf("CreateOrUpdate() IsSuccessful = false, want true")
+	payload, err := io.ReadAll(httpRequest.Body)
+	if err != nil {
+		t.Fatalf("read request body: %v", err)
 	}
-	if got := len(fake.updateRequests); got != 1 {
-		t.Fatalf("update requests = %d, want 1", got)
+	for _, forbidden := range []string{"actions", "conditions", "isEnabled", "lifecycleState"} {
+		if strings.Contains(string(payload), `"`+forbidden+`"`) {
+			t.Fatalf("request body = %s, unexpectedly contains %s", payload, forbidden)
+		}
 	}
-	if got := fake.updateRequests[0].UpdateIngestTimeRuleDetails.IsEnabled; got == nil || *got {
-		t.Fatalf("update isEnabled = %v, want desired false", got)
-	}
-	if resource.Status.IsEnabled {
-		t.Fatal("status isEnabled = true, want OCI readback false")
-	}
-	if got := resource.Status.OsokStatus.OpcRequestID; got != "update-opc" {
-		t.Fatalf("status opcRequestId = %q, want update-opc", got)
+	if !strings.Contains(string(payload), `"description":"updated"`) {
+		t.Fatalf("request body = %s, want mutable description", payload)
 	}
 }
 
@@ -485,13 +547,19 @@ func assertIngestTimeRuleMutableUpdateRequest(
 		t.Fatalf("update id = %q, want existing-id", got)
 	}
 	if got := stringPtrValue(updateRequest.UpdateIngestTimeRuleDetails.DisplayName); got != resource.Spec.DisplayName {
-		t.Fatalf("update displayName = %q, want %q", got, resource.Spec.DisplayName)
+		t.Fatalf("update displayName = %q, want unchanged identity %q", got, resource.Spec.DisplayName)
 	}
 	if got := stringPtrValue(updateRequest.UpdateIngestTimeRuleDetails.Description); got != resource.Spec.Description {
 		t.Fatalf("update description = %q, want %q", got, resource.Spec.Description)
 	}
-	if updateRequest.UpdateIngestTimeRuleDetails.IsEnabled == nil || *updateRequest.UpdateIngestTimeRuleDetails.IsEnabled {
-		t.Fatalf("update isEnabled = %v, want desired false", updateRequest.UpdateIngestTimeRuleDetails.IsEnabled)
+	if updateRequest.UpdateIngestTimeRuleDetails.IsEnabled != nil {
+		t.Fatalf("update isEnabled = %v, want omitted create-only field", updateRequest.UpdateIngestTimeRuleDetails.IsEnabled)
+	}
+	if updateRequest.UpdateIngestTimeRuleDetails.Conditions != nil {
+		t.Fatalf("update conditions = %#v, want omitted create-only field", updateRequest.UpdateIngestTimeRuleDetails.Conditions)
+	}
+	if len(updateRequest.UpdateIngestTimeRuleDetails.Actions) != 0 {
+		t.Fatalf("update actions = %#v, want omitted create-only field", updateRequest.UpdateIngestTimeRuleDetails.Actions)
 	}
 }
 
@@ -536,11 +604,12 @@ func assertIngestTimeRuleCreatedStatus(t *testing.T, resource *loganalyticsv1bet
 type fakeIngestTimeRuleOCIClient struct {
 	namespaces []loganalyticssdk.NamespaceSummary
 
-	createRequests []loganalyticssdk.CreateIngestTimeRuleRequest
-	getRequests    []loganalyticssdk.GetIngestTimeRuleRequest
-	listRequests   []loganalyticssdk.ListIngestTimeRulesRequest
-	updateRequests []loganalyticssdk.UpdateIngestTimeRuleRequest
-	deleteRequests []loganalyticssdk.DeleteIngestTimeRuleRequest
+	namespaceRequests []loganalyticssdk.ListNamespacesRequest
+	createRequests    []loganalyticssdk.CreateIngestTimeRuleRequest
+	getRequests       []loganalyticssdk.GetIngestTimeRuleRequest
+	listRequests      []loganalyticssdk.ListIngestTimeRulesRequest
+	updateRequests    []loganalyticssdk.UpdateIngestTimeRuleRequest
+	deleteRequests    []loganalyticssdk.DeleteIngestTimeRuleRequest
 
 	createResponse loganalyticssdk.CreateIngestTimeRuleResponse
 	createErr      error
@@ -631,6 +700,7 @@ func (f *fakeIngestTimeRuleOCIClient) ListNamespaces(
 	_ context.Context,
 	request loganalyticssdk.ListNamespacesRequest,
 ) (loganalyticssdk.ListNamespacesResponse, error) {
+	f.namespaceRequests = append(f.namespaceRequests, request)
 	return loganalyticssdk.ListNamespacesResponse{
 		NamespaceCollection: loganalyticssdk.NamespaceCollection{Items: f.namespaces},
 	}, nil

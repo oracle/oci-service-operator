@@ -1,0 +1,146 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "fleetappsmanagement",
+  "slug": "patch",
+  "kind": "Patch",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_fleet_apps_management_patch",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreatePatch",
+        "requestType": "fleetappsmanagement.CreatePatchRequest",
+        "responseType": "fleetappsmanagement.CreatePatchResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetPatch",
+        "requestType": "fleetappsmanagement.GetPatchRequest",
+        "responseType": "fleetappsmanagement.GetPatchResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListPatches",
+        "requestType": "fleetappsmanagement.ListPatchesRequest",
+        "responseType": "fleetappsmanagement.ListPatchesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangePatchCompartment",
+        "requestType": "fleetappsmanagement.ChangePatchCompartmentRequest",
+        "responseType": "fleetappsmanagement.ChangePatchCompartmentResponse"
+      },
+      {
+        "operation": "UpdatePatch",
+        "requestType": "fleetappsmanagement.UpdatePatchRequest",
+        "responseType": "fleetappsmanagement.UpdatePatchResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeletePatch",
+        "requestType": "fleetappsmanagement.DeletePatchRequest",
+        "responseType": "fleetappsmanagement.DeletePatchResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "artifact_details.artifact.content.bucket",
+      "artifact_details.artifact.content.checksum",
+      "artifact_details.artifact.content.namespace",
+      "artifact_details.artifact.content.object",
+      "artifact_details.artifact.content.source_type",
+      "artifact_details.artifacts.architecture",
+      "artifact_details.artifacts.content.bucket",
+      "artifact_details.artifacts.content.checksum",
+      "artifact_details.artifacts.content.namespace",
+      "artifact_details.artifacts.content.object",
+      "artifact_details.artifacts.content.source_type",
+      "artifact_details.artifacts.os_type",
+      "artifact_details.category",
+      "compartment_id",
+      "defined_tags",
+      "dependent_patches.id",
+      "description",
+      "freeform_tags",
+      "patch_type.platform_configuration_id",
+      "product.platform_configuration_id",
+      "product.version",
+      "severity",
+      "time_released"
+    ],
+    "forceNew": [
+      "name"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_fleet_apps_management_patches",
+    "collectionField": "patch_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "id",
+      "name",
+      "patch_type_id",
+      "product_id",
+      "should_compliance_policy_rules_be_applied",
+      "state",
+      "time_released_greater_than_or_equal_to",
+      "time_released_less_than",
+      "type",
+      "version"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/fleetappsmanagement/patch/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/fleetappsmanagement/patch/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from the pinned terraform-provider-oci source revision."
+  ]
+}

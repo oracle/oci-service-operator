@@ -18,8 +18,10 @@ import (
 	loadbalancerv1beta1 "github.com/oracle/oci-service-operator/api/loadbalancer/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/credhelper"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
+	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
+	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 type listenerRuntimeOCIClient interface {
@@ -27,6 +29,30 @@ type listenerRuntimeOCIClient interface {
 	GetLoadBalancer(context.Context, loadbalancersdk.GetLoadBalancerRequest) (loadbalancersdk.GetLoadBalancerResponse, error)
 	UpdateListener(context.Context, loadbalancersdk.UpdateListenerRequest) (loadbalancersdk.UpdateListenerResponse, error)
 	DeleteListener(context.Context, loadbalancersdk.DeleteListenerRequest) (loadbalancersdk.DeleteListenerResponse, error)
+}
+
+type listenerWorkRequestClient interface {
+	GetWorkRequest(context.Context, loadbalancersdk.GetWorkRequestRequest) (loadbalancersdk.GetWorkRequestResponse, error)
+}
+
+var listenerWorkRequestAsyncAdapter = servicemanager.WorkRequestAsyncAdapter{
+	PendingStatusTokens:   []string{string(loadbalancersdk.WorkRequestLifecycleStateAccepted), string(loadbalancersdk.WorkRequestLifecycleStateInProgress)},
+	SucceededStatusTokens: []string{string(loadbalancersdk.WorkRequestLifecycleStateSucceeded)},
+	FailedStatusTokens:    []string{string(loadbalancersdk.WorkRequestLifecycleStateFailed)},
+	CreateActionTokens:    []string{"AddListener", "CreateListener"},
+	UpdateActionTokens:    []string{"UpdateListener"},
+	DeleteActionTokens:    []string{"RemoveListener", "DeleteListener"},
+}
+
+type listenerWorkRequestView struct {
+	Id            string
+	Status        string
+	OperationType string
+	Message       string
+}
+
+type listenerWorkRequestConvergingClient struct {
+	delegate ListenerServiceClient
 }
 
 type listenerReadRequest struct {
@@ -81,8 +107,21 @@ func (e listenerNotFoundServiceError) GetOpcRequestID() string {
 func init() {
 	registerListenerRuntimeHooksMutator(func(manager *ListenerServiceManager, hooks *ListenerRuntimeHooks) {
 		applyListenerRuntimeHooks(listenerCredentialClient(manager), hooks)
+		workRequestClient, initErr := newListenerWorkRequestClient(manager)
+		applyListenerWorkRequestHooks(hooks, workRequestClient, initErr)
 		applyListenerReadHooks(hooks, providerListenerGetLoadBalancerCall(manager))
 	})
+}
+
+func newListenerWorkRequestClient(manager *ListenerServiceManager) (listenerWorkRequestClient, error) {
+	if manager == nil {
+		return nil, fmt.Errorf("Listener service manager is nil")
+	}
+	client, err := loadbalancersdk.NewLoadBalancerClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return nil, fmt.Errorf("initialize Listener work request client: %w", err)
+	}
+	return client, nil
 }
 
 func newGeneratedListenerServiceClient(
@@ -93,14 +132,20 @@ func newGeneratedListenerServiceClient(
 ) ListenerServiceClient {
 	hooks := newListenerRuntimeHooksWithOCIClient(client)
 	applyListenerRuntimeHooks(credentialClient, &hooks)
+	workRequestClient, ok := client.(listenerWorkRequestClient)
+	if !ok && initErr == nil {
+		initErr = fmt.Errorf("Listener OCI client does not support work requests")
+	}
+	applyListenerWorkRequestHooks(&hooks, workRequestClient, initErr)
 	applyListenerReadHooks(&hooks, client.GetLoadBalancer)
 	config := buildListenerGeneratedRuntimeConfig(&ListenerServiceManager{Log: log}, hooks)
 	config.CredentialClient = credentialClient
 	config.InitError = initErr
 
-	return defaultListenerServiceClient{
+	delegate := defaultListenerServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*loadbalancerv1beta1.Listener](config),
 	}
+	return wrapListenerGeneratedClient(hooks, delegate)
 }
 
 func applyListenerRuntimeHooks(credentialClient credhelper.CredentialClient, hooks *ListenerRuntimeHooks) {
@@ -118,6 +163,7 @@ func applyListenerRuntimeHooks(credentialClient credhelper.CredentialClient, hoo
 		return buildListenerUpdateBody(ctx, resource, credentialClient, namespace, currentResponse)
 	}
 	hooks.Identity = generatedruntime.IdentityHooks[*loadbalancerv1beta1.Listener]{
+		RecordBeforeCreateFollowUp: true,
 		Resolve: func(resource *loadbalancerv1beta1.Listener) (any, error) {
 			return resolveListenerIdentity(resource)
 		},
@@ -127,10 +173,86 @@ func applyListenerRuntimeHooks(credentialClient credhelper.CredentialClient, hoo
 		RecordTracked: func(resource *loadbalancerv1beta1.Listener, identity any, resourceID string) {
 			recordListenerTrackedIdentity(resource, identity.(listenerIdentity), resourceID)
 		},
+		SeedSyntheticTrackedID: func(resource *loadbalancerv1beta1.Listener, identity any) func() {
+			previous := resource.Status.OsokStatus.Ocid
+			resolved := identity.(listenerIdentity)
+			resource.Status.OsokStatus.Ocid = shared.OCID(listenerSyntheticOCID(resolved.loadBalancerID, resolved.listenerName))
+			return func() { resource.Status.OsokStatus.Ocid = previous }
+		},
 	}
 	hooks.Create.Fields = listenerCreateFields()
 	hooks.Update.Fields = listenerUpdateFields()
 	hooks.Delete.Fields = listenerDeleteFields()
+}
+
+func applyListenerWorkRequestHooks(hooks *ListenerRuntimeHooks, client listenerWorkRequestClient, initErr error) {
+	if hooks == nil {
+		return
+	}
+	hooks.Async.Adapter = listenerWorkRequestAsyncAdapter
+	hooks.Async.GetWorkRequest = func(ctx context.Context, workRequestID string) (any, error) {
+		if initErr != nil {
+			return nil, initErr
+		}
+		if client == nil {
+			return nil, fmt.Errorf("Listener work request client is not configured")
+		}
+		response, err := client.GetWorkRequest(ctx, loadbalancersdk.GetWorkRequestRequest{WorkRequestId: common.String(strings.TrimSpace(workRequestID))})
+		if err != nil {
+			return nil, err
+		}
+		return listenerWorkRequestView{
+			Id:            stringValue(response.Id),
+			Status:        string(response.LifecycleState),
+			OperationType: stringValue(response.Type),
+			Message:       stringValue(response.Message),
+		}, nil
+	}
+	hooks.Async.ResolveAction = func(workRequest any) (string, error) {
+		view, ok := workRequest.(listenerWorkRequestView)
+		if !ok {
+			return "", fmt.Errorf("expected Listener work request view, got %T", workRequest)
+		}
+		return view.OperationType, nil
+	}
+	hooks.Async.Message = func(phase shared.OSOKAsyncPhase, workRequest any) string {
+		view, ok := workRequest.(listenerWorkRequestView)
+		if !ok || view.Id == "" || view.Status == "" {
+			return ""
+		}
+		message := fmt.Sprintf("Listener %s work request %s is %s", phase, view.Id, view.Status)
+		if view.Message != "" {
+			message += ": " + view.Message
+		}
+		return message
+	}
+	hooks.WrapGeneratedClient = append(hooks.WrapGeneratedClient, func(delegate ListenerServiceClient) ListenerServiceClient {
+		return listenerWorkRequestConvergingClient{delegate: delegate}
+	})
+}
+
+func (c listenerWorkRequestConvergingClient) CreateOrUpdate(ctx context.Context, resource *loadbalancerv1beta1.Listener, req ctrl.Request) (servicemanager.OSOKResponse, error) {
+	response, err := c.delegate.CreateOrUpdate(ctx, resource, req)
+	if err != nil || resource == nil || !response.IsSuccessful || !response.ShouldRequeue {
+		return response, err
+	}
+	if resource.Status.OsokStatus.Async.Current != nil {
+		return c.delegate.CreateOrUpdate(ctx, resource, req)
+	}
+	switch shared.OSOKConditionType(resource.Status.OsokStatus.Reason) {
+	case shared.Provisioning, shared.Updating:
+		return c.delegate.CreateOrUpdate(ctx, resource, req)
+	default:
+		return response, err
+	}
+}
+
+func (c listenerWorkRequestConvergingClient) Delete(ctx context.Context, resource *loadbalancerv1beta1.Listener) (bool, error) {
+	deleted, err := c.delegate.Delete(ctx, resource)
+	if err != nil || deleted || resource == nil || resource.Status.OsokStatus.Async.Current == nil {
+		return deleted, err
+	}
+	return c.delegate.Delete(ctx, resource)
 }
 
 func applyListenerReadHooks(
@@ -243,9 +365,13 @@ func listenerRuntimeSemantics() *generatedruntime.Semantics {
 		FormalService: "loadbalancer",
 		FormalSlug:    "listener",
 		Async: &generatedruntime.AsyncSemantics{
-			Strategy:             "lifecycle",
+			Strategy:             "workrequest",
 			Runtime:              "generatedruntime",
-			FormalClassification: "lifecycle",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
 		},
 		StatusProjection:  "required",
 		SecretSideEffects: "none",
@@ -420,6 +546,9 @@ func buildListenerUpdateBody(
 	if err != nil {
 		return loadbalancersdk.UpdateListenerDetails{}, false, fmt.Errorf("marshal desired Listener update values: %w", err)
 	}
+	if err := preserveListenerOmittedConnectionConfiguration(desiredValues, currentSource); err != nil {
+		return loadbalancersdk.UpdateListenerDetails{}, false, err
+	}
 	if err := overlayListenerExplicitMutableClears(desiredValues, currentSource); err != nil {
 		return loadbalancersdk.UpdateListenerDetails{}, false, err
 	}
@@ -449,6 +578,22 @@ func buildListenerUpdateBody(
 	}
 
 	return desired, true, nil
+}
+
+func preserveListenerOmittedConnectionConfiguration(desiredValues map[string]any, currentSource any) error {
+	if _, present := listenerLookupValue(desiredValues, "connectionConfiguration"); present {
+		return nil
+	}
+	currentValues, err := listenerJSONMap(currentSource)
+	if err != nil {
+		return fmt.Errorf("marshal current Listener connection configuration: %w", err)
+	}
+	current, present := listenerLookupValue(currentValues, "connectionConfiguration")
+	if !present || !listenerMeaningfulValue(current) {
+		return nil
+	}
+	listenerSetValue(desiredValues, "connectionConfiguration", current)
+	return nil
 }
 
 func listenerJSONMap(value any) (map[string]any, error) {
@@ -648,6 +793,7 @@ func listenerRuntimeViewFromLoadBalancer(loadBalancer loadbalancersdk.LoadBalanc
 		Listener:       listener,
 		Ocid:           listenerSyntheticOCID(loadBalancerID, listenerName),
 		LoadBalancerId: loadBalancerID,
+		LifecycleState: "ACTIVE",
 	}, true
 }
 
@@ -776,7 +922,10 @@ func rejectListenerUnsupportedMutableClears(desiredValues map[string]any, curren
 			continue
 		}
 
-		desiredValue, _ := listenerLookupValue(desiredValues, path)
+		desiredValue, desiredPresent := listenerLookupValue(desiredValues, path)
+		if !desiredPresent {
+			continue
+		}
 		unsupported = append(unsupported, listenerOmittedMeaningfulPaths(currentValue, desiredValue, path)...)
 	}
 	if len(unsupported) == 0 {

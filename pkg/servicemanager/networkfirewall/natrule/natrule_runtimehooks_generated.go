@@ -66,25 +66,25 @@ func newNatRuleDefaultRuntimeHooks(sdkClient networkfirewallsdk.NetworkFirewallC
 			},
 		},
 		Get: runtimeOperationHooks[networkfirewallsdk.GetNatRuleRequest, networkfirewallsdk.GetNatRuleResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "NatRuleName", RequestName: "natRuleName", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "NatRuleName", RequestName: "natRuleName", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request networkfirewallsdk.GetNatRuleRequest) (networkfirewallsdk.GetNatRuleResponse, error) {
 				return sdkClient.GetNatRule(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[networkfirewallsdk.ListNatRulesRequest, networkfirewallsdk.ListNatRulesResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: true}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "NatRulePriorityOrder", RequestName: "natRulePriorityOrder", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "NatRulePriorityOrder", RequestName: "natRulePriorityOrder", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request networkfirewallsdk.ListNatRulesRequest) (networkfirewallsdk.ListNatRulesResponse, error) {
 				return sdkClient.ListNatRules(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[networkfirewallsdk.UpdateNatRuleRequest, networkfirewallsdk.UpdateNatRuleResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "NatRuleName", RequestName: "natRuleName", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdateNatRuleDetails", RequestName: "UpdateNatRuleDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "NatRuleName", RequestName: "natRuleName", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateNatRuleDetails", RequestName: "UpdateNatRuleDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request networkfirewallsdk.UpdateNatRuleRequest) (networkfirewallsdk.UpdateNatRuleResponse, error) {
 				return sdkClient.UpdateNatRule(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[networkfirewallsdk.DeleteNatRuleRequest, networkfirewallsdk.DeleteNatRuleResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "NatRuleName", RequestName: "natRuleName", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "NatRuleName", RequestName: "natRuleName", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request networkfirewallsdk.DeleteNatRuleRequest) (networkfirewallsdk.DeleteNatRuleResponse, error) {
 				return sdkClient.DeleteNatRule(ctx, request)
 			},

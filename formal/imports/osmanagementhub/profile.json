@@ -1,0 +1,147 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "osmanagementhub",
+  "slug": "profile",
+  "kind": "Profile",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_os_management_hub_profile",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateProfile",
+        "requestType": "osmanagementhub.CreateProfileRequest",
+        "responseType": "osmanagementhub.CreateProfileResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetProfile",
+        "requestType": "osmanagementhub.GetProfileRequest",
+        "responseType": "osmanagementhub.GetProfileResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListProfiles",
+        "requestType": "osmanagementhub.ListProfilesRequest",
+        "responseType": "osmanagementhub.ListProfilesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeProfileCompartment",
+        "requestType": "osmanagementhub.ChangeProfileCompartmentRequest",
+        "responseType": "osmanagementhub.ChangeProfileCompartmentResponse"
+      },
+      {
+        "operation": "UpdateProfile",
+        "requestType": "osmanagementhub.UpdateProfileRequest",
+        "responseType": "osmanagementhub.UpdateProfileResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteProfile",
+        "requestType": "osmanagementhub.DeleteProfileRequest",
+        "responseType": "osmanagementhub.DeleteProfileResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags",
+      "is_default_profile"
+    ],
+    "forceNew": [
+      "arch_type",
+      "lifecycle_stage_id",
+      "managed_instance_group_id",
+      "management_station_id",
+      "os_family",
+      "profile_type",
+      "registration_type",
+      "software_source_ids",
+      "vendor_name"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_os_management_hub_profiles",
+    "collectionField": "profile_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "arch_type",
+      "compartment_id",
+      "display_name",
+      "display_name_contains",
+      "is_default_profile",
+      "is_service_provided_profile",
+      "management_station",
+      "management_station_not_equal_to",
+      "os_family",
+      "profile_id",
+      "profile_type",
+      "profile_version",
+      "registration_type",
+      "state",
+      "vendor_name"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/osmanagementhub/profile/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/osmanagementhub/profile/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts refreshed from the pinned Terraform provider; repository-authored polymorphic profile semantics are reviewed separately."
+  ]
+}

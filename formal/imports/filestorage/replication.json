@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "filestorage",
+  "slug": "replication",
+  "kind": "Replication",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_file_storage_replication",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateReplication",
+        "requestType": "filestorage.CreateReplicationRequest",
+        "responseType": "filestorage.CreateReplicationResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetReplication",
+        "requestType": "filestorage.GetReplicationRequest",
+        "responseType": "filestorage.GetReplicationResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListReplications",
+        "requestType": "filestorage.ListReplicationsRequest",
+        "responseType": "filestorage.ListReplicationsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeReplicationCompartment",
+        "requestType": "filestorage.ChangeReplicationCompartmentRequest",
+        "responseType": "filestorage.ChangeReplicationCompartmentResponse"
+      },
+      {
+        "operation": "UpdateReplication",
+        "requestType": "filestorage.UpdateReplicationRequest",
+        "responseType": "filestorage.UpdateReplicationResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteReplication",
+        "requestType": "filestorage.DeleteReplicationRequest",
+        "responseType": "filestorage.DeleteReplicationResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "display_name",
+      "freeform_tags",
+      "is_lock_override",
+      "replication_interval"
+    ],
+    "forceNew": [
+      "locks",
+      "locks.message",
+      "locks.related_resource_id",
+      "locks.time_created",
+      "locks.type",
+      "source_id",
+      "target_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_file_storage_replications",
+    "collectionField": "replications",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "availability_domain",
+      "compartment_id",
+      "display_name",
+      "file_system_id",
+      "id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/filestorage/replication/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/filestorage/replication/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from the pinned terraform-provider-oci source revision."
+  ]
+}

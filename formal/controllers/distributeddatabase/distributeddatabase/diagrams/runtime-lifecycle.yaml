@@ -23,7 +23,7 @@ repoAuthored:
       - displayName
       - dbDeploymentType
       - lifecycleState
-    matchRule: "exact compartmentId plus displayName list filters, then narrow summary candidates in memory to a unique exact prefix plus dbDeploymentType match; when lifecycleState is already known the runtime preserves that filter on fallback list rereads"
+    matchRule: "exact compartmentId plus displayName list filters preserve dbDeploymentType and lifecycleState when already known, then narrow summary candidates in memory to a unique exact prefix plus dbDeploymentType match"
   mutation:
     mutable:
       - definedTags
@@ -31,6 +31,11 @@ repoAuthored:
       - freeformTags
     forceNew:
       - compartmentId
+    createOnly:
+      - catalogDetails.adminPassword
+      - catalogDetails.shardSpace
+      - shardDetails.adminPassword
+      - shardDetails.peerVmClusterIds
   hooks:
     create:
       - helper: tfresource.CreateResource
@@ -47,4 +52,5 @@ notes:
   - "Reviewed lifecycle mapping treats CREATING as provisioning, UPDATING as updating, ACTIVE and INACTIVE as success, NEEDS_ATTENTION and FAILED as terminal non-success, and DELETING as terminating."
   - "ListDistributedDatabases returns DistributedDatabaseSummary items that omit fields such as scanListenerPort, latestGsmImageDetails, shardDetails, catalogDetails, gsmDetails, dbBackupConfig, and gsmSshPublicKey, so every successful bind or write path rereads GetDistributedDatabase before projecting steady-state status."
   - "The provider resource exposes broader patch, state-transition, and trigger update families, but the current CRD does not publish those controls; the package-local runtime only performs in-place updates through UpdateDistributedDatabaseDetails for displayName, freeformTags, and definedTags."
+  - "Write-only shard and catalog passwords plus peer VM cluster IDs are accepted during create but omitted or projected through different OCI read shapes; update parity ignores only those unobservable inputs and still rejects drift in observable shard or catalog fields."
   - "Delete keeps the finalizer until GetDistributedDatabase or list fallback confirms DELETED or NOT_FOUND."

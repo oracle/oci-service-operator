@@ -1,0 +1,99 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: cloudmigrations
+slug: targetasset
+kind: TargetAsset
+archetype: generated-service-manager
+states:
+- provisioning
+- active
+- updating
+- terminating
+repoAuthored:
+  operations:
+    create:
+    - CreateTargetAsset
+    update:
+    - UpdateTargetAsset
+    delete:
+    - DeleteTargetAsset
+  providerLifecycle:
+    createPending:
+    - CREATING
+    updatePending: []
+    deletePending:
+    - DELETING
+  listLookup:
+    filters:
+    - displayName
+    - migrationPlanId
+    - state
+    - targetAssetId
+    matchRule: exact declared filters match within the resource scope; duplicate matches
+      fail
+  mutation:
+    mutable:
+    - blockVolumesPerformance
+    - isExcludedFromExecution
+    - msLicense
+    - preferredShapeType
+    - type
+    - userSpec.agentConfig.areAllPluginsDisabled
+    - userSpec.agentConfig.isManagementDisabled
+    - userSpec.agentConfig.isMonitoringDisabled
+    - userSpec.agentConfig.pluginsConfig.desiredState
+    - userSpec.agentConfig.pluginsConfig.name
+    - userSpec.availabilityDomain
+    - userSpec.capacityReservationId
+    - userSpec.compartmentId
+    - userSpec.createVnicDetails.assignPrivateDnsRecord
+    - userSpec.createVnicDetails.assignPublicIp
+    - userSpec.createVnicDetails.definedTags
+    - userSpec.createVnicDetails.displayName
+    - userSpec.createVnicDetails.freeformTags
+    - userSpec.createVnicDetails.hostnameLabel
+    - userSpec.createVnicDetails.nsgIds
+    - userSpec.createVnicDetails.privateIp
+    - userSpec.createVnicDetails.skipSourceDestCheck
+    - userSpec.createVnicDetails.subnetId
+    - userSpec.createVnicDetails.vlanId
+    - userSpec.dedicatedVmHostId
+    - userSpec.definedTags
+    - userSpec.displayName
+    - userSpec.faultDomain
+    - userSpec.freeformTags
+    - userSpec.hostnameLabel
+    - userSpec.instanceOptions.areLegacyImdsEndpointsDisabled
+    - userSpec.ipxeScript
+    - userSpec.isPvEncryptionInTransitEnabled
+    - userSpec.preemptibleInstanceConfig.preemptionAction.preserveBootVolume
+    - userSpec.preemptibleInstanceConfig.preemptionAction.type
+    - userSpec.shape
+    - userSpec.shapeConfig.baselineOcpuUtilization
+    - userSpec.shapeConfig.memoryInGbs
+    - userSpec.shapeConfig.ocpus
+    - userSpec.sourceDetails.bootVolumeId
+    - userSpec.sourceDetails.bootVolumeSizeInGbs
+    - userSpec.sourceDetails.bootVolumeVpusPerGb
+    - userSpec.sourceDetails.imageId
+    - userSpec.sourceDetails.kmsKeyId
+    - userSpec.sourceDetails.sourceType
+    forceNew:
+    - migrationPlanId
+  hooks:
+    create:
+    - helper: tfresource.CreateResource
+    update:
+    - helper: tfresource.UpdateResource
+    delete:
+    - helper: tfresource.DeleteResource
+  followUp:
+    create: GetWorkRequest -> read-after-write
+    update: GetWorkRequest -> read-after-write
+    delete: GetWorkRequest -> confirm-delete
+notes:
+- The generated service manager uses the reviewed CRUD request, response, lifecycle,
+  and status projection contract.
+- Work-request phases are declared per operation from the vendored SDK response surface.
+- Secret side effects are none and finalizer ownership is retained until confirmed
+  deletion.

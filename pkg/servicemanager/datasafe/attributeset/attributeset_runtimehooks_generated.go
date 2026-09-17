@@ -50,15 +50,84 @@ func registerAttributeSetRuntimeHooksMutator(mutator AttributeSetRuntimeHooksMut
 	}
 	attributesetRuntimeHooksMutators = append(attributesetRuntimeHooksMutators, mutator)
 }
+func newAttributeSetRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "datasafe",
+		FormalSlug:    "attributeset",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"accessLevel", "attributeSetId", "attributeSetType", "compartmentId", "compartmentIdInSubtree", "displayName", "inUse", "isUserDefined", "state"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"attributeSetValues", "compartmentId", "definedTags", "description", "displayName", "freeformTags"},
+			ForceNew:      []string{"attributeSetType"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "AttributeSet", Action: "CreateAttributeSet"}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "AttributeSet", Action: "UpdateAttributeSet"}, {Helper: "ChangeAttributeSetCompartment", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "AttributeSet", Action: "DeleteAttributeSet"}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "AttributeSet", Action: "CreateAttributeSet"}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "AttributeSet", Action: "UpdateAttributeSet"}, {Helper: "ChangeAttributeSetCompartment", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "AttributeSet", Action: "DeleteAttributeSet"}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newAttributeSetDefaultRuntimeHooks(sdkClient datasafesdk.DataSafeClient) AttributeSetRuntimeHooks {
 	return AttributeSetRuntimeHooks{
+		Semantics:       newAttributeSetRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*datasafev1beta1.AttributeSet]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*datasafev1beta1.AttributeSet]{},
 		StatusHooks:     generatedruntime.StatusHooks[*datasafev1beta1.AttributeSet]{},
 		ParityHooks:     generatedruntime.ParityHooks[*datasafev1beta1.AttributeSet]{},
-		Async:           generatedruntime.AsyncHooks[*datasafev1beta1.AttributeSet]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*datasafev1beta1.AttributeSet]{},
+		Async: generatedruntime.AsyncHooks[*datasafev1beta1.AttributeSet]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := datasafesdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*datasafev1beta1.AttributeSet]{},
 		Create: runtimeOperationHooks[datasafesdk.CreateAttributeSetRequest, datasafesdk.CreateAttributeSetResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateAttributeSetDetails", RequestName: "CreateAttributeSetDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request datasafesdk.CreateAttributeSetRequest) (datasafesdk.CreateAttributeSetResponse, error) {
@@ -106,10 +175,19 @@ func buildAttributeSetGeneratedRuntimeConfig(
 	hooks AttributeSetRuntimeHooks,
 ) generatedruntime.Config[*datasafev1beta1.AttributeSet] {
 	return generatedruntime.Config[*datasafev1beta1.AttributeSet]{
-		Kind:            "AttributeSet",
-		SDKName:         "AttributeSet",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "AttributeSet",
+		SDKName:   "AttributeSet",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

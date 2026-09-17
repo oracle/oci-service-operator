@@ -96,9 +96,14 @@ spec:
               status:
                 description: The status of the object.
                 type: string
+              workspaceId:
+                description: The OCID of the Data Integration workspace containing
+                  this resource.
+                type: string
             required:
             - bucketName
             - fileName
+            - workspaceId
             type: object
           status:
             description: ImportRequestStatus defines the observed state of ImportRequest.

@@ -1,0 +1,34 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: ons
+slug: topic
+kind: Topic
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - terminating
+repoAuthored:
+  listLookup:
+    filters:
+      - compartmentId
+      - name
+      - id
+    matchRule: Adopt only a unique topic match in the requested compartment.
+  mutation:
+    mutable:
+      - description
+      - freeformTags
+      - definedTags
+    forceNew:
+      - compartmentId
+      - name
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - CREATING requeues and ACTIVE succeeds; topic updates settle through read-after-write without a distinct update lifecycle state.
+  - Delete retains the finalizer while OCI reports DELETING and completes only after confirmed absence.
+  - Description and tags update in place; compartmentId and name require replacement.
+  - Topic status uses the shared OSOK identity and condition surface and has no Kubernetes Secret side effects.

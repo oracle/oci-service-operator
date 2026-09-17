@@ -47,7 +47,7 @@ ScheduledQuerySpec defines the desired state of ScheduledQuery.
 | [`scheduledQueryProcessingConfiguration`](#kind-scheduledquery-spec-scheduledqueryprocessingconfiguration) | ScheduledQueryProcessingConfiguration defines nested fields for ScheduledQuery.ScheduledQueryProcessingConfiguration. | `object` | No | - | - |
 | `scheduledQueryProcessingSubType` | Processing sub type of the scheduled query. | `string` | No | - | - |
 | `scheduledQueryProcessingType` | Type of the scheduled query. | `string` | No | - | - |
-| `scheduledQueryRetentionCriteria` | Retention criteria for the scheduled query. | `string` | No | - | - |
+| `scheduledQueryRetentionCriteria` | Retention criteria for the scheduled query. The live service rejects create requests when this value is omitted. | `string` | Yes | - | - |
 | `scheduledQueryRetentionPeriodInMs` | Retention period for the scheduled query in milliseconds. | `integer (int64)` | No | - | - |
 | `scheduledQuerySchedule` | Schedule for the scheduled query. | `string` | No | - | - |
 | `scheduledQueryText` | Scheduled query to be run. | `string` | No | - | - |

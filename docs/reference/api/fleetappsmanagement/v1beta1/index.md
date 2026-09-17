@@ -964,6 +964,7 @@ FleetCredentialSpec defines the desired state of FleetCredential.
 | --- | --- | --- | --- | --- | --- |
 | `displayName` | A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information. Example: `My new resource` | `string` | Yes | - | - |
 | [`entitySpecifics`](#kind-fleetcredential-spec-entityspecifics) | FleetCredentialEntitySpecificsFields defines nested fields for FleetCredential.EntitySpecifics. | `object` | Yes | - | - |
+| `fleetId` | The OCID of the Fleet Application Management fleet containing this resource. | `string` | Yes | - | - |
 | [`password`](#kind-fleetcredential-spec-password) | FleetCredentialPasswordFields defines nested fields for FleetCredential.Password. | `object` | Yes | - | - |
 | [`user`](#kind-fleetcredential-spec-user) | FleetCredentialUserFields defines nested fields for FleetCredential.User. | `object` | Yes | - | - |
 
@@ -1171,6 +1172,7 @@ FleetPropertySpec defines the desired state of FleetProperty.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| `fleetId` | The OCID of the Fleet Application Management fleet containing this resource. | `string` | Yes | - | - |
 | `propertyId` | OCID referring to global level metadata property. | `string` | Yes | - | - |
 | `value` | Value of the Property. | `string` | Yes | - | - |
 
@@ -1273,6 +1275,7 @@ FleetResourceSpec defines the desired state of FleetResource.
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `compartmentId` | OCID of the compartment to which the resource belongs to. | `string` | Yes | - | - |
+| `fleetId` | The OCID of the Fleet Application Management fleet containing this resource. | `string` | Yes | - | - |
 | `resourceId` | The OCID of the resource. | `string` | Yes | - | - |
 | `resourceRegion` | Associated region | `string` | No | - | - |
 | `resourceType` | Type of the Resource. | `string` | No | - | - |

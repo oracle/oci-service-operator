@@ -632,10 +632,41 @@ FsuCycleGoalVersionDetails defines nested fields for FsuCycle.GoalVersionDetails
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| [`components`](#kind-fsucycle-spec-goalversiondetails-components) | - | `list[object]` | No | - | - |
 | `homePolicy` | - | `string` | No | - | - |
 | `jsonData` | - | `string` | No | - | - |
 | `newHomePrefix` | - | `string` | No | - | - |
+| `softwareImageId` | - | `string` | No | - | - |
 | `type` | - | `string` | No | - | - |
+| `version` | - | `string` | No | - | - |
+
+<a id="kind-fsucycle-spec-goalversiondetails-components"></a>
+##### Spec.goalVersionDetails.components[]
+
+[Back to FsuCycle spec](#kind-fsucycle-spec)
+
+FsuCycleGoalVersionDetailsComponent defines nested fields for FsuCycle.GoalVersionDetails.Component.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `componentType` | - | `string` | No | - | - |
+| [`goalVersionDetails`](#kind-fsucycle-spec-goalversiondetails-components-goalversiondetails) | FsuCycleGoalVersionDetailsComponentGoalVersionDetails defines nested fields for FsuCycle.GoalVersionDetails.Component.GoalVersionDetails. | `object` | No | - | - |
+| `homePolicy` | Goal home policy to use when Staging the Goal Version during patching. CREATE_NEW: Create a new DBHome (for Database Collections) for the specified image or version. USE_EXISTING: All database targets in the same VMCluster or CloudVmCluster will be moved to a shared database home. If an existing home for the selected image or version is not found in the VM Cluster for a target database, then a new home will be created. If more than one existing home for the selected image is found, then the home with the least number of databases will be used. If multiple homes have the least number of databases, then a home will be selected at random. | `string` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `newHomePrefix` | Prefix name used for new DB home resources created as part of the Stage Action. Format: <specified_prefix>_<timestamp> If not specified, a default OCI DB home resource will be generated for the new DB home resources created. | `string` | No | - | - |
+
+<a id="kind-fsucycle-spec-goalversiondetails-components-goalversiondetails"></a>
+###### Spec.goalVersionDetails.components[].goalVersionDetails
+
+[Back to FsuCycle spec](#kind-fsucycle-spec)
+
+FsuCycleGoalVersionDetailsComponentGoalVersionDetails defines nested fields for FsuCycle.GoalVersionDetails.Component.GoalVersionDetails.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `goalType` | - | `string` | No | - | - |
+| `goalVersion` | Goal version string matching an Oracle released 'GUEST_OS' software image. | `string` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
 
 <a id="kind-fsucycle-spec-stageactionschedule"></a>
 #### Spec.stageActionSchedule
@@ -749,10 +780,41 @@ FsuCycleGoalVersionDetails defines nested fields for FsuCycle.GoalVersionDetails
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| [`components`](#kind-fsucycle-status-goalversiondetails-components) | - | `list[object]` | No | - | - |
 | `homePolicy` | - | `string` | No | - | - |
 | `jsonData` | - | `string` | No | - | - |
 | `newHomePrefix` | - | `string` | No | - | - |
+| `softwareImageId` | - | `string` | No | - | - |
 | `type` | - | `string` | No | - | - |
+| `version` | - | `string` | No | - | - |
+
+<a id="kind-fsucycle-status-goalversiondetails-components"></a>
+##### Status.goalVersionDetails.components[]
+
+[Back to FsuCycle status](#kind-fsucycle-status)
+
+FsuCycleGoalVersionDetailsComponent defines nested fields for FsuCycle.GoalVersionDetails.Component.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `componentType` | - | `string` | No | - | - |
+| [`goalVersionDetails`](#kind-fsucycle-status-goalversiondetails-components-goalversiondetails) | FsuCycleGoalVersionDetailsComponentGoalVersionDetails defines nested fields for FsuCycle.GoalVersionDetails.Component.GoalVersionDetails. | `object` | No | - | - |
+| `homePolicy` | Goal home policy to use when Staging the Goal Version during patching. CREATE_NEW: Create a new DBHome (for Database Collections) for the specified image or version. USE_EXISTING: All database targets in the same VMCluster or CloudVmCluster will be moved to a shared database home. If an existing home for the selected image or version is not found in the VM Cluster for a target database, then a new home will be created. If more than one existing home for the selected image is found, then the home with the least number of databases will be used. If multiple homes have the least number of databases, then a home will be selected at random. | `string` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `newHomePrefix` | Prefix name used for new DB home resources created as part of the Stage Action. Format: <specified_prefix>_<timestamp> If not specified, a default OCI DB home resource will be generated for the new DB home resources created. | `string` | No | - | - |
+
+<a id="kind-fsucycle-status-goalversiondetails-components-goalversiondetails"></a>
+###### Status.goalVersionDetails.components[].goalVersionDetails
+
+[Back to FsuCycle status](#kind-fsucycle-status)
+
+FsuCycleGoalVersionDetailsComponentGoalVersionDetails defines nested fields for FsuCycle.GoalVersionDetails.Component.GoalVersionDetails.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `goalType` | - | `string` | No | - | - |
+| `goalVersion` | Goal version string matching an Oracle released 'GUEST_OS' software image. | `string` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
 
 <a id="kind-fsucycle-status-nextactiontoexecute"></a>
 #### Status.nextActionToExecute[]

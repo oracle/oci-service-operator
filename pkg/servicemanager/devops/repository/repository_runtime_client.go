@@ -80,7 +80,7 @@ func applyRepositoryRuntimeHooks(
 		return
 	}
 
-	hooks.Semantics = newRepositoryRuntimeSemantics()
+	hooks.Semantics = reviewedRepositoryRuntimeSemantics()
 	hooks.Async.Adapter = repositoryWorkRequestAsyncAdapter
 	hooks.Async.GetWorkRequest = func(ctx context.Context, workRequestID string) (any, error) {
 		return getRepositoryWorkRequest(ctx, workRequestClient, initErr, workRequestID)
@@ -104,7 +104,7 @@ func applyRepositoryRuntimeHooks(
 	hooks.ParityHooks.ValidateCreateOnlyDrift = validateRepositoryCreateOnlyDrift
 }
 
-func newRepositoryRuntimeSemantics() *generatedruntime.Semantics {
+func reviewedRepositoryRuntimeSemantics() *generatedruntime.Semantics {
 	return &generatedruntime.Semantics{
 		FormalService: "devops",
 		FormalSlug:    "repository",

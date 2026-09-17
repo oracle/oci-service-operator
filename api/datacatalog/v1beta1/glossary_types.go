@@ -30,6 +30,9 @@ type GlossarySpec struct {
 	// The list of customized properties along with the values for this object
 	// +kubebuilder:validation:Optional
 	CustomPropertyMembers []GlossaryCustomPropertyMember `json:"customPropertyMembers,omitempty"`
+	// The OCID of the catalog containing the glossary.
+	// +kubebuilder:validation:Required
+	CatalogId string `json:"catalogId"`
 }
 
 // GlossaryCustomPropertyMember defines nested fields for Glossary.CustomPropertyMember.

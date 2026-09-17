@@ -1,0 +1,134 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: cloudbridge
+slug: asset
+kind: Asset
+archetype: generated-service-manager
+states:
+- provisioning
+- active
+- updating
+- terminating
+repoAuthored:
+  operations:
+    create:
+    - CreateAsset
+    update:
+    - UpdateAsset
+    delete:
+    - DeleteAsset
+  providerLifecycle:
+    createPending: []
+    updatePending: []
+    deletePending:
+    - DELETING
+  listLookup:
+    filters:
+    - assetId
+    - assetType
+    - compartmentId
+    - displayName
+    - externalAssetKey
+    - inventoryId
+    - sourceKey
+    - state
+    matchRule: exact declared filters match within the resource scope; duplicate matches
+      fail
+  mutation:
+    mutable:
+    - assetSourceIds
+    - assetType
+    - compartmentId
+    - compute.connectedNetworks
+    - compute.coresCount
+    - compute.cpuModel
+    - compute.description
+    - compute.disks.bootOrder
+    - compute.disks.location
+    - compute.disks.name
+    - compute.disks.persistentMode
+    - compute.disks.sizeInMbs
+    - compute.disks.uuid
+    - compute.disks.uuidLun
+    - compute.disksCount
+    - compute.dnsName
+    - compute.firmware
+    - compute.gpuDevices.coresCount
+    - compute.gpuDevices.description
+    - compute.gpuDevices.manufacturer
+    - compute.gpuDevices.memoryInMbs
+    - compute.gpuDevices.name
+    - compute.gpuDevicesCount
+    - compute.guestState
+    - compute.hardwareVersion
+    - compute.hostName
+    - compute.isPmemEnabled
+    - compute.isTpmEnabled
+    - compute.latencySensitivity
+    - compute.memoryInMbs
+    - compute.nics.ipAddresses
+    - compute.nics.label
+    - compute.nics.macAddress
+    - compute.nics.macAddressType
+    - compute.nics.networkName
+    - compute.nics.switchName
+    - compute.nicsCount
+    - compute.nvdimmController.busNumber
+    - compute.nvdimmController.label
+    - compute.nvdimms.controllerKey
+    - compute.nvdimms.label
+    - compute.nvdimms.unitNumber
+    - compute.operatingSystem
+    - compute.operatingSystemVersion
+    - compute.pmemInMbs
+    - compute.powerState
+    - compute.primaryIp
+    - compute.scsiController.label
+    - compute.scsiController.sharedBus
+    - compute.scsiController.unitNumber
+    - compute.storageProvisionedInMbs
+    - compute.threadsPerCoreCount
+    - definedTags
+    - displayName
+    - freeformTags
+    - vm.hypervisorHost
+    - vm.hypervisorVendor
+    - vm.hypervisorVersion
+    - vmwareVcenter.dataCenter
+    - vmwareVcenter.vcenterKey
+    - vmwareVcenter.vcenterVersion
+    - vmwareVm.cluster
+    - vmwareVm.customerFields
+    - vmwareVm.customerTags.description
+    - vmwareVm.customerTags.name
+    - vmwareVm.faultToleranceBandwidth
+    - vmwareVm.faultToleranceSecondaryLatency
+    - vmwareVm.faultToleranceState
+    - vmwareVm.instanceUuid
+    - vmwareVm.isDisksCbtEnabled
+    - vmwareVm.isDisksUuidEnabled
+    - vmwareVm.path
+    - vmwareVm.vmwareToolsStatus
+    forceNew:
+    - externalAssetKey
+    - inventoryId
+    - sourceKey
+  hooks:
+    create:
+    - helper: tfresource.CreateResource
+    update:
+    - helper: tfresource.UpdateResource
+    - helper: tfresource.WaitForUpdatedState
+    delete:
+    - helper: tfresource.DeleteResource
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+- The generated service manager uses the reviewed CRUD request, response, lifecycle,
+  and status projection contract.
+- CRUD responses use lifecycle/read-after-write convergence without a work-request
+  tracker.
+- Secret side effects are none and finalizer ownership is retained until confirmed
+  deletion.

@@ -1,0 +1,87 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: fleetappsmanagement
+slug: schedulerdefinition
+kind: SchedulerDefinition
+archetype: generated-service-manager
+states:
+- provisioning
+- active
+- updating
+- terminating
+repoAuthored:
+  operations:
+    create:
+    - CreateSchedulerDefinition
+    update:
+    - UpdateSchedulerDefinition
+    delete:
+    - DeleteSchedulerDefinition
+  providerLifecycle:
+    createPending:
+    - CREATING
+    updatePending: []
+    deletePending:
+    - DELETING
+  listLookup:
+    filters:
+    - compartmentId
+    - displayName
+    - fleetId
+    - id
+    - maintenanceWindowId
+    - product
+    - runbookId
+    - runbookVersionName
+    - state
+    - timeScheduledGreaterThanOrEqualTo
+    - timeScheduledLessThan
+    matchRule: exact declared filters match within the resource scope; duplicate matches
+      fail
+  mutation:
+    mutable:
+    - actionGroups.displayName
+    - actionGroups.fleetId
+    - actionGroups.kind
+    - actionGroups.runbookId
+    - actionGroups.runbookVersionName
+    - actionGroups.sequence
+    - definedTags
+    - description
+    - displayName
+    - freeformTags
+    - runBooks.inputParameters.arguments.content.bucket
+    - runBooks.inputParameters.arguments.content.checksum
+    - runBooks.inputParameters.arguments.content.namespace
+    - runBooks.inputParameters.arguments.content.object
+    - runBooks.inputParameters.arguments.content.sourceType
+    - runBooks.inputParameters.arguments.kind
+    - runBooks.inputParameters.arguments.name
+    - runBooks.inputParameters.arguments.value
+    - runBooks.inputParameters.stepName
+    - runBooks.runbookId
+    - runBooks.runbookVersionName
+    - schedule.duration
+    - schedule.executionStartdate
+    - schedule.maintenanceWindowId
+    - schedule.recurrences
+    - schedule.type
+    forceNew:
+    - compartmentId
+  hooks:
+    create:
+    - helper: tfresource.CreateResource
+    update:
+    - helper: tfresource.UpdateResource
+    delete:
+    - helper: tfresource.DeleteResource
+  followUp:
+    create: GetWorkRequest -> read-after-write
+    update: GetWorkRequest -> read-after-write
+    delete: confirm-delete
+notes:
+- The generated service manager uses the reviewed CRUD request, response, lifecycle,
+  and status projection contract.
+- Work-request phases are declared per operation from the vendored SDK response surface.
+- Secret side effects are none and finalizer ownership is retained until confirmed
+  deletion.

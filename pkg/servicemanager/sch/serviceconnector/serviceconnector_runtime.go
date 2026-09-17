@@ -580,7 +580,12 @@ func listServiceConnectorPages(
 			combined.OpcRequestId = response.OpcRequestId
 		}
 		combined.RawResponse = response.RawResponse
-		combined.Items = append(combined.Items, response.Items...)
+		for _, item := range response.Items {
+			if item.LifecycleState == schsdk.LifecycleStateDeleted {
+				continue
+			}
+			combined.Items = append(combined.Items, item)
+		}
 
 		nextPage := strings.TrimSpace(stringValue(response.OpcNextPage))
 		if nextPage == "" {
@@ -725,6 +730,9 @@ func resolveServiceConnectorWorkRequestAction(workRequest schsdk.WorkRequest) (s
 		if candidate == "" {
 			continue
 		}
+		if candidate == string(schsdk.OperationStatusInProgress) && serviceConnectorWorkRequestPending(workRequest.Status) {
+			continue
+		}
 		if action == "" {
 			action = candidate
 			continue
@@ -733,7 +741,21 @@ func resolveServiceConnectorWorkRequestAction(workRequest schsdk.WorkRequest) (s
 			return "", fmt.Errorf("ServiceConnector work request %s exposes conflicting ServiceConnector action types %q and %q", stringValue(workRequest.Id), action, candidate)
 		}
 	}
+	if action == "" && serviceConnectorWorkRequestPending(workRequest.Status) {
+		if phase, ok := serviceConnectorWorkRequestPhaseFromOperationType(workRequest.OperationType); ok {
+			return string(serviceConnectorWorkRequestActionForPhase(phase)), nil
+		}
+	}
 	return action, nil
+}
+
+func serviceConnectorWorkRequestPending(status schsdk.OperationStatusEnum) bool {
+	switch status {
+	case schsdk.OperationStatusAccepted, schsdk.OperationStatusInProgress, schsdk.OperationStatusCanceling:
+		return true
+	default:
+		return false
+	}
 }
 
 func isServiceConnectorWorkRequestResource(resource schsdk.WorkRequestResource) bool {

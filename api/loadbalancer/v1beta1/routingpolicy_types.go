@@ -25,6 +25,9 @@ type RoutingPolicySpec struct {
 	// The list of routing rules.
 	// +kubebuilder:validation:Required
 	Rules []RoutingPolicyRule `json:"rules"`
+	// The OCID of the load balancer that owns this routing policy.
+	// +kubebuilder:validation:Optional
+	LoadBalancerId string `json:"loadBalancerId,omitempty"`
 }
 
 // RoutingPolicyRuleAction defines nested fields for RoutingPolicy.Rule.Action.
@@ -62,6 +65,8 @@ type RoutingPolicyStatus struct {
 	ConditionLanguageVersion string `json:"conditionLanguageVersion,omitempty"`
 	// The ordered list of routing rules.
 	Rules []RoutingPolicyRule `json:"rules,omitempty"`
+	// The bound load balancer OCID used to address this routing policy.
+	LoadBalancerId string `json:"loadBalancerId,omitempty"`
 }
 
 // +kubebuilder:object:root=true

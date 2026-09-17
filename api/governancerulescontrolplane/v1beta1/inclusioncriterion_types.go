@@ -21,7 +21,7 @@ type InclusionCriterionSpec struct {
 	// +kubebuilder:validation:Required
 	Type string `json:"type"`
 	// +kubebuilder:validation:Optional
-	Association InclusionCriterionAssociation `json:"association,omitempty"`
+	Association InclusionCriterionAssociation `json:"association,omitempty,omitzero"`
 }
 
 // InclusionCriterionAssociation defines nested fields for InclusionCriterion.Association.

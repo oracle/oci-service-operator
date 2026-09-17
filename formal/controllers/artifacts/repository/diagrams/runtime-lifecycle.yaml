@@ -1,0 +1,36 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: artifacts
+slug: repository
+kind: Repository
+archetype: generated-service-manager
+states:
+  - active
+  - terminating
+  - deleted
+repoAuthored:
+  listLookup:
+    filters:
+      - compartmentId
+      - displayName
+      - id
+    matchRule: Adopt only a unique generic-repository match in the requested compartment.
+  mutation:
+    mutable:
+      - displayName
+      - description
+      - freeformTags
+      - definedTags
+    forceNew:
+      - compartmentId
+      - isImmutable
+      - repositoryType
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - The polymorphic GENERIC repository path settles create and update on AVAILABLE and preserves repositoryType in both request bodies.
+  - Delete retains the finalizer through DELETING until DELETED or an unambiguous absence; auth-shaped 404 responses remain conservative.
+  - Display name, description, and tags update in place; compartmentId, isImmutable, and repositoryType require replacement.
+  - The runtime has no Kubernetes Secret side effects.

@@ -29,7 +29,11 @@ spec:
   apmDomainId: ocid1.apmdomain.oc1..exampleuniqueID
   scheduledQueryName: scheduled-query-sample
   scheduledQueryProcessingType: QUERY
-  scheduledQueryText: 'show spans where service.name = "checkout"'
-  scheduledQuerySchedule: '0 */12 * * *'
+  scheduledQueryProcessingSubType: NONE
+  scheduledQueryText: 'SHOW SPANS * FIRST 100 ROWS BETWEEN now() - 2 HOURS AND now()'
+  scheduledQuerySchedule: 'SCHEDULE STARTING AFTER 2099-01-01T00:00:00Z EVERY 720 MINUTES'
   scheduledQueryDescription: Sample scheduled query managed by OCI Service Operator
+  scheduledQueryMaximumRuntimeInSeconds: 60
+  scheduledQueryRetentionCriteria: KEEP_DATA_UNTIL_RETENTION_PERIOD
+  scheduledQueryRetentionPeriodInMs: 86400000
 ```

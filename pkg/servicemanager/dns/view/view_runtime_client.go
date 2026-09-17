@@ -9,6 +9,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"sync"
 
 	dnssdk "github.com/oracle/oci-go-sdk/v65/dns"
 	dnsv1beta1 "github.com/oracle/oci-service-operator/api/dns/v1beta1"
@@ -27,6 +28,46 @@ type viewOCIClient interface {
 	DeleteView(context.Context, dnssdk.DeleteViewRequest) (dnssdk.DeleteViewResponse, error)
 }
 
+type viewAcceptedDeleteEvidence struct {
+	mu  sync.Mutex
+	ids map[string]struct{}
+}
+
+func newViewAcceptedDeleteEvidence() *viewAcceptedDeleteEvidence {
+	return &viewAcceptedDeleteEvidence{ids: map[string]struct{}{}}
+}
+
+func (e *viewAcceptedDeleteEvidence) record(id string) {
+	id = strings.TrimSpace(id)
+	if e == nil || id == "" {
+		return
+	}
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	e.ids[id] = struct{}{}
+}
+
+func (e *viewAcceptedDeleteEvidence) has(id string) bool {
+	id = strings.TrimSpace(id)
+	if e == nil || id == "" {
+		return false
+	}
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	_, ok := e.ids[id]
+	return ok
+}
+
+func (e *viewAcceptedDeleteEvidence) forget(id string) {
+	id = strings.TrimSpace(id)
+	if e == nil || id == "" {
+		return
+	}
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	delete(e.ids, id)
+}
+
 func init() {
 	registerViewRuntimeHooksMutator(func(_ *ViewServiceManager, hooks *ViewRuntimeHooks) {
 		applyViewRuntimeHooks(hooks)
@@ -43,7 +84,46 @@ func applyViewRuntimeHooks(hooks *ViewRuntimeHooks) {
 	hooks.List.Fields = viewListFields()
 	hooks.DeleteHooks.HandleError = handleViewDeleteError
 	forcePrivateViewScope(hooks)
-	wrapViewDeleteConfirmation(hooks)
+	acceptedDeletes := newViewAcceptedDeleteEvidence()
+	trackViewAcceptedDeletes(hooks, acceptedDeletes)
+	configureViewDeleteConfirmRead(hooks, acceptedDeletes)
+	wrapViewDeleteConfirmation(hooks, acceptedDeletes)
+}
+
+func trackViewAcceptedDeletes(hooks *ViewRuntimeHooks, acceptedDeletes *viewAcceptedDeleteEvidence) {
+	if hooks == nil || hooks.Delete.Call == nil {
+		return
+	}
+	deleteView := hooks.Delete.Call
+	hooks.Delete.Call = func(ctx context.Context, request dnssdk.DeleteViewRequest) (dnssdk.DeleteViewResponse, error) {
+		response, err := deleteView(ctx, request)
+		if err == nil && request.ViewId != nil {
+			acceptedDeletes.record(*request.ViewId)
+		}
+		return response, err
+	}
+}
+
+func configureViewDeleteConfirmRead(hooks *ViewRuntimeHooks, acceptedDeletes *viewAcceptedDeleteEvidence) {
+	if hooks == nil || hooks.Get.Call == nil {
+		return
+	}
+	getView := hooks.Get.Call
+	hooks.DeleteHooks.ConfirmRead = func(
+		ctx context.Context,
+		_ *dnsv1beta1.View,
+		currentID string,
+	) (any, error) {
+		response, err := getView(ctx, dnssdk.GetViewRequest{ViewId: &currentID})
+		if err == nil || !errorutil.ClassifyDeleteError(err).IsAuthShapedNotFound() ||
+			!acceptedDeletes.has(currentID) {
+			return response, err
+		}
+		return dnssdk.GetViewResponse{View: dnssdk.View{
+			Id:             &currentID,
+			LifecycleState: dnssdk.ViewLifecycleStateDeleted,
+		}}, nil
+	}
 }
 
 func newViewServiceClientWithOCIClient(log loggerutil.OSOKLogger, client viewOCIClient) ViewServiceClient {
@@ -262,22 +342,24 @@ func handleViewDeleteError(resource *dnsv1beta1.View, err error) error {
 	return err
 }
 
-func wrapViewDeleteConfirmation(hooks *ViewRuntimeHooks) {
+func wrapViewDeleteConfirmation(hooks *ViewRuntimeHooks, acceptedDeletes *viewAcceptedDeleteEvidence) {
 	if hooks.Get.Call == nil {
 		return
 	}
 	getView := hooks.Get.Call
 	hooks.WrapGeneratedClient = append(hooks.WrapGeneratedClient, func(delegate ViewServiceClient) ViewServiceClient {
 		return viewDeleteConfirmationClient{
-			delegate: delegate,
-			getView:  getView,
+			delegate:        delegate,
+			getView:         getView,
+			acceptedDeletes: acceptedDeletes,
 		}
 	})
 }
 
 type viewDeleteConfirmationClient struct {
-	delegate ViewServiceClient
-	getView  func(context.Context, dnssdk.GetViewRequest) (dnssdk.GetViewResponse, error)
+	delegate        ViewServiceClient
+	getView         func(context.Context, dnssdk.GetViewRequest) (dnssdk.GetViewResponse, error)
+	acceptedDeletes *viewAcceptedDeleteEvidence
 }
 
 func (c viewDeleteConfirmationClient) CreateOrUpdate(ctx context.Context, resource *dnsv1beta1.View, req ctrl.Request) (servicemanager.OSOKResponse, error) {
@@ -285,10 +367,15 @@ func (c viewDeleteConfirmationClient) CreateOrUpdate(ctx context.Context, resour
 }
 
 func (c viewDeleteConfirmationClient) Delete(ctx context.Context, resource *dnsv1beta1.View) (bool, error) {
+	viewID := trackedViewID(resource)
 	if err := c.rejectAuthShapedConfirmRead(ctx, resource); err != nil {
 		return false, err
 	}
-	return c.delegate.Delete(ctx, resource)
+	deleted, err := c.delegate.Delete(ctx, resource)
+	if deleted {
+		c.acceptedDeletes.forget(viewID)
+	}
+	return deleted, err
 }
 
 func (c viewDeleteConfirmationClient) rejectAuthShapedConfirmRead(ctx context.Context, resource *dnsv1beta1.View) error {
@@ -304,6 +391,9 @@ func (c viewDeleteConfirmationClient) rejectAuthShapedConfirmRead(ctx context.Co
 		return nil
 	}
 	if !errorutil.ClassifyDeleteError(err).IsAuthShapedNotFound() {
+		return nil
+	}
+	if c.acceptedDeletes.has(viewID) {
 		return nil
 	}
 	servicemanager.RecordErrorOpcRequestID(&resource.Status.OsokStatus, err)

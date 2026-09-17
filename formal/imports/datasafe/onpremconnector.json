@@ -1,0 +1,128 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "onpremconnector",
+  "kind": "OnPremConnector",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_on_prem_connector",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOnPremConnector",
+        "requestType": "datasafe.CreateOnPremConnectorRequest",
+        "responseType": "datasafe.CreateOnPremConnectorResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOnPremConnector",
+        "requestType": "datasafe.GetOnPremConnectorRequest",
+        "responseType": "datasafe.GetOnPremConnectorResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOnPremConnectors",
+        "requestType": "datasafe.ListOnPremConnectorsRequest",
+        "responseType": "datasafe.ListOnPremConnectorsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeOnPremConnectorCompartment",
+        "requestType": "datasafe.ChangeOnPremConnectorCompartmentRequest",
+        "responseType": "datasafe.ChangeOnPremConnectorCompartmentResponse"
+      },
+      {
+        "operation": "UpdateOnPremConnector",
+        "requestType": "datasafe.UpdateOnPremConnectorRequest",
+        "responseType": "datasafe.UpdateOnPremConnectorResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOnPremConnector",
+        "requestType": "datasafe.DeleteOnPremConnectorRequest",
+        "responseType": "datasafe.DeleteOnPremConnectorResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "FAILED",
+        "INACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags"
+    ],
+    "forceNew": null,
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_data_safe_on_prem_connectors",
+    "collectionField": "on_prem_connectors",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "access_level",
+      "compartment_id",
+      "compartment_id_in_subtree",
+      "display_name",
+      "on_prem_connector_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/onpremconnector/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/onpremconnector/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts are imported from the pinned terraform-provider-oci revision; repo-authored runtime semantics remain authoritative."
+  ]
+}

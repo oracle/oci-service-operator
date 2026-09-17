@@ -1,0 +1,25 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: dataintegration
+slug: disapplicationdetaileddescription
+kind: DisApplicationDetailedDescription
+archetype: generated-service-manager
+states:
+  - active
+  - terminating
+repoAuthored:
+  mutation:
+    mutable:
+      - "logo"
+      - "detailedDescription"
+    forceNew:
+      - "workspaceId"
+      - "applicationKey"
+  followUp:
+    create: "read-after-write"
+    update: "read-after-write"
+    delete: "confirm-delete"
+notes:
+  - "The vendored SDK response has no lifecycle state or required work-request flow; successful writes settle from the response and configured follow-up."
+  - "Parent identifiers scope composite OCI request paths and remain replacement-only unless the SDK update details explicitly expose them."
+  - "Create, get, list where available, update, and delete request shapes are exercised by the package-local typed OCI mock integration test."

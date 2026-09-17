@@ -60,8 +60,8 @@ spec:
                 description: version
                 type: integer
               compartmentId:
-                description: OCID of the compartment that this resource belongs to.
-                  Defaults to compartment of the Workspace.
+                description: The compartment OCID required by the DIS application
+                  collection lookup.
                 type: string
               definedTags:
                 additionalProperties:
@@ -263,10 +263,16 @@ spec:
                       in this operation.
                     type: string
                 type: object
+              workspaceId:
+                description: The OCID of the Data Integration workspace containing
+                  this resource.
+                type: string
             required:
+            - compartmentId
             - identifier
             - name
             - objectVersion
+            - workspaceId
             type: object
           status:
             description: DisApplicationStatus defines the observed state of DisApplication.

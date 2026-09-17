@@ -66,25 +66,25 @@ func newMappedSecretDefaultRuntimeHooks(sdkClient networkfirewallsdk.NetworkFire
 			},
 		},
 		Get: runtimeOperationHooks[networkfirewallsdk.GetMappedSecretRequest, networkfirewallsdk.GetMappedSecretResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "MappedSecretName", RequestName: "mappedSecretName", Contribution: "path", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "MappedSecretName", RequestName: "mappedSecretName", Contribution: "path", PreferResourceID: true}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request networkfirewallsdk.GetMappedSecretRequest) (networkfirewallsdk.GetMappedSecretResponse, error) {
 				return sdkClient.GetMappedSecret(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[networkfirewallsdk.ListMappedSecretsRequest, networkfirewallsdk.ListMappedSecretsResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: true}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request networkfirewallsdk.ListMappedSecretsRequest) (networkfirewallsdk.ListMappedSecretsResponse, error) {
 				return sdkClient.ListMappedSecrets(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[networkfirewallsdk.UpdateMappedSecretRequest, networkfirewallsdk.UpdateMappedSecretResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "MappedSecretName", RequestName: "mappedSecretName", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdateMappedSecretDetails", RequestName: "UpdateMappedSecretDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "MappedSecretName", RequestName: "mappedSecretName", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateMappedSecretDetails", RequestName: "UpdateMappedSecretDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request networkfirewallsdk.UpdateMappedSecretRequest) (networkfirewallsdk.UpdateMappedSecretResponse, error) {
 				return sdkClient.UpdateMappedSecret(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[networkfirewallsdk.DeleteMappedSecretRequest, networkfirewallsdk.DeleteMappedSecretResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "MappedSecretName", RequestName: "mappedSecretName", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "MappedSecretName", RequestName: "mappedSecretName", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request networkfirewallsdk.DeleteMappedSecretRequest) (networkfirewallsdk.DeleteMappedSecretResponse, error) {
 				return sdkClient.DeleteMappedSecret(ctx, request)
 			},

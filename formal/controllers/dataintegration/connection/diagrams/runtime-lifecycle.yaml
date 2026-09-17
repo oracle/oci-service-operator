@@ -1,0 +1,63 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: dataintegration
+slug: connection
+kind: Connection
+archetype: generated-service-manager
+states:
+  - active
+  - terminating
+repoAuthored:
+  listLookup:
+    filters:
+      - "name"
+    matchRule: exact unique match on fields exposed by the scoped OCI list response
+  mutation:
+    mutable:
+      - "key"
+      - "modelVersion"
+      - "parentRef"
+      - "description"
+      - "objectStatus"
+      - "connectionProperties"
+      - "registryMetadata"
+      - "name"
+      - "identifier"
+      - "username"
+      - "password"
+      - "passwordSecret"
+      - "accessKey"
+      - "secretKey"
+      - "defaultExternalStorage"
+      - "tnsAlias"
+      - "tnsNames"
+      - "hdfsPrincipal"
+      - "dataNodePrincipal"
+      - "nameNodePrincipal"
+      - "realm"
+      - "keyDistributionCenter"
+      - "keyTabContent"
+      - "authHeader"
+      - "accessTokenUrl"
+      - "clientId"
+      - "clientSecret"
+      - "scope"
+      - "grantType"
+      - "credentialFileContent"
+      - "userId"
+      - "fingerPrint"
+      - "passPhrase"
+      - "objectVersion"
+    forceNew:
+      - "jsonData"
+      - "modelType"
+      - "workspaceId"
+      - "dataAssetKey"
+  followUp:
+    create: "read-after-write"
+    update: "read-after-write"
+    delete: "confirm-delete"
+notes:
+  - "The vendored SDK response has no lifecycle state or required work-request flow; successful writes settle from the response and configured follow-up."
+  - "Parent identifiers scope composite OCI request paths and remain replacement-only unless the SDK update details explicitly expose them."
+  - "Create, get, list where available, update, and delete request shapes are exercised by the package-local typed OCI mock integration test."

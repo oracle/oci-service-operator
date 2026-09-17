@@ -72,11 +72,11 @@ type CreateWidgetResponse struct {
 }
 
 type GetWidgetResponse struct {
-	Widget
+	Widget `presentIn:"body"`
 }
 
 type ListWidgetsResponse struct {
-	Items []WidgetSummary
+	Items []WidgetSummary `presentIn:"body"`
 }
 
 type UpdateWidgetResponse struct {

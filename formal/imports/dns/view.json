@@ -1,0 +1,130 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "dns",
+  "slug": "view",
+  "kind": "View",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_dns_view",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateView",
+        "requestType": "dns.CreateViewRequest",
+        "responseType": "dns.CreateViewResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetView",
+        "requestType": "dns.GetViewRequest",
+        "responseType": "dns.GetViewResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListViews",
+        "requestType": "dns.ListViewsRequest",
+        "responseType": "dns.ListViewsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeViewCompartment",
+        "requestType": "dns.ChangeViewCompartmentRequest",
+        "responseType": "dns.ChangeViewCompartmentResponse"
+      },
+      {
+        "operation": "UpdateView",
+        "requestType": "dns.UpdateViewRequest",
+        "responseType": "dns.UpdateViewResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteView",
+        "requestType": "dns.DeleteViewRequest",
+        "responseType": "dns.DeleteViewResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "display_name",
+      "freeform_tags",
+      "scope"
+    ],
+    "forceNew": null,
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_dns_views",
+    "collectionField": "views",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "id",
+      "scope",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/dns/view/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/dns/view/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Refreshed from the pinned terraform-provider-oci DNS View resource; protected-view and deletion behavior remain repo-authored."
+  ]
+}

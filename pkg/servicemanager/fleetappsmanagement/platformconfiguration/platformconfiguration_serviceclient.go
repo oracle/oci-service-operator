@@ -32,8 +32,28 @@ type defaultPlatformConfigurationServiceClient struct {
 
 var _ PlatformConfigurationServiceClient = defaultPlatformConfigurationServiceClient{}
 
+type PlatformConfigurationSDKClients struct {
+	fleetAppsManagementAdminClient       fleetappsmanagementsdk.FleetAppsManagementAdminClient
+	fleetAppsManagementWorkRequestClient fleetappsmanagementsdk.FleetAppsManagementWorkRequestClient
+}
+
+func newPlatformConfigurationSDKClients(manager *PlatformConfigurationServiceManager) (PlatformConfigurationSDKClients, error) {
+	var clients PlatformConfigurationSDKClients
+	fleetAppsManagementAdminClientClient, err := fleetappsmanagementsdk.NewFleetAppsManagementAdminClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize PlatformConfiguration OCI client FleetAppsManagementAdminClient: %w", err)
+	}
+	clients.fleetAppsManagementAdminClient = fleetAppsManagementAdminClientClient
+	fleetAppsManagementWorkRequestClientClient, err := fleetappsmanagementsdk.NewFleetAppsManagementWorkRequestClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize PlatformConfiguration OCI client FleetAppsManagementWorkRequestClient: %w", err)
+	}
+	clients.fleetAppsManagementWorkRequestClient = fleetAppsManagementWorkRequestClientClient
+	return clients, nil
+}
+
 var newPlatformConfigurationServiceClient = func(manager *PlatformConfigurationServiceManager) PlatformConfigurationServiceClient {
-	sdkClient, err := fleetappsmanagementsdk.NewFleetAppsManagementAdminClientWithConfigurationProvider(manager.Provider)
+	sdkClient, err := newPlatformConfigurationSDKClients(manager)
 	hooks := newPlatformConfigurationRuntimeHooks(manager, sdkClient)
 	config := buildPlatformConfigurationGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {

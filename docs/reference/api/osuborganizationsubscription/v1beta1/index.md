@@ -45,7 +45,28 @@ OrganizationSubscriptionStatus defines the observed state of OrganizationSubscri
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| [`currency`](#kind-organizationsubscription-status-currency) | OrganizationSubscriptionCurrency defines nested fields for OrganizationSubscription.Currency. | `object` | No | - | - |
+| `id` | SPM internal Subscription ID | `string` | No | - | - |
+| `sdkStatus` | Status of the plan This uses a distinct JSON name so it can coexist with the OSOK status envelope. | `string` | No | - | - |
+| `serviceName` | Customer friendly service name provided by PRG | `string` | No | - | - |
 | [`status`](#kind-organizationsubscription-status-status) | - | `object` | Yes | - | - |
+| `timeEnd` | Represents the date when the last service of the subscription ends | `string` | No | - | - |
+| `timeStart` | Represents the date when the first service of the subscription was activated | `string` | No | - | - |
+| `totalValue` | Total aggregate TCLV of all lines for the subscription including expired, active, and signed | `string` | No | - | - |
+| `type` | Subscription Type i.e. IAAS,SAAS,PAAS | `string` | No | - | - |
+
+<a id="kind-organizationsubscription-status-currency"></a>
+#### Status.currency
+
+[Back to OrganizationSubscription status](#kind-organizationsubscription-status)
+
+OrganizationSubscriptionCurrency defines nested fields for OrganizationSubscription.Currency.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `isoCode` | Currency Code | `string` | No | - | - |
+| `name` | Currency name | `string` | No | - | - |
+| `stdPrecision` | Standard Precision of the Currency | `integer (int64)` | No | - | - |
 
 <a id="kind-organizationsubscription-status-status"></a>
 #### Status.status

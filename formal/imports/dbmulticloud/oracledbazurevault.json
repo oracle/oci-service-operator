@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "dbmulticloud",
+  "slug": "oracledbazurevault",
+  "kind": "OracleDbAzureVault",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_dbmulticloud_oracle_db_azure_vault",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOracleDbAzureVault",
+        "requestType": "dbmulticloud.CreateOracleDbAzureVaultRequest",
+        "responseType": "dbmulticloud.CreateOracleDbAzureVaultResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOracleDbAzureVault",
+        "requestType": "dbmulticloud.GetOracleDbAzureVaultRequest",
+        "responseType": "dbmulticloud.GetOracleDbAzureVaultResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOracleDbAzureVaults",
+        "requestType": "dbmulticloud.ListOracleDbAzureVaultsRequest",
+        "responseType": "dbmulticloud.ListOracleDbAzureVaultsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeOracleDbAzureVaultCompartment",
+        "requestType": "dbmulticloud.ChangeOracleDbAzureVaultCompartmentRequest",
+        "responseType": "dbmulticloud.ChangeOracleDbAzureVaultCompartmentResponse"
+      },
+      {
+        "operation": "UpdateOracleDbAzureVault",
+        "requestType": "dbmulticloud.UpdateOracleDbAzureVaultRequest",
+        "responseType": "dbmulticloud.UpdateOracleDbAzureVaultResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOracleDbAzureVault",
+        "requestType": "dbmulticloud.DeleteOracleDbAzureVaultRequest",
+        "responseType": "dbmulticloud.DeleteOracleDbAzureVaultResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "azure_vault_id",
+      "compartment_id",
+      "defined_tags",
+      "display_name",
+      "freeform_tags",
+      "location",
+      "oracle_db_azure_resource_group",
+      "oracle_db_connector_id",
+      "properties",
+      "type"
+    ],
+    "forceNew": null,
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_dbmulticloud_oracle_db_azure_vaults",
+    "collectionField": "oracle_db_azure_vault_summary_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "oracle_db_azure_connector_id",
+      "oracle_db_azure_resource_group",
+      "oracle_db_azure_vault_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/dbmulticloud/oracledbazurevault/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/dbmulticloud/oracledbazurevault/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from the pinned terraform-provider-oci source revision."
+  ]
+}

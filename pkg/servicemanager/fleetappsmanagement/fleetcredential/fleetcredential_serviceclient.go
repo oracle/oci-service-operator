@@ -32,8 +32,28 @@ type defaultFleetCredentialServiceClient struct {
 
 var _ FleetCredentialServiceClient = defaultFleetCredentialServiceClient{}
 
+type FleetCredentialSDKClients struct {
+	fleetAppsManagementClient            fleetappsmanagementsdk.FleetAppsManagementClient
+	fleetAppsManagementWorkRequestClient fleetappsmanagementsdk.FleetAppsManagementWorkRequestClient
+}
+
+func newFleetCredentialSDKClients(manager *FleetCredentialServiceManager) (FleetCredentialSDKClients, error) {
+	var clients FleetCredentialSDKClients
+	fleetAppsManagementClientClient, err := fleetappsmanagementsdk.NewFleetAppsManagementClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize FleetCredential OCI client FleetAppsManagementClient: %w", err)
+	}
+	clients.fleetAppsManagementClient = fleetAppsManagementClientClient
+	fleetAppsManagementWorkRequestClientClient, err := fleetappsmanagementsdk.NewFleetAppsManagementWorkRequestClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize FleetCredential OCI client FleetAppsManagementWorkRequestClient: %w", err)
+	}
+	clients.fleetAppsManagementWorkRequestClient = fleetAppsManagementWorkRequestClientClient
+	return clients, nil
+}
+
 var newFleetCredentialServiceClient = func(manager *FleetCredentialServiceManager) FleetCredentialServiceClient {
-	sdkClient, err := fleetappsmanagementsdk.NewFleetAppsManagementClientWithConfigurationProvider(manager.Provider)
+	sdkClient, err := newFleetCredentialSDKClients(manager)
 	hooks := newFleetCredentialRuntimeHooks(manager, sdkClient)
 	config := buildFleetCredentialGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {

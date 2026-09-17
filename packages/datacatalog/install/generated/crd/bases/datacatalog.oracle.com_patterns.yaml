@@ -56,6 +56,9 @@ spec:
           spec:
             description: PatternSpec defines the desired state of Pattern.
             properties:
+              catalogId:
+                description: The OCID of the catalog containing the pattern.
+                type: string
               checkFailureLimit:
                 description: |-
                   The maximum number of UNMATCHED files, in checkFilePathList, above which the check fails. Optional, if
@@ -107,6 +110,7 @@ spec:
                   Example: `{"properties": { "default": { "tbd"}}}`
                 type: object
             required:
+            - catalogId
             - displayName
             type: object
           status:

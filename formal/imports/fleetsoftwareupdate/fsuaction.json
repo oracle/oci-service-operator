@@ -1,0 +1,146 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "fleetsoftwareupdate",
+  "slug": "fsuaction",
+  "kind": "FsuAction",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "unavailable",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateFsuAction",
+        "requestType": "fleetsoftwareupdate.CreateFsuActionRequest",
+        "responseType": "fleetsoftwareupdate.CreateFsuActionResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetFsuAction",
+        "requestType": "fleetsoftwareupdate.GetFsuActionRequest",
+        "responseType": "fleetsoftwareupdate.GetFsuActionResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListFsuActions",
+        "requestType": "fleetsoftwareupdate.ListFsuActionsRequest",
+        "responseType": "fleetsoftwareupdate.ListFsuActionsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateFsuAction",
+        "requestType": "fleetsoftwareupdate.UpdateFsuActionRequest",
+        "responseType": "fleetsoftwareupdate.UpdateFsuActionResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteFsuAction",
+        "requestType": "fleetsoftwareupdate.DeleteFsuActionRequest",
+        "responseType": "fleetsoftwareupdate.DeleteFsuActionResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "displayName",
+      "freeformTags",
+      "definedTags"
+    ],
+    "forceNew": [
+      "jsonData",
+      "compartmentId",
+      "type",
+      "fsuCycleId",
+      "scheduleDetails",
+      "details"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "FsuAction",
+        "action": "CreateFsuAction"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "FsuAction",
+        "action": "UpdateFsuAction"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "FsuAction",
+        "action": "DeleteFsuAction"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "unavailable",
+    "collectionField": "Items",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartmentId",
+      "fsuCycleId",
+      "lifecycleState",
+      "displayName",
+      "type",
+      "opc-request-id"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/fleetsoftwareupdate/fsuaction/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/fleetsoftwareupdate/fsuaction/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Terraform provider formal-import could not resolve unavailable; the vendored SDK, generated runtime, and package-owned typed OCI fixtures define this reviewed contract."
+  ]
+}

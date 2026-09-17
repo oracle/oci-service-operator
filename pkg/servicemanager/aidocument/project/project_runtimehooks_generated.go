@@ -77,8 +77,8 @@ func newProjectRuntimeSemantics() *generatedruntime.Semantics {
 			MatchFields:        []string{"compartmentId", "displayName", "id", "state"},
 		},
 		Mutation: generatedruntime.MutationSemantics{
-			Mutable:       []string{"definedTags", "description", "displayName", "freeformTags"},
-			ForceNew:      []string{"compartmentId"},
+			Mutable:       []string{"description", "displayName"},
+			ForceNew:      []string{"compartmentId", "definedTags", "freeformTags"},
 			ConflictsWith: map[string][]string{},
 		},
 		Hooks: generatedruntime.HookSet{

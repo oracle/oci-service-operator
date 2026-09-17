@@ -2364,10 +2364,15 @@ spec:
                       type: object
                   type: object
                 type: array
+              workspaceId:
+                description: The OCID of the Data Integration workspace containing
+                  this resource.
+                type: string
             required:
             - identifier
             - name
             - registryMetadata
+            - workspaceId
             type: object
           status:
             description: UserDefinedFunctionStatus defines the observed state of UserDefinedFunction.

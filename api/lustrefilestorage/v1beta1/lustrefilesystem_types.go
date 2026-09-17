@@ -70,7 +70,7 @@ type LustreFileSystemSpec struct {
 	// +kubebuilder:validation:Optional
 	ClusterPlacementGroupId string `json:"clusterPlacementGroupId,omitempty"`
 	// +kubebuilder:validation:Optional
-	MaintenanceWindow LustreFileSystemMaintenanceWindow `json:"maintenanceWindow,omitempty"`
+	MaintenanceWindow LustreFileSystemMaintenanceWindow `json:"maintenanceWindow,omitempty,omitzero"`
 }
 
 // LustreFileSystemRootSquashConfiguration defines nested fields for LustreFileSystem.RootSquashConfiguration.

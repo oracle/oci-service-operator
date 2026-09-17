@@ -50,15 +50,84 @@ func registerTriggerRuntimeHooksMutator(mutator TriggerRuntimeHooksMutator) {
 	}
 	triggerRuntimeHooksMutators = append(triggerRuntimeHooksMutators, mutator)
 }
+func newTriggerRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "devops",
+		FormalSlug:    "trigger",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "displayName", "id", "projectId", "state"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"connectionId", "definedTags", "description", "displayName", "freeformTags", "jsonData", "repositoryId"},
+			ForceNew:      []string{"projectId", "triggerSource"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "Trigger", Action: "CreateTrigger"}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "Trigger", Action: "UpdateTrigger"}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "Trigger", Action: "DeleteTrigger"}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "workrequest",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "Trigger", Action: "CreateTrigger"}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "workrequest",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "Trigger", Action: "UpdateTrigger"}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "Trigger", Action: "DeleteTrigger"}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newTriggerDefaultRuntimeHooks(sdkClient devopssdk.DevopsClient) TriggerRuntimeHooks {
 	return TriggerRuntimeHooks{
+		Semantics:       newTriggerRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*devopsv1beta1.Trigger]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*devopsv1beta1.Trigger]{},
 		StatusHooks:     generatedruntime.StatusHooks[*devopsv1beta1.Trigger]{},
 		ParityHooks:     generatedruntime.ParityHooks[*devopsv1beta1.Trigger]{},
-		Async:           generatedruntime.AsyncHooks[*devopsv1beta1.Trigger]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*devopsv1beta1.Trigger]{},
+		Async: generatedruntime.AsyncHooks[*devopsv1beta1.Trigger]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := devopssdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*devopsv1beta1.Trigger]{},
 		Create: runtimeOperationHooks[devopssdk.CreateTriggerRequest, devopssdk.CreateTriggerResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateTriggerDetails", RequestName: "CreateTriggerDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request devopssdk.CreateTriggerRequest) (devopssdk.CreateTriggerResponse, error) {
@@ -106,10 +175,19 @@ func buildTriggerGeneratedRuntimeConfig(
 	hooks TriggerRuntimeHooks,
 ) generatedruntime.Config[*devopsv1beta1.Trigger] {
 	return generatedruntime.Config[*devopsv1beta1.Trigger]{
-		Kind:            "Trigger",
-		SDKName:         "Trigger",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "Trigger",
+		SDKName:   "Trigger",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

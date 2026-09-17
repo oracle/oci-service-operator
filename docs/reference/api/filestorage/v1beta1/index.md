@@ -938,6 +938,7 @@ QuotaRuleSpec defines the desired state of QuotaRule.
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `displayName` | A user-friendly name. It does not have to be unique, and it is changeable. Avoid entering confidential information. Example: `UserXYZ's quota` | `string` | No | - | - |
+| `fileSystemId` | The OCID of the file system containing this quota rule. | `string` | Yes | - | - |
 | `isHardQuota` | Whether the quota rule will be enforced. If `isHardQuota` is true, the quota rule is enforced so that the write is blocked if usage exceeds the hard quota limit. If `isHardQuota` is false, writes succeed even if usage exceeds the soft quota limit, but the quota rule is violated. | `boolean` | Yes | - | - |
 | `principalId` | An identifier for the user or the group associated with quota rule and usage. UNIX-like operating systems use this integer value to identify a user or group to manage access control. | `integer` | No | - | - |
 | `principalType` | The type of the owner of this quota rule and usage. | `string` | Yes | - | - |

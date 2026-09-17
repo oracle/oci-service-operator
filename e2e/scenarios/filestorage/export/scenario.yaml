@@ -1,0 +1,27 @@
+version: 1
+name: filestorage-export-basic-crud
+service: filestorage
+namespace: default
+timeout: 20m
+pollInterval: 10s
+create: create.yaml
+update: update.yaml
+ready:
+  conditionTypes: [Active]
+  lifecycleStates: [ACTIVE]
+  requireOCID: true
+  fieldsEqual:
+    - desired: spec.exportSetId
+      observed: status.exportSetId
+    - desired: spec.fileSystemId
+      observed: status.fileSystemId
+    - desired: spec.path
+      observed: status.path
+    - desired: spec.exportOptions
+      observed: status.exportOptions
+failureConditionTypes: [Failed]
+delete:
+  enabled: true
+  timeout: 20m
+  cleanupDependencies: true
+cleanupOnFailure: true

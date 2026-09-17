@@ -1,0 +1,29 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: integration
+slug: integrationinstance
+kind: IntegrationInstance
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending: ["CREATING"]
+    updatePending: ["UPDATING"]
+    deletePending: ["DELETING"]
+  listLookup:
+    filters: ["compartmentId","displayName"]
+    matchRule: exact resource identity match; duplicate matches fail
+  mutation:
+    mutable: ["alternateCustomEndpoints","customEndpoint","definedTags","displayName","freeformTags","integrationInstanceType","isByol","isFileServerEnabled","isVisualBuilderEnabled","messagePacks","networkEndpointDetails","securityAttributes"]
+    forceNew: ["compartmentId","consumptionModel","domainId","idcsAt","isDisasterRecoveryEnabled","shape"]
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - "The runtime uses its declared lifecycle-state contract for IntegrationInstance reconciliation."
+  - "The credential-free mock exercises SDK request serialization, response projection, mutation when supported, and confirmed deletion."

@@ -119,25 +119,25 @@ func newBucketDefaultRuntimeHooks(sdkClient objectstoragesdk.ObjectStorageClient
 			},
 		},
 		Get: runtimeOperationHooks[objectstoragesdk.GetBucketRequest, objectstoragesdk.GetBucketResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NamespaceName", RequestName: "namespaceName", Contribution: "path", PreferResourceID: false}, {FieldName: "BucketName", RequestName: "bucketName", Contribution: "path", PreferResourceID: false}, {FieldName: "Fields", RequestName: "fields", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NamespaceName", RequestName: "namespaceName", Contribution: "path", PreferResourceID: false}, {FieldName: "BucketName", RequestName: "bucketName", Contribution: "path", PreferResourceID: true}, {FieldName: "Fields", RequestName: "fields", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request objectstoragesdk.GetBucketRequest) (objectstoragesdk.GetBucketResponse, error) {
 				return sdkClient.GetBucket(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[objectstoragesdk.ListBucketsRequest, objectstoragesdk.ListBucketsResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NamespaceName", RequestName: "namespaceName", Contribution: "path", PreferResourceID: true}, {FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Fields", RequestName: "fields", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NamespaceName", RequestName: "namespaceName", Contribution: "path", PreferResourceID: false}, {FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Fields", RequestName: "fields", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request objectstoragesdk.ListBucketsRequest) (objectstoragesdk.ListBucketsResponse, error) {
 				return sdkClient.ListBuckets(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[objectstoragesdk.UpdateBucketRequest, objectstoragesdk.UpdateBucketResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NamespaceName", RequestName: "namespaceName", Contribution: "path", PreferResourceID: false}, {FieldName: "BucketName", RequestName: "bucketName", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdateBucketDetails", RequestName: "UpdateBucketDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NamespaceName", RequestName: "namespaceName", Contribution: "path", PreferResourceID: false}, {FieldName: "BucketName", RequestName: "bucketName", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateBucketDetails", RequestName: "UpdateBucketDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request objectstoragesdk.UpdateBucketRequest) (objectstoragesdk.UpdateBucketResponse, error) {
 				return sdkClient.UpdateBucket(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[objectstoragesdk.DeleteBucketRequest, objectstoragesdk.DeleteBucketResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NamespaceName", RequestName: "namespaceName", Contribution: "path", PreferResourceID: false}, {FieldName: "BucketName", RequestName: "bucketName", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NamespaceName", RequestName: "namespaceName", Contribution: "path", PreferResourceID: false}, {FieldName: "BucketName", RequestName: "bucketName", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request objectstoragesdk.DeleteBucketRequest) (objectstoragesdk.DeleteBucketResponse, error) {
 				return sdkClient.DeleteBucket(ctx, request)
 			},

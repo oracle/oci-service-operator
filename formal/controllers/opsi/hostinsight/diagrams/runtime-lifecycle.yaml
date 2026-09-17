@@ -1,0 +1,78 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: opsi
+slug: hostinsight
+kind: HostInsight
+archetype: generated-service-manager
+states:
+- provisioning
+- active
+- updating
+- terminating
+repoAuthored:
+  operations:
+    create:
+    - CreateHostInsight
+    update:
+    - UpdateHostInsight
+    delete:
+    - DeleteHostInsight
+  providerLifecycle:
+    createPending:
+    - CREATING
+    updatePending:
+    - UPDATING
+    deletePending:
+    - DELETING
+  listLookup:
+    filters:
+    - compartmentId
+    - entitySource
+    - computeId
+    - managementAgentId
+    - enterpriseManagerIdentifier
+    - enterpriseManagerBridgeId
+    - enterpriseManagerEntityIdentifier
+    - exadataInsightId
+    matchRule: exact compartmentId, entitySource, computeId, managementAgentId, enterpriseManagerIdentifier,
+      enterpriseManagerBridgeId, enterpriseManagerEntityIdentifier, exadataInsightId
+      match within the resource scope; duplicate matches fail
+  mutation:
+    mutable:
+    - definedTags
+    - freeformTags
+    forceNew:
+    - compartmentId
+    - entitySource
+    - computeId
+    - managementAgentId
+    - enterpriseManagerIdentifier
+    - enterpriseManagerBridgeId
+    - enterpriseManagerEntityIdentifier
+    - exadataInsightId
+  hooks:
+    create:
+    - helper: tfresource.CreateResource
+      entityType: HostInsight
+      action: CreateHostInsight
+    update:
+    - helper: tfresource.UpdateResource
+      entityType: HostInsight
+      action: UpdateHostInsight
+    delete:
+    - helper: tfresource.DeleteResource
+      entityType: HostInsight
+      action: DeleteHostInsight
+  followUp:
+    create: GetWorkRequest -> GetHostInsight
+    update: GetWorkRequest -> GetHostInsight
+    delete: confirm-delete
+notes:
+- The production runtime uses the declared work-request phases and service-local async
+  adapter.
+- Lifecycle success and pending states mirror the production service-manager semantics.
+- Status projection is required, Secret side effects are none, and the finalizer policy
+  is retain-until-confirmed-delete.
+- Provider DisableHostInsight operations are intentionally excluded because the
+  production service manager uses the primary create and delete operations.
+- Delete ownership is retained until a terminal lifecycle state or confirmed absence.

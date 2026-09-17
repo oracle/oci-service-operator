@@ -100,7 +100,7 @@ func (f *fakeTriggerOCIClient) GetWorkRequest(ctx context.Context, request devop
 func TestTriggerRuntimeSemanticsEncodesWorkRequestAndDeleteContracts(t *testing.T) {
 	t.Parallel()
 
-	got := newTriggerRuntimeSemantics()
+	got := reviewedTriggerRuntimeSemantics()
 	if got.FormalService != "devops" || got.FormalSlug != "trigger" {
 		t.Fatalf("formal identity = %s/%s, want devops/trigger", got.FormalService, got.FormalSlug)
 	}
@@ -506,6 +506,27 @@ func TestTriggerDeleteKeepsFinalizerWhileOCIIsDeleting(t *testing.T) {
 		t.Fatal("status.deletedAt set while OCI delete is still pending")
 	}
 	requireTriggerAsync(t, resource, shared.OSOKAsyncPhaseDelete, "", shared.OSOKAsyncClassPending)
+}
+
+func TestTriggerDeleteConfirmReadUsesScopedListForAuthShapedNotFound(t *testing.T) {
+	t.Parallel()
+
+	resource := newTriggerResource()
+	fake := &fakeTriggerOCIClient{
+		getFn: func(context.Context, devopssdk.GetTriggerRequest) (devopssdk.GetTriggerResponse, error) {
+			return devopssdk.GetTriggerResponse{}, errortest.NewServiceError(404, errorutil.NotAuthorizedOrNotFound, "ambiguous")
+		},
+		listFn: func(_ context.Context, request devopssdk.ListTriggersRequest) (devopssdk.ListTriggersResponse, error) {
+			requireTriggerStringPtr(t, "list projectId", request.ProjectId, resource.Spec.ProjectId)
+			return devopssdk.ListTriggersResponse{}, nil
+		},
+	}
+	hooks := newTriggerRuntimeHooksWithOCIClient(fake)
+	confirmRead := triggerDeleteConfirmRead(hooks.Get.Call, paginateTriggerListCall(hooks.List.Call))
+	_, err := confirmRead(context.Background(), resource, triggerTestID)
+	if err == nil || !errorutil.ClassifyDeleteError(err).IsUnambiguousNotFound() {
+		t.Fatalf("confirmRead() error = %v, want unambiguous NotFound after scoped list proves absence", err)
+	}
 }
 
 func TestTriggerDeleteTracksWorkRequestUntilReadbackConfirmsDeletion(t *testing.T) {

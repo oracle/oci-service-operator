@@ -50,8 +50,61 @@ func registerOccDemandSignalRuntimeHooksMutator(mutator OccDemandSignalRuntimeHo
 	}
 	occdemandsignalRuntimeHooksMutators = append(occdemandsignalRuntimeHooksMutators, mutator)
 }
+func newOccDemandSignalRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "demandsignal",
+		FormalSlug:    "occdemandsignal",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "lifecycle",
+			Runtime:              "generatedruntime",
+			FormalClassification: "lifecycle",
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "displayName", "id", "state"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"compartmentId", "definedTags", "displayName", "freeformTags", "isActive", "patchOperations.from", "patchOperations.operation", "patchOperations.position", "patchOperations.selectedItem", "patchOperations.selection", "patchOperations.value"},
+			ForceNew:      []string{"occDemandSignalId", "occDemandSignals", "occDemandSignals.resourceType", "occDemandSignals.units", "occDemandSignals.values", "occDemandSignals.values.comments", "occDemandSignals.values.timeExpected", "occDemandSignals.values.value"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newOccDemandSignalDefaultRuntimeHooks(sdkClient demandsignalsdk.OccDemandSignalClient) OccDemandSignalRuntimeHooks {
 	return OccDemandSignalRuntimeHooks{
+		Semantics:       newOccDemandSignalRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*demandsignalv1beta1.OccDemandSignal]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*demandsignalv1beta1.OccDemandSignal]{},

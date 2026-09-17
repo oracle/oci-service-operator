@@ -157,6 +157,7 @@ BackendSetSpec defines the desired state of BackendSet.
 | `isInstantFailoverTcpResetEnabled` | This only applies when using instant failover. If enabled, the network load balancer will send TCP RST to clients when a backend becomes unhealthy and the traffic is moved to a healthy backend. If disabled, the network load balancer will not send TCP RST before moving traffic to a healthy backend. By default, TCP RST is enabled. | `boolean` | No | - | - |
 | `isPreserveSource` | If this parameter is enabled, then the network load balancer preserves the source IP of the packet when it is forwarded to backends. Backends see the original source IP. If the isPreserveSourceDestination parameter is enabled for the network load balancer resource, then this parameter cannot be disabled. The value is true by default. | `boolean` | No | - | - |
 | `name` | A user-friendly name for the backend set that must be unique and cannot be changed. Valid backend set names include only alphanumeric characters, dashes, and underscores. Backend set names cannot contain spaces. Avoid entering confidential information. Example: `example_backend_set` | `string` | Yes | - | - |
+| `networkLoadBalancerId` | The OCID of the network load balancer that owns this backend set. | `string` | No | - | - |
 | `policy` | The network load balancer policy for the backend set. Example: `FIVE_TUPLE`` | `string` | Yes | - | - |
 
 <a id="kind-backendset-spec-backends"></a>
@@ -229,6 +230,7 @@ BackendSetStatus defines the observed state of BackendSet.
 | `isInstantFailoverTcpResetEnabled` | This only applies when using instant failover. If enabled, the network load balancer will send TCP RST to clients when a backend becomes unhealthy and the traffic is moved to a healthy backend. If disabled, the network load balancer will not send TCP RST before moving traffic to a healthy backend. By default, TCP RST is enabled. | `boolean` | No | - | - |
 | `isPreserveSource` | If this parameter is enabled, then the network load balancer preserves the source IP of the packet when it is forwarded to backends. Backends see the original source IP. If the isPreserveSourceDestination parameter is enabled for the network load balancer resource, then this parameter cannot be disabled. The value is true by default. | `boolean` | No | - | - |
 | `name` | A user-friendly name for the backend set that must be unique and cannot be changed. Valid backend set names include only alphanumeric characters, dashes, and underscores. Backend set names cannot contain spaces. Avoid entering confidential information. Example: `example_backend_set` | `string` | No | - | - |
+| `networkLoadBalancerId` | The bound network load balancer OCID used to address this backend set. | `string` | No | - | - |
 | `policy` | The network load balancer policy for the backend set. Example: `FIVE_TUPLE` | `string` | No | - | - |
 | [`status`](#kind-backendset-status-status) | - | `object` | Yes | - | - |
 
@@ -368,6 +370,7 @@ ListenerSpec defines the desired state of Listener.
 | `isPpv2Enabled` | Property to enable/disable PPv2 feature for this listener. | `boolean` | No | - | - |
 | `l3IpIdleTimeout` | The duration for L3IP idle timeout in seconds. Example: `200` | `integer` | No | - | - |
 | `name` | A friendly name for the listener. It must be unique and it cannot be changed. Example: `example_listener` | `string` | Yes | - | - |
+| `networkLoadBalancerId` | The OCID of the network load balancer that owns this listener. | `string` | No | - | - |
 | `port` | The communication port for the listener. Example: `80` | `integer` | Yes | - | - |
 | `protocol` | The protocol on which the listener accepts connection requests. For public network load balancers, ANY protocol refers to TCP/UDP with the wildcard port. For private network load balancers, ANY protocol refers to TCP/UDP/ICMP (note that ICMP requires isPreserveSourceDestination to be set to true). "ListNetworkLoadBalancersProtocols" API is deprecated and it will not return the updated values. Use the allowed values for the protocol instead. Example: `TCP` | `string` | Yes | - | - |
 | `tcpIdleTimeout` | The duration for TCP idle timeout in seconds. Example: `300` | `integer` | No | - | - |
@@ -385,6 +388,7 @@ ListenerStatus defines the observed state of Listener.
 | `isPpv2Enabled` | Property to enable/disable PPv2 feature for this listener. | `boolean` | No | - | - |
 | `l3IpIdleTimeout` | The duration for L3IP idle timeout in seconds. Example: `200` | `integer` | No | - | - |
 | `name` | A friendly name for the listener. It must be unique and it cannot be changed. Example: `example_listener` | `string` | No | - | - |
+| `networkLoadBalancerId` | The bound network load balancer OCID used to address this listener. | `string` | No | - | - |
 | `port` | The communication port for the listener. Example: `80` | `integer` | No | - | - |
 | `protocol` | The protocol on which the listener accepts connection requests. For public network load balancers, ANY protocol refers to TCP/UDP with the wildcard port. For private network load balancers, ANY protocol refers to TCP/UDP/ICMP (note that ICMP requires isPreserveSourceDestination to be set to true). "ListNetworkLoadBalancersProtocols" API is deprecated and it will not return the updated values. Use the allowed values for the protocol instead. Example: `TCP` | `string` | No | - | - |
 | [`status`](#kind-listener-status-status) | - | `object` | Yes | - | - |

@@ -50,15 +50,84 @@ func registerWaasPolicyRuntimeHooksMutator(mutator WaasPolicyRuntimeHooksMutator
 	}
 	waaspolicyRuntimeHooksMutators = append(waaspolicyRuntimeHooksMutators, mutator)
 }
+func newWaasPolicyRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "waas",
+		FormalSlug:    "waaspolicy",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE", "FAILED"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "displayNames", "ids", "states", "timeCreatedGreaterThanOrEqualTo", "timeCreatedLessThan"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"additionalDomains", "compartmentId", "definedTags", "displayName", "freeformTags", "originGroups", "origins", "policyConfig", "wafConfig"},
+			ForceNew:      []string{"domain"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "WaasPolicy", Action: "CreateWaasPolicy"}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "WorkRequest", Action: "GetWorkRequest"}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "WaasPolicy", Action: "UpdateWaasPolicy"}, {Helper: "ChangeWaasPolicyCompartment", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "WorkRequest", Action: "GetWorkRequest"}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "WaasPolicy", Action: "DeleteWaasPolicy"}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "workrequest",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "WaasPolicy", Action: "CreateWaasPolicy"}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "WorkRequest", Action: "GetWorkRequest"}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "workrequest",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "WaasPolicy", Action: "UpdateWaasPolicy"}, {Helper: "ChangeWaasPolicyCompartment", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "WorkRequest", Action: "GetWorkRequest"}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "WaasPolicy", Action: "DeleteWaasPolicy"}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newWaasPolicyDefaultRuntimeHooks(sdkClient waassdk.WaasClient) WaasPolicyRuntimeHooks {
 	return WaasPolicyRuntimeHooks{
+		Semantics:       newWaasPolicyRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*waasv1beta1.WaasPolicy]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*waasv1beta1.WaasPolicy]{},
 		StatusHooks:     generatedruntime.StatusHooks[*waasv1beta1.WaasPolicy]{},
 		ParityHooks:     generatedruntime.ParityHooks[*waasv1beta1.WaasPolicy]{},
-		Async:           generatedruntime.AsyncHooks[*waasv1beta1.WaasPolicy]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*waasv1beta1.WaasPolicy]{},
+		Async: generatedruntime.AsyncHooks[*waasv1beta1.WaasPolicy]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := waassdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*waasv1beta1.WaasPolicy]{},
 		Create: runtimeOperationHooks[waassdk.CreateWaasPolicyRequest, waassdk.CreateWaasPolicyResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateWaasPolicyDetails", RequestName: "CreateWaasPolicyDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request waassdk.CreateWaasPolicyRequest) (waassdk.CreateWaasPolicyResponse, error) {
@@ -106,10 +175,19 @@ func buildWaasPolicyGeneratedRuntimeConfig(
 	hooks WaasPolicyRuntimeHooks,
 ) generatedruntime.Config[*waasv1beta1.WaasPolicy] {
 	return generatedruntime.Config[*waasv1beta1.WaasPolicy]{
-		Kind:            "WaasPolicy",
-		SDKName:         "WaasPolicy",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "WaasPolicy",
+		SDKName:   "WaasPolicy",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

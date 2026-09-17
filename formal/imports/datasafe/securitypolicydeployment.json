@@ -1,0 +1,123 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "securitypolicydeployment",
+  "kind": "SecurityPolicyDeployment",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_security_policy_deployment",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateSecurityPolicyDeployment",
+        "requestType": "datasafe.CreateSecurityPolicyDeploymentRequest",
+        "responseType": "datasafe.CreateSecurityPolicyDeploymentResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetSecurityPolicyDeployment",
+        "requestType": "datasafe.GetSecurityPolicyDeploymentRequest",
+        "responseType": "datasafe.GetSecurityPolicyDeploymentResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListSecurityPolicyDeployments",
+        "requestType": "datasafe.ListSecurityPolicyDeploymentsRequest",
+        "responseType": "datasafe.ListSecurityPolicyDeploymentsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeSecurityPolicyDeploymentCompartment",
+        "requestType": "datasafe.ChangeSecurityPolicyDeploymentCompartmentRequest",
+        "responseType": "datasafe.ChangeSecurityPolicyDeploymentCompartmentResponse"
+      },
+      {
+        "operation": "UpdateSecurityPolicyDeployment",
+        "requestType": "datasafe.UpdateSecurityPolicyDeploymentRequest",
+        "responseType": "datasafe.UpdateSecurityPolicyDeploymentResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteSecurityPolicyDeployment",
+        "requestType": "datasafe.DeleteSecurityPolicyDeploymentRequest",
+        "responseType": "datasafe.DeleteSecurityPolicyDeploymentResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "DEPLOYED"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "deploy_trigger",
+      "description",
+      "display_name",
+      "freeform_tags",
+      "refresh_trigger"
+    ],
+    "forceNew": [
+      "security_policy_id",
+      "target_id",
+      "target_type"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_data_safe_security_policy_deployments",
+    "collectionField": "security_policy_deployment_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "access_level",
+      "compartment_id",
+      "compartment_id_in_subtree",
+      "display_name",
+      "security_policy_deployment_id",
+      "security_policy_id",
+      "state",
+      "target_id",
+      "target_type"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/securitypolicydeployment/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/securitypolicydeployment/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from the pinned terraform-provider-oci source revision."
+  ]
+}

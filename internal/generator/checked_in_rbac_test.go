@@ -36,6 +36,23 @@ func TestCheckedInDatabaseAutonomousDatabasePackageRBACMatchesReadOnlySecretSema
 	)
 }
 
+func TestCheckedInApiGatewayPackageRBACMatchesEndpointSecretAndEventSemantics(t *testing.T) {
+	controllerPath := filepath.Join(repoRoot(t), "controllers", "apigateway", "apigateway_controller.go")
+	assertFileContains(t, controllerPath, []string{
+		`// +kubebuilder:rbac:groups="",resources=events,verbs=create;patch`,
+		`// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;create;update;delete`,
+	})
+
+	assertCoreResourceVerbs(
+		t,
+		filepath.Join(repoRoot(t), "packages", "apigateway", "install", "generated", "rbac", "role.yaml"),
+		map[string][]string{
+			"events":  {"create", "patch"},
+			"secrets": {"create", "delete", "get", "list", "update", "watch"},
+		},
+	)
+}
+
 func TestCheckedInPSQLDbSystemPackageRBACMatchesSecretAndEventRecorderSemantics(t *testing.T) {
 	controllerPath := filepath.Join(repoRoot(t), "controllers", "psql", "dbsystem_controller.go")
 	assertFileContains(t, controllerPath, []string{

@@ -1,0 +1,16 @@
+#
+# Copyright (c) 2026, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+#
+
+apiVersion: apigateway.oracle.com/v1beta1
+kind: ApiGateway
+metadata:
+  name: osok-api-gw-${OSOK_E2E_SUFFIX}
+spec:
+  compartmentId: ${OCI_COMPARTMENT_ID}
+  displayName: osok-api-gw-u-${OSOK_E2E_SUFFIX}
+  endpointType: PRIVATE
+  subnetId: ${OCI_SUBNET_ID}
+  freeformTags:
+    osok-e2e-phase: update

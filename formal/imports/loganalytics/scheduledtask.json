@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "loganalytics",
+  "slug": "scheduledtask",
+  "kind": "ScheduledTask",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_loganalytics_scheduledtask",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateScheduledTask",
+        "requestType": "loganalytics.CreateScheduledTaskRequest",
+        "responseType": "loganalytics.CreateScheduledTaskResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetScheduledTask",
+        "requestType": "loganalytics.GetScheduledTaskRequest",
+        "responseType": "loganalytics.GetScheduledTaskResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListScheduledTask",
+        "requestType": "loganalytics.ListScheduledTaskRequest",
+        "responseType": "loganalytics.ListScheduledTaskResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateScheduledTask",
+        "requestType": "loganalytics.UpdateScheduledTaskRequest",
+        "responseType": "loganalytics.UpdateScheduledTaskResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteScheduledTask",
+        "requestType": "loganalytics.DeleteScheduledTaskRequest",
+        "responseType": "loganalytics.DeleteScheduledTaskResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_loganalytics_scheduledtask",
+    "collectionField": "scheduledtask",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/loganalytics/scheduledtask/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/loganalytics/scheduledtask/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for loganalytics/scheduledtask; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

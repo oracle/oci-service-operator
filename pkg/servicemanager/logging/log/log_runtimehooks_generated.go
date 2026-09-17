@@ -119,25 +119,25 @@ func newLogDefaultRuntimeHooks(sdkClient loggingsdk.LoggingManagementClient) Log
 			},
 		},
 		Get: runtimeOperationHooks[loggingsdk.GetLogRequest, loggingsdk.GetLogResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "LogGroupId", RequestName: "logGroupId", Contribution: "path", PreferResourceID: true}, {FieldName: "LogId", RequestName: "logId", Contribution: "path", PreferResourceID: true}},
+			Fields: []generatedruntime.RequestField{{FieldName: "LogGroupId", RequestName: "logGroupId", Contribution: "path", PreferResourceID: false}, {FieldName: "LogId", RequestName: "logId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request loggingsdk.GetLogRequest) (loggingsdk.GetLogResponse, error) {
 				return sdkClient.GetLog(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[loggingsdk.ListLogsRequest, loggingsdk.ListLogsResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "LogGroupId", RequestName: "logGroupId", Contribution: "path", PreferResourceID: true}, {FieldName: "LogType", RequestName: "logType", Contribution: "query", PreferResourceID: false}, {FieldName: "SourceService", RequestName: "sourceService", Contribution: "query", PreferResourceID: false}, {FieldName: "SourceResource", RequestName: "sourceResource", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "LogGroupId", RequestName: "logGroupId", Contribution: "path", PreferResourceID: false}, {FieldName: "LogType", RequestName: "logType", Contribution: "query", PreferResourceID: false}, {FieldName: "SourceService", RequestName: "sourceService", Contribution: "query", PreferResourceID: false}, {FieldName: "SourceResource", RequestName: "sourceResource", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loggingsdk.ListLogsRequest) (loggingsdk.ListLogsResponse, error) {
 				return sdkClient.ListLogs(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[loggingsdk.UpdateLogRequest, loggingsdk.UpdateLogResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "LogGroupId", RequestName: "logGroupId", Contribution: "path", PreferResourceID: true}, {FieldName: "LogId", RequestName: "logId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateLogDetails", RequestName: "UpdateLogDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "LogGroupId", RequestName: "logGroupId", Contribution: "path", PreferResourceID: false}, {FieldName: "LogId", RequestName: "logId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateLogDetails", RequestName: "UpdateLogDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loggingsdk.UpdateLogRequest) (loggingsdk.UpdateLogResponse, error) {
 				return sdkClient.UpdateLog(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[loggingsdk.DeleteLogRequest, loggingsdk.DeleteLogResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "LogGroupId", RequestName: "logGroupId", Contribution: "path", PreferResourceID: true}, {FieldName: "LogId", RequestName: "logId", Contribution: "path", PreferResourceID: true}},
+			Fields: []generatedruntime.RequestField{{FieldName: "LogGroupId", RequestName: "logGroupId", Contribution: "path", PreferResourceID: false}, {FieldName: "LogId", RequestName: "logId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request loggingsdk.DeleteLogRequest) (loggingsdk.DeleteLogResponse, error) {
 				return sdkClient.DeleteLog(ctx, request)
 			},

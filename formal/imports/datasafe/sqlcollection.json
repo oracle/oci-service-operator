@@ -1,0 +1,130 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "sqlcollection",
+  "kind": "SqlCollection",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_sql_collection",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateSqlCollection",
+        "requestType": "datasafe.CreateSqlCollectionRequest",
+        "responseType": "datasafe.CreateSqlCollectionResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetSqlCollection",
+        "requestType": "datasafe.GetSqlCollectionRequest",
+        "responseType": "datasafe.GetSqlCollectionResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListSqlCollections",
+        "requestType": "datasafe.ListSqlCollectionsRequest",
+        "responseType": "datasafe.ListSqlCollectionsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeSqlCollectionCompartment",
+        "requestType": "datasafe.ChangeSqlCollectionCompartmentRequest",
+        "responseType": "datasafe.ChangeSqlCollectionCompartmentResponse"
+      },
+      {
+        "operation": "UpdateSqlCollection",
+        "requestType": "datasafe.UpdateSqlCollectionRequest",
+        "responseType": "datasafe.UpdateSqlCollectionResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteSqlCollection",
+        "requestType": "datasafe.DeleteSqlCollectionRequest",
+        "responseType": "datasafe.DeleteSqlCollectionResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "COLLECTING",
+        "INACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags",
+      "generate_sql_firewall_policy_trigger",
+      "purge_logs_trigger",
+      "refresh_log_insights_trigger",
+      "start_trigger",
+      "stop_trigger"
+    ],
+    "forceNew": [
+      "db_user_name",
+      "sql_level",
+      "status",
+      "target_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_data_safe_sql_collections",
+    "collectionField": "sql_collection_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "access_level",
+      "compartment_id",
+      "compartment_id_in_subtree",
+      "db_user_name",
+      "display_name",
+      "sql_collection_id",
+      "state",
+      "target_database_group_id",
+      "target_id",
+      "time_created_greater_than_or_equal_to",
+      "time_created_less_than"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/sqlcollection/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/sqlcollection/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts are imported from the pinned terraform-provider-oci revision; repo-authored runtime semantics remain authoritative."
+  ]
+}

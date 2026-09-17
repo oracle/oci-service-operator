@@ -253,11 +253,16 @@ spec:
                   type: object
                   x-kubernetes-preserve-unknown-fields: true
                 type: array
+              workspaceId:
+                description: The OCID of the Data Integration workspace containing
+                  this resource.
+                type: string
             required:
             - identifier
             - name
             - objectVersion
             - registryMetadata
+            - workspaceId
             type: object
           status:
             description: TaskStatus defines the observed state of Task.

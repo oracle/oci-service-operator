@@ -33,14 +33,14 @@ state "DeleteCleanupBlocked" as delete_cleanup_blocked
 [*] --> observe : CreateEsxiHost
 observe --> resolve_by_lookup : tracked identity missing
 resolve_by_lookup --> evaluate_ready : lookup or create reaches\nACTIVE
-resolve_by_lookup --> retryable : OCI state in PROVISIONING,\nUPDATING, DELETING
+resolve_by_lookup --> retryable : OCI state in CREATING,\nUPDATING, DELETING
 resolve_by_lookup --> failed : unresolved OCI error or non-success state
 observe --> evaluate_ready : OCI state in ACTIVE
-observe --> retryable : OCI state in PROVISIONING,\nUPDATING, DELETING
+observe --> retryable : OCI state in CREATING,\nUPDATING, DELETING
 observe --> failed : unresolved OCI error or non-success state
 evaluate_ready --> reject_unsupported_drift : force-new or conflicting\ndrift detected
 reject_unsupported_drift --> ready : wait for spec or live state change
-evaluate_ready --> apply_update : supported mutable drift for\ndisplay_name
+evaluate_ready --> apply_update : supported mutable drift for\nbillingDonorHostId,\ndefinedTags, displayName (+2\nmore)
 apply_update --> ready : update path completes
 evaluate_ready --> ready : no supported drift remains
 ready --> ready : no supported drift remains
@@ -69,19 +69,28 @@ archetype: generated-service-manager
 status/finalizer: required /
 retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
-provider states: create PROVISIONING; update
+provider states: create CREATING; update
 UPDATING; delete DELETING
-supported drift: display_name
+follow-up: create=read-after-write;
+update=read-after-write; delete=confirm-delete
+supported drift: billingDonorHostId,
+definedTags, displayName, freeformTags (+1 more)
 reject before mutate: force-new fields
-compartment_id
+capacityReservationId, clusterId,
+computeAvailabilityDomain, currentCommitment (+3
+more)
 create-only fields: none
 list lookup: scaffold_ocvp_esxihost filters
-compartment_id, state
+clusterId, displayName; exact clusterId plus
+displayName match; duplicate matches fail
 conflicts: none
 open gaps: none
-Scaffold metadata only; replace with
-controller-specific runtime states before
-promotion.
+The runtime updates billingDonorHostId only with
+a compatible nextCommitment and rejects
+create-only drift before mutation.
+Create and update settle only after GetEsxiHost
+reaches ACTIVE; delete retains the finalizer
+until absence is confirmed.
 end note
 note right of delete_pending
 delete policy: required

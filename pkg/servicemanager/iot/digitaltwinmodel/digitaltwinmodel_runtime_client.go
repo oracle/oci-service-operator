@@ -456,12 +456,48 @@ func digitalTwinModelSpecURI(spec map[string]interface{}) (string, error) {
 }
 
 func digitalTwinModelSpecsEqual(left map[string]interface{}, right map[string]interface{}) bool {
+	right = normalizeObservedDigitalTwinModelSpec(left, right).(map[string]interface{})
 	leftPayload, leftErr := json.Marshal(left)
 	rightPayload, rightErr := json.Marshal(right)
 	if leftErr != nil || rightErr != nil {
 		return reflect.DeepEqual(left, right)
 	}
 	return string(leftPayload) == string(rightPayload)
+}
+
+func normalizeObservedDigitalTwinModelSpec(desired, observed any) any {
+	switch desiredValue := desired.(type) {
+	case map[string]interface{}:
+		observedValue, ok := observed.(map[string]interface{})
+		if !ok {
+			return observed
+		}
+		normalized := make(map[string]interface{}, len(observedValue))
+		for key, value := range observedValue {
+			desiredChild, desiredHasKey := desiredValue[key]
+			if key == "@id" && !desiredHasKey {
+				continue
+			}
+			if desiredHasKey {
+				normalized[key] = normalizeObservedDigitalTwinModelSpec(desiredChild, value)
+				continue
+			}
+			normalized[key] = value
+		}
+		return normalized
+	case []interface{}:
+		observedValue, ok := observed.([]interface{})
+		if !ok || len(desiredValue) != len(observedValue) {
+			return observed
+		}
+		normalized := make([]interface{}, len(observedValue))
+		for index := range observedValue {
+			normalized[index] = normalizeObservedDigitalTwinModelSpec(desiredValue[index], observedValue[index])
+		}
+		return normalized
+	default:
+		return observed
+	}
 }
 
 func digitalTwinModelBodyFromResponse(response any) (iotsdk.DigitalTwinModel, bool) {

@@ -1,0 +1,21 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: networkfirewall
+slug: mappedsecret
+kind: MappedSecret
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  listLookup:
+    filters: ["networkFirewallPolicyId","name"]
+    matchRule: exact parent policy and mapped-secret name match
+  mutation:
+    mutable: ["description","type","source","vaultSecretId","versionNumber"]
+    forceNew: ["networkFirewallPolicyId","name"]
+  followUp: {create: read-after-write, update: read-after-write, delete: confirm-delete}
+notes:
+  - "MappedSecret is a state-free named policy child; its parent policy and name form the stable tracked identity."

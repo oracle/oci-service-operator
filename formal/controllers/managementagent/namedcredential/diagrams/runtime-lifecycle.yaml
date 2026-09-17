@@ -1,0 +1,62 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: managementagent
+slug: namedcredential
+kind: NamedCredential
+archetype: generated-service-manager
+states:
+- provisioning
+- active
+- updating
+- terminating
+repoAuthored:
+  operations:
+    update:
+    - UpdateNamedCredential
+  providerLifecycle:
+    createPending:
+    - CREATING
+    updatePending:
+    - UPDATING
+    deletePending:
+    - DELETING
+  listLookup:
+    filters:
+    - managementAgentId
+    - name
+    matchRule: exact managementAgentId, name match within the resource scope; duplicate
+      matches fail
+  mutation:
+    mutable:
+    - properties
+    - description
+    - freeformTags
+    - definedTags
+    forceNew:
+    - managementAgentId
+    - name
+    - type
+  hooks:
+    create:
+    - helper: tfresource.CreateResource
+      entityType: NamedCredential
+      action: CreateNamedCredential
+    update:
+    - helper: tfresource.UpdateResource
+      entityType: NamedCredential
+      action: UpdateNamedCredential
+    delete:
+    - helper: tfresource.DeleteResource
+      entityType: NamedCredential
+      action: DeleteNamedCredential
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+- The production runtime uses the declared work-request phases and service-local async
+  adapter.
+- Lifecycle success and pending states mirror the production service-manager semantics.
+- Status projection is required, Secret side effects are none, and the finalizer policy
+  is retain-until-confirmed-delete.
+- Delete ownership is retained until a terminal lifecycle state or confirmed absence.

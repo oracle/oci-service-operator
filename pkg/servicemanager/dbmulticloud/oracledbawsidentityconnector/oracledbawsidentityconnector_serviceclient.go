@@ -32,8 +32,28 @@ type defaultOracleDbAwsIdentityConnectorServiceClient struct {
 
 var _ OracleDbAwsIdentityConnectorServiceClient = defaultOracleDbAwsIdentityConnectorServiceClient{}
 
+type OracleDbAwsIdentityConnectorSDKClients struct {
+	dbMulticloudAwsProviderClient dbmulticloudsdk.DbMulticloudAwsProviderClient
+	workRequestClient             dbmulticloudsdk.WorkRequestClient
+}
+
+func newOracleDbAwsIdentityConnectorSDKClients(manager *OracleDbAwsIdentityConnectorServiceManager) (OracleDbAwsIdentityConnectorSDKClients, error) {
+	var clients OracleDbAwsIdentityConnectorSDKClients
+	dbMulticloudAwsProviderClientClient, err := dbmulticloudsdk.NewDbMulticloudAwsProviderClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize OracleDbAwsIdentityConnector OCI client DbMulticloudAwsProviderClient: %w", err)
+	}
+	clients.dbMulticloudAwsProviderClient = dbMulticloudAwsProviderClientClient
+	workRequestClientClient, err := dbmulticloudsdk.NewWorkRequestClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize OracleDbAwsIdentityConnector OCI client WorkRequestClient: %w", err)
+	}
+	clients.workRequestClient = workRequestClientClient
+	return clients, nil
+}
+
 var newOracleDbAwsIdentityConnectorServiceClient = func(manager *OracleDbAwsIdentityConnectorServiceManager) OracleDbAwsIdentityConnectorServiceClient {
-	sdkClient, err := dbmulticloudsdk.NewDbMulticloudAwsProviderClientWithConfigurationProvider(manager.Provider)
+	sdkClient, err := newOracleDbAwsIdentityConnectorSDKClients(manager)
 	hooks := newOracleDbAwsIdentityConnectorRuntimeHooks(manager, sdkClient)
 	config := buildOracleDbAwsIdentityConnectorGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {

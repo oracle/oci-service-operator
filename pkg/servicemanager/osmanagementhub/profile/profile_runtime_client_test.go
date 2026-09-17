@@ -916,6 +916,9 @@ func TestProfileDeleteRejectsAuthShapedConfirmReadBeforeDelete(t *testing.T) {
 	client.getProfile = func(context.Context, osmanagementhubsdk.GetProfileRequest) (osmanagementhubsdk.GetProfileResponse, error) {
 		return osmanagementhubsdk.GetProfileResponse{}, errortest.NewServiceError(404, errorutil.NotAuthorizedOrNotFound, "not authorized or not found")
 	}
+	client.listProfiles = func(context.Context, osmanagementhubsdk.ListProfilesRequest) (osmanagementhubsdk.ListProfilesResponse, error) {
+		return osmanagementhubsdk.ListProfilesResponse{ProfileCollection: osmanagementhubsdk.ProfileCollection{Items: []osmanagementhubsdk.ProfileSummary{{Id: common.String(testProfileID)}}}}, nil
+	}
 
 	deleted, err := newProfileServiceClientWithOCIClient(client).Delete(context.Background(), resource)
 	if err == nil {
@@ -932,6 +935,29 @@ func TestProfileDeleteRejectsAuthShapedConfirmReadBeforeDelete(t *testing.T) {
 	}
 	if got := resource.Status.OsokStatus.OpcRequestID; got != "opc-request-id" {
 		t.Fatalf("status.opcRequestId = %q, want service error request id", got)
+	}
+}
+
+func TestProfileDeleteAcceptsAuthShapedReadWhenScopedListProvesAbsence(t *testing.T) {
+	resource := testProfileResource()
+	resource.Status.OsokStatus.Ocid = shared.OCID(testProfileID)
+	client := &fakeProfileOCIClient{}
+	client.getProfile = func(context.Context, osmanagementhubsdk.GetProfileRequest) (osmanagementhubsdk.GetProfileResponse, error) {
+		return osmanagementhubsdk.GetProfileResponse{}, errortest.NewServiceError(404, errorutil.NotAuthorizedOrNotFound, "not authorized or not found")
+	}
+	client.listProfiles = func(context.Context, osmanagementhubsdk.ListProfilesRequest) (osmanagementhubsdk.ListProfilesResponse, error) {
+		return osmanagementhubsdk.ListProfilesResponse{}, nil
+	}
+
+	deleted, err := newProfileServiceClientWithOCIClient(client).Delete(context.Background(), resource)
+	if err != nil {
+		t.Fatalf("Delete() error = %v", err)
+	}
+	if !deleted {
+		t.Fatal("Delete() deleted = false, want true after scoped list absence")
+	}
+	if len(client.deleteRequests) != 0 {
+		t.Fatalf("DeleteProfile calls = %d, want 0 for already-absent profile", len(client.deleteRequests))
 	}
 }
 

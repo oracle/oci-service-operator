@@ -1,0 +1,31 @@
+version: 1
+name: redis-cluster-basic-crud
+service: redis
+namespace: default
+timeout: 90m
+pollInterval: 20s
+create: create.yaml
+update: update.yaml
+ready:
+  conditionTypes: [Active]
+  lifecycleStates: [ACTIVE]
+  requireOCID: true
+  fieldsEqual:
+    - desired: spec.displayName
+      observed: status.displayName
+    - desired: spec.nodeCount
+      observed: status.nodeCount
+    - desired: spec.nodeMemoryInGBs
+      observed: status.nodeMemoryInGBs
+    - desired: spec.softwareVersion
+      observed: status.softwareVersion
+    - desired: spec.subnetId
+      observed: status.subnetId
+    - desired: spec.freeformTags
+      observed: status.freeformTags
+failureConditionTypes: [Failed]
+delete:
+  enabled: true
+  timeout: 90m
+  cleanupDependencies: true
+cleanupOnFailure: true

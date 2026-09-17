@@ -66,25 +66,25 @@ func newFolderDefaultRuntimeHooks(sdkClient dataintegrationsdk.DataIntegrationCl
 			},
 		},
 		Get: runtimeOperationHooks[dataintegrationsdk.GetFolderRequest, dataintegrationsdk.GetFolderResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "FolderKey", RequestName: "folderKey", Contribution: "path", PreferResourceID: false}, {FieldName: "Projection", RequestName: "projection", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "FolderKey", RequestName: "folderKey", Contribution: "path", PreferResourceID: true}, {FieldName: "Projection", RequestName: "projection", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dataintegrationsdk.GetFolderRequest) (dataintegrationsdk.GetFolderResponse, error) {
 				return sdkClient.GetFolder(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[dataintegrationsdk.ListFoldersRequest, dataintegrationsdk.ListFoldersResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: true}, {FieldName: "AggregatorKey", RequestName: "aggregatorKey", Contribution: "query", PreferResourceID: false}, {FieldName: "Fields", RequestName: "fields", Contribution: "query", PreferResourceID: false}, {FieldName: "Name", RequestName: "name", Contribution: "query", PreferResourceID: false}, {FieldName: "NameContains", RequestName: "nameContains", Contribution: "query", PreferResourceID: false}, {FieldName: "Identifier", RequestName: "identifier", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "AggregatorKey", RequestName: "aggregatorKey", Contribution: "query", PreferResourceID: false}, {FieldName: "Fields", RequestName: "fields", Contribution: "query", PreferResourceID: false}, {FieldName: "Name", RequestName: "name", Contribution: "query", PreferResourceID: false}, {FieldName: "NameContains", RequestName: "nameContains", Contribution: "query", PreferResourceID: false}, {FieldName: "Identifier", RequestName: "identifier", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dataintegrationsdk.ListFoldersRequest) (dataintegrationsdk.ListFoldersResponse, error) {
 				return sdkClient.ListFolders(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[dataintegrationsdk.UpdateFolderRequest, dataintegrationsdk.UpdateFolderResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "FolderKey", RequestName: "folderKey", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdateFolderDetails", RequestName: "UpdateFolderDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "FolderKey", RequestName: "folderKey", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateFolderDetails", RequestName: "UpdateFolderDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dataintegrationsdk.UpdateFolderRequest) (dataintegrationsdk.UpdateFolderResponse, error) {
 				return sdkClient.UpdateFolder(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[dataintegrationsdk.DeleteFolderRequest, dataintegrationsdk.DeleteFolderResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "FolderKey", RequestName: "folderKey", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "FolderKey", RequestName: "folderKey", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request dataintegrationsdk.DeleteFolderRequest) (dataintegrationsdk.DeleteFolderResponse, error) {
 				return sdkClient.DeleteFolder(ctx, request)
 			},

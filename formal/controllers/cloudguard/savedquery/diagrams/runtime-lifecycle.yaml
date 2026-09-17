@@ -1,0 +1,54 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: cloudguard
+slug: savedquery
+kind: SavedQuery
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - terminating
+  - deleted
+repoAuthored:
+  providerLifecycle:
+    createPending:
+      - CREATING
+    deletePending:
+      - DELETING
+  listLookup:
+    filters:
+      - compartmentId
+      - displayName
+    matchRule: exact unique compartmentId plus displayName match
+  mutation:
+    mutable:
+      - definedTags
+      - description
+      - displayName
+      - freeformTags
+      - query
+    forceNew:
+      - compartmentId
+  operations:
+    update:
+      - UpdateSavedQuery
+  hooks:
+    create:
+      - helper: tfresource.CreateResource
+    update:
+      - helper: tfresource.UpdateResource
+    delete:
+      - helper: tfresource.DeleteResource
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - The reviewed provider source classifies CREATING as create-pending and
+    DELETING as delete-pending. The recorded trace observed ACTIVE create and
+    update responses followed by 404 confirmation after a 202 delete.
+  - Display name, query, description, and tag maps reconcile in place.
+    ChangeSavedQueryCompartment remains outside the published runtime, so
+    compartmentId is replacement-only.
+  - Pre-create reuse is limited to a unique exact compartmentId plus
+    displayName match. The runtime has no Secret side effects.

@@ -1,0 +1,29 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: computecloudatcustomer
+slug: cccupgradeschedule
+kind: CccUpgradeSchedule
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending: []
+    updatePending: []
+    deletePending: ["DELETING"]
+  listLookup:
+    filters: ["accessLevel","cccUpgradeScheduleId","compartmentId","compartmentIdInSubtree","displayName","displayNameContains","state"]
+    matchRule: exact resource identity match; duplicate matches fail
+  mutation:
+    mutable: ["compartmentId","definedTags","description","displayName","events.description","events.scheduleEventDuration","events.scheduleEventRecurrences","events.timeStart","freeformTags"]
+    forceNew: []
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - "The CccUpgradeSchedule runtime retains package-local lifecycle, identity, mutation, and delete handling."
+  - "The credential-free evidence mock verifies the recorded create/update payloads, SDK response decoding, status projection, and delete confirmation."

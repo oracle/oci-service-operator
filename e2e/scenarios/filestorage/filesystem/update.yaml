@@ -1,0 +1,15 @@
+#
+# Copyright (c) 2026, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+#
+
+apiVersion: filestorage.oracle.com/v1beta1
+kind: FileSystem
+metadata:
+  name: osok-fs-${OSOK_E2E_SUFFIX}
+spec:
+  availabilityDomain: ${OCI_AVAILABILITY_DOMAIN}
+  compartmentId: ${OCI_COMPARTMENT_ID}
+  displayName: osok-fs-updated-${OSOK_E2E_SUFFIX}
+  freeformTags:
+    osok-e2e-phase: update

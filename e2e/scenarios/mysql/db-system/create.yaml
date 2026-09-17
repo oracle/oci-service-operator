@@ -1,0 +1,30 @@
+#
+# Copyright (c) 2026, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+#
+
+apiVersion: mysql.oracle.com/v1beta1
+kind: DbSystem
+metadata:
+  name: osok-mysql-${OSOK_E2E_SUFFIX}
+spec:
+  compartmentId: ${OCI_COMPARTMENT_ID}
+  shapeName: ${OCI_MYSQL_SHAPE}
+  subnetId: ${OCI_SUBNET_ID}
+  availabilityDomain: ${OCI_AVAILABILITY_DOMAIN}
+  displayName: osok-mysql-${OSOK_E2E_SUFFIX}
+  description: OSOK live lifecycle create
+  adminUsername:
+    secret:
+      secretName: osok-mysql-admin-${OSOK_E2E_SUFFIX}
+  adminPassword:
+    secret:
+      secretName: osok-mysql-admin-${OSOK_E2E_SUFFIX}
+  dataStorageSizeInGBs: 50
+  hostnameLabel: osokmysql${OSOK_E2E_ID}
+  deletionPolicy:
+    automaticBackupRetention: DELETE
+    finalBackup: SKIP_FINAL_BACKUP
+    isDeleteProtected: false
+  freeformTags:
+    osok-e2e-phase: create

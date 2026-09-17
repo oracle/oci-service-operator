@@ -880,7 +880,11 @@ func (c deployPipelineDeleteWithoutTrackedIDClient) Delete(
 	resource *devopsv1beta1.DeployPipeline,
 ) (bool, error) {
 	if deployPipelineTrackedID(resource) != "" {
-		return c.DeployPipelineServiceClient.Delete(ctx, resource)
+		deleted, err := c.DeployPipelineServiceClient.Delete(ctx, resource)
+		if !isDeployPipelineAmbiguousNotFound(err) {
+			return deleted, err
+		}
+		return c.confirmTrackedDeployPipelineAbsence(ctx, resource, err)
 	}
 	response, found, err := deployPipelineDeleteResolutionByList(ctx, resource, c.listDeployPipelines)
 	if err != nil {
@@ -895,6 +899,22 @@ func (c deployPipelineDeleteWithoutTrackedIDClient) Delete(
 		resource.Status.OsokStatus.Ocid = shared.OCID(deployPipelineID)
 	}
 	return c.DeployPipelineServiceClient.Delete(ctx, resource)
+}
+
+func (c deployPipelineDeleteWithoutTrackedIDClient) confirmTrackedDeployPipelineAbsence(
+	ctx context.Context,
+	resource *devopsv1beta1.DeployPipeline,
+	ambiguousErr error,
+) (bool, error) {
+	_, found, err := deployPipelineDeleteResolutionByList(ctx, resource, c.listDeployPipelines)
+	if err != nil {
+		return false, fmt.Errorf("confirm %s deletion by scoped list: %w", deployPipelineKind, err)
+	}
+	if found {
+		return false, ambiguousErr
+	}
+	markDeployPipelineDeleted(resource, "OCI resource no longer exists")
+	return true, nil
 }
 
 func handleDeployPipelineDeleteError(resource *devopsv1beta1.DeployPipeline, err error) error {

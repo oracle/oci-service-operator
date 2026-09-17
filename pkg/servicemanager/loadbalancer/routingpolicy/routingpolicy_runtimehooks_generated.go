@@ -66,25 +66,25 @@ func newRoutingPolicyDefaultRuntimeHooks(sdkClient loadbalancersdk.LoadBalancerC
 			},
 		},
 		Get: runtimeOperationHooks[loadbalancersdk.GetRoutingPolicyRequest, loadbalancersdk.GetRoutingPolicyResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "RoutingPolicyName", RequestName: "routingPolicyName", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "RoutingPolicyName", RequestName: "routingPolicyName", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request loadbalancersdk.GetRoutingPolicyRequest) (loadbalancersdk.GetRoutingPolicyResponse, error) {
 				return sdkClient.GetRoutingPolicy(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[loadbalancersdk.ListRoutingPoliciesRequest, loadbalancersdk.ListRoutingPoliciesResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: true}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loadbalancersdk.ListRoutingPoliciesRequest) (loadbalancersdk.ListRoutingPoliciesResponse, error) {
 				return sdkClient.ListRoutingPolicies(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[loadbalancersdk.UpdateRoutingPolicyRequest, loadbalancersdk.UpdateRoutingPolicyResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "RoutingPolicyName", RequestName: "routingPolicyName", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdateRoutingPolicyDetails", RequestName: "UpdateRoutingPolicyDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "RoutingPolicyName", RequestName: "routingPolicyName", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateRoutingPolicyDetails", RequestName: "UpdateRoutingPolicyDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loadbalancersdk.UpdateRoutingPolicyRequest) (loadbalancersdk.UpdateRoutingPolicyResponse, error) {
 				return sdkClient.UpdateRoutingPolicy(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[loadbalancersdk.DeleteRoutingPolicyRequest, loadbalancersdk.DeleteRoutingPolicyResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "RoutingPolicyName", RequestName: "routingPolicyName", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "RoutingPolicyName", RequestName: "routingPolicyName", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request loadbalancersdk.DeleteRoutingPolicyRequest) (loadbalancersdk.DeleteRoutingPolicyResponse, error) {
 				return sdkClient.DeleteRoutingPolicy(ctx, request)
 			},

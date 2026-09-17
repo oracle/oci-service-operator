@@ -7,9 +7,21 @@ package generatedruntime
 
 import (
 	"context"
-	containerenginev1beta1 "github.com/oracle/oci-service-operator/api/containerengine/v1beta1"
+	"reflect"
 	"testing"
+
+	containerenginev1beta1 "github.com/oracle/oci-service-operator/api/containerengine/v1beta1"
+	shared "github.com/oracle/oci-service-operator/pkg/shared"
 )
+
+type jsonValueResolutionResource struct {
+	Spec jsonValueResolutionSpec
+}
+
+type jsonValueResolutionSpec struct {
+	Array  shared.JSONValue `json:"array"`
+	Object shared.JSONValue `json:"object"`
+}
 
 func TestResolveSpecValueWithBoolFieldsPreservesNestedFalseClusterBooleans(t *testing.T) {
 	t.Parallel()
@@ -31,5 +43,28 @@ func TestResolveSpecValueWithBoolFieldsPreservesNestedFalseClusterBooleans(t *te
 		if !ok || boolValue {
 			t.Fatalf("ResolveSpecValueWithBoolFields() %s = %#v, want false", path, got)
 		}
+	}
+}
+
+func TestResolveSpecValueWithBoolFieldsPreservesArbitraryJSONShapes(t *testing.T) {
+	t.Parallel()
+	resource := &jsonValueResolutionResource{Spec: jsonValueResolutionSpec{
+		Array:  shared.JSONValue{Raw: []byte(`[]`)},
+		Object: shared.JSONValue{Raw: []byte(`{"enabled":false}`)},
+	}}
+
+	resolved, err := ResolveSpecValueWithBoolFields(resource, context.Background(), nil, "default")
+	if err != nil {
+		t.Fatalf("ResolveSpecValueWithBoolFields() error = %v", err)
+	}
+	values, ok := resolved.(map[string]any)
+	if !ok {
+		t.Fatalf("ResolveSpecValueWithBoolFields() type = %T, want map[string]any", resolved)
+	}
+	if got := values["array"]; !reflect.DeepEqual(got, []any{}) {
+		t.Fatalf("resolved array = %#v, want empty JSON array", got)
+	}
+	if got := values["object"]; !reflect.DeepEqual(got, map[string]any{"enabled": false}) {
+		t.Fatalf("resolved object = %#v, want JSON object", got)
 	}
 }

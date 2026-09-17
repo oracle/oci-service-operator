@@ -9,5 +9,33 @@ states:
   - active
   - updating
   - terminating
+repoAuthored:
+  listLookup:
+    filters:
+      - name
+    matchRule: Resolve the named cipher suite only beneath the annotated load balancer.
+  mutation:
+    mutable:
+      - ciphers
+    forceNew:
+      - name
+  hooks:
+    create:
+      - helper: CreateSSLCipherSuite
+    update:
+      - helper: UpdateSSLCipherSuite
+    delete:
+      - helper: DeleteSSLCipherSuite
+  followUp:
+    create: GetWorkRequest -> GetSSLCipherSuite
+    update: GetWorkRequest -> GetSSLCipherSuite
+    delete: GetWorkRequest -> confirm-delete
 notes:
-  - Scaffold metadata only; replace with controller-specific runtime states before promotion.
+  - Live Load Balancer work requests report `CreateCipherSuite`,
+    `UpdateCipherSuite`, and `DeleteCipherSuite`; the runtime accepts those
+    observed operation names as well as the SDK's SSLCipherSuite spellings.
+  - >-
+    `ACCEPTED` and `IN_PROGRESS` remain pending, `SUCCEEDED` transitions to a
+    child readback, and failed work requests retain actionable async status.
+  - The child has no independent OCI OCID. Runtime identity is the annotated
+    load balancer plus immutable cipher-suite `name`; only `ciphers` update.

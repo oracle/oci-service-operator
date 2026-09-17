@@ -57,8 +57,20 @@ func newArtifactDefaultRuntimeHooks(sdkClient marketplacepublishersdk.Marketplac
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*marketplacepublisherv1beta1.Artifact]{},
 		StatusHooks:     generatedruntime.StatusHooks[*marketplacepublisherv1beta1.Artifact]{},
 		ParityHooks:     generatedruntime.ParityHooks[*marketplacepublisherv1beta1.Artifact]{},
-		Async:           generatedruntime.AsyncHooks[*marketplacepublisherv1beta1.Artifact]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*marketplacepublisherv1beta1.Artifact]{},
+		Async: generatedruntime.AsyncHooks[*marketplacepublisherv1beta1.Artifact]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := marketplacepublishersdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*marketplacepublisherv1beta1.Artifact]{},
 		Create: runtimeOperationHooks[marketplacepublishersdk.CreateArtifactRequest, marketplacepublishersdk.CreateArtifactResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateArtifactDetails", RequestName: "CreateArtifactDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request marketplacepublishersdk.CreateArtifactRequest) (marketplacepublishersdk.CreateArtifactResponse, error) {
@@ -106,10 +118,19 @@ func buildArtifactGeneratedRuntimeConfig(
 	hooks ArtifactRuntimeHooks,
 ) generatedruntime.Config[*marketplacepublisherv1beta1.Artifact] {
 	return generatedruntime.Config[*marketplacepublisherv1beta1.Artifact]{
-		Kind:            "Artifact",
-		SDKName:         "Artifact",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "Artifact",
+		SDKName:   "Artifact",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

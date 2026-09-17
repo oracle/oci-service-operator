@@ -1,0 +1,141 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datacatalog",
+  "slug": "catalog",
+  "kind": "Catalog",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_datacatalog_catalog",
+  "operations": {
+    "create": [
+      {
+        "operation": "AttachCatalogPrivateEndpoint",
+        "requestType": "datacatalog.AttachCatalogPrivateEndpointRequest",
+        "responseType": "datacatalog.AttachCatalogPrivateEndpointResponse"
+      },
+      {
+        "operation": "CreateCatalog",
+        "requestType": "datacatalog.CreateCatalogRequest",
+        "responseType": "datacatalog.CreateCatalogResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetCatalog",
+        "requestType": "datacatalog.GetCatalogRequest",
+        "responseType": "datacatalog.GetCatalogResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListCatalogs",
+        "requestType": "datacatalog.ListCatalogsRequest",
+        "responseType": "datacatalog.ListCatalogsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "AttachCatalogPrivateEndpoint",
+        "requestType": "datacatalog.AttachCatalogPrivateEndpointRequest",
+        "responseType": "datacatalog.AttachCatalogPrivateEndpointResponse"
+      },
+      {
+        "operation": "ChangeCatalogCompartment",
+        "requestType": "datacatalog.ChangeCatalogCompartmentRequest",
+        "responseType": "datacatalog.ChangeCatalogCompartmentResponse"
+      },
+      {
+        "operation": "DetachCatalogPrivateEndpoint",
+        "requestType": "datacatalog.DetachCatalogPrivateEndpointRequest",
+        "responseType": "datacatalog.DetachCatalogPrivateEndpointResponse"
+      },
+      {
+        "operation": "UpdateCatalog",
+        "requestType": "datacatalog.UpdateCatalogRequest",
+        "responseType": "datacatalog.UpdateCatalogResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteCatalog",
+        "requestType": "datacatalog.DeleteCatalogRequest",
+        "responseType": "datacatalog.DeleteCatalogResponse"
+      },
+      {
+        "operation": "DetachCatalogPrivateEndpoint",
+        "requestType": "datacatalog.DetachCatalogPrivateEndpointRequest",
+        "responseType": "datacatalog.DetachCatalogPrivateEndpointResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "attached_catalog_private_endpoints",
+      "compartment_id",
+      "defined_tags",
+      "display_name",
+      "freeform_tags"
+    ],
+    "forceNew": null,
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_datacatalog_catalogs",
+    "collectionField": "catalogs",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datacatalog/catalog/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datacatalog/catalog/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts are imported from the pinned terraform-provider-oci revision; repo-authored runtime semantics remain authoritative."
+  ]
+}

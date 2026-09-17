@@ -1,0 +1,119 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "loganalytics",
+  "slug": "ingesttimerule",
+  "kind": "IngestTimeRule",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_log_analytics_namespace_ingest_time_rule",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateIngestTimeRule",
+        "requestType": "loganalytics.CreateIngestTimeRuleRequest",
+        "responseType": "loganalytics.CreateIngestTimeRuleResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetIngestTimeRule",
+        "requestType": "loganalytics.GetIngestTimeRuleRequest",
+        "responseType": "loganalytics.GetIngestTimeRuleResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeIngestTimeRuleCompartment",
+        "requestType": "loganalytics.ChangeIngestTimeRuleCompartmentRequest",
+        "responseType": "loganalytics.ChangeIngestTimeRuleCompartmentResponse"
+      },
+      {
+        "operation": "UpdateIngestTimeRule",
+        "requestType": "loganalytics.UpdateIngestTimeRuleRequest",
+        "responseType": "loganalytics.UpdateIngestTimeRuleResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteIngestTimeRule",
+        "requestType": "loganalytics.DeleteIngestTimeRuleRequest",
+        "responseType": "loganalytics.DeleteIngestTimeRuleResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "actions.compartment_id",
+      "actions.dimensions",
+      "actions.metric_name",
+      "actions.namespace",
+      "actions.resource_group",
+      "actions.type",
+      "compartment_id",
+      "conditions.additional_conditions.condition_field",
+      "conditions.additional_conditions.condition_operator",
+      "conditions.additional_conditions.condition_value",
+      "conditions.field_name",
+      "conditions.field_operator",
+      "conditions.field_value",
+      "conditions.kind",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags"
+    ],
+    "forceNew": [
+      "namespace"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/loganalytics/ingesttimerule/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/loganalytics/ingesttimerule/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Pinned provider operations are combined with reviewed composite-path IngestTimeRule runtime semantics."
+  ]
+}

@@ -38,7 +38,7 @@ group Lookup and bind
 alt tracked or explicit OCI identity already exists
 ServiceManager -> OCI: GetDkim
 else tracked identity is missing
-ServiceManager -> OCI: ListDkim(filters: compartment_id,\nstate)
+ServiceManager -> OCI: ListDkim(filters: email_domain_id,\nid, name)
 alt reusable OCI resource is not found
 ServiceManager -> OCI: CreateDkim
 loop create pending PROVISIONING
@@ -67,21 +67,27 @@ ServiceManager --> BaseReconciler: requeue while OCI remains in\nPROVISIONING, U
 else live state requires field-aware\ndrift evaluation
 group Drift handling
 note over ServiceManager,OCI
-Supported update surface: display_name
+Supported update surface: defined_tags,
+description, freeform_tags
 Reject before mutate: force-new fields
-compartment_id
-Lookup filters: compartment_id, state
+email_domain_id, name
+Lookup filters: email_domain_id, id,
+name
+Lookup matching: Adopt only a unique
+selector match beneath the requested
+email domain.
 end note
 opt force-new or conflicting drift is detected
 ServiceManager --> BaseReconciler: reject before OCI mutation
 end
 opt supported mutable drift is detected
-ServiceManager -> OCI: Apply UpdateDkim only for mutable\nfields display_name
+ServiceManager -> OCI: Apply UpdateDkim only for mutable\nfields defined_tags, description,\nfreeform_tags
 loop update pending UPDATING
 ServiceManager -> OCI: GetDkim
 end
 end
-ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=template action=CREATED;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource
+ServiceManager -> OCI: run helper hooks create=CreateDkim;\nupdate=UpdateDkim; delete=DeleteDkim
+ServiceManager -> OCI: apply follow-up strategy\ncreate=read-after-write;\nupdate=read-after-write;\ndelete=confirm-delete
 end
 ServiceManager --> BaseReconciler: status=required,\nfinalizer=retain-until-confirmed-delete
 end
@@ -110,16 +116,32 @@ retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
 provider states: create PROVISIONING; update
 UPDATING; delete DELETING
-supported drift: display_name
+follow-up: create=read-after-write;
+update=read-after-write; delete=confirm-delete
+supported drift: defined_tags, description,
+freeform_tags
 reject before mutate: force-new fields
-compartment_id
+email_domain_id, name
 create-only fields: none
 list lookup: scaffold_email_dkim filters
-compartment_id, state
+email_domain_id, id, name; Adopt only a unique
+selector match beneath the requested email
+domain.
 conflicts: none
 open gaps: none
-Scaffold metadata only; replace with
-controller-specific runtime states before
-promotion.
+`NEEDS_ATTENTION` is a steady successful state
+for an unverified DKIM: OCI has created the key
+and is waiting for the operator to publish its
+DNS records. The runtime must not fail
+reconciliation while that external DNS action is
+pending.
+`CREATING` and `UPDATING` requeue; `ACTIVE` and
+`NEEDS_ATTENTION` are successful steady states;
+delete retains the finalizer through `DELETING`
+until OCI reports `DELETED` or an unambiguous
+absence.
+The runtime projects the generated selector and
+DNS CNAME/TXT values into status without
+creating Kubernetes Secrets.
 end note
 @enduml

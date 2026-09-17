@@ -1,0 +1,44 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: dns
+slug: zone
+kind: Zone
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+  - deleted
+  - failed
+repoAuthored:
+  listLookup:
+    filters:
+      - compartmentId
+      - name
+      - scope
+      - viewId
+    matchRule: Adopt only a unique zone in the requested scope and private view.
+  mutation:
+    mutable:
+      - freeformTags
+      - definedTags
+      - resolutionMode
+      - dnssecState
+      - externalMasters
+      - externalDownstreams
+    forceNew:
+      - name
+      - compartmentId
+      - scope
+      - viewId
+      - zoneType
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - CREATING and UPDATING requeue, ACTIVE succeeds, FAILED is terminal, and delete completes only on DELETED or confirmed absence.
+  - Private-zone lookup preserves scope plus viewId and does not conflate global zones with same-name private zones.
+  - Tags, resolution/DNSSEC settings, and external transfer endpoints update in place; zone identity fields require replacement.
+  - The runtime has no Kubernetes Secret side effects.

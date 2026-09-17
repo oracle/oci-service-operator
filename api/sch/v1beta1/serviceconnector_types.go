@@ -118,7 +118,7 @@ type ServiceConnectorSource struct {
 	// +kubebuilder:validation:Optional
 	StreamId string `json:"streamId,omitempty"`
 	// +kubebuilder:validation:Optional
-	Cursor ServiceConnectorSourceCursor `json:"cursor,omitempty"`
+	Cursor ServiceConnectorSourceCursor `json:"cursor,omitempty,omitzero"`
 	// The name of the connector plugin. This name indicates the service to be called by the connector plugin. For example, `QueueSource` indicates the Queue service.
 	// To find names of connector plugins, list the plugin using ListConnectorPlugins.
 	// +kubebuilder:validation:Optional

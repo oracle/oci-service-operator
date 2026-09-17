@@ -27,7 +27,7 @@ type TaskScheduleSpec struct {
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskScheduleParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskScheduleParentRef `json:"parentRef,omitempty,omitzero"`
 	// Detailed description for the object.
 	// +kubebuilder:validation:Optional
 	Description string `json:"description,omitempty"`
@@ -38,9 +38,9 @@ type TaskScheduleSpec struct {
 	// +kubebuilder:validation:Optional
 	ObjectStatus int `json:"objectStatus,omitempty"`
 	// +kubebuilder:validation:Optional
-	ScheduleRef TaskScheduleScheduleRef `json:"scheduleRef,omitempty"`
+	ScheduleRef TaskScheduleScheduleRef `json:"scheduleRef,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	ConfigProviderDelegate TaskScheduleConfigProviderDelegate `json:"configProviderDelegate,omitempty"`
+	ConfigProviderDelegate TaskScheduleConfigProviderDelegate `json:"configProviderDelegate,omitempty,omitzero"`
 	// Whether the task schedule is enabled.
 	// +kubebuilder:validation:Optional
 	IsEnabled bool `json:"isEnabled,omitempty"`
@@ -75,10 +75,16 @@ type TaskScheduleSpec struct {
 	// +kubebuilder:validation:Optional
 	ExpectedDurationUnit string `json:"expectedDurationUnit,omitempty"`
 	// +kubebuilder:validation:Optional
-	RegistryMetadata TaskScheduleRegistryMetadata `json:"registryMetadata,omitempty"`
+	RegistryMetadata TaskScheduleRegistryMetadata `json:"registryMetadata,omitempty,omitzero"`
 	// The type of the object.
 	// +kubebuilder:validation:Optional
 	ModelType string `json:"modelType,omitempty"`
+	// The OCID of the Data Integration workspace containing this resource.
+	// +kubebuilder:validation:Required
+	WorkspaceId string `json:"workspaceId"`
+	// The key of the application containing this resource.
+	// +kubebuilder:validation:Required
+	ApplicationKey string `json:"applicationKey"`
 }
 
 // TaskScheduleParentRef defines nested fields for TaskSchedule.ParentRef.
@@ -127,7 +133,7 @@ type TaskScheduleScheduleRefFrequencyDetails struct {
 	// +kubebuilder:validation:Optional
 	Interval int `json:"interval,omitempty"`
 	// +kubebuilder:validation:Optional
-	Time TaskScheduleScheduleRefFrequencyDetailsTime `json:"time,omitempty"`
+	Time TaskScheduleScheduleRefFrequencyDetailsTime `json:"time,omitempty,omitzero"`
 	// A list of days of the month to be scheduled. i.e. excute every 2nd,3rd, 10th of the month.
 	// +kubebuilder:validation:Optional
 	Days []int `json:"days,omitempty"`
@@ -202,7 +208,7 @@ type TaskScheduleScheduleRefMetadata struct {
 	// +kubebuilder:validation:Optional
 	AggregatorKey string `json:"aggregatorKey,omitempty"`
 	// +kubebuilder:validation:Optional
-	Aggregator TaskScheduleScheduleRefMetadataAggregator `json:"aggregator,omitempty"`
+	Aggregator TaskScheduleScheduleRefMetadataAggregator `json:"aggregator,omitempty,omitzero"`
 	// The full path to identify this object.
 	// +kubebuilder:validation:Optional
 	IdentifierPath string `json:"identifierPath,omitempty"`
@@ -219,7 +225,7 @@ type TaskScheduleScheduleRefMetadata struct {
 	// +kubebuilder:validation:Optional
 	IsFavorite bool `json:"isFavorite,omitempty"`
 	// +kubebuilder:validation:Optional
-	CountStatistics TaskScheduleScheduleRefMetadataCountStatistics `json:"countStatistics,omitempty"`
+	CountStatistics TaskScheduleScheduleRefMetadataCountStatistics `json:"countStatistics,omitempty,omitzero"`
 }
 
 // TaskScheduleScheduleRef defines nested fields for TaskSchedule.ScheduleRef.
@@ -234,7 +240,7 @@ type TaskScheduleScheduleRef struct {
 	// +kubebuilder:validation:Optional
 	ModelType string `json:"modelType,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskScheduleScheduleRefParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskScheduleScheduleRefParentRef `json:"parentRef,omitempty,omitzero"`
 	// Free form text without any restriction on permitted characters. Name can have letters, numbers, and special characters. The value is editable and is restricted to 1000 characters.
 	// +kubebuilder:validation:Optional
 	Name string `json:"name,omitempty"`
@@ -251,7 +257,7 @@ type TaskScheduleScheduleRef struct {
 	// +kubebuilder:validation:Optional
 	Identifier string `json:"identifier,omitempty"`
 	// +kubebuilder:validation:Optional
-	FrequencyDetails TaskScheduleScheduleRefFrequencyDetails `json:"frequencyDetails,omitempty"`
+	FrequencyDetails TaskScheduleScheduleRefFrequencyDetails `json:"frequencyDetails,omitempty,omitzero"`
 	// The timezone for the schedule.
 	// +kubebuilder:validation:Optional
 	Timezone string `json:"timezone,omitempty"`
@@ -259,7 +265,7 @@ type TaskScheduleScheduleRef struct {
 	// +kubebuilder:validation:Optional
 	IsDaylightAdjustmentEnabled bool `json:"isDaylightAdjustmentEnabled,omitempty"`
 	// +kubebuilder:validation:Optional
-	Metadata TaskScheduleScheduleRefMetadata `json:"metadata,omitempty"`
+	Metadata TaskScheduleScheduleRefMetadata `json:"metadata,omitempty,omitzero"`
 }
 
 // TaskScheduleConfigProviderDelegateBindings defines nested fields for TaskSchedule.ConfigProviderDelegate.Bindings.

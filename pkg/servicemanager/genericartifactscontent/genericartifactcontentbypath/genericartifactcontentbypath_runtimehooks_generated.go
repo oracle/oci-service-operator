@@ -56,7 +56,7 @@ func newGenericArtifactContentByPathDefaultRuntimeHooks(sdkClient genericartifac
 		Async:           generatedruntime.AsyncHooks[*genericartifactscontentv1beta1.GenericArtifactContentByPath]{},
 		DeleteHooks:     generatedruntime.DeleteHooks[*genericartifactscontentv1beta1.GenericArtifactContentByPath]{},
 		Get: runtimeOperationHooks[genericartifactscontentsdk.GetGenericArtifactContentByPathRequest, genericartifactscontentsdk.GetGenericArtifactContentByPathResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "RepositoryId", RequestName: "repositoryId", Contribution: "path", PreferResourceID: false}, {FieldName: "ArtifactPath", RequestName: "artifactPath", Contribution: "path", PreferResourceID: false}, {FieldName: "Version", RequestName: "version", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "RepositoryId", RequestName: "repositoryId", Contribution: "path", PreferResourceID: false}, {FieldName: "ArtifactPath", RequestName: "artifactPath", Contribution: "path", PreferResourceID: false}, {FieldName: "Version", RequestName: "version", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request genericartifactscontentsdk.GetGenericArtifactContentByPathRequest) (genericartifactscontentsdk.GetGenericArtifactContentByPathResponse, error) {
 				return sdkClient.GetGenericArtifactContentByPath(ctx, request)
 			},

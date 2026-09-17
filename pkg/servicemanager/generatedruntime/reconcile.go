@@ -147,6 +147,9 @@ func (c ServiceClient[T]) createOrReadResource(ctx context.Context, resource T, 
 		}
 		requeueDuration := responseRetryAfterDuration(response)
 		c.seedOpeningRequestID(resource, response)
+		if c.config.Identity.RecordBeforeCreateFollowUp && c.config.Identity.RecordTracked != nil {
+			c.recordTrackedIdentity(resource, identity, responseID(response))
+		}
 		if c.generatedWorkRequestPhaseEnabled(shared.OSOKAsyncPhaseCreate) {
 			workRequestID, err := c.startGeneratedWorkRequest(resource, response, shared.OSOKAsyncPhaseCreate, identity)
 			if err != nil {

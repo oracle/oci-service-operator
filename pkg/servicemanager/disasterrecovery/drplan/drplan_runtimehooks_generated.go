@@ -114,8 +114,20 @@ func newDrPlanDefaultRuntimeHooks(sdkClient disasterrecoverysdk.DisasterRecovery
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*disasterrecoveryv1beta1.DrPlan]{},
 		StatusHooks:     generatedruntime.StatusHooks[*disasterrecoveryv1beta1.DrPlan]{},
 		ParityHooks:     generatedruntime.ParityHooks[*disasterrecoveryv1beta1.DrPlan]{},
-		Async:           generatedruntime.AsyncHooks[*disasterrecoveryv1beta1.DrPlan]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*disasterrecoveryv1beta1.DrPlan]{},
+		Async: generatedruntime.AsyncHooks[*disasterrecoveryv1beta1.DrPlan]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := disasterrecoverysdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*disasterrecoveryv1beta1.DrPlan]{},
 		Create: runtimeOperationHooks[disasterrecoverysdk.CreateDrPlanRequest, disasterrecoverysdk.CreateDrPlanResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateDrPlanDetails", RequestName: "CreateDrPlanDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request disasterrecoverysdk.CreateDrPlanRequest) (disasterrecoverysdk.CreateDrPlanResponse, error) {
@@ -163,10 +175,19 @@ func buildDrPlanGeneratedRuntimeConfig(
 	hooks DrPlanRuntimeHooks,
 ) generatedruntime.Config[*disasterrecoveryv1beta1.DrPlan] {
 	return generatedruntime.Config[*disasterrecoveryv1beta1.DrPlan]{
-		Kind:            "DrPlan",
-		SDKName:         "DrPlan",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "DrPlan",
+		SDKName:   "DrPlan",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datalabelingservicedataplane",
+  "slug": "annotation",
+  "kind": "Annotation",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "unavailable",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateAnnotation",
+        "requestType": "datalabelingservicedataplane.CreateAnnotationRequest",
+        "responseType": "datalabelingservicedataplane.CreateAnnotationResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetAnnotation",
+        "requestType": "datalabelingservicedataplane.GetAnnotationRequest",
+        "responseType": "datalabelingservicedataplane.GetAnnotationResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListAnnotations",
+        "requestType": "datalabelingservicedataplane.ListAnnotationsRequest",
+        "responseType": "datalabelingservicedataplane.ListAnnotationsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateAnnotation",
+        "requestType": "datalabelingservicedataplane.UpdateAnnotationRequest",
+        "responseType": "datalabelingservicedataplane.UpdateAnnotationResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteAnnotation",
+        "requestType": "datalabelingservicedataplane.DeleteAnnotationRequest",
+        "responseType": "datalabelingservicedataplane.DeleteAnnotationResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "entities",
+      "freeformTags",
+      "definedTags"
+    ],
+    "forceNew": [
+      "recordId",
+      "compartmentId"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "unavailable",
+    "collectionField": "Items",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartmentId",
+      "datasetId",
+      "lifecycleState",
+      "id",
+      "updatedBy",
+      "recordId",
+      "timeCreatedGreaterThanOrEqualTo",
+      "timeCreatedLessThanOrEqualTo"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datalabelingservicedataplane/annotation/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datalabelingservicedataplane/annotation/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Terraform provider formal-import could not resolve unavailable; the vendored SDK, generated runtime, and package-owned typed OCI fixtures define this reviewed contract."
+  ]
+}

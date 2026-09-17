@@ -50,15 +50,84 @@ func registerWebAppFirewallPolicyRuntimeHooksMutator(mutator WebAppFirewallPolic
 	}
 	webappfirewallpolicyRuntimeHooksMutators = append(webappfirewallpolicyRuntimeHooksMutators, mutator)
 }
+func newWebAppFirewallPolicyRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "waf",
+		FormalSlug:    "webappfirewallpolicy",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "displayName", "id", "state"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"actions", "compartmentId", "definedTags", "displayName", "freeformTags", "requestAccessControl", "requestProtection", "requestRateLimiting", "responseAccessControl", "responseProtection", "systemTags"},
+			ForceNew:      []string{},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "webAppFirewallPolicy", Action: "CREATED"}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "ChangeWebAppFirewallPolicyCompartment", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "webAppFirewallPolicy", Action: "UPDATED"}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "webAppFirewallPolicy", Action: "DELETED"}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "webAppFirewallPolicy", Action: "CREATED"}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "ChangeWebAppFirewallPolicyCompartment", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "webAppFirewallPolicy", Action: "UPDATED"}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "webAppFirewallPolicy", Action: "DELETED"}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newWebAppFirewallPolicyDefaultRuntimeHooks(sdkClient wafsdk.WafClient) WebAppFirewallPolicyRuntimeHooks {
 	return WebAppFirewallPolicyRuntimeHooks{
+		Semantics:       newWebAppFirewallPolicyRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*wafv1beta1.WebAppFirewallPolicy]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*wafv1beta1.WebAppFirewallPolicy]{},
 		StatusHooks:     generatedruntime.StatusHooks[*wafv1beta1.WebAppFirewallPolicy]{},
 		ParityHooks:     generatedruntime.ParityHooks[*wafv1beta1.WebAppFirewallPolicy]{},
-		Async:           generatedruntime.AsyncHooks[*wafv1beta1.WebAppFirewallPolicy]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*wafv1beta1.WebAppFirewallPolicy]{},
+		Async: generatedruntime.AsyncHooks[*wafv1beta1.WebAppFirewallPolicy]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := wafsdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*wafv1beta1.WebAppFirewallPolicy]{},
 		Create: runtimeOperationHooks[wafsdk.CreateWebAppFirewallPolicyRequest, wafsdk.CreateWebAppFirewallPolicyResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateWebAppFirewallPolicyDetails", RequestName: "CreateWebAppFirewallPolicyDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request wafsdk.CreateWebAppFirewallPolicyRequest) (wafsdk.CreateWebAppFirewallPolicyResponse, error) {
@@ -106,10 +175,19 @@ func buildWebAppFirewallPolicyGeneratedRuntimeConfig(
 	hooks WebAppFirewallPolicyRuntimeHooks,
 ) generatedruntime.Config[*wafv1beta1.WebAppFirewallPolicy] {
 	return generatedruntime.Config[*wafv1beta1.WebAppFirewallPolicy]{
-		Kind:            "WebAppFirewallPolicy",
-		SDKName:         "WebAppFirewallPolicy",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "WebAppFirewallPolicy",
+		SDKName:   "WebAppFirewallPolicy",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

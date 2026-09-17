@@ -5,7 +5,7 @@
   "slug": "query",
   "kind": "Query",
   "sourceRef": "terraform-provider-oci",
-  "providerResource": "oci_usage_query",
+  "providerResource": "oci_metering_computation_query",
   "operations": {
     "create": [
       {
@@ -130,6 +130,6 @@
     ]
   },
   "notes": [
-    "Seeded from the OCI Usage API Query SDK surface; refresh with formal-import when a matching terraform-provider-oci checkout is available."
+    "Refreshed from the pinned terraform-provider-oci Metering Computation Query resource; state-free settling remains repo-authored."
   ]
 }

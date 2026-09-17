@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "networkloadbalancer",
+  "slug": "backend",
+  "kind": "Backend",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_network_load_balancer_backend",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateBackend",
+        "requestType": "networkloadbalancer.CreateBackendRequest",
+        "responseType": "networkloadbalancer.CreateBackendResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetBackend",
+        "requestType": "networkloadbalancer.GetBackendRequest",
+        "responseType": "networkloadbalancer.GetBackendResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListBackends",
+        "requestType": "networkloadbalancer.ListBackendsRequest",
+        "responseType": "networkloadbalancer.ListBackendsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateBackend",
+        "requestType": "networkloadbalancer.UpdateBackendRequest",
+        "responseType": "networkloadbalancer.UpdateBackendResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteBackend",
+        "requestType": "networkloadbalancer.DeleteBackendRequest",
+        "responseType": "networkloadbalancer.DeleteBackendResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "is_backup",
+      "is_drain",
+      "is_offline",
+      "weight"
+    ],
+    "forceNew": [
+      "backend_set_name",
+      "ip_address",
+      "name",
+      "network_load_balancer_id",
+      "port",
+      "target_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_network_load_balancer_backends",
+    "collectionField": "backend_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "backend_set_name",
+      "network_load_balancer_id"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/networkloadbalancer/backend/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/networkloadbalancer/backend/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from terraform-provider-oci for networkloadbalancer/backend; ACTIVE represents successful readback for this child without an independent lifecycle field."
+  ]
+}

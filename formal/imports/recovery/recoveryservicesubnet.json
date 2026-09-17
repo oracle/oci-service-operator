@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "recovery",
+  "slug": "recoveryservicesubnet",
+  "kind": "RecoveryServiceSubnet",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_recovery_recovery_service_subnet",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateRecoveryServiceSubnet",
+        "requestType": "recovery.CreateRecoveryServiceSubnetRequest",
+        "responseType": "recovery.CreateRecoveryServiceSubnetResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetRecoveryServiceSubnet",
+        "requestType": "recovery.GetRecoveryServiceSubnetRequest",
+        "responseType": "recovery.GetRecoveryServiceSubnetResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListRecoveryServiceSubnets",
+        "requestType": "recovery.ListRecoveryServiceSubnetsRequest",
+        "responseType": "recovery.ListRecoveryServiceSubnetsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeRecoveryServiceSubnetCompartment",
+        "requestType": "recovery.ChangeRecoveryServiceSubnetCompartmentRequest",
+        "responseType": "recovery.ChangeRecoveryServiceSubnetCompartmentResponse"
+      },
+      {
+        "operation": "UpdateRecoveryServiceSubnet",
+        "requestType": "recovery.UpdateRecoveryServiceSubnetRequest",
+        "responseType": "recovery.UpdateRecoveryServiceSubnetResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteRecoveryServiceSubnet",
+        "requestType": "recovery.DeleteRecoveryServiceSubnetRequest",
+        "responseType": "recovery.DeleteRecoveryServiceSubnetResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "display_name",
+      "freeform_tags",
+      "nsg_ids",
+      "subnets"
+    ],
+    "forceNew": [
+      "subnet_id",
+      "vcn_id"
+    ],
+    "conflictsWith": {
+      "subnets": [
+        "subnet_id"
+      ]
+    }
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_recovery_recovery_service_subnets",
+    "collectionField": "recovery_service_subnet_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "id",
+      "state",
+      "vcn_id"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/recovery/recoveryservicesubnet/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/recovery/recoveryservicesubnet/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from terraform-provider-oci for recovery/recoveryservicesubnet."
+  ]
+}

@@ -1,0 +1,29 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: marketplaceprivateoffer
+slug: offer
+kind: Offer
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending: ["CREATING"]
+    updatePending: ["UPDATING"]
+    deletePending: ["DELETING"]
+  listLookup:
+    filters: ["buyerCompartmentId","displayName","id","sellerCompartmentId"]
+    matchRule: exact resource identity match; duplicate matches fail
+  mutation:
+    mutable: ["buyerCompartmentId","buyerInformation","customFields","definedTags","description","displayName","duration","freeformTags","internalNotes","pricing","resourceBundles","sellerInformation","timeAcceptBy","timeStartDate"]
+    forceNew: ["sellerCompartmentId"]
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - "The runtime uses its declared lifecycle-state contract for Offer reconciliation."
+  - "The credential-free mock exercises SDK request serialization, response projection, mutation when supported, and confirmed deletion."

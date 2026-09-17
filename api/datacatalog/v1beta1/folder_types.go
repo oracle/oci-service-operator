@@ -52,6 +52,12 @@ type FolderSpec struct {
 	// Type key of the object. Type keys can be found via the '/types' endpoint.
 	// +kubebuilder:validation:Optional
 	TypeKey string `json:"typeKey,omitempty"`
+	// The OCID of the catalog containing this resource.
+	// +kubebuilder:validation:Required
+	CatalogId string `json:"catalogId"`
+	// The key of the data asset containing this resource.
+	// +kubebuilder:validation:Required
+	DataAssetKey string `json:"dataAssetKey"`
 }
 
 // FolderCustomPropertyMember defines nested fields for Folder.CustomPropertyMember.

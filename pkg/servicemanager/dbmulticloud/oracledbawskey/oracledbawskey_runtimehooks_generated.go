@@ -50,50 +50,62 @@ func registerOracleDbAwsKeyRuntimeHooksMutator(mutator OracleDbAwsKeyRuntimeHook
 	}
 	oracledbawskeyRuntimeHooksMutators = append(oracledbawskeyRuntimeHooksMutators, mutator)
 }
-func newOracleDbAwsKeyDefaultRuntimeHooks(sdkClient dbmulticloudsdk.DbMulticloudAwsProviderClient) OracleDbAwsKeyRuntimeHooks {
+func newOracleDbAwsKeyDefaultRuntimeHooks(sdkClient OracleDbAwsKeySDKClients) OracleDbAwsKeyRuntimeHooks {
 	return OracleDbAwsKeyRuntimeHooks{
 		Identity:        generatedruntime.IdentityHooks[*dbmulticloudv1beta1.OracleDbAwsKey]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*dbmulticloudv1beta1.OracleDbAwsKey]{},
 		StatusHooks:     generatedruntime.StatusHooks[*dbmulticloudv1beta1.OracleDbAwsKey]{},
 		ParityHooks:     generatedruntime.ParityHooks[*dbmulticloudv1beta1.OracleDbAwsKey]{},
-		Async:           generatedruntime.AsyncHooks[*dbmulticloudv1beta1.OracleDbAwsKey]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*dbmulticloudv1beta1.OracleDbAwsKey]{},
+		Async: generatedruntime.AsyncHooks[*dbmulticloudv1beta1.OracleDbAwsKey]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := dbmulticloudsdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.workRequestClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*dbmulticloudv1beta1.OracleDbAwsKey]{},
 		Create: runtimeOperationHooks[dbmulticloudsdk.CreateOracleDbAwsKeyRequest, dbmulticloudsdk.CreateOracleDbAwsKeyResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateOracleDbAwsKeyDetails", RequestName: "CreateOracleDbAwsKeyDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dbmulticloudsdk.CreateOracleDbAwsKeyRequest) (dbmulticloudsdk.CreateOracleDbAwsKeyResponse, error) {
-				return sdkClient.CreateOracleDbAwsKey(ctx, request)
+				return sdkClient.dbMulticloudAwsProviderClient.CreateOracleDbAwsKey(ctx, request)
 			},
 		},
 		Get: runtimeOperationHooks[dbmulticloudsdk.GetOracleDbAwsKeyRequest, dbmulticloudsdk.GetOracleDbAwsKeyResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OracleDbAwsKeyId", RequestName: "oracleDbAwsKeyId", Contribution: "path", PreferResourceID: true}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dbmulticloudsdk.GetOracleDbAwsKeyRequest) (dbmulticloudsdk.GetOracleDbAwsKeyResponse, error) {
-				return sdkClient.GetOracleDbAwsKey(ctx, request)
+				return sdkClient.dbMulticloudAwsProviderClient.GetOracleDbAwsKey(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[dbmulticloudsdk.ListOracleDbAwsKeysRequest, dbmulticloudsdk.ListOracleDbAwsKeysResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "OracleDbAwsKeyId", RequestName: "oracleDbAwsKeyId", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "OracleDbAwsConnectorId", RequestName: "oracleDbAwsConnectorId", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dbmulticloudsdk.ListOracleDbAwsKeysRequest) (dbmulticloudsdk.ListOracleDbAwsKeysResponse, error) {
-				return sdkClient.ListOracleDbAwsKeys(ctx, request)
+				return sdkClient.dbMulticloudAwsProviderClient.ListOracleDbAwsKeys(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[dbmulticloudsdk.UpdateOracleDbAwsKeyRequest, dbmulticloudsdk.UpdateOracleDbAwsKeyResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OracleDbAwsKeyId", RequestName: "oracleDbAwsKeyId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateOracleDbAwsKeyDetails", RequestName: "UpdateOracleDbAwsKeyDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dbmulticloudsdk.UpdateOracleDbAwsKeyRequest) (dbmulticloudsdk.UpdateOracleDbAwsKeyResponse, error) {
-				return sdkClient.UpdateOracleDbAwsKey(ctx, request)
+				return sdkClient.dbMulticloudAwsProviderClient.UpdateOracleDbAwsKey(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[dbmulticloudsdk.DeleteOracleDbAwsKeyRequest, dbmulticloudsdk.DeleteOracleDbAwsKeyResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OracleDbAwsKeyId", RequestName: "oracleDbAwsKeyId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request dbmulticloudsdk.DeleteOracleDbAwsKeyRequest) (dbmulticloudsdk.DeleteOracleDbAwsKeyResponse, error) {
-				return sdkClient.DeleteOracleDbAwsKey(ctx, request)
+				return sdkClient.dbMulticloudAwsProviderClient.DeleteOracleDbAwsKey(ctx, request)
 			},
 		},
 		WrapGeneratedClient: []func(OracleDbAwsKeyServiceClient) OracleDbAwsKeyServiceClient{},
 	}
 }
 
-func newOracleDbAwsKeyRuntimeHooks(manager *OracleDbAwsKeyServiceManager, sdkClient dbmulticloudsdk.DbMulticloudAwsProviderClient) OracleDbAwsKeyRuntimeHooks {
+func newOracleDbAwsKeyRuntimeHooks(manager *OracleDbAwsKeyServiceManager, sdkClient OracleDbAwsKeySDKClients) OracleDbAwsKeyRuntimeHooks {
 	hooks := newOracleDbAwsKeyDefaultRuntimeHooks(sdkClient)
 	for _, mutator := range oracledbawskeyRuntimeHooksMutators {
 		mutator(manager, &hooks)
@@ -106,10 +118,19 @@ func buildOracleDbAwsKeyGeneratedRuntimeConfig(
 	hooks OracleDbAwsKeyRuntimeHooks,
 ) generatedruntime.Config[*dbmulticloudv1beta1.OracleDbAwsKey] {
 	return generatedruntime.Config[*dbmulticloudv1beta1.OracleDbAwsKey]{
-		Kind:            "OracleDbAwsKey",
-		SDKName:         "OracleDbAwsKey",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "OracleDbAwsKey",
+		SDKName:   "OracleDbAwsKey",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

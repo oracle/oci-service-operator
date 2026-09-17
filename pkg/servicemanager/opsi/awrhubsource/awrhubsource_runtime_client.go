@@ -125,7 +125,7 @@ func applyAwrHubSourceRuntimeHooks(
 		return
 	}
 
-	hooks.Semantics = newAwrHubSourceRuntimeSemantics()
+	hooks.Semantics = reviewedAwrHubSourceRuntimeSemantics()
 	hooks.BuildCreateBody = func(_ context.Context, resource *opsiv1beta1.AwrHubSource, _ string) (any, error) {
 		return buildAwrHubSourceCreateBody(resource)
 	}
@@ -167,7 +167,7 @@ func applyAwrHubSourceRuntimeHooks(
 	})
 }
 
-func newAwrHubSourceRuntimeSemantics() *generatedruntime.Semantics {
+func reviewedAwrHubSourceRuntimeSemantics() *generatedruntime.Semantics {
 	return &generatedruntime.Semantics{
 		FormalService:     "opsi",
 		FormalSlug:        "awrhubsource",

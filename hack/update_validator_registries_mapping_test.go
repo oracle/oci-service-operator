@@ -148,11 +148,11 @@ func TestBuildSDKMappingsSupportsExplicitSurfaceAndExclusionOverrides(t *testing
 	}
 	for _, sdkStruct := range []string{"ons.NotificationTopic", "ons.NotificationTopicSummary"} {
 		mapping := topicByStruct[sdkStruct]
-		if !mapping.Exclude {
-			t.Fatalf("%s Exclude = false, want true", sdkStruct)
+		if mapping.Exclude {
+			t.Fatalf("%s Exclude = true, want generated status coverage", sdkStruct)
 		}
-		if mapping.Reason == "" {
-			t.Fatalf("%s Reason = %q, want non-empty exclusion reason", sdkStruct, mapping.Reason)
+		if mapping.Reason != "" || mapping.APISurface != "status" {
+			t.Fatalf("%s mapping = %+v, want included status mapping", sdkStruct, mapping)
 		}
 	}
 	if topicByStruct["ons.CreateTopicDetails"].Exclude {

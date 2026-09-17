@@ -1,0 +1,20 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: stackmonitoring
+slug: metricextension
+kind: MetricExtension
+archetype: generated-service-manager
+states: [active, terminating]
+repoAuthored:
+  providerLifecycle:
+    deletePending: []
+  listLookup:
+    filters: [compartmentId, resourceType, name, id]
+    matchRule: exact compartment, resourceType, and name match; duplicate matches fail
+  mutation:
+    mutable: [displayName, description, collectionRecurrences, metricList, queryProperties]
+    forceNew: [name, resourceType, compartmentId]
+  followUp: {create: read-after-write, update: read-after-write, delete: confirm-delete}
+notes:
+  - ACTIVE, DRAFT, and PUBLISHED are accepted stable states; DELETED confirms deletion.
+  - Query-property discriminators select the concrete collection-method SDK model.

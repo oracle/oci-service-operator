@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "dataintegration",
+  "slug": "copyobjectrequest",
+  "kind": "CopyObjectRequest",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_dataintegration_copyobjectrequest",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateCopyObjectRequest",
+        "requestType": "dataintegration.CreateCopyObjectRequestRequest",
+        "responseType": "dataintegration.CreateCopyObjectRequestResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetCopyObjectRequest",
+        "requestType": "dataintegration.GetCopyObjectRequestRequest",
+        "responseType": "dataintegration.GetCopyObjectRequestResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListCopyObjectRequest",
+        "requestType": "dataintegration.ListCopyObjectRequestRequest",
+        "responseType": "dataintegration.ListCopyObjectRequestResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateCopyObjectRequest",
+        "requestType": "dataintegration.UpdateCopyObjectRequestRequest",
+        "responseType": "dataintegration.UpdateCopyObjectRequestResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteCopyObjectRequest",
+        "requestType": "dataintegration.DeleteCopyObjectRequestRequest",
+        "responseType": "dataintegration.DeleteCopyObjectRequestResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_dataintegration_copyobjectrequest",
+    "collectionField": "copyobjectrequest",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/dataintegration/copyobjectrequest/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/dataintegration/copyobjectrequest/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for dataintegration/copyobjectrequest; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

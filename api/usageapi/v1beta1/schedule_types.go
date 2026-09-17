@@ -40,7 +40,7 @@ type ScheduleSpec struct {
 	// +kubebuilder:validation:Optional
 	SavedReportId string `json:"savedReportId,omitempty"`
 	// +kubebuilder:validation:Optional
-	QueryProperties ScheduleQueryProperties `json:"queryProperties,omitempty"`
+	QueryProperties ScheduleQueryProperties `json:"queryProperties,omitempty,omitzero"`
 	// Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
 	// See Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"bar-key": "value"}`
 	// +kubebuilder:validation:Optional
@@ -149,7 +149,7 @@ type ScheduleQueryProperties struct {
 	// +kubebuilder:validation:Optional
 	GroupByTag []ScheduleQueryPropertiesGroupByTag `json:"groupByTag,omitempty"`
 	// +kubebuilder:validation:Optional
-	Filter ScheduleQueryPropertiesFilter `json:"filter,omitempty"`
+	Filter ScheduleQueryPropertiesFilter `json:"filter,omitempty,omitzero"`
 	// The depth level of the compartment.
 	// +kubebuilder:validation:Optional
 	CompartmentDepth float32 `json:"compartmentDepth,omitempty"`

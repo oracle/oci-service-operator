@@ -1,0 +1,150 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "goldengate",
+  "slug": "pipeline",
+  "kind": "Pipeline",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_golden_gate_pipeline",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreatePipeline",
+        "requestType": "goldengate.CreatePipelineRequest",
+        "responseType": "goldengate.CreatePipelineResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetPipeline",
+        "requestType": "goldengate.GetPipelineRequest",
+        "responseType": "goldengate.GetPipelineResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListPipelines",
+        "requestType": "goldengate.ListPipelinesRequest",
+        "responseType": "goldengate.ListPipelinesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdatePipeline",
+        "requestType": "goldengate.UpdatePipelineRequest",
+        "responseType": "goldengate.UpdatePipelineResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeletePipeline",
+        "requestType": "goldengate.DeletePipelineRequest",
+        "responseType": "goldengate.DeletePipelineResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "description",
+      "freeformTags",
+      "definedTags",
+      "subnetId",
+      "displayName",
+      "licenseModel",
+      "processOptions",
+      "mappingRules"
+    ],
+    "forceNew": [
+      "jsonData",
+      "locks",
+      "compartmentId",
+      "sourceConnectionDetails",
+      "targetConnectionDetails",
+      "recipeType"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "Pipeline",
+        "action": "CreatePipeline"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "Pipeline",
+        "action": "UpdatePipeline"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "Pipeline",
+        "action": "DeletePipeline"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "unavailable",
+    "collectionField": "Items",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartmentId",
+      "lifecycleState",
+      "lifecycleSubState",
+      "displayName",
+      "opc-request-id"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/goldengate/pipeline/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/goldengate/pipeline/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Terraform provider formal-import could not resolve oci_golden_gate_pipeline; the vendored SDK, generated runtime, and package-owned typed OCI fixtures define this reviewed contract."
+  ]
+}

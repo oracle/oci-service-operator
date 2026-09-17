@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "stackmonitoring",
+  "slug": "maintenancewindow",
+  "kind": "MaintenanceWindow",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_stack_monitoring_maintenance_window",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateMaintenanceWindow",
+        "requestType": "stackmonitoring.CreateMaintenanceWindowRequest",
+        "responseType": "stackmonitoring.CreateMaintenanceWindowResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetMaintenanceWindow",
+        "requestType": "stackmonitoring.GetMaintenanceWindowRequest",
+        "responseType": "stackmonitoring.GetMaintenanceWindowResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateMaintenanceWindow",
+        "requestType": "stackmonitoring.UpdateMaintenanceWindowRequest",
+        "responseType": "stackmonitoring.UpdateMaintenanceWindowResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteMaintenanceWindow",
+        "requestType": "stackmonitoring.DeleteMaintenanceWindowRequest",
+        "responseType": "stackmonitoring.DeleteMaintenanceWindowResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "NEEDS_ATTENTION"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "defined_tags",
+      "description",
+      "freeform_tags",
+      "resources.resource_id",
+      "schedule.maintenance_window_duration",
+      "schedule.maintenance_window_recurrences",
+      "schedule.schedule_type",
+      "schedule.time_maintenance_window_end",
+      "schedule.time_maintenance_window_start"
+    ],
+    "forceNew": [
+      "compartment_id",
+      "name",
+      "resources.are_members_included"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/stackmonitoring/maintenancewindow/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/stackmonitoring/maintenancewindow/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from the pinned terraform-provider-oci source revision."
+  ]
+}

@@ -56,6 +56,9 @@ spec:
           spec:
             description: FunctionLibrarySpec defines the desired state of FunctionLibrary.
             properties:
+              aggregatorKey:
+                description: The aggregator key required by the collection lookup.
+                type: string
               categoryName:
                 description: The category name.
                 type: string
@@ -111,10 +114,16 @@ spec:
                     description: The registry version.
                     type: integer
                 type: object
+              workspaceId:
+                description: The OCID of the Data Integration workspace containing
+                  this resource.
+                type: string
             required:
+            - aggregatorKey
             - identifier
             - name
             - registryMetadata
+            - workspaceId
             type: object
           status:
             description: FunctionLibraryStatus defines the observed state of FunctionLibrary.

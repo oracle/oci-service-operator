@@ -15,13 +15,16 @@ gaps: []
   `pkg/servicemanager/ailanguage/project/project_runtime_client.go` rather than
   the generated helper/read-after-write baseline in
   `pkg/servicemanager/ailanguage/project/project_serviceclient.go`.
-- Create, update, and delete are work-request-backed. The runtime stores the
+- Create and delete are work-request-backed. The runtime stores the
   in-flight OCI work request in `status.async.current`, normalizes AI Language
   `OperationStatus*` values (`ACCEPTED`, `IN_PROGRESS`, `WAITING`,
   `CANCELING`, `SUCCEEDED`, `CANCELED`, and `NEEDS_ATTENTION`) into shared
   async classes, normalizes work-request `OperationType*` values into
   create/update/delete phases, and resumes reconciliation from that shared
-  async tracker across requeues.
+  async tracker across requeues. The live `UpdateProject` endpoint may instead
+  return synchronous HTTP 200 without `opc-work-request-id`; that path rereads
+  the Project and uses a lifecycle-sourced pending update until mutable fields
+  converge, while retaining work-request handling when OCI supplies a header.
 - Create-time identity recovery is work-request-backed. The runtime records the
   create response Project OCID when OCI returns it, otherwise resolves the
   created Project OCID from work-request resources before reading the Project
@@ -63,7 +66,8 @@ gaps: []
 ## Authority and scoped cleanup
 
 - `formal/controllers/ailanguage/project/*` is the authoritative formal path
-  for the promoted `ailanguage/Project` work-request-backed runtime contract.
+  for the promoted `ailanguage/Project` asynchronous-create/delete and
+  synchronous-update runtime contract.
 - `pkg/servicemanager/ailanguage/project/project_runtime_client.go` and
   `pkg/servicemanager/ailanguage/project/project_runtime_client_test.go` own
   the live runtime behavior.

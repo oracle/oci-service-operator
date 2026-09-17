@@ -1,0 +1,97 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: goldengate
+slug: deployment
+kind: Deployment
+archetype: generated-service-manager
+states:
+- provisioning
+- active
+- updating
+- terminating
+repoAuthored:
+  operations:
+    create:
+    - CreateDeployment
+    update:
+    - UpdateDeployment
+    delete:
+    - DeleteDeployment
+  providerLifecycle:
+    createPending:
+    - CREATING
+    updatePending:
+    - UPDATING
+    deletePending:
+    - DELETING
+  listLookup:
+    filters:
+    - compartmentId
+    - supportedConnectionType
+    - assignedConnectionId
+    - assignableConnectionId
+    - lifecycleState
+    - lifecycleSubState
+    - deploymentType
+    - displayName
+    matchRule: exact declared filters match within the resource scope; duplicate matches
+      fail
+  mutation:
+    mutable:
+    - displayName
+    - subnetId
+    - licenseModel
+    - isByolCpuCoreCountLimitEnabled
+    - byolCpuCoreCountLimit
+    - environmentType
+    - description
+    - placements
+    - freeformTags
+    - definedTags
+    - loadBalancerSubnetId
+    - fqdn
+    - nsgIds
+    - isPublic
+    - cpuCoreCount
+    - isAutoScalingEnabled
+    - securityAttributes
+    - oggData
+    - maintenanceWindow
+    - maintenanceConfiguration
+    - backupSchedule
+    forceNew:
+    - compartmentId
+    - sourceDeploymentId
+    - availabilityDomain
+    - faultDomain
+    - locks
+    - deploymentBackupId
+    - deploymentType
+    - subscriptionId
+    - clusterPlacementGroupId
+  hooks:
+    create:
+    - helper: tfresource.CreateResource
+    - helper: tfresource.WaitForWorkRequestWithErrorHandling
+      entityType: Deployment
+      action: CreateDeployment
+    update:
+    - helper: tfresource.UpdateResource
+    - helper: tfresource.WaitForWorkRequestWithErrorHandling
+      entityType: Deployment
+      action: UpdateDeployment
+    delete:
+    - helper: tfresource.DeleteResource
+    - helper: tfresource.WaitForWorkRequestWithErrorHandling
+      entityType: Deployment
+      action: DeleteDeployment
+  followUp:
+    create: GetWorkRequest -> read-after-write
+    update: GetWorkRequest -> read-after-write
+    delete: GetWorkRequest -> confirm-delete
+notes:
+- The generated service manager uses the reviewed CRUD request, response, lifecycle,
+  and status projection contract.
+- Work-request phases are declared per operation from the vendored SDK response surface.
+- Secret side effects are none and finalizer ownership is retained until confirmed
+  deletion.

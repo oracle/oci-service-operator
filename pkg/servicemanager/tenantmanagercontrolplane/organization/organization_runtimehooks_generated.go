@@ -104,7 +104,7 @@ func newOrganizationRuntimeSemantics() *generatedruntime.Semantics {
 		Unsupported:         []generatedruntime.UnsupportedSemantic{},
 	}
 }
-func newOrganizationDefaultRuntimeHooks(sdkClient tenantmanagercontrolplanesdk.OrganizationClient) OrganizationRuntimeHooks {
+func newOrganizationDefaultRuntimeHooks(sdkClient OrganizationSDKClients) OrganizationRuntimeHooks {
 	return OrganizationRuntimeHooks{
 		Semantics:       newOrganizationRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*tenantmanagercontrolplanev1beta1.Organization]{},
@@ -112,31 +112,43 @@ func newOrganizationDefaultRuntimeHooks(sdkClient tenantmanagercontrolplanesdk.O
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*tenantmanagercontrolplanev1beta1.Organization]{},
 		StatusHooks:     generatedruntime.StatusHooks[*tenantmanagercontrolplanev1beta1.Organization]{},
 		ParityHooks:     generatedruntime.ParityHooks[*tenantmanagercontrolplanev1beta1.Organization]{},
-		Async:           generatedruntime.AsyncHooks[*tenantmanagercontrolplanev1beta1.Organization]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*tenantmanagercontrolplanev1beta1.Organization]{},
+		Async: generatedruntime.AsyncHooks[*tenantmanagercontrolplanev1beta1.Organization]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := tenantmanagercontrolplanesdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.workRequestClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*tenantmanagercontrolplanev1beta1.Organization]{},
 		Get: runtimeOperationHooks[tenantmanagercontrolplanesdk.GetOrganizationRequest, tenantmanagercontrolplanesdk.GetOrganizationResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OrganizationId", RequestName: "organizationId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request tenantmanagercontrolplanesdk.GetOrganizationRequest) (tenantmanagercontrolplanesdk.GetOrganizationResponse, error) {
-				return sdkClient.GetOrganization(ctx, request)
+				return sdkClient.organizationClient.GetOrganization(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[tenantmanagercontrolplanesdk.ListOrganizationsRequest, tenantmanagercontrolplanesdk.ListOrganizationsResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request tenantmanagercontrolplanesdk.ListOrganizationsRequest) (tenantmanagercontrolplanesdk.ListOrganizationsResponse, error) {
-				return sdkClient.ListOrganizations(ctx, request)
+				return sdkClient.organizationClient.ListOrganizations(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[tenantmanagercontrolplanesdk.UpdateOrganizationRequest, tenantmanagercontrolplanesdk.UpdateOrganizationResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OrganizationId", RequestName: "organizationId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateOrganizationDetails", RequestName: "UpdateOrganizationDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request tenantmanagercontrolplanesdk.UpdateOrganizationRequest) (tenantmanagercontrolplanesdk.UpdateOrganizationResponse, error) {
-				return sdkClient.UpdateOrganization(ctx, request)
+				return sdkClient.organizationClient.UpdateOrganization(ctx, request)
 			},
 		},
 		WrapGeneratedClient: []func(OrganizationServiceClient) OrganizationServiceClient{},
 	}
 }
 
-func newOrganizationRuntimeHooks(manager *OrganizationServiceManager, sdkClient tenantmanagercontrolplanesdk.OrganizationClient) OrganizationRuntimeHooks {
+func newOrganizationRuntimeHooks(manager *OrganizationServiceManager, sdkClient OrganizationSDKClients) OrganizationRuntimeHooks {
 	hooks := newOrganizationDefaultRuntimeHooks(sdkClient)
 	for _, mutator := range organizationRuntimeHooksMutators {
 		mutator(manager, &hooks)
@@ -149,10 +161,19 @@ func buildOrganizationGeneratedRuntimeConfig(
 	hooks OrganizationRuntimeHooks,
 ) generatedruntime.Config[*tenantmanagercontrolplanev1beta1.Organization] {
 	return generatedruntime.Config[*tenantmanagercontrolplanev1beta1.Organization]{
-		Kind:            "Organization",
-		SDKName:         "Organization",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "Organization",
+		SDKName:   "Organization",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"update"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

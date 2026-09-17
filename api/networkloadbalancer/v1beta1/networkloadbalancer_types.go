@@ -223,7 +223,7 @@ type NetworkLoadBalancerBackendSetsHealthChecker struct {
 	// +kubebuilder:validation:Optional
 	ResponseData string `json:"responseData,omitempty"`
 	// +kubebuilder:validation:Optional
-	Dns NetworkLoadBalancerBackendSetsHealthCheckerDns `json:"dns,omitempty"`
+	Dns NetworkLoadBalancerBackendSetsHealthCheckerDns `json:"dns,omitempty,omitzero"`
 }
 
 // NetworkLoadBalancerBackendSetsBackend defines nested fields for NetworkLoadBalancer.BackendSets.Backend.

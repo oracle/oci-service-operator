@@ -66,6 +66,7 @@ func applyRuleSetRuntimeHooks(hooks *RuleSetRuntimeHooks) {
 		return buildRuleSetUpdateBody(resource, currentResponse)
 	}
 	hooks.Identity = generatedruntime.IdentityHooks[*loadbalancerv1beta1.RuleSet]{
+		RecordBeforeCreateFollowUp: true,
 		Resolve: func(resource *loadbalancerv1beta1.RuleSet) (any, error) {
 			return resolveRuleSetIdentity(resource)
 		},
@@ -77,6 +78,9 @@ func applyRuleSetRuntimeHooks(hooks *RuleSetRuntimeHooks) {
 		},
 		LookupExisting: func(context.Context, *loadbalancerv1beta1.RuleSet, any) (any, error) {
 			return nil, nil
+		},
+		SeedSyntheticTrackedID: func(resource *loadbalancerv1beta1.RuleSet, identity any) func() {
+			return seedSyntheticRuleSetID(resource, identity.(ruleSetIdentity).ruleSetName)
 		},
 	}
 	hooks.Create.Fields = ruleSetCreateFields()
@@ -223,20 +227,20 @@ func ruleSetDeleteFields() []generatedruntime.RequestField {
 
 func ruleSetLoadBalancerIDField() generatedruntime.RequestField {
 	return generatedruntime.RequestField{
-		FieldName:        "LoadBalancerId",
-		RequestName:      "loadBalancerId",
-		Contribution:     "path",
-		PreferResourceID: true,
-		LookupPaths:      []string{"status.status.ocid"},
+		FieldName:    "LoadBalancerId",
+		RequestName:  "loadBalancerId",
+		Contribution: "path",
+		LookupPaths:  []string{"status.loadBalancerId", "spec.loadBalancerId"},
 	}
 }
 
 func ruleSetNameField() generatedruntime.RequestField {
 	return generatedruntime.RequestField{
-		FieldName:    "RuleSetName",
-		RequestName:  "ruleSetName",
-		Contribution: "path",
-		LookupPaths:  []string{"status.name", "spec.name", "name"},
+		FieldName:        "RuleSetName",
+		RequestName:      "ruleSetName",
+		Contribution:     "path",
+		PreferResourceID: true,
+		LookupPaths:      []string{"status.name", "spec.name", "name"},
 	}
 }
 
@@ -594,23 +598,27 @@ func resolveRuleSetIdentity(resource *loadbalancerv1beta1.RuleSet) (ruleSetIdent
 		return ruleSetIdentity{}, fmt.Errorf("resolve RuleSet identity: resource is nil")
 	}
 
-	statusLoadBalancerID := strings.TrimSpace(string(resource.Status.OsokStatus.Ocid))
+	statusLoadBalancerID := strings.TrimSpace(resource.Status.LoadBalancerId)
+	specLoadBalancerID := strings.TrimSpace(resource.Spec.LoadBalancerId)
 	annotationLoadBalancerID := strings.TrimSpace(resource.Annotations[ruleSetLoadBalancerIDAnnotation])
-	if statusLoadBalancerID != "" && annotationLoadBalancerID != "" && statusLoadBalancerID != annotationLoadBalancerID {
+	if specLoadBalancerID != "" && annotationLoadBalancerID != "" && specLoadBalancerID != annotationLoadBalancerID {
+		return ruleSetIdentity{}, fmt.Errorf("resolve RuleSet identity: spec.loadBalancerId %q conflicts with %s annotation %q", specLoadBalancerID, ruleSetLoadBalancerIDAnnotation, annotationLoadBalancerID)
+	}
+	desiredLoadBalancerID := firstNonEmptyTrim(specLoadBalancerID, annotationLoadBalancerID)
+	if statusLoadBalancerID != "" && desiredLoadBalancerID != "" && statusLoadBalancerID != desiredLoadBalancerID {
 		return ruleSetIdentity{}, fmt.Errorf(
-			"resolve RuleSet identity: %s changed from recorded loadBalancerId %q to %q",
-			ruleSetLoadBalancerIDAnnotation,
+			"resolve RuleSet identity: loadBalancerId changed from recorded value %q to %q",
 			statusLoadBalancerID,
-			annotationLoadBalancerID,
+			desiredLoadBalancerID,
 		)
 	}
 
 	identity := ruleSetIdentity{
-		loadBalancerID: firstNonEmptyTrim(statusLoadBalancerID, annotationLoadBalancerID),
+		loadBalancerID: firstNonEmptyTrim(statusLoadBalancerID, desiredLoadBalancerID),
 		ruleSetName:    firstNonEmptyTrim(resource.Status.Name, resource.Spec.Name, resource.Name),
 	}
 	if identity.loadBalancerID == "" {
-		return ruleSetIdentity{}, fmt.Errorf("resolve RuleSet identity: %s annotation is required", ruleSetLoadBalancerIDAnnotation)
+		return ruleSetIdentity{}, fmt.Errorf("resolve RuleSet identity: spec.loadBalancerId or %s annotation is required", ruleSetLoadBalancerIDAnnotation)
 	}
 	if identity.ruleSetName == "" {
 		return ruleSetIdentity{}, fmt.Errorf("resolve RuleSet identity: rule set name is empty")
@@ -622,14 +630,19 @@ func recordRuleSetPathIdentity(resource *loadbalancerv1beta1.RuleSet, identity r
 	if resource == nil {
 		return
 	}
+	resource.Status.LoadBalancerId = identity.loadBalancerID
 	resource.Status.Name = identity.ruleSetName
-	// RuleSet has no child OCID in the Load Balancer API; the parent loadBalancerId
-	// is the stable path identity used for Get, Update, and Delete.
-	resource.Status.OsokStatus.Ocid = shared.OCID(identity.loadBalancerID)
 }
 
 func recordRuleSetTrackedIdentity(resource *loadbalancerv1beta1.RuleSet, identity ruleSetIdentity) {
 	recordRuleSetPathIdentity(resource, identity)
+	resource.Status.OsokStatus.Ocid = shared.OCID(identity.ruleSetName)
+}
+
+func seedSyntheticRuleSetID(resource *loadbalancerv1beta1.RuleSet, name string) func() {
+	previous := resource.Status.OsokStatus.Ocid
+	resource.Status.OsokStatus.Ocid = shared.OCID(name)
+	return func() { resource.Status.OsokStatus.Ocid = previous }
 }
 
 func copyStringSlice(values []string) []string {

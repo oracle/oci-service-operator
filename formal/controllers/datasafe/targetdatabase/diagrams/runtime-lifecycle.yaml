@@ -1,0 +1,105 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: datasafe
+slug: targetdatabase
+kind: TargetDatabase
+archetype: generated-service-manager
+states:
+- provisioning
+- active
+- updating
+- terminating
+repoAuthored:
+  operations:
+    create:
+    - CreateTargetDatabase
+    update:
+    - UpdateTargetDatabase
+    delete:
+    - DeleteTargetDatabase
+  providerLifecycle:
+    createPending:
+    - CREATING
+    updatePending: []
+    deletePending:
+    - DELETING
+  listLookup:
+    filters:
+    - accessLevel
+    - associatedResourceId
+    - compartmentId
+    - compartmentIdInSubtree
+    - databaseType
+    - displayName
+    - infrastructureType
+    - state
+    - targetDatabaseId
+    matchRule: exact declared filters match within the resource scope; duplicate matches
+      fail
+  mutation:
+    mutable:
+    - compartmentId
+    - connectionOption.connectionType
+    - connectionOption.datasafePrivateEndpointId
+    - connectionOption.onPremConnectorId
+    - credentials.password
+    - credentials.userName
+    - databaseDetails.autonomousDatabaseId
+    - databaseDetails.databaseType
+    - databaseDetails.dbSystemId
+    - databaseDetails.infrastructureType
+    - databaseDetails.instanceId
+    - databaseDetails.ipAddresses
+    - databaseDetails.listenerPort
+    - databaseDetails.pluggableDatabaseId
+    - databaseDetails.serviceName
+    - databaseDetails.vmClusterId
+    - definedTags
+    - description
+    - displayName
+    - freeformTags
+    - tlsConfig.certificateStoreType
+    - tlsConfig.keyStoreContent
+    - tlsConfig.status
+    - tlsConfig.storePassword
+    - tlsConfig.trustStoreContent
+    forceNew:
+    - peerTargetDatabaseDetails
+    - peerTargetDatabaseDetails.databaseDetails
+    - peerTargetDatabaseDetails.databaseDetails.autonomousDatabaseId
+    - peerTargetDatabaseDetails.databaseDetails.databaseType
+    - peerTargetDatabaseDetails.databaseDetails.dbSystemId
+    - peerTargetDatabaseDetails.databaseDetails.infrastructureType
+    - peerTargetDatabaseDetails.databaseDetails.instanceId
+    - peerTargetDatabaseDetails.databaseDetails.ipAddresses
+    - peerTargetDatabaseDetails.databaseDetails.listenerPort
+    - peerTargetDatabaseDetails.databaseDetails.pluggableDatabaseId
+    - peerTargetDatabaseDetails.databaseDetails.serviceName
+    - peerTargetDatabaseDetails.databaseDetails.vmClusterId
+    - peerTargetDatabaseDetails.dataguardAssociationId
+    - peerTargetDatabaseDetails.description
+    - peerTargetDatabaseDetails.displayName
+    - peerTargetDatabaseDetails.tlsConfig
+    - peerTargetDatabaseDetails.tlsConfig.certificateStoreType
+    - peerTargetDatabaseDetails.tlsConfig.keyStoreContent
+    - peerTargetDatabaseDetails.tlsConfig.status
+    - peerTargetDatabaseDetails.tlsConfig.storePassword
+    - peerTargetDatabaseDetails.tlsConfig.trustStoreContent
+  hooks:
+    create:
+    - helper: tfresource.CreateResource
+    update:
+    - helper: tfresource.UpdateResource
+    - helper: tfresource.WaitForUpdatedState
+    delete:
+    - helper: tfresource.DeleteResource
+  followUp:
+    create: GetWorkRequest -> read-after-write
+    update: GetWorkRequest -> read-after-write
+    delete: GetWorkRequest -> confirm-delete
+notes:
+- The generated service manager uses the reviewed CRUD request, response, lifecycle,
+  and status projection contract.
+- Work-request phases are declared per operation from the vendored SDK response surface.
+- Secret side effects are none and finalizer ownership is retained until confirmed
+  deletion.

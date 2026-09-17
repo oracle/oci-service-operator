@@ -1,0 +1,70 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: datasafe
+slug: sensitivecolumn
+kind: SensitiveColumn
+archetype: generated-service-manager
+states:
+- provisioning
+- active
+- updating
+- terminating
+repoAuthored:
+  operations:
+    update:
+    - UpdateSensitiveColumn
+  providerLifecycle:
+    createPending:
+    - CREATING
+    updatePending:
+    - UPDATING
+    deletePending:
+    - DELETING
+  listLookup:
+    filters:
+    - sensitiveDataModelId
+    - schemaName
+    - objectName
+    - columnName
+    matchRule: exact sensitiveDataModelId, schemaName, objectName, columnName match
+      within the resource scope; duplicate matches fail
+  mutation:
+    mutable:
+    - dataType
+    - status
+    - sensitiveTypeId
+    - parentColumnKeys
+    - relationType
+    - appDefinedChildColumnKeys
+    - dbDefinedChildColumnKeys
+    forceNew:
+    - sensitiveDataModelId
+    - schemaName
+    - objectName
+    - columnName
+    - appName
+    - objectType
+  hooks:
+    create:
+    - helper: tfresource.CreateResource
+      entityType: SensitiveColumn
+      action: CreateSensitiveColumn
+    update:
+    - helper: tfresource.UpdateResource
+      entityType: SensitiveColumn
+      action: UpdateSensitiveColumn
+    delete:
+    - helper: tfresource.DeleteResource
+      entityType: SensitiveColumn
+      action: DeleteSensitiveColumn
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+- The production runtime uses the declared work-request phases and service-local async
+  adapter.
+- Lifecycle success and pending states mirror the production service-manager semantics.
+- Status projection is required, Secret side effects are none, and the finalizer policy
+  is retain-until-confirmed-delete.
+- Delete ownership is retained until a terminal lifecycle state or confirmed absence.

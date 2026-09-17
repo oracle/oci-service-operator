@@ -217,10 +217,17 @@ func certificateRuntimeSemantics() *generatedruntime.Semantics {
 		},
 		Mutation: generatedruntime.MutationSemantics{
 			UpdateCandidate: []string{"compartmentId", "displayName", "freeformTags", "definedTags"},
-			Mutable:         []string{"compartmentId", "displayName", "freeformTags", "definedTags"},
-			ForceNew: []string{
+			// The final two fields are listed here only to prevent OCI's normalized
+			// certificate readback from being rejected before the custom check.
+			// validateCertificateCreateOnlyDrift enforces replacement for them and
+			// privateKeyData through the persisted create-only fingerprint, and the
+			// update builder never sends any of those create-only fields.
+			Mutable: []string{
+				"compartmentId",
+				"displayName",
+				"freeformTags",
+				"definedTags",
 				"certificateData",
-				"privateKeyData",
 				"isTrustVerificationDisabled",
 			},
 			ConflictsWith: map[string][]string{},

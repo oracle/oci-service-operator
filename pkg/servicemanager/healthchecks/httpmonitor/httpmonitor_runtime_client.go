@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/oracle/oci-go-sdk/v65/common"
 	healthcheckssdk "github.com/oracle/oci-go-sdk/v65/healthchecks"
 	healthchecksv1beta1 "github.com/oracle/oci-service-operator/api/healthchecks/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/errorutil"
@@ -42,66 +43,16 @@ func applyHttpMonitorRuntimeHooks(hooks *HttpMonitorRuntimeHooks) {
 		return
 	}
 
-	hooks.Semantics = newHttpMonitorRuntimeSemantics()
 	hooks.List.Fields = httpMonitorListFields()
 	hooks.List.Call = paginatedHttpMonitorListCall(hooks.List.Call)
 	hooks.DeleteHooks.HandleError = handleHttpMonitorDeleteError
 	hooks.DeleteHooks.ApplyOutcome = applyHttpMonitorDeleteOutcome
 	if hooks.Get.Call != nil {
 		get := hooks.Get.Call
+		list := hooks.List.Call
 		hooks.WrapGeneratedClient = append(hooks.WrapGeneratedClient, func(delegate HttpMonitorServiceClient) HttpMonitorServiceClient {
-			return httpMonitorDeleteGuardClient{delegate: delegate, get: get}
+			return httpMonitorDeleteGuardClient{delegate: delegate, get: get, list: list}
 		})
-	}
-}
-
-func newHttpMonitorRuntimeSemantics() *generatedruntime.Semantics {
-	return &generatedruntime.Semantics{
-		FormalService:       "healthchecks",
-		FormalSlug:          "httpmonitor",
-		StatusProjection:    "required",
-		SecretSideEffects:   "none",
-		FinalizerPolicy:     "retain-until-confirmed-delete",
-		Lifecycle:           generatedruntime.LifecycleSemantics{},
-		Delete:              generatedruntime.DeleteSemantics{Policy: "best-effort"},
-		List:                &generatedruntime.ListSemantics{ResponseItemsField: "Items", MatchFields: []string{"compartmentId", "displayName", "protocol", "id"}},
-		Mutation:            httpMonitorMutationSemantics(),
-		Hooks:               httpMonitorHookSet(),
-		CreateFollowUp:      generatedruntime.FollowUpSemantics{Strategy: "read-after-write", Hooks: []generatedruntime.Hook{{Helper: "tfresource.CreateResource"}}},
-		UpdateFollowUp:      generatedruntime.FollowUpSemantics{Strategy: "read-after-write", Hooks: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource"}}},
-		DeleteFollowUp:      generatedruntime.FollowUpSemantics{Strategy: "confirm-delete", Hooks: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource"}}},
-		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
-		Unsupported:         []generatedruntime.UnsupportedSemantic{},
-	}
-}
-
-func httpMonitorMutationSemantics() generatedruntime.MutationSemantics {
-	return generatedruntime.MutationSemantics{
-		Mutable: []string{
-			"targets",
-			"vantagePointNames",
-			"port",
-			"timeoutInSeconds",
-			"protocol",
-			"method",
-			"path",
-			"headers",
-			"displayName",
-			"intervalInSeconds",
-			"isEnabled",
-			"freeformTags",
-			"definedTags",
-		},
-		ForceNew:      []string{"compartmentId"},
-		ConflictsWith: map[string][]string{},
-	}
-}
-
-func httpMonitorHookSet() generatedruntime.HookSet {
-	return generatedruntime.HookSet{
-		Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource"}},
-		Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource"}},
-		Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource"}},
 	}
 }
 
@@ -247,6 +198,7 @@ func markHttpMonitorTerminating(resource *healthchecksv1beta1.HttpMonitor, messa
 type httpMonitorDeleteGuardClient struct {
 	delegate HttpMonitorServiceClient
 	get      func(context.Context, healthcheckssdk.GetHttpMonitorRequest) (healthcheckssdk.GetHttpMonitorResponse, error)
+	list     func(context.Context, healthcheckssdk.ListHttpMonitorsRequest) (healthcheckssdk.ListHttpMonitorsResponse, error)
 }
 
 func (c httpMonitorDeleteGuardClient) CreateOrUpdate(ctx context.Context, resource *healthchecksv1beta1.HttpMonitor, req ctrl.Request) (servicemanager.OSOKResponse, error) {
@@ -261,9 +213,50 @@ func (c httpMonitorDeleteGuardClient) Delete(ctx context.Context, resource *heal
 
 	_, err := c.get(ctx, healthcheckssdk.GetHttpMonitorRequest{MonitorId: &currentID})
 	if err != nil && errorutil.ClassifyDeleteError(err).IsAuthShapedNotFound() {
-		return false, handleHttpMonitorDeleteError(resource, err)
+		return c.confirmAuthShapedAbsence(ctx, resource, currentID, err)
 	}
-	return c.delegate.Delete(ctx, resource)
+	deleted, err := c.delegate.Delete(ctx, resource)
+	if err != nil && errorutil.ClassifyDeleteError(err).IsAuthShapedNotFound() {
+		return c.confirmAuthShapedAbsence(ctx, resource, currentID, err)
+	}
+	return deleted, err
+}
+
+func (c httpMonitorDeleteGuardClient) confirmAuthShapedAbsence(
+	ctx context.Context,
+	resource *healthchecksv1beta1.HttpMonitor,
+	currentID string,
+	authShapedErr error,
+) (bool, error) {
+	servicemanager.RecordErrorOpcRequestID(&resource.Status.OsokStatus, authShapedErr)
+	if c.list == nil {
+		return false, handleHttpMonitorDeleteError(resource, authShapedErr)
+	}
+	response, err := c.list(ctx, healthcheckssdk.ListHttpMonitorsRequest{
+		CompartmentId: common.String(resource.Spec.CompartmentId),
+		DisplayName:   common.String(resource.Spec.DisplayName),
+	})
+	if err != nil {
+		return false, fmt.Errorf("confirm HttpMonitor deletion by list: %w", err)
+	}
+	for _, item := range response.Items {
+		if httpMonitorStringValue(item.Id) == currentID {
+			return false, handleHttpMonitorDeleteError(resource, authShapedErr)
+		}
+	}
+	markHttpMonitorDeletedAfterAbsence(resource)
+	return true, nil
+}
+
+func markHttpMonitorDeletedAfterAbsence(resource *healthchecksv1beta1.HttpMonitor) {
+	now := metav1.Now()
+	status := &resource.Status.OsokStatus
+	status.DeletedAt = &now
+	status.UpdatedAt = &now
+	status.Message = "OCI resource deletion confirmed by scoped list absence"
+	status.Reason = string(shared.Terminating)
+	servicemanager.ClearAsyncOperation(status)
+	*status = util.UpdateOSOKStatusCondition(*status, shared.Terminating, corev1.ConditionTrue, "", status.Message, loggerutil.OSOKLogger{})
 }
 
 func httpMonitorTrackedID(resource *healthchecksv1beta1.HttpMonitor) string {
@@ -289,6 +282,7 @@ func newHttpMonitorServiceClientWithOCIClient(log loggerutil.OSOKLogger, client 
 
 func newHttpMonitorRuntimeHooksWithOCIClient(client httpMonitorOCIClient) HttpMonitorRuntimeHooks {
 	return HttpMonitorRuntimeHooks{
+		Semantics: newHttpMonitorRuntimeSemantics(),
 		Create: runtimeOperationHooks[healthcheckssdk.CreateHttpMonitorRequest, healthcheckssdk.CreateHttpMonitorResponse]{
 			Fields: httpMonitorCreateFields(),
 			Call: func(ctx context.Context, request healthcheckssdk.CreateHttpMonitorRequest) (healthcheckssdk.CreateHttpMonitorResponse, error) {

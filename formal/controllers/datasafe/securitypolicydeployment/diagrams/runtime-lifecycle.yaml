@@ -1,0 +1,64 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: datasafe
+slug: securitypolicydeployment
+kind: SecurityPolicyDeployment
+archetype: generated-service-manager
+states:
+- provisioning
+- active
+- updating
+- terminating
+repoAuthored:
+  operations:
+    create:
+    - CreateSecurityPolicyDeployment
+    update:
+    - UpdateSecurityPolicyDeployment
+    delete:
+    - DeleteSecurityPolicyDeployment
+  providerLifecycle:
+    createPending:
+    - CREATING
+    updatePending: []
+    deletePending:
+    - DELETING
+  listLookup:
+    filters:
+    - accessLevel
+    - compartmentId
+    - compartmentIdInSubtree
+    - displayName
+    - securityPolicyDeploymentId
+    - securityPolicyId
+    - state
+    - targetId
+    - targetType
+    matchRule: exact declared filters match within the resource scope; duplicate matches
+      fail
+  mutation:
+    mutable:
+    - compartmentId
+    - definedTags
+    - deployTrigger
+    - description
+    - displayName
+    - freeformTags
+    - refreshTrigger
+    forceNew:
+    - securityPolicyId
+    - targetId
+    - targetType
+  hooks:
+    delete:
+    - helper: tfresource.DeleteResource
+  followUp:
+    create: GetWorkRequest -> read-after-write
+    update: GetWorkRequest -> read-after-write
+    delete: GetWorkRequest -> confirm-delete
+notes:
+- The generated service manager uses the reviewed CRUD request, response, lifecycle,
+  and status projection contract.
+- Work-request phases are declared per operation from the vendored SDK response surface.
+- Secret side effects are none and finalizer ownership is retained until confirmed
+  deletion.

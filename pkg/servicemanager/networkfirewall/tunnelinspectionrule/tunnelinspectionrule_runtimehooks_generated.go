@@ -66,25 +66,25 @@ func newTunnelInspectionRuleDefaultRuntimeHooks(sdkClient networkfirewallsdk.Net
 			},
 		},
 		Get: runtimeOperationHooks[networkfirewallsdk.GetTunnelInspectionRuleRequest, networkfirewallsdk.GetTunnelInspectionRuleResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "TunnelInspectionRuleName", RequestName: "tunnelInspectionRuleName", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "TunnelInspectionRuleName", RequestName: "tunnelInspectionRuleName", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request networkfirewallsdk.GetTunnelInspectionRuleRequest) (networkfirewallsdk.GetTunnelInspectionRuleResponse, error) {
 				return sdkClient.GetTunnelInspectionRule(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[networkfirewallsdk.ListTunnelInspectionRulesRequest, networkfirewallsdk.ListTunnelInspectionRulesResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: true}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "TunnelInspectionRulePriorityOrder", RequestName: "tunnelInspectionRulePriorityOrder", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "TunnelInspectionRulePriorityOrder", RequestName: "tunnelInspectionRulePriorityOrder", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request networkfirewallsdk.ListTunnelInspectionRulesRequest) (networkfirewallsdk.ListTunnelInspectionRulesResponse, error) {
 				return sdkClient.ListTunnelInspectionRules(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[networkfirewallsdk.UpdateTunnelInspectionRuleRequest, networkfirewallsdk.UpdateTunnelInspectionRuleResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "TunnelInspectionRuleName", RequestName: "tunnelInspectionRuleName", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdateTunnelInspectionRuleDetails", RequestName: "UpdateTunnelInspectionRuleDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "TunnelInspectionRuleName", RequestName: "tunnelInspectionRuleName", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateTunnelInspectionRuleDetails", RequestName: "UpdateTunnelInspectionRuleDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request networkfirewallsdk.UpdateTunnelInspectionRuleRequest) (networkfirewallsdk.UpdateTunnelInspectionRuleResponse, error) {
 				return sdkClient.UpdateTunnelInspectionRule(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[networkfirewallsdk.DeleteTunnelInspectionRuleRequest, networkfirewallsdk.DeleteTunnelInspectionRuleResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "TunnelInspectionRuleName", RequestName: "tunnelInspectionRuleName", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "TunnelInspectionRuleName", RequestName: "tunnelInspectionRuleName", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request networkfirewallsdk.DeleteTunnelInspectionRuleRequest) (networkfirewallsdk.DeleteTunnelInspectionRuleResponse, error) {
 				return sdkClient.DeleteTunnelInspectionRule(ctx, request)
 			},

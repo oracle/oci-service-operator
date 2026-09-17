@@ -39,10 +39,10 @@ type NodePoolSpec struct {
 	NodeImageName string `json:"nodeImageName,omitempty"`
 	// Specify the source to use to launch nodes in the node pool. Currently, image is the only supported source.
 	// +kubebuilder:validation:Optional
-	NodeSourceDetails NodePoolNodeSourceDetails `json:"nodeSourceDetails,omitempty"`
+	NodeSourceDetails NodePoolNodeSourceDetails `json:"nodeSourceDetails,omitempty,omitzero"`
 	// Specify the configuration of the shape to launch nodes in the node pool.
 	// +kubebuilder:validation:Optional
-	NodeShapeConfig NodePoolNodeShapeConfig `json:"nodeShapeConfig,omitempty"`
+	NodeShapeConfig NodePoolNodeShapeConfig `json:"nodeShapeConfig,omitempty,omitzero"`
 	// A list of key/value pairs to add to nodes after they join the Kubernetes cluster.
 	// +kubebuilder:validation:Optional
 	InitialNodeLabels []NodePoolInitialNodeLabel `json:"initialNodeLabels,omitempty"`
@@ -61,7 +61,7 @@ type NodePoolSpec struct {
 	// The configuration of nodes in the node pool. Exactly one of the
 	// subnetIds or nodeConfigDetails properties must be specified.
 	// +kubebuilder:validation:Optional
-	NodeConfigDetails NodePoolNodeConfigDetails `json:"nodeConfigDetails,omitempty"`
+	NodeConfigDetails NodePoolNodeConfigDetails `json:"nodeConfigDetails,omitempty,omitzero"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
 	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
@@ -73,9 +73,9 @@ type NodePoolSpec struct {
 	// +kubebuilder:validation:Optional
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 	// +kubebuilder:validation:Optional
-	NodeEvictionNodePoolSettings NodePoolNodeEvictionNodePoolSettings `json:"nodeEvictionNodePoolSettings,omitempty"`
+	NodeEvictionNodePoolSettings NodePoolNodeEvictionNodePoolSettings `json:"nodeEvictionNodePoolSettings,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	NodePoolCyclingDetails NodePoolCyclingDetails `json:"nodePoolCyclingDetails,omitempty"`
+	NodePoolCyclingDetails NodePoolCyclingDetails `json:"nodePoolCyclingDetails,omitempty,omitzero"`
 }
 
 // NodePoolNodeSourceDetails defines nested fields for NodePool.NodeSourceDetails.
@@ -143,7 +143,7 @@ type NodePoolNodeConfigDetailsPlacementConfig struct {
 	// +kubebuilder:validation:Optional
 	CapacityReservationId string `json:"capacityReservationId,omitempty"`
 	// +kubebuilder:validation:Optional
-	PreemptibleNodeConfig NodePoolNodeConfigDetailsPlacementConfigPreemptibleNodeConfig `json:"preemptibleNodeConfig,omitempty"`
+	PreemptibleNodeConfig NodePoolNodeConfigDetailsPlacementConfigPreemptibleNodeConfig `json:"preemptibleNodeConfig,omitempty,omitzero"`
 	// A list of fault domains in which to place nodes.
 	// +kubebuilder:validation:Optional
 	FaultDomains []string `json:"faultDomains,omitempty"`
@@ -199,7 +199,7 @@ type NodePoolNodeConfigDetails struct {
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 	// The CNI related configuration of pods in the node pool.
 	// +kubebuilder:validation:Optional
-	NodePoolPodNetworkOptionDetails NodePoolNodeConfigDetailsNodePoolPodNetworkOptionDetails `json:"nodePoolPodNetworkOptionDetails,omitempty"`
+	NodePoolPodNetworkOptionDetails NodePoolNodeConfigDetailsNodePoolPodNetworkOptionDetails `json:"nodePoolPodNetworkOptionDetails,omitempty,omitzero"`
 }
 
 // NodePoolNodeEvictionNodePoolSettings defines nested fields for NodePool.NodeEvictionNodePoolSettings.

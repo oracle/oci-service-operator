@@ -50,15 +50,84 @@ func registerSessionRuntimeHooksMutator(mutator SessionRuntimeHooksMutator) {
 	}
 	sessionRuntimeHooksMutators = append(sessionRuntimeHooksMutators, mutator)
 }
+func newSessionRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "bastion",
+		FormalSlug:    "session",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"bastionId", "displayName", "sessionId", "sessionLifecycleState"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"displayName"},
+			ForceNew:      []string{"bastionId", "keyDetails", "keyType", "sessionTtlInSeconds", "targetResourceDetails"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "session", Action: "CREATED"}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "session", Action: "DELETED"}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> GetSession",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "session", Action: "CREATED"}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "session", Action: "DELETED"}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newSessionDefaultRuntimeHooks(sdkClient bastionsdk.BastionClient) SessionRuntimeHooks {
 	return SessionRuntimeHooks{
+		Semantics:       newSessionRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*bastionv1beta1.Session]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*bastionv1beta1.Session]{},
 		StatusHooks:     generatedruntime.StatusHooks[*bastionv1beta1.Session]{},
 		ParityHooks:     generatedruntime.ParityHooks[*bastionv1beta1.Session]{},
-		Async:           generatedruntime.AsyncHooks[*bastionv1beta1.Session]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*bastionv1beta1.Session]{},
+		Async: generatedruntime.AsyncHooks[*bastionv1beta1.Session]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := bastionsdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*bastionv1beta1.Session]{},
 		Create: runtimeOperationHooks[bastionsdk.CreateSessionRequest, bastionsdk.CreateSessionResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateSessionDetails", RequestName: "CreateSessionDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request bastionsdk.CreateSessionRequest) (bastionsdk.CreateSessionResponse, error) {
@@ -106,10 +175,19 @@ func buildSessionGeneratedRuntimeConfig(
 	hooks SessionRuntimeHooks,
 ) generatedruntime.Config[*bastionv1beta1.Session] {
 	return generatedruntime.Config[*bastionv1beta1.Session]{
-		Kind:            "Session",
-		SDKName:         "Session",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "Session",
+		SDKName:   "Session",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

@@ -23,7 +23,7 @@ type TaskValidationSpec struct {
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationParentRef `json:"parentRef,omitempty,omitzero"`
 	// Free form text without any restriction on permitted characters. Name can have letters, numbers, and special characters. The value is editable and is restricted to 1000 characters.
 	// +kubebuilder:validation:Optional
 	Name string `json:"name,omitempty"`
@@ -49,11 +49,11 @@ type TaskValidationSpec struct {
 	// +kubebuilder:validation:Optional
 	Parameters []TaskValidationParameter `json:"parameters,omitempty"`
 	// +kubebuilder:validation:Optional
-	OpConfigValues TaskValidationOpConfigValues `json:"opConfigValues,omitempty"`
+	OpConfigValues TaskValidationOpConfigValues `json:"opConfigValues,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	ConfigProviderDelegate TaskValidationConfigProviderDelegate `json:"configProviderDelegate,omitempty"`
+	ConfigProviderDelegate TaskValidationConfigProviderDelegate `json:"configProviderDelegate,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	Metadata TaskValidationMetadata `json:"metadata,omitempty"`
+	Metadata TaskValidationMetadata `json:"metadata,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
 	ModelType string `json:"modelType,omitempty"`
 	// +kubebuilder:validation:Optional
@@ -120,7 +120,7 @@ type TaskValidationInputPortConfigValues struct {
 	// +kubebuilder:validation:Optional
 	ConfigParamValues map[string]TaskValidationInputPortConfigValuesConfigParamValues `json:"configParamValues,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationInputPortConfigValuesParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationInputPortConfigValuesParentRef `json:"parentRef,omitempty,omitzero"`
 }
 
 // TaskValidationInputPortFieldParentRef defines nested fields for TaskValidation.InputPort.Field.ParentRef.
@@ -171,7 +171,7 @@ type TaskValidationInputPortFieldConfigValues struct {
 	// +kubebuilder:validation:Optional
 	ConfigParamValues map[string]TaskValidationInputPortFieldConfigValuesConfigParamValues `json:"configParamValues,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationInputPortFieldConfigValuesParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationInputPortFieldConfigValuesParentRef `json:"parentRef,omitempty,omitzero"`
 }
 
 // TaskValidationInputPortFieldTypeParentRef defines nested fields for TaskValidation.InputPort.Field.Type.ParentRef.
@@ -222,7 +222,7 @@ type TaskValidationInputPortFieldTypeConfigValues struct {
 	// +kubebuilder:validation:Optional
 	ConfigParamValues map[string]TaskValidationInputPortFieldTypeConfigValuesConfigParamValues `json:"configParamValues,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationInputPortFieldTypeConfigValuesParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationInputPortFieldTypeConfigValuesParentRef `json:"parentRef,omitempty,omitzero"`
 }
 
 // TaskValidationInputPortFieldTypeConfigDefinitionParentRef defines nested fields for TaskValidation.InputPort.Field.Type.ConfigDefinition.ParentRef.
@@ -238,7 +238,7 @@ type TaskValidationInputPortFieldTypeConfigDefinitionParentRef struct {
 // TaskValidationInputPortFieldTypeConfigDefinitionConfigParameterDefinitions defines nested fields for TaskValidation.InputPort.Field.Type.ConfigDefinition.ConfigParameterDefinitions.
 type TaskValidationInputPortFieldTypeConfigDefinitionConfigParameterDefinitions struct {
 	// +kubebuilder:validation:Optional
-	ParameterType shared.JSONValue `json:"parameterType,omitempty"`
+	ParameterType shared.JSONValue `json:"parameterType,omitempty,omitzero"`
 	// This object represents the configurable properties for an object type.
 	// +kubebuilder:validation:Optional
 	ParameterName string `json:"parameterName,omitempty"`
@@ -271,7 +271,7 @@ type TaskValidationInputPortFieldTypeConfigDefinition struct {
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationInputPortFieldTypeConfigDefinitionParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationInputPortFieldTypeConfigDefinitionParentRef `json:"parentRef,omitempty,omitzero"`
 	// Free form text without any restriction on permitted characters. Name can have letters, numbers, and special characters. The value is editable and is restricted to 1000 characters.
 	// +kubebuilder:validation:Optional
 	Name string `json:"name,omitempty"`
@@ -334,7 +334,7 @@ type TaskValidationInputPortFieldTypeTypeHandlerConfigValues struct {
 	// +kubebuilder:validation:Optional
 	ConfigParamValues map[string]TaskValidationInputPortFieldTypeTypeHandlerConfigValuesConfigParamValues `json:"configParamValues,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationInputPortFieldTypeTypeHandlerConfigValuesParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationInputPortFieldTypeTypeHandlerConfigValuesParentRef `json:"parentRef,omitempty,omitzero"`
 }
 
 // TaskValidationInputPortFieldTypeTypeHandlerScopeReference defines nested fields for TaskValidation.InputPort.Field.Type.TypeHandler.ScopeReference.
@@ -398,7 +398,7 @@ type TaskValidationInputPortFieldTypeTypeHandlerProjectionRuleConfigValues struc
 	// +kubebuilder:validation:Optional
 	ConfigParamValues map[string]TaskValidationInputPortFieldTypeTypeHandlerProjectionRuleConfigValuesConfigParamValues `json:"configParamValues,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationInputPortFieldTypeTypeHandlerProjectionRuleConfigValuesParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationInputPortFieldTypeTypeHandlerProjectionRuleConfigValuesParentRef `json:"parentRef,omitempty,omitzero"`
 }
 
 // TaskValidationInputPortFieldTypeTypeHandlerProjectionRule defines nested fields for TaskValidation.InputPort.Field.Type.TypeHandler.ProjectionRule.
@@ -412,12 +412,12 @@ type TaskValidationInputPortFieldTypeTypeHandlerProjectionRule struct {
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationInputPortFieldTypeTypeHandlerProjectionRuleParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationInputPortFieldTypeTypeHandlerProjectionRuleParentRef `json:"parentRef,omitempty,omitzero"`
 	// Specifies whether the rule uses a java regex syntax.
 	// +kubebuilder:validation:Optional
 	IsJavaRegexSyntax bool `json:"isJavaRegexSyntax,omitempty"`
 	// +kubebuilder:validation:Optional
-	ConfigValues TaskValidationInputPortFieldTypeTypeHandlerProjectionRuleConfigValues `json:"configValues,omitempty"`
+	ConfigValues TaskValidationInputPortFieldTypeTypeHandlerProjectionRuleConfigValues `json:"configValues,omitempty,omitzero"`
 	// The status of an object that can be set to value 1 for shallow references across objects, other values reserved.
 	// +kubebuilder:validation:Optional
 	ObjectStatus int `json:"objectStatus,omitempty"`
@@ -477,7 +477,7 @@ type TaskValidationInputPortFieldTypeTypeHandler struct {
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationInputPortFieldTypeTypeHandlerParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationInputPortFieldTypeTypeHandlerParentRef `json:"parentRef,omitempty,omitzero"`
 	// Reference key for the typed object.
 	// +kubebuilder:validation:Optional
 	Scope string `json:"scope,omitempty"`
@@ -485,12 +485,12 @@ type TaskValidationInputPortFieldTypeTypeHandler struct {
 	// +kubebuilder:validation:Optional
 	FlattenDetails string `json:"flattenDetails,omitempty"`
 	// +kubebuilder:validation:Optional
-	ConfigValues TaskValidationInputPortFieldTypeTypeHandlerConfigValues `json:"configValues,omitempty"`
+	ConfigValues TaskValidationInputPortFieldTypeTypeHandlerConfigValues `json:"configValues,omitempty,omitzero"`
 	// The status of an object that can be set to value 1 for shallow references across objects, other values reserved.
 	// +kubebuilder:validation:Optional
 	ObjectStatus int `json:"objectStatus,omitempty"`
 	// +kubebuilder:validation:Optional
-	ScopeReference TaskValidationInputPortFieldTypeTypeHandlerScopeReference `json:"scopeReference,omitempty"`
+	ScopeReference TaskValidationInputPortFieldTypeTypeHandlerScopeReference `json:"scopeReference,omitempty,omitzero"`
 	// Specifies whether it is ordered by rule.
 	// +kubebuilder:validation:Optional
 	IsOrderByRule bool `json:"isOrderByRule,omitempty"`
@@ -510,7 +510,7 @@ type TaskValidationInputPortFieldType struct {
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationInputPortFieldTypeParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationInputPortFieldTypeParentRef `json:"parentRef,omitempty,omitzero"`
 	// Free form text without any restriction on permitted characters. Name can have letters, numbers, and special characters. The value is editable and is restricted to 1000 characters.
 	// +kubebuilder:validation:Optional
 	Name string `json:"name,omitempty"`
@@ -529,14 +529,14 @@ type TaskValidationInputPortFieldType struct {
 	// +kubebuilder:validation:Optional
 	WrappedType shared.JSONValue `json:"wrappedType,omitempty"`
 	// +kubebuilder:validation:Optional
-	ConfigValues TaskValidationInputPortFieldTypeConfigValues `json:"configValues,omitempty"`
+	ConfigValues TaskValidationInputPortFieldTypeConfigValues `json:"configValues,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	ConfigDefinition TaskValidationInputPortFieldTypeConfigDefinition `json:"configDefinition,omitempty"`
+	ConfigDefinition TaskValidationInputPortFieldTypeConfigDefinition `json:"configDefinition,omitempty,omitzero"`
 	// The java type name.
 	// +kubebuilder:validation:Optional
 	JavaTypeName string `json:"javaTypeName,omitempty"`
 	// +kubebuilder:validation:Optional
-	TypeHandler TaskValidationInputPortFieldTypeTypeHandler `json:"typeHandler,omitempty"`
+	TypeHandler TaskValidationInputPortFieldTypeTypeHandler `json:"typeHandler,omitempty,omitzero"`
 	// The data type system name.
 	// +kubebuilder:validation:Optional
 	TypeSystemName string `json:"typeSystemName,omitempty"`
@@ -608,7 +608,7 @@ type TaskValidationInputPortFieldSplitConditionConfigValues struct {
 	// +kubebuilder:validation:Optional
 	ConfigParamValues map[string]TaskValidationInputPortFieldSplitConditionConfigValuesConfigParamValues `json:"configParamValues,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationInputPortFieldSplitConditionConfigValuesParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationInputPortFieldSplitConditionConfigValuesParentRef `json:"parentRef,omitempty,omitzero"`
 }
 
 // TaskValidationInputPortFieldSplitCondition defines nested fields for TaskValidation.InputPort.Field.SplitCondition.
@@ -623,12 +623,12 @@ type TaskValidationInputPortFieldSplitCondition struct {
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationInputPortFieldSplitConditionParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationInputPortFieldSplitConditionParentRef `json:"parentRef,omitempty,omitzero"`
 	// The expression string for the object.
 	// +kubebuilder:validation:Optional
 	ExprString string `json:"exprString,omitempty"`
 	// +kubebuilder:validation:Optional
-	ConfigValues TaskValidationInputPortFieldSplitConditionConfigValues `json:"configValues,omitempty"`
+	ConfigValues TaskValidationInputPortFieldSplitConditionConfigValues `json:"configValues,omitempty,omitzero"`
 	// The status of an object that can be set to value 1 for shallow references across objects, other values reserved.
 	// +kubebuilder:validation:Optional
 	ObjectStatus int `json:"objectStatus,omitempty"`
@@ -685,7 +685,7 @@ type TaskValidationInputPortFieldNativeShapeFieldConfigValues struct {
 	// +kubebuilder:validation:Optional
 	ConfigParamValues map[string]TaskValidationInputPortFieldNativeShapeFieldConfigValuesConfigParamValues `json:"configParamValues,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationInputPortFieldNativeShapeFieldConfigValuesParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationInputPortFieldNativeShapeFieldConfigValuesParentRef `json:"parentRef,omitempty,omitzero"`
 }
 
 // TaskValidationInputPortFieldNativeShapeField defines nested fields for TaskValidation.InputPort.Field.NativeShapeField.
@@ -700,7 +700,7 @@ type TaskValidationInputPortFieldNativeShapeField struct {
 	// +kubebuilder:validation:Optional
 	Type shared.JSONValue `json:"type,omitempty"`
 	// +kubebuilder:validation:Optional
-	ConfigValues TaskValidationInputPortFieldNativeShapeFieldConfigValues `json:"configValues,omitempty"`
+	ConfigValues TaskValidationInputPortFieldNativeShapeFieldConfigValues `json:"configValues,omitempty,omitzero"`
 	// The position of the attribute.
 	// +kubebuilder:validation:Optional
 	Position int `json:"position,omitempty"`
@@ -760,7 +760,7 @@ type TaskValidationInputPortFieldExprConfigValues struct {
 	// +kubebuilder:validation:Optional
 	ConfigParamValues map[string]TaskValidationInputPortFieldExprConfigValuesConfigParamValues `json:"configParamValues,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationInputPortFieldExprConfigValuesParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationInputPortFieldExprConfigValuesParentRef `json:"parentRef,omitempty,omitzero"`
 }
 
 // TaskValidationInputPortFieldExpr defines nested fields for TaskValidation.InputPort.Field.Expr.
@@ -775,12 +775,12 @@ type TaskValidationInputPortFieldExpr struct {
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationInputPortFieldExprParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationInputPortFieldExprParentRef `json:"parentRef,omitempty,omitzero"`
 	// The expression string for the object.
 	// +kubebuilder:validation:Optional
 	ExprString string `json:"exprString,omitempty"`
 	// +kubebuilder:validation:Optional
-	ConfigValues TaskValidationInputPortFieldExprConfigValues `json:"configValues,omitempty"`
+	ConfigValues TaskValidationInputPortFieldExprConfigValues `json:"configValues,omitempty,omitzero"`
 	// The status of an object that can be set to value 1 for shallow references across objects, other values reserved.
 	// +kubebuilder:validation:Optional
 	ObjectStatus int `json:"objectStatus,omitempty"`
@@ -834,7 +834,7 @@ type TaskValidationInputPortFieldUseTypeConfigValues struct {
 	// +kubebuilder:validation:Optional
 	ConfigParamValues map[string]TaskValidationInputPortFieldUseTypeConfigValuesConfigParamValues `json:"configParamValues,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationInputPortFieldUseTypeConfigValuesParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationInputPortFieldUseTypeConfigValuesParentRef `json:"parentRef,omitempty,omitzero"`
 }
 
 // TaskValidationInputPortFieldUseTypeConfigDefinitionParentRef defines nested fields for TaskValidation.InputPort.Field.UseType.ConfigDefinition.ParentRef.
@@ -895,7 +895,7 @@ type TaskValidationInputPortFieldUseTypeConfigDefinitionConfigParameterDefinitio
 	// +kubebuilder:validation:Optional
 	ConfigParamValues map[string]TaskValidationInputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeConfigValuesConfigParamValues `json:"configParamValues,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationInputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeConfigValuesParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationInputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeConfigValuesParentRef `json:"parentRef,omitempty,omitzero"`
 }
 
 // TaskValidationInputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerParentRef defines nested fields for TaskValidation.InputPort.Field.UseType.ConfigDefinition.ConfigParameterDefinitions.ParameterType.TypeHandler.ParentRef.
@@ -946,7 +946,7 @@ type TaskValidationInputPortFieldUseTypeConfigDefinitionConfigParameterDefinitio
 	// +kubebuilder:validation:Optional
 	ConfigParamValues map[string]TaskValidationInputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerConfigValuesConfigParamValues `json:"configParamValues,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationInputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerConfigValuesParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationInputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerConfigValuesParentRef `json:"parentRef,omitempty,omitzero"`
 }
 
 // TaskValidationInputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerScopeReference defines nested fields for TaskValidation.InputPort.Field.UseType.ConfigDefinition.ConfigParameterDefinitions.ParameterType.TypeHandler.ScopeReference.
@@ -1010,7 +1010,7 @@ type TaskValidationInputPortFieldUseTypeConfigDefinitionConfigParameterDefinitio
 	// +kubebuilder:validation:Optional
 	ConfigParamValues map[string]TaskValidationInputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerProjectionRuleConfigValuesConfigParamValues `json:"configParamValues,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationInputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerProjectionRuleConfigValuesParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationInputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerProjectionRuleConfigValuesParentRef `json:"parentRef,omitempty,omitzero"`
 }
 
 // TaskValidationInputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerProjectionRule defines nested fields for TaskValidation.InputPort.Field.UseType.ConfigDefinition.ConfigParameterDefinitions.ParameterType.TypeHandler.ProjectionRule.
@@ -1024,12 +1024,12 @@ type TaskValidationInputPortFieldUseTypeConfigDefinitionConfigParameterDefinitio
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationInputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerProjectionRuleParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationInputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerProjectionRuleParentRef `json:"parentRef,omitempty,omitzero"`
 	// Specifies whether the rule uses a java regex syntax.
 	// +kubebuilder:validation:Optional
 	IsJavaRegexSyntax bool `json:"isJavaRegexSyntax,omitempty"`
 	// +kubebuilder:validation:Optional
-	ConfigValues TaskValidationInputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerProjectionRuleConfigValues `json:"configValues,omitempty"`
+	ConfigValues TaskValidationInputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerProjectionRuleConfigValues `json:"configValues,omitempty,omitzero"`
 	// The status of an object that can be set to value 1 for shallow references across objects, other values reserved.
 	// +kubebuilder:validation:Optional
 	ObjectStatus int `json:"objectStatus,omitempty"`
@@ -1089,7 +1089,7 @@ type TaskValidationInputPortFieldUseTypeConfigDefinitionConfigParameterDefinitio
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationInputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationInputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerParentRef `json:"parentRef,omitempty,omitzero"`
 	// Reference key for the typed object.
 	// +kubebuilder:validation:Optional
 	Scope string `json:"scope,omitempty"`
@@ -1097,12 +1097,12 @@ type TaskValidationInputPortFieldUseTypeConfigDefinitionConfigParameterDefinitio
 	// +kubebuilder:validation:Optional
 	FlattenDetails string `json:"flattenDetails,omitempty"`
 	// +kubebuilder:validation:Optional
-	ConfigValues TaskValidationInputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerConfigValues `json:"configValues,omitempty"`
+	ConfigValues TaskValidationInputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerConfigValues `json:"configValues,omitempty,omitzero"`
 	// The status of an object that can be set to value 1 for shallow references across objects, other values reserved.
 	// +kubebuilder:validation:Optional
 	ObjectStatus int `json:"objectStatus,omitempty"`
 	// +kubebuilder:validation:Optional
-	ScopeReference TaskValidationInputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerScopeReference `json:"scopeReference,omitempty"`
+	ScopeReference TaskValidationInputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerScopeReference `json:"scopeReference,omitempty,omitzero"`
 	// Specifies whether it is ordered by rule.
 	// +kubebuilder:validation:Optional
 	IsOrderByRule bool `json:"isOrderByRule,omitempty"`
@@ -1122,7 +1122,7 @@ type TaskValidationInputPortFieldUseTypeConfigDefinitionConfigParameterDefinitio
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationInputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationInputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeParentRef `json:"parentRef,omitempty,omitzero"`
 	// Free form text without any restriction on permitted characters. Name can have letters, numbers, and special characters. The value is editable and is restricted to 1000 characters.
 	// +kubebuilder:validation:Optional
 	Name string `json:"name,omitempty"`
@@ -1141,14 +1141,14 @@ type TaskValidationInputPortFieldUseTypeConfigDefinitionConfigParameterDefinitio
 	// +kubebuilder:validation:Optional
 	WrappedType shared.JSONValue `json:"wrappedType,omitempty"`
 	// +kubebuilder:validation:Optional
-	ConfigValues TaskValidationInputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeConfigValues `json:"configValues,omitempty"`
+	ConfigValues TaskValidationInputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeConfigValues `json:"configValues,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	ConfigDefinition shared.JSONValue `json:"configDefinition,omitempty"`
+	ConfigDefinition shared.JSONValue `json:"configDefinition,omitempty,omitzero"`
 	// The java type name.
 	// +kubebuilder:validation:Optional
 	JavaTypeName string `json:"javaTypeName,omitempty"`
 	// +kubebuilder:validation:Optional
-	TypeHandler TaskValidationInputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandler `json:"typeHandler,omitempty"`
+	TypeHandler TaskValidationInputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandler `json:"typeHandler,omitempty,omitzero"`
 	// The data type system name.
 	// +kubebuilder:validation:Optional
 	TypeSystemName string `json:"typeSystemName,omitempty"`
@@ -1175,7 +1175,7 @@ type TaskValidationInputPortFieldUseTypeConfigDefinitionConfigParameterDefinitio
 // TaskValidationInputPortFieldUseTypeConfigDefinitionConfigParameterDefinitions defines nested fields for TaskValidation.InputPort.Field.UseType.ConfigDefinition.ConfigParameterDefinitions.
 type TaskValidationInputPortFieldUseTypeConfigDefinitionConfigParameterDefinitions struct {
 	// +kubebuilder:validation:Optional
-	ParameterType TaskValidationInputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterType `json:"parameterType,omitempty"`
+	ParameterType TaskValidationInputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterType `json:"parameterType,omitempty,omitzero"`
 	// This object represents the configurable properties for an object type.
 	// +kubebuilder:validation:Optional
 	ParameterName string `json:"parameterName,omitempty"`
@@ -1208,7 +1208,7 @@ type TaskValidationInputPortFieldUseTypeConfigDefinition struct {
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationInputPortFieldUseTypeConfigDefinitionParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationInputPortFieldUseTypeConfigDefinitionParentRef `json:"parentRef,omitempty,omitzero"`
 	// Free form text without any restriction on permitted characters. Name can have letters, numbers, and special characters. The value is editable and is restricted to 1000 characters.
 	// +kubebuilder:validation:Optional
 	Name string `json:"name,omitempty"`
@@ -1232,7 +1232,7 @@ type TaskValidationInputPortFieldUseType struct {
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationInputPortFieldUseTypeParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationInputPortFieldUseTypeParentRef `json:"parentRef,omitempty,omitzero"`
 	// Free form text without any restriction on permitted characters. Name can have letters, numbers, and special characters. The value is editable and is restricted to 1000 characters.
 	// +kubebuilder:validation:Optional
 	Name string `json:"name,omitempty"`
@@ -1246,9 +1246,9 @@ type TaskValidationInputPortFieldUseType struct {
 	// +kubebuilder:validation:Optional
 	WrappedType shared.JSONValue `json:"wrappedType,omitempty"`
 	// +kubebuilder:validation:Optional
-	ConfigValues TaskValidationInputPortFieldUseTypeConfigValues `json:"configValues,omitempty"`
+	ConfigValues TaskValidationInputPortFieldUseTypeConfigValues `json:"configValues,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	ConfigDefinition TaskValidationInputPortFieldUseTypeConfigDefinition `json:"configDefinition,omitempty"`
+	ConfigDefinition TaskValidationInputPortFieldUseTypeConfigDefinition `json:"configDefinition,omitempty,omitzero"`
 }
 
 // TaskValidationInputPortField defines nested fields for TaskValidation.InputPort.Field.
@@ -1262,9 +1262,9 @@ type TaskValidationInputPortField struct {
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationInputPortFieldParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationInputPortFieldParentRef `json:"parentRef,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	ConfigValues TaskValidationInputPortFieldConfigValues `json:"configValues,omitempty"`
+	ConfigValues TaskValidationInputPortFieldConfigValues `json:"configValues,omitempty,omitzero"`
 	// The status of an object that can be set to value 1 for shallow references across objects, other values reserved.
 	// +kubebuilder:validation:Optional
 	ObjectStatus int `json:"objectStatus,omitempty"`
@@ -1283,12 +1283,12 @@ type TaskValidationInputPortField struct {
 	// +kubebuilder:validation:Optional
 	PortType string `json:"portType,omitempty"`
 	// +kubebuilder:validation:Optional
-	Type TaskValidationInputPortFieldType `json:"type,omitempty"`
+	Type TaskValidationInputPortFieldType `json:"type,omitempty,omitzero"`
 	// Labels are keywords or labels that you can add to data assets, dataflows and so on. You can define your own labels and use them to categorize content.
 	// +kubebuilder:validation:Optional
 	Labels []string `json:"labels,omitempty"`
 	// +kubebuilder:validation:Optional
-	SplitCondition TaskValidationInputPortFieldSplitCondition `json:"splitCondition,omitempty"`
+	SplitCondition TaskValidationInputPortFieldSplitCondition `json:"splitCondition,omitempty,omitzero"`
 	// The port based on what decision expression evaluates to.
 	// +kubebuilder:validation:Optional
 	DecisionOutputPortType string `json:"decisionOutputPortType,omitempty"`
@@ -1296,9 +1296,9 @@ type TaskValidationInputPortField struct {
 	// +kubebuilder:validation:Optional
 	Scope string `json:"scope,omitempty"`
 	// +kubebuilder:validation:Optional
-	ScopeReference TaskValidationInputPortFieldScopeReference `json:"scopeReference,omitempty"`
+	ScopeReference TaskValidationInputPortFieldScopeReference `json:"scopeReference,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	NativeShapeField TaskValidationInputPortFieldNativeShapeField `json:"nativeShapeField,omitempty"`
+	NativeShapeField TaskValidationInputPortFieldNativeShapeField `json:"nativeShapeField,omitempty,omitzero"`
 	// The default value of the parameter.
 	// +kubebuilder:validation:Optional
 	DefaultValue shared.JSONValue `json:"defaultValue,omitempty"`
@@ -1321,9 +1321,9 @@ type TaskValidationInputPortField struct {
 	// +kubebuilder:validation:Optional
 	OutputAggregationType string `json:"outputAggregationType,omitempty"`
 	// +kubebuilder:validation:Optional
-	Expr TaskValidationInputPortFieldExpr `json:"expr,omitempty"`
+	Expr TaskValidationInputPortFieldExpr `json:"expr,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	UseType TaskValidationInputPortFieldUseType `json:"useType,omitempty"`
+	UseType TaskValidationInputPortFieldUseType `json:"useType,omitempty,omitzero"`
 	// column name pattern can be used to generate the name structure of the generated columns. By default column names are of %PIVOT_KEY_VALUE% or %MACRO_INPUT%_%PIVOT_KEY_VALUE%, but we can change it something by passing something like MY_PREFIX%PIVOT_KEY_VALUE%MY_SUFFIX or MY_PREFIX%MACRO_INPUT%_%PIVOT_KEY_VALUE%MY_SUFFIX which will add custom prefix and suffix to the column name.
 	// +kubebuilder:validation:Optional
 	ColumnNamePattern string `json:"columnNamePattern,omitempty"`
@@ -1347,9 +1347,9 @@ type TaskValidationInputPort struct {
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationInputPortParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationInputPortParentRef `json:"parentRef,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	ConfigValues TaskValidationInputPortConfigValues `json:"configValues,omitempty"`
+	ConfigValues TaskValidationInputPortConfigValues `json:"configValues,omitempty,omitzero"`
 	// The status of an object that can be set to value 1 for shallow references across objects, other values reserved.
 	// +kubebuilder:validation:Optional
 	ObjectStatus int `json:"objectStatus,omitempty"`
@@ -1415,7 +1415,7 @@ type TaskValidationOutputPortConfigValues struct {
 	// +kubebuilder:validation:Optional
 	ConfigParamValues map[string]TaskValidationOutputPortConfigValuesConfigParamValues `json:"configParamValues,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationOutputPortConfigValuesParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationOutputPortConfigValuesParentRef `json:"parentRef,omitempty,omitzero"`
 }
 
 // TaskValidationOutputPortFieldParentRef defines nested fields for TaskValidation.OutputPort.Field.ParentRef.
@@ -1466,7 +1466,7 @@ type TaskValidationOutputPortFieldConfigValues struct {
 	// +kubebuilder:validation:Optional
 	ConfigParamValues map[string]TaskValidationOutputPortFieldConfigValuesConfigParamValues `json:"configParamValues,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationOutputPortFieldConfigValuesParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationOutputPortFieldConfigValuesParentRef `json:"parentRef,omitempty,omitzero"`
 }
 
 // TaskValidationOutputPortFieldTypeParentRef defines nested fields for TaskValidation.OutputPort.Field.Type.ParentRef.
@@ -1517,7 +1517,7 @@ type TaskValidationOutputPortFieldTypeConfigValues struct {
 	// +kubebuilder:validation:Optional
 	ConfigParamValues map[string]TaskValidationOutputPortFieldTypeConfigValuesConfigParamValues `json:"configParamValues,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationOutputPortFieldTypeConfigValuesParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationOutputPortFieldTypeConfigValuesParentRef `json:"parentRef,omitempty,omitzero"`
 }
 
 // TaskValidationOutputPortFieldTypeConfigDefinitionParentRef defines nested fields for TaskValidation.OutputPort.Field.Type.ConfigDefinition.ParentRef.
@@ -1533,7 +1533,7 @@ type TaskValidationOutputPortFieldTypeConfigDefinitionParentRef struct {
 // TaskValidationOutputPortFieldTypeConfigDefinitionConfigParameterDefinitions defines nested fields for TaskValidation.OutputPort.Field.Type.ConfigDefinition.ConfigParameterDefinitions.
 type TaskValidationOutputPortFieldTypeConfigDefinitionConfigParameterDefinitions struct {
 	// +kubebuilder:validation:Optional
-	ParameterType shared.JSONValue `json:"parameterType,omitempty"`
+	ParameterType shared.JSONValue `json:"parameterType,omitempty,omitzero"`
 	// This object represents the configurable properties for an object type.
 	// +kubebuilder:validation:Optional
 	ParameterName string `json:"parameterName,omitempty"`
@@ -1566,7 +1566,7 @@ type TaskValidationOutputPortFieldTypeConfigDefinition struct {
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationOutputPortFieldTypeConfigDefinitionParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationOutputPortFieldTypeConfigDefinitionParentRef `json:"parentRef,omitempty,omitzero"`
 	// Free form text without any restriction on permitted characters. Name can have letters, numbers, and special characters. The value is editable and is restricted to 1000 characters.
 	// +kubebuilder:validation:Optional
 	Name string `json:"name,omitempty"`
@@ -1629,7 +1629,7 @@ type TaskValidationOutputPortFieldTypeTypeHandlerConfigValues struct {
 	// +kubebuilder:validation:Optional
 	ConfigParamValues map[string]TaskValidationOutputPortFieldTypeTypeHandlerConfigValuesConfigParamValues `json:"configParamValues,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationOutputPortFieldTypeTypeHandlerConfigValuesParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationOutputPortFieldTypeTypeHandlerConfigValuesParentRef `json:"parentRef,omitempty,omitzero"`
 }
 
 // TaskValidationOutputPortFieldTypeTypeHandlerScopeReference defines nested fields for TaskValidation.OutputPort.Field.Type.TypeHandler.ScopeReference.
@@ -1693,7 +1693,7 @@ type TaskValidationOutputPortFieldTypeTypeHandlerProjectionRuleConfigValues stru
 	// +kubebuilder:validation:Optional
 	ConfigParamValues map[string]TaskValidationOutputPortFieldTypeTypeHandlerProjectionRuleConfigValuesConfigParamValues `json:"configParamValues,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationOutputPortFieldTypeTypeHandlerProjectionRuleConfigValuesParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationOutputPortFieldTypeTypeHandlerProjectionRuleConfigValuesParentRef `json:"parentRef,omitempty,omitzero"`
 }
 
 // TaskValidationOutputPortFieldTypeTypeHandlerProjectionRule defines nested fields for TaskValidation.OutputPort.Field.Type.TypeHandler.ProjectionRule.
@@ -1707,12 +1707,12 @@ type TaskValidationOutputPortFieldTypeTypeHandlerProjectionRule struct {
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationOutputPortFieldTypeTypeHandlerProjectionRuleParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationOutputPortFieldTypeTypeHandlerProjectionRuleParentRef `json:"parentRef,omitempty,omitzero"`
 	// Specifies whether the rule uses a java regex syntax.
 	// +kubebuilder:validation:Optional
 	IsJavaRegexSyntax bool `json:"isJavaRegexSyntax,omitempty"`
 	// +kubebuilder:validation:Optional
-	ConfigValues TaskValidationOutputPortFieldTypeTypeHandlerProjectionRuleConfigValues `json:"configValues,omitempty"`
+	ConfigValues TaskValidationOutputPortFieldTypeTypeHandlerProjectionRuleConfigValues `json:"configValues,omitempty,omitzero"`
 	// The status of an object that can be set to value 1 for shallow references across objects, other values reserved.
 	// +kubebuilder:validation:Optional
 	ObjectStatus int `json:"objectStatus,omitempty"`
@@ -1772,7 +1772,7 @@ type TaskValidationOutputPortFieldTypeTypeHandler struct {
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationOutputPortFieldTypeTypeHandlerParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationOutputPortFieldTypeTypeHandlerParentRef `json:"parentRef,omitempty,omitzero"`
 	// Reference key for the typed object.
 	// +kubebuilder:validation:Optional
 	Scope string `json:"scope,omitempty"`
@@ -1780,12 +1780,12 @@ type TaskValidationOutputPortFieldTypeTypeHandler struct {
 	// +kubebuilder:validation:Optional
 	FlattenDetails string `json:"flattenDetails,omitempty"`
 	// +kubebuilder:validation:Optional
-	ConfigValues TaskValidationOutputPortFieldTypeTypeHandlerConfigValues `json:"configValues,omitempty"`
+	ConfigValues TaskValidationOutputPortFieldTypeTypeHandlerConfigValues `json:"configValues,omitempty,omitzero"`
 	// The status of an object that can be set to value 1 for shallow references across objects, other values reserved.
 	// +kubebuilder:validation:Optional
 	ObjectStatus int `json:"objectStatus,omitempty"`
 	// +kubebuilder:validation:Optional
-	ScopeReference TaskValidationOutputPortFieldTypeTypeHandlerScopeReference `json:"scopeReference,omitempty"`
+	ScopeReference TaskValidationOutputPortFieldTypeTypeHandlerScopeReference `json:"scopeReference,omitempty,omitzero"`
 	// Specifies whether it is ordered by rule.
 	// +kubebuilder:validation:Optional
 	IsOrderByRule bool `json:"isOrderByRule,omitempty"`
@@ -1805,7 +1805,7 @@ type TaskValidationOutputPortFieldType struct {
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationOutputPortFieldTypeParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationOutputPortFieldTypeParentRef `json:"parentRef,omitempty,omitzero"`
 	// Free form text without any restriction on permitted characters. Name can have letters, numbers, and special characters. The value is editable and is restricted to 1000 characters.
 	// +kubebuilder:validation:Optional
 	Name string `json:"name,omitempty"`
@@ -1824,14 +1824,14 @@ type TaskValidationOutputPortFieldType struct {
 	// +kubebuilder:validation:Optional
 	WrappedType shared.JSONValue `json:"wrappedType,omitempty"`
 	// +kubebuilder:validation:Optional
-	ConfigValues TaskValidationOutputPortFieldTypeConfigValues `json:"configValues,omitempty"`
+	ConfigValues TaskValidationOutputPortFieldTypeConfigValues `json:"configValues,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	ConfigDefinition TaskValidationOutputPortFieldTypeConfigDefinition `json:"configDefinition,omitempty"`
+	ConfigDefinition TaskValidationOutputPortFieldTypeConfigDefinition `json:"configDefinition,omitempty,omitzero"`
 	// The java type name.
 	// +kubebuilder:validation:Optional
 	JavaTypeName string `json:"javaTypeName,omitempty"`
 	// +kubebuilder:validation:Optional
-	TypeHandler TaskValidationOutputPortFieldTypeTypeHandler `json:"typeHandler,omitempty"`
+	TypeHandler TaskValidationOutputPortFieldTypeTypeHandler `json:"typeHandler,omitempty,omitzero"`
 	// The data type system name.
 	// +kubebuilder:validation:Optional
 	TypeSystemName string `json:"typeSystemName,omitempty"`
@@ -1903,7 +1903,7 @@ type TaskValidationOutputPortFieldSplitConditionConfigValues struct {
 	// +kubebuilder:validation:Optional
 	ConfigParamValues map[string]TaskValidationOutputPortFieldSplitConditionConfigValuesConfigParamValues `json:"configParamValues,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationOutputPortFieldSplitConditionConfigValuesParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationOutputPortFieldSplitConditionConfigValuesParentRef `json:"parentRef,omitempty,omitzero"`
 }
 
 // TaskValidationOutputPortFieldSplitCondition defines nested fields for TaskValidation.OutputPort.Field.SplitCondition.
@@ -1918,12 +1918,12 @@ type TaskValidationOutputPortFieldSplitCondition struct {
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationOutputPortFieldSplitConditionParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationOutputPortFieldSplitConditionParentRef `json:"parentRef,omitempty,omitzero"`
 	// The expression string for the object.
 	// +kubebuilder:validation:Optional
 	ExprString string `json:"exprString,omitempty"`
 	// +kubebuilder:validation:Optional
-	ConfigValues TaskValidationOutputPortFieldSplitConditionConfigValues `json:"configValues,omitempty"`
+	ConfigValues TaskValidationOutputPortFieldSplitConditionConfigValues `json:"configValues,omitempty,omitzero"`
 	// The status of an object that can be set to value 1 for shallow references across objects, other values reserved.
 	// +kubebuilder:validation:Optional
 	ObjectStatus int `json:"objectStatus,omitempty"`
@@ -1980,7 +1980,7 @@ type TaskValidationOutputPortFieldNativeShapeFieldConfigValues struct {
 	// +kubebuilder:validation:Optional
 	ConfigParamValues map[string]TaskValidationOutputPortFieldNativeShapeFieldConfigValuesConfigParamValues `json:"configParamValues,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationOutputPortFieldNativeShapeFieldConfigValuesParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationOutputPortFieldNativeShapeFieldConfigValuesParentRef `json:"parentRef,omitempty,omitzero"`
 }
 
 // TaskValidationOutputPortFieldNativeShapeField defines nested fields for TaskValidation.OutputPort.Field.NativeShapeField.
@@ -1995,7 +1995,7 @@ type TaskValidationOutputPortFieldNativeShapeField struct {
 	// +kubebuilder:validation:Optional
 	Type shared.JSONValue `json:"type,omitempty"`
 	// +kubebuilder:validation:Optional
-	ConfigValues TaskValidationOutputPortFieldNativeShapeFieldConfigValues `json:"configValues,omitempty"`
+	ConfigValues TaskValidationOutputPortFieldNativeShapeFieldConfigValues `json:"configValues,omitempty,omitzero"`
 	// The position of the attribute.
 	// +kubebuilder:validation:Optional
 	Position int `json:"position,omitempty"`
@@ -2055,7 +2055,7 @@ type TaskValidationOutputPortFieldExprConfigValues struct {
 	// +kubebuilder:validation:Optional
 	ConfigParamValues map[string]TaskValidationOutputPortFieldExprConfigValuesConfigParamValues `json:"configParamValues,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationOutputPortFieldExprConfigValuesParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationOutputPortFieldExprConfigValuesParentRef `json:"parentRef,omitempty,omitzero"`
 }
 
 // TaskValidationOutputPortFieldExpr defines nested fields for TaskValidation.OutputPort.Field.Expr.
@@ -2070,12 +2070,12 @@ type TaskValidationOutputPortFieldExpr struct {
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationOutputPortFieldExprParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationOutputPortFieldExprParentRef `json:"parentRef,omitempty,omitzero"`
 	// The expression string for the object.
 	// +kubebuilder:validation:Optional
 	ExprString string `json:"exprString,omitempty"`
 	// +kubebuilder:validation:Optional
-	ConfigValues TaskValidationOutputPortFieldExprConfigValues `json:"configValues,omitempty"`
+	ConfigValues TaskValidationOutputPortFieldExprConfigValues `json:"configValues,omitempty,omitzero"`
 	// The status of an object that can be set to value 1 for shallow references across objects, other values reserved.
 	// +kubebuilder:validation:Optional
 	ObjectStatus int `json:"objectStatus,omitempty"`
@@ -2129,7 +2129,7 @@ type TaskValidationOutputPortFieldUseTypeConfigValues struct {
 	// +kubebuilder:validation:Optional
 	ConfigParamValues map[string]TaskValidationOutputPortFieldUseTypeConfigValuesConfigParamValues `json:"configParamValues,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationOutputPortFieldUseTypeConfigValuesParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationOutputPortFieldUseTypeConfigValuesParentRef `json:"parentRef,omitempty,omitzero"`
 }
 
 // TaskValidationOutputPortFieldUseTypeConfigDefinitionParentRef defines nested fields for TaskValidation.OutputPort.Field.UseType.ConfigDefinition.ParentRef.
@@ -2190,7 +2190,7 @@ type TaskValidationOutputPortFieldUseTypeConfigDefinitionConfigParameterDefiniti
 	// +kubebuilder:validation:Optional
 	ConfigParamValues map[string]TaskValidationOutputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeConfigValuesConfigParamValues `json:"configParamValues,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationOutputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeConfigValuesParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationOutputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeConfigValuesParentRef `json:"parentRef,omitempty,omitzero"`
 }
 
 // TaskValidationOutputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerParentRef defines nested fields for TaskValidation.OutputPort.Field.UseType.ConfigDefinition.ConfigParameterDefinitions.ParameterType.TypeHandler.ParentRef.
@@ -2241,7 +2241,7 @@ type TaskValidationOutputPortFieldUseTypeConfigDefinitionConfigParameterDefiniti
 	// +kubebuilder:validation:Optional
 	ConfigParamValues map[string]TaskValidationOutputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerConfigValuesConfigParamValues `json:"configParamValues,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationOutputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerConfigValuesParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationOutputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerConfigValuesParentRef `json:"parentRef,omitempty,omitzero"`
 }
 
 // TaskValidationOutputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerScopeReference defines nested fields for TaskValidation.OutputPort.Field.UseType.ConfigDefinition.ConfigParameterDefinitions.ParameterType.TypeHandler.ScopeReference.
@@ -2305,7 +2305,7 @@ type TaskValidationOutputPortFieldUseTypeConfigDefinitionConfigParameterDefiniti
 	// +kubebuilder:validation:Optional
 	ConfigParamValues map[string]TaskValidationOutputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerProjectionRuleConfigValuesConfigParamValues `json:"configParamValues,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationOutputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerProjectionRuleConfigValuesParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationOutputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerProjectionRuleConfigValuesParentRef `json:"parentRef,omitempty,omitzero"`
 }
 
 // TaskValidationOutputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerProjectionRule defines nested fields for TaskValidation.OutputPort.Field.UseType.ConfigDefinition.ConfigParameterDefinitions.ParameterType.TypeHandler.ProjectionRule.
@@ -2319,12 +2319,12 @@ type TaskValidationOutputPortFieldUseTypeConfigDefinitionConfigParameterDefiniti
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationOutputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerProjectionRuleParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationOutputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerProjectionRuleParentRef `json:"parentRef,omitempty,omitzero"`
 	// Specifies whether the rule uses a java regex syntax.
 	// +kubebuilder:validation:Optional
 	IsJavaRegexSyntax bool `json:"isJavaRegexSyntax,omitempty"`
 	// +kubebuilder:validation:Optional
-	ConfigValues TaskValidationOutputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerProjectionRuleConfigValues `json:"configValues,omitempty"`
+	ConfigValues TaskValidationOutputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerProjectionRuleConfigValues `json:"configValues,omitempty,omitzero"`
 	// The status of an object that can be set to value 1 for shallow references across objects, other values reserved.
 	// +kubebuilder:validation:Optional
 	ObjectStatus int `json:"objectStatus,omitempty"`
@@ -2384,7 +2384,7 @@ type TaskValidationOutputPortFieldUseTypeConfigDefinitionConfigParameterDefiniti
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationOutputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationOutputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerParentRef `json:"parentRef,omitempty,omitzero"`
 	// Reference key for the typed object.
 	// +kubebuilder:validation:Optional
 	Scope string `json:"scope,omitempty"`
@@ -2392,12 +2392,12 @@ type TaskValidationOutputPortFieldUseTypeConfigDefinitionConfigParameterDefiniti
 	// +kubebuilder:validation:Optional
 	FlattenDetails string `json:"flattenDetails,omitempty"`
 	// +kubebuilder:validation:Optional
-	ConfigValues TaskValidationOutputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerConfigValues `json:"configValues,omitempty"`
+	ConfigValues TaskValidationOutputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerConfigValues `json:"configValues,omitempty,omitzero"`
 	// The status of an object that can be set to value 1 for shallow references across objects, other values reserved.
 	// +kubebuilder:validation:Optional
 	ObjectStatus int `json:"objectStatus,omitempty"`
 	// +kubebuilder:validation:Optional
-	ScopeReference TaskValidationOutputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerScopeReference `json:"scopeReference,omitempty"`
+	ScopeReference TaskValidationOutputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerScopeReference `json:"scopeReference,omitempty,omitzero"`
 	// Specifies whether it is ordered by rule.
 	// +kubebuilder:validation:Optional
 	IsOrderByRule bool `json:"isOrderByRule,omitempty"`
@@ -2417,7 +2417,7 @@ type TaskValidationOutputPortFieldUseTypeConfigDefinitionConfigParameterDefiniti
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationOutputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationOutputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeParentRef `json:"parentRef,omitempty,omitzero"`
 	// Free form text without any restriction on permitted characters. Name can have letters, numbers, and special characters. The value is editable and is restricted to 1000 characters.
 	// +kubebuilder:validation:Optional
 	Name string `json:"name,omitempty"`
@@ -2436,14 +2436,14 @@ type TaskValidationOutputPortFieldUseTypeConfigDefinitionConfigParameterDefiniti
 	// +kubebuilder:validation:Optional
 	WrappedType shared.JSONValue `json:"wrappedType,omitempty"`
 	// +kubebuilder:validation:Optional
-	ConfigValues TaskValidationOutputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeConfigValues `json:"configValues,omitempty"`
+	ConfigValues TaskValidationOutputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeConfigValues `json:"configValues,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	ConfigDefinition shared.JSONValue `json:"configDefinition,omitempty"`
+	ConfigDefinition shared.JSONValue `json:"configDefinition,omitempty,omitzero"`
 	// The java type name.
 	// +kubebuilder:validation:Optional
 	JavaTypeName string `json:"javaTypeName,omitempty"`
 	// +kubebuilder:validation:Optional
-	TypeHandler TaskValidationOutputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandler `json:"typeHandler,omitempty"`
+	TypeHandler TaskValidationOutputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandler `json:"typeHandler,omitempty,omitzero"`
 	// The data type system name.
 	// +kubebuilder:validation:Optional
 	TypeSystemName string `json:"typeSystemName,omitempty"`
@@ -2470,7 +2470,7 @@ type TaskValidationOutputPortFieldUseTypeConfigDefinitionConfigParameterDefiniti
 // TaskValidationOutputPortFieldUseTypeConfigDefinitionConfigParameterDefinitions defines nested fields for TaskValidation.OutputPort.Field.UseType.ConfigDefinition.ConfigParameterDefinitions.
 type TaskValidationOutputPortFieldUseTypeConfigDefinitionConfigParameterDefinitions struct {
 	// +kubebuilder:validation:Optional
-	ParameterType TaskValidationOutputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterType `json:"parameterType,omitempty"`
+	ParameterType TaskValidationOutputPortFieldUseTypeConfigDefinitionConfigParameterDefinitionsParameterType `json:"parameterType,omitempty,omitzero"`
 	// This object represents the configurable properties for an object type.
 	// +kubebuilder:validation:Optional
 	ParameterName string `json:"parameterName,omitempty"`
@@ -2503,7 +2503,7 @@ type TaskValidationOutputPortFieldUseTypeConfigDefinition struct {
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationOutputPortFieldUseTypeConfigDefinitionParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationOutputPortFieldUseTypeConfigDefinitionParentRef `json:"parentRef,omitempty,omitzero"`
 	// Free form text without any restriction on permitted characters. Name can have letters, numbers, and special characters. The value is editable and is restricted to 1000 characters.
 	// +kubebuilder:validation:Optional
 	Name string `json:"name,omitempty"`
@@ -2527,7 +2527,7 @@ type TaskValidationOutputPortFieldUseType struct {
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationOutputPortFieldUseTypeParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationOutputPortFieldUseTypeParentRef `json:"parentRef,omitempty,omitzero"`
 	// Free form text without any restriction on permitted characters. Name can have letters, numbers, and special characters. The value is editable and is restricted to 1000 characters.
 	// +kubebuilder:validation:Optional
 	Name string `json:"name,omitempty"`
@@ -2541,9 +2541,9 @@ type TaskValidationOutputPortFieldUseType struct {
 	// +kubebuilder:validation:Optional
 	WrappedType shared.JSONValue `json:"wrappedType,omitempty"`
 	// +kubebuilder:validation:Optional
-	ConfigValues TaskValidationOutputPortFieldUseTypeConfigValues `json:"configValues,omitempty"`
+	ConfigValues TaskValidationOutputPortFieldUseTypeConfigValues `json:"configValues,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	ConfigDefinition TaskValidationOutputPortFieldUseTypeConfigDefinition `json:"configDefinition,omitempty"`
+	ConfigDefinition TaskValidationOutputPortFieldUseTypeConfigDefinition `json:"configDefinition,omitempty,omitzero"`
 }
 
 // TaskValidationOutputPortField defines nested fields for TaskValidation.OutputPort.Field.
@@ -2557,9 +2557,9 @@ type TaskValidationOutputPortField struct {
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationOutputPortFieldParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationOutputPortFieldParentRef `json:"parentRef,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	ConfigValues TaskValidationOutputPortFieldConfigValues `json:"configValues,omitempty"`
+	ConfigValues TaskValidationOutputPortFieldConfigValues `json:"configValues,omitempty,omitzero"`
 	// The status of an object that can be set to value 1 for shallow references across objects, other values reserved.
 	// +kubebuilder:validation:Optional
 	ObjectStatus int `json:"objectStatus,omitempty"`
@@ -2578,12 +2578,12 @@ type TaskValidationOutputPortField struct {
 	// +kubebuilder:validation:Optional
 	PortType string `json:"portType,omitempty"`
 	// +kubebuilder:validation:Optional
-	Type TaskValidationOutputPortFieldType `json:"type,omitempty"`
+	Type TaskValidationOutputPortFieldType `json:"type,omitempty,omitzero"`
 	// Labels are keywords or labels that you can add to data assets, dataflows and so on. You can define your own labels and use them to categorize content.
 	// +kubebuilder:validation:Optional
 	Labels []string `json:"labels,omitempty"`
 	// +kubebuilder:validation:Optional
-	SplitCondition TaskValidationOutputPortFieldSplitCondition `json:"splitCondition,omitempty"`
+	SplitCondition TaskValidationOutputPortFieldSplitCondition `json:"splitCondition,omitempty,omitzero"`
 	// The port based on what decision expression evaluates to.
 	// +kubebuilder:validation:Optional
 	DecisionOutputPortType string `json:"decisionOutputPortType,omitempty"`
@@ -2591,9 +2591,9 @@ type TaskValidationOutputPortField struct {
 	// +kubebuilder:validation:Optional
 	Scope string `json:"scope,omitempty"`
 	// +kubebuilder:validation:Optional
-	ScopeReference TaskValidationOutputPortFieldScopeReference `json:"scopeReference,omitempty"`
+	ScopeReference TaskValidationOutputPortFieldScopeReference `json:"scopeReference,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	NativeShapeField TaskValidationOutputPortFieldNativeShapeField `json:"nativeShapeField,omitempty"`
+	NativeShapeField TaskValidationOutputPortFieldNativeShapeField `json:"nativeShapeField,omitempty,omitzero"`
 	// The default value of the parameter.
 	// +kubebuilder:validation:Optional
 	DefaultValue shared.JSONValue `json:"defaultValue,omitempty"`
@@ -2616,9 +2616,9 @@ type TaskValidationOutputPortField struct {
 	// +kubebuilder:validation:Optional
 	OutputAggregationType string `json:"outputAggregationType,omitempty"`
 	// +kubebuilder:validation:Optional
-	Expr TaskValidationOutputPortFieldExpr `json:"expr,omitempty"`
+	Expr TaskValidationOutputPortFieldExpr `json:"expr,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	UseType TaskValidationOutputPortFieldUseType `json:"useType,omitempty"`
+	UseType TaskValidationOutputPortFieldUseType `json:"useType,omitempty,omitzero"`
 	// column name pattern can be used to generate the name structure of the generated columns. By default column names are of %PIVOT_KEY_VALUE% or %MACRO_INPUT%_%PIVOT_KEY_VALUE%, but we can change it something by passing something like MY_PREFIX%PIVOT_KEY_VALUE%MY_SUFFIX or MY_PREFIX%MACRO_INPUT%_%PIVOT_KEY_VALUE%MY_SUFFIX which will add custom prefix and suffix to the column name.
 	// +kubebuilder:validation:Optional
 	ColumnNamePattern string `json:"columnNamePattern,omitempty"`
@@ -2642,9 +2642,9 @@ type TaskValidationOutputPort struct {
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationOutputPortParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationOutputPortParentRef `json:"parentRef,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	ConfigValues TaskValidationOutputPortConfigValues `json:"configValues,omitempty"`
+	ConfigValues TaskValidationOutputPortConfigValues `json:"configValues,omitempty,omitzero"`
 	// The status of an object that can be set to value 1 for shallow references across objects, other values reserved.
 	// +kubebuilder:validation:Optional
 	ObjectStatus int `json:"objectStatus,omitempty"`
@@ -2710,7 +2710,7 @@ type TaskValidationParameterConfigValues struct {
 	// +kubebuilder:validation:Optional
 	ConfigParamValues map[string]TaskValidationParameterConfigValuesConfigParamValues `json:"configParamValues,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationParameterConfigValuesParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationParameterConfigValuesParentRef `json:"parentRef,omitempty,omitzero"`
 }
 
 // TaskValidationParameter defines nested fields for TaskValidation.Parameter.
@@ -2722,9 +2722,9 @@ type TaskValidationParameter struct {
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationParameterParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationParameterParentRef `json:"parentRef,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	ConfigValues TaskValidationParameterConfigValues `json:"configValues,omitempty"`
+	ConfigValues TaskValidationParameterConfigValues `json:"configValues,omitempty,omitzero"`
 	// The status of an object that can be set to value 1 for shallow references across objects, other values reserved.
 	// +kubebuilder:validation:Optional
 	ObjectStatus int `json:"objectStatus,omitempty"`
@@ -2798,7 +2798,7 @@ type TaskValidationOpConfigValues struct {
 	// +kubebuilder:validation:Optional
 	ConfigParamValues map[string]TaskValidationOpConfigValuesConfigParamValues `json:"configParamValues,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef TaskValidationOpConfigValuesParentRef `json:"parentRef,omitempty"`
+	ParentRef TaskValidationOpConfigValuesParentRef `json:"parentRef,omitempty,omitzero"`
 }
 
 // TaskValidationConfigProviderDelegateBindings defines nested fields for TaskValidation.ConfigProviderDelegate.Bindings.
@@ -2878,7 +2878,7 @@ type TaskValidationMetadata struct {
 	// +kubebuilder:validation:Optional
 	AggregatorKey string `json:"aggregatorKey,omitempty"`
 	// +kubebuilder:validation:Optional
-	Aggregator TaskValidationMetadataAggregator `json:"aggregator,omitempty"`
+	Aggregator TaskValidationMetadataAggregator `json:"aggregator,omitempty,omitzero"`
 	// The full path to identify this object.
 	// +kubebuilder:validation:Optional
 	IdentifierPath string `json:"identifierPath,omitempty"`
@@ -2895,7 +2895,7 @@ type TaskValidationMetadata struct {
 	// +kubebuilder:validation:Optional
 	IsFavorite bool `json:"isFavorite,omitempty"`
 	// +kubebuilder:validation:Optional
-	CountStatistics TaskValidationMetadataCountStatistics `json:"countStatistics,omitempty"`
+	CountStatistics TaskValidationMetadataCountStatistics `json:"countStatistics,omitempty,omitzero"`
 }
 
 // TaskValidationValidationMessages defines nested fields for TaskValidation.ValidationMessages.

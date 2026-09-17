@@ -50,15 +50,84 @@ func registerFsuCycleRuntimeHooksMutator(mutator FsuCycleRuntimeHooksMutator) {
 	}
 	fsucycleRuntimeHooksMutators = append(fsucycleRuntimeHooksMutators, mutator)
 }
+func newFsuCycleRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "fleetsoftwareupdate",
+		FormalSlug:    "fsucycle",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"S_CREATING", "S_IN_PROGRESS"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"S_ACTIVE", "S_NEEDS_ATTENTION", "S_SUCCEEDED"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"collectionType", "compartmentId", "displayName", "fsuCollectionId", "state", "targetVersion"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"batchingStrategy.isForceRolling", "batchingStrategy.isWaitForBatchResume", "batchingStrategy.percentage", "batchingStrategy.type", "compartmentId", "definedTags", "diagnosticsCollection.logCollectionMode", "displayName", "freeformTags", "goalVersionDetails.components.componentType", "goalVersionDetails.components.goalVersionDetails.goalSoftwareImageId", "goalVersionDetails.components.goalVersionDetails.goalType", "goalVersionDetails.components.goalVersionDetails.goalVersion", "goalVersionDetails.components.homePolicy", "goalVersionDetails.components.newHomePrefix", "goalVersionDetails.homePolicy", "goalVersionDetails.newHomePrefix", "goalVersionDetails.softwareImageId", "goalVersionDetails.type", "goalVersionDetails.version", "isIgnoreMissingPatches", "isIgnorePatches", "isKeepPlacement", "maxDrainTimeoutInSeconds", "type", "upgradeDetails.collectionType", "upgradeDetails.isIgnorePostUpgradeErrors", "upgradeDetails.isIgnorePrerequisites", "upgradeDetails.isRecompileInvalidObjects", "upgradeDetails.isTimeZoneUpgrade", "upgradeDetails.maxDrainTimeoutInSeconds"},
+			ForceNew:      []string{"applyActionSchedule", "applyActionSchedule.timeToStart", "applyActionSchedule.type", "fsuCollectionId", "stageActionSchedule", "stageActionSchedule.timeToStart", "stageActionSchedule.type"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newFsuCycleDefaultRuntimeHooks(sdkClient fleetsoftwareupdatesdk.FleetSoftwareUpdateClient) FsuCycleRuntimeHooks {
 	return FsuCycleRuntimeHooks{
+		Semantics:       newFsuCycleRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*fleetsoftwareupdatev1beta1.FsuCycle]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*fleetsoftwareupdatev1beta1.FsuCycle]{},
 		StatusHooks:     generatedruntime.StatusHooks[*fleetsoftwareupdatev1beta1.FsuCycle]{},
 		ParityHooks:     generatedruntime.ParityHooks[*fleetsoftwareupdatev1beta1.FsuCycle]{},
-		Async:           generatedruntime.AsyncHooks[*fleetsoftwareupdatev1beta1.FsuCycle]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*fleetsoftwareupdatev1beta1.FsuCycle]{},
+		Async: generatedruntime.AsyncHooks[*fleetsoftwareupdatev1beta1.FsuCycle]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := fleetsoftwareupdatesdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*fleetsoftwareupdatev1beta1.FsuCycle]{},
 		Create: runtimeOperationHooks[fleetsoftwareupdatesdk.CreateFsuCycleRequest, fleetsoftwareupdatesdk.CreateFsuCycleResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateFsuCycleDetails", RequestName: "CreateFsuCycleDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request fleetsoftwareupdatesdk.CreateFsuCycleRequest) (fleetsoftwareupdatesdk.CreateFsuCycleResponse, error) {
@@ -106,10 +175,19 @@ func buildFsuCycleGeneratedRuntimeConfig(
 	hooks FsuCycleRuntimeHooks,
 ) generatedruntime.Config[*fleetsoftwareupdatev1beta1.FsuCycle] {
 	return generatedruntime.Config[*fleetsoftwareupdatev1beta1.FsuCycle]{
-		Kind:            "FsuCycle",
-		SDKName:         "FsuCycle",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "FsuCycle",
+		SDKName:   "FsuCycle",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

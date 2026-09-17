@@ -241,6 +241,10 @@ spec:
                   contain spaces. Avoid entering confidential information.
                   Example: `example_backend_set`
                 type: string
+              networkLoadBalancerId:
+                description: The OCID of the network load balancer that owns this
+                  backend set.
+                type: string
               policy:
                 description: |-
                   The network load balancer policy for the backend set.
@@ -437,6 +441,10 @@ spec:
                   Valid backend set names include only alphanumeric characters, dashes, and underscores. Backend set names cannot
                   contain spaces. Avoid entering confidential information.
                   Example: `example_backend_set`
+                type: string
+              networkLoadBalancerId:
+                description: The bound network load balancer OCID used to address
+                  this backend set.
                 type: string
               policy:
                 description: |-

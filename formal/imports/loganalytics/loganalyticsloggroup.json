@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "loganalytics",
+  "slug": "loganalyticsloggroup",
+  "kind": "LogAnalyticsLogGroup",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_log_analytics_log_analytics_log_group",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateLogAnalyticsLogGroup",
+        "requestType": "loganalytics.CreateLogAnalyticsLogGroupRequest",
+        "responseType": "loganalytics.CreateLogAnalyticsLogGroupResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetLogAnalyticsLogGroup",
+        "requestType": "loganalytics.GetLogAnalyticsLogGroupRequest",
+        "responseType": "loganalytics.GetLogAnalyticsLogGroupResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListLogAnalyticsLogGroups",
+        "requestType": "loganalytics.ListLogAnalyticsLogGroupsRequest",
+        "responseType": "loganalytics.ListLogAnalyticsLogGroupsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeLogAnalyticsLogGroupCompartment",
+        "requestType": "loganalytics.ChangeLogAnalyticsLogGroupCompartmentRequest",
+        "responseType": "loganalytics.ChangeLogAnalyticsLogGroupCompartmentResponse"
+      },
+      {
+        "operation": "UpdateLogAnalyticsLogGroup",
+        "requestType": "loganalytics.UpdateLogAnalyticsLogGroupRequest",
+        "responseType": "loganalytics.UpdateLogAnalyticsLogGroupResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteLogAnalyticsLogGroup",
+        "requestType": "loganalytics.DeleteLogAnalyticsLogGroupRequest",
+        "responseType": "loganalytics.DeleteLogAnalyticsLogGroupResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name",
+      "description",
+      "freeform_tags",
+      "defined_tags"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_log_analytics_log_analytics_log_groups",
+    "collectionField": "log_analytics_log_group_summary_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "id"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/loganalytics/loganalyticsloggroup/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/loganalytics/loganalyticsloggroup/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "delete-confirmation",
+      "lifecycle-classification",
+      "list-lookup",
+      "mutation-policy",
+      "secret-output"
+    ]
+  },
+  "notes": [
+    "Pinned provider operations are combined with reviewed namespace-path identity and LogAnalyticsLogGroup runtime semantics."
+  ]
+}

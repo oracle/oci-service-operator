@@ -120,11 +120,16 @@ spec:
                     description: The registry version.
                     type: integer
                 type: object
+              workspaceId:
+                description: The OCID of the Data Integration workspace containing
+                  this resource.
+                type: string
             required:
             - identifier
             - modelType
             - name
             - objectVersion
+            - workspaceId
             type: object
           status:
             description: ProjectStatus defines the observed state of Project.

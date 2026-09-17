@@ -66,25 +66,25 @@ func newSecurityRuleDefaultRuntimeHooks(sdkClient networkfirewallsdk.NetworkFire
 			},
 		},
 		Get: runtimeOperationHooks[networkfirewallsdk.GetSecurityRuleRequest, networkfirewallsdk.GetSecurityRuleResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "SecurityRuleName", RequestName: "securityRuleName", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "SecurityRuleName", RequestName: "securityRuleName", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request networkfirewallsdk.GetSecurityRuleRequest) (networkfirewallsdk.GetSecurityRuleResponse, error) {
 				return sdkClient.GetSecurityRule(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[networkfirewallsdk.ListSecurityRulesRequest, networkfirewallsdk.ListSecurityRulesResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: true}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "SecurityRulePriorityOrder", RequestName: "securityRulePriorityOrder", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "SecurityRulePriorityOrder", RequestName: "securityRulePriorityOrder", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request networkfirewallsdk.ListSecurityRulesRequest) (networkfirewallsdk.ListSecurityRulesResponse, error) {
 				return sdkClient.ListSecurityRules(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[networkfirewallsdk.UpdateSecurityRuleRequest, networkfirewallsdk.UpdateSecurityRuleResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "SecurityRuleName", RequestName: "securityRuleName", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdateSecurityRuleDetails", RequestName: "UpdateSecurityRuleDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "SecurityRuleName", RequestName: "securityRuleName", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateSecurityRuleDetails", RequestName: "UpdateSecurityRuleDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request networkfirewallsdk.UpdateSecurityRuleRequest) (networkfirewallsdk.UpdateSecurityRuleResponse, error) {
 				return sdkClient.UpdateSecurityRule(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[networkfirewallsdk.DeleteSecurityRuleRequest, networkfirewallsdk.DeleteSecurityRuleResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "SecurityRuleName", RequestName: "securityRuleName", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "SecurityRuleName", RequestName: "securityRuleName", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request networkfirewallsdk.DeleteSecurityRuleRequest) (networkfirewallsdk.DeleteSecurityRuleResponse, error) {
 				return sdkClient.DeleteSecurityRule(ctx, request)
 			},

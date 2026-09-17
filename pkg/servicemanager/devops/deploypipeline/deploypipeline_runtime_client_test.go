@@ -408,6 +408,35 @@ func TestDeployPipelineServiceClientNoopReconcileDoesNotUpdate(t *testing.T) {
 	}
 }
 
+func TestDeployPipelineDeleteConfirmsPreDeleteAuthShapedNotFoundByScopedList(t *testing.T) {
+	t.Parallel()
+
+	resource := makeDeployPipelineResource()
+	resource.Status.Id = testDeployPipelineID
+	resource.Status.OsokStatus.Ocid = shared.OCID(testDeployPipelineID)
+	deleteCalled := false
+	client := testDeployPipelineClient(&fakeDeployPipelineOCIClient{
+		getFn: func(context.Context, devopssdk.GetDeployPipelineRequest) (devopssdk.GetDeployPipelineResponse, error) {
+			return devopssdk.GetDeployPipelineResponse{}, errortest.NewServiceError(404, errorutil.NotAuthorizedOrNotFound, "not authorized or not found")
+		},
+		deleteFn: func(context.Context, devopssdk.DeleteDeployPipelineRequest) (devopssdk.DeleteDeployPipelineResponse, error) {
+			deleteCalled = true
+			return devopssdk.DeleteDeployPipelineResponse{}, nil
+		},
+		listFn: func(context.Context, devopssdk.ListDeployPipelinesRequest) (devopssdk.ListDeployPipelinesResponse, error) {
+			return devopssdk.ListDeployPipelinesResponse{}, nil
+		},
+	})
+
+	deleted, err := client.Delete(context.Background(), resource)
+	if err != nil {
+		t.Fatalf("Delete() error = %v", err)
+	}
+	if !deleted || deleteCalled || resource.Status.OsokStatus.DeletedAt == nil {
+		t.Fatalf("Delete() deleted=%v deleteCalled=%v deletedAt=%v, want scoped absence confirmation", deleted, deleteCalled, resource.Status.OsokStatus.DeletedAt)
+	}
+}
+
 func TestDeployPipelineServiceClientUpdatesMutableFields(t *testing.T) {
 	t.Parallel()
 
@@ -569,6 +598,9 @@ func TestDeployPipelineDeleteTreatsPreDeleteAuthShapedNotFoundAsError(t *testing
 	deleteCalled := false
 
 	client := testDeployPipelineClient(&fakeDeployPipelineOCIClient{
+		listFn: func(context.Context, devopssdk.ListDeployPipelinesRequest) (devopssdk.ListDeployPipelinesResponse, error) {
+			return devopssdk.ListDeployPipelinesResponse{DeployPipelineCollection: devopssdk.DeployPipelineCollection{Items: []devopssdk.DeployPipelineSummary{makeSDKDeployPipelineSummary(testDeployPipelineID, testProjectID, resource.Spec.DisplayName, resource.Spec.Description, devopssdk.DeployPipelineLifecycleStateActive)}}}, nil
+		},
 		getFn: func(context.Context, devopssdk.GetDeployPipelineRequest) (devopssdk.GetDeployPipelineResponse, error) {
 			return devopssdk.GetDeployPipelineResponse{}, errortest.NewServiceError(404, errorutil.NotAuthorizedOrNotFound, "not authorized or not found")
 		},

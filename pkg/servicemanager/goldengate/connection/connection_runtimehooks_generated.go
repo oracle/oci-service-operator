@@ -50,15 +50,84 @@ func registerConnectionRuntimeHooksMutator(mutator ConnectionRuntimeHooksMutator
 	}
 	connectionRuntimeHooksMutators = append(connectionRuntimeHooksMutators, mutator)
 }
+func newConnectionRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "goldengate",
+		FormalSlug:    "connection",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{"UPDATING"},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"assignableDeploymentId", "assignableDeploymentType", "assignedDeploymentId", "compartmentId", "connectionType", "displayName", "lifecycleState", "technologyType"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"authenticationType", "definedTags", "description", "displayName", "doesUseSecretIds", "fingerprint", "freeformTags", "keyId", "nsgIds", "password", "passwordSecretId", "routingMethod", "securityAttributes", "securityProtocol", "servers", "subnetId", "username", "vaultId"},
+			ForceNew:      []string{"accessKeyId", "accountKey", "accountKeySecretId", "accountName", "additionalAttributes", "authenticationMode", "azureAuthorityHost", "azureTenantId", "bootstrapServers", "catalog", "clientId", "clientSecret", "clientSecretSecretId", "clusterId", "clusterPlacementGroupId", "compartmentId", "connectionFactory", "connectionString", "connectionType", "connectionUrl", "consumerProperties", "coreSiteXml", "databaseId", "databaseName", "dbSystemId", "deploymentId", "endpoint", "host", "jndiConnectionFactory", "jndiInitialContextFactory", "jndiProviderUrl", "jndiSecurityCredentials", "jndiSecurityCredentialsSecretId", "jndiSecurityPrincipal", "jsonData", "keyStore", "keyStorePassword", "keyStorePasswordSecretId", "keyStoreSecretId", "locks", "port", "privateIp", "privateKeyFile", "privateKeyFileSecretId", "privateKeyPassphrase", "privateKeyPassphraseSecretId", "producerProperties", "publicKeyFingerprint", "redisClusterId", "region", "sasToken", "sasTokenSecretId", "secretAccessKey", "secretAccessKeySecretId", "serviceAccountKeyFile", "serviceAccountKeyFileSecretId", "sessionMode", "shouldUseJndi", "shouldUseResourcePrincipal", "shouldValidateServerCertificate", "sslCa", "sslCert", "sslClientKeystash", "sslClientKeystashSecretId", "sslClientKeystoredb", "sslClientKeystoredbSecretId", "sslCrl", "sslKey", "sslKeyPassword", "sslKeyPasswordSecretId", "sslKeySecretId", "sslMode", "sslServerCertificate", "storage", "storageCredentialName", "streamPoolId", "subscriptionId", "technologyType", "tenancyId", "tenantId", "tlsCaFile", "tlsCertificateKeyFile", "tlsCertificateKeyFilePassword", "tlsCertificateKeyFilePasswordSecretId", "tlsCertificateKeyFileSecretId", "trustStore", "trustStorePassword", "trustStorePasswordSecretId", "trustStoreSecretId", "url", "userId", "wallet", "walletSecretId"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "Connection", Action: "CreateConnection"}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "Connection", Action: "UpdateConnection"}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "Connection", Action: "DeleteConnection"}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "Connection", Action: "CreateConnection"}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "Connection", Action: "UpdateConnection"}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "Connection", Action: "DeleteConnection"}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newConnectionDefaultRuntimeHooks(sdkClient goldengatesdk.GoldenGateClient) ConnectionRuntimeHooks {
 	return ConnectionRuntimeHooks{
+		Semantics:       newConnectionRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*goldengatev1beta1.Connection]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*goldengatev1beta1.Connection]{},
 		StatusHooks:     generatedruntime.StatusHooks[*goldengatev1beta1.Connection]{},
 		ParityHooks:     generatedruntime.ParityHooks[*goldengatev1beta1.Connection]{},
-		Async:           generatedruntime.AsyncHooks[*goldengatev1beta1.Connection]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*goldengatev1beta1.Connection]{},
+		Async: generatedruntime.AsyncHooks[*goldengatev1beta1.Connection]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := goldengatesdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*goldengatev1beta1.Connection]{},
 		Create: runtimeOperationHooks[goldengatesdk.CreateConnectionRequest, goldengatesdk.CreateConnectionResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateConnectionDetails", RequestName: "CreateConnectionDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request goldengatesdk.CreateConnectionRequest) (goldengatesdk.CreateConnectionResponse, error) {
@@ -106,10 +175,19 @@ func buildConnectionGeneratedRuntimeConfig(
 	hooks ConnectionRuntimeHooks,
 ) generatedruntime.Config[*goldengatev1beta1.Connection] {
 	return generatedruntime.Config[*goldengatev1beta1.Connection]{
-		Kind:            "Connection",
-		SDKName:         "Connection",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "Connection",
+		SDKName:   "Connection",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

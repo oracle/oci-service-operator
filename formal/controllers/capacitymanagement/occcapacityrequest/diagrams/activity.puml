@@ -55,17 +55,18 @@ stop
 endif
 }
 partition "Ready and Drift Handling" {
-:Compare live OCI state against the imported\nfield surface;
+:Compare live OCI state against the\nrepo-authored mutation surface;
 if ("Force-new or conflicting drift detected?") then (yes)
-:Reject drift before OCI mutation for force-new\nfields availability_domain, compartment_id,\ndate_expected_capacity_handover, description\n(+5 more);
+:Reject drift before OCI mutation for force-new\nfields availabilityDomain, compartmentId,\ndateExpectedCapacityHandover, description (+5\nmore);
 stop
 endif
 if ("Supported mutable drift detected?") then (yes)
-:Apply UpdateOccCapacityRequest only for\nmutable fields defined_tags, display_name,\nfreeform_tags, request_state;
+:Apply UpdateOccCapacityRequest only for\nmutable fields definedTags, displayName,\nfreeformTags, requestState;
 else (no)
 :Skip the no-op mutation path;
 endif
 :Run provider helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=template action=CREATED;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource when the\nmatching field-driven path executes;
+:Apply explicit follow-up semantics\ncreate=read-after-write;\nupdate=read-after-write; delete=confirm-delete;
 :Return success for the ACTIVE success state;
 :Project required status and finalizer policy\nretain-until-confirmed-delete;
 :Requeue on provisioning, updating, terminating;
@@ -93,11 +94,13 @@ retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
 provider states: create CREATING; update
 UPDATING; delete DELETING
-supported drift: defined_tags, display_name,
-freeform_tags, request_state
+follow-up: create=read-after-write;
+update=read-after-write; delete=confirm-delete
+supported drift: definedTags, displayName,
+freeformTags, requestState
 reject before mutate: force-new fields
-availability_domain, compartment_id,
-date_expected_capacity_handover, description (+5
+availabilityDomain, compartmentId,
+dateExpectedCapacityHandover, description (+5
 more)
 create-only fields: none
 list lookup:
@@ -106,8 +109,12 @@ filters compartment_id, display_name, id,
 namespace (+2 more)
 conflicts: none
 open gaps: none
-Scaffold metadata only; replace with
-controller-specific runtime states before
-promotion.
+The runtime intentionally disables
+list-before-create because a capacity request
+cannot be safely reused from a broad search.
+requestState supports the SUBMITTED and
+CANCELLED update values exposed by the OCI SDK;
+terminal server-managed request states are
+normalized out of desired state.
 end note
 @enduml

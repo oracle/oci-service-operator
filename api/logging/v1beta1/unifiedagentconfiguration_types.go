@@ -40,7 +40,7 @@ type UnifiedAgentConfigurationSpec struct {
 	// +kubebuilder:validation:Optional
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// +kubebuilder:validation:Optional
-	GroupAssociation UnifiedAgentConfigurationGroupAssociation `json:"groupAssociation,omitempty"`
+	GroupAssociation UnifiedAgentConfigurationGroupAssociation `json:"groupAssociation,omitempty,omitzero"`
 }
 
 // UnifiedAgentConfigurationServiceConfigurationSourceParserPattern defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Source.Parser.Pattern.
@@ -216,7 +216,7 @@ type UnifiedAgentConfigurationServiceConfigurationSourceParser struct {
 	// +kubebuilder:validation:Optional
 	SyslogParserType string `json:"syslogParserType,omitempty"`
 	// +kubebuilder:validation:Optional
-	RecordInput UnifiedAgentConfigurationServiceConfigurationSourceParserRecordInput `json:"recordInput,omitempty"`
+	RecordInput UnifiedAgentConfigurationServiceConfigurationSourceParserRecordInput `json:"recordInput,omitempty,omitzero"`
 	// Regex pattern.
 	// +kubebuilder:validation:Optional
 	Expression string `json:"expression,omitempty"`
@@ -237,7 +237,7 @@ type UnifiedAgentConfigurationServiceConfigurationSourceParser struct {
 	IsMergeCriFields bool `json:"isMergeCriFields,omitempty"`
 	// Optional nested JSON Parser for CRI. Supported fields are fieldTimeKey, timeFormat, and isKeepTimeKey.
 	// +kubebuilder:validation:Optional
-	NestedParser UnifiedAgentConfigurationServiceConfigurationSourceParserNestedParser `json:"nestedParser,omitempty"`
+	NestedParser UnifiedAgentConfigurationServiceConfigurationSourceParserNestedParser `json:"nestedParser,omitempty,omitzero"`
 }
 
 // UnifiedAgentConfigurationServiceConfigurationSourceAdvancedOptions defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Source.AdvancedOptions.
@@ -266,9 +266,9 @@ type UnifiedAgentConfigurationServiceConfigurationSource struct {
 	// +kubebuilder:validation:Optional
 	Paths []string `json:"paths,omitempty"`
 	// +kubebuilder:validation:Optional
-	Parser UnifiedAgentConfigurationServiceConfigurationSourceParser `json:"parser,omitempty"`
+	Parser UnifiedAgentConfigurationServiceConfigurationSourceParser `json:"parser,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	AdvancedOptions UnifiedAgentConfigurationServiceConfigurationSourceAdvancedOptions `json:"advancedOptions,omitempty"`
+	AdvancedOptions UnifiedAgentConfigurationServiceConfigurationSourceAdvancedOptions `json:"advancedOptions,omitempty,omitzero"`
 }
 
 // UnifiedAgentConfigurationServiceConfigurationDestinationOperationalMetricsConfigurationSourceRecordInput defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Destination.OperationalMetricsConfiguration.Source.RecordInput.
@@ -314,7 +314,7 @@ type UnifiedAgentConfigurationServiceConfigurationDestination struct {
 	// +kubebuilder:validation:Required
 	LogObjectId string `json:"logObjectId"`
 	// +kubebuilder:validation:Optional
-	OperationalMetricsConfiguration UnifiedAgentConfigurationServiceConfigurationDestinationOperationalMetricsConfiguration `json:"operationalMetricsConfiguration,omitempty"`
+	OperationalMetricsConfiguration UnifiedAgentConfigurationServiceConfigurationDestinationOperationalMetricsConfiguration `json:"operationalMetricsConfiguration,omitempty,omitzero"`
 }
 
 // UnifiedAgentConfigurationServiceConfigurationFilterCustomSection defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Filter.CustomSection.
@@ -500,7 +500,7 @@ type UnifiedAgentConfigurationServiceConfigurationFilterParser struct {
 	// +kubebuilder:validation:Optional
 	SyslogParserType string `json:"syslogParserType,omitempty"`
 	// +kubebuilder:validation:Optional
-	RecordInput UnifiedAgentConfigurationServiceConfigurationFilterParserRecordInput `json:"recordInput,omitempty"`
+	RecordInput UnifiedAgentConfigurationServiceConfigurationFilterParserRecordInput `json:"recordInput,omitempty,omitzero"`
 	// Regex pattern.
 	// +kubebuilder:validation:Optional
 	Expression string `json:"expression,omitempty"`
@@ -521,7 +521,7 @@ type UnifiedAgentConfigurationServiceConfigurationFilterParser struct {
 	IsMergeCriFields bool `json:"isMergeCriFields,omitempty"`
 	// Optional nested JSON Parser for CRI. Supported fields are fieldTimeKey, timeFormat, and isKeepTimeKey.
 	// +kubebuilder:validation:Optional
-	NestedParser UnifiedAgentConfigurationServiceConfigurationFilterParserNestedParser `json:"nestedParser,omitempty"`
+	NestedParser UnifiedAgentConfigurationServiceConfigurationFilterParserNestedParser `json:"nestedParser,omitempty,omitzero"`
 }
 
 // UnifiedAgentConfigurationServiceConfigurationFilterAllowList defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Filter.AllowList.
@@ -573,7 +573,7 @@ type UnifiedAgentConfigurationServiceConfigurationFilter struct {
 	// +kubebuilder:validation:Optional
 	CustomSections []UnifiedAgentConfigurationServiceConfigurationFilterCustomSection `json:"customSections,omitempty"`
 	// +kubebuilder:validation:Optional
-	Parser UnifiedAgentConfigurationServiceConfigurationFilterParser `json:"parser,omitempty"`
+	Parser UnifiedAgentConfigurationServiceConfigurationFilterParser `json:"parser,omitempty,omitzero"`
 	// The field name in the record to parse.
 	// +kubebuilder:validation:Optional
 	KeyName string `json:"keyName,omitempty"`
@@ -851,7 +851,7 @@ type UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationSource
 	// +kubebuilder:validation:Optional
 	SyslogParserType string `json:"syslogParserType,omitempty"`
 	// +kubebuilder:validation:Optional
-	RecordInput UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationSourceParserRecordInput `json:"recordInput,omitempty"`
+	RecordInput UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationSourceParserRecordInput `json:"recordInput,omitempty,omitzero"`
 	// Regex pattern.
 	// +kubebuilder:validation:Optional
 	Expression string `json:"expression,omitempty"`
@@ -872,7 +872,7 @@ type UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationSource
 	IsMergeCriFields bool `json:"isMergeCriFields,omitempty"`
 	// Optional nested JSON Parser for CRI. Supported fields are fieldTimeKey, timeFormat, and isKeepTimeKey.
 	// +kubebuilder:validation:Optional
-	NestedParser UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationSourceParserNestedParser `json:"nestedParser,omitempty"`
+	NestedParser UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationSourceParserNestedParser `json:"nestedParser,omitempty,omitzero"`
 }
 
 // UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationSourceAdvancedOptions defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.ApplicationConfiguration.Source.AdvancedOptions.
@@ -889,11 +889,11 @@ type UnifiedAgentConfigurationServiceConfigurationApplicationConfiguration struc
 	// +kubebuilder:validation:Optional
 	SourceType string `json:"sourceType,omitempty"`
 	// +kubebuilder:validation:Optional
-	Source UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationSource `json:"source,omitempty"`
+	Source UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationSource `json:"source,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	Destination UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationDestination `json:"destination,omitempty"`
+	Destination UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationDestination `json:"destination,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	Filter UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationFilter `json:"filter,omitempty"`
+	Filter UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationFilter `json:"filter,omitempty,omitzero"`
 	// Tail log source objects.
 	// +kubebuilder:validation:Optional
 	Sources []UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationSource `json:"sources,omitempty"`
@@ -909,7 +909,7 @@ type UnifiedAgentConfigurationServiceConfiguration struct {
 	// +kubebuilder:validation:Optional
 	Sources []UnifiedAgentConfigurationServiceConfigurationSource `json:"sources,omitempty"`
 	// +kubebuilder:validation:Optional
-	Destination UnifiedAgentConfigurationServiceConfigurationDestination `json:"destination,omitempty"`
+	Destination UnifiedAgentConfigurationServiceConfigurationDestination `json:"destination,omitempty,omitzero"`
 	// Logging filter object.
 	// +kubebuilder:validation:Optional
 	Filter []UnifiedAgentConfigurationServiceConfigurationFilter `json:"filter,omitempty"`

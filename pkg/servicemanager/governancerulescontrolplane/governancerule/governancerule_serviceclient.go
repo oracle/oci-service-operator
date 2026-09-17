@@ -32,8 +32,28 @@ type defaultGovernanceRuleServiceClient struct {
 
 var _ GovernanceRuleServiceClient = defaultGovernanceRuleServiceClient{}
 
+type GovernanceRuleSDKClients struct {
+	governanceRuleClient governancerulescontrolplanesdk.GovernanceRuleClient
+	workRequestClient    governancerulescontrolplanesdk.WorkRequestClient
+}
+
+func newGovernanceRuleSDKClients(manager *GovernanceRuleServiceManager) (GovernanceRuleSDKClients, error) {
+	var clients GovernanceRuleSDKClients
+	governanceRuleClientClient, err := governancerulescontrolplanesdk.NewGovernanceRuleClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize GovernanceRule OCI client GovernanceRuleClient: %w", err)
+	}
+	clients.governanceRuleClient = governanceRuleClientClient
+	workRequestClientClient, err := governancerulescontrolplanesdk.NewWorkRequestClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize GovernanceRule OCI client WorkRequestClient: %w", err)
+	}
+	clients.workRequestClient = workRequestClientClient
+	return clients, nil
+}
+
 var newGovernanceRuleServiceClient = func(manager *GovernanceRuleServiceManager) GovernanceRuleServiceClient {
-	sdkClient, err := governancerulescontrolplanesdk.NewGovernanceRuleClientWithConfigurationProvider(manager.Provider)
+	sdkClient, err := newGovernanceRuleSDKClients(manager)
 	hooks := newGovernanceRuleRuntimeHooks(manager, sdkClient)
 	config := buildGovernanceRuleGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {

@@ -40,9 +40,11 @@ type scheduledTaskOCIClient interface {
 }
 
 type namespaceResolvingScheduledTaskClient struct {
-	delegate ScheduledTaskServiceClient
-	client   scheduledTaskOCIClient
-	initErr  error
+	delegate               ScheduledTaskServiceClient
+	client                 scheduledTaskOCIClient
+	initErr                error
+	namespaceProvider      common.ConfigurationProvider
+	namespaceCompartmentID string
 }
 
 type scheduledTaskResourceContextKey struct{}
@@ -95,11 +97,19 @@ func applyScheduledTaskRuntimeHooks(
 	hooks.DeleteHooks.HandleError = handleScheduledTaskDeleteError
 	hooks.WrapGeneratedClient = append(hooks.WrapGeneratedClient, func(delegate ScheduledTaskServiceClient) ScheduledTaskServiceClient {
 		return &namespaceResolvingScheduledTaskClient{
-			delegate: delegate,
-			client:   client,
-			initErr:  initErr,
+			delegate:          delegate,
+			client:            client,
+			initErr:           initErr,
+			namespaceProvider: scheduledTaskConfigurationProvider(manager),
 		}
 	})
+}
+
+func scheduledTaskConfigurationProvider(manager *ScheduledTaskServiceManager) common.ConfigurationProvider {
+	if manager == nil {
+		return nil
+	}
+	return manager.Provider
 }
 
 func applyScheduledTaskBodyHooks(hooks *ScheduledTaskRuntimeHooks) {
@@ -450,7 +460,13 @@ func (c *namespaceResolvingScheduledTaskClient) resolveLogAnalyticsNamespace(
 	if c.client == nil {
 		return "", fmt.Errorf("ScheduledTask OCI client is not configured")
 	}
-	compartmentID := strings.TrimSpace(resource.Spec.CompartmentId)
+	compartmentID, err := c.resolveNamespaceCompartmentID()
+	if err != nil {
+		return "", err
+	}
+	if compartmentID == "" {
+		compartmentID = strings.TrimSpace(resource.Spec.CompartmentId)
+	}
 	if compartmentID == "" {
 		return "", fmt.Errorf("lookup ScheduledTask namespace: spec.compartmentId is required")
 	}
@@ -466,6 +482,23 @@ func (c *namespaceResolvingScheduledTaskClient) resolveLogAnalyticsNamespace(
 		return "", fmt.Errorf("lookup ScheduledTask namespace: %w", err)
 	}
 	return namespace, nil
+}
+
+func (c *namespaceResolvingScheduledTaskClient) resolveNamespaceCompartmentID() (string, error) {
+	if c == nil {
+		return "", nil
+	}
+	if compartmentID := strings.TrimSpace(c.namespaceCompartmentID); compartmentID != "" {
+		return compartmentID, nil
+	}
+	if c.namespaceProvider == nil {
+		return "", nil
+	}
+	tenancyID, err := c.namespaceProvider.TenancyOCID()
+	if err != nil {
+		return "", fmt.Errorf("resolve Log Analytics namespace tenancy: %w", err)
+	}
+	return strings.TrimSpace(tenancyID), nil
 }
 
 func (c *namespaceResolvingScheduledTaskClient) rejectAuthShapedPreDeleteConfirmRead(

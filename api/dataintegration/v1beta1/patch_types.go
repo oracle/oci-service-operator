@@ -39,7 +39,7 @@ type PatchSpec struct {
 	// +kubebuilder:validation:Optional
 	ObjectStatus int `json:"objectStatus,omitempty"`
 	// +kubebuilder:validation:Optional
-	RegistryMetadata PatchRegistryMetadata `json:"registryMetadata,omitempty"`
+	RegistryMetadata PatchRegistryMetadata `json:"registryMetadata,omitempty,omitzero"`
 }
 
 // PatchRegistryMetadata defines nested fields for Patch.RegistryMetadata.

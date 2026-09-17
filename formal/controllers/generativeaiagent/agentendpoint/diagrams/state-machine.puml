@@ -25,6 +25,7 @@ state "Retryable" as retryable
 state "Failed" as failed
 observe : read spec, tracked status, delete intent,\nand current OCI lifecycle
 state "ResolveByLookup" as resolve_by_lookup
+state "RejectUnsupportedDrift" as reject_unsupported_drift
 state "ApplyUpdate" as apply_update
 state "DeletePending" as delete_pending
 state "Deleted" as deleted
@@ -37,7 +38,9 @@ resolve_by_lookup --> failed : unresolved OCI error or non-success state
 observe --> evaluate_ready : OCI state in ACTIVE
 observe --> retryable : OCI state in CREATING,\nUPDATING, DELETING
 observe --> failed : unresolved OCI error or non-success state
-evaluate_ready --> apply_update : supported mutable drift for\ncompartment_id,\ncontent_moderation_config,\ndefined_tags (+12 more)
+evaluate_ready --> reject_unsupported_drift : force-new or conflicting\ndrift detected
+reject_unsupported_drift --> ready : wait for spec or live state change
+evaluate_ready --> apply_update : supported mutable drift for\ncontentModerationConfig,\ndefinedTags, description\n(+11 more)
 apply_update --> ready : update path completes
 evaluate_ready --> ready : no supported drift remains
 ready --> ready : no supported drift remains
@@ -68,10 +71,10 @@ retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
 provider states: create CREATING; update
 UPDATING; delete DELETING
-supported drift: compartment_id,
-content_moderation_config, defined_tags,
-description (+11 more)
-reject before mutate: none
+supported drift: contentModerationConfig,
+definedTags, description, displayName (+10 more)
+reject before mutate: force-new fields agentId,
+compartmentId, shouldEnableSession
 create-only fields: none
 list lookup:
 oci_generative_ai_agent_agent_endpoints filters
@@ -79,9 +82,10 @@ agent_id, compartment_id, display_name,
 lifecycle_state
 conflicts: none
 open gaps: none
-Scaffold metadata only; replace with
-controller-specific runtime states before
-promotion.
+The reviewed handwritten runtime reconciles the
+mutable fields in place and rejects drift for
+agentId, compartmentId, and shouldEnableSession
+without invoking ChangeAgentEndpointCompartment.
 end note
 note right of delete_pending
 delete policy: required

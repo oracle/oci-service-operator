@@ -30,7 +30,7 @@ type TaskRunSpec struct {
 	// +kubebuilder:validation:Optional
 	Description string `json:"description,omitempty"`
 	// +kubebuilder:validation:Optional
-	ConfigProvider TaskRunConfigProvider `json:"configProvider,omitempty"`
+	ConfigProvider TaskRunConfigProvider `json:"configProvider,omitempty,omitzero"`
 	// Value can only contain upper case letters, underscore, and numbers. It should begin with upper case letter or underscore. The value can be modified.
 	// +kubebuilder:validation:Optional
 	Identifier string `json:"identifier,omitempty"`
@@ -47,13 +47,22 @@ type TaskRunSpec struct {
 	// +kubebuilder:validation:Optional
 	StepId string `json:"stepId,omitempty"`
 	// +kubebuilder:validation:Optional
-	RegistryMetadata TaskRunRegistryMetadata `json:"registryMetadata,omitempty"`
+	RegistryMetadata TaskRunRegistryMetadata `json:"registryMetadata,omitempty,omitzero"`
 	// The status of the object.
 	// +kubebuilder:validation:Optional
 	Status string `json:"status,omitempty"`
 	// The version of the object that is used to track changes in the object instance.
 	// +kubebuilder:validation:Optional
 	ObjectVersion int `json:"objectVersion,omitempty"`
+	// The OCID of the Data Integration workspace containing this resource.
+	// +kubebuilder:validation:Required
+	WorkspaceId string `json:"workspaceId"`
+	// The key of the application containing this resource.
+	// +kubebuilder:validation:Required
+	ApplicationKey string `json:"applicationKey"`
+	// The aggregator key required by the collection lookup.
+	// +kubebuilder:validation:Required
+	AggregatorKey string `json:"aggregatorKey"`
 }
 
 // TaskRunConfigProviderBindings defines nested fields for TaskRun.ConfigProvider.Bindings.

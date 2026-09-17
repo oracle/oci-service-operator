@@ -1,0 +1,26 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: osmanagementhub
+slug: lifecycleenvironment
+kind: LifecycleEnvironment
+archetype: generated-service-manager
+states: [provisioning, active, updating, terminating]
+repoAuthored:
+  providerLifecycle:
+    createPending: [CREATING]
+    updatePending: [UPDATING]
+    deletePending: [CREATING, UPDATING, DELETING]
+  listLookup:
+    filters: [compartmentId, displayName, archType, osFamily, vendorName, location, id]
+    matchRule: exact full-identity match; duplicate matches fail
+  mutation:
+    mutable: [displayName, description, stages, freeformTags, definedTags]
+    forceNew: [compartmentId, archType, osFamily, vendorName, location]
+  hooks:
+    create: [{helper: tfresource.CreateResource}]
+    update: [{helper: tfresource.UpdateResource}]
+    delete: [{helper: tfresource.DeleteResource}]
+  followUp: {create: read-after-write, update: read-after-write, delete: confirm-delete}
+notes:
+  - ACTIVE is success and DELETED confirms deletion; lifecycle rereads retain the finalizer through pending states.
+  - The dynamic mock verifies exact create/update SDK bodies, status projection, and delete confirmation.

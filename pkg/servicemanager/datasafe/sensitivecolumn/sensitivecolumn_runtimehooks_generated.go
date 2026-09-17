@@ -50,15 +50,84 @@ func registerSensitiveColumnRuntimeHooksMutator(mutator SensitiveColumnRuntimeHo
 	}
 	sensitivecolumnRuntimeHooksMutators = append(sensitivecolumnRuntimeHooksMutators, mutator)
 }
+func newSensitiveColumnRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "datasafe",
+		FormalSlug:    "sensitivecolumn",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{"UPDATING"},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"columnName", "objectName", "schemaName", "sensitiveDataModelId"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"appDefinedChildColumnKeys", "dataType", "dbDefinedChildColumnKeys", "parentColumnKeys", "relationType", "sensitiveTypeId", "status"},
+			ForceNew:      []string{"appName", "columnName", "objectName", "objectType", "schemaName", "sensitiveDataModelId"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "SensitiveColumn", Action: "CreateSensitiveColumn"}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "SensitiveColumn", Action: "UpdateSensitiveColumn"}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "SensitiveColumn", Action: "DeleteSensitiveColumn"}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "SensitiveColumn", Action: "CreateSensitiveColumn"}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "SensitiveColumn", Action: "UpdateSensitiveColumn"}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "SensitiveColumn", Action: "DeleteSensitiveColumn"}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newSensitiveColumnDefaultRuntimeHooks(sdkClient datasafesdk.DataSafeClient) SensitiveColumnRuntimeHooks {
 	return SensitiveColumnRuntimeHooks{
+		Semantics:       newSensitiveColumnRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*datasafev1beta1.SensitiveColumn]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*datasafev1beta1.SensitiveColumn]{},
 		StatusHooks:     generatedruntime.StatusHooks[*datasafev1beta1.SensitiveColumn]{},
 		ParityHooks:     generatedruntime.ParityHooks[*datasafev1beta1.SensitiveColumn]{},
-		Async:           generatedruntime.AsyncHooks[*datasafev1beta1.SensitiveColumn]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*datasafev1beta1.SensitiveColumn]{},
+		Async: generatedruntime.AsyncHooks[*datasafev1beta1.SensitiveColumn]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := datasafesdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*datasafev1beta1.SensitiveColumn]{},
 		Create: runtimeOperationHooks[datasafesdk.CreateSensitiveColumnRequest, datasafesdk.CreateSensitiveColumnResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "SensitiveDataModelId", RequestName: "sensitiveDataModelId", Contribution: "path", PreferResourceID: false}, {FieldName: "CreateSensitiveColumnDetails", RequestName: "CreateSensitiveColumnDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request datasafesdk.CreateSensitiveColumnRequest) (datasafesdk.CreateSensitiveColumnResponse, error) {
@@ -66,25 +135,25 @@ func newSensitiveColumnDefaultRuntimeHooks(sdkClient datasafesdk.DataSafeClient)
 			},
 		},
 		Get: runtimeOperationHooks[datasafesdk.GetSensitiveColumnRequest, datasafesdk.GetSensitiveColumnResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "SensitiveDataModelId", RequestName: "sensitiveDataModelId", Contribution: "path", PreferResourceID: false}, {FieldName: "SensitiveColumnKey", RequestName: "sensitiveColumnKey", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "SensitiveDataModelId", RequestName: "sensitiveDataModelId", Contribution: "path", PreferResourceID: false}, {FieldName: "SensitiveColumnKey", RequestName: "sensitiveColumnKey", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request datasafesdk.GetSensitiveColumnRequest) (datasafesdk.GetSensitiveColumnResponse, error) {
 				return sdkClient.GetSensitiveColumn(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[datasafesdk.ListSensitiveColumnsRequest, datasafesdk.ListSensitiveColumnsResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "SensitiveDataModelId", RequestName: "sensitiveDataModelId", Contribution: "path", PreferResourceID: true}, {FieldName: "TimeCreatedGreaterThanOrEqualTo", RequestName: "timeCreatedGreaterThanOrEqualTo", Contribution: "query", PreferResourceID: false}, {FieldName: "TimeCreatedLessThan", RequestName: "timeCreatedLessThan", Contribution: "query", PreferResourceID: false}, {FieldName: "TimeUpdatedGreaterThanOrEqualTo", RequestName: "timeUpdatedGreaterThanOrEqualTo", Contribution: "query", PreferResourceID: false}, {FieldName: "TimeUpdatedLessThan", RequestName: "timeUpdatedLessThan", Contribution: "query", PreferResourceID: false}, {FieldName: "SensitiveColumnLifecycleState", RequestName: "sensitiveColumnLifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "ColumnDataCountFilter", RequestName: "columnDataCountFilter", Contribution: "query", PreferResourceID: false}, {FieldName: "ConfidenceLevel", RequestName: "confidenceLevel", Contribution: "query", PreferResourceID: false}, {FieldName: "SchemaName", RequestName: "schemaName", Contribution: "query", PreferResourceID: false}, {FieldName: "ObjectName", RequestName: "objectName", Contribution: "query", PreferResourceID: false}, {FieldName: "ColumnName", RequestName: "columnName", Contribution: "query", PreferResourceID: false}, {FieldName: "ObjectType", RequestName: "objectType", Contribution: "query", PreferResourceID: false}, {FieldName: "DataType", RequestName: "dataType", Contribution: "query", PreferResourceID: false}, {FieldName: "Status", RequestName: "status", Contribution: "query", PreferResourceID: false}, {FieldName: "SensitiveTypeId", RequestName: "sensitiveTypeId", Contribution: "query", PreferResourceID: false}, {FieldName: "ParentColumnKey", RequestName: "parentColumnKey", Contribution: "query", PreferResourceID: false}, {FieldName: "RelationType", RequestName: "relationType", Contribution: "query", PreferResourceID: false}, {FieldName: "ColumnGroup", RequestName: "columnGroup", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "IsCaseInSensitive", RequestName: "isCaseInSensitive", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "SensitiveDataModelId", RequestName: "sensitiveDataModelId", Contribution: "path", PreferResourceID: false}, {FieldName: "TimeCreatedGreaterThanOrEqualTo", RequestName: "timeCreatedGreaterThanOrEqualTo", Contribution: "query", PreferResourceID: false}, {FieldName: "TimeCreatedLessThan", RequestName: "timeCreatedLessThan", Contribution: "query", PreferResourceID: false}, {FieldName: "TimeUpdatedGreaterThanOrEqualTo", RequestName: "timeUpdatedGreaterThanOrEqualTo", Contribution: "query", PreferResourceID: false}, {FieldName: "TimeUpdatedLessThan", RequestName: "timeUpdatedLessThan", Contribution: "query", PreferResourceID: false}, {FieldName: "SensitiveColumnLifecycleState", RequestName: "sensitiveColumnLifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "ColumnDataCountFilter", RequestName: "columnDataCountFilter", Contribution: "query", PreferResourceID: false}, {FieldName: "ConfidenceLevel", RequestName: "confidenceLevel", Contribution: "query", PreferResourceID: false}, {FieldName: "SchemaName", RequestName: "schemaName", Contribution: "query", PreferResourceID: false}, {FieldName: "ObjectName", RequestName: "objectName", Contribution: "query", PreferResourceID: false}, {FieldName: "ColumnName", RequestName: "columnName", Contribution: "query", PreferResourceID: false}, {FieldName: "ObjectType", RequestName: "objectType", Contribution: "query", PreferResourceID: false}, {FieldName: "DataType", RequestName: "dataType", Contribution: "query", PreferResourceID: false}, {FieldName: "Status", RequestName: "status", Contribution: "query", PreferResourceID: false}, {FieldName: "SensitiveTypeId", RequestName: "sensitiveTypeId", Contribution: "query", PreferResourceID: false}, {FieldName: "ParentColumnKey", RequestName: "parentColumnKey", Contribution: "query", PreferResourceID: false}, {FieldName: "RelationType", RequestName: "relationType", Contribution: "query", PreferResourceID: false}, {FieldName: "ColumnGroup", RequestName: "columnGroup", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "IsCaseInSensitive", RequestName: "isCaseInSensitive", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request datasafesdk.ListSensitiveColumnsRequest) (datasafesdk.ListSensitiveColumnsResponse, error) {
 				return sdkClient.ListSensitiveColumns(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[datasafesdk.UpdateSensitiveColumnRequest, datasafesdk.UpdateSensitiveColumnResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "SensitiveDataModelId", RequestName: "sensitiveDataModelId", Contribution: "path", PreferResourceID: false}, {FieldName: "SensitiveColumnKey", RequestName: "sensitiveColumnKey", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdateSensitiveColumnDetails", RequestName: "UpdateSensitiveColumnDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "SensitiveDataModelId", RequestName: "sensitiveDataModelId", Contribution: "path", PreferResourceID: false}, {FieldName: "SensitiveColumnKey", RequestName: "sensitiveColumnKey", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateSensitiveColumnDetails", RequestName: "UpdateSensitiveColumnDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request datasafesdk.UpdateSensitiveColumnRequest) (datasafesdk.UpdateSensitiveColumnResponse, error) {
 				return sdkClient.UpdateSensitiveColumn(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[datasafesdk.DeleteSensitiveColumnRequest, datasafesdk.DeleteSensitiveColumnResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "SensitiveDataModelId", RequestName: "sensitiveDataModelId", Contribution: "path", PreferResourceID: false}, {FieldName: "SensitiveColumnKey", RequestName: "sensitiveColumnKey", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "SensitiveDataModelId", RequestName: "sensitiveDataModelId", Contribution: "path", PreferResourceID: false}, {FieldName: "SensitiveColumnKey", RequestName: "sensitiveColumnKey", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request datasafesdk.DeleteSensitiveColumnRequest) (datasafesdk.DeleteSensitiveColumnResponse, error) {
 				return sdkClient.DeleteSensitiveColumn(ctx, request)
 			},
@@ -106,10 +175,19 @@ func buildSensitiveColumnGeneratedRuntimeConfig(
 	hooks SensitiveColumnRuntimeHooks,
 ) generatedruntime.Config[*datasafev1beta1.SensitiveColumn] {
 	return generatedruntime.Config[*datasafev1beta1.SensitiveColumn]{
-		Kind:            "SensitiveColumn",
-		SDKName:         "SensitiveColumn",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "SensitiveColumn",
+		SDKName:   "SensitiveColumn",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

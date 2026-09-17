@@ -53,6 +53,10 @@ spec:
           spec:
             description: TargetResponderRecipeSpec defines the desired state of TargetResponderRecipe.
             properties:
+              compartmentId:
+                description: The OCID of the compartment used to confirm the target
+                  responder recipe through its collection endpoint.
+                type: string
               responderRecipeId:
                 description: Unique identifier for responder recipe
                 type: string
@@ -134,8 +138,14 @@ spec:
                   - responderRuleId
                   type: object
                 type: array
+              targetId:
+                description: The OCID of the Cloud Guard target receiving the responder
+                  recipe.
+                type: string
             required:
+            - compartmentId
             - responderRecipeId
+            - targetId
             type: object
           status:
             description: TargetResponderRecipeStatus defines the observed state of

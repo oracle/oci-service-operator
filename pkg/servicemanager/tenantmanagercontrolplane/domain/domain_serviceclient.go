@@ -32,8 +32,28 @@ type defaultDomainServiceClient struct {
 
 var _ DomainServiceClient = defaultDomainServiceClient{}
 
+type DomainSDKClients struct {
+	domainClient      tenantmanagercontrolplanesdk.DomainClient
+	workRequestClient tenantmanagercontrolplanesdk.WorkRequestClient
+}
+
+func newDomainSDKClients(manager *DomainServiceManager) (DomainSDKClients, error) {
+	var clients DomainSDKClients
+	domainClientClient, err := tenantmanagercontrolplanesdk.NewDomainClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize Domain OCI client DomainClient: %w", err)
+	}
+	clients.domainClient = domainClientClient
+	workRequestClientClient, err := tenantmanagercontrolplanesdk.NewWorkRequestClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize Domain OCI client WorkRequestClient: %w", err)
+	}
+	clients.workRequestClient = workRequestClientClient
+	return clients, nil
+}
+
 var newDomainServiceClient = func(manager *DomainServiceManager) DomainServiceClient {
-	sdkClient, err := tenantmanagercontrolplanesdk.NewDomainClientWithConfigurationProvider(manager.Provider)
+	sdkClient, err := newDomainSDKClients(manager)
 	hooks := newDomainRuntimeHooks(manager, sdkClient)
 	config := buildDomainGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {

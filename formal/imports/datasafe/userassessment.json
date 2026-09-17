@@ -1,0 +1,138 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "userassessment",
+  "kind": "UserAssessment",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_user_assessment",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateUserAssessment",
+        "requestType": "datasafe.CreateUserAssessmentRequest",
+        "responseType": "datasafe.CreateUserAssessmentResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetUserAssessment",
+        "requestType": "datasafe.GetUserAssessmentRequest",
+        "responseType": "datasafe.GetUserAssessmentResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListUserAssessments",
+        "requestType": "datasafe.ListUserAssessmentsRequest",
+        "responseType": "datasafe.ListUserAssessmentsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeUserAssessmentCompartment",
+        "requestType": "datasafe.ChangeUserAssessmentCompartmentRequest",
+        "responseType": "datasafe.ChangeUserAssessmentCompartmentResponse"
+      },
+      {
+        "operation": "UpdateUserAssessment",
+        "requestType": "datasafe.UpdateUserAssessmentRequest",
+        "responseType": "datasafe.UpdateUserAssessmentResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteUserAssessment",
+        "requestType": "datasafe.DeleteUserAssessmentRequest",
+        "responseType": "datasafe.DeleteUserAssessmentResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "SUCCEEDED"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags",
+      "is_assessment_scheduled",
+      "schedule"
+    ],
+    "forceNew": [
+      "target_id",
+      "target_type"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_data_safe_user_assessments",
+    "collectionField": "user_assessments",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "access_level",
+      "compartment_id",
+      "compartment_id_in_subtree",
+      "display_name",
+      "is_baseline",
+      "is_schedule_assessment",
+      "schedule_user_assessment_id",
+      "state",
+      "target_database_group_id",
+      "target_id",
+      "target_type",
+      "time_created_greater_than_or_equal_to",
+      "time_created_less_than",
+      "triggered_by",
+      "type"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/userassessment/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/userassessment/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from the pinned terraform-provider-oci source revision."
+  ]
+}

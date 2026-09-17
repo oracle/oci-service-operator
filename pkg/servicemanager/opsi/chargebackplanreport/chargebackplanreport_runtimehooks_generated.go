@@ -57,8 +57,20 @@ func newChargebackPlanReportDefaultRuntimeHooks(sdkClient opsisdk.OperationsInsi
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*opsiv1beta1.ChargebackPlanReport]{},
 		StatusHooks:     generatedruntime.StatusHooks[*opsiv1beta1.ChargebackPlanReport]{},
 		ParityHooks:     generatedruntime.ParityHooks[*opsiv1beta1.ChargebackPlanReport]{},
-		Async:           generatedruntime.AsyncHooks[*opsiv1beta1.ChargebackPlanReport]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*opsiv1beta1.ChargebackPlanReport]{},
+		Async: generatedruntime.AsyncHooks[*opsiv1beta1.ChargebackPlanReport]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := opsisdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*opsiv1beta1.ChargebackPlanReport]{},
 		Create: runtimeOperationHooks[opsisdk.CreateChargebackPlanReportRequest, opsisdk.CreateChargebackPlanReportResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "Id", RequestName: "id", Contribution: "query", PreferResourceID: false}, {FieldName: "ResourceType", RequestName: "resourceType", Contribution: "query", PreferResourceID: false}, {FieldName: "CreateChargebackPlanReportDetails", RequestName: "CreateChargebackPlanReportDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request opsisdk.CreateChargebackPlanReportRequest) (opsisdk.CreateChargebackPlanReportResponse, error) {
@@ -106,10 +118,19 @@ func buildChargebackPlanReportGeneratedRuntimeConfig(
 	hooks ChargebackPlanReportRuntimeHooks,
 ) generatedruntime.Config[*opsiv1beta1.ChargebackPlanReport] {
 	return generatedruntime.Config[*opsiv1beta1.ChargebackPlanReport]{
-		Kind:            "ChargebackPlanReport",
-		SDKName:         "ChargebackPlanReport",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "ChargebackPlanReport",
+		SDKName:   "ChargebackPlanReport",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

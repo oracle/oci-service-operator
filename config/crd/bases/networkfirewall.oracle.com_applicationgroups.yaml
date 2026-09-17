@@ -68,9 +68,14 @@ spec:
               name:
                 description: Name of the application Group.
                 type: string
+              networkFirewallPolicyId:
+                description: The OCID of the Network Firewall policy that owns this
+                  resource.
+                type: string
             required:
             - apps
             - name
+            - networkFirewallPolicyId
             type: object
           status:
             description: ApplicationGroupStatus defines the observed state of ApplicationGroup.

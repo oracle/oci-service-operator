@@ -66,7 +66,7 @@ func newEntityDefaultRuntimeHooks(sdkClient datacatalogsdk.DataCatalogClient) En
 			},
 		},
 		Get: runtimeOperationHooks[datacatalogsdk.GetEntityRequest, datacatalogsdk.GetEntityResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "DataAssetKey", RequestName: "dataAssetKey", Contribution: "path", PreferResourceID: false}, {FieldName: "EntityKey", RequestName: "entityKey", Contribution: "path", PreferResourceID: false}, {FieldName: "IsIncludeObjectRelationships", RequestName: "isIncludeObjectRelationships", Contribution: "query", PreferResourceID: false}, {FieldName: "Fields", RequestName: "fields", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "DataAssetKey", RequestName: "dataAssetKey", Contribution: "path", PreferResourceID: false}, {FieldName: "EntityKey", RequestName: "entityKey", Contribution: "path", PreferResourceID: true}, {FieldName: "IsIncludeObjectRelationships", RequestName: "isIncludeObjectRelationships", Contribution: "query", PreferResourceID: false}, {FieldName: "Fields", RequestName: "fields", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request datacatalogsdk.GetEntityRequest) (datacatalogsdk.GetEntityResponse, error) {
 				return sdkClient.GetEntity(ctx, request)
 			},
@@ -78,13 +78,13 @@ func newEntityDefaultRuntimeHooks(sdkClient datacatalogsdk.DataCatalogClient) En
 			},
 		},
 		Update: runtimeOperationHooks[datacatalogsdk.UpdateEntityRequest, datacatalogsdk.UpdateEntityResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "DataAssetKey", RequestName: "dataAssetKey", Contribution: "path", PreferResourceID: false}, {FieldName: "EntityKey", RequestName: "entityKey", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdateEntityDetails", RequestName: "UpdateEntityDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "DataAssetKey", RequestName: "dataAssetKey", Contribution: "path", PreferResourceID: false}, {FieldName: "EntityKey", RequestName: "entityKey", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateEntityDetails", RequestName: "UpdateEntityDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request datacatalogsdk.UpdateEntityRequest) (datacatalogsdk.UpdateEntityResponse, error) {
 				return sdkClient.UpdateEntity(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[datacatalogsdk.DeleteEntityRequest, datacatalogsdk.DeleteEntityResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "DataAssetKey", RequestName: "dataAssetKey", Contribution: "path", PreferResourceID: false}, {FieldName: "EntityKey", RequestName: "entityKey", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "DataAssetKey", RequestName: "dataAssetKey", Contribution: "path", PreferResourceID: false}, {FieldName: "EntityKey", RequestName: "entityKey", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request datacatalogsdk.DeleteEntityRequest) (datacatalogsdk.DeleteEntityResponse, error) {
 				return sdkClient.DeleteEntity(ctx, request)
 			},

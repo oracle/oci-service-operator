@@ -1,0 +1,31 @@
+#
+# Copyright (c) 2026, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+#
+
+apiVersion: autoscaling.oracle.com/v1beta1
+kind: AutoScalingConfiguration
+metadata:
+  name: osok-autoscaling-${OSOK_E2E_SUFFIX}
+spec:
+  compartmentId: ${OCI_COMPARTMENT_ID}
+  displayName: osok-autoscaling-updated-${OSOK_E2E_SUFFIX}
+  isEnabled: false
+  coolDownInSeconds: 600
+  resource:
+    id: ${OCI_INSTANCE_POOL_ID}
+    type: instancePool
+  policies:
+    - policyType: scheduled
+      displayName: osok-autoscaling-policy-${OSOK_E2E_SUFFIX}
+      isEnabled: false
+      capacity:
+        min: 1
+        max: 1
+        initial: 1
+      executionSchedule:
+        type: cron
+        expression: "0 0 0 ? * * *"
+        timezone: UTC
+  freeformTags:
+    osok-e2e-phase: update

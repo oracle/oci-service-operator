@@ -220,14 +220,14 @@ type StackDataflow struct {
 	// +kubebuilder:validation:Required
 	LogBucketInstanceId string `json:"logBucketInstanceId"`
 	// +kubebuilder:validation:Optional
-	DriverShapeConfig StackDataflowDriverShapeConfig `json:"driverShapeConfig,omitempty"`
+	DriverShapeConfig StackDataflowDriverShapeConfig `json:"driverShapeConfig,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	ExecutorShapeConfig StackDataflowExecutorShapeConfig `json:"executorShapeConfig,omitempty"`
+	ExecutorShapeConfig StackDataflowExecutorShapeConfig `json:"executorShapeConfig,omitempty,omitzero"`
 	// OCID of the already provisioned dataflow private endpoint.
 	// +kubebuilder:validation:Optional
 	PrivateEndpointId string `json:"privateEndpointId,omitempty"`
 	// +kubebuilder:validation:Optional
-	Connections StackDataflowConnections `json:"connections,omitempty"`
+	Connections StackDataflowConnections `json:"connections,omitempty,omitzero"`
 	// InstanceId of warehouse bucket created as part of objectstorage service in stack. Mandatory for SQL applications.
 	// +kubebuilder:validation:Optional
 	WarehouseBucketInstanceId string `json:"warehouseBucketInstanceId,omitempty"`

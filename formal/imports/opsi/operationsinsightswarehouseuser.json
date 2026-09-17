@@ -1,0 +1,123 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "opsi",
+  "slug": "operationsinsightswarehouseuser",
+  "kind": "OperationsInsightsWarehouseUser",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_opsi_operations_insights_warehouse_user",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOperationsInsightsWarehouseUser",
+        "requestType": "opsi.CreateOperationsInsightsWarehouseUserRequest",
+        "responseType": "opsi.CreateOperationsInsightsWarehouseUserResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOperationsInsightsWarehouseUser",
+        "requestType": "opsi.GetOperationsInsightsWarehouseUserRequest",
+        "responseType": "opsi.GetOperationsInsightsWarehouseUserResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOperationsInsightsWarehouseUsers",
+        "requestType": "opsi.ListOperationsInsightsWarehouseUsersRequest",
+        "responseType": "opsi.ListOperationsInsightsWarehouseUsersResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOperationsInsightsWarehouseUser",
+        "requestType": "opsi.UpdateOperationsInsightsWarehouseUserRequest",
+        "responseType": "opsi.UpdateOperationsInsightsWarehouseUserResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOperationsInsightsWarehouseUser",
+        "requestType": "opsi.DeleteOperationsInsightsWarehouseUserRequest",
+        "responseType": "opsi.DeleteOperationsInsightsWarehouseUserResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "connection_password",
+      "defined_tags",
+      "freeform_tags",
+      "is_awr_data_access",
+      "is_em_data_access",
+      "is_opsi_data_access"
+    ],
+    "forceNew": [
+      "compartment_id",
+      "name",
+      "operations_insights_warehouse_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_opsi_operations_insights_warehouse_users",
+    "collectionField": "operations_insights_warehouse_user_summary_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "id",
+      "operations_insights_warehouse_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/opsi/operationsinsightswarehouseuser/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/opsi/operationsinsightswarehouseuser/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from terraform-provider-oci for opsi/operationsinsightswarehouseuser."
+  ]
+}

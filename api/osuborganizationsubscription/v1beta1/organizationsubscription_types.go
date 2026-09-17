@@ -16,9 +16,35 @@ import (
 type OrganizationSubscriptionSpec struct {
 }
 
+// OrganizationSubscriptionCurrency defines nested fields for OrganizationSubscription.Currency.
+type OrganizationSubscriptionCurrency struct {
+	// Currency Code
+	IsoCode string `json:"isoCode,omitempty"`
+	// Currency name
+	Name string `json:"name,omitempty"`
+	// Standard Precision of the Currency
+	StdPrecision int64 `json:"stdPrecision,omitempty"`
+}
+
 // OrganizationSubscriptionStatus defines the observed state of OrganizationSubscription.
 type OrganizationSubscriptionStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// SPM internal Subscription ID
+	Id string `json:"id,omitempty"`
+	// Customer friendly service name provided by PRG
+	ServiceName string `json:"serviceName,omitempty"`
+	// Subscription Type i.e. IAAS,SAAS,PAAS
+	Type string `json:"type,omitempty"`
+	// Status of the plan
+	// This uses a distinct JSON name so it can coexist with the OSOK status envelope.
+	Status string `json:"sdkStatus,omitempty"`
+	// Represents the date when the first service of the subscription was activated
+	TimeStart string `json:"timeStart,omitempty"`
+	// Represents the date when the last service of the subscription ends
+	TimeEnd  string                           `json:"timeEnd,omitempty"`
+	Currency OrganizationSubscriptionCurrency `json:"currency,omitempty"`
+	// Total aggregate TCLV of all lines for the subscription including expired, active, and signed
+	TotalValue string `json:"totalValue,omitempty"`
 }
 
 // +kubebuilder:object:root=true

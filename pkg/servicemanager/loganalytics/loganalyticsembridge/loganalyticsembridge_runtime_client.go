@@ -176,21 +176,18 @@ func reviewedLogAnalyticsEmBridgeRuntimeSemantics() *generatedruntime.Semantics 
 
 func logAnalyticsEmBridgeCreateFields() []generatedruntime.RequestField {
 	return []generatedruntime.RequestField{
-		logAnalyticsEmBridgeNamespaceField(),
 		{FieldName: "CreateLogAnalyticsEmBridgeDetails", RequestName: "CreateLogAnalyticsEmBridgeDetails", Contribution: "body"},
 	}
 }
 
 func logAnalyticsEmBridgeGetFields() []generatedruntime.RequestField {
 	return []generatedruntime.RequestField{
-		logAnalyticsEmBridgeNamespaceField(),
 		{FieldName: "LogAnalyticsEmBridgeId", RequestName: "logAnalyticsEmBridgeId", Contribution: "path", PreferResourceID: true},
 	}
 }
 
 func logAnalyticsEmBridgeListFields() []generatedruntime.RequestField {
 	return []generatedruntime.RequestField{
-		logAnalyticsEmBridgeNamespaceField(),
 		{
 			FieldName:    "CompartmentId",
 			RequestName:  "compartmentId",
@@ -203,9 +200,6 @@ func logAnalyticsEmBridgeListFields() []generatedruntime.RequestField {
 			Contribution: "query",
 			LookupPaths:  []string{"status.displayName", "spec.displayName", "displayName"},
 		},
-		{FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query"},
-		{FieldName: "LifecycleDetailsContains", RequestName: "lifecycleDetailsContains", Contribution: "query"},
-		{FieldName: "ImportStatus", RequestName: "importStatus", Contribution: "query"},
 		{FieldName: "Limit", RequestName: "limit", Contribution: "query"},
 		{FieldName: "Page", RequestName: "page", Contribution: "query"},
 		{FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query"},
@@ -215,7 +209,6 @@ func logAnalyticsEmBridgeListFields() []generatedruntime.RequestField {
 
 func logAnalyticsEmBridgeUpdateFields() []generatedruntime.RequestField {
 	return []generatedruntime.RequestField{
-		logAnalyticsEmBridgeNamespaceField(),
 		{FieldName: "LogAnalyticsEmBridgeId", RequestName: "logAnalyticsEmBridgeId", Contribution: "path", PreferResourceID: true},
 		{FieldName: "UpdateLogAnalyticsEmBridgeDetails", RequestName: "UpdateLogAnalyticsEmBridgeDetails", Contribution: "body"},
 	}
@@ -223,17 +216,8 @@ func logAnalyticsEmBridgeUpdateFields() []generatedruntime.RequestField {
 
 func logAnalyticsEmBridgeDeleteFields() []generatedruntime.RequestField {
 	return []generatedruntime.RequestField{
-		logAnalyticsEmBridgeNamespaceField(),
 		{FieldName: "LogAnalyticsEmBridgeId", RequestName: "logAnalyticsEmBridgeId", Contribution: "path", PreferResourceID: true},
 		{FieldName: "IsDeleteEntities", RequestName: "isDeleteEntities", Contribution: "query"},
-	}
-}
-
-func logAnalyticsEmBridgeNamespaceField() generatedruntime.RequestField {
-	return generatedruntime.RequestField{
-		FieldName:    "NamespaceName",
-		RequestName:  "logAnalyticsNamespaceName",
-		Contribution: "path",
 	}
 }
 

@@ -106,7 +106,7 @@ func newPrivilegedApiControlRuntimeSemantics() *generatedruntime.Semantics {
 		Unsupported:         []generatedruntime.UnsupportedSemantic{},
 	}
 }
-func newPrivilegedApiControlDefaultRuntimeHooks(sdkClient apiaccesscontrolsdk.PrivilegedApiControlClient) PrivilegedApiControlRuntimeHooks {
+func newPrivilegedApiControlDefaultRuntimeHooks(sdkClient PrivilegedApiControlSDKClients) PrivilegedApiControlRuntimeHooks {
 	return PrivilegedApiControlRuntimeHooks{
 		Semantics:       newPrivilegedApiControlRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*apiaccesscontrolv1beta1.PrivilegedApiControl]{},
@@ -114,43 +114,55 @@ func newPrivilegedApiControlDefaultRuntimeHooks(sdkClient apiaccesscontrolsdk.Pr
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*apiaccesscontrolv1beta1.PrivilegedApiControl]{},
 		StatusHooks:     generatedruntime.StatusHooks[*apiaccesscontrolv1beta1.PrivilegedApiControl]{},
 		ParityHooks:     generatedruntime.ParityHooks[*apiaccesscontrolv1beta1.PrivilegedApiControl]{},
-		Async:           generatedruntime.AsyncHooks[*apiaccesscontrolv1beta1.PrivilegedApiControl]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*apiaccesscontrolv1beta1.PrivilegedApiControl]{},
+		Async: generatedruntime.AsyncHooks[*apiaccesscontrolv1beta1.PrivilegedApiControl]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := apiaccesscontrolsdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.privilegedApiWorkRequestClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*apiaccesscontrolv1beta1.PrivilegedApiControl]{},
 		Create: runtimeOperationHooks[apiaccesscontrolsdk.CreatePrivilegedApiControlRequest, apiaccesscontrolsdk.CreatePrivilegedApiControlResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreatePrivilegedApiControlDetails", RequestName: "CreatePrivilegedApiControlDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request apiaccesscontrolsdk.CreatePrivilegedApiControlRequest) (apiaccesscontrolsdk.CreatePrivilegedApiControlResponse, error) {
-				return sdkClient.CreatePrivilegedApiControl(ctx, request)
+				return sdkClient.privilegedApiControlClient.CreatePrivilegedApiControl(ctx, request)
 			},
 		},
 		Get: runtimeOperationHooks[apiaccesscontrolsdk.GetPrivilegedApiControlRequest, apiaccesscontrolsdk.GetPrivilegedApiControlResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "PrivilegedApiControlId", RequestName: "privilegedApiControlId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request apiaccesscontrolsdk.GetPrivilegedApiControlRequest) (apiaccesscontrolsdk.GetPrivilegedApiControlResponse, error) {
-				return sdkClient.GetPrivilegedApiControl(ctx, request)
+				return sdkClient.privilegedApiControlClient.GetPrivilegedApiControl(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[apiaccesscontrolsdk.ListPrivilegedApiControlsRequest, apiaccesscontrolsdk.ListPrivilegedApiControlsResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "Id", RequestName: "id", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "ResourceType", RequestName: "resourceType", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request apiaccesscontrolsdk.ListPrivilegedApiControlsRequest) (apiaccesscontrolsdk.ListPrivilegedApiControlsResponse, error) {
-				return sdkClient.ListPrivilegedApiControls(ctx, request)
+				return sdkClient.privilegedApiControlClient.ListPrivilegedApiControls(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[apiaccesscontrolsdk.UpdatePrivilegedApiControlRequest, apiaccesscontrolsdk.UpdatePrivilegedApiControlResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "PrivilegedApiControlId", RequestName: "privilegedApiControlId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdatePrivilegedApiControlDetails", RequestName: "UpdatePrivilegedApiControlDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request apiaccesscontrolsdk.UpdatePrivilegedApiControlRequest) (apiaccesscontrolsdk.UpdatePrivilegedApiControlResponse, error) {
-				return sdkClient.UpdatePrivilegedApiControl(ctx, request)
+				return sdkClient.privilegedApiControlClient.UpdatePrivilegedApiControl(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[apiaccesscontrolsdk.DeletePrivilegedApiControlRequest, apiaccesscontrolsdk.DeletePrivilegedApiControlResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "PrivilegedApiControlId", RequestName: "privilegedApiControlId", Contribution: "path", PreferResourceID: true}, {FieldName: "Description", RequestName: "description", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request apiaccesscontrolsdk.DeletePrivilegedApiControlRequest) (apiaccesscontrolsdk.DeletePrivilegedApiControlResponse, error) {
-				return sdkClient.DeletePrivilegedApiControl(ctx, request)
+				return sdkClient.privilegedApiControlClient.DeletePrivilegedApiControl(ctx, request)
 			},
 		},
 		WrapGeneratedClient: []func(PrivilegedApiControlServiceClient) PrivilegedApiControlServiceClient{},
 	}
 }
 
-func newPrivilegedApiControlRuntimeHooks(manager *PrivilegedApiControlServiceManager, sdkClient apiaccesscontrolsdk.PrivilegedApiControlClient) PrivilegedApiControlRuntimeHooks {
+func newPrivilegedApiControlRuntimeHooks(manager *PrivilegedApiControlServiceManager, sdkClient PrivilegedApiControlSDKClients) PrivilegedApiControlRuntimeHooks {
 	hooks := newPrivilegedApiControlDefaultRuntimeHooks(sdkClient)
 	for _, mutator := range privilegedapicontrolRuntimeHooksMutators {
 		mutator(manager, &hooks)
@@ -163,10 +175,19 @@ func buildPrivilegedApiControlGeneratedRuntimeConfig(
 	hooks PrivilegedApiControlRuntimeHooks,
 ) generatedruntime.Config[*apiaccesscontrolv1beta1.PrivilegedApiControl] {
 	return generatedruntime.Config[*apiaccesscontrolv1beta1.PrivilegedApiControl]{
-		Kind:            "PrivilegedApiControl",
-		SDKName:         "PrivilegedApiControl",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "PrivilegedApiControl",
+		SDKName:   "PrivilegedApiControl",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

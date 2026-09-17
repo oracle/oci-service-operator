@@ -171,11 +171,10 @@ func TestRuleSetRequestFieldsKeepOperationsScopedToRecordedPath(t *testing.T) {
 			got:  ruleSetCreateFields(),
 			want: []generatedruntime.RequestField{
 				{
-					FieldName:        "LoadBalancerId",
-					RequestName:      "loadBalancerId",
-					Contribution:     "path",
-					PreferResourceID: true,
-					LookupPaths:      []string{"status.status.ocid"},
+					FieldName:    "LoadBalancerId",
+					RequestName:  "loadBalancerId",
+					Contribution: "path",
+					LookupPaths:  []string{"status.loadBalancerId", "spec.loadBalancerId"},
 				},
 				{
 					FieldName:    "CreateRuleSetDetails",
@@ -189,17 +188,17 @@ func TestRuleSetRequestFieldsKeepOperationsScopedToRecordedPath(t *testing.T) {
 			got:  ruleSetGetFields(),
 			want: []generatedruntime.RequestField{
 				{
-					FieldName:        "LoadBalancerId",
-					RequestName:      "loadBalancerId",
-					Contribution:     "path",
-					PreferResourceID: true,
-					LookupPaths:      []string{"status.status.ocid"},
+					FieldName:    "LoadBalancerId",
+					RequestName:  "loadBalancerId",
+					Contribution: "path",
+					LookupPaths:  []string{"status.loadBalancerId", "spec.loadBalancerId"},
 				},
 				{
-					FieldName:    "RuleSetName",
-					RequestName:  "ruleSetName",
-					Contribution: "path",
-					LookupPaths:  []string{"status.name", "spec.name", "name"},
+					FieldName:        "RuleSetName",
+					RequestName:      "ruleSetName",
+					Contribution:     "path",
+					PreferResourceID: true,
+					LookupPaths:      []string{"status.name", "spec.name", "name"},
 				},
 			},
 		},
@@ -208,11 +207,10 @@ func TestRuleSetRequestFieldsKeepOperationsScopedToRecordedPath(t *testing.T) {
 			got:  ruleSetListFields(),
 			want: []generatedruntime.RequestField{
 				{
-					FieldName:        "LoadBalancerId",
-					RequestName:      "loadBalancerId",
-					Contribution:     "path",
-					PreferResourceID: true,
-					LookupPaths:      []string{"status.status.ocid"},
+					FieldName:    "LoadBalancerId",
+					RequestName:  "loadBalancerId",
+					Contribution: "path",
+					LookupPaths:  []string{"status.loadBalancerId", "spec.loadBalancerId"},
 				},
 			},
 		},
@@ -221,17 +219,17 @@ func TestRuleSetRequestFieldsKeepOperationsScopedToRecordedPath(t *testing.T) {
 			got:  ruleSetUpdateFields(),
 			want: []generatedruntime.RequestField{
 				{
-					FieldName:        "LoadBalancerId",
-					RequestName:      "loadBalancerId",
-					Contribution:     "path",
-					PreferResourceID: true,
-					LookupPaths:      []string{"status.status.ocid"},
+					FieldName:    "LoadBalancerId",
+					RequestName:  "loadBalancerId",
+					Contribution: "path",
+					LookupPaths:  []string{"status.loadBalancerId", "spec.loadBalancerId"},
 				},
 				{
-					FieldName:    "RuleSetName",
-					RequestName:  "ruleSetName",
-					Contribution: "path",
-					LookupPaths:  []string{"status.name", "spec.name", "name"},
+					FieldName:        "RuleSetName",
+					RequestName:      "ruleSetName",
+					Contribution:     "path",
+					PreferResourceID: true,
+					LookupPaths:      []string{"status.name", "spec.name", "name"},
 				},
 				{
 					FieldName:    "UpdateRuleSetDetails",
@@ -245,17 +243,17 @@ func TestRuleSetRequestFieldsKeepOperationsScopedToRecordedPath(t *testing.T) {
 			got:  ruleSetDeleteFields(),
 			want: []generatedruntime.RequestField{
 				{
-					FieldName:        "LoadBalancerId",
-					RequestName:      "loadBalancerId",
-					Contribution:     "path",
-					PreferResourceID: true,
-					LookupPaths:      []string{"status.status.ocid"},
+					FieldName:    "LoadBalancerId",
+					RequestName:  "loadBalancerId",
+					Contribution: "path",
+					LookupPaths:  []string{"status.loadBalancerId", "spec.loadBalancerId"},
 				},
 				{
-					FieldName:    "RuleSetName",
-					RequestName:  "ruleSetName",
-					Contribution: "path",
-					LookupPaths:  []string{"status.name", "spec.name", "name"},
+					FieldName:        "RuleSetName",
+					RequestName:      "ruleSetName",
+					Contribution:     "path",
+					PreferResourceID: true,
+					LookupPaths:      []string{"status.name", "spec.name", "name"},
 				},
 			},
 		},
@@ -345,6 +343,7 @@ func TestCreateOrUpdateRejectsMissingRuleSetLoadBalancerAnnotation(t *testing.T)
 
 	resource := makeUntrackedRuleSetResource()
 	resource.Annotations = nil
+	resource.Spec.LoadBalancerId = ""
 	client := &fakeGeneratedRuleSetOCIClient{}
 
 	response, err := newTestRuleSetRuntimeClient(client).CreateOrUpdate(context.Background(), resource, ctrl.Request{})
@@ -433,10 +432,12 @@ func TestCreateOrUpdateBindsExistingRuleSet(t *testing.T) {
 	if len(client.updateRequests) != 0 {
 		t.Fatalf("update requests = %d, want 0 for no-drift bind path", len(client.updateRequests))
 	}
-	if len(client.getRequests) != 1 {
-		t.Fatalf("get requests = %d, want 1 for bind path", len(client.getRequests))
+	if len(client.getRequests) != 0 || len(client.listRequests) != 1 {
+		t.Fatalf("bind reads = get:%d list:%d, want list-only identity binding", len(client.getRequests), len(client.listRequests))
 	}
-	assertRuleSetPathIdentity(t, client.getRequests[0].LoadBalancerId, client.getRequests[0].RuleSetName, ruleSetLoadBalancerID, ruleSetNameValue)
+	if got := stringValue(client.listRequests[0].LoadBalancerId); got != ruleSetLoadBalancerID {
+		t.Fatalf("list loadBalancerId = %q, want %q", got, ruleSetLoadBalancerID)
+	}
 	assertRuleSetTrackedStatus(t, resource, ruleSetLoadBalancerID, ruleSetNameValue, resource.Spec.Items)
 }
 
@@ -579,7 +580,7 @@ func TestCreateOrUpdateRejectsRuleSetLoadBalancerAnnotationDrift(t *testing.T) {
 	client := &fakeGeneratedRuleSetOCIClient{}
 
 	response, err := newTestRuleSetRuntimeClient(client).CreateOrUpdate(context.Background(), resource, ctrl.Request{})
-	if err == nil || !strings.Contains(err.Error(), "changed from recorded loadBalancerId") {
+	if err == nil || !strings.Contains(err.Error(), "conflicts with") {
 		t.Fatalf("CreateOrUpdate() error = %v, want annotation drift error", err)
 	}
 	if response.IsSuccessful {
@@ -675,7 +676,8 @@ func makeUntrackedRuleSetResource() *loadbalancerv1beta1.RuleSet {
 			},
 		},
 		Spec: loadbalancerv1beta1.RuleSetSpec{
-			Name: ruleSetNameValue,
+			Name:           ruleSetNameValue,
+			LoadBalancerId: ruleSetLoadBalancerID,
 			Items: []loadbalancerv1beta1.RuleSetItem{
 				ruleSetAddRequestHeaderRule("x-osok", "enabled"),
 			},
@@ -686,10 +688,11 @@ func makeUntrackedRuleSetResource() *loadbalancerv1beta1.RuleSet {
 func makeTrackedRuleSetResource() *loadbalancerv1beta1.RuleSet {
 	resource := makeUntrackedRuleSetResource()
 	resource.Status = loadbalancerv1beta1.RuleSetStatus{
-		Name:  ruleSetNameValue,
-		Items: append([]loadbalancerv1beta1.RuleSetItem(nil), resource.Spec.Items...),
+		Name:           ruleSetNameValue,
+		LoadBalancerId: ruleSetLoadBalancerID,
+		Items:          append([]loadbalancerv1beta1.RuleSetItem(nil), resource.Spec.Items...),
 		OsokStatus: shared.OSOKStatus{
-			Ocid: shared.OCID(ruleSetLoadBalancerID),
+			Ocid: shared.OCID(ruleSetNameValue),
 		},
 	}
 	return resource
@@ -764,8 +767,11 @@ func assertRuleSetTrackedStatus(t *testing.T, resource *loadbalancerv1beta1.Rule
 	if resource == nil {
 		t.Fatal("resource = nil, want RuleSet")
 	}
-	if got := string(resource.Status.OsokStatus.Ocid); got != wantLoadBalancerID {
-		t.Fatalf("status.status.ocid = %q, want recorded loadBalancerId %q", got, wantLoadBalancerID)
+	if got := resource.Status.LoadBalancerId; got != wantLoadBalancerID {
+		t.Fatalf("status.loadBalancerId = %q, want %q", got, wantLoadBalancerID)
+	}
+	if got := string(resource.Status.OsokStatus.Ocid); got != wantRuleSetName {
+		t.Fatalf("status.status.ocid = %q, want tracked rule set name %q", got, wantRuleSetName)
 	}
 	if got := resource.Status.Name; got != wantRuleSetName {
 		t.Fatalf("status.name = %q, want %q", got, wantRuleSetName)

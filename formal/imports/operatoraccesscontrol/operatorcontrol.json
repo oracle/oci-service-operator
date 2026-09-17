@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "operatoraccesscontrol",
+  "slug": "operatorcontrol",
+  "kind": "OperatorControl",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_operator_access_control_operator_control",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOperatorControl",
+        "requestType": "operatoraccesscontrol.CreateOperatorControlRequest",
+        "responseType": "operatoraccesscontrol.CreateOperatorControlResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOperatorControl",
+        "requestType": "operatoraccesscontrol.GetOperatorControlRequest",
+        "responseType": "operatoraccesscontrol.GetOperatorControlResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOperatorControls",
+        "requestType": "operatoraccesscontrol.ListOperatorControlsRequest",
+        "responseType": "operatoraccesscontrol.ListOperatorControlsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeOperatorControlCompartment",
+        "requestType": "operatoraccesscontrol.ChangeOperatorControlCompartmentRequest",
+        "responseType": "operatoraccesscontrol.ChangeOperatorControlCompartmentResponse"
+      },
+      {
+        "operation": "UpdateOperatorControl",
+        "requestType": "operatoraccesscontrol.UpdateOperatorControlRequest",
+        "responseType": "operatoraccesscontrol.UpdateOperatorControlResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOperatorControl",
+        "requestType": "operatoraccesscontrol.DeleteOperatorControlRequest",
+        "responseType": "operatoraccesscontrol.DeleteOperatorControlResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "target": [
+        "S_ASSIGNED",
+        "S_CREATED",
+        "S_UNASSIGNED"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "approver_groups_list",
+      "approvers_list",
+      "compartment_id",
+      "defined_tags",
+      "description",
+      "email_id_list",
+      "freeform_tags",
+      "is_fully_pre_approved",
+      "number_of_approvers",
+      "operator_control_name",
+      "pre_approved_op_action_list",
+      "system_message"
+    ],
+    "forceNew": [
+      "resource_type"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_operator_access_control_operator_controls",
+    "collectionField": "operator_control_collection",
+    "responseItemsField": "Res",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "resource_type",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/operatoraccesscontrol/operatorcontrol/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/operatoraccesscontrol/operatorcontrol/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts are imported from the pinned terraform-provider-oci revision; repo-authored runtime semantics remain authoritative."
+  ]
+}

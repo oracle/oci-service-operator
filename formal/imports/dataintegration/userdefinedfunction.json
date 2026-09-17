@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "dataintegration",
+  "slug": "userdefinedfunction",
+  "kind": "UserDefinedFunction",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_dataintegration_userdefinedfunction",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateUserDefinedFunction",
+        "requestType": "dataintegration.CreateUserDefinedFunctionRequest",
+        "responseType": "dataintegration.CreateUserDefinedFunctionResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetUserDefinedFunction",
+        "requestType": "dataintegration.GetUserDefinedFunctionRequest",
+        "responseType": "dataintegration.GetUserDefinedFunctionResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListUserDefinedFunction",
+        "requestType": "dataintegration.ListUserDefinedFunctionRequest",
+        "responseType": "dataintegration.ListUserDefinedFunctionResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateUserDefinedFunction",
+        "requestType": "dataintegration.UpdateUserDefinedFunctionRequest",
+        "responseType": "dataintegration.UpdateUserDefinedFunctionResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteUserDefinedFunction",
+        "requestType": "dataintegration.DeleteUserDefinedFunctionRequest",
+        "responseType": "dataintegration.DeleteUserDefinedFunctionResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_dataintegration_userdefinedfunction",
+    "collectionField": "userdefinedfunction",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/dataintegration/userdefinedfunction/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/dataintegration/userdefinedfunction/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for dataintegration/userdefinedfunction; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

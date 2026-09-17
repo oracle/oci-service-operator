@@ -1,0 +1,21 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: loganalytics
+slug: loganalyticsobjectcollectionrule
+kind: LogAnalyticsObjectCollectionRule
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  listLookup:
+    filters: ["osNamespace","compartmentId","name"]
+    matchRule: exact object-storage namespace, compartment, and rule name match; duplicate matches fail
+  mutation:
+    mutable: ["charEncoding","definedTags","description","entityId","freeformTags","isEnabled","logGroupId","logSet","logSetExtRegex","logSetKey","logSourceName","objectNameFilters","overrides","streamCursorTime","streamCursorType","streamId","timezone"]
+    forceNew: ["collectionType","compartmentId","isForceHistoricCollection","logType","name","osBucketName","osNamespace","pollSince","pollTill"]
+  followUp: {create: read-after-write, update: read-after-write, delete: confirm-delete}
+notes:
+  - "ACTIVE and INACTIVE are steady states; a DELETED read or an unambiguous not-found response completes deletion."

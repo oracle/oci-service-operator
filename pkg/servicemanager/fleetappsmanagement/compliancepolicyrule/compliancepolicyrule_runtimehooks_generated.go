@@ -50,50 +50,119 @@ func registerCompliancePolicyRuleRuntimeHooksMutator(mutator CompliancePolicyRul
 	}
 	compliancepolicyruleRuntimeHooksMutators = append(compliancepolicyruleRuntimeHooksMutators, mutator)
 }
-func newCompliancePolicyRuleDefaultRuntimeHooks(sdkClient fleetappsmanagementsdk.FleetAppsManagementAdminClient) CompliancePolicyRuleRuntimeHooks {
+func newCompliancePolicyRuleRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "fleetappsmanagement",
+		FormalSlug:    "compliancepolicyrule",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "compliancePolicyId", "displayName", "id", "patchName", "state"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"definedTags", "freeformTags", "gracePeriod", "patchSelection.daysSinceRelease", "patchSelection.patchLevel", "patchSelection.patchName", "patchSelection.selectionType", "patchTypeId", "productVersion.isApplicableForAllHigherVersions", "productVersion.version", "severity"},
+			ForceNew:      []string{"compliancePolicyId", "displayName"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
+func newCompliancePolicyRuleDefaultRuntimeHooks(sdkClient CompliancePolicyRuleSDKClients) CompliancePolicyRuleRuntimeHooks {
 	return CompliancePolicyRuleRuntimeHooks{
+		Semantics:       newCompliancePolicyRuleRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*fleetappsmanagementv1beta1.CompliancePolicyRule]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*fleetappsmanagementv1beta1.CompliancePolicyRule]{},
 		StatusHooks:     generatedruntime.StatusHooks[*fleetappsmanagementv1beta1.CompliancePolicyRule]{},
 		ParityHooks:     generatedruntime.ParityHooks[*fleetappsmanagementv1beta1.CompliancePolicyRule]{},
-		Async:           generatedruntime.AsyncHooks[*fleetappsmanagementv1beta1.CompliancePolicyRule]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*fleetappsmanagementv1beta1.CompliancePolicyRule]{},
+		Async: generatedruntime.AsyncHooks[*fleetappsmanagementv1beta1.CompliancePolicyRule]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := fleetappsmanagementsdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.fleetAppsManagementWorkRequestClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*fleetappsmanagementv1beta1.CompliancePolicyRule]{},
 		Create: runtimeOperationHooks[fleetappsmanagementsdk.CreateCompliancePolicyRuleRequest, fleetappsmanagementsdk.CreateCompliancePolicyRuleResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateCompliancePolicyRuleDetails", RequestName: "CreateCompliancePolicyRuleDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.CreateCompliancePolicyRuleRequest) (fleetappsmanagementsdk.CreateCompliancePolicyRuleResponse, error) {
-				return sdkClient.CreateCompliancePolicyRule(ctx, request)
+				return sdkClient.fleetAppsManagementAdminClient.CreateCompliancePolicyRule(ctx, request)
 			},
 		},
 		Get: runtimeOperationHooks[fleetappsmanagementsdk.GetCompliancePolicyRuleRequest, fleetappsmanagementsdk.GetCompliancePolicyRuleResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CompliancePolicyRuleId", RequestName: "compliancePolicyRuleId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.GetCompliancePolicyRuleRequest) (fleetappsmanagementsdk.GetCompliancePolicyRuleResponse, error) {
-				return sdkClient.GetCompliancePolicyRule(ctx, request)
+				return sdkClient.fleetAppsManagementAdminClient.GetCompliancePolicyRule(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[fleetappsmanagementsdk.ListCompliancePolicyRulesRequest, fleetappsmanagementsdk.ListCompliancePolicyRulesResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "PatchName", RequestName: "patchName", Contribution: "query", PreferResourceID: false}, {FieldName: "CompliancePolicyId", RequestName: "compliancePolicyId", Contribution: "query", PreferResourceID: false}, {FieldName: "Id", RequestName: "id", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.ListCompliancePolicyRulesRequest) (fleetappsmanagementsdk.ListCompliancePolicyRulesResponse, error) {
-				return sdkClient.ListCompliancePolicyRules(ctx, request)
+				return sdkClient.fleetAppsManagementAdminClient.ListCompliancePolicyRules(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[fleetappsmanagementsdk.UpdateCompliancePolicyRuleRequest, fleetappsmanagementsdk.UpdateCompliancePolicyRuleResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CompliancePolicyRuleId", RequestName: "compliancePolicyRuleId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateCompliancePolicyRuleDetails", RequestName: "UpdateCompliancePolicyRuleDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.UpdateCompliancePolicyRuleRequest) (fleetappsmanagementsdk.UpdateCompliancePolicyRuleResponse, error) {
-				return sdkClient.UpdateCompliancePolicyRule(ctx, request)
+				return sdkClient.fleetAppsManagementAdminClient.UpdateCompliancePolicyRule(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[fleetappsmanagementsdk.DeleteCompliancePolicyRuleRequest, fleetappsmanagementsdk.DeleteCompliancePolicyRuleResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CompliancePolicyRuleId", RequestName: "compliancePolicyRuleId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.DeleteCompliancePolicyRuleRequest) (fleetappsmanagementsdk.DeleteCompliancePolicyRuleResponse, error) {
-				return sdkClient.DeleteCompliancePolicyRule(ctx, request)
+				return sdkClient.fleetAppsManagementAdminClient.DeleteCompliancePolicyRule(ctx, request)
 			},
 		},
 		WrapGeneratedClient: []func(CompliancePolicyRuleServiceClient) CompliancePolicyRuleServiceClient{},
 	}
 }
 
-func newCompliancePolicyRuleRuntimeHooks(manager *CompliancePolicyRuleServiceManager, sdkClient fleetappsmanagementsdk.FleetAppsManagementAdminClient) CompliancePolicyRuleRuntimeHooks {
+func newCompliancePolicyRuleRuntimeHooks(manager *CompliancePolicyRuleServiceManager, sdkClient CompliancePolicyRuleSDKClients) CompliancePolicyRuleRuntimeHooks {
 	hooks := newCompliancePolicyRuleDefaultRuntimeHooks(sdkClient)
 	for _, mutator := range compliancepolicyruleRuntimeHooksMutators {
 		mutator(manager, &hooks)
@@ -106,10 +175,19 @@ func buildCompliancePolicyRuleGeneratedRuntimeConfig(
 	hooks CompliancePolicyRuleRuntimeHooks,
 ) generatedruntime.Config[*fleetappsmanagementv1beta1.CompliancePolicyRule] {
 	return generatedruntime.Config[*fleetappsmanagementv1beta1.CompliancePolicyRule]{
-		Kind:            "CompliancePolicyRule",
-		SDKName:         "CompliancePolicyRule",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "CompliancePolicyRule",
+		SDKName:   "CompliancePolicyRule",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

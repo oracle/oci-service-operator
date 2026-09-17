@@ -50,8 +50,61 @@ func registerWlpAgentRuntimeHooksMutator(mutator WlpAgentRuntimeHooksMutator) {
 	}
 	wlpagentRuntimeHooksMutators = append(wlpagentRuntimeHooksMutators, mutator)
 }
+func newWlpAgentRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "cloudguard",
+		FormalSlug:    "wlpagent",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "none",
+			Runtime:              "generatedruntime",
+			FormalClassification: "none",
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{},
+			TerminalStates: []string{"NOT_FOUND"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"agentVersion", "compartmentId"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"certificateSignedRequest", "definedTags", "freeformTags"},
+			ForceNew:      []string{"agentVersion", "compartmentId", "osInfo"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newWlpAgentDefaultRuntimeHooks(sdkClient cloudguardsdk.CloudGuardClient) WlpAgentRuntimeHooks {
 	return WlpAgentRuntimeHooks{
+		Semantics:       newWlpAgentRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*cloudguardv1beta1.WlpAgent]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*cloudguardv1beta1.WlpAgent]{},

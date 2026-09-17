@@ -1,0 +1,198 @@
+# Copyright (c) 2026, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+# yaml-language-server: $schema=https://raw.githubusercontent.com/kyverno/chainsaw/v0.2.15/.schemas/json/test-chainsaw-v1alpha1.json
+
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: Test
+metadata:
+  name: apigateway-gateway-deployment
+spec:
+  concurrent: false
+  timeouts:
+    apply: 2m
+    assert: 45m
+    cleanup: 60m
+    delete: 60m
+    exec: 2m
+  bindings:
+    - name: suffix
+      value: (env('OSOK_E2E_SUFFIX'))
+    - name: compartmentId
+      value: (env('OCI_COMPARTMENT_ID'))
+    - name: subnetId
+      value: (env('OCI_SUBNET_ID'))
+    - name: gatewayName
+      value: (join('-', ['osok-chain-gw', $suffix]))
+    - name: deploymentName
+      value: (join('-', ['osok-chain-deploy', $suffix]))
+    - name: gatewayUpdatedName
+      value: (join('-', ['osok-chain-gw-u', $suffix]))
+    - name: deploymentUpdatedName
+      value: (join('-', ['osok-chain-deploy-u', $suffix]))
+    - name: pathPrefix
+      value: (join('', ['/osok-', $suffix]))
+  steps:
+    - name: exercise-gateway-deployment-chain
+      description: Create a gateway, verify its endpoint Secret, pass its observed OCID to a deployment, and clean up in dependency order.
+      try:
+        - script:
+            env:
+              - name: OCI_COMPARTMENT_ID
+                value: ($compartmentId)
+              - name: OCI_SUBNET_ID
+                value: ($subnetId)
+            content: |
+              set -eu
+              test -n "$OCI_COMPARTMENT_ID" || { echo "OCI_COMPARTMENT_ID is required" >&2; exit 2; }
+              test -n "$OCI_SUBNET_ID" || { echo "OCI_SUBNET_ID is required" >&2; exit 2; }
+        - apply:
+            resource:
+              apiVersion: apigateway.oracle.com/v1beta1
+              kind: ApiGateway
+              metadata:
+                name: ($gatewayName)
+                namespace: ($namespace)
+              spec:
+                compartmentId: ($compartmentId)
+                displayName: ($gatewayName)
+                endpointType: PRIVATE
+                subnetId: ($subnetId)
+                freeformTags:
+                  osok-e2e-phase: create
+        - assert:
+            resource:
+              apiVersion: apigateway.oracle.com/v1beta1
+              kind: ApiGateway
+              metadata:
+                name: ($gatewayName)
+              status:
+                displayName: ($gatewayName)
+                endpointType: PRIVATE
+                subnetId: ($subnetId)
+                lifecycleState: ACTIVE
+                freeformTags:
+                  osok-e2e-phase: create
+                status:
+                  (conditions[?type == 'Active' && status == 'True'] | length(@) > `0`): true
+                  (ocid != null && length(ocid) > `0`): true
+        - assert:
+            resource:
+              apiVersion: v1
+              kind: Secret
+              metadata:
+                name: ($gatewayName)
+              (data.hostname != null && length(data.hostname) > `0`): true
+        - apply:
+            resource:
+              apiVersion: apigateway.oracle.com/v1beta1
+              kind: ApiGateway
+              metadata:
+                name: ($gatewayName)
+                namespace: ($namespace)
+              spec:
+                compartmentId: ($compartmentId)
+                displayName: ($gatewayUpdatedName)
+                endpointType: PRIVATE
+                subnetId: ($subnetId)
+                freeformTags:
+                  osok-e2e-phase: update
+        - assert:
+            resource:
+              apiVersion: apigateway.oracle.com/v1beta1
+              kind: ApiGateway
+              metadata:
+                name: ($gatewayName)
+              status:
+                displayName: ($gatewayUpdatedName)
+                endpointType: PRIVATE
+                subnetId: ($subnetId)
+                freeformTags:
+                  osok-e2e-phase: update
+                lifecycleState: ACTIVE
+        - assert:
+            resource:
+              apiVersion: v1
+              kind: Secret
+              metadata:
+                name: ($gatewayName)
+              (data.hostname != null && length(data.hostname) > `0`): true
+        - script:
+            env:
+              - name: RESOURCE_NAME
+                value: ($gatewayName)
+            content: kubectl get apigateway.apigateway.oracle.com "$RESOURCE_NAME" -n "$NAMESPACE" -o json
+            outputs:
+              - name: gateway
+                value: (json_parse($stdout))
+        - apply:
+            resource:
+              apiVersion: apigateway.oracle.com/v1beta1
+              kind: ApiGatewayDeployment
+              metadata:
+                name: ($deploymentName)
+                namespace: ($namespace)
+              spec:
+                gatewayId: ($gateway.status.status.ocid)
+                compartmentId: ($compartmentId)
+                displayName: ($deploymentName)
+                pathPrefix: ($pathPrefix)
+                routes:
+                  - path: /hello
+                    methods: [GET]
+                    backend:
+                      type: STOCK_RESPONSE_BACKEND
+                      status: 200
+                      body: OSOK composite lifecycle create
+                freeformTags:
+                  osok-e2e-phase: create
+        - assert:
+            resource:
+              apiVersion: apigateway.oracle.com/v1beta1
+              kind: ApiGatewayDeployment
+              metadata:
+                name: ($deploymentName)
+              spec:
+                (gatewayId == $gateway.status.status.ocid): true
+              status:
+                status:
+                  (conditions[?type == 'Active' && status == 'True'] | length(@) > `0`): true
+                  (ocid != null && length(ocid) > `0`): true
+        - apply:
+            resource:
+              apiVersion: apigateway.oracle.com/v1beta1
+              kind: ApiGatewayDeployment
+              metadata:
+                name: ($deploymentName)
+                namespace: ($namespace)
+              spec:
+                gatewayId: ($gateway.status.status.ocid)
+                compartmentId: ($compartmentId)
+                displayName: ($deploymentUpdatedName)
+                pathPrefix: ($pathPrefix)
+                routes:
+                  - path: /hello
+                    methods: [GET]
+                    backend:
+                      type: STOCK_RESPONSE_BACKEND
+                      status: 200
+                      body: OSOK composite lifecycle update
+                freeformTags:
+                  osok-e2e-phase: update
+        - assert:
+            resource:
+              apiVersion: apigateway.oracle.com/v1beta1
+              kind: ApiGatewayDeployment
+              metadata:
+                name: ($deploymentName)
+              status:
+                displayName: ($deploymentUpdatedName)
+                freeformTags:
+                  osok-e2e-phase: update
+                lifecycleState: ACTIVE
+                specification:
+                  routes:
+                    - path: /hello
+                      backend:
+                        type: STOCK_RESPONSE_BACKEND
+                        status: 200
+                        body: OSOK composite lifecycle update

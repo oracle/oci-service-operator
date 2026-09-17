@@ -1,0 +1,27 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: loganalytics
+slug: ingesttimerule
+kind: IngestTimeRule
+archetype: generated-service-manager
+states:
+  - active
+  - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending: []
+    updatePending: []
+    deletePending: ["DELETING"]
+  listLookup:
+    filters: []
+    matchRule: exact parent path plus immutable child identity; duplicate matches fail
+  mutation:
+    mutable: ["actions.compartmentId","actions.dimensions","actions.metricName","actions.namespace","actions.resourceGroup","actions.type","compartmentId","conditions.additionalConditions.conditionField","conditions.additionalConditions.conditionOperator","conditions.additionalConditions.conditionValue","conditions.fieldName","conditions.fieldOperator","conditions.fieldValue","conditions.kind","definedTags","description","displayName","freeformTags"]
+    forceNew: ["namespace"]
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - "The OCI namespace or parent identifier remains part of every IngestTimeRule request path."
+  - "The recorded composite-path mock verifies request bodies, nested paths, status projection, and confirmed deletion."

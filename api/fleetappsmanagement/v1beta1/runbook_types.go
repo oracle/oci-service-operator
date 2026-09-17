@@ -122,9 +122,9 @@ type RunbookVersionTaskTaskRecordDetailsExecutionDetails struct {
 	// +kubebuilder:validation:Optional
 	ExecutionType string `json:"executionType,omitempty"`
 	// +kubebuilder:validation:Optional
-	Variables RunbookVersionTaskTaskRecordDetailsExecutionDetailsVariables `json:"variables,omitempty"`
+	Variables RunbookVersionTaskTaskRecordDetailsExecutionDetailsVariables `json:"variables,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	Content RunbookVersionTaskTaskRecordDetailsExecutionDetailsContent `json:"content,omitempty"`
+	Content RunbookVersionTaskTaskRecordDetailsExecutionDetailsContent `json:"content,omitempty,omitzero"`
 	// Optional command to execute the content.
 	// You can provide any commands/arguments that can't be part of the script.
 	// +kubebuilder:validation:Optional
@@ -175,7 +175,7 @@ type RunbookVersionTaskTaskRecordDetails struct {
 	// +kubebuilder:validation:Optional
 	Scope string `json:"scope,omitempty"`
 	// +kubebuilder:validation:Optional
-	ExecutionDetails RunbookVersionTaskTaskRecordDetailsExecutionDetails `json:"executionDetails,omitempty"`
+	ExecutionDetails RunbookVersionTaskTaskRecordDetailsExecutionDetails `json:"executionDetails,omitempty,omitzero"`
 	// The description of the task.
 	// +kubebuilder:validation:Optional
 	Description string `json:"description,omitempty"`
@@ -186,7 +186,7 @@ type RunbookVersionTaskTaskRecordDetails struct {
 	// +kubebuilder:validation:Optional
 	IsCopyToLibraryEnabled bool `json:"isCopyToLibraryEnabled,omitempty"`
 	// +kubebuilder:validation:Optional
-	Properties RunbookVersionTaskTaskRecordDetailsProperties `json:"properties,omitempty"`
+	Properties RunbookVersionTaskTaskRecordDetailsProperties `json:"properties,omitempty,omitzero"`
 	// Is this a discovery output task?
 	// +kubebuilder:validation:Optional
 	IsDiscoveryOutputTask bool `json:"isDiscoveryOutputTask,omitempty"`
@@ -273,14 +273,14 @@ type RunbookVersionTaskStepProperties struct {
 	// +kubebuilder:validation:Required
 	ActionOnFailure string `json:"actionOnFailure"`
 	// +kubebuilder:validation:Optional
-	RunOn RunbookVersionTaskStepPropertiesRunOn `json:"runOn,omitempty"`
+	RunOn RunbookVersionTaskStepPropertiesRunOn `json:"runOn,omitempty,omitzero"`
 	// Build control flow conditions that determine the relevance of the task execution.
 	// +kubebuilder:validation:Optional
 	PreCondition string `json:"preCondition,omitempty"`
 	// +kubebuilder:validation:Optional
-	PauseDetails RunbookVersionTaskStepPropertiesPauseDetails `json:"pauseDetails,omitempty"`
+	PauseDetails RunbookVersionTaskStepPropertiesPauseDetails `json:"pauseDetails,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	NotificationPreferences RunbookVersionTaskStepPropertiesNotificationPreferences `json:"notificationPreferences,omitempty"`
+	NotificationPreferences RunbookVersionTaskStepPropertiesNotificationPreferences `json:"notificationPreferences,omitempty,omitzero"`
 }
 
 // RunbookVersionTaskOutputVariableMappingOutputVariableDetails defines nested fields for Runbook.RunbookVersion.Task.OutputVariableMapping.OutputVariableDetails.
@@ -310,7 +310,7 @@ type RunbookVersionTask struct {
 	// +kubebuilder:validation:Required
 	TaskRecordDetails RunbookVersionTaskTaskRecordDetails `json:"taskRecordDetails"`
 	// +kubebuilder:validation:Optional
-	StepProperties RunbookVersionTaskStepProperties `json:"stepProperties,omitempty"`
+	StepProperties RunbookVersionTaskStepProperties `json:"stepProperties,omitempty,omitzero"`
 	// Mapping output variables of previous tasks to the input variables of the current task.
 	// +kubebuilder:validation:Optional
 	OutputVariableMappings []RunbookVersionTaskOutputVariableMapping `json:"outputVariableMappings,omitempty"`
@@ -385,14 +385,14 @@ type RunbookVersionGroupProperties struct {
 	// +kubebuilder:validation:Required
 	ActionOnFailure string `json:"actionOnFailure"`
 	// +kubebuilder:validation:Optional
-	RunOn RunbookVersionGroupPropertiesRunOn `json:"runOn,omitempty"`
+	RunOn RunbookVersionGroupPropertiesRunOn `json:"runOn,omitempty,omitzero"`
 	// Build control flow conditions that determine the relevance of the task execution.
 	// +kubebuilder:validation:Optional
 	PreCondition string `json:"preCondition,omitempty"`
 	// +kubebuilder:validation:Optional
-	PauseDetails RunbookVersionGroupPropertiesPauseDetails `json:"pauseDetails,omitempty"`
+	PauseDetails RunbookVersionGroupPropertiesPauseDetails `json:"pauseDetails,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	NotificationPreferences RunbookVersionGroupPropertiesNotificationPreferences `json:"notificationPreferences,omitempty"`
+	NotificationPreferences RunbookVersionGroupPropertiesNotificationPreferences `json:"notificationPreferences,omitempty,omitzero"`
 }
 
 // RunbookVersionGroup defines nested fields for Runbook.RunbookVersion.Group.
@@ -407,7 +407,7 @@ type RunbookVersionGroup struct {
 	// +kubebuilder:validation:Required
 	Name string `json:"name"`
 	// +kubebuilder:validation:Optional
-	Properties RunbookVersionGroupProperties `json:"properties,omitempty"`
+	Properties RunbookVersionGroupProperties `json:"properties,omitempty,omitzero"`
 }
 
 // RunbookVersionExecutionWorkflowDetailsWorkflowStep defines nested fields for Runbook.RunbookVersion.ExecutionWorkflowDetails.Workflow.Step.
@@ -500,7 +500,7 @@ type RunbookVersionFields struct {
 	// +kubebuilder:validation:Required
 	ExecutionWorkflowDetails RunbookVersionExecutionWorkflowDetails `json:"executionWorkflowDetails"`
 	// +kubebuilder:validation:Optional
-	RollbackWorkflowDetails RunbookVersionRollbackWorkflowDetails `json:"rollbackWorkflowDetails,omitempty"`
+	RollbackWorkflowDetails RunbookVersionRollbackWorkflowDetails `json:"rollbackWorkflowDetails,omitempty,omitzero"`
 	// The version of the runbook.
 	// +kubebuilder:validation:Optional
 	Version string `json:"version,omitempty"`

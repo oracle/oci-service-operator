@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "cloudbridge",
+  "slug": "inventory",
+  "kind": "Inventory",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_cloud_bridge_inventory",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateInventory",
+        "requestType": "cloudbridge.CreateInventoryRequest",
+        "responseType": "cloudbridge.CreateInventoryResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetInventory",
+        "requestType": "cloudbridge.GetInventoryRequest",
+        "responseType": "cloudbridge.GetInventoryResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListInventories",
+        "requestType": "cloudbridge.ListInventoriesRequest",
+        "responseType": "cloudbridge.ListInventoriesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateInventory",
+        "requestType": "cloudbridge.UpdateInventoryRequest",
+        "responseType": "cloudbridge.UpdateInventoryResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteInventory",
+        "requestType": "cloudbridge.DeleteInventoryRequest",
+        "responseType": "cloudbridge.DeleteInventoryResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "defined_tags",
+      "display_name",
+      "freeform_tags"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_cloud_bridge_inventories",
+    "collectionField": "inventory_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/cloudbridge/inventory/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/cloudbridge/inventory/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from the pinned terraform-provider-oci source revision."
+  ]
+}

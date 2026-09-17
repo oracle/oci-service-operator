@@ -50,15 +50,84 @@ func registerNewsReportRuntimeHooksMutator(mutator NewsReportRuntimeHooksMutator
 	}
 	newsreportRuntimeHooksMutators = append(newsreportRuntimeHooksMutators, mutator)
 }
+func newNewsReportRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "opsi",
+		FormalSlug:    "newsreport",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE", "NEEDS_ATTENTION"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "compartmentIdInSubtree", "newsReportId", "state", "status"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"areChildCompartmentsIncluded", "contentTypes", "dayOfWeek", "definedTags", "description", "freeformTags", "locale", "matchRule", "name", "newsFrequency", "onsTopicId", "status", "tagFilters"},
+			ForceNew:      []string{"compartmentId"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "generatedruntime.Create", EntityType: "NewsReport", Action: "CREATE_NEWS_REPORT"}},
+			Update: []generatedruntime.Hook{{Helper: "generatedruntime.Update", EntityType: "NewsReport", Action: "UPDATE_NEWS_REPORT"}},
+			Delete: []generatedruntime.Hook{{Helper: "generatedruntime.Delete", EntityType: "NewsReport", Action: "DELETE_NEWS_REPORT"}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "generatedruntime.Create", EntityType: "NewsReport", Action: "CREATE_NEWS_REPORT"}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "generatedruntime.Update", EntityType: "NewsReport", Action: "UPDATE_NEWS_REPORT"}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "generatedruntime.Delete", EntityType: "NewsReport", Action: "DELETE_NEWS_REPORT"}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newNewsReportDefaultRuntimeHooks(sdkClient opsisdk.OperationsInsightsClient) NewsReportRuntimeHooks {
 	return NewsReportRuntimeHooks{
+		Semantics:       newNewsReportRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*opsiv1beta1.NewsReport]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*opsiv1beta1.NewsReport]{},
 		StatusHooks:     generatedruntime.StatusHooks[*opsiv1beta1.NewsReport]{},
 		ParityHooks:     generatedruntime.ParityHooks[*opsiv1beta1.NewsReport]{},
-		Async:           generatedruntime.AsyncHooks[*opsiv1beta1.NewsReport]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*opsiv1beta1.NewsReport]{},
+		Async: generatedruntime.AsyncHooks[*opsiv1beta1.NewsReport]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := opsisdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*opsiv1beta1.NewsReport]{},
 		Create: runtimeOperationHooks[opsisdk.CreateNewsReportRequest, opsisdk.CreateNewsReportResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateNewsReportDetails", RequestName: "CreateNewsReportDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request opsisdk.CreateNewsReportRequest) (opsisdk.CreateNewsReportResponse, error) {
@@ -106,10 +175,19 @@ func buildNewsReportGeneratedRuntimeConfig(
 	hooks NewsReportRuntimeHooks,
 ) generatedruntime.Config[*opsiv1beta1.NewsReport] {
 	return generatedruntime.Config[*opsiv1beta1.NewsReport]{
-		Kind:            "NewsReport",
-		SDKName:         "NewsReport",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "NewsReport",
+		SDKName:   "NewsReport",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

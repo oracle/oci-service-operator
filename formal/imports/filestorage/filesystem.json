@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "filestorage",
+  "slug": "filesystem",
+  "kind": "FileSystem",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_file_storage_file_system",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateFileSystem",
+        "requestType": "filestorage.CreateFileSystemRequest",
+        "responseType": "filestorage.CreateFileSystemResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetFileSystem",
+        "requestType": "filestorage.GetFileSystemRequest",
+        "responseType": "filestorage.GetFileSystemResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListFileSystems",
+        "requestType": "filestorage.ListFileSystemsRequest",
+        "responseType": "filestorage.ListFileSystemsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeFileSystemCompartment",
+        "requestType": "filestorage.ChangeFileSystemCompartmentRequest",
+        "responseType": "filestorage.ChangeFileSystemCompartmentResponse"
+      },
+      {
+        "operation": "ToggleQuotaRules",
+        "requestType": "filestorage.ToggleQuotaRulesRequest",
+        "responseType": "filestorage.ToggleQuotaRulesResponse"
+      },
+      {
+        "operation": "UpdateFileSystem",
+        "requestType": "filestorage.UpdateFileSystemRequest",
+        "responseType": "filestorage.UpdateFileSystemResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteFileSystem",
+        "requestType": "filestorage.DeleteFileSystemRequest",
+        "responseType": "filestorage.DeleteFileSystemResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "are_quota_rules_enabled",
+      "clone_attach_status",
+      "compartment_id",
+      "defined_tags",
+      "detach_clone_trigger",
+      "display_name",
+      "filesystem_snapshot_policy_id",
+      "freeform_tags",
+      "is_lock_override",
+      "kms_key_id"
+    ],
+    "forceNew": [
+      "availability_domain",
+      "locks",
+      "locks.message",
+      "locks.related_resource_id",
+      "locks.time_created",
+      "locks.type",
+      "source_snapshot_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.WaitForCreatedState"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_file_storage_file_systems",
+    "collectionField": "file_systems",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "availability_domain",
+      "compartment_id",
+      "display_name"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/filestorage/filesystem/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/filestorage/filesystem/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "lifecycle-classification",
+      "list-lookup",
+      "mutation-policy",
+      "status-projection",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Recorded OCI create and update responses include the resource body; the published OSOK runtime confirms lifecycle through GetFileSystem reads.",
+    "CREATING and UPDATING are lifecycle-pending states, ACTIVE is steady success, and delete retains the finalizer through DELETING until DELETED or NotFound.",
+    "ChangeFileSystemCompartment, ToggleQuotaRules, and clone-detach behavior remain outside the published generic runtime."
+  ]
+}

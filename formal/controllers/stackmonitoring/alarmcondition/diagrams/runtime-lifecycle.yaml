@@ -1,0 +1,22 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: stackmonitoring
+slug: alarmcondition
+kind: AlarmCondition
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  providerLifecycle: {createPending: ["CREATING"], updatePending: ["UPDATING"], deletePending: []}
+  listLookup:
+    filters: ["monitoringTemplateId","namespace","resourceType","metricName","conditionType","compositeType","id"]
+    matchRule: exact parent template and alarm signature match; tracked ID is preferred and duplicate matches fail
+  mutation:
+    mutable: ["namespace","resourceType","metricName","conditionType","conditions","compositeType","freeformTags","definedTags"]
+    forceNew: ["monitoringTemplateId"]
+  followUp: {create: read-after-write, update: read-after-write, delete: confirm-delete}
+notes:
+  - "monitoringTemplateId is supplied by the required metadata annotation because the generated CRD has no spec field for the parent path."

@@ -66,7 +66,7 @@ else (no)
 :Skip the no-op mutation path;
 endif
 :Run provider helper hooks\ncreate=CreateProject; update=UpdateProject;\ndelete=DeleteProject when the matching\nfield-driven path executes;
-:Apply explicit follow-up semantics\ncreate=GetWorkRequest -> GetProject;\nupdate=GetWorkRequest -> GetProject;\ndelete=GetWorkRequest ->\nGetProject/ListProjects confirm-delete;
+:Apply explicit follow-up semantics\ncreate=GetWorkRequest -> GetProject;\nupdate=GetProject after synchronous 200;\nGetWorkRequest when supplied;\ndelete=GetWorkRequest ->\nGetProject/ListProjects confirm-delete;
 :Return success for the ACTIVE success state;
 :Project required status and finalizer policy\nretain-until-confirmed-delete;
 :Requeue on provisioning, updating, terminating;
@@ -95,7 +95,8 @@ requeue: provisioning, updating, terminating
 provider states: create CREATING; update
 UPDATING; delete DELETING
 follow-up: create=GetWorkRequest -> GetProject;
-update=GetWorkRequest -> GetProject;
+update=GetProject after synchronous 200;
+GetWorkRequest when supplied;
 delete=GetWorkRequest -> GetProject/ListProjects
 confirm-delete
 supported drift: defined_tags, description,
@@ -112,27 +113,32 @@ the tracked projectId when GetProject returns
 NotFound.
 conflicts: none
 open gaps: none
-Create, update, and delete persist the in-flight
-OCI work request in `status.async.current`,
-normalize AI Language `OperationStatus*` values
-into shared async classes, and normalize
-work-request `OperationType*` values into
-create/update/delete phases before deriving
-conditions and requeue.
+Create and delete persist the in-flight OCI work
+request in `status.async.current`, normalize AI
+Language `OperationStatus*` values into shared
+async classes, and normalize work-request
+`OperationType*` values into create/delete
+phases before deriving conditions and requeue.
+Update accepts the live service's synchronous
+HTTP 200 response when no `opc-work-request-id`
+is present, rereads the Project, and keeps a
+lifecycle-sourced pending update until mutable
+fields converge. The work-request path remains
+supported when OCI supplies the header.
 Create recovers the Project OCID from the create
 response when OCI returns it or from
 work-request resources when the response omits
 it, then polls `GetProject` until the Project
-becomes readable. Update also gates completion
-on a succeeded work request plus a readable
-`GetProject`. Retryable 409 "currently being
-modified" conflicts project a lifecycle-sourced
-pending update when OCI omits a work-request ID;
-later reconciles reread `GetProject`, clear
-async if mutable drift is already gone, and
-otherwise back off for one normal requeue
-interval before retrying `UpdateProject` instead
-of hot-looping on every `ACTIVE` reread.
+becomes readable. Update gates completion on a
+readable `GetProject` whose mutable fields
+match. Retryable 409 "currently being modified"
+conflicts project a lifecycle-sourced pending
+update when OCI omits a work-request ID; later
+reconciles reread `GetProject`, clear async if
+mutable drift is already gone, and otherwise
+back off for one normal requeue interval before
+retrying `UpdateProject` instead of hot-looping
+on every `ACTIVE` reread.
 Pre-create lookup adopts only a unique paginated
 non-`DELETED` `ListProjects` match on
 `compartmentId` and `displayName`. Delete

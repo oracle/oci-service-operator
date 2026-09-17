@@ -56,6 +56,9 @@ spec:
           spec:
             description: GlossarySpec defines the desired state of Glossary.
             properties:
+              catalogId:
+                description: The OCID of the catalog containing the glossary.
+                type: string
               customPropertyMembers:
                 description: The list of customized properties along with the values
                   for this object
@@ -93,6 +96,7 @@ spec:
                   glossary.
                 type: string
             required:
+            - catalogId
             - displayName
             type: object
           status:

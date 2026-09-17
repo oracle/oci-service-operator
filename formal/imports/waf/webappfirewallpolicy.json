@@ -1,0 +1,191 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "waf",
+  "slug": "webappfirewallpolicy",
+  "kind": "WebAppFirewallPolicy",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_waf_web_app_firewall_policy",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateWebAppFirewallPolicy",
+        "requestType": "waf.CreateWebAppFirewallPolicyRequest",
+        "responseType": "waf.CreateWebAppFirewallPolicyResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetWebAppFirewallPolicy",
+        "requestType": "waf.GetWebAppFirewallPolicyRequest",
+        "responseType": "waf.GetWebAppFirewallPolicyResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListWebAppFirewallPolicies",
+        "requestType": "waf.ListWebAppFirewallPoliciesRequest",
+        "responseType": "waf.ListWebAppFirewallPoliciesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeWebAppFirewallPolicyCompartment",
+        "requestType": "waf.ChangeWebAppFirewallPolicyCompartmentRequest",
+        "responseType": "waf.ChangeWebAppFirewallPolicyCompartmentResponse"
+      },
+      {
+        "operation": "UpdateWebAppFirewallPolicy",
+        "requestType": "waf.UpdateWebAppFirewallPolicyRequest",
+        "responseType": "waf.UpdateWebAppFirewallPolicyResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteWebAppFirewallPolicy",
+        "requestType": "waf.DeleteWebAppFirewallPolicyRequest",
+        "responseType": "waf.DeleteWebAppFirewallPolicyResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "actions.body.template",
+      "actions.body.text",
+      "actions.body.type",
+      "actions.code",
+      "actions.headers.name",
+      "actions.headers.value",
+      "actions.name",
+      "actions.type",
+      "compartment_id",
+      "defined_tags",
+      "display_name",
+      "freeform_tags",
+      "request_access_control.default_action_name",
+      "request_access_control.rules.action_name",
+      "request_access_control.rules.condition",
+      "request_access_control.rules.condition_language",
+      "request_access_control.rules.name",
+      "request_access_control.rules.type",
+      "request_protection.body_inspection_size_limit_exceeded_action_name",
+      "request_protection.body_inspection_size_limit_in_bytes",
+      "request_protection.rules.action_name",
+      "request_protection.rules.condition",
+      "request_protection.rules.condition_language",
+      "request_protection.rules.is_body_inspection_enabled",
+      "request_protection.rules.name",
+      "request_protection.rules.protection_capabilities.action_name",
+      "request_protection.rules.protection_capabilities.collaborative_action_threshold",
+      "request_protection.rules.protection_capabilities.collaborative_weights.key",
+      "request_protection.rules.protection_capabilities.collaborative_weights.weight",
+      "request_protection.rules.protection_capabilities.exclusions.args",
+      "request_protection.rules.protection_capabilities.exclusions.request_cookies",
+      "request_protection.rules.protection_capabilities.key",
+      "request_protection.rules.protection_capabilities.version",
+      "request_protection.rules.protection_capability_settings.allowed_http_methods",
+      "request_protection.rules.protection_capability_settings.max_http_request_header_length",
+      "request_protection.rules.protection_capability_settings.max_http_request_headers",
+      "request_protection.rules.protection_capability_settings.max_number_of_arguments",
+      "request_protection.rules.protection_capability_settings.max_single_argument_length",
+      "request_protection.rules.protection_capability_settings.max_total_argument_length",
+      "request_protection.rules.type",
+      "request_rate_limiting.rules.action_name",
+      "request_rate_limiting.rules.condition",
+      "request_rate_limiting.rules.condition_language",
+      "request_rate_limiting.rules.configurations.action_duration_in_seconds",
+      "request_rate_limiting.rules.configurations.period_in_seconds",
+      "request_rate_limiting.rules.configurations.requests_limit",
+      "request_rate_limiting.rules.name",
+      "request_rate_limiting.rules.type",
+      "response_access_control.rules.action_name",
+      "response_access_control.rules.condition",
+      "response_access_control.rules.condition_language",
+      "response_access_control.rules.name",
+      "response_access_control.rules.type",
+      "response_protection.rules.action_name",
+      "response_protection.rules.condition",
+      "response_protection.rules.condition_language",
+      "response_protection.rules.is_body_inspection_enabled",
+      "response_protection.rules.name",
+      "response_protection.rules.protection_capabilities.action_name",
+      "response_protection.rules.protection_capabilities.collaborative_action_threshold",
+      "response_protection.rules.protection_capabilities.collaborative_weights.key",
+      "response_protection.rules.protection_capabilities.collaborative_weights.weight",
+      "response_protection.rules.protection_capabilities.exclusions.args",
+      "response_protection.rules.protection_capabilities.exclusions.request_cookies",
+      "response_protection.rules.protection_capabilities.key",
+      "response_protection.rules.protection_capabilities.version",
+      "response_protection.rules.protection_capability_settings.allowed_http_methods",
+      "response_protection.rules.protection_capability_settings.max_http_request_header_length",
+      "response_protection.rules.protection_capability_settings.max_http_request_headers",
+      "response_protection.rules.protection_capability_settings.max_number_of_arguments",
+      "response_protection.rules.protection_capability_settings.max_single_argument_length",
+      "response_protection.rules.protection_capability_settings.max_total_argument_length",
+      "response_protection.rules.type",
+      "system_tags"
+    ],
+    "forceNew": null,
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_waf_web_app_firewall_policies",
+    "collectionField": "web_app_firewall_policy_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/waf/webappfirewallpolicy/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/waf/webappfirewallpolicy/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from terraform-provider-oci for waf/webappfirewallpolicy."
+  ]
+}

@@ -7,6 +7,7 @@ package generatedruntime
 
 import (
 	"context"
+	coresdk "github.com/oracle/oci-go-sdk/v65/core"
 	"github.com/oracle/oci-service-operator/pkg/errorutil/errortest"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -203,6 +204,79 @@ func TestServiceClientCreateOrUpdateKeepsTrackedCurrentIDWhenPreCreateLookupMiss
 	}
 	if string(resource.Status.OsokStatus.Ocid) != "ocid1.bucket.oc1..existing" {
 		t.Fatalf("status.ocid = %q, want tracked OCID preserved", resource.Status.OsokStatus.Ocid)
+	}
+}
+
+func TestTrackedStatusIDCannotBeClearedWhileAsyncOperationIsPending(t *testing.T) {
+	t.Parallel()
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Thing",
+		SDKName: "Thing",
+		Get: &Operation{
+			NewRequest: func() any { return &fakeGetThingRequest{} },
+			Fields: []RequestField{
+				{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true},
+			},
+		},
+	})
+	resource := &fakeResource{
+		Status: fakeStatus{
+			OsokStatus: shared.OSOKStatus{
+				Ocid: "ocid1.thing.oc1..creating",
+				Async: shared.OSOKAsyncTracker{Current: &shared.OSOKAsyncOperation{
+					Source:          shared.OSOKAsyncSourceLifecycle,
+					Phase:           shared.OSOKAsyncPhaseCreate,
+					NormalizedClass: shared.OSOKAsyncClassPending,
+				}},
+			},
+		},
+	}
+
+	if client.trackedStatusIDCanBeClearedAfterGetNotFound(resource, "ocid1.thing.oc1..creating") {
+		t.Fatal("pending async operation must retain its tracked OCI ID after an eventually consistent NotFound")
+	}
+
+	resource.Status.OsokStatus.Async.Current = nil
+	if !client.trackedStatusIDCanBeClearedAfterGetNotFound(resource, "ocid1.thing.oc1..creating") {
+		t.Fatal("tracked OCI ID should remain clearable after the pending async operation is gone")
+	}
+}
+
+func TestDeletePhaseGetDisablesSDKRetriesWithoutChangingObserveReads(t *testing.T) {
+	t.Parallel()
+
+	var retryAttempts []uint
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Thing",
+		SDKName: "Thing",
+		Get: &Operation{
+			NewRequest: func() any { return &coresdk.GetInstanceRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				policy := request.(*coresdk.GetInstanceRequest).RequestMetadata.RetryPolicy
+				if policy == nil {
+					retryAttempts = append(retryAttempts, 0)
+				} else {
+					retryAttempts = append(retryAttempts, policy.MaximumNumberAttempts)
+				}
+				return coresdk.GetInstanceResponse{}, nil
+			},
+			Fields: []RequestField{
+				{FieldName: "InstanceId", RequestName: "instanceId", Contribution: "path", PreferResourceID: true},
+			},
+		},
+	})
+	resource := &fakeResource{}
+	state := readResourceState{readID: "ocid1.instance.oc1..example"}
+
+	if _, _, _, err := client.readResourceWithGet(context.Background(), resource, state, readPhaseObserve); err != nil {
+		t.Fatalf("observe read error = %v", err)
+	}
+	if _, _, _, err := client.readResourceWithGet(context.Background(), resource, state, readPhaseDelete); err != nil {
+		t.Fatalf("delete read error = %v", err)
+	}
+	if len(retryAttempts) != 2 || retryAttempts[0] != 0 || retryAttempts[1] != 1 {
+		t.Fatalf("retry attempts = %v, want default policy for observe and one attempt for delete", retryAttempts)
 	}
 }
 

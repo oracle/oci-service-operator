@@ -1,0 +1,18 @@
+#
+# Copyright (c) 2026, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+#
+
+apiVersion: queue.oracle.com/v1beta1
+kind: Queue
+metadata:
+  name: osok-queue-${OSOK_E2E_SUFFIX}
+spec:
+  compartmentId: ${OCI_COMPARTMENT_ID}
+  displayName: osok-queue-updated-${OSOK_E2E_SUFFIX}
+  retentionInSeconds: 86400
+  visibilityInSeconds: 45
+  timeoutInSeconds: 20
+  channelConsumptionLimit: 100
+  freeformTags:
+    osok-e2e-phase: updated

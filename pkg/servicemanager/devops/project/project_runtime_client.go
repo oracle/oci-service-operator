@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
+	"sync"
 
 	"github.com/oracle/oci-go-sdk/v65/common"
 	devopssdk "github.com/oracle/oci-go-sdk/v65/devops"
@@ -94,6 +95,7 @@ func applyProjectRuntimeHooks(
 	}
 
 	hooks.Semantics = reviewedProjectRuntimeSemantics()
+	var acceptedDeletes sync.Map
 	hooks.BuildCreateBody = func(_ context.Context, resource *devopsv1beta1.Project, _ string) (any, error) {
 		if resource == nil {
 			return nil, fmt.Errorf("Project resource is nil")
@@ -116,6 +118,17 @@ func applyProjectRuntimeHooks(
 			return devopssdk.GetProjectResponse{}, fmt.Errorf("Project OCI client is not configured")
 		}
 		response, err := client.GetProject(ctx, request)
+		if err != nil && request.ProjectId != nil {
+			if _, accepted := acceptedDeletes.Load(strings.TrimSpace(*request.ProjectId)); accepted &&
+				errorutil.ClassifyDeleteError(err).IsAuthShapedNotFound() {
+				return response, errorutil.NotFoundOciError{
+					HTTPStatusCode: 404,
+					ErrorCode:      errorutil.NotFound,
+					OpcRequestID:   errorutil.OpcRequestID(err),
+					Description:    "DevOps project no longer exists after accepted deletion",
+				}
+			}
+		}
 		return response, conservativeProjectNotFoundError(err, "read")
 	}
 	hooks.List.Fields = projectListFields()
@@ -130,6 +143,9 @@ func applyProjectRuntimeHooks(
 			return devopssdk.DeleteProjectResponse{}, fmt.Errorf("Project OCI client is not configured")
 		}
 		response, err := client.DeleteProject(ctx, request)
+		if err == nil && request.ProjectId != nil {
+			acceptedDeletes.Store(strings.TrimSpace(*request.ProjectId), struct{}{})
+		}
 		return response, conservativeProjectNotFoundError(err, "delete")
 	}
 	hooks.TrackedRecreate.ClearTrackedIdentity = clearTrackedProjectIdentity

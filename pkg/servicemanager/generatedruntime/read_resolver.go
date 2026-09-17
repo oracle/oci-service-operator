@@ -11,6 +11,8 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
+
+	shared "github.com/oracle/oci-service-operator/pkg/shared"
 )
 
 func (c ServiceClient[T]) prepareCreateOrUpdateState(ctx context.Context, resource T, identity any) (createOrUpdateState, error) {
@@ -76,6 +78,11 @@ func (c ServiceClient[T]) resolveTrackedCurrentID(resource T, currentID string, 
 func (c ServiceClient[T]) trackedStatusIDCanBeClearedAfterGetNotFound(resource T, preferredID string) bool {
 	getOp := c.getReadOperation()
 	if preferredID == "" || !c.usesStatusOnlyCurrentID(resource, preferredID) || getOp == nil {
+		return false
+	}
+	if status, err := osokStatus(resource); err == nil &&
+		status.Async.Current != nil &&
+		status.Async.Current.NormalizedClass == shared.OSOKAsyncClassPending {
 		return false
 	}
 
@@ -340,7 +347,7 @@ func (c ServiceClient[T]) readResourceWithGet(ctx context.Context, resource T, s
 		return state, nil, false, nil
 	}
 
-	response, err := c.invoke(ctx, getOp, resource, state.readID, requestBuildOptions{})
+	response, err := c.invoke(ctx, getOp, resource, state.readID, requestBuildOptions{DisableRetries: phase == readPhaseDelete})
 	if err == nil {
 		return state, response, true, nil
 	}
@@ -365,7 +372,7 @@ func (c ServiceClient[T]) readResourceWithList(ctx context.Context, resource T, 
 		return nil, fmt.Errorf("%s generated runtime has no readable OCI operation", c.config.Kind)
 	}
 
-	response, err := c.invokeWithValues(ctx, listOp, resource, state.listValues, state.listID, requestBuildOptions{})
+	response, err := c.invokeWithValues(ctx, listOp, resource, state.listValues, state.listID, requestBuildOptions{DisableRetries: phase == readPhaseDelete})
 	if err != nil {
 		return nil, err
 	}

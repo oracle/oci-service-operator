@@ -9,5 +9,14 @@ states:
   - active
   - updating
   - terminating
+repoAuthored:
+  providerLifecycle: {createPending: ["CREATING"], updatePending: ["UPDATING"], deletePending: ["DELETING"]}
+  listLookup:
+    filters: ["odaInstanceId","type"]
+    matchRule: exact parent and translator type match; duplicate matches fail
+  mutation:
+    mutable: ["baseUrl","properties","freeformTags","definedTags"]
+    forceNew: ["type"]
+  followUp: {create: read-after-write, update: read-after-write, delete: confirm-delete}
 notes:
-  - Scaffold metadata only; replace with controller-specific runtime states before promotion.
+  - "authToken is write-only: it accompanies create and detected mutable updates but cannot independently trigger drift correction."

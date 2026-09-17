@@ -1,0 +1,42 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: filestorage
+slug: mounttarget
+kind: MountTarget
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+  - deleted
+  - failed
+repoAuthored:
+  listLookup:
+    filters:
+      - availabilityDomain
+      - compartmentId
+      - displayName
+    matchRule: Adopt only a unique mount target in the requested availability domain and compartment.
+  mutation:
+    mutable:
+      - displayName
+      - freeformTags
+      - definedTags
+      - nsgIds
+      - securityAttributes
+    forceNew:
+      - availabilityDomain
+      - compartmentId
+      - subnetId
+      - hostnameLabel
+      - ipAddress
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - CREATING and UPDATING requeue, ACTIVE succeeds, FAILED is terminal, and delete retains the finalizer through DELETING until DELETED or absence.
+  - The generated status projects exportSetId and private-IP identities needed by dependent exports.
+  - Display name, tags, NSGs, and security attributes update in place; placement, subnet, hostname, and chosen IP require replacement.
+  - The runtime has no Kubernetes Secret side effects.

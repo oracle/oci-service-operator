@@ -1,0 +1,57 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: aidataplatform
+slug: aidataplatform
+kind: AiDataPlatform
+archetype: generated-service-manager
+states:
+- provisioning
+- active
+- updating
+- terminating
+repoAuthored:
+  operations:
+    update:
+    - UpdateAiDataPlatform
+  providerLifecycle:
+    createPending:
+    - CREATING
+    updatePending:
+    - UPDATING
+    deletePending:
+    - DELETING
+  listLookup:
+    filters:
+    - compartmentId
+    - displayName
+    - id
+    matchRule: exact compartmentId, displayName, id match within the resource scope;
+      duplicate matches fail
+  mutation:
+    mutable:
+    - displayName
+    - aiDataPlatformType
+    - freeformTags
+    - definedTags
+    - systemTags
+    forceNew:
+    - compartmentId
+    - defaultWorkspaceName
+  hooks:
+    create:
+    - helper: tfresource.CreateResource
+    update:
+    - helper: tfresource.UpdateResource
+    delete:
+    - helper: tfresource.DeleteResource
+  followUp:
+    create: GetWorkRequest -> GetAiDataPlatform
+    update: GetWorkRequest -> GetAiDataPlatform
+    delete: confirm-delete
+notes:
+- The production runtime uses the declared work-request phases and service-local async
+  adapter.
+- Lifecycle success and pending states mirror the production service-manager semantics.
+- Status projection is required, Secret side effects are none, and the finalizer policy
+  is retain-until-confirmed-delete.
+- Delete ownership is retained until a terminal lifecycle state or confirmed absence.

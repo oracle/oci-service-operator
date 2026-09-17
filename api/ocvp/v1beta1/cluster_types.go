@@ -81,7 +81,7 @@ type ClusterSpec struct {
 	// +kubebuilder:validation:Optional
 	EsxiSoftwareVersion string `json:"esxiSoftwareVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ClusterByolAllocationDetails ClusterByolAllocationDetails `json:"clusterByolAllocationDetails,omitempty"`
+	ClusterByolAllocationDetails ClusterByolAllocationDetails `json:"clusterByolAllocationDetails,omitempty,omitzero"`
 	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the initial VMware BYOL Allocation used to deploy VMware Cloud Foundation.
 	// +kubebuilder:validation:Optional
 	InitialVcfByolAllocationId string `json:"initialVcfByolAllocationId,omitempty"`

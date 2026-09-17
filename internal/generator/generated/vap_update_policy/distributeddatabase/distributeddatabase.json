@@ -13,11 +13,15 @@
     "apiVersion": "distributeddatabase.oracle.com/v1beta1",
     "kind": "DistributedDatabase",
     "formalSlug": "distributeddatabase",
-    "providerResource": "oci_distributeddatabase_distributed_database",
+    "providerResource": "oci_globally_distributed_database_sharded_database",
     "specPathPrefix": "spec"
   },
   "update": {
-    "allowInPlacePaths": null,
+    "allowInPlacePaths": [
+      "definedTags",
+      "displayName",
+      "freeformTags"
+    ],
     "denyRules": [
       {
         "fieldPath": "compartmentId",

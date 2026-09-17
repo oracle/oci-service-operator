@@ -99,7 +99,7 @@ func applyBastionRuntimeHooks(
 		return
 	}
 
-	hooks.Semantics = newBastionRuntimeSemantics()
+	hooks.Semantics = reviewedBastionRuntimeSemantics()
 	hooks.Async.Adapter = bastionWorkRequestAsyncAdapter
 	hooks.Async.GetWorkRequest = func(ctx context.Context, workRequestID string) (any, error) {
 		return getBastionWorkRequest(ctx, client, initErr, workRequestID)
@@ -115,7 +115,7 @@ func applyBastionRuntimeHooks(
 	}
 }
 
-func newBastionRuntimeSemantics() *generatedruntime.Semantics {
+func reviewedBastionRuntimeSemantics() *generatedruntime.Semantics {
 	return &generatedruntime.Semantics{
 		FormalService: "bastion",
 		FormalSlug:    "bastion",

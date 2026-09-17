@@ -461,6 +461,9 @@ func TestManagementDashboardDeleteStopsBeforeDeleteOnAuthShapedConfirmRead(t *te
 		getManagementDashboard: func(context.Context, managementdashboardsdk.GetManagementDashboardRequest) (managementdashboardsdk.GetManagementDashboardResponse, error) {
 			return managementdashboardsdk.GetManagementDashboardResponse{}, authErr
 		},
+		listManagementDashboards: func(context.Context, managementdashboardsdk.ListManagementDashboardsRequest) (managementdashboardsdk.ListManagementDashboardsResponse, error) {
+			return managementdashboardsdk.ListManagementDashboardsResponse{}, authErr
+		},
 	}
 
 	deleted, err := newTestManagementDashboardClient(fake).Delete(context.Background(), resource)
@@ -478,6 +481,37 @@ func TestManagementDashboardDeleteStopsBeforeDeleteOnAuthShapedConfirmRead(t *te
 	}
 	if !strings.Contains(err.Error(), "NotAuthorizedOrNotFound") {
 		t.Fatalf("Delete() error = %q, want NotAuthorizedOrNotFound context", err.Error())
+	}
+}
+
+func TestManagementDashboardDeleteUsesScopedListAfterAuthShapedGet(t *testing.T) {
+	resource := testManagementDashboardResource(t)
+	resource.Status.OsokStatus.Ocid = shared.OCID(testManagementDashboardID)
+	authErr := errortest.NewServiceError(404, errorutil.NotAuthorizedOrNotFound, "not authorized or not found")
+	fake := &fakeManagementDashboardOCIClient{
+		getManagementDashboard: func(context.Context, managementdashboardsdk.GetManagementDashboardRequest) (managementdashboardsdk.GetManagementDashboardResponse, error) {
+			return managementdashboardsdk.GetManagementDashboardResponse{}, authErr
+		},
+		listManagementDashboards: func(_ context.Context, request managementdashboardsdk.ListManagementDashboardsRequest) (managementdashboardsdk.ListManagementDashboardsResponse, error) {
+			if got := managementDashboardStringValue(request.CompartmentId); got != resource.Spec.CompartmentId {
+				t.Fatalf("ListManagementDashboards() compartment = %q, want %q", got, resource.Spec.CompartmentId)
+			}
+			if got := managementDashboardStringValue(request.DisplayName); got != resource.Spec.DisplayName {
+				t.Fatalf("ListManagementDashboards() displayName = %q, want %q", got, resource.Spec.DisplayName)
+			}
+			return managementdashboardsdk.ListManagementDashboardsResponse{}, nil
+		},
+	}
+
+	deleted, err := newTestManagementDashboardClient(fake).Delete(context.Background(), resource)
+	if err != nil {
+		t.Fatalf("Delete() error = %v", err)
+	}
+	if !deleted {
+		t.Fatal("Delete() deleted = false, want true after scoped list proves absence")
+	}
+	if fake.deleteCalls != 0 {
+		t.Fatalf("DeleteManagementDashboard() calls = %d, want 0 for already-absent resource", fake.deleteCalls)
 	}
 }
 

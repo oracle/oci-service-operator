@@ -40,6 +40,12 @@ type FunctionLibrarySpec struct {
 	// The version of the object that is used to track changes in the object instance.
 	// +kubebuilder:validation:Optional
 	ObjectVersion int `json:"objectVersion,omitempty"`
+	// The OCID of the Data Integration workspace containing this resource.
+	// +kubebuilder:validation:Required
+	WorkspaceId string `json:"workspaceId"`
+	// The aggregator key required by the collection lookup.
+	// +kubebuilder:validation:Required
+	AggregatorKey string `json:"aggregatorKey"`
 }
 
 // FunctionLibraryRegistryMetadata defines nested fields for FunctionLibrary.RegistryMetadata.

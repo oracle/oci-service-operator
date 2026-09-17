@@ -27,7 +27,7 @@ partition "Observe and Bind" {
 if ("Tracked or explicit OCI identity present?") then (yes)
 :Get the current OCI resource via GetCluster;
 else (no)
-:Resolve an existing OCI resource through\nListClusters using filters compartment_id,\ndisplay_name, lifecycle_state, sddc_id;
+:Resolve an existing OCI resource through\nListClusters using filters compartmentId,\ndisplayName, lifecycleState, sddcId;
 :Create the OCI resource via CreateCluster when\nno reusable match is found;
 :Persist the resolved or created OCI identity\ninto status;
 endif
@@ -55,13 +55,13 @@ stop
 endif
 }
 partition "Ready and Drift Handling" {
-:Compare live OCI state against the imported\nfield surface;
+:Compare live OCI state against the\nrepo-authored mutation surface;
 if ("Force-new or conflicting drift detected?") then (yes)
-:Reject drift before OCI mutation for force-new\nfields capacity_reservation_id,\ncompute_availability_domain, datastores,\nesxi_hosts_count (+7 more);
+:Reject drift before OCI mutation for force-new\nfields capacityReservationId,\ncomputeAvailabilityDomain, datastores,\nesxiHostsCount (+7 more);
 stop
 endif
 if ("Supported mutable drift detected?") then (yes)
-:Apply UpdateCluster only for mutable fields\ndefined_tags, display_name,\nesxi_software_version, freeform_tags (+2 more);
+:Apply UpdateCluster only for mutable fields\ndefinedTags, displayName, esxiSoftwareVersion,\nfreeformTags (+2 more);
 else (no)
 :Skip the no-op mutation path;
 endif
@@ -96,16 +96,17 @@ provider states: create CREATING, UPDATING;
 update UPDATING; delete DELETING
 follow-up: create=read-after-write;
 update=read-after-write; delete=confirm-delete
-supported drift: defined_tags, display_name,
-esxi_software_version, freeform_tags (+2 more)
+supported drift: definedTags, displayName,
+esxiSoftwareVersion, freeformTags (+2 more)
 reject before mutate: force-new fields
-capacity_reservation_id,
-compute_availability_domain, datastores,
-esxi_hosts_count (+7 more)
+capacityReservationId,
+computeAvailabilityDomain, datastores,
+esxiHostsCount (+7 more)
 create-only fields: none
 list lookup: oci_ocvp_clusters filters
-compartment_id, display_name, lifecycle_state,
-sddc_id
+compartmentId, displayName, lifecycleState,
+sddcId; exact SDDC and display-name identity
+match; duplicate matches fail
 conflicts: none
 open gaps: none
 Create or bind only attempts list reuse when

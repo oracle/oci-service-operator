@@ -9,5 +9,14 @@ states:
   - active
   - updating
   - terminating
+repoAuthored:
+  providerLifecycle: {createPending: ["CREATING"], updatePending: ["UPDATING"], deletePending: ["DELETING"]}
+  listLookup:
+    filters: ["odaInstanceId","name","version"]
+    matchRule: exact parent, name, and version match; version creation never binds an unrelated skill
+  mutation:
+    mutable: ["category","description","freeformTags","definedTags"]
+    forceNew: ["kind","id","name","displayName","version","platformVersion","dialogVersion","multilingualMode","primaryLanguageTag","nativeLanguageTags"]
+  followUp: {create: work-request-then-read, update: read-after-write, delete: confirm-delete}
 notes:
-  - Scaffold metadata only; replace with controller-specific runtime states before promotion.
+  - "Create records and polls the ODA work request before binding its resource ID; update and delete use lifecycle reads."

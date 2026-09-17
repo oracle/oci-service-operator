@@ -71,24 +71,27 @@ func (unsupportedAnalyzeApplicationsConfigurationDelegate) Delete(
 func TestApplyAnalyzeApplicationsConfigurationRuntimeHooksWrapsGeneratedClient(t *testing.T) {
 	hooks := newAnalyzeApplicationsConfigurationDefaultRuntimeHooks(jmsutilssdk.JmsUtilsClient{})
 	client := &fakeAnalyzeApplicationsConfigurationOCIClient{}
-	applyAnalyzeApplicationsConfigurationRuntimeHooks(nil, &hooks, client, nil)
+	manager := &AnalyzeApplicationsConfigurationServiceManager{
+		Provider: common.NewRawConfigurationProvider("ocid1.tenancy.oc1..test", "user", "us-ashburn-1", "fingerprint", "private-key", nil),
+	}
+	applyAnalyzeApplicationsConfigurationRuntimeHooks(manager, &hooks, client, nil)
 
 	if len(hooks.WrapGeneratedClient) != 1 {
 		t.Fatalf("WrapGeneratedClient count = %d, want 1", len(hooks.WrapGeneratedClient))
 	}
 	wrapped := hooks.WrapGeneratedClient[0](unsupportedAnalyzeApplicationsConfigurationDelegate{})
-	if _, ok := wrapped.(*analyzeApplicationsConfigurationRuntimeClient); !ok {
+	runtimeClient, ok := wrapped.(*analyzeApplicationsConfigurationRuntimeClient)
+	if !ok {
 		t.Fatalf("wrapped client type = %T, want *analyzeApplicationsConfigurationRuntimeClient", wrapped)
 	}
+	requireStringPtr(t, "wrapped compartmentId", runtimeClient.compartmentID, "ocid1.tenancy.oc1..test")
 }
 
 func TestCreateOrUpdateBindsExistingConfigurationWhenSpecEmpty(t *testing.T) {
 	resource := &jmsutilsv1beta1.AnalyzeApplicationsConfiguration{}
 	client := &fakeAnalyzeApplicationsConfigurationOCIClient{
 		getFn: func(_ context.Context, req jmsutilssdk.GetAnalyzeApplicationsConfigurationRequest) (jmsutilssdk.GetAnalyzeApplicationsConfigurationResponse, error) {
-			if req.CompartmentId != nil {
-				t.Fatalf("GetAnalyzeApplicationsConfiguration compartmentId = %q, want nil because CRD has no compartmentId field", *req.CompartmentId)
-			}
+			requireStringPtr(t, "GetAnalyzeApplicationsConfiguration compartmentId", req.CompartmentId, "ocid1.tenancy.oc1..test")
 			return getAnalyzeApplicationsConfigurationResponse("oci-namespace", "analysis-bucket", "opc-get"), nil
 		},
 		updateFn: func(context.Context, jmsutilssdk.UpdateAnalyzeApplicationsConfigurationRequest) (jmsutilssdk.UpdateAnalyzeApplicationsConfigurationResponse, error) {
@@ -304,7 +307,10 @@ func TestCreateOrUpdateRejectsNilResourceBeforeOCI(t *testing.T) {
 func newTestAnalyzeApplicationsConfigurationRuntimeClient(
 	client analyzeApplicationsConfigurationOCIClient,
 ) *analyzeApplicationsConfigurationRuntimeClient {
-	return &analyzeApplicationsConfigurationRuntimeClient{client: client}
+	return &analyzeApplicationsConfigurationRuntimeClient{
+		client:        client,
+		compartmentID: common.String("ocid1.tenancy.oc1..test"),
+	}
 }
 
 func getAnalyzeApplicationsConfigurationResponse(

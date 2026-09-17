@@ -1,0 +1,17 @@
+#
+# Copyright (c) 2026, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+#
+
+apiVersion: core.oracle.com/v1beta1
+kind: Subnet
+metadata:
+  name: osok-subnet-${OSOK_E2E_SUFFIX}
+spec:
+  compartmentId: ${OCI_COMPARTMENT_ID}
+  vcnId: ${OCI_VCN_ID}
+  cidrBlock: 10.0.50.0/24
+  displayName: osok-subnet-${OSOK_E2E_SUFFIX}
+  prohibitPublicIpOnVnic: true
+  freeformTags:
+    osok-e2e-phase: create

@@ -54,6 +54,10 @@ spec:
             description: DetectorRecipeDetectorRuleSpec defines the desired state
               of DetectorRecipeDetectorRule.
             properties:
+              compartmentId:
+                description: The OCID of the compartment used to confirm the detector
+                  rule through its recipe collection.
+                type: string
               details:
                 description: DetectorRecipeDetectorRuleDetailsFields defines nested
                   fields for DetectorRecipeDetectorRule.Details.
@@ -224,6 +228,13 @@ spec:
                 required:
                 - name
                 type: object
+              detectorRecipeId:
+                description: The OCID of the detector recipe containing the detector
+                  rule.
+                type: string
+            required:
+            - compartmentId
+            - detectorRecipeId
             type: object
           status:
             description: DetectorRecipeDetectorRuleStatus defines the observed state

@@ -1,0 +1,74 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: fleetsoftwareupdate
+slug: fsuaction
+kind: FsuAction
+archetype: generated-service-manager
+states:
+- provisioning
+- active
+- updating
+- terminating
+repoAuthored:
+  operations:
+    create:
+    - CreateFsuAction
+    update:
+    - UpdateFsuAction
+    delete:
+    - DeleteFsuAction
+  providerLifecycle:
+    createPending:
+    - CREATING
+    updatePending:
+    - UPDATING
+    deletePending:
+    - DELETING
+  listLookup:
+    filters:
+    - compartmentId
+    - fsuCycleId
+    - lifecycleState
+    - displayName
+    - type
+    - opc-request-id
+    matchRule: exact declared filters match within the resource scope; duplicate matches
+      fail
+  mutation:
+    mutable:
+    - displayName
+    - freeformTags
+    - definedTags
+    forceNew:
+    - jsonData
+    - compartmentId
+    - type
+    - fsuCycleId
+    - scheduleDetails
+    - details
+  hooks:
+    create:
+    - helper: tfresource.CreateResource
+    - helper: tfresource.WaitForWorkRequestWithErrorHandling
+      entityType: FsuAction
+      action: CreateFsuAction
+    update:
+    - helper: tfresource.UpdateResource
+    - helper: tfresource.WaitForWorkRequestWithErrorHandling
+      entityType: FsuAction
+      action: UpdateFsuAction
+    delete:
+    - helper: tfresource.DeleteResource
+    - helper: tfresource.WaitForWorkRequestWithErrorHandling
+      entityType: FsuAction
+      action: DeleteFsuAction
+  followUp:
+    create: GetWorkRequest -> read-after-write
+    update: GetWorkRequest -> read-after-write
+    delete: GetWorkRequest -> confirm-delete
+notes:
+- The generated service manager uses the reviewed CRUD request, response, lifecycle,
+  and status projection contract.
+- Work-request phases are declared per operation from the vendored SDK response surface.
+- Secret side effects are none and finalizer ownership is retained until confirmed
+  deletion.

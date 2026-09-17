@@ -14,6 +14,7 @@ testbin/
 .envtest-home/
 .tmp/
 bundle/
+e2e/.e2e-lite-local-*/
 
 # This is to remediate SCA findings wrt downloads from dockerfiles present in go vendor tree
 vendor/**/Dockerfile

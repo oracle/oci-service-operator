@@ -50,50 +50,119 @@ func registerProvisionRuntimeHooksMutator(mutator ProvisionRuntimeHooksMutator) 
 	}
 	provisionRuntimeHooksMutators = append(provisionRuntimeHooksMutators, mutator)
 }
-func newProvisionDefaultRuntimeHooks(sdkClient fleetappsmanagementsdk.FleetAppsManagementProvisionClient) ProvisionRuntimeHooks {
+func newProvisionRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "fleetappsmanagement",
+		FormalSlug:    "provision",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "displayName", "fleetId", "id", "state"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"compartmentId", "definedTags", "deployedResources.resourceInstanceList.compartmentId", "displayName", "freeformTags", "provisionDescription"},
+			ForceNew:      []string{"configCatalogItemId", "fleetId", "packageCatalogItemId", "tfVariableCompartmentId", "tfVariableCurrentUserId", "tfVariableRegionId", "tfVariableTenancyId"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForUpdatedState", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForUpdatedState", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
+func newProvisionDefaultRuntimeHooks(sdkClient ProvisionSDKClients) ProvisionRuntimeHooks {
 	return ProvisionRuntimeHooks{
+		Semantics:       newProvisionRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*fleetappsmanagementv1beta1.Provision]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*fleetappsmanagementv1beta1.Provision]{},
 		StatusHooks:     generatedruntime.StatusHooks[*fleetappsmanagementv1beta1.Provision]{},
 		ParityHooks:     generatedruntime.ParityHooks[*fleetappsmanagementv1beta1.Provision]{},
-		Async:           generatedruntime.AsyncHooks[*fleetappsmanagementv1beta1.Provision]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*fleetappsmanagementv1beta1.Provision]{},
+		Async: generatedruntime.AsyncHooks[*fleetappsmanagementv1beta1.Provision]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := fleetappsmanagementsdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.fleetAppsManagementWorkRequestClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*fleetappsmanagementv1beta1.Provision]{},
 		Create: runtimeOperationHooks[fleetappsmanagementsdk.CreateProvisionRequest, fleetappsmanagementsdk.CreateProvisionResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateProvisionDetails", RequestName: "CreateProvisionDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.CreateProvisionRequest) (fleetappsmanagementsdk.CreateProvisionResponse, error) {
-				return sdkClient.CreateProvision(ctx, request)
+				return sdkClient.fleetAppsManagementProvisionClient.CreateProvision(ctx, request)
 			},
 		},
 		Get: runtimeOperationHooks[fleetappsmanagementsdk.GetProvisionRequest, fleetappsmanagementsdk.GetProvisionResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "ProvisionId", RequestName: "provisionId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.GetProvisionRequest) (fleetappsmanagementsdk.GetProvisionResponse, error) {
-				return sdkClient.GetProvision(ctx, request)
+				return sdkClient.fleetAppsManagementProvisionClient.GetProvision(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[fleetappsmanagementsdk.ListProvisionsRequest, fleetappsmanagementsdk.ListProvisionsResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "Id", RequestName: "id", Contribution: "query", PreferResourceID: false}, {FieldName: "FleetId", RequestName: "fleetId", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.ListProvisionsRequest) (fleetappsmanagementsdk.ListProvisionsResponse, error) {
-				return sdkClient.ListProvisions(ctx, request)
+				return sdkClient.fleetAppsManagementProvisionClient.ListProvisions(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[fleetappsmanagementsdk.UpdateProvisionRequest, fleetappsmanagementsdk.UpdateProvisionResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "ProvisionId", RequestName: "provisionId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateProvisionDetails", RequestName: "UpdateProvisionDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.UpdateProvisionRequest) (fleetappsmanagementsdk.UpdateProvisionResponse, error) {
-				return sdkClient.UpdateProvision(ctx, request)
+				return sdkClient.fleetAppsManagementProvisionClient.UpdateProvision(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[fleetappsmanagementsdk.DeleteProvisionRequest, fleetappsmanagementsdk.DeleteProvisionResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "ProvisionId", RequestName: "provisionId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.DeleteProvisionRequest) (fleetappsmanagementsdk.DeleteProvisionResponse, error) {
-				return sdkClient.DeleteProvision(ctx, request)
+				return sdkClient.fleetAppsManagementProvisionClient.DeleteProvision(ctx, request)
 			},
 		},
 		WrapGeneratedClient: []func(ProvisionServiceClient) ProvisionServiceClient{},
 	}
 }
 
-func newProvisionRuntimeHooks(manager *ProvisionServiceManager, sdkClient fleetappsmanagementsdk.FleetAppsManagementProvisionClient) ProvisionRuntimeHooks {
+func newProvisionRuntimeHooks(manager *ProvisionServiceManager, sdkClient ProvisionSDKClients) ProvisionRuntimeHooks {
 	hooks := newProvisionDefaultRuntimeHooks(sdkClient)
 	for _, mutator := range provisionRuntimeHooksMutators {
 		mutator(manager, &hooks)
@@ -106,10 +175,19 @@ func buildProvisionGeneratedRuntimeConfig(
 	hooks ProvisionRuntimeHooks,
 ) generatedruntime.Config[*fleetappsmanagementv1beta1.Provision] {
 	return generatedruntime.Config[*fleetappsmanagementv1beta1.Provision]{
-		Kind:            "Provision",
-		SDKName:         "Provision",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "Provision",
+		SDKName:   "Provision",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

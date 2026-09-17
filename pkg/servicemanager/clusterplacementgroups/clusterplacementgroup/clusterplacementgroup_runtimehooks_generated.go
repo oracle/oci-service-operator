@@ -114,8 +114,20 @@ func newClusterPlacementGroupDefaultRuntimeHooks(sdkClient clusterplacementgroup
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*clusterplacementgroupsv1beta1.ClusterPlacementGroup]{},
 		StatusHooks:     generatedruntime.StatusHooks[*clusterplacementgroupsv1beta1.ClusterPlacementGroup]{},
 		ParityHooks:     generatedruntime.ParityHooks[*clusterplacementgroupsv1beta1.ClusterPlacementGroup]{},
-		Async:           generatedruntime.AsyncHooks[*clusterplacementgroupsv1beta1.ClusterPlacementGroup]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*clusterplacementgroupsv1beta1.ClusterPlacementGroup]{},
+		Async: generatedruntime.AsyncHooks[*clusterplacementgroupsv1beta1.ClusterPlacementGroup]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := clusterplacementgroupssdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*clusterplacementgroupsv1beta1.ClusterPlacementGroup]{},
 		Create: runtimeOperationHooks[clusterplacementgroupssdk.CreateClusterPlacementGroupRequest, clusterplacementgroupssdk.CreateClusterPlacementGroupResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateClusterPlacementGroupDetails", RequestName: "CreateClusterPlacementGroupDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request clusterplacementgroupssdk.CreateClusterPlacementGroupRequest) (clusterplacementgroupssdk.CreateClusterPlacementGroupResponse, error) {
@@ -163,10 +175,19 @@ func buildClusterPlacementGroupGeneratedRuntimeConfig(
 	hooks ClusterPlacementGroupRuntimeHooks,
 ) generatedruntime.Config[*clusterplacementgroupsv1beta1.ClusterPlacementGroup] {
 	return generatedruntime.Config[*clusterplacementgroupsv1beta1.ClusterPlacementGroup]{
-		Kind:            "ClusterPlacementGroup",
-		SDKName:         "ClusterPlacementGroup",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "ClusterPlacementGroup",
+		SDKName:   "ClusterPlacementGroup",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

@@ -259,10 +259,15 @@ spec:
                       in this operation.
                     type: string
                 type: object
+              workspaceId:
+                description: The OCID of the Data Integration workspace containing
+                  this resource.
+                type: string
             required:
             - identifier
             - name
             - objectVersion
+            - workspaceId
             type: object
           status:
             description: ApplicationStatus defines the observed state of Application.

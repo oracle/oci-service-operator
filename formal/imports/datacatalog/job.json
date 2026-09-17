@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datacatalog",
+  "slug": "job",
+  "kind": "Job",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_datacatalog_job",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateJob",
+        "requestType": "datacatalog.CreateJobRequest",
+        "responseType": "datacatalog.CreateJobResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetJob",
+        "requestType": "datacatalog.GetJobRequest",
+        "responseType": "datacatalog.GetJobResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListJob",
+        "requestType": "datacatalog.ListJobRequest",
+        "responseType": "datacatalog.ListJobResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateJob",
+        "requestType": "datacatalog.UpdateJobRequest",
+        "responseType": "datacatalog.UpdateJobResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteJob",
+        "requestType": "datacatalog.DeleteJobRequest",
+        "responseType": "datacatalog.DeleteJobResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_datacatalog_job",
+    "collectionField": "job",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datacatalog/job/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datacatalog/job/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for datacatalog/job; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -47,21 +47,21 @@ type AssetSpec struct {
 	// +kubebuilder:validation:Optional
 	AssetType string `json:"assetType,omitempty"`
 	// +kubebuilder:validation:Optional
-	AwsEbs AssetAwsEbs `json:"awsEbs,omitempty"`
+	AwsEbs AssetAwsEbs `json:"awsEbs,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	Compute AssetCompute `json:"compute,omitempty"`
+	Compute AssetCompute `json:"compute,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	Vm AssetVm `json:"vm,omitempty"`
+	Vm AssetVm `json:"vm,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	VmwareVm AssetVmwareVm `json:"vmwareVm,omitempty"`
+	VmwareVm AssetVmwareVm `json:"vmwareVm,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	VmwareVCenter AssetVmwareVCenter `json:"vmwareVCenter,omitempty"`
+	VmwareVCenter AssetVmwareVCenter `json:"vmwareVCenter,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	AwsEc2 AssetAwsEc2 `json:"awsEc2,omitempty"`
+	AwsEc2 AssetAwsEc2 `json:"awsEc2,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	AwsEc2Cost AssetAwsEc2Cost `json:"awsEc2Cost,omitempty"`
+	AwsEc2Cost AssetAwsEc2Cost `json:"awsEc2Cost,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	AttachedEbsVolumesCost AssetAttachedEbsVolumesCost `json:"attachedEbsVolumesCost,omitempty"`
+	AttachedEbsVolumesCost AssetAttachedEbsVolumesCost `json:"attachedEbsVolumesCost,omitempty,omitzero"`
 }
 
 // AssetAwsEbsAttachment defines nested fields for Asset.AwsEbs.Attachment.
@@ -316,9 +316,9 @@ type AssetCompute struct {
 	// +kubebuilder:validation:Optional
 	Nvdimms []AssetComputeNvdimm `json:"nvdimms,omitempty"`
 	// +kubebuilder:validation:Optional
-	NvdimmController AssetComputeNvdimmController `json:"nvdimmController,omitempty"`
+	NvdimmController AssetComputeNvdimmController `json:"nvdimmController,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	ScsiController AssetComputeScsiController `json:"scsiController,omitempty"`
+	ScsiController AssetComputeScsiController `json:"scsiController,omitempty,omitzero"`
 	// Hardware version.
 	// +kubebuilder:validation:Optional
 	HardwareVersion string `json:"hardwareVersion,omitempty"`
@@ -481,7 +481,7 @@ type AssetAwsEc2NetworkInterfacePrivateIpAddressAssociation struct {
 // AssetAwsEc2NetworkInterfacePrivateIpAddress defines nested fields for Asset.AwsEc2.NetworkInterface.PrivateIpAddress.
 type AssetAwsEc2NetworkInterfacePrivateIpAddress struct {
 	// +kubebuilder:validation:Optional
-	Association AssetAwsEc2NetworkInterfacePrivateIpAddressAssociation `json:"association,omitempty"`
+	Association AssetAwsEc2NetworkInterfacePrivateIpAddressAssociation `json:"association,omitempty,omitzero"`
 	// Indicates whether this IPv4 address is the primary private IP address of the network interface.
 	// +kubebuilder:validation:Optional
 	IsPrimary bool `json:"isPrimary,omitempty"`
@@ -496,9 +496,9 @@ type AssetAwsEc2NetworkInterfacePrivateIpAddress struct {
 // AssetAwsEc2NetworkInterface defines nested fields for Asset.AwsEc2.NetworkInterface.
 type AssetAwsEc2NetworkInterface struct {
 	// +kubebuilder:validation:Optional
-	Association AssetAwsEc2NetworkInterfaceAssociation `json:"association,omitempty"`
+	Association AssetAwsEc2NetworkInterfaceAssociation `json:"association,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	Attachment AssetAwsEc2NetworkInterfaceAttachment `json:"attachment,omitempty"`
+	Attachment AssetAwsEc2NetworkInterfaceAttachment `json:"attachment,omitempty,omitzero"`
 	// The description.
 	// +kubebuilder:validation:Optional
 	Description string `json:"description,omitempty"`
@@ -650,7 +650,7 @@ type AssetAwsEc2 struct {
 	// +kubebuilder:validation:Optional
 	NetworkInterfaces []AssetAwsEc2NetworkInterface `json:"networkInterfaces,omitempty"`
 	// +kubebuilder:validation:Optional
-	Placement AssetAwsEc2Placement `json:"placement,omitempty"`
+	Placement AssetAwsEc2Placement `json:"placement,omitempty,omitzero"`
 	// (IPv4 only) The private DNS hostname name assigned to the instance.
 	// +kubebuilder:validation:Optional
 	PrivateDnsName string `json:"privateDnsName,omitempty"`

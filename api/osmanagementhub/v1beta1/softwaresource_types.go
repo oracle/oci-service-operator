@@ -41,7 +41,7 @@ type SoftwareSourceSpec struct {
 	// +kubebuilder:validation:Optional
 	VendorSoftwareSources []SoftwareSourceVendorSoftwareSource `json:"vendorSoftwareSources,omitempty"`
 	// +kubebuilder:validation:Optional
-	CustomSoftwareSourceFilter SoftwareSourceCustomSoftwareSourceFilter `json:"customSoftwareSourceFilter,omitempty"`
+	CustomSoftwareSourceFilter SoftwareSourceCustomSoftwareSourceFilter `json:"customSoftwareSourceFilter,omitempty,omitzero"`
 	// Indicates whether the service should automatically update the custom software source to use the latest package versions available. The service reviews packages levels once a day.
 	// +kubebuilder:validation:Optional
 	IsAutomaticallyUpdated bool `json:"isAutomaticallyUpdated,omitempty"`

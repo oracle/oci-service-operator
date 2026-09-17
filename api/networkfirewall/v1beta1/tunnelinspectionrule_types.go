@@ -22,7 +22,7 @@ type TunnelInspectionRuleSpec struct {
 	// +kubebuilder:validation:Optional
 	Action string `json:"action,omitempty"`
 	// +kubebuilder:validation:Optional
-	Position TunnelInspectionRulePosition `json:"position,omitempty"`
+	Position TunnelInspectionRulePosition `json:"position,omitempty,omitzero"`
 	// The description of the tunnel inspect rule. This field can be used to add additional info.
 	// +kubebuilder:validation:Optional
 	Description string `json:"description,omitempty"`
@@ -32,9 +32,12 @@ type TunnelInspectionRuleSpec struct {
 	// +kubebuilder:validation:Optional
 	Protocol string `json:"protocol,omitempty"`
 	// +kubebuilder:validation:Optional
-	Condition TunnelInspectionRuleCondition `json:"condition,omitempty"`
+	Condition TunnelInspectionRuleCondition `json:"condition,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	Profile TunnelInspectionRuleProfile `json:"profile,omitempty"`
+	Profile TunnelInspectionRuleProfile `json:"profile,omitempty,omitzero"`
+	// The OCID of the Network Firewall policy that owns this resource.
+	// +kubebuilder:validation:Required
+	NetworkFirewallPolicyId string `json:"networkFirewallPolicyId"`
 }
 
 // TunnelInspectionRulePosition defines nested fields for TunnelInspectionRule.Position.

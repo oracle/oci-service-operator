@@ -50,50 +50,62 @@ func registerFleetCredentialRuntimeHooksMutator(mutator FleetCredentialRuntimeHo
 	}
 	fleetcredentialRuntimeHooksMutators = append(fleetcredentialRuntimeHooksMutators, mutator)
 }
-func newFleetCredentialDefaultRuntimeHooks(sdkClient fleetappsmanagementsdk.FleetAppsManagementClient) FleetCredentialRuntimeHooks {
+func newFleetCredentialDefaultRuntimeHooks(sdkClient FleetCredentialSDKClients) FleetCredentialRuntimeHooks {
 	return FleetCredentialRuntimeHooks{
 		Identity:        generatedruntime.IdentityHooks[*fleetappsmanagementv1beta1.FleetCredential]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*fleetappsmanagementv1beta1.FleetCredential]{},
 		StatusHooks:     generatedruntime.StatusHooks[*fleetappsmanagementv1beta1.FleetCredential]{},
 		ParityHooks:     generatedruntime.ParityHooks[*fleetappsmanagementv1beta1.FleetCredential]{},
-		Async:           generatedruntime.AsyncHooks[*fleetappsmanagementv1beta1.FleetCredential]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*fleetappsmanagementv1beta1.FleetCredential]{},
+		Async: generatedruntime.AsyncHooks[*fleetappsmanagementv1beta1.FleetCredential]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := fleetappsmanagementsdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.fleetAppsManagementWorkRequestClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*fleetappsmanagementv1beta1.FleetCredential]{},
 		Create: runtimeOperationHooks[fleetappsmanagementsdk.CreateFleetCredentialRequest, fleetappsmanagementsdk.CreateFleetCredentialResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "FleetId", RequestName: "fleetId", Contribution: "path", PreferResourceID: false}, {FieldName: "CreateFleetCredentialDetails", RequestName: "CreateFleetCredentialDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.CreateFleetCredentialRequest) (fleetappsmanagementsdk.CreateFleetCredentialResponse, error) {
-				return sdkClient.CreateFleetCredential(ctx, request)
+				return sdkClient.fleetAppsManagementClient.CreateFleetCredential(ctx, request)
 			},
 		},
 		Get: runtimeOperationHooks[fleetappsmanagementsdk.GetFleetCredentialRequest, fleetappsmanagementsdk.GetFleetCredentialResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "FleetCredentialId", RequestName: "fleetCredentialId", Contribution: "path", PreferResourceID: true}, {FieldName: "FleetId", RequestName: "fleetId", Contribution: "path", PreferResourceID: false}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.GetFleetCredentialRequest) (fleetappsmanagementsdk.GetFleetCredentialResponse, error) {
-				return sdkClient.GetFleetCredential(ctx, request)
+				return sdkClient.fleetAppsManagementClient.GetFleetCredential(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[fleetappsmanagementsdk.ListFleetCredentialsRequest, fleetappsmanagementsdk.ListFleetCredentialsResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "FleetId", RequestName: "fleetId", Contribution: "path", PreferResourceID: true}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "ResourceId", RequestName: "resourceId", Contribution: "query", PreferResourceID: false}, {FieldName: "Target", RequestName: "target", Contribution: "query", PreferResourceID: false}, {FieldName: "CredentialLevel", RequestName: "credentialLevel", Contribution: "query", PreferResourceID: false}, {FieldName: "Id", RequestName: "id", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "FleetId", RequestName: "fleetId", Contribution: "path", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "ResourceId", RequestName: "resourceId", Contribution: "query", PreferResourceID: false}, {FieldName: "Target", RequestName: "target", Contribution: "query", PreferResourceID: false}, {FieldName: "CredentialLevel", RequestName: "credentialLevel", Contribution: "query", PreferResourceID: false}, {FieldName: "Id", RequestName: "id", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.ListFleetCredentialsRequest) (fleetappsmanagementsdk.ListFleetCredentialsResponse, error) {
-				return sdkClient.ListFleetCredentials(ctx, request)
+				return sdkClient.fleetAppsManagementClient.ListFleetCredentials(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[fleetappsmanagementsdk.UpdateFleetCredentialRequest, fleetappsmanagementsdk.UpdateFleetCredentialResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "FleetCredentialId", RequestName: "fleetCredentialId", Contribution: "path", PreferResourceID: true}, {FieldName: "FleetId", RequestName: "fleetId", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdateFleetCredentialDetails", RequestName: "UpdateFleetCredentialDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.UpdateFleetCredentialRequest) (fleetappsmanagementsdk.UpdateFleetCredentialResponse, error) {
-				return sdkClient.UpdateFleetCredential(ctx, request)
+				return sdkClient.fleetAppsManagementClient.UpdateFleetCredential(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[fleetappsmanagementsdk.DeleteFleetCredentialRequest, fleetappsmanagementsdk.DeleteFleetCredentialResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "FleetCredentialId", RequestName: "fleetCredentialId", Contribution: "path", PreferResourceID: true}, {FieldName: "FleetId", RequestName: "fleetId", Contribution: "path", PreferResourceID: false}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.DeleteFleetCredentialRequest) (fleetappsmanagementsdk.DeleteFleetCredentialResponse, error) {
-				return sdkClient.DeleteFleetCredential(ctx, request)
+				return sdkClient.fleetAppsManagementClient.DeleteFleetCredential(ctx, request)
 			},
 		},
 		WrapGeneratedClient: []func(FleetCredentialServiceClient) FleetCredentialServiceClient{},
 	}
 }
 
-func newFleetCredentialRuntimeHooks(manager *FleetCredentialServiceManager, sdkClient fleetappsmanagementsdk.FleetAppsManagementClient) FleetCredentialRuntimeHooks {
+func newFleetCredentialRuntimeHooks(manager *FleetCredentialServiceManager, sdkClient FleetCredentialSDKClients) FleetCredentialRuntimeHooks {
 	hooks := newFleetCredentialDefaultRuntimeHooks(sdkClient)
 	for _, mutator := range fleetcredentialRuntimeHooksMutators {
 		mutator(manager, &hooks)
@@ -106,10 +118,19 @@ func buildFleetCredentialGeneratedRuntimeConfig(
 	hooks FleetCredentialRuntimeHooks,
 ) generatedruntime.Config[*fleetappsmanagementv1beta1.FleetCredential] {
 	return generatedruntime.Config[*fleetappsmanagementv1beta1.FleetCredential]{
-		Kind:            "FleetCredential",
-		SDKName:         "FleetCredential",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "FleetCredential",
+		SDKName:   "FleetCredential",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

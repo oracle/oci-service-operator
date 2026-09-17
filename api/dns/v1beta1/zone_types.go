@@ -82,7 +82,7 @@ type ZoneSpec struct {
 	// +kubebuilder:validation:Optional
 	MigrationSource string `json:"migrationSource,omitempty"`
 	// +kubebuilder:validation:Optional
-	DynectMigrationDetails ZoneDynectMigrationDetails `json:"dynectMigrationDetails,omitempty"`
+	DynectMigrationDetails ZoneDynectMigrationDetails `json:"dynectMigrationDetails,omitempty,omitzero"`
 }
 
 // ZoneExternalMaster defines nested fields for Zone.ExternalMaster.

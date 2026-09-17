@@ -9,6 +9,21 @@ states:
   - terminating
   - deleted
   - failed
+repoAuthored:
+  providerLifecycle:
+    createPending: []
+    updatePending: []
+    deletePending: []
+  listLookup:
+    filters: ["agreementId","compartmentId","displayName","listingId","packageVersion"]
+    matchRule: exact agreement identity match; duplicate matches fail
+  mutation:
+    mutable: ["definedTags","displayName","freeformTags"]
+    forceNew: ["agreementId","compartmentId","listingId","packageVersion","signature"]
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
 notes:
   - AcceptedAgreement reuses an existing OCI agreement before create by exact compartmentId, listingId, packageVersion, and agreementId match, with displayName narrowing when set.
   - OCI accepted agreement responses do not expose lifecycle state, so successful create and update normalize directly to Active from the immediate response body.

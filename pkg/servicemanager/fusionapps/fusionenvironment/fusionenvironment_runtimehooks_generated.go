@@ -50,15 +50,84 @@ func registerFusionEnvironmentRuntimeHooksMutator(mutator FusionEnvironmentRunti
 	}
 	fusionenvironmentRuntimeHooksMutators = append(fusionenvironmentRuntimeHooksMutators, mutator)
 }
+func newFusionEnvironmentRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "fusionapps",
+		FormalSlug:    "fusionenvironment",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{"UPDATING"},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "displayName", "fusionEnvironmentFamilyId", "lifecycleState", "opc-request-id"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"additionalLanguagePacks", "definedTags", "displayName", "freeformTags", "isIPv6DualStackEnabled", "kmsKeyId", "maintenancePolicy", "rules"},
+			ForceNew:      []string{"compartmentId", "createFusionEnvironmentAdminUserDetails", "dnsPrefix", "fusionEnvironmentFamilyId", "fusionEnvironmentType"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "FusionEnvironment", Action: "CreateFusionEnvironment"}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "FusionEnvironment", Action: "UpdateFusionEnvironment"}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "FusionEnvironment", Action: "DeleteFusionEnvironment"}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "FusionEnvironment", Action: "CreateFusionEnvironment"}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "FusionEnvironment", Action: "UpdateFusionEnvironment"}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "FusionEnvironment", Action: "DeleteFusionEnvironment"}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newFusionEnvironmentDefaultRuntimeHooks(sdkClient fusionappssdk.FusionApplicationsClient) FusionEnvironmentRuntimeHooks {
 	return FusionEnvironmentRuntimeHooks{
+		Semantics:       newFusionEnvironmentRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*fusionappsv1beta1.FusionEnvironment]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*fusionappsv1beta1.FusionEnvironment]{},
 		StatusHooks:     generatedruntime.StatusHooks[*fusionappsv1beta1.FusionEnvironment]{},
 		ParityHooks:     generatedruntime.ParityHooks[*fusionappsv1beta1.FusionEnvironment]{},
-		Async:           generatedruntime.AsyncHooks[*fusionappsv1beta1.FusionEnvironment]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*fusionappsv1beta1.FusionEnvironment]{},
+		Async: generatedruntime.AsyncHooks[*fusionappsv1beta1.FusionEnvironment]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := fusionappssdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*fusionappsv1beta1.FusionEnvironment]{},
 		Create: runtimeOperationHooks[fusionappssdk.CreateFusionEnvironmentRequest, fusionappssdk.CreateFusionEnvironmentResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateFusionEnvironmentDetails", RequestName: "CreateFusionEnvironmentDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request fusionappssdk.CreateFusionEnvironmentRequest) (fusionappssdk.CreateFusionEnvironmentResponse, error) {
@@ -106,10 +175,19 @@ func buildFusionEnvironmentGeneratedRuntimeConfig(
 	hooks FusionEnvironmentRuntimeHooks,
 ) generatedruntime.Config[*fusionappsv1beta1.FusionEnvironment] {
 	return generatedruntime.Config[*fusionappsv1beta1.FusionEnvironment]{
-		Kind:            "FusionEnvironment",
-		SDKName:         "FusionEnvironment",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "FusionEnvironment",
+		SDKName:   "FusionEnvironment",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

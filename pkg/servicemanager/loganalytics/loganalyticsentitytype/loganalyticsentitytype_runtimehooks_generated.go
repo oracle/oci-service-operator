@@ -66,25 +66,25 @@ func newLogAnalyticsEntityTypeDefaultRuntimeHooks(sdkClient loganalyticssdk.LogA
 			},
 		},
 		Get: runtimeOperationHooks[loganalyticssdk.GetLogAnalyticsEntityTypeRequest, loganalyticssdk.GetLogAnalyticsEntityTypeResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NamespaceName", RequestName: "namespaceName", Contribution: "path", PreferResourceID: false}, {FieldName: "EntityTypeName", RequestName: "entityTypeName", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NamespaceName", RequestName: "namespaceName", Contribution: "path", PreferResourceID: false}, {FieldName: "EntityTypeName", RequestName: "entityTypeName", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request loganalyticssdk.GetLogAnalyticsEntityTypeRequest) (loganalyticssdk.GetLogAnalyticsEntityTypeResponse, error) {
 				return sdkClient.GetLogAnalyticsEntityType(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[loganalyticssdk.ListLogAnalyticsEntityTypesRequest, loganalyticssdk.ListLogAnalyticsEntityTypesResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NamespaceName", RequestName: "namespaceName", Contribution: "path", PreferResourceID: true}, {FieldName: "Name", RequestName: "name", Contribution: "query", PreferResourceID: false}, {FieldName: "NameContains", RequestName: "nameContains", Contribution: "query", PreferResourceID: false}, {FieldName: "CloudType", RequestName: "cloudType", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NamespaceName", RequestName: "namespaceName", Contribution: "path", PreferResourceID: false}, {FieldName: "Name", RequestName: "name", Contribution: "query", PreferResourceID: false}, {FieldName: "NameContains", RequestName: "nameContains", Contribution: "query", PreferResourceID: false}, {FieldName: "CloudType", RequestName: "cloudType", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loganalyticssdk.ListLogAnalyticsEntityTypesRequest) (loganalyticssdk.ListLogAnalyticsEntityTypesResponse, error) {
 				return sdkClient.ListLogAnalyticsEntityTypes(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[loganalyticssdk.UpdateLogAnalyticsEntityTypeRequest, loganalyticssdk.UpdateLogAnalyticsEntityTypeResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NamespaceName", RequestName: "namespaceName", Contribution: "path", PreferResourceID: false}, {FieldName: "EntityTypeName", RequestName: "entityTypeName", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdateLogAnalyticsEntityTypeDetails", RequestName: "UpdateLogAnalyticsEntityTypeDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NamespaceName", RequestName: "namespaceName", Contribution: "path", PreferResourceID: false}, {FieldName: "EntityTypeName", RequestName: "entityTypeName", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateLogAnalyticsEntityTypeDetails", RequestName: "UpdateLogAnalyticsEntityTypeDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loganalyticssdk.UpdateLogAnalyticsEntityTypeRequest) (loganalyticssdk.UpdateLogAnalyticsEntityTypeResponse, error) {
 				return sdkClient.UpdateLogAnalyticsEntityType(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[loganalyticssdk.DeleteLogAnalyticsEntityTypeRequest, loganalyticssdk.DeleteLogAnalyticsEntityTypeResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NamespaceName", RequestName: "namespaceName", Contribution: "path", PreferResourceID: false}, {FieldName: "EntityTypeName", RequestName: "entityTypeName", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NamespaceName", RequestName: "namespaceName", Contribution: "path", PreferResourceID: false}, {FieldName: "EntityTypeName", RequestName: "entityTypeName", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request loganalyticssdk.DeleteLogAnalyticsEntityTypeRequest) (loganalyticssdk.DeleteLogAnalyticsEntityTypeResponse, error) {
 				return sdkClient.DeleteLogAnalyticsEntityType(ctx, request)
 			},

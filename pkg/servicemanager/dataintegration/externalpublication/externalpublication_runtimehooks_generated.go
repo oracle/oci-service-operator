@@ -66,7 +66,7 @@ func newExternalPublicationDefaultRuntimeHooks(sdkClient dataintegrationsdk.Data
 			},
 		},
 		Get: runtimeOperationHooks[dataintegrationsdk.GetExternalPublicationRequest, dataintegrationsdk.GetExternalPublicationResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "TaskKey", RequestName: "taskKey", Contribution: "path", PreferResourceID: false}, {FieldName: "ExternalPublicationsKey", RequestName: "externalPublicationsKey", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "TaskKey", RequestName: "taskKey", Contribution: "path", PreferResourceID: false}, {FieldName: "ExternalPublicationsKey", RequestName: "externalPublicationsKey", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request dataintegrationsdk.GetExternalPublicationRequest) (dataintegrationsdk.GetExternalPublicationResponse, error) {
 				return sdkClient.GetExternalPublication(ctx, request)
 			},
@@ -78,13 +78,13 @@ func newExternalPublicationDefaultRuntimeHooks(sdkClient dataintegrationsdk.Data
 			},
 		},
 		Update: runtimeOperationHooks[dataintegrationsdk.UpdateExternalPublicationRequest, dataintegrationsdk.UpdateExternalPublicationResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "TaskKey", RequestName: "taskKey", Contribution: "path", PreferResourceID: false}, {FieldName: "ExternalPublicationsKey", RequestName: "externalPublicationsKey", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdateExternalPublicationDetails", RequestName: "UpdateExternalPublicationDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "TaskKey", RequestName: "taskKey", Contribution: "path", PreferResourceID: false}, {FieldName: "ExternalPublicationsKey", RequestName: "externalPublicationsKey", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateExternalPublicationDetails", RequestName: "UpdateExternalPublicationDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dataintegrationsdk.UpdateExternalPublicationRequest) (dataintegrationsdk.UpdateExternalPublicationResponse, error) {
 				return sdkClient.UpdateExternalPublication(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[dataintegrationsdk.DeleteExternalPublicationRequest, dataintegrationsdk.DeleteExternalPublicationResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "TaskKey", RequestName: "taskKey", Contribution: "path", PreferResourceID: false}, {FieldName: "ExternalPublicationsKey", RequestName: "externalPublicationsKey", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "TaskKey", RequestName: "taskKey", Contribution: "path", PreferResourceID: false}, {FieldName: "ExternalPublicationsKey", RequestName: "externalPublicationsKey", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request dataintegrationsdk.DeleteExternalPublicationRequest) (dataintegrationsdk.DeleteExternalPublicationResponse, error) {
 				return sdkClient.DeleteExternalPublication(ctx, request)
 			},

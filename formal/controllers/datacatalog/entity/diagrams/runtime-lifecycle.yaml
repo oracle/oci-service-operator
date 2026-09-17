@@ -1,0 +1,51 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: datacatalog
+slug: entity
+kind: Entity
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending:
+      - "CREATING"
+    updatePending:
+      - "UPDATING"
+    deletePending:
+      - "DELETING"
+      - "TERMINATING"
+  listLookup:
+    filters:
+      - "displayName"
+    matchRule: exact unique match on fields exposed by the scoped OCI list response
+  mutation:
+    mutable:
+      - "displayName"
+      - "timeExternal"
+      - "businessName"
+      - "description"
+      - "isLogical"
+      - "isPartition"
+      - "folderKey"
+      - "patternKey"
+      - "realizedExpression"
+      - "harvestStatus"
+      - "lastJobKey"
+      - "customPropertyMembers"
+      - "properties"
+    forceNew:
+      - "typeKey"
+      - "catalogId"
+      - "dataAssetKey"
+  followUp:
+    create: "read-after-write"
+    update: "read-after-write"
+    delete: "confirm-delete"
+notes:
+  - "The runtime projects the vendored SDK lifecycle states and treats ACTIVE, INACTIVE as converged."
+  - "Parent identifiers scope composite OCI request paths and remain replacement-only unless the SDK update details explicitly expose them."
+  - "Create, get, list where available, update, and delete request shapes are exercised by the package-local typed OCI mock integration test."

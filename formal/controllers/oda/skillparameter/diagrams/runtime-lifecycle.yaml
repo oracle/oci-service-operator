@@ -9,5 +9,14 @@ states:
   - active
   - updating
   - terminating
+repoAuthored:
+  providerLifecycle: {createPending: ["CREATING"], updatePending: ["UPDATING"], deletePending: ["DELETING"]}
+  listLookup:
+    filters: ["odaInstanceId","skillId","name"]
+    matchRule: exact parent skill and parameter name match; duplicate matches fail
+  mutation:
+    mutable: ["description","displayName","value"]
+    forceNew: ["name","type"]
+  followUp: {create: read-after-write, update: read-after-write, delete: confirm-delete}
 notes:
-  - Scaffold metadata only; replace with controller-specific runtime states before promotion.
+  - "Parameter name is the nested item identity; parent ODA instance and skill IDs are retained outside the OCI response for all follow-up calls."

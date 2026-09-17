@@ -50,9 +50,9 @@ type ApplicationSpec struct {
 	// +kubebuilder:validation:Optional
 	LifecycleState string `json:"lifecycleState,omitempty"`
 	// +kubebuilder:validation:Optional
-	SourceApplicationInfo ApplicationSourceApplicationInfo `json:"sourceApplicationInfo,omitempty"`
+	SourceApplicationInfo ApplicationSourceApplicationInfo `json:"sourceApplicationInfo,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	RegistryMetadata ApplicationRegistryMetadata `json:"registryMetadata,omitempty"`
+	RegistryMetadata ApplicationRegistryMetadata `json:"registryMetadata,omitempty,omitzero"`
 	// The version of the object that is used to track changes in the object instance.
 	// +kubebuilder:validation:Required
 	ObjectVersion int `json:"objectVersion"`
@@ -60,9 +60,12 @@ type ApplicationSpec struct {
 	// +kubebuilder:validation:Optional
 	ApplicationVersion int `json:"applicationVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef ApplicationParentRef `json:"parentRef,omitempty"`
+	ParentRef ApplicationParentRef `json:"parentRef,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	Metadata ApplicationMetadata `json:"metadata,omitempty"`
+	Metadata ApplicationMetadata `json:"metadata,omitempty,omitzero"`
+	// The OCID of the Data Integration workspace containing this resource.
+	// +kubebuilder:validation:Required
+	WorkspaceId string `json:"workspaceId"`
 }
 
 // ApplicationSourceApplicationInfo defines nested fields for Application.SourceApplicationInfo.
@@ -167,7 +170,7 @@ type ApplicationMetadata struct {
 	// +kubebuilder:validation:Optional
 	AggregatorKey string `json:"aggregatorKey,omitempty"`
 	// +kubebuilder:validation:Optional
-	Aggregator ApplicationMetadataAggregator `json:"aggregator,omitempty"`
+	Aggregator ApplicationMetadataAggregator `json:"aggregator,omitempty,omitzero"`
 	// The full path to identify this object.
 	// +kubebuilder:validation:Optional
 	IdentifierPath string `json:"identifierPath,omitempty"`
@@ -184,7 +187,7 @@ type ApplicationMetadata struct {
 	// +kubebuilder:validation:Optional
 	IsFavorite bool `json:"isFavorite,omitempty"`
 	// +kubebuilder:validation:Optional
-	CountStatistics ApplicationMetadataCountStatistics `json:"countStatistics,omitempty"`
+	CountStatistics ApplicationMetadataCountStatistics `json:"countStatistics,omitempty,omitzero"`
 }
 
 // ApplicationDependentObjectMetadata defines nested fields for Application.DependentObjectMetadata.

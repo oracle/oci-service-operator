@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "devops",
+  "slug": "repository",
+  "kind": "Repository",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_devops_repository",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateRepository",
+        "requestType": "devops.CreateRepositoryRequest",
+        "responseType": "devops.CreateRepositoryResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetRepository",
+        "requestType": "devops.GetRepositoryRequest",
+        "responseType": "devops.GetRepositoryResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateRepository",
+        "requestType": "devops.UpdateRepositoryRequest",
+        "responseType": "devops.UpdateRepositoryResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteRepository",
+        "requestType": "devops.DeleteRepositoryRequest",
+        "responseType": "devops.DeleteRepositoryResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "default_branch",
+      "defined_tags",
+      "description",
+      "freeform_tags",
+      "mirror_repository_config.connector_id",
+      "mirror_repository_config.repository_url",
+      "mirror_repository_config.trigger_schedule.custom_schedule",
+      "mirror_repository_config.trigger_schedule.schedule_type",
+      "name",
+      "repository_type"
+    ],
+    "forceNew": [
+      "parent_repository_id",
+      "project_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/devops/repository/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/devops/repository/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from terraform-provider-oci for devops/repository."
+  ]
+}

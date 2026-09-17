@@ -33,6 +33,7 @@ This summary shows the top-level `spec` fields. Use [the full API reference](../
 | Field | Description | Type | Required |
 | --- | --- | --- | --- |
 | `conditionLanguageVersion` | The version of the language in which `condition` of `rules` are composed. | `string` | Yes |
+| `loadBalancerId` | The OCID of the load balancer that owns this routing policy. | `string` | No |
 | `name` | The name for this list of routing rules. It must be unique and it cannot be changed. Avoid entering confidential information. Example: `example_routing_rules` | `string` | Yes |
 | [`rules`](../../reference/api/loadbalancer/v1beta1/index.md#kind-routingpolicy-spec-rules) | The list of routing rules. | `list[object]` | Yes |
 
@@ -44,6 +45,7 @@ This summary shows the top-level `status` fields. Use [the full API reference](.
 | Field | Description | Type | Required |
 | --- | --- | --- | --- |
 | `conditionLanguageVersion` | The version of the language in which `condition` of `rules` are composed. | `string` | No |
+| `loadBalancerId` | The bound load balancer OCID used to address this routing policy. | `string` | No |
 | `name` | The unique name for this list of routing rules. Avoid entering confidential information. Example: `example_routing_policy` | `string` | No |
 | [`rules`](../../reference/api/loadbalancer/v1beta1/index.md#kind-routingpolicy-status-rules) | The ordered list of routing rules. | `list[object]` | No |
 | [`status`](../../reference/api/loadbalancer/v1beta1/index.md#kind-routingpolicy-status-status) | - | `object` | Yes |

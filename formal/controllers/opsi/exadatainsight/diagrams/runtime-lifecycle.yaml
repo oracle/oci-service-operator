@@ -1,0 +1,76 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: opsi
+slug: exadatainsight
+kind: ExadataInsight
+archetype: generated-service-manager
+states:
+- provisioning
+- active
+- updating
+- terminating
+repoAuthored:
+  operations:
+    create:
+    - CreateExadataInsight
+    update:
+    - UpdateExadataInsight
+    delete:
+    - DeleteExadataInsight
+  providerLifecycle:
+    createPending:
+    - CREATING
+    updatePending:
+    - UPDATING
+    deletePending:
+    - DELETING
+  listLookup:
+    filters:
+    - compartmentId
+    - entitySource
+    - enterpriseManagerBridgeId
+    - enterpriseManagerEntityIdentifier
+    - exadataInfraId
+    matchRule: exact compartmentId, entitySource, enterpriseManagerBridgeId, enterpriseManagerEntityIdentifier,
+      exadataInfraId match within the resource scope; duplicate matches fail
+  mutation:
+    mutable:
+    - freeformTags
+    - definedTags
+    - isAutoSyncEnabled
+    forceNew:
+    - compartmentId
+    - entitySource
+    - enterpriseManagerIdentifier
+    - enterpriseManagerBridgeId
+    - enterpriseManagerEntityIdentifier
+    - exadataInfraId
+    - jsonData
+    - memberEntityDetails
+    - memberVmClusterDetails
+  hooks:
+    create:
+    - helper: generatedruntime.Create
+      entityType: ExadataInsight
+      action: CREATE_EXADATA_INSIGHT
+    update:
+    - helper: generatedruntime.Update
+      entityType: ExadataInsight
+      action: UPDATE_EXADATA_INSIGHT
+    delete:
+    - helper: generatedruntime.Delete
+      entityType: ExadataInsight
+      action: DELETE_EXADATA_INSIGHT
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+- The production runtime uses the declared work-request phases and service-local async
+  adapter.
+- Lifecycle success and pending states mirror the production service-manager semantics.
+- Status projection is required, Secret side effects are none, and the finalizer policy
+  is retain-until-confirmed-delete.
+- Provider DisableExadataInsight operations are intentionally excluded because the
+  production service manager uses the primary create and delete operations.
+- Delete ownership is retained until a terminal lifecycle state or confirmed absence.

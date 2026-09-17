@@ -34,7 +34,7 @@ type FunctionSpec struct {
 	// +kubebuilder:validation:Optional
 	ImageDigest string `json:"imageDigest,omitempty"`
 	// +kubebuilder:validation:Optional
-	SourceDetails FunctionSourceDetails `json:"sourceDetails,omitempty"`
+	SourceDetails FunctionSourceDetails `json:"sourceDetails,omitempty,omitzero"`
 	// Function configuration. These values are passed on to the function as environment variables, this overrides application configuration values.
 	// Keys must be ASCII strings consisting solely of letters, digits, and the '_' (underscore) character, and must not begin with a digit. Values should be limited to printable unicode characters.
 	// Example: `{"MY_FUNCTION_CONFIG": "ConfVal"}`
@@ -45,16 +45,16 @@ type FunctionSpec struct {
 	// +kubebuilder:validation:Optional
 	TimeoutInSeconds int `json:"timeoutInSeconds,omitempty"`
 	// +kubebuilder:validation:Optional
-	ProvisionedConcurrencyConfig FunctionProvisionedConcurrencyConfig `json:"provisionedConcurrencyConfig,omitempty"`
+	ProvisionedConcurrencyConfig FunctionProvisionedConcurrencyConfig `json:"provisionedConcurrencyConfig,omitempty,omitzero"`
 	// Timeout for detached function invocations. Value in seconds.
 	// +kubebuilder:validation:Optional
 	DetachedModeTimeoutInSeconds int `json:"detachedModeTimeoutInSeconds,omitempty"`
 	// +kubebuilder:validation:Optional
-	FailureDestination FunctionFailureDestination `json:"failureDestination,omitempty"`
+	FailureDestination FunctionFailureDestination `json:"failureDestination,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	SuccessDestination FunctionSuccessDestination `json:"successDestination,omitempty"`
+	SuccessDestination FunctionSuccessDestination `json:"successDestination,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	TraceConfig FunctionTraceConfig `json:"traceConfig,omitempty"`
+	TraceConfig FunctionTraceConfig `json:"traceConfig,omitempty,omitzero"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
 	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`

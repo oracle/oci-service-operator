@@ -56,6 +56,9 @@ spec:
           spec:
             description: PipelineSpec defines the desired state of Pipeline.
             properties:
+              aggregatorKey:
+                description: The aggregator key required by the collection lookup.
+                type: string
               description:
                 description: Detailed description for the object.
                 type: string
@@ -152,10 +155,16 @@ spec:
                   type: object
                   x-kubernetes-preserve-unknown-fields: true
                 type: array
+              workspaceId:
+                description: The OCID of the Data Integration workspace containing
+                  this resource.
+                type: string
             required:
+            - aggregatorKey
             - identifier
             - name
             - registryMetadata
+            - workspaceId
             type: object
           status:
             description: PipelineStatus defines the observed state of Pipeline.

@@ -20,13 +20,13 @@ type FsuCycleSpec struct {
 	// +kubebuilder:validation:Optional
 	DisplayName string `json:"displayName,omitempty"`
 	// +kubebuilder:validation:Optional
-	BatchingStrategy FsuCycleBatchingStrategy `json:"batchingStrategy,omitempty"`
+	BatchingStrategy FsuCycleBatchingStrategy `json:"batchingStrategy,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	StageActionSchedule FsuCycleStageActionSchedule `json:"stageActionSchedule,omitempty"`
+	StageActionSchedule FsuCycleStageActionSchedule `json:"stageActionSchedule,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	ApplyActionSchedule FsuCycleApplyActionSchedule `json:"applyActionSchedule,omitempty"`
+	ApplyActionSchedule FsuCycleApplyActionSchedule `json:"applyActionSchedule,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	DiagnosticsCollection FsuCycleDiagnosticsCollection `json:"diagnosticsCollection,omitempty"`
+	DiagnosticsCollection FsuCycleDiagnosticsCollection `json:"diagnosticsCollection,omitempty,omitzero"`
 	// Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
 	// Example: `{"bar-key": "value"}`
 	// +kubebuilder:validation:Optional
@@ -60,7 +60,7 @@ type FsuCycleSpec struct {
 	// +kubebuilder:validation:Optional
 	IsKeepPlacement bool `json:"isKeepPlacement,omitempty"`
 	// +kubebuilder:validation:Optional
-	UpgradeDetails FsuCycleUpgradeDetails `json:"upgradeDetails,omitempty"`
+	UpgradeDetails FsuCycleUpgradeDetails `json:"upgradeDetails,omitempty,omitzero"`
 }
 
 // FsuCycleBatchingStrategy defines nested fields for FsuCycle.BatchingStrategy.
@@ -104,7 +104,10 @@ type FsuCycleGoalVersionDetails struct {
 	// +kubebuilder:validation:Optional
 	NewHomePrefix string `json:"newHomePrefix,omitempty"`
 	// +kubebuilder:validation:Optional
-	Type string `json:"type,omitempty"`
+	Type            string                                `json:"type,omitempty"`
+	Components      []FsuCycleGoalVersionDetailsComponent `json:"components,omitempty"`
+	Version         string                                `json:"version,omitempty"`
+	SoftwareImageId string                                `json:"softwareImageId,omitempty"`
 }
 
 // FsuCycleUpgradeDetails defines nested fields for FsuCycle.UpgradeDetails.

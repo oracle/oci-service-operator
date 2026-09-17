@@ -35,7 +35,7 @@ type ListingRevisionSpec struct {
 	// +kubebuilder:validation:Optional
 	LongDescription string `json:"longDescription,omitempty"`
 	// +kubebuilder:validation:Optional
-	ContentLanguage ListingRevisionContentLanguage `json:"contentLanguage,omitempty"`
+	ContentLanguage ListingRevisionContentLanguage `json:"contentLanguage,omitempty,omitzero"`
 	// Languages supported by the publisher for the listing revision.
 	// +kubebuilder:validation:Optional
 	Supportedlanguages []ListingRevisionSupportedlanguage `json:"supportedlanguages,omitempty"`
@@ -68,7 +68,7 @@ type ListingRevisionSpec struct {
 	// +kubebuilder:validation:Optional
 	Products []ListingRevisionProduct `json:"products,omitempty"`
 	// +kubebuilder:validation:Optional
-	VersionDetails ListingRevisionVersionDetails `json:"versionDetails,omitempty"`
+	VersionDetails ListingRevisionVersionDetails `json:"versionDetails,omitempty,omitzero"`
 	// System requirements for the listing revision.
 	// +kubebuilder:validation:Optional
 	SystemRequirements string `json:"systemRequirements,omitempty"`
@@ -112,7 +112,7 @@ type ListingRevisionSpec struct {
 	// +kubebuilder:validation:Optional
 	SelfPacedTrainingUrl string `json:"selfPacedTrainingUrl,omitempty"`
 	// +kubebuilder:validation:Optional
-	DownloadInfo ListingRevisionDownloadInfo `json:"downloadInfo,omitempty"`
+	DownloadInfo ListingRevisionDownloadInfo `json:"downloadInfo,omitempty,omitzero"`
 }
 
 // ListingRevisionContentLanguage defines nested fields for ListingRevision.ContentLanguage.

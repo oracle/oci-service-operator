@@ -167,7 +167,7 @@ func TestDkimRuntimeSemanticsEncodesLifecycleContract(t *testing.T) {
 	}
 	assertDkimStringSliceEqual(t, "Lifecycle.ProvisioningStates", got.Lifecycle.ProvisioningStates, []string{"CREATING"})
 	assertDkimStringSliceEqual(t, "Lifecycle.UpdatingStates", got.Lifecycle.UpdatingStates, []string{"UPDATING"})
-	assertDkimStringSliceEqual(t, "Lifecycle.ActiveStates", got.Lifecycle.ActiveStates, []string{"ACTIVE"})
+	assertDkimStringSliceEqual(t, "Lifecycle.ActiveStates", got.Lifecycle.ActiveStates, []string{"ACTIVE", "NEEDS_ATTENTION"})
 	if got.Delete.Policy != "required" || got.DeleteFollowUp.Strategy != "confirm-delete" {
 		t.Fatalf("delete semantics = %#v followUp=%#v, want required confirm-delete", got.Delete, got.DeleteFollowUp)
 	}
@@ -455,7 +455,7 @@ func TestDkimServiceClientClassifiesLifecycleStates(t *testing.T) {
 		{name: "updating", state: emailsdk.DkimLifecycleStateUpdating, wantSuccess: true, wantRequeue: true, wantCondition: shared.Updating},
 		{name: "deleting", state: emailsdk.DkimLifecycleStateDeleting, wantSuccess: true, wantRequeue: true, wantCondition: shared.Terminating},
 		{name: "failed", state: emailsdk.DkimLifecycleStateFailed, wantCondition: shared.Failed},
-		{name: "needs attention", state: emailsdk.DkimLifecycleStateNeedsAttention, wantCondition: shared.Failed},
+		{name: "needs attention", state: emailsdk.DkimLifecycleStateNeedsAttention, wantSuccess: true, wantCondition: shared.Active},
 		{name: "inactive", state: emailsdk.DkimLifecycleStateInactive, wantCondition: shared.Failed},
 	}
 

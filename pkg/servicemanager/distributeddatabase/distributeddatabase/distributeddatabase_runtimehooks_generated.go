@@ -74,7 +74,7 @@ func newDistributedDatabaseRuntimeSemantics() *generatedruntime.Semantics {
 		},
 		List: &generatedruntime.ListSemantics{
 			ResponseItemsField: "Items",
-			MatchFields:        []string{"compartmentId", "dbDeploymentType", "displayName", "metadata", "privateEndpointId", "state"},
+			MatchFields:        []string{"compartmentId", "displayName", "state"},
 		},
 		Mutation: generatedruntime.MutationSemantics{
 			Mutable:       []string{"definedTags", "displayName", "freeformTags"},

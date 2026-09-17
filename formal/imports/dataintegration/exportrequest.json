@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "dataintegration",
+  "slug": "exportrequest",
+  "kind": "ExportRequest",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_dataintegration_exportrequest",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateExportRequest",
+        "requestType": "dataintegration.CreateExportRequestRequest",
+        "responseType": "dataintegration.CreateExportRequestResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetExportRequest",
+        "requestType": "dataintegration.GetExportRequestRequest",
+        "responseType": "dataintegration.GetExportRequestResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListExportRequest",
+        "requestType": "dataintegration.ListExportRequestRequest",
+        "responseType": "dataintegration.ListExportRequestResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateExportRequest",
+        "requestType": "dataintegration.UpdateExportRequestRequest",
+        "responseType": "dataintegration.UpdateExportRequestResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteExportRequest",
+        "requestType": "dataintegration.DeleteExportRequestRequest",
+        "responseType": "dataintegration.DeleteExportRequestResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_dataintegration_exportrequest",
+    "collectionField": "exportrequest",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/dataintegration/exportrequest/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/dataintegration/exportrequest/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for dataintegration/exportrequest; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

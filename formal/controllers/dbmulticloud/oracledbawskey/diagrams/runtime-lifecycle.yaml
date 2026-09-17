@@ -1,0 +1,76 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: dbmulticloud
+slug: oracledbawskey
+kind: OracleDbAwsKey
+archetype: generated-service-manager
+states:
+- provisioning
+- active
+- updating
+- terminating
+repoAuthored:
+  operations:
+    create:
+    - CreateOracleDbAwsKey
+    update:
+    - UpdateOracleDbAwsKey
+    delete:
+    - DeleteOracleDbAwsKey
+  providerLifecycle:
+    createPending:
+    - CREATING
+    updatePending:
+    - UPDATING
+    deletePending:
+    - DELETING
+  listLookup:
+    filters:
+    - compartmentId
+    - displayName
+    - oracleDbAwsKeyId
+    - lifecycleState
+    - oracleDbAwsConnectorId
+    - opc-request-id
+    matchRule: exact declared filters match within the resource scope; duplicate matches
+      fail
+  mutation:
+    mutable:
+    - displayName
+    - freeformTags
+    - definedTags
+    forceNew:
+    - compartmentId
+    - oracleDbConnectorId
+    - awsKeyArn
+    - awsAccountId
+    - type
+    - location
+    - isAwsKeyEnabled
+    - properties
+  hooks:
+    create:
+    - helper: tfresource.CreateResource
+    - helper: tfresource.WaitForWorkRequestWithErrorHandling
+      entityType: OracleDbAwsKey
+      action: CreateOracleDbAwsKey
+    update:
+    - helper: tfresource.UpdateResource
+    - helper: tfresource.WaitForWorkRequestWithErrorHandling
+      entityType: OracleDbAwsKey
+      action: UpdateOracleDbAwsKey
+    delete:
+    - helper: tfresource.DeleteResource
+    - helper: tfresource.WaitForWorkRequestWithErrorHandling
+      entityType: OracleDbAwsKey
+      action: DeleteOracleDbAwsKey
+  followUp:
+    create: GetWorkRequest -> read-after-write
+    update: GetWorkRequest -> read-after-write
+    delete: GetWorkRequest -> confirm-delete
+notes:
+- The generated service manager uses the reviewed CRUD request, response, lifecycle,
+  and status projection contract.
+- Work-request phases are declared per operation from the vendored SDK response surface.
+- Secret side effects are none and finalizer ownership is retained until confirmed
+  deletion.

@@ -58,6 +58,56 @@ spec:
             description: ExternalLocationSummariesMetadataStatus defines the observed
               state of ExternalLocationSummariesMetadata.
             properties:
+              items:
+                description: List of ExternalLocationSummariesMetadatumSummary
+                items:
+                  description: ExternalLocationSummariesMetadataItem defines nested
+                    fields for ExternalLocationSummariesMetadata.Item.
+                  properties:
+                    definedTags:
+                      additionalProperties:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      description: |-
+                        Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                        For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                        Example: `{"Operations": {"CostCenter": "42"}}`
+                      type: object
+                    externalLocation:
+                      description: ExternalLocationSummariesMetadataItemExternalLocation
+                        defines nested fields for ExternalLocationSummariesMetadata.Item.ExternalLocation.
+                      properties:
+                        cspRegion:
+                          description: CSP region corresponding to the given OCI region
+                          type: string
+                        cspRegionDisplayName:
+                          description: CSP region display Name corresponding to the
+                            given OCI region
+                          type: string
+                      type: object
+                    freeformTags:
+                      additionalProperties:
+                        type: string
+                      description: |-
+                        Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                        For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                        Example: `{"Department": "Finance"}`
+                      type: object
+                    ociRegion:
+                      description: OCI region identifier https://docs.oracle.com/en-us/iaas/Content/General/Concepts/regions.htm
+                      type: string
+                    systemTags:
+                      additionalProperties:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      description: |-
+                        System tags for this resource. Each key is predefined and scoped to a namespace.
+                        Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                      type: object
+                  type: object
+                type: array
               status:
                 properties:
                   async:

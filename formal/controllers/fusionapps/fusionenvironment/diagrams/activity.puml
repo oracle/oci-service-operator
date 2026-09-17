@@ -1,0 +1,124 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Activity - fusionapps/FusionEnvironment
+skinparam activity {
+  backgroundColor #f8fafc
+  borderColor #0f172a
+  fontColor #0f172a
+  diamondBackgroundColor #e2e8f0
+  diamondBorderColor #1d4ed8
+  diamondFontColor #0f172a
+  startColor #1d4ed8
+  endColor #0f172a
+  barColor #1d4ed8
+}
+start
+partition "Observe and Bind" {
+:Start from shared flow\nshared/diagrams/shared-reconcile-activity.svg;
+:Read desired FusionEnvironment spec, tracked\nstatus, and delete intent;
+if ("Tracked or explicit OCI identity present?") then (yes)
+:Get the current OCI resource via\nGetFusionEnvironment;
+else (no)
+:Resolve an existing OCI resource through\nListFusionEnvironments using filters\ncompartmentId, fusionEnvironmentFamilyId,\ndisplayName, lifecycleState (+1 more);
+:Create the OCI resource via\nCreateFusionEnvironment when no reusable match\nis found;
+:Persist the resolved or created OCI identity\ninto status;
+endif
+}
+if ("Delete requested?") then (yes)
+partition "Delete" {
+:Delete path uses DeleteFusionEnvironment with\nrequired via GetFusionEnvironment or\nListFusionEnvironments to DELETED confirmation;
+:Confirm deletion via GetFusionEnvironment or\nListFusionEnvironments until OCI reaches\nDELETED;
+if ("Delete cleanup and finalizer release succeed?") then (yes)
+:Remove the finalizer after delete completion;
+else (no)
+:Stay blocked until cleanup or finalizer\nrelease succeeds;
+endif
+}
+stop
+else (no)
+partition "Lifecycle Classification" {
+if ("OCI state in retryable set?") then (yes)
+:Request requeue while OCI remains in CREATING,\nUPDATING, DELETING;
+stop
+endif
+if ("OCI state is outside success targets?") then (yes)
+:Return an unsuccessful reconcile result until\nOCI reaches ACTIVE;
+stop
+endif
+}
+partition "Ready and Drift Handling" {
+:Compare live OCI state against the\nrepo-authored mutation surface;
+if ("Force-new or conflicting drift detected?") then (yes)
+:Reject drift before OCI mutation for force-new\nfields compartmentId,\nfusionEnvironmentFamilyId,\nfusionEnvironmentType,\ncreateFusionEnvironmentAdminUserDetails (+1\nmore);
+stop
+endif
+if ("Supported mutable drift detected?") then (yes)
+:Apply UpdateFusionEnvironment only for mutable\nfields displayName, maintenancePolicy,\nkmsKeyId, additionalLanguagePacks (+4 more);
+else (no)
+:Skip the no-op mutation path;
+endif
+:Run provider helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=FusionEnvironment\naction=CreateFusionEnvironment;\nupdate=tfresource.UpdateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=FusionEnvironment\naction=UpdateFusionEnvironment;\ndelete=tfresource.DeleteResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=FusionEnvironment\naction=DeleteFusionEnvironment when the\nmatching field-driven path executes;
+:Apply explicit follow-up semantics\ncreate=GetWorkRequest -> read-after-write;\nupdate=GetWorkRequest -> read-after-write;\ndelete=GetWorkRequest -> confirm-delete;
+:Return success for the ACTIVE success state;
+:Project required status and finalizer policy\nretain-until-confirmed-delete;
+:Requeue on provisioning, updating, terminating;
+}
+endif
+stop
+note right
+shared diagram:
+shared/diagrams/shared-reconcile-activity.svg
+Start from the shared reconcile activity and
+specialize provider-backed CRUD, wait, and
+status-projection details here.
+Controller-local activity diagrams add
+list-lookup hints, secret policies, delete
+handling, and open formal gaps.
+archetype batch: Generated service-manager
+controllers specialize the shared reconcile path
+with formal runtime ownership.
+service: fusionapps
+slug: fusionenvironment
+kind: FusionEnvironment
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: provisioning, updating, terminating
+provider states: create CREATING; update
+UPDATING; delete DELETING
+follow-up: create=GetWorkRequest ->
+read-after-write; update=GetWorkRequest ->
+read-after-write; delete=GetWorkRequest ->
+confirm-delete
+supported drift: displayName, maintenancePolicy,
+kmsKeyId, additionalLanguagePacks (+4 more)
+reject before mutate: force-new fields
+compartmentId, fusionEnvironmentFamilyId,
+fusionEnvironmentType,
+createFusionEnvironmentAdminUserDetails (+1
+more)
+create-only fields: none
+list lookup: unavailable filters compartmentId,
+fusionEnvironmentFamilyId, displayName,
+lifecycleState (+1 more); exact declared filters
+match within the resource scope; duplicate
+matches fail
+conflicts: none
+open gaps: none
+The generated service manager uses the reviewed
+CRUD request, response, lifecycle, and status
+projection contract.
+Work-request phases are declared per operation
+from the vendored SDK response surface.
+Secret side effects are none and finalizer
+ownership is retained until confirmed deletion.
+end note
+@enduml

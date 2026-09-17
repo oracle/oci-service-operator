@@ -27,7 +27,7 @@ partition "Observe and Bind" {
 if ("Tracked or explicit OCI identity present?") then (yes)
 :Get the current OCI resource via\nGetLogSavedSearch;
 else (no)
-:Resolve an existing OCI resource through\nListLogSavedSearch using filters\ncompartment_id, state;
+:Resolve an existing OCI resource through\nListLogSavedSearch using filters\ncompartmentId, lifecycleState, name;
 :Create the OCI resource via\nCreateLogSavedSearch when no reusable match is\nfound;
 :Persist the resolved or created OCI identity\ninto status;
 endif
@@ -55,17 +55,18 @@ stop
 endif
 }
 partition "Ready and Drift Handling" {
-:Compare live OCI state against the imported\nfield surface;
+:Compare live OCI state against the\nrepo-authored mutation surface;
 if ("Force-new or conflicting drift detected?") then (yes)
-:Reject drift before OCI mutation for force-new\nfields compartment_id;
+:Reject drift before OCI mutation for force-new\nfields compartmentId;
 stop
 endif
 if ("Supported mutable drift detected?") then (yes)
-:Apply UpdateLogSavedSearch only for mutable\nfields display_name;
+:Apply UpdateLogSavedSearch only for mutable\nfields definedTags, description, freeformTags,\nname (+1 more);
 else (no)
 :Skip the no-op mutation path;
 endif
-:Run provider helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=template action=CREATED;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource when the\nmatching field-driven path executes;
+:Run provider helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource when the\nmatching field-driven path executes;
+:Apply explicit follow-up semantics\ncreate=read-after-write;\nupdate=read-after-write; delete=confirm-delete;
 :Return success for the ACTIVE success state;
 :Project required status and finalizer policy\nretain-until-confirmed-delete;
 :Requeue on provisioning, updating, terminating;
@@ -93,16 +94,25 @@ retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
 provider states: create PROVISIONING; update
 UPDATING; delete DELETING
-supported drift: display_name
+follow-up: create=read-after-write;
+update=read-after-write; delete=confirm-delete
+supported drift: definedTags, description,
+freeformTags, name (+1 more)
 reject before mutate: force-new fields
-compartment_id
+compartmentId
 create-only fields: none
 list lookup: scaffold_logging_logsavedsearch
-filters compartment_id, state
+filters compartmentId, lifecycleState, name;
+Adopt only a unique saved-search match in the
+requested compartment.
 conflicts: none
 open gaps: none
-Scaffold metadata only; replace with
-controller-specific runtime states before
-promotion.
+CREATING and UPDATING requeue, ACTIVE succeeds,
+and DELETING retains the finalizer until OCI
+reports the saved search absent.
+CompartmentId is replacement-only; name, query,
+description, and tag fields reconcile in place.
+The runtime projects the OCI saved-search status
+and has no Kubernetes Secret side effects.
 end note
 @enduml

@@ -1,0 +1,14 @@
+#
+# Copyright (c) 2026, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+#
+
+apiVersion: email.oracle.com/v1beta1
+kind: Sender
+metadata:
+  name: osok-email-sender-${OSOK_E2E_SUFFIX}
+spec:
+  compartmentId: ${OCI_COMPARTMENT_ID}
+  emailAddress: ${OCI_EMAIL_SENDER_ADDRESS}
+  freeformTags:
+    osok-e2e-phase: update

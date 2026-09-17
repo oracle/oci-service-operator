@@ -1,0 +1,149 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "fusionapps",
+  "slug": "fusionenvironment",
+  "kind": "FusionEnvironment",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_fusion_apps_fusion_environment",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateFusionEnvironment",
+        "requestType": "fusionapps.CreateFusionEnvironmentRequest",
+        "responseType": "fusionapps.CreateFusionEnvironmentResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetFusionEnvironment",
+        "requestType": "fusionapps.GetFusionEnvironmentRequest",
+        "responseType": "fusionapps.GetFusionEnvironmentResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListFusionEnvironments",
+        "requestType": "fusionapps.ListFusionEnvironmentsRequest",
+        "responseType": "fusionapps.ListFusionEnvironmentsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateFusionEnvironment",
+        "requestType": "fusionapps.UpdateFusionEnvironmentRequest",
+        "responseType": "fusionapps.UpdateFusionEnvironmentResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteFusionEnvironment",
+        "requestType": "fusionapps.DeleteFusionEnvironmentRequest",
+        "responseType": "fusionapps.DeleteFusionEnvironmentResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "displayName",
+      "maintenancePolicy",
+      "kmsKeyId",
+      "additionalLanguagePacks",
+      "isIPv6DualStackEnabled",
+      "rules",
+      "freeformTags",
+      "definedTags"
+    ],
+    "forceNew": [
+      "compartmentId",
+      "fusionEnvironmentFamilyId",
+      "fusionEnvironmentType",
+      "createFusionEnvironmentAdminUserDetails",
+      "dnsPrefix"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "FusionEnvironment",
+        "action": "CreateFusionEnvironment"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "FusionEnvironment",
+        "action": "UpdateFusionEnvironment"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "FusionEnvironment",
+        "action": "DeleteFusionEnvironment"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "unavailable",
+    "collectionField": "Items",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartmentId",
+      "fusionEnvironmentFamilyId",
+      "displayName",
+      "lifecycleState",
+      "opc-request-id"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/fusionapps/fusionenvironment/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/fusionapps/fusionenvironment/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Terraform provider formal-import could not resolve oci_fusion_apps_fusion_environment; the vendored SDK, generated runtime, and package-owned typed OCI fixtures define this reviewed contract."
+  ]
+}

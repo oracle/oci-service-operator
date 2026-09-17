@@ -488,6 +488,12 @@ func assertScheduleUpdateRequest(
 	if got := request.FreeformTags; !reflect.DeepEqual(got, desired.Spec.FreeformTags) {
 		t.Fatalf("update freeformTags = %#v, want %#v", got, desired.Spec.FreeformTags)
 	}
+	if len(request.ResourceFilters) != len(desired.Spec.ResourceFilters) {
+		t.Fatalf("update resourceFilters = %#v, want preserved desired filters", request.ResourceFilters)
+	}
+	if len(request.Resources) != 1 || scheduleStringValue(request.Resources[0].Id) != desired.Spec.Resources[0].Id {
+		t.Fatalf("update resources = %#v, want preserved desired resources", request.Resources)
+	}
 }
 
 func TestScheduleServiceClientCreateOrUpdateRejectsCompartmentDriftBeforeUpdate(t *testing.T) {

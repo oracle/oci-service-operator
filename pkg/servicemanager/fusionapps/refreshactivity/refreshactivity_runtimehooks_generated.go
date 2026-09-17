@@ -57,8 +57,20 @@ func newRefreshActivityDefaultRuntimeHooks(sdkClient fusionappssdk.FusionApplica
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*fusionappsv1beta1.RefreshActivity]{},
 		StatusHooks:     generatedruntime.StatusHooks[*fusionappsv1beta1.RefreshActivity]{},
 		ParityHooks:     generatedruntime.ParityHooks[*fusionappsv1beta1.RefreshActivity]{},
-		Async:           generatedruntime.AsyncHooks[*fusionappsv1beta1.RefreshActivity]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*fusionappsv1beta1.RefreshActivity]{},
+		Async: generatedruntime.AsyncHooks[*fusionappsv1beta1.RefreshActivity]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := fusionappssdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*fusionappsv1beta1.RefreshActivity]{},
 		Create: runtimeOperationHooks[fusionappssdk.CreateRefreshActivityRequest, fusionappssdk.CreateRefreshActivityResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "FusionEnvironmentId", RequestName: "fusionEnvironmentId", Contribution: "path", PreferResourceID: false}, {FieldName: "CreateRefreshActivityDetails", RequestName: "CreateRefreshActivityDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request fusionappssdk.CreateRefreshActivityRequest) (fusionappssdk.CreateRefreshActivityResponse, error) {
@@ -72,7 +84,7 @@ func newRefreshActivityDefaultRuntimeHooks(sdkClient fusionappssdk.FusionApplica
 			},
 		},
 		List: runtimeOperationHooks[fusionappssdk.ListRefreshActivitiesRequest, fusionappssdk.ListRefreshActivitiesResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "FusionEnvironmentId", RequestName: "fusionEnvironmentId", Contribution: "path", PreferResourceID: true}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "TimeScheduledStartGreaterThanOrEqualTo", RequestName: "timeScheduledStartGreaterThanOrEqualTo", Contribution: "query", PreferResourceID: false}, {FieldName: "TimeExpectedFinishLessThanOrEqualTo", RequestName: "timeExpectedFinishLessThanOrEqualTo", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "FusionEnvironmentId", RequestName: "fusionEnvironmentId", Contribution: "path", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "TimeScheduledStartGreaterThanOrEqualTo", RequestName: "timeScheduledStartGreaterThanOrEqualTo", Contribution: "query", PreferResourceID: false}, {FieldName: "TimeExpectedFinishLessThanOrEqualTo", RequestName: "timeExpectedFinishLessThanOrEqualTo", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request fusionappssdk.ListRefreshActivitiesRequest) (fusionappssdk.ListRefreshActivitiesResponse, error) {
 				return sdkClient.ListRefreshActivities(ctx, request)
 			},
@@ -106,10 +118,19 @@ func buildRefreshActivityGeneratedRuntimeConfig(
 	hooks RefreshActivityRuntimeHooks,
 ) generatedruntime.Config[*fusionappsv1beta1.RefreshActivity] {
 	return generatedruntime.Config[*fusionappsv1beta1.RefreshActivity]{
-		Kind:            "RefreshActivity",
-		SDKName:         "RefreshActivity",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "RefreshActivity",
+		SDKName:   "RefreshActivity",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

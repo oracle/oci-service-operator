@@ -1,0 +1,17 @@
+version: 1
+name: api-gateway-deployment-basic-crud
+service: apigateway
+namespace: default
+timeout: 45m
+pollInterval: 15s
+create: create.yaml
+update: update.yaml
+ready:
+  conditionTypes: [Active]
+  requireOCID: true
+failureConditionTypes: [Failed]
+delete:
+  enabled: true
+  timeout: 45m
+  cleanupDependencies: true
+cleanupOnFailure: true

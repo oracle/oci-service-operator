@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "networkfirewall",
+  "slug": "tunnelinspectionrule",
+  "kind": "TunnelInspectionRule",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_network_firewall_network_firewall_policy_tunnel_inspection_rule",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateTunnelInspectionRule",
+        "requestType": "networkfirewall.CreateTunnelInspectionRuleRequest",
+        "responseType": "networkfirewall.CreateTunnelInspectionRuleResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetTunnelInspectionRule",
+        "requestType": "networkfirewall.GetTunnelInspectionRuleRequest",
+        "responseType": "networkfirewall.GetTunnelInspectionRuleResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateTunnelInspectionRule",
+        "requestType": "networkfirewall.UpdateTunnelInspectionRuleRequest",
+        "responseType": "networkfirewall.UpdateTunnelInspectionRuleResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteTunnelInspectionRule",
+        "requestType": "networkfirewall.DeleteTunnelInspectionRuleRequest",
+        "responseType": "networkfirewall.DeleteTunnelInspectionRuleResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "action",
+      "position",
+      "protocol",
+      "condition",
+      "profile"
+    ],
+    "forceNew": [
+      "network_firewall_policy_id",
+      "name"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/networkfirewall/tunnelinspectionrule/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/networkfirewall/tunnelinspectionrule/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "delete-confirmation",
+      "lifecycle-classification",
+      "list-lookup",
+      "mutation-policy",
+      "secret-output"
+    ]
+  },
+  "notes": [
+    "Pinned provider operations are combined with reviewed composite parent/name identity and TunnelInspectionRule runtime semantics."
+  ]
+}

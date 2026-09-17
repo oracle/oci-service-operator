@@ -1,0 +1,135 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Sequence - cloudguard/DetectorRecipeDetectorRule
+hide footbox
+skinparam sequence {
+  actorBorderColor #0f172a
+  actorBackgroundColor #e2e8f0
+  participantBorderColor #0f172a
+  participantBackgroundColor #e2e8f0
+  participantFontColor #0f172a
+  lifeLineBorderColor #94a3b8
+  groupBorderColor #cbd5e1
+  groupBackgroundColor #f8fafc
+}
+actor Kubernetes
+participant Controller
+participant BaseReconciler
+participant "OSOKServiceManager" as ServiceManager
+participant OCI
+note over BaseReconciler,ServiceManager
+shared resolution:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete:
+shared/diagrams/shared-delete-sequence.svg
+end note
+Kubernetes -> Controller: enqueue DetectorRecipeDetectorRule\nreconcile
+Controller -> BaseReconciler: Reconcile(request)
+BaseReconciler -> ServiceManager: reconcile desired\nDetectorRecipeDetectorRule
+group Lookup and bind
+alt tracked or explicit OCI identity already exists
+ServiceManager -> OCI: GetDetectorRecipeDetectorRule
+else tracked identity is missing
+ServiceManager -> OCI: ListDetectorRecipeDetectorRule(filters:\ndetectorRecipeId, compartmentId,\ndetails.name)
+alt reusable OCI resource is not found
+ServiceManager -> OCI: CreateDetectorRecipeDetectorRule
+loop create pending CREATING
+ServiceManager -> OCI: GetDetectorRecipeDetectorRule
+end
+else reusable OCI resource already exists
+ServiceManager -> OCI: GetDetectorRecipeDetectorRule
+end
+ServiceManager --> BaseReconciler: persist resolved OCI identity in status
+end
+alt delete requested
+group Delete
+ServiceManager -> OCI: DeleteDetectorRecipeDetectorRule
+ServiceManager -> OCI: confirm delete via\nGetDetectorRecipeDetectorRule or\nListDetectorRecipeDetectorRule
+loop delete pending DELETING
+ServiceManager -> OCI: GetDetectorRecipeDetectorRule or\nListDetectorRecipeDetectorRule
+end
+alt cleanup or finalizer release is blocked
+ServiceManager --> BaseReconciler: retain delete state and retry
+else delete completion observed
+ServiceManager --> BaseReconciler: release finalizer after delete completion
+end
+end
+else OCI state is retryable
+ServiceManager --> BaseReconciler: requeue while OCI remains in\nCREATING, UPDATING, DELETING
+else live state requires field-aware\ndrift evaluation
+group Drift handling
+note over ServiceManager,OCI
+Supported update surface: details
+Reject before mutate: force-new fields
+detectorRecipeId
+Lookup filters: detectorRecipeId,
+compartmentId, details.name
+Lookup matching: exact parent recipe and
+rule name match; deleted rules are
+excluded
+end note
+opt force-new or conflicting drift is detected
+ServiceManager --> BaseReconciler: reject before OCI mutation
+end
+opt supported mutable drift is detected
+ServiceManager -> OCI: Apply\nUpdateDetectorRecipeDetectorRule\nonly for mutable fields details
+loop update pending UPDATING
+ServiceManager -> OCI: GetDetectorRecipeDetectorRule
+end
+end
+ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=template action=CREATED;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource
+ServiceManager -> OCI: apply follow-up strategy\ncreate=none; update=none;\ndelete=confirm-delete
+end
+ServiceManager --> BaseReconciler: status=required,\nfinalizer=retain-until-confirmed-delete
+end
+BaseReconciler --> Controller: requeue on provisioning, updating,\nterminating
+note right of ServiceManager
+shared diagram:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete diagram:
+shared/diagrams/shared-delete-sequence.svg
+Start from the shared resolution sequence for
+OCID binding, datasource pagination, and
+create-or-update dispatch.
+Layer the shared delete sequence when finalizer
+retention, delete confirmation, work-request
+polling, or Secret cleanup apply.
+archetype batch: Generated service-manager
+controllers follow the shared resolution and
+delete sequences with imported waits and
+controller-local policy.
+service: cloudguard
+slug: detectorrecipedetectorrule
+kind: DetectorRecipeDetectorRule
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: provisioning, updating, terminating
+provider states: create CREATING; update
+UPDATING; delete DELETING
+follow-up: create=none; update=none;
+delete=confirm-delete
+supported drift: details
+reject before mutate: force-new fields
+detectorRecipeId
+create-only fields: none
+list lookup:
+scaffold_cloudguard_detectorrecipedetectorrule
+filters detectorRecipeId, compartmentId,
+details.name; exact parent recipe and rule name
+match; deleted rules are excluded
+conflicts: none
+open gaps: none
+Detector rule identity is the service rule key
+nested under detectorRecipeId; status projects
+that key as the tracked identity.
+end note
+@enduml

@@ -651,7 +651,11 @@ func (c buildPipelineDeleteWithoutTrackedIDClient) Delete(
 	}
 
 	if buildPipelineTrackedID(resource) != "" {
-		return c.BuildPipelineServiceClient.Delete(ctx, resource)
+		deleted, err := c.BuildPipelineServiceClient.Delete(ctx, resource)
+		if !isBuildPipelineAmbiguousNotFound(err) {
+			return deleted, err
+		}
+		return c.confirmTrackedBuildPipelineAbsence(ctx, resource, err)
 	}
 
 	response, found, err := buildPipelineDeleteResolutionByList(ctx, resource, c.listBuildPipelines)
@@ -667,6 +671,22 @@ func (c buildPipelineDeleteWithoutTrackedIDClient) Delete(
 		resource.Status.OsokStatus.Ocid = shared.OCID(buildPipelineID)
 	}
 	return c.BuildPipelineServiceClient.Delete(ctx, resource)
+}
+
+func (c buildPipelineDeleteWithoutTrackedIDClient) confirmTrackedBuildPipelineAbsence(
+	ctx context.Context,
+	resource *devopsv1beta1.BuildPipeline,
+	ambiguousErr error,
+) (bool, error) {
+	_, found, err := buildPipelineDeleteResolutionByList(ctx, resource, c.listBuildPipelines)
+	if err != nil {
+		return false, fmt.Errorf("confirm BuildPipeline deletion by scoped list: %w", err)
+	}
+	if found {
+		return false, ambiguousErr
+	}
+	markBuildPipelineDeleted(resource, "OCI resource no longer exists")
+	return true, nil
 }
 
 func (c buildPipelineDeleteWithoutTrackedIDClient) resumeWriteWorkRequestBeforeDelete(
@@ -848,6 +868,14 @@ func markBuildPipelineWriteReadbackPending(
 
 func isBuildPipelineReadNotFound(err error) bool {
 	return errorutil.ClassifyDeleteError(err).IsUnambiguousNotFound()
+}
+
+func isBuildPipelineAmbiguousNotFound(err error) bool {
+	if err == nil {
+		return false
+	}
+	var ambiguous buildPipelineAmbiguousNotFoundError
+	return errors.As(err, &ambiguous) || errorutil.ClassifyDeleteError(err).IsAuthShapedNotFound()
 }
 
 func buildPipelineTrackedID(resource *devopsv1beta1.BuildPipeline) string {

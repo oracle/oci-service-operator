@@ -50,50 +50,119 @@ func registerMultiCloudResourceDiscoveryRuntimeHooksMutator(mutator MultiCloudRe
 	}
 	multicloudresourcediscoveryRuntimeHooksMutators = append(multicloudresourcediscoveryRuntimeHooksMutators, mutator)
 }
-func newMultiCloudResourceDiscoveryDefaultRuntimeHooks(sdkClient dbmulticloudsdk.MultiCloudResourceDiscoveryClient) MultiCloudResourceDiscoveryRuntimeHooks {
+func newMultiCloudResourceDiscoveryRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "dbmulticloud",
+		FormalSlug:    "multicloudresourcediscovery",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"IN_PROGRESS"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"CANCELED", "FAILED", "NEEDS_ATTENTION", "SUCCEEDED"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "displayName", "multiCloudResourceDiscoveryId", "oracleDbAzureConnectorId", "resourceType", "resourcesFilter", "state"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"compartmentId", "definedTags", "displayName", "freeformTags", "oracleDbConnectorId", "resourceType"},
+			ForceNew:      []string{"resourcesFilter"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
+func newMultiCloudResourceDiscoveryDefaultRuntimeHooks(sdkClient MultiCloudResourceDiscoverySDKClients) MultiCloudResourceDiscoveryRuntimeHooks {
 	return MultiCloudResourceDiscoveryRuntimeHooks{
+		Semantics:       newMultiCloudResourceDiscoveryRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*dbmulticloudv1beta1.MultiCloudResourceDiscovery]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*dbmulticloudv1beta1.MultiCloudResourceDiscovery]{},
 		StatusHooks:     generatedruntime.StatusHooks[*dbmulticloudv1beta1.MultiCloudResourceDiscovery]{},
 		ParityHooks:     generatedruntime.ParityHooks[*dbmulticloudv1beta1.MultiCloudResourceDiscovery]{},
-		Async:           generatedruntime.AsyncHooks[*dbmulticloudv1beta1.MultiCloudResourceDiscovery]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*dbmulticloudv1beta1.MultiCloudResourceDiscovery]{},
+		Async: generatedruntime.AsyncHooks[*dbmulticloudv1beta1.MultiCloudResourceDiscovery]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := dbmulticloudsdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.workRequestClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*dbmulticloudv1beta1.MultiCloudResourceDiscovery]{},
 		Create: runtimeOperationHooks[dbmulticloudsdk.CreateMultiCloudResourceDiscoveryRequest, dbmulticloudsdk.CreateMultiCloudResourceDiscoveryResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateMultiCloudResourceDiscoveryDetails", RequestName: "CreateMultiCloudResourceDiscoveryDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dbmulticloudsdk.CreateMultiCloudResourceDiscoveryRequest) (dbmulticloudsdk.CreateMultiCloudResourceDiscoveryResponse, error) {
-				return sdkClient.CreateMultiCloudResourceDiscovery(ctx, request)
+				return sdkClient.multiCloudResourceDiscoveryClient.CreateMultiCloudResourceDiscovery(ctx, request)
 			},
 		},
 		Get: runtimeOperationHooks[dbmulticloudsdk.GetMultiCloudResourceDiscoveryRequest, dbmulticloudsdk.GetMultiCloudResourceDiscoveryResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "MultiCloudResourceDiscoveryId", RequestName: "multiCloudResourceDiscoveryId", Contribution: "path", PreferResourceID: true}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dbmulticloudsdk.GetMultiCloudResourceDiscoveryRequest) (dbmulticloudsdk.GetMultiCloudResourceDiscoveryResponse, error) {
-				return sdkClient.GetMultiCloudResourceDiscovery(ctx, request)
+				return sdkClient.multiCloudResourceDiscoveryClient.GetMultiCloudResourceDiscovery(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[dbmulticloudsdk.ListMultiCloudResourceDiscoveriesRequest, dbmulticloudsdk.ListMultiCloudResourceDiscoveriesResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "MultiCloudResourceDiscoveryId", RequestName: "multiCloudResourceDiscoveryId", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "OracleDbAzureConnectorId", RequestName: "oracleDbAzureConnectorId", Contribution: "query", PreferResourceID: false}, {FieldName: "ResourceType", RequestName: "resourceType", Contribution: "query", PreferResourceID: false}, {FieldName: "ResourcesFilter", RequestName: "resourcesFilter", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dbmulticloudsdk.ListMultiCloudResourceDiscoveriesRequest) (dbmulticloudsdk.ListMultiCloudResourceDiscoveriesResponse, error) {
-				return sdkClient.ListMultiCloudResourceDiscoveries(ctx, request)
+				return sdkClient.multiCloudResourceDiscoveryClient.ListMultiCloudResourceDiscoveries(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[dbmulticloudsdk.UpdateMultiCloudResourceDiscoveryRequest, dbmulticloudsdk.UpdateMultiCloudResourceDiscoveryResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "MultiCloudResourceDiscoveryId", RequestName: "multiCloudResourceDiscoveryId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateMultiCloudResourceDiscoveryDetails", RequestName: "UpdateMultiCloudResourceDiscoveryDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dbmulticloudsdk.UpdateMultiCloudResourceDiscoveryRequest) (dbmulticloudsdk.UpdateMultiCloudResourceDiscoveryResponse, error) {
-				return sdkClient.UpdateMultiCloudResourceDiscovery(ctx, request)
+				return sdkClient.multiCloudResourceDiscoveryClient.UpdateMultiCloudResourceDiscovery(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[dbmulticloudsdk.DeleteMultiCloudResourceDiscoveryRequest, dbmulticloudsdk.DeleteMultiCloudResourceDiscoveryResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "MultiCloudResourceDiscoveryId", RequestName: "multiCloudResourceDiscoveryId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request dbmulticloudsdk.DeleteMultiCloudResourceDiscoveryRequest) (dbmulticloudsdk.DeleteMultiCloudResourceDiscoveryResponse, error) {
-				return sdkClient.DeleteMultiCloudResourceDiscovery(ctx, request)
+				return sdkClient.multiCloudResourceDiscoveryClient.DeleteMultiCloudResourceDiscovery(ctx, request)
 			},
 		},
 		WrapGeneratedClient: []func(MultiCloudResourceDiscoveryServiceClient) MultiCloudResourceDiscoveryServiceClient{},
 	}
 }
 
-func newMultiCloudResourceDiscoveryRuntimeHooks(manager *MultiCloudResourceDiscoveryServiceManager, sdkClient dbmulticloudsdk.MultiCloudResourceDiscoveryClient) MultiCloudResourceDiscoveryRuntimeHooks {
+func newMultiCloudResourceDiscoveryRuntimeHooks(manager *MultiCloudResourceDiscoveryServiceManager, sdkClient MultiCloudResourceDiscoverySDKClients) MultiCloudResourceDiscoveryRuntimeHooks {
 	hooks := newMultiCloudResourceDiscoveryDefaultRuntimeHooks(sdkClient)
 	for _, mutator := range multicloudresourcediscoveryRuntimeHooksMutators {
 		mutator(manager, &hooks)
@@ -106,10 +175,19 @@ func buildMultiCloudResourceDiscoveryGeneratedRuntimeConfig(
 	hooks MultiCloudResourceDiscoveryRuntimeHooks,
 ) generatedruntime.Config[*dbmulticloudv1beta1.MultiCloudResourceDiscovery] {
 	return generatedruntime.Config[*dbmulticloudv1beta1.MultiCloudResourceDiscovery]{
-		Kind:            "MultiCloudResourceDiscovery",
-		SDKName:         "MultiCloudResourceDiscovery",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "MultiCloudResourceDiscovery",
+		SDKName:   "MultiCloudResourceDiscovery",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

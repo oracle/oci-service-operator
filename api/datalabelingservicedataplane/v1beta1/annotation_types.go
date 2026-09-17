@@ -84,13 +84,13 @@ type AnnotationEntity struct {
 	// +kubebuilder:validation:Optional
 	Labels []AnnotationEntityLabel `json:"labels,omitempty"`
 	// +kubebuilder:validation:Optional
-	BoundingPolygon AnnotationEntityBoundingPolygon `json:"boundingPolygon,omitempty"`
+	BoundingPolygon AnnotationEntityBoundingPolygon `json:"boundingPolygon,omitempty,omitzero"`
 	// A simple key-value pair that is applied without any predefined name, type, or scope. It exists for cross-compatibility only.
 	// For example: `{"bar-key": "value"}`
 	// +kubebuilder:validation:Optional
 	ExtendedMetadata map[string]string `json:"extendedMetadata,omitempty"`
 	// +kubebuilder:validation:Optional
-	DocumentEntityMetadata AnnotationEntityDocumentEntityMetadata `json:"documentEntityMetadata,omitempty"`
+	DocumentEntityMetadata AnnotationEntityDocumentEntityMetadata `json:"documentEntityMetadata,omitempty,omitzero"`
 	// Entity Name.
 	// +kubebuilder:validation:Optional
 	Text string `json:"text,omitempty"`
@@ -104,7 +104,7 @@ type AnnotationEntity struct {
 	// +kubebuilder:validation:Optional
 	PageNumber float32 `json:"pageNumber,omitempty"`
 	// +kubebuilder:validation:Optional
-	TextSpan AnnotationEntityTextSpan `json:"textSpan,omitempty"`
+	TextSpan AnnotationEntityTextSpan `json:"textSpan,omitempty,omitzero"`
 }
 
 // AnnotationStatus defines the observed state of Annotation.

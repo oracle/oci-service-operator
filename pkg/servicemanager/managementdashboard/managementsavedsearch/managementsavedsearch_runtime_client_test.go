@@ -333,8 +333,8 @@ func TestManagementSavedSearchDeleteRetainsFinalizerUntilReadbackNotFound(t *tes
 	if resource.Status.OsokStatus.DeletedAt == nil {
 		t.Fatal("status.status.deletedAt = nil, want delete timestamp")
 	}
-	if got := resource.Status.OsokStatus.OpcRequestID; got != "opc-delete" {
-		t.Fatalf("status.status.opcRequestId = %q, want delete request id", got)
+	if got := resource.Status.OsokStatus.OpcRequestID; got != "opc-request-id" {
+		t.Fatalf("status.status.opcRequestId = %q, want final confirmation request id", got)
 	}
 }
 
@@ -370,29 +370,37 @@ func TestManagementSavedSearchDeleteKeepsFinalizerWhileReadbackExists(t *testing
 	}
 }
 
-func TestManagementSavedSearchDeleteRejectsAuthShapedPreRead(t *testing.T) {
+func TestManagementSavedSearchDeleteAcceptsAuthShapedPreReadAfterScopedListProvesAbsence(t *testing.T) {
 	resource := newTestManagementSavedSearch("saved-search-auth-shaped-delete")
 	setManagementSavedSearchStatusID(resource, testManagementSavedSearchID)
 	client := &fakeManagementSavedSearchOCIClient{}
 	client.get = func(_ context.Context, _ managementdashboardsdk.GetManagementSavedSearchRequest) (managementdashboardsdk.GetManagementSavedSearchResponse, error) {
 		return managementdashboardsdk.GetManagementSavedSearchResponse{}, errortest.NewServiceError(404, errorutil.NotAuthorizedOrNotFound, "not authorized or not found")
 	}
+	client.list = func(_ context.Context, request managementdashboardsdk.ListManagementSavedSearchesRequest) (managementdashboardsdk.ListManagementSavedSearchesResponse, error) {
+		assertStringPtr(t, "list compartmentId", request.CompartmentId, resource.Spec.CompartmentId)
+		assertStringPtr(t, "list displayName", request.DisplayName, resource.Spec.DisplayName)
+		return managementdashboardsdk.ListManagementSavedSearchesResponse{}, nil
+	}
 	client.delete = func(_ context.Context, _ managementdashboardsdk.DeleteManagementSavedSearchRequest) (managementdashboardsdk.DeleteManagementSavedSearchResponse, error) {
 		return managementdashboardsdk.DeleteManagementSavedSearchResponse{}, nil
 	}
 
 	deleted, err := newTestManagementSavedSearchClient(client).Delete(context.Background(), resource)
-	if err == nil {
-		t.Fatal("Delete() error = nil, want auth-shaped pre-read rejection")
+	if err != nil {
+		t.Fatalf("Delete() error = %v", err)
 	}
-	if deleted {
-		t.Fatal("Delete() deleted = true, want false")
+	if !deleted {
+		t.Fatal("Delete() deleted = false, want true after scoped list proves absence")
 	}
 	if len(client.deleteRequests) != 0 {
 		t.Fatalf("DeleteManagementSavedSearch() calls = %d, want 0 after auth-shaped pre-read", len(client.deleteRequests))
 	}
 	if got := resource.Status.OsokStatus.OpcRequestID; got != "opc-request-id" {
 		t.Fatalf("status.status.opcRequestId = %q, want ambiguous read request id", got)
+	}
+	if resource.Status.OsokStatus.DeletedAt == nil {
+		t.Fatal("status.status.deletedAt = nil, want deletion timestamp")
 	}
 }
 

@@ -96,6 +96,7 @@ type ServiceManagerModel struct {
 	FileStem                 string
 	Formal                   *FormalModel
 	Semantics                *RuntimeSemanticsModel
+	Async                    *RuntimeAsyncModel
 	PackagePath              string
 	PackageName              string
 	APIImportPath            string
@@ -118,6 +119,8 @@ type ServiceManagerModel struct {
 	ListOperation            *RuntimeOperationModel
 	UpdateOperation          *RuntimeOperationModel
 	DeleteOperation          *RuntimeOperationModel
+	WorkRequestOperation     *RuntimeOperationModel
+	WorkRequestIDFieldName   string
 	RuntimeHooksFileName     string
 	ServiceClientFileName    string
 	ServiceManagerFileName   string
@@ -172,6 +175,7 @@ type RuntimeModel struct {
 	List                  *RuntimeOperationModel
 	Update                *RuntimeOperationModel
 	Delete                *RuntimeOperationModel
+	WorkRequest           *RuntimeOperationModel
 }
 
 // SDKClientModel describes one OCI SDK client constructor used by a generated runtime surface.

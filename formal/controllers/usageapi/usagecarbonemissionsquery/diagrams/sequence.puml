@@ -38,12 +38,9 @@ group Lookup and bind
 alt tracked or explicit OCI identity already exists
 ServiceManager -> OCI: GetUsageCarbonEmissionsQuery
 else tracked identity is missing
-ServiceManager -> OCI: ListUsageCarbonEmissionsQuery(filters:\ncompartment_id, state)
+ServiceManager -> OCI: ListUsageCarbonEmissionsQueries(filters:\ncompartment_id)
 alt reusable OCI resource is not found
 ServiceManager -> OCI: CreateUsageCarbonEmissionsQuery
-loop create pending PROVISIONING
-ServiceManager -> OCI: GetUsageCarbonEmissionsQuery
-end
 else reusable OCI resource already exists
 ServiceManager -> OCI: GetUsageCarbonEmissionsQuery
 end
@@ -52,40 +49,37 @@ end
 alt delete requested
 group Delete
 ServiceManager -> OCI: DeleteUsageCarbonEmissionsQuery
-ServiceManager -> OCI: confirm delete via\nGetUsageCarbonEmissionsQuery or\nListUsageCarbonEmissionsQuery
-loop delete pending DELETING
-ServiceManager -> OCI: GetUsageCarbonEmissionsQuery or\nListUsageCarbonEmissionsQuery
-end
+ServiceManager -> OCI: confirm delete via\nGetUsageCarbonEmissionsQuery or\nListUsageCarbonEmissionsQueries
 alt cleanup or finalizer release is blocked
 ServiceManager --> BaseReconciler: retain delete state and retry
 else delete completion observed
 ServiceManager --> BaseReconciler: release finalizer after delete completion
 end
 end
-else OCI state is retryable
-ServiceManager --> BaseReconciler: requeue while OCI remains in\nPROVISIONING, UPDATING, DELETING
 else live state requires field-aware\ndrift evaluation
 group Drift handling
 note over ServiceManager,OCI
-Supported update surface: display_name
+Supported update surface:
+query_definition.cost_analysis_ui.graph,
+query_definition.cost_analysis_ui.is_cumulative_graph,
+query_definition.display_name,
+query_definition.report_query.compartment_depth
+(+14 more)
 Reject before mutate: force-new fields
 compartment_id
-Lookup filters: compartment_id, state
+Lookup filters: compartment_id
 end note
 opt force-new or conflicting drift is detected
 ServiceManager --> BaseReconciler: reject before OCI mutation
 end
 opt supported mutable drift is detected
-ServiceManager -> OCI: Apply\nUpdateUsageCarbonEmissionsQuery only\nfor mutable fields display_name
-loop update pending UPDATING
-ServiceManager -> OCI: GetUsageCarbonEmissionsQuery
+ServiceManager -> OCI: Apply\nUpdateUsageCarbonEmissionsQuery only\nfor mutable fields\nquery_definition.cost_analysis_ui.graph,\nquery_definition.cost_analysis_ui.is_cumulative_graph,\nquery_definition.display_name,\nquery_definition.report_query.compartment_depth\n(+14 more)
 end
-end
-ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=template action=CREATED;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource
+ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource
 end
 ServiceManager --> BaseReconciler: status=required,\nfinalizer=retain-until-confirmed-delete
 end
-BaseReconciler --> Controller: requeue on provisioning, updating,\nterminating
+BaseReconciler --> Controller: requeue on terminating
 note right of ServiceManager
 shared diagram:
 shared/diagrams/shared-resolution-sequence.svg
@@ -107,20 +101,34 @@ kind: UsageCarbonEmissionsQuery
 archetype: generated-service-manager
 status/finalizer: required /
 retain-until-confirmed-delete
-requeue: provisioning, updating, terminating
-provider states: create PROVISIONING; update
-UPDATING; delete DELETING
-supported drift: display_name
+requeue: terminating
+provider states: create none; update none;
+delete none
+supported drift:
+query_definition.cost_analysis_ui.graph,
+query_definition.cost_analysis_ui.is_cumulative_graph,
+query_definition.display_name,
+query_definition.report_query.compartment_depth
+(+14 more)
 reject before mutate: force-new fields
 compartment_id
 create-only fields: none
 list lookup:
-scaffold_usageapi_usagecarbonemissionsquery
-filters compartment_id, state
+oci_metering_computation_usage_carbon_emissions_queries
+filters compartment_id
 conflicts: none
 open gaps: none
-Scaffold metadata only; replace with
-controller-specific runtime states before
-promotion.
+The SDK does not expose lifecycle state on
+UsageCarbonEmissionsQuery bodies, so create and
+update settle through read-after-write
+confirmation and the service-local wrapper
+projects Active status.
+In-place updates are limited to queryDefinition;
+compartmentId requires replacement.
+Existing queries are matched by the populated
+queryDefinition fields, and delete retains the
+finalizer until Get confirms absence.
+The runtime has no Kubernetes Secret side
+effects.
 end note
 @enduml

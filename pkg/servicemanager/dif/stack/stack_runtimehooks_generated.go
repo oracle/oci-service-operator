@@ -57,8 +57,20 @@ func newStackDefaultRuntimeHooks(sdkClient difsdk.StackClient) StackRuntimeHooks
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*difv1beta1.Stack]{},
 		StatusHooks:     generatedruntime.StatusHooks[*difv1beta1.Stack]{},
 		ParityHooks:     generatedruntime.ParityHooks[*difv1beta1.Stack]{},
-		Async:           generatedruntime.AsyncHooks[*difv1beta1.Stack]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*difv1beta1.Stack]{},
+		Async: generatedruntime.AsyncHooks[*difv1beta1.Stack]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := difsdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*difv1beta1.Stack]{},
 		Create: runtimeOperationHooks[difsdk.CreateStackRequest, difsdk.CreateStackResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateStackDetails", RequestName: "CreateStackDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request difsdk.CreateStackRequest) (difsdk.CreateStackResponse, error) {
@@ -106,10 +118,19 @@ func buildStackGeneratedRuntimeConfig(
 	hooks StackRuntimeHooks,
 ) generatedruntime.Config[*difv1beta1.Stack] {
 	return generatedruntime.Config[*difv1beta1.Stack]{
-		Kind:            "Stack",
-		SDKName:         "Stack",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "Stack",
+		SDKName:   "Stack",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

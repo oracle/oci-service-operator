@@ -28,6 +28,9 @@ type AddressListSpec struct {
 	Description string `json:"description,omitempty"`
 	// +kubebuilder:validation:Optional
 	JsonData string `json:"jsonData,omitempty"`
+	// The OCID of the Network Firewall policy that owns this resource.
+	// +kubebuilder:validation:Required
+	NetworkFirewallPolicyId string `json:"networkFirewallPolicyId"`
 }
 
 // AddressListStatus defines the observed state of AddressList.

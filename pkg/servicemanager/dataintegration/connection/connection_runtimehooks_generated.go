@@ -66,25 +66,25 @@ func newConnectionDefaultRuntimeHooks(sdkClient dataintegrationsdk.DataIntegrati
 			},
 		},
 		Get: runtimeOperationHooks[dataintegrationsdk.GetConnectionRequest, dataintegrationsdk.GetConnectionResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "ConnectionKey", RequestName: "connectionKey", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "ConnectionKey", RequestName: "connectionKey", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request dataintegrationsdk.GetConnectionRequest) (dataintegrationsdk.GetConnectionResponse, error) {
 				return sdkClient.GetConnection(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[dataintegrationsdk.ListConnectionsRequest, dataintegrationsdk.ListConnectionsResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: true}, {FieldName: "DataAssetKey", RequestName: "dataAssetKey", Contribution: "query", PreferResourceID: false}, {FieldName: "Name", RequestName: "name", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Fields", RequestName: "fields", Contribution: "query", PreferResourceID: false}, {FieldName: "Type", RequestName: "type", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "DataAssetKey", RequestName: "dataAssetKey", Contribution: "query", PreferResourceID: false}, {FieldName: "Name", RequestName: "name", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Fields", RequestName: "fields", Contribution: "query", PreferResourceID: false}, {FieldName: "Type", RequestName: "type", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dataintegrationsdk.ListConnectionsRequest) (dataintegrationsdk.ListConnectionsResponse, error) {
 				return sdkClient.ListConnections(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[dataintegrationsdk.UpdateConnectionRequest, dataintegrationsdk.UpdateConnectionResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "ConnectionKey", RequestName: "connectionKey", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdateConnectionDetails", RequestName: "UpdateConnectionDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "ConnectionKey", RequestName: "connectionKey", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateConnectionDetails", RequestName: "UpdateConnectionDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dataintegrationsdk.UpdateConnectionRequest) (dataintegrationsdk.UpdateConnectionResponse, error) {
 				return sdkClient.UpdateConnection(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[dataintegrationsdk.DeleteConnectionRequest, dataintegrationsdk.DeleteConnectionResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "ConnectionKey", RequestName: "connectionKey", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "ConnectionKey", RequestName: "connectionKey", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request dataintegrationsdk.DeleteConnectionRequest) (dataintegrationsdk.DeleteConnectionResponse, error) {
 				return sdkClient.DeleteConnection(ctx, request)
 			},

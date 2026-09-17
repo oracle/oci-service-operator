@@ -7,11 +7,21 @@ package generatedruntime
 
 import (
 	"context"
+	"github.com/oracle/oci-go-sdk/v65/common"
+	"github.com/oracle/oci-go-sdk/v65/datacatalog"
 	"github.com/oracle/oci-service-operator/pkg/errorutil/errortest"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"testing"
 )
+
+type keyedThingResponse struct {
+	Thing keyedThing `presentIn:"body"`
+}
+
+type keyedThing struct {
+	Key string `json:"key"`
+}
 
 func TestApplySuccessSetsLifecycleAsyncTrackerWhilePending(t *testing.T) {
 	t.Parallel()
@@ -82,6 +92,44 @@ func TestApplySuccessClearsLifecycleAsyncTrackerWhenActive(t *testing.T) {
 	}
 	if resource.Status.OsokStatus.Reason != string(shared.Active) {
 		t.Fatalf("status.reason = %q, want %q", resource.Status.OsokStatus.Reason, shared.Active)
+	}
+}
+
+func TestApplySuccessTreatsStateFreeResponseAsActiveWhenAsyncIsNone(t *testing.T) {
+	t.Parallel()
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind: "StateFreeThing", SDKName: "Thing",
+		Semantics: &Semantics{Async: &AsyncSemantics{Strategy: asyncStrategyNone, Runtime: asyncRuntimeGeneratedRuntime, FormalClassification: asyncStrategyNone}},
+	})
+	resource := &fakeResource{}
+	response, err := client.applySuccess(resource, fakeGetThingResponse{Thing: fakeThing{Id: "ocid1.thing.oc1..state-free", DisplayName: "state-free"}}, shared.Provisioning)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !response.IsSuccessful || response.ShouldRequeue {
+		t.Fatalf("response = %#v, want successful no-requeue", response)
+	}
+	if resource.Status.OsokStatus.Reason != string(shared.Active) {
+		t.Fatalf("status reason = %q, want Active", resource.Status.OsokStatus.Reason)
+	}
+}
+
+func TestApplySuccessRequeuesMissingDeclaredLifecycleState(t *testing.T) {
+	t.Parallel()
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind: "LifecycleThing", SDKName: "Thing",
+		Semantics: &Semantics{
+			Async:     &AsyncSemantics{Strategy: asyncStrategyNone, Runtime: asyncRuntimeGeneratedRuntime, FormalClassification: asyncStrategyNone},
+			Lifecycle: LifecycleSemantics{ActiveStates: []string{"ACTIVE"}},
+		},
+	})
+	resource := &fakeResource{}
+	response, err := client.applySuccess(resource, fakeGetThingResponse{Thing: fakeThing{Id: "ocid1.thing.oc1..lifecycle", DisplayName: "lifecycle"}}, shared.Provisioning)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !response.IsSuccessful || !response.ShouldRequeue {
+		t.Fatalf("response = %#v, want successful requeue while the declared lifecycle state is absent", response)
 	}
 }
 
@@ -200,6 +248,23 @@ func TestResponseWorkRequestIDReadsOCIHeader(t *testing.T) {
 	}
 	if got := responseWorkRequestID(fakeDeleteThingResponse{}); got != "" {
 		t.Fatalf("responseWorkRequestID(delete) = %q, want empty string", got)
+	}
+}
+
+func TestResponseIDFallsBackToKeyedResourceIdentity(t *testing.T) {
+	t.Parallel()
+	if got := responseID(keyedThingResponse{Thing: keyedThing{Key: "catalog-key"}}); got != "catalog-key" {
+		t.Fatalf("responseID(keyed resource) = %q, want catalog-key", got)
+	}
+}
+
+func TestResponseIDReadsOCIKeyedResponseBody(t *testing.T) {
+	t.Parallel()
+	response := datacatalog.CreateAttributeTagResponse{
+		AttributeTag: datacatalog.AttributeTag{Key: common.String("tag-key")},
+	}
+	if got := responseID(response); got != "tag-key" {
+		t.Fatalf("responseID(CreateAttributeTagResponse) = %q, want tag-key", got)
 	}
 }
 

@@ -97,7 +97,7 @@ func applyAiDataPlatformRuntimeHooks(
 		return
 	}
 
-	hooks.Semantics = newAiDataPlatformRuntimeSemantics()
+	hooks.Semantics = reviewedAiDataPlatformRuntimeSemantics()
 	hooks.BuildCreateBody = buildAiDataPlatformCreateBody
 	hooks.BuildUpdateBody = buildAiDataPlatformUpdateBody
 	hooks.Create.Fields = aiDataPlatformCreateFields()
@@ -196,7 +196,7 @@ func newAiDataPlatformRuntimeHooksWithOCIClient(client aiDataPlatformOCIClient) 
 	}
 }
 
-func newAiDataPlatformRuntimeSemantics() *generatedruntime.Semantics {
+func reviewedAiDataPlatformRuntimeSemantics() *generatedruntime.Semantics {
 	return &generatedruntime.Semantics{
 		FormalService: "aidataplatform",
 		FormalSlug:    "aidataplatform",

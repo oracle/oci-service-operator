@@ -1,0 +1,153 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "opsi",
+  "slug": "hostinsight",
+  "kind": "HostInsight",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_opsi_host_insight",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateHostInsight",
+        "requestType": "opsi.CreateHostInsightRequest",
+        "responseType": "opsi.CreateHostInsightResponse"
+      },
+      {
+        "operation": "DisableHostInsight",
+        "requestType": "opsi.DisableHostInsightRequest",
+        "responseType": "opsi.DisableHostInsightResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetHostInsight",
+        "requestType": "opsi.GetHostInsightRequest",
+        "responseType": "opsi.GetHostInsightResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListHostInsights",
+        "requestType": "opsi.ListHostInsightsRequest",
+        "responseType": "opsi.ListHostInsightsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeHostInsightCompartment",
+        "requestType": "opsi.ChangeHostInsightCompartmentRequest",
+        "responseType": "opsi.ChangeHostInsightCompartmentResponse"
+      },
+      {
+        "operation": "DisableHostInsight",
+        "requestType": "opsi.DisableHostInsightRequest",
+        "responseType": "opsi.DisableHostInsightResponse"
+      },
+      {
+        "operation": "EnableHostInsight",
+        "requestType": "opsi.EnableHostInsightRequest",
+        "responseType": "opsi.EnableHostInsightResponse"
+      },
+      {
+        "operation": "UpdateHostInsight",
+        "requestType": "opsi.UpdateHostInsightRequest",
+        "responseType": "opsi.UpdateHostInsightResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteHostInsight",
+        "requestType": "opsi.DeleteHostInsightRequest",
+        "responseType": "opsi.DeleteHostInsightResponse"
+      },
+      {
+        "operation": "DisableHostInsight",
+        "requestType": "opsi.DisableHostInsightRequest",
+        "responseType": "opsi.DisableHostInsightResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "entity_source",
+      "freeform_tags",
+      "status"
+    ],
+    "forceNew": [
+      "compute_id",
+      "enterprise_manager_bridge_id",
+      "enterprise_manager_entity_identifier",
+      "enterprise_manager_identifier",
+      "exadata_insight_id",
+      "management_agent_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_opsi_host_insights",
+    "collectionField": "host_insight_summary_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "compartment_id_in_subtree",
+      "enterprise_manager_bridge_id",
+      "exadata_insight_id",
+      "host_type",
+      "id",
+      "state",
+      "status"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/opsi/hostinsight/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/opsi/hostinsight/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from terraform-provider-oci for opsi/hostinsight."
+  ]
+}

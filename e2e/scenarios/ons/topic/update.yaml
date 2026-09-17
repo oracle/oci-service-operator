@@ -1,0 +1,15 @@
+#
+# Copyright (c) 2026, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+#
+
+apiVersion: ons.oracle.com/v1beta1
+kind: Topic
+metadata:
+  name: osok-topic-${OSOK_E2E_SUFFIX}
+spec:
+  name: osok-e2e-topic-${OSOK_E2E_ID}
+  compartmentId: ${OCI_COMPARTMENT_ID}
+  description: OSOK lifecycle test topic updated
+  freeformTags:
+    osok-e2e-phase: update

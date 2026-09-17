@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "recovery",
+  "slug": "protectionpolicy",
+  "kind": "ProtectionPolicy",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_recovery_protection_policy",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateProtectionPolicy",
+        "requestType": "recovery.CreateProtectionPolicyRequest",
+        "responseType": "recovery.CreateProtectionPolicyResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetProtectionPolicy",
+        "requestType": "recovery.GetProtectionPolicyRequest",
+        "responseType": "recovery.GetProtectionPolicyResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListProtectionPolicies",
+        "requestType": "recovery.ListProtectionPoliciesRequest",
+        "responseType": "recovery.ListProtectionPoliciesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeProtectionPolicyCompartment",
+        "requestType": "recovery.ChangeProtectionPolicyCompartmentRequest",
+        "responseType": "recovery.ChangeProtectionPolicyCompartmentResponse"
+      },
+      {
+        "operation": "UpdateProtectionPolicy",
+        "requestType": "recovery.UpdateProtectionPolicyRequest",
+        "responseType": "recovery.UpdateProtectionPolicyResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteProtectionPolicy",
+        "requestType": "recovery.DeleteProtectionPolicyRequest",
+        "responseType": "recovery.DeleteProtectionPolicyResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "backup_retention_period_in_days",
+      "compartment_id",
+      "defined_tags",
+      "display_name",
+      "freeform_tags",
+      "policy_locked_date_time"
+    ],
+    "forceNew": [
+      "must_enforce_cloud_locality"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_recovery_protection_policies",
+    "collectionField": "protection_policy_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "owner",
+      "protection_policy_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/recovery/protectionpolicy/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/recovery/protectionpolicy/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from terraform-provider-oci for recovery/protectionpolicy."
+  ]
+}

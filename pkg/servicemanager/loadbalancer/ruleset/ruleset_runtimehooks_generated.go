@@ -66,25 +66,25 @@ func newRuleSetDefaultRuntimeHooks(sdkClient loadbalancersdk.LoadBalancerClient)
 			},
 		},
 		Get: runtimeOperationHooks[loadbalancersdk.GetRuleSetRequest, loadbalancersdk.GetRuleSetResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "RuleSetName", RequestName: "ruleSetName", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "RuleSetName", RequestName: "ruleSetName", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request loadbalancersdk.GetRuleSetRequest) (loadbalancersdk.GetRuleSetResponse, error) {
 				return sdkClient.GetRuleSet(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[loadbalancersdk.ListRuleSetsRequest, loadbalancersdk.ListRuleSetsResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: true}},
+			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loadbalancersdk.ListRuleSetsRequest) (loadbalancersdk.ListRuleSetsResponse, error) {
 				return sdkClient.ListRuleSets(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[loadbalancersdk.UpdateRuleSetRequest, loadbalancersdk.UpdateRuleSetResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "RuleSetName", RequestName: "ruleSetName", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdateRuleSetDetails", RequestName: "UpdateRuleSetDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "RuleSetName", RequestName: "ruleSetName", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateRuleSetDetails", RequestName: "UpdateRuleSetDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loadbalancersdk.UpdateRuleSetRequest) (loadbalancersdk.UpdateRuleSetResponse, error) {
 				return sdkClient.UpdateRuleSet(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[loadbalancersdk.DeleteRuleSetRequest, loadbalancersdk.DeleteRuleSetResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "RuleSetName", RequestName: "ruleSetName", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "RuleSetName", RequestName: "ruleSetName", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request loadbalancersdk.DeleteRuleSetRequest) (loadbalancersdk.DeleteRuleSetResponse, error) {
 				return sdkClient.DeleteRuleSet(ctx, request)
 			},

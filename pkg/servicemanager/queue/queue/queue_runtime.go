@@ -486,7 +486,7 @@ func resolveQueueWorkRequestAction(workRequest queuesdk.WorkRequest) (string, er
 			continue
 		}
 		candidate := strings.TrimSpace(string(resource.ActionType))
-		if candidate == "" {
+		if candidate == "" || strings.EqualFold(candidate, string(queuesdk.ActionTypeInProgress)) {
 			continue
 		}
 		if action == "" {
@@ -495,6 +495,11 @@ func resolveQueueWorkRequestAction(workRequest queuesdk.WorkRequest) (string, er
 		}
 		if action != candidate {
 			return "", fmt.Errorf("Queue work request %s exposes conflicting Queue action types %q and %q", stringValue(workRequest.Id), action, candidate)
+		}
+	}
+	if action == "" {
+		if phase, ok := queueWorkRequestPhaseFromOperationType(workRequest.OperationType); ok {
+			action = string(queueWorkRequestActionForPhase(phase))
 		}
 	}
 

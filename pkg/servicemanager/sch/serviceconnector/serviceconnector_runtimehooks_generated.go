@@ -50,15 +50,84 @@ func registerServiceConnectorRuntimeHooksMutator(mutator ServiceConnectorRuntime
 	}
 	serviceconnectorRuntimeHooksMutators = append(serviceconnectorRuntimeHooksMutators, mutator)
 }
+func newServiceConnectorRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "sch",
+		FormalSlug:    "serviceconnector",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "displayName", "state"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"definedTags", "description", "displayName", "freeformTags", "source", "target", "tasks"},
+			ForceNew:      []string{"compartmentId"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{},
+			Update: []generatedruntime.Hook{},
+			Delete: []generatedruntime.Hook{},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newServiceConnectorDefaultRuntimeHooks(sdkClient schsdk.ServiceConnectorClient) ServiceConnectorRuntimeHooks {
 	return ServiceConnectorRuntimeHooks{
+		Semantics:       newServiceConnectorRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*schv1beta1.ServiceConnector]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*schv1beta1.ServiceConnector]{},
 		StatusHooks:     generatedruntime.StatusHooks[*schv1beta1.ServiceConnector]{},
 		ParityHooks:     generatedruntime.ParityHooks[*schv1beta1.ServiceConnector]{},
-		Async:           generatedruntime.AsyncHooks[*schv1beta1.ServiceConnector]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*schv1beta1.ServiceConnector]{},
+		Async: generatedruntime.AsyncHooks[*schv1beta1.ServiceConnector]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := schsdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*schv1beta1.ServiceConnector]{},
 		Create: runtimeOperationHooks[schsdk.CreateServiceConnectorRequest, schsdk.CreateServiceConnectorResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateServiceConnectorDetails", RequestName: "CreateServiceConnectorDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request schsdk.CreateServiceConnectorRequest) (schsdk.CreateServiceConnectorResponse, error) {
@@ -106,10 +175,19 @@ func buildServiceConnectorGeneratedRuntimeConfig(
 	hooks ServiceConnectorRuntimeHooks,
 ) generatedruntime.Config[*schv1beta1.ServiceConnector] {
 	return generatedruntime.Config[*schv1beta1.ServiceConnector]{
-		Kind:            "ServiceConnector",
-		SDKName:         "ServiceConnector",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "ServiceConnector",
+		SDKName:   "ServiceConnector",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

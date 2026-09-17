@@ -1,0 +1,137 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Sequence - stackmonitoring/MonitoredResourceType
+hide footbox
+skinparam sequence {
+  actorBorderColor #0f172a
+  actorBackgroundColor #e2e8f0
+  participantBorderColor #0f172a
+  participantBackgroundColor #e2e8f0
+  participantFontColor #0f172a
+  lifeLineBorderColor #94a3b8
+  groupBorderColor #cbd5e1
+  groupBackgroundColor #f8fafc
+}
+actor Kubernetes
+participant Controller
+participant BaseReconciler
+participant "OSOKServiceManager" as ServiceManager
+participant OCI
+note over BaseReconciler,ServiceManager
+shared resolution:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete:
+shared/diagrams/shared-delete-sequence.svg
+end note
+Kubernetes -> Controller: enqueue MonitoredResourceType\nreconcile
+Controller -> BaseReconciler: Reconcile(request)
+BaseReconciler -> ServiceManager: reconcile desired\nMonitoredResourceType
+group Lookup and bind
+alt tracked or explicit OCI identity already exists
+ServiceManager -> OCI: GetMonitoredResourceType
+else tracked identity is missing
+ServiceManager -> OCI: ListMonitoredResourceTypes(filters:\ncompartmentId, name)
+alt reusable OCI resource is not found
+ServiceManager -> OCI: CreateMonitoredResourceType
+loop create pending CREATING
+ServiceManager -> OCI: GetMonitoredResourceType
+end
+else reusable OCI resource already exists
+ServiceManager -> OCI: GetMonitoredResourceType
+end
+ServiceManager --> BaseReconciler: persist resolved OCI identity in status
+end
+alt delete requested
+group Delete
+ServiceManager -> OCI: DeleteMonitoredResourceType
+ServiceManager -> OCI: confirm delete via\nGetMonitoredResourceType or\nListMonitoredResourceTypes
+loop delete pending DELETING
+ServiceManager -> OCI: GetMonitoredResourceType or\nListMonitoredResourceTypes
+end
+alt cleanup or finalizer release is blocked
+ServiceManager --> BaseReconciler: retain delete state and retry
+else delete completion observed
+ServiceManager --> BaseReconciler: release finalizer after delete completion
+end
+end
+else OCI state is retryable
+ServiceManager --> BaseReconciler: requeue while OCI remains in\nCREATING, UPDATING, DELETING
+else live state requires field-aware\ndrift evaluation
+group Drift handling
+note over ServiceManager,OCI
+Supported update surface: definedTags,
+description, displayName, freeformTags
+(+4 more)
+Reject before mutate: force-new fields
+compartmentId, name
+Lookup filters: compartmentId, name
+Lookup matching: exact tenancy-unique
+name and compartment match
+end note
+opt force-new or conflicting drift is detected
+ServiceManager --> BaseReconciler: reject before OCI mutation
+end
+opt supported mutable drift is detected
+ServiceManager -> OCI: Apply UpdateMonitoredResourceType\nonly for mutable fields definedTags,\ndescription, displayName,\nfreeformTags (+4 more)
+loop update pending UPDATING
+ServiceManager -> OCI: GetMonitoredResourceType
+end
+end
+ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource
+ServiceManager -> OCI: apply follow-up strategy\ncreate=read-after-write;\nupdate=read-after-write;\ndelete=confirm-delete
+end
+ServiceManager --> BaseReconciler: status=required,\nfinalizer=retain-until-confirmed-delete
+end
+BaseReconciler --> Controller: requeue on provisioning, updating,\nterminating
+note right of ServiceManager
+shared diagram:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete diagram:
+shared/diagrams/shared-delete-sequence.svg
+Start from the shared resolution sequence for
+OCID binding, datasource pagination, and
+create-or-update dispatch.
+Layer the shared delete sequence when finalizer
+retention, delete confirmation, work-request
+polling, or Secret cleanup apply.
+archetype batch: Generated service-manager
+controllers follow the shared resolution and
+delete sequences with imported waits and
+controller-local policy.
+service: stackmonitoring
+slug: monitoredresourcetype
+kind: MonitoredResourceType
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: provisioning, updating, terminating
+provider states: create CREATING; update
+UPDATING; delete DELETING
+follow-up: create=read-after-write;
+update=read-after-write; delete=confirm-delete
+supported drift: definedTags, description,
+displayName, freeformTags (+4 more)
+reject before mutate: force-new fields
+compartmentId, name
+create-only fields: none
+list lookup:
+oci_stack_monitoring_monitored_resource_types
+filters compartmentId, name; exact
+tenancy-unique name and compartment match
+conflicts: none
+open gaps: none
+ACTIVE is success and DELETED confirms deletion;
+ambiguous authorization-shaped 404s are not
+accepted as deletion.
+Optional polymorphic metadata is normalized
+before create and update comparison.
+end note
+@enduml

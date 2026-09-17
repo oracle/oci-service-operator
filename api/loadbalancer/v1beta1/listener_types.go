@@ -43,9 +43,9 @@ type ListenerSpec struct {
 	// +kubebuilder:validation:Optional
 	PathRouteSetName string `json:"pathRouteSetName,omitempty"`
 	// +kubebuilder:validation:Optional
-	SslConfiguration ListenerSslConfiguration `json:"sslConfiguration,omitempty"`
+	SslConfiguration ListenerSslConfiguration `json:"sslConfiguration,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	ConnectionConfiguration ListenerConnectionConfiguration `json:"connectionConfiguration,omitempty"`
+	ConnectionConfiguration ListenerConnectionConfiguration `json:"connectionConfiguration,omitempty,omitzero"`
 	// The name of the routing policy applied to this listener's traffic.
 	// Example: `example_routing_policy`
 	// +kubebuilder:validation:Optional

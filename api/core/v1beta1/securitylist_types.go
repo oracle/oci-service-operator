@@ -77,9 +77,9 @@ type SecurityListEgressSecurityRuleTcpOptionsSourcePortRange struct {
 // SecurityListEgressSecurityRuleTcpOptions defines nested fields for SecurityList.EgressSecurityRule.TcpOptions.
 type SecurityListEgressSecurityRuleTcpOptions struct {
 	// +kubebuilder:validation:Optional
-	DestinationPortRange SecurityListEgressSecurityRuleTcpOptionsDestinationPortRange `json:"destinationPortRange,omitempty"`
+	DestinationPortRange SecurityListEgressSecurityRuleTcpOptionsDestinationPortRange `json:"destinationPortRange,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	SourcePortRange SecurityListEgressSecurityRuleTcpOptionsSourcePortRange `json:"sourcePortRange,omitempty"`
+	SourcePortRange SecurityListEgressSecurityRuleTcpOptionsSourcePortRange `json:"sourcePortRange,omitempty,omitzero"`
 }
 
 // SecurityListEgressSecurityRuleUdpOptionsDestinationPortRange defines nested fields for SecurityList.EgressSecurityRule.UdpOptions.DestinationPortRange.
@@ -107,9 +107,9 @@ type SecurityListEgressSecurityRuleUdpOptionsSourcePortRange struct {
 // SecurityListEgressSecurityRuleUdpOptions defines nested fields for SecurityList.EgressSecurityRule.UdpOptions.
 type SecurityListEgressSecurityRuleUdpOptions struct {
 	// +kubebuilder:validation:Optional
-	DestinationPortRange SecurityListEgressSecurityRuleUdpOptionsDestinationPortRange `json:"destinationPortRange,omitempty"`
+	DestinationPortRange SecurityListEgressSecurityRuleUdpOptionsDestinationPortRange `json:"destinationPortRange,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	SourcePortRange SecurityListEgressSecurityRuleUdpOptionsSourcePortRange `json:"sourcePortRange,omitempty"`
+	SourcePortRange SecurityListEgressSecurityRuleUdpOptionsSourcePortRange `json:"sourcePortRange,omitempty,omitzero"`
 }
 
 // SecurityListEgressSecurityRule defines nested fields for SecurityList.EgressSecurityRule.
@@ -140,7 +140,7 @@ type SecurityListEgressSecurityRule struct {
 	// +kubebuilder:validation:Optional
 	DestinationType string `json:"destinationType,omitempty"`
 	// +kubebuilder:validation:Optional
-	IcmpOptions SecurityListEgressSecurityRuleIcmpOptions `json:"icmpOptions,omitempty"`
+	IcmpOptions SecurityListEgressSecurityRuleIcmpOptions `json:"icmpOptions,omitempty,omitzero"`
 	// A stateless rule allows traffic in one direction. Remember to add a corresponding
 	// stateless rule in the other direction if you need to support bidirectional traffic. For
 	// example, if egress traffic allows TCP destination port 80, there should be an ingress
@@ -149,9 +149,9 @@ type SecurityListEgressSecurityRule struct {
 	// +kubebuilder:validation:Optional
 	IsStateless bool `json:"isStateless,omitempty"`
 	// +kubebuilder:validation:Optional
-	TcpOptions SecurityListEgressSecurityRuleTcpOptions `json:"tcpOptions,omitempty"`
+	TcpOptions SecurityListEgressSecurityRuleTcpOptions `json:"tcpOptions,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	UdpOptions SecurityListEgressSecurityRuleUdpOptions `json:"udpOptions,omitempty"`
+	UdpOptions SecurityListEgressSecurityRuleUdpOptions `json:"udpOptions,omitempty,omitzero"`
 	// An optional description of your choice for the rule.
 	// +kubebuilder:validation:Optional
 	Description string `json:"description,omitempty"`
@@ -192,9 +192,9 @@ type SecurityListIngressSecurityRuleTcpOptionsSourcePortRange struct {
 // SecurityListIngressSecurityRuleTcpOptions defines nested fields for SecurityList.IngressSecurityRule.TcpOptions.
 type SecurityListIngressSecurityRuleTcpOptions struct {
 	// +kubebuilder:validation:Optional
-	DestinationPortRange SecurityListIngressSecurityRuleTcpOptionsDestinationPortRange `json:"destinationPortRange,omitempty"`
+	DestinationPortRange SecurityListIngressSecurityRuleTcpOptionsDestinationPortRange `json:"destinationPortRange,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	SourcePortRange SecurityListIngressSecurityRuleTcpOptionsSourcePortRange `json:"sourcePortRange,omitempty"`
+	SourcePortRange SecurityListIngressSecurityRuleTcpOptionsSourcePortRange `json:"sourcePortRange,omitempty,omitzero"`
 }
 
 // SecurityListIngressSecurityRuleUdpOptionsDestinationPortRange defines nested fields for SecurityList.IngressSecurityRule.UdpOptions.DestinationPortRange.
@@ -222,9 +222,9 @@ type SecurityListIngressSecurityRuleUdpOptionsSourcePortRange struct {
 // SecurityListIngressSecurityRuleUdpOptions defines nested fields for SecurityList.IngressSecurityRule.UdpOptions.
 type SecurityListIngressSecurityRuleUdpOptions struct {
 	// +kubebuilder:validation:Optional
-	DestinationPortRange SecurityListIngressSecurityRuleUdpOptionsDestinationPortRange `json:"destinationPortRange,omitempty"`
+	DestinationPortRange SecurityListIngressSecurityRuleUdpOptionsDestinationPortRange `json:"destinationPortRange,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	SourcePortRange SecurityListIngressSecurityRuleUdpOptionsSourcePortRange `json:"sourcePortRange,omitempty"`
+	SourcePortRange SecurityListIngressSecurityRuleUdpOptionsSourcePortRange `json:"sourcePortRange,omitempty,omitzero"`
 }
 
 // SecurityListIngressSecurityRule defines nested fields for SecurityList.IngressSecurityRule.
@@ -247,7 +247,7 @@ type SecurityListIngressSecurityRule struct {
 	// +kubebuilder:validation:Required
 	Source string `json:"source"`
 	// +kubebuilder:validation:Optional
-	IcmpOptions SecurityListIngressSecurityRuleIcmpOptions `json:"icmpOptions,omitempty"`
+	IcmpOptions SecurityListIngressSecurityRuleIcmpOptions `json:"icmpOptions,omitempty,omitzero"`
 	// A stateless rule allows traffic in one direction. Remember to add a corresponding
 	// stateless rule in the other direction if you need to support bidirectional traffic. For
 	// example, if ingress traffic allows TCP destination port 80, there should be an egress
@@ -263,9 +263,9 @@ type SecurityListIngressSecurityRule struct {
 	// +kubebuilder:validation:Optional
 	SourceType string `json:"sourceType,omitempty"`
 	// +kubebuilder:validation:Optional
-	TcpOptions SecurityListIngressSecurityRuleTcpOptions `json:"tcpOptions,omitempty"`
+	TcpOptions SecurityListIngressSecurityRuleTcpOptions `json:"tcpOptions,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	UdpOptions SecurityListIngressSecurityRuleUdpOptions `json:"udpOptions,omitempty"`
+	UdpOptions SecurityListIngressSecurityRuleUdpOptions `json:"udpOptions,omitempty,omitzero"`
 	// An optional description of your choice for the rule.
 	// +kubebuilder:validation:Optional
 	Description string `json:"description,omitempty"`

@@ -114,8 +114,20 @@ func newMacOrderDefaultRuntimeHooks(sdkClient mngdmacsdk.MacOrderClient) MacOrde
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*mngdmacv1beta1.MacOrder]{},
 		StatusHooks:     generatedruntime.StatusHooks[*mngdmacv1beta1.MacOrder]{},
 		ParityHooks:     generatedruntime.ParityHooks[*mngdmacv1beta1.MacOrder]{},
-		Async:           generatedruntime.AsyncHooks[*mngdmacv1beta1.MacOrder]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*mngdmacv1beta1.MacOrder]{},
+		Async: generatedruntime.AsyncHooks[*mngdmacv1beta1.MacOrder]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := mngdmacsdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*mngdmacv1beta1.MacOrder]{},
 		Create: runtimeOperationHooks[mngdmacsdk.CreateMacOrderRequest, mngdmacsdk.CreateMacOrderResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateMacOrderDetails", RequestName: "CreateMacOrderDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request mngdmacsdk.CreateMacOrderRequest) (mngdmacsdk.CreateMacOrderResponse, error) {
@@ -163,10 +175,19 @@ func buildMacOrderGeneratedRuntimeConfig(
 	hooks MacOrderRuntimeHooks,
 ) generatedruntime.Config[*mngdmacv1beta1.MacOrder] {
 	return generatedruntime.Config[*mngdmacv1beta1.MacOrder]{
-		Kind:            "MacOrder",
-		SDKName:         "MacOrder",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "MacOrder",
+		SDKName:   "MacOrder",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "fleetappsmanagement",
+  "slug": "maintenancewindow",
+  "kind": "MaintenanceWindow",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_fleet_apps_management_maintenance_window",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateMaintenanceWindow",
+        "requestType": "fleetappsmanagement.CreateMaintenanceWindowRequest",
+        "responseType": "fleetappsmanagement.CreateMaintenanceWindowResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetMaintenanceWindow",
+        "requestType": "fleetappsmanagement.GetMaintenanceWindowRequest",
+        "responseType": "fleetappsmanagement.GetMaintenanceWindowResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListMaintenanceWindows",
+        "requestType": "fleetappsmanagement.ListMaintenanceWindowsRequest",
+        "responseType": "fleetappsmanagement.ListMaintenanceWindowsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateMaintenanceWindow",
+        "requestType": "fleetappsmanagement.UpdateMaintenanceWindowRequest",
+        "responseType": "fleetappsmanagement.UpdateMaintenanceWindowResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteMaintenanceWindow",
+        "requestType": "fleetappsmanagement.DeleteMaintenanceWindowRequest",
+        "responseType": "fleetappsmanagement.DeleteMaintenanceWindowResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "target": [
+        "ACTIVE",
+        "NEEDS_ATTENTION"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "defined_tags",
+      "description",
+      "display_name",
+      "duration",
+      "freeform_tags",
+      "is_outage",
+      "is_recurring",
+      "recurrences",
+      "time_schedule_start"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_fleet_apps_management_maintenance_windows",
+    "collectionField": "maintenance_window_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "id",
+      "state",
+      "time_schedule_start_greater_than_or_equal_to"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/fleetappsmanagement/maintenancewindow/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/fleetappsmanagement/maintenancewindow/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from the pinned terraform-provider-oci source revision."
+  ]
+}

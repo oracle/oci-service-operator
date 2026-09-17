@@ -70,9 +70,9 @@ type TargetDetectorRecipeDetectorRuleDetailsConditionGroupCondition struct {
 	// +kubebuilder:validation:Optional
 	ValueType string `json:"valueType,omitempty"`
 	// +kubebuilder:validation:Optional
-	LeftOperand shared.JSONValue `json:"leftOperand,omitempty"`
+	LeftOperand shared.JSONValue `json:"leftOperand,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	RightOperand shared.JSONValue `json:"rightOperand,omitempty"`
+	RightOperand shared.JSONValue `json:"rightOperand,omitempty,omitzero"`
 	// Composite condition operator
 	// +kubebuilder:validation:Optional
 	CompositeOperator string `json:"compositeOperator,omitempty"`
@@ -132,9 +132,9 @@ type TargetResponderRecipeResponderRuleDetailsCondition struct {
 	// +kubebuilder:validation:Optional
 	ValueType string `json:"valueType,omitempty"`
 	// +kubebuilder:validation:Optional
-	LeftOperand shared.JSONValue `json:"leftOperand,omitempty"`
+	LeftOperand shared.JSONValue `json:"leftOperand,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	RightOperand shared.JSONValue `json:"rightOperand,omitempty"`
+	RightOperand shared.JSONValue `json:"rightOperand,omitempty,omitzero"`
 	// Composite condition operator
 	// +kubebuilder:validation:Optional
 	CompositeOperator string `json:"compositeOperator,omitempty"`
@@ -156,7 +156,7 @@ type TargetResponderRecipeResponderRuleDetailsConfiguration struct {
 // TargetResponderRecipeResponderRuleDetails defines nested fields for Target.TargetResponderRecipe.ResponderRule.Details.
 type TargetResponderRecipeResponderRuleDetails struct {
 	// +kubebuilder:validation:Optional
-	Condition TargetResponderRecipeResponderRuleDetailsCondition `json:"condition,omitempty"`
+	Condition TargetResponderRecipeResponderRuleDetailsCondition `json:"condition,omitempty,omitzero"`
 	// List of responder rule configurations
 	// +kubebuilder:validation:Optional
 	Configurations []TargetResponderRecipeResponderRuleDetailsConfiguration `json:"configurations,omitempty"`

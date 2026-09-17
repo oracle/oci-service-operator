@@ -360,7 +360,6 @@ func TestScheduledJobCreateOrUpdateRejectsCreateOnlyDrift(t *testing.T) {
 			ScheduledJob: scheduledJobFromSpec("ocid1.scheduledjob.oc1..existing", currentSpec, osmanagementhubsdk.ScheduledJobLifecycleStateActive),
 		}, nil
 	}
-
 	_, err := newTestScheduledJobClient(client).CreateOrUpdate(context.Background(), resource, testScheduledJobRequest())
 	if err == nil || !strings.Contains(err.Error(), "managedInstanceIds") {
 		t.Fatalf("CreateOrUpdate() error = %v, want create-only drift rejection", err)
@@ -541,6 +540,11 @@ func TestScheduledJobDeleteRetainsFinalizerOnAuthShapedConfirmRead(t *testing.T)
 			ScheduledJob: scheduledJobFromSpec("ocid1.scheduledjob.oc1..existing", resource.Spec, osmanagementhubsdk.ScheduledJobLifecycleStateActive),
 		}, nil
 	}
+	client.list = func(context.Context, osmanagementhubsdk.ListScheduledJobsRequest) (osmanagementhubsdk.ListScheduledJobsResponse, error) {
+		return osmanagementhubsdk.ListScheduledJobsResponse{ScheduledJobCollection: osmanagementhubsdk.ScheduledJobCollection{Items: []osmanagementhubsdk.ScheduledJobSummary{
+			scheduledJobSummaryFromSpec("ocid1.scheduledjob.oc1..existing", resource.Spec, osmanagementhubsdk.ScheduledJobLifecycleStateActive),
+		}}}, nil
+	}
 	client.delete = func(_ context.Context, _ osmanagementhubsdk.DeleteScheduledJobRequest) (osmanagementhubsdk.DeleteScheduledJobResponse, error) {
 		return osmanagementhubsdk.DeleteScheduledJobResponse{OpcRequestId: common.String("opc-delete")}, nil
 	}
@@ -560,6 +564,35 @@ func TestScheduledJobDeleteRetainsFinalizerOnAuthShapedConfirmRead(t *testing.T)
 	}
 	if resource.Status.OsokStatus.DeletedAt != nil {
 		t.Fatalf("status.status.deletedAt = %v, want nil after auth-shaped confirm read", resource.Status.OsokStatus.DeletedAt)
+	}
+}
+
+func TestScheduledJobDeleteAcceptsAuthShapedReadAfterScopedListAbsence(t *testing.T) {
+	resource := newTestScheduledJob()
+	recordScheduledJobID(resource, "ocid1.scheduledjob.oc1..existing")
+	authErr := errortest.NewServiceError(404, errorutil.NotAuthorizedOrNotFound, "not authorized or not found")
+	client := &fakeScheduledJobOCIClient{}
+	getCalls := 0
+	client.get = func(context.Context, osmanagementhubsdk.GetScheduledJobRequest) (osmanagementhubsdk.GetScheduledJobResponse, error) {
+		getCalls++
+		if getCalls == 3 {
+			return osmanagementhubsdk.GetScheduledJobResponse{}, authErr
+		}
+		return osmanagementhubsdk.GetScheduledJobResponse{ScheduledJob: scheduledJobFromSpec("ocid1.scheduledjob.oc1..existing", resource.Spec, osmanagementhubsdk.ScheduledJobLifecycleStateActive)}, nil
+	}
+	client.list = func(context.Context, osmanagementhubsdk.ListScheduledJobsRequest) (osmanagementhubsdk.ListScheduledJobsResponse, error) {
+		return osmanagementhubsdk.ListScheduledJobsResponse{}, nil
+	}
+	client.delete = func(context.Context, osmanagementhubsdk.DeleteScheduledJobRequest) (osmanagementhubsdk.DeleteScheduledJobResponse, error) {
+		return osmanagementhubsdk.DeleteScheduledJobResponse{OpcRequestId: common.String("opc-delete")}, nil
+	}
+
+	deleted, err := newTestScheduledJobClient(client).Delete(context.Background(), resource)
+	if err != nil {
+		t.Fatalf("Delete() error = %v", err)
+	}
+	if !deleted {
+		t.Fatal("Delete() deleted = false, want true after scoped list absence")
 	}
 }
 

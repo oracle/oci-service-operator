@@ -36,7 +36,7 @@ type ScheduleSpec struct {
 	// +kubebuilder:validation:Optional
 	ObjectStatus int `json:"objectStatus,omitempty"`
 	// +kubebuilder:validation:Optional
-	FrequencyDetails ScheduleFrequencyDetails `json:"frequencyDetails,omitempty"`
+	FrequencyDetails ScheduleFrequencyDetails `json:"frequencyDetails,omitempty,omitzero"`
 	// The timezone for the schedule.
 	// +kubebuilder:validation:Optional
 	Timezone string `json:"timezone,omitempty"`
@@ -44,12 +44,18 @@ type ScheduleSpec struct {
 	// +kubebuilder:validation:Optional
 	IsDaylightAdjustmentEnabled bool `json:"isDaylightAdjustmentEnabled,omitempty"`
 	// +kubebuilder:validation:Optional
-	RegistryMetadata ScheduleRegistryMetadata `json:"registryMetadata,omitempty"`
+	RegistryMetadata ScheduleRegistryMetadata `json:"registryMetadata,omitempty,omitzero"`
 	// The type of the object.
 	// +kubebuilder:validation:Optional
 	ModelType string `json:"modelType,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef ScheduleParentRef `json:"parentRef,omitempty"`
+	ParentRef ScheduleParentRef `json:"parentRef,omitempty,omitzero"`
+	// The OCID of the Data Integration workspace containing this resource.
+	// +kubebuilder:validation:Required
+	WorkspaceId string `json:"workspaceId"`
+	// The key of the application containing this resource.
+	// +kubebuilder:validation:Required
+	ApplicationKey string `json:"applicationKey"`
 }
 
 // ScheduleFrequencyDetailsTime defines nested fields for Schedule.FrequencyDetails.Time.
@@ -78,7 +84,7 @@ type ScheduleFrequencyDetails struct {
 	// +kubebuilder:validation:Optional
 	Interval int `json:"interval,omitempty"`
 	// +kubebuilder:validation:Optional
-	Time ScheduleFrequencyDetailsTime `json:"time,omitempty"`
+	Time ScheduleFrequencyDetailsTime `json:"time,omitempty,omitzero"`
 	// A list of days of the month to be scheduled. i.e. excute every 2nd,3rd, 10th of the month.
 	// +kubebuilder:validation:Optional
 	Days []int `json:"days,omitempty"`

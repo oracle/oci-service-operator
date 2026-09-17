@@ -36,7 +36,7 @@ type FsuCollectionSpec struct {
 	// +kubebuilder:validation:Optional
 	Type string `json:"type,omitempty"`
 	// +kubebuilder:validation:Optional
-	FleetDiscovery FsuCollectionFleetDiscovery `json:"fleetDiscovery,omitempty"`
+	FleetDiscovery FsuCollectionFleetDiscovery `json:"fleetDiscovery,omitempty,omitzero"`
 	// Database Major Version of targets to be included in the Exadata Fleet Update Collection.
 	// https://docs.oracle.com/en-us/iaas/api/#/en/database/20160918/DbVersionSummary/ListDbVersions
 	// Only Database targets that match the version specified in this value would be added to the Exadata Fleet Update Collection.
@@ -181,7 +181,7 @@ type FsuCollectionComponent struct {
 	// +kubebuilder:validation:Optional
 	ComponentType string `json:"componentType,omitempty"`
 	// +kubebuilder:validation:Optional
-	FleetDiscovery FsuCollectionComponentFleetDiscovery `json:"fleetDiscovery,omitempty"`
+	FleetDiscovery FsuCollectionComponentFleetDiscovery `json:"fleetDiscovery,omitempty,omitzero"`
 	// Grid Infrastructure Major Version of targets to be included in the Exadata Fleet Update Collection.
 	// Only GI targets that match the version specified in this value would be added to the Exadata Fleet Update Collection.
 	// +kubebuilder:validation:Optional

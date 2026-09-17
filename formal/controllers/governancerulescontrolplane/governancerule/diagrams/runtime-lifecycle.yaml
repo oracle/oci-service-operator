@@ -1,0 +1,66 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: governancerulescontrolplane
+slug: governancerule
+kind: GovernanceRule
+archetype: generated-service-manager
+states:
+- provisioning
+- active
+- updating
+- terminating
+repoAuthored:
+  operations:
+    update:
+    - UpdateGovernanceRule
+  providerLifecycle:
+    createPending: []
+    updatePending: []
+    deletePending: []
+  listLookup:
+    filters:
+    - compartmentId
+    - displayName
+    - type
+    - id
+    matchRule: exact compartmentId, displayName, type, id match within the resource
+      scope; duplicate matches fail
+  mutation:
+    mutable:
+    - displayName
+    - description
+    - template
+    - relatedResourceId
+    - freeformTags
+    - definedTags
+    forceNew:
+    - compartmentId
+    - type
+    - creationOption
+  hooks:
+    create:
+    - helper: tfresource.CreateResource
+    - helper: tfresource.WaitForWorkRequestWithErrorHandling
+      entityType: governanceRule
+      action: CREATE_GOVERNANCE_RULE
+    update:
+    - helper: tfresource.UpdateResource
+    - helper: tfresource.WaitForWorkRequestWithErrorHandling
+      entityType: governanceRule
+      action: UPDATE_GOVERNANCE_RULE
+    delete:
+    - helper: tfresource.DeleteResource
+    - helper: tfresource.WaitForWorkRequestWithErrorHandling
+      entityType: governanceRule
+      action: DELETE_GOVERNANCE_RULE
+  followUp:
+    create: GetWorkRequest -> GetGovernanceRule
+    update: GetWorkRequest -> GetGovernanceRule
+    delete: confirm-delete
+notes:
+- The production runtime uses the declared work-request phases and service-local async
+  adapter.
+- Lifecycle success and pending states mirror the production service-manager semantics.
+- Status projection is required, Secret side effects are none, and the finalizer policy
+  is retain-until-confirmed-delete.
+- Delete ownership is retained until a terminal lifecycle state or confirmed absence.

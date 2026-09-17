@@ -1,0 +1,60 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: healthchecks
+slug: httpmonitor
+kind: HttpMonitor
+archetype: generated-service-manager
+states:
+  - active
+  - terminating
+repoAuthored:
+  listLookup:
+    filters:
+      - compartmentId
+      - displayName
+      - protocol
+      - id
+    matchRule: paginated exact compartmentId plus displayName and protocol match; tracked ID disambiguates existing resources
+  mutation:
+    mutable:
+      - definedTags
+      - displayName
+      - freeformTags
+      - headers
+      - intervalInSeconds
+      - isEnabled
+      - method
+      - path
+      - port
+      - protocol
+      - targets
+      - timeoutInSeconds
+      - vantagePointNames
+    forceNew:
+      - compartmentId
+  operations:
+    update:
+      - UpdateHttpMonitor
+  hooks:
+    create:
+      - helper: tfresource.CreateResource
+    update:
+      - helper: tfresource.UpdateResource
+    delete:
+      - helper: tfresource.DeleteResource
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - HttpMonitor has no SDK lifecycle field. Create and update settle through a
+    readable response, including correction of OCI's default isEnabled value
+    when the desired CR explicitly carries false.
+  - All UpdateHttpMonitorDetails fields reconcile in place. The separate
+    ChangeHttpMonitorCompartment action remains unpublished, so compartmentId
+    is replacement-only.
+  - Pre-create reuse is paginated and bounded by compartmentId, displayName,
+    protocol, and tracked ID.
+  - Delete is best-effort, but the retained resource-local guard treats an
+    auth-shaped 404 as ambiguous until a scoped list proves absence. There are
+    no Secret side effects.

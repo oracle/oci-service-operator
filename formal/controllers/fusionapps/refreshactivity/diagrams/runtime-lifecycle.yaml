@@ -1,0 +1,37 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: fusionapps
+slug: refreshactivity
+kind: RefreshActivity
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+  - failed
+repoAuthored:
+  providerLifecycle:
+    createPending:
+      - "ACCEPTED"
+      - "IN_PROGRESS"
+  listLookup:
+    filters:
+      - "sourceFusionEnvironmentId"
+      - "timeScheduledStart"
+    matchRule: exact unique match on fields exposed by the scoped OCI list response
+  mutation:
+    mutable:
+      - "timeScheduledStart"
+    forceNew:
+      - "sourceFusionEnvironmentId"
+      - "isDataMaskingOpted"
+      - "fusionEnvironmentId"
+  followUp:
+    create: "work-request-then-read"
+    update: "read-after-write"
+    delete: "work-request-then-confirm-delete"
+notes:
+  - "The vendored SDK exposes create, delete through service work requests; the runtime polls those requests and preserves the tracked resource identity before rereading OCI."
+  - "Parent identifiers scope composite OCI request paths and remain replacement-only unless the SDK update details explicitly expose them."
+  - "Create, get, list where available, update, and delete request shapes are exercised by the package-local typed OCI mock integration test."

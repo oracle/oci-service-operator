@@ -1,0 +1,127 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "managedkafka",
+  "slug": "kafkaclusterconfig",
+  "kind": "KafkaClusterConfig",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_managed_kafka_kafka_cluster_config",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateKafkaClusterConfig",
+        "requestType": "managedkafka.CreateKafkaClusterConfigRequest",
+        "responseType": "managedkafka.CreateKafkaClusterConfigResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetKafkaClusterConfig",
+        "requestType": "managedkafka.GetKafkaClusterConfigRequest",
+        "responseType": "managedkafka.GetKafkaClusterConfigResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListKafkaClusterConfigs",
+        "requestType": "managedkafka.ListKafkaClusterConfigsRequest",
+        "responseType": "managedkafka.ListKafkaClusterConfigsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeKafkaClusterConfigCompartment",
+        "requestType": "managedkafka.ChangeKafkaClusterConfigCompartmentRequest",
+        "responseType": "managedkafka.ChangeKafkaClusterConfigCompartmentResponse"
+      },
+      {
+        "operation": "UpdateKafkaClusterConfig",
+        "requestType": "managedkafka.UpdateKafkaClusterConfigRequest",
+        "responseType": "managedkafka.UpdateKafkaClusterConfigResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteKafkaClusterConfig",
+        "requestType": "managedkafka.DeleteKafkaClusterConfigRequest",
+        "responseType": "managedkafka.DeleteKafkaClusterConfigResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "display_name",
+      "freeform_tags",
+      "latest_config.config_id",
+      "latest_config.properties",
+      "latest_config.version_number"
+    ],
+    "forceNew": null,
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_managed_kafka_kafka_cluster_configs",
+    "collectionField": "kafka_cluster_config_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/managedkafka/kafkaclusterconfig/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/managedkafka/kafkaclusterconfig/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts are imported from the pinned terraform-provider-oci revision; repo-authored runtime semantics remain authoritative."
+  ]
+}

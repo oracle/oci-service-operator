@@ -672,6 +672,9 @@ func assertMetricExtensionUpdateRequest(t *testing.T, request stackmonitoringsdk
 	if request.DisplayName == nil || *request.DisplayName != "metric extension updated" {
 		t.Fatalf("UpdateMetricExtension() displayName = %#v, want updated value", request.DisplayName)
 	}
+	if len(request.MetricList) != len(testMetricExtensionResource().Spec.MetricList) {
+		t.Fatalf("UpdateMetricExtension() metricList length = %d, want complete metric list", len(request.MetricList))
+	}
 	query, ok := request.QueryProperties.(stackmonitoringsdk.JmxUpdateQueryProperties)
 	if !ok {
 		t.Fatalf("UpdateMetricExtension() queryProperties = %T, want JmxUpdateQueryProperties", request.QueryProperties)

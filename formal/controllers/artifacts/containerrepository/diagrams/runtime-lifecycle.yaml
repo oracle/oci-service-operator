@@ -1,0 +1,36 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: artifacts
+slug: containerrepository
+kind: ContainerRepository
+archetype: generated-service-manager
+states:
+  - active
+  - terminating
+  - deleted
+repoAuthored:
+  listLookup:
+    filters:
+      - compartmentId
+      - displayName
+      - id
+    matchRule: Adopt only a unique repository match in the requested compartment.
+  mutation:
+    mutable:
+      - isImmutable
+      - isPublic
+      - readme
+      - freeformTags
+      - definedTags
+    forceNew:
+      - compartmentId
+      - displayName
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - Create and update return AVAILABLE directly; delete retains the finalizer through DELETING until DELETED, REPO_ID_UNKNOWN, or scoped absence.
+  - Auth-shaped NotAuthorizedOrNotFound remains ambiguous and does not release the finalizer without stronger evidence.
+  - Repository visibility, immutability, README, and tags update in place; compartmentId and displayName require replacement.
+  - The runtime has no Kubernetes Secret side effects.

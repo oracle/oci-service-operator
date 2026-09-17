@@ -1,0 +1,26 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: osmanagementhub
+slug: profile
+kind: Profile
+archetype: generated-service-manager
+states: [provisioning, active, updating, terminating]
+repoAuthored:
+  providerLifecycle:
+    createPending: [CREATING]
+    updatePending: [UPDATING]
+    deletePending: [DELETING]
+  listLookup:
+    filters: [compartmentId, displayName, profileType, registrationType, isDefaultProfile, managementStationId, vendorName, osFamily, archType, id]
+    matchRule: exact profile discriminator and immutable identity match; duplicate matches fail
+  mutation:
+    mutable: [displayName, description, isDefaultProfile, freeformTags, definedTags]
+    forceNew: [compartmentId, profileType, managementStationId, registrationType, managedInstanceGroupId, vendorName, osFamily, archType, softwareSourceIds, lifecycleStageId]
+  hooks:
+    create: [{helper: tfresource.CreateResource}]
+    update: [{helper: tfresource.UpdateResource}]
+    delete: [{helper: tfresource.DeleteResource}]
+  followUp: {create: read-after-write, update: read-after-write, delete: confirm-delete}
+notes:
+  - ACTIVE and INACTIVE are stable states; DELETED confirms deletion.
+  - Profile-type discriminators select the concrete OCI SDK create and response models.

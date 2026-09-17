@@ -450,13 +450,166 @@ func TestForceNewValuesEqualIgnoresMeaninglessNestedMapsInSlices(t *testing.T) {
 	}
 }
 
+func TestForceNewValuesEqualIgnoresObservedOnlyFieldsInSlices(t *testing.T) {
+	t.Parallel()
+	spec := []any{
+		map[string]any{
+			"policyType":  "scheduled",
+			"displayName": "nightly-stop",
+			"executionSchedule": map[string]any{
+				"type":       "cron",
+				"expression": "0 0 0 ? * * *",
+				"timezone":   "UTC",
+			},
+		},
+	}
+	current := []any{
+		map[string]any{
+			"id":          "ocid1.autoscalingpolicy.oc1..generated",
+			"timeCreated": "2026-09-04T12:00:00Z",
+			"policyType":  "scheduled",
+			"displayName": "nightly-stop",
+			"executionSchedule": map[string]any{
+				"type":       "cron",
+				"expression": "0 0 0 ? * * *",
+				"timezone":   "UTC",
+			},
+		},
+	}
+	if !forceNewValuesEqual(spec, current) {
+		t.Fatal("forceNewValuesEqual() = false, want observed-only list-item fields ignored")
+	}
+}
+
+func TestForceNewValuesEqualRejectsDesiredDriftInSlices(t *testing.T) {
+	t.Parallel()
+	spec := []any{map[string]any{"displayName": "nightly-stop"}}
+	current := []any{map[string]any{
+		"id":          "ocid1.autoscalingpolicy.oc1..generated",
+		"displayName": "morning-start",
+	}}
+	if forceNewValuesEqual(spec, current) {
+		t.Fatal("forceNewValuesEqual() = true, want desired list-item drift rejected")
+	}
+}
+
 func TestUnsupportedUpdateDriftPathsIgnoresMeaninglessNestedMaps(t *testing.T) {
 	t.Parallel()
 	spec := map[string]any{"displayName": "example", "preemptibleInstanceConfig": map[string]any{"preemptionAction": map[string]any{"jsonData": "", "type": ""}}}
 	current := map[string]any{"displayName": "example"}
-	paths := unsupportedUpdateDriftPaths(spec, current, MutationSemantics{Mutable: []string{"displayName"}})
+	paths := unsupportedUpdateDriftPaths(spec, current, MutationSemantics{
+		Mutable:                 []string{"displayName"},
+		ZeroValueNullEquivalent: []string{"securitySamlConfig"},
+	})
 	if len(paths) != 0 {
 		t.Fatalf("unsupportedUpdateDriftPaths() = %v, want no drift for meaningless nested maps", paths)
+	}
+}
+
+func TestUnsupportedUpdateDriftPathsIgnoresSDKJSONDataCache(t *testing.T) {
+	t.Parallel()
+	spec := map[string]any{
+		"databaseDetails": map[string]any{
+			"jsonData":           "desired-serialization-cache",
+			"infrastructureType": "AUTONOMOUS_DATABASE",
+		},
+	}
+	current := map[string]any{
+		"databaseDetails": map[string]any{
+			"jsonData":           "observed-serialization-cache",
+			"infrastructureType": "AUTONOMOUS_DATABASE",
+		},
+	}
+	if paths := unsupportedUpdateDriftPaths(spec, current, MutationSemantics{}); len(paths) != 0 {
+		t.Fatalf("unsupportedUpdateDriftPaths() = %v, want SDK jsonData cache ignored", paths)
+	}
+}
+
+func TestUnsupportedUpdateDriftPathsTreatsZeroOnlyOptionalObjectAsNull(t *testing.T) {
+	t.Parallel()
+	spec := map[string]any{
+		"displayName": "example",
+		"securitySamlConfig": map[string]any{
+			"isEnabled":          false,
+			"idpMetadataContent": "",
+			"idpEntityId":        "",
+		},
+	}
+	current := map[string]any{
+		"displayName":        "example",
+		"securitySamlConfig": nil,
+	}
+	paths := unsupportedUpdateDriftPaths(spec, current, MutationSemantics{
+		Mutable:                 []string{"displayName"},
+		ZeroValueNullEquivalent: []string{"securitySamlConfig"},
+	})
+	if len(paths) != 0 {
+		t.Fatalf("unsupportedUpdateDriftPaths() = %v, want zero-only object and null to compare equal", paths)
+	}
+}
+
+func TestUnsupportedUpdateDriftPathsRequiresDeclaredNullEquivalence(t *testing.T) {
+	t.Parallel()
+	spec := map[string]any{
+		"securitySamlConfig": map[string]any{
+			"isEnabled":          false,
+			"idpMetadataContent": "",
+			"idpEntityId":        "",
+		},
+	}
+	current := map[string]any{"securitySamlConfig": nil}
+	paths := unsupportedUpdateDriftPaths(spec, current, MutationSemantics{})
+	if len(paths) != 1 || paths[0] != "securitySamlConfig" {
+		t.Fatalf("unsupportedUpdateDriftPaths() = %v, want undeclared null equivalence to remain drift", paths)
+	}
+}
+
+func TestUnsupportedUpdateDriftPathsPreservesNonzeroOptionalObjectIntent(t *testing.T) {
+	t.Parallel()
+	spec := map[string]any{
+		"displayName": "example",
+		"securitySamlConfig": map[string]any{
+			"isEnabled":          true,
+			"idpMetadataContent": "metadata",
+			"idpEntityId":        "provider",
+		},
+	}
+	current := map[string]any{
+		"displayName":        "example",
+		"securitySamlConfig": nil,
+	}
+	paths := unsupportedUpdateDriftPaths(spec, current, MutationSemantics{Mutable: []string{"displayName"}})
+	if len(paths) != 1 || paths[0] != "securitySamlConfig" {
+		t.Fatalf("unsupportedUpdateDriftPaths() = %v, want nonzero optional object drift", paths)
+	}
+}
+
+func TestUnsupportedUpdateDriftPathsUsesOptInEquivalence(t *testing.T) {
+	t.Parallel()
+	spec := map[string]any{"outputLocation": map[string]any{"prefix": "transcripts"}}
+	current := map[string]any{"outputLocation": map[string]any{"prefix": "transcripts/job-123/"}}
+
+	paths := unsupportedUpdateDriftPathsWithEquivalence(spec, current, MutationSemantics{}, func(path string, desired any, observed any) (bool, bool) {
+		if path != "outputLocation.prefix" {
+			return false, false
+		}
+		return true, desired == "transcripts" && observed == "transcripts/job-123/"
+	})
+	if len(paths) != 0 {
+		t.Fatalf("unsupportedUpdateDriftPathsWithEquivalence() = %v, want no drift", paths)
+	}
+}
+
+func TestUnsupportedUpdateDriftPathsRetainsHandledNonEquivalentValue(t *testing.T) {
+	t.Parallel()
+	spec := map[string]any{"outputLocation": map[string]any{"prefix": "changed"}}
+	current := map[string]any{"outputLocation": map[string]any{"prefix": "transcripts/job-123/"}}
+
+	paths := unsupportedUpdateDriftPathsWithEquivalence(spec, current, MutationSemantics{}, func(path string, _ any, _ any) (bool, bool) {
+		return path == "outputLocation.prefix", false
+	})
+	if len(paths) != 1 || paths[0] != "outputLocation.prefix" {
+		t.Fatalf("unsupportedUpdateDriftPathsWithEquivalence() = %v, want outputLocation.prefix", paths)
 	}
 }
 

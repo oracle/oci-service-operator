@@ -43,7 +43,7 @@ type ContainerInstanceSpec struct {
 	// +kubebuilder:validation:Optional
 	Volumes []ContainerInstanceVolume `json:"volumes,omitempty"`
 	// +kubebuilder:validation:Optional
-	DnsConfig ContainerInstanceDnsConfig `json:"dnsConfig,omitempty"`
+	DnsConfig ContainerInstanceDnsConfig `json:"dnsConfig,omitempty,omitzero"`
 	// The amount of time that processes in a container have to gracefully end when the container must be stopped. For example, when you delete a container instance. After the timeout is reached, the processes are sent a signal to be deleted.
 	// +kubebuilder:validation:Optional
 	GracefulShutdownTimeoutInSeconds int64 `json:"gracefulShutdownTimeoutInSeconds,omitempty"`
@@ -193,7 +193,7 @@ type ContainerInstanceContainerSecurityContext struct {
 	// Determines if the container will have a read-only root file system. Default value is false.
 	IsRootFileSystemReadonly bool `json:"isRootFileSystemReadonly,omitempty"`
 	// +kubebuilder:validation:Optional
-	Capabilities ContainerInstanceContainerSecurityContextCapabilities `json:"capabilities,omitempty"`
+	Capabilities ContainerInstanceContainerSecurityContextCapabilities `json:"capabilities,omitempty,omitzero"`
 }
 
 // ContainerInstanceContainer defines nested fields for ContainerInstance.Container.
@@ -238,13 +238,13 @@ type ContainerInstanceContainer struct {
 	// +kubebuilder:validation:Optional
 	IsResourcePrincipalDisabled bool `json:"isResourcePrincipalDisabled,omitempty"`
 	// +kubebuilder:validation:Optional
-	ResourceConfig ContainerInstanceContainerResourceConfig `json:"resourceConfig,omitempty"`
+	ResourceConfig ContainerInstanceContainerResourceConfig `json:"resourceConfig,omitempty,omitzero"`
 	// list of container health checks to check container status and take appropriate action if container status is failed.
 	// There are two types of health checks that we currently support HTTP and TCP.
 	// +kubebuilder:validation:Optional
 	HealthChecks []ContainerInstanceContainerHealthCheck `json:"healthChecks,omitempty"`
 	// +kubebuilder:validation:Optional
-	SecurityContext ContainerInstanceContainerSecurityContext `json:"securityContext,omitempty"`
+	SecurityContext ContainerInstanceContainerSecurityContext `json:"securityContext,omitempty,omitzero"`
 	// Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
 	// Example: `{"bar-key": "value"}`
 	// +kubebuilder:validation:Optional

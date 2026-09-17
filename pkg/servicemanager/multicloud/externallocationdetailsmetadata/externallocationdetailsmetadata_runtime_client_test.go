@@ -90,6 +90,10 @@ func TestExternalLocationDetailsMetadataPaginatesAndRecordsObservedIdentity(t *t
 	assertExternalLocationDetailsMetadataRequest(t, lister.requests[0], "")
 	assertExternalLocationDetailsMetadataRequest(t, lister.requests[1], "page-2")
 	assertExternalLocationDetailsMetadataObservedStatus(t, resource.Status.OsokStatus, externalLocationDetailsMetadataTestSelector().identity(selected), "opc-page-2")
+	if resource.Status.OciRegion != "us-ashburn-1" || resource.Status.OciPhysicalAd != "iad-ad-1" ||
+		resource.Status.ClusterPlacementGroupId != "cpg-selected" {
+		t.Fatalf("projected ExternalLocationDetailsMetadata status = %+v", resource.Status)
+	}
 }
 
 func TestExternalLocationDetailsMetadataNoOpReconcileKeepsRecordedIdentity(t *testing.T) {

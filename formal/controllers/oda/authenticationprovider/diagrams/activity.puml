@@ -27,7 +27,7 @@ partition "Observe and Bind" {
 if ("Tracked or explicit OCI identity present?") then (yes)
 :Get the current OCI resource via\nGetAuthenticationProvider;
 else (no)
-:Resolve an existing OCI resource through\nListAuthenticationProvider using filters\ncompartment_id, state;
+:Resolve an existing OCI resource through\nListAuthenticationProvider using filters\nodaInstanceId, identityProvider, name;
 :Create the OCI resource via\nCreateAuthenticationProvider when no reusable\nmatch is found;
 :Persist the resolved or created OCI identity\ninto status;
 endif
@@ -46,7 +46,7 @@ stop
 else (no)
 partition "Lifecycle Classification" {
 if ("OCI state in retryable set?") then (yes)
-:Request requeue while OCI remains in\nPROVISIONING, UPDATING, DELETING;
+:Request requeue while OCI remains in CREATING,\nUPDATING, DELETING;
 stop
 endif
 if ("OCI state is outside success targets?") then (yes)
@@ -55,17 +55,18 @@ stop
 endif
 }
 partition "Ready and Drift Handling" {
-:Compare live OCI state against the imported\nfield surface;
+:Compare live OCI state against the\nrepo-authored mutation surface;
 if ("Force-new or conflicting drift detected?") then (yes)
-:Reject drift before OCI mutation for force-new\nfields compartment_id;
+:Reject drift before OCI mutation for force-new\nfields grantType, identityProvider, name,\nisVisible;
 stop
 endif
 if ("Supported mutable drift detected?") then (yes)
-:Apply UpdateAuthenticationProvider only for\nmutable fields display_name;
+:Apply UpdateAuthenticationProvider only for\nmutable fields authorizationEndpointUrl,\nclientId, definedTags, freeformTags (+7 more);
 else (no)
 :Skip the no-op mutation path;
 endif
 :Run provider helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=template action=CREATED;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource when the\nmatching field-driven path executes;
+:Apply explicit follow-up semantics\ncreate=read-after-write;\nupdate=read-after-write; delete=confirm-delete;
 :Return success for the ACTIVE success state;
 :Project required status and finalizer policy\nretain-until-confirmed-delete;
 :Requeue on provisioning, updating, terminating;
@@ -91,18 +92,23 @@ archetype: generated-service-manager
 status/finalizer: required /
 retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
-provider states: create PROVISIONING; update
+provider states: create CREATING; update
 UPDATING; delete DELETING
-supported drift: display_name
+follow-up: create=read-after-write;
+update=read-after-write; delete=confirm-delete
+supported drift: authorizationEndpointUrl,
+clientId, definedTags, freeformTags (+7 more)
 reject before mutate: force-new fields
-compartment_id
+grantType, identityProvider, name, isVisible
 create-only fields: none
 list lookup: scaffold_oda_authenticationprovider
-filters compartment_id, state
+filters odaInstanceId, identityProvider, name;
+exact parent, provider type, and name match;
+duplicate matches fail
 conflicts: none
 open gaps: none
-Scaffold metadata only; replace with
-controller-specific runtime states before
-promotion.
+clientSecret is write-only: it is sent on create
+or alongside another supported update, but
+cannot independently trigger drift correction.
 end note
 @enduml

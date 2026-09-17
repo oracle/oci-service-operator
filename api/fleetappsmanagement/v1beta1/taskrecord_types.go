@@ -104,9 +104,9 @@ type TaskRecordDetailsExecutionDetails struct {
 	// +kubebuilder:validation:Optional
 	ExecutionType string `json:"executionType,omitempty"`
 	// +kubebuilder:validation:Optional
-	Variables TaskRecordDetailsExecutionDetailsVariables `json:"variables,omitempty"`
+	Variables TaskRecordDetailsExecutionDetailsVariables `json:"variables,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	Content TaskRecordDetailsExecutionDetailsContent `json:"content,omitempty"`
+	Content TaskRecordDetailsExecutionDetailsContent `json:"content,omitempty,omitzero"`
 	// Optional command to execute the content.
 	// You can provide any commands/arguments that can't be part of the script.
 	// +kubebuilder:validation:Optional
@@ -164,7 +164,7 @@ type TaskRecordDetails struct {
 	// +kubebuilder:validation:Optional
 	OsType string `json:"osType,omitempty"`
 	// +kubebuilder:validation:Optional
-	Properties TaskRecordDetailsProperties `json:"properties,omitempty"`
+	Properties TaskRecordDetailsProperties `json:"properties,omitempty,omitzero"`
 	// Is this a discovery output task?
 	// +kubebuilder:validation:Optional
 	IsDiscoveryOutputTask bool `json:"isDiscoveryOutputTask,omitempty"`

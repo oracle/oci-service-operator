@@ -12,6 +12,20 @@ import (
 
 const generatedRuntimeMatrixCurrentID = "ocid1.thing.oc1..matrix"
 
+type headerOnlyResponse struct {
+	Location *string `presentIn:"header"`
+}
+
+func TestResponseBodyIgnoresNamedHeaderFields(t *testing.T) {
+	t.Parallel()
+
+	location := "/workRequests/example"
+	body, ok := responseBody(headerOnlyResponse{Location: &location})
+	if ok || body != nil {
+		t.Fatalf("responseBody() = (%#v, %t), want no body for header-only response", body, ok)
+	}
+}
+
 func TestServiceClientGeneratedRuntimePlainCreateErrorMatrix(t *testing.T) {
 	t.Parallel()
 

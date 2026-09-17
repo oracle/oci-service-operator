@@ -1,0 +1,124 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "devops",
+  "slug": "project",
+  "kind": "Project",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_devops_project",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateProject",
+        "requestType": "devops.CreateProjectRequest",
+        "responseType": "devops.CreateProjectResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetProject",
+        "requestType": "devops.GetProjectRequest",
+        "responseType": "devops.GetProjectResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListProjects",
+        "requestType": "devops.ListProjectsRequest",
+        "responseType": "devops.ListProjectsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeProjectCompartment",
+        "requestType": "devops.ChangeProjectCompartmentRequest",
+        "responseType": "devops.ChangeProjectCompartmentResponse"
+      },
+      {
+        "operation": "UpdateProject",
+        "requestType": "devops.UpdateProjectRequest",
+        "responseType": "devops.UpdateProjectResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteProject",
+        "requestType": "devops.DeleteProjectRequest",
+        "responseType": "devops.DeleteProjectResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "description",
+      "freeform_tags",
+      "notification_config.topic_id"
+    ],
+    "forceNew": [
+      "name"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_devops_projects",
+    "collectionField": "project_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "id",
+      "name",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/devops/project/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/devops/project/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from terraform-provider-oci for devops/project."
+  ]
+}

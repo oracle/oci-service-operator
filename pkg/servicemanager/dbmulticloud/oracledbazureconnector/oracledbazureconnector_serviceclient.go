@@ -32,8 +32,28 @@ type defaultOracleDbAzureConnectorServiceClient struct {
 
 var _ OracleDbAzureConnectorServiceClient = defaultOracleDbAzureConnectorServiceClient{}
 
+type OracleDbAzureConnectorSDKClients struct {
+	oracleDbAzureConnectorClient dbmulticloudsdk.OracleDBAzureConnectorClient
+	workRequestClient            dbmulticloudsdk.WorkRequestClient
+}
+
+func newOracleDbAzureConnectorSDKClients(manager *OracleDbAzureConnectorServiceManager) (OracleDbAzureConnectorSDKClients, error) {
+	var clients OracleDbAzureConnectorSDKClients
+	oracleDbAzureConnectorClientClient, err := dbmulticloudsdk.NewOracleDBAzureConnectorClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize OracleDbAzureConnector OCI client OracleDBAzureConnectorClient: %w", err)
+	}
+	clients.oracleDbAzureConnectorClient = oracleDbAzureConnectorClientClient
+	workRequestClientClient, err := dbmulticloudsdk.NewWorkRequestClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize OracleDbAzureConnector OCI client WorkRequestClient: %w", err)
+	}
+	clients.workRequestClient = workRequestClientClient
+	return clients, nil
+}
+
 var newOracleDbAzureConnectorServiceClient = func(manager *OracleDbAzureConnectorServiceManager) OracleDbAzureConnectorServiceClient {
-	sdkClient, err := dbmulticloudsdk.NewOracleDBAzureConnectorClientWithConfigurationProvider(manager.Provider)
+	sdkClient, err := newOracleDbAzureConnectorSDKClients(manager)
 	hooks := newOracleDbAzureConnectorRuntimeHooks(manager, sdkClient)
 	config := buildOracleDbAzureConnectorGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {

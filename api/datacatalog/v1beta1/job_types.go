@@ -39,6 +39,9 @@ type JobSpec struct {
 	// the associated job definition. All executions will use this connection.
 	// +kubebuilder:validation:Optional
 	ConnectionKey string `json:"connectionKey,omitempty"`
+	// The OCID of the catalog containing this resource.
+	// +kubebuilder:validation:Required
+	CatalogId string `json:"catalogId"`
 }
 
 // JobExecution defines nested fields for Job.Execution.

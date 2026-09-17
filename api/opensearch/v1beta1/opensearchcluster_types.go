@@ -132,9 +132,9 @@ type OpensearchClusterSpec struct {
 	// +kubebuilder:validation:Optional
 	SecurityMasterUserPasswordHash string `json:"securityMasterUserPasswordHash,omitempty"`
 	// +kubebuilder:validation:Optional
-	SecuritySamlConfig OpensearchClusterSecuritySamlConfig `json:"securitySamlConfig,omitempty"`
+	SecuritySamlConfig OpensearchClusterSecuritySamlConfig `json:"securitySamlConfig,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	BackupPolicy OpensearchClusterBackupPolicy `json:"backupPolicy,omitempty"`
+	BackupPolicy OpensearchClusterBackupPolicy `json:"backupPolicy,omitempty,omitzero"`
 	// The OCID of the NSG where the private endpoint vnic will be attached.
 	// +kubebuilder:validation:Optional
 	NsgId string `json:"nsgId,omitempty"`
@@ -145,13 +145,13 @@ type OpensearchClusterSpec struct {
 	// +kubebuilder:validation:Optional
 	InboundClusterIds []string `json:"inboundClusterIds,omitempty"`
 	// +kubebuilder:validation:Optional
-	OutboundClusterConfig OpensearchClusterOutboundClusterConfig `json:"outboundClusterConfig,omitempty"`
+	OutboundClusterConfig OpensearchClusterOutboundClusterConfig `json:"outboundClusterConfig,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	MaintenanceDetails OpensearchClusterMaintenanceDetails `json:"maintenanceDetails,omitempty"`
+	MaintenanceDetails OpensearchClusterMaintenanceDetails `json:"maintenanceDetails,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	LoadBalancerConfig OpensearchClusterLoadBalancerConfig `json:"loadBalancerConfig,omitempty"`
+	LoadBalancerConfig OpensearchClusterLoadBalancerConfig `json:"loadBalancerConfig,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	CertificateConfig OpensearchClusterCertificateConfig `json:"certificateConfig,omitempty"`
+	CertificateConfig OpensearchClusterCertificateConfig `json:"certificateConfig,omitempty,omitzero"`
 	// Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
 	// Example: `{"bar-key": "value"}`
 	// +kubebuilder:validation:Optional

@@ -1,0 +1,124 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "fleetappsmanagement",
+  "slug": "property",
+  "kind": "Property",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_fleet_apps_management_property",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateProperty",
+        "requestType": "fleetappsmanagement.CreatePropertyRequest",
+        "responseType": "fleetappsmanagement.CreatePropertyResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetProperty",
+        "requestType": "fleetappsmanagement.GetPropertyRequest",
+        "responseType": "fleetappsmanagement.GetPropertyResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListProperties",
+        "requestType": "fleetappsmanagement.ListPropertiesRequest",
+        "responseType": "fleetappsmanagement.ListPropertiesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangePropertyCompartment",
+        "requestType": "fleetappsmanagement.ChangePropertyCompartmentRequest",
+        "responseType": "fleetappsmanagement.ChangePropertyCompartmentResponse"
+      },
+      {
+        "operation": "UpdateProperty",
+        "requestType": "fleetappsmanagement.UpdatePropertyRequest",
+        "responseType": "fleetappsmanagement.UpdatePropertyResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteProperty",
+        "requestType": "fleetappsmanagement.DeletePropertyRequest",
+        "responseType": "fleetappsmanagement.DeletePropertyResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "defined_tags",
+      "display_name",
+      "freeform_tags",
+      "selection",
+      "value_type",
+      "values"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_fleet_apps_management_properties",
+    "collectionField": "property_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "id",
+      "scope",
+      "state",
+      "type"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/fleetappsmanagement/property/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/fleetappsmanagement/property/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from the pinned terraform-provider-oci source revision."
+  ]
+}

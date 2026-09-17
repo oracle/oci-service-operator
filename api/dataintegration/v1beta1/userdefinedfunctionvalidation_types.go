@@ -24,7 +24,7 @@ type UserDefinedFunctionValidationSpec struct {
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef UserDefinedFunctionValidationParentRef `json:"parentRef,omitempty"`
+	ParentRef UserDefinedFunctionValidationParentRef `json:"parentRef,omitempty,omitzero"`
 	// Free form text without any restriction on permitted characters. Name can have letters, numbers, and special characters. The value is editable and is restricted to 1000 characters.
 	// +kubebuilder:validation:Optional
 	Name string `json:"name,omitempty"`
@@ -38,7 +38,7 @@ type UserDefinedFunctionValidationSpec struct {
 	// +kubebuilder:validation:Optional
 	Signatures []UserDefinedFunctionValidationSignature `json:"signatures,omitempty"`
 	// +kubebuilder:validation:Optional
-	Expr UserDefinedFunctionValidationExpr `json:"expr,omitempty"`
+	Expr UserDefinedFunctionValidationExpr `json:"expr,omitempty,omitzero"`
 	// Detailed description for the object.
 	// +kubebuilder:validation:Optional
 	Description string `json:"description,omitempty"`
@@ -46,7 +46,7 @@ type UserDefinedFunctionValidationSpec struct {
 	// +kubebuilder:validation:Optional
 	ObjectStatus int `json:"objectStatus,omitempty"`
 	// +kubebuilder:validation:Optional
-	Metadata UserDefinedFunctionValidationMetadata `json:"metadata,omitempty"`
+	Metadata UserDefinedFunctionValidationMetadata `json:"metadata,omitempty,omitzero"`
 	// A key map. If provided, key is replaced with generated key. This structure provides mapping between user provided key and generated key.
 	// +kubebuilder:validation:Optional
 	KeyMap map[string]string `json:"keyMap,omitempty"`
@@ -120,7 +120,7 @@ type UserDefinedFunctionValidationSignatureRetTypeConfigValues struct {
 	// +kubebuilder:validation:Optional
 	ConfigParamValues map[string]UserDefinedFunctionValidationSignatureRetTypeConfigValuesConfigParamValues `json:"configParamValues,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef UserDefinedFunctionValidationSignatureRetTypeConfigValuesParentRef `json:"parentRef,omitempty"`
+	ParentRef UserDefinedFunctionValidationSignatureRetTypeConfigValuesParentRef `json:"parentRef,omitempty,omitzero"`
 }
 
 // UserDefinedFunctionValidationSignatureRetTypeConfigDefinitionParentRef defines nested fields for UserDefinedFunctionValidation.Signature.RetType.ConfigDefinition.ParentRef.
@@ -181,7 +181,7 @@ type UserDefinedFunctionValidationSignatureRetTypeConfigDefinitionConfigParamete
 	// +kubebuilder:validation:Optional
 	ConfigParamValues map[string]UserDefinedFunctionValidationSignatureRetTypeConfigDefinitionConfigParameterDefinitionsParameterTypeConfigValuesConfigParamValues `json:"configParamValues,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef UserDefinedFunctionValidationSignatureRetTypeConfigDefinitionConfigParameterDefinitionsParameterTypeConfigValuesParentRef `json:"parentRef,omitempty"`
+	ParentRef UserDefinedFunctionValidationSignatureRetTypeConfigDefinitionConfigParameterDefinitionsParameterTypeConfigValuesParentRef `json:"parentRef,omitempty,omitzero"`
 }
 
 // UserDefinedFunctionValidationSignatureRetTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerParentRef defines nested fields for UserDefinedFunctionValidation.Signature.RetType.ConfigDefinition.ConfigParameterDefinitions.ParameterType.TypeHandler.ParentRef.
@@ -232,7 +232,7 @@ type UserDefinedFunctionValidationSignatureRetTypeConfigDefinitionConfigParamete
 	// +kubebuilder:validation:Optional
 	ConfigParamValues map[string]UserDefinedFunctionValidationSignatureRetTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerConfigValuesConfigParamValues `json:"configParamValues,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef UserDefinedFunctionValidationSignatureRetTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerConfigValuesParentRef `json:"parentRef,omitempty"`
+	ParentRef UserDefinedFunctionValidationSignatureRetTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerConfigValuesParentRef `json:"parentRef,omitempty,omitzero"`
 }
 
 // UserDefinedFunctionValidationSignatureRetTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerScopeReference defines nested fields for UserDefinedFunctionValidation.Signature.RetType.ConfigDefinition.ConfigParameterDefinitions.ParameterType.TypeHandler.ScopeReference.
@@ -296,7 +296,7 @@ type UserDefinedFunctionValidationSignatureRetTypeConfigDefinitionConfigParamete
 	// +kubebuilder:validation:Optional
 	ConfigParamValues map[string]UserDefinedFunctionValidationSignatureRetTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerProjectionRuleConfigValuesConfigParamValues `json:"configParamValues,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef UserDefinedFunctionValidationSignatureRetTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerProjectionRuleConfigValuesParentRef `json:"parentRef,omitempty"`
+	ParentRef UserDefinedFunctionValidationSignatureRetTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerProjectionRuleConfigValuesParentRef `json:"parentRef,omitempty,omitzero"`
 }
 
 // UserDefinedFunctionValidationSignatureRetTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerProjectionRule defines nested fields for UserDefinedFunctionValidation.Signature.RetType.ConfigDefinition.ConfigParameterDefinitions.ParameterType.TypeHandler.ProjectionRule.
@@ -310,12 +310,12 @@ type UserDefinedFunctionValidationSignatureRetTypeConfigDefinitionConfigParamete
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef UserDefinedFunctionValidationSignatureRetTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerProjectionRuleParentRef `json:"parentRef,omitempty"`
+	ParentRef UserDefinedFunctionValidationSignatureRetTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerProjectionRuleParentRef `json:"parentRef,omitempty,omitzero"`
 	// Specifies whether the rule uses a java regex syntax.
 	// +kubebuilder:validation:Optional
 	IsJavaRegexSyntax bool `json:"isJavaRegexSyntax,omitempty"`
 	// +kubebuilder:validation:Optional
-	ConfigValues UserDefinedFunctionValidationSignatureRetTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerProjectionRuleConfigValues `json:"configValues,omitempty"`
+	ConfigValues UserDefinedFunctionValidationSignatureRetTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerProjectionRuleConfigValues `json:"configValues,omitempty,omitzero"`
 	// The status of an object that can be set to value 1 for shallow references across objects, other values reserved.
 	// +kubebuilder:validation:Optional
 	ObjectStatus int `json:"objectStatus,omitempty"`
@@ -375,7 +375,7 @@ type UserDefinedFunctionValidationSignatureRetTypeConfigDefinitionConfigParamete
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef UserDefinedFunctionValidationSignatureRetTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerParentRef `json:"parentRef,omitempty"`
+	ParentRef UserDefinedFunctionValidationSignatureRetTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerParentRef `json:"parentRef,omitempty,omitzero"`
 	// Reference key for the typed object.
 	// +kubebuilder:validation:Optional
 	Scope string `json:"scope,omitempty"`
@@ -383,12 +383,12 @@ type UserDefinedFunctionValidationSignatureRetTypeConfigDefinitionConfigParamete
 	// +kubebuilder:validation:Optional
 	FlattenDetails string `json:"flattenDetails,omitempty"`
 	// +kubebuilder:validation:Optional
-	ConfigValues UserDefinedFunctionValidationSignatureRetTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerConfigValues `json:"configValues,omitempty"`
+	ConfigValues UserDefinedFunctionValidationSignatureRetTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerConfigValues `json:"configValues,omitempty,omitzero"`
 	// The status of an object that can be set to value 1 for shallow references across objects, other values reserved.
 	// +kubebuilder:validation:Optional
 	ObjectStatus int `json:"objectStatus,omitempty"`
 	// +kubebuilder:validation:Optional
-	ScopeReference UserDefinedFunctionValidationSignatureRetTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerScopeReference `json:"scopeReference,omitempty"`
+	ScopeReference UserDefinedFunctionValidationSignatureRetTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerScopeReference `json:"scopeReference,omitempty,omitzero"`
 	// Specifies whether it is ordered by rule.
 	// +kubebuilder:validation:Optional
 	IsOrderByRule bool `json:"isOrderByRule,omitempty"`
@@ -408,7 +408,7 @@ type UserDefinedFunctionValidationSignatureRetTypeConfigDefinitionConfigParamete
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef UserDefinedFunctionValidationSignatureRetTypeConfigDefinitionConfigParameterDefinitionsParameterTypeParentRef `json:"parentRef,omitempty"`
+	ParentRef UserDefinedFunctionValidationSignatureRetTypeConfigDefinitionConfigParameterDefinitionsParameterTypeParentRef `json:"parentRef,omitempty,omitzero"`
 	// Free form text without any restriction on permitted characters. Name can have letters, numbers, and special characters. The value is editable and is restricted to 1000 characters.
 	// +kubebuilder:validation:Optional
 	Name string `json:"name,omitempty"`
@@ -427,14 +427,14 @@ type UserDefinedFunctionValidationSignatureRetTypeConfigDefinitionConfigParamete
 	// +kubebuilder:validation:Optional
 	WrappedType shared.JSONValue `json:"wrappedType,omitempty"`
 	// +kubebuilder:validation:Optional
-	ConfigValues UserDefinedFunctionValidationSignatureRetTypeConfigDefinitionConfigParameterDefinitionsParameterTypeConfigValues `json:"configValues,omitempty"`
+	ConfigValues UserDefinedFunctionValidationSignatureRetTypeConfigDefinitionConfigParameterDefinitionsParameterTypeConfigValues `json:"configValues,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	ConfigDefinition shared.JSONValue `json:"configDefinition,omitempty"`
+	ConfigDefinition shared.JSONValue `json:"configDefinition,omitempty,omitzero"`
 	// The java type name.
 	// +kubebuilder:validation:Optional
 	JavaTypeName string `json:"javaTypeName,omitempty"`
 	// +kubebuilder:validation:Optional
-	TypeHandler UserDefinedFunctionValidationSignatureRetTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandler `json:"typeHandler,omitempty"`
+	TypeHandler UserDefinedFunctionValidationSignatureRetTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandler `json:"typeHandler,omitempty,omitzero"`
 	// The data type system name.
 	// +kubebuilder:validation:Optional
 	TypeSystemName string `json:"typeSystemName,omitempty"`
@@ -461,7 +461,7 @@ type UserDefinedFunctionValidationSignatureRetTypeConfigDefinitionConfigParamete
 // UserDefinedFunctionValidationSignatureRetTypeConfigDefinitionConfigParameterDefinitions defines nested fields for UserDefinedFunctionValidation.Signature.RetType.ConfigDefinition.ConfigParameterDefinitions.
 type UserDefinedFunctionValidationSignatureRetTypeConfigDefinitionConfigParameterDefinitions struct {
 	// +kubebuilder:validation:Optional
-	ParameterType UserDefinedFunctionValidationSignatureRetTypeConfigDefinitionConfigParameterDefinitionsParameterType `json:"parameterType,omitempty"`
+	ParameterType UserDefinedFunctionValidationSignatureRetTypeConfigDefinitionConfigParameterDefinitionsParameterType `json:"parameterType,omitempty,omitzero"`
 	// This object represents the configurable properties for an object type.
 	// +kubebuilder:validation:Optional
 	ParameterName string `json:"parameterName,omitempty"`
@@ -494,7 +494,7 @@ type UserDefinedFunctionValidationSignatureRetTypeConfigDefinition struct {
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef UserDefinedFunctionValidationSignatureRetTypeConfigDefinitionParentRef `json:"parentRef,omitempty"`
+	ParentRef UserDefinedFunctionValidationSignatureRetTypeConfigDefinitionParentRef `json:"parentRef,omitempty,omitzero"`
 	// Free form text without any restriction on permitted characters. Name can have letters, numbers, and special characters. The value is editable and is restricted to 1000 characters.
 	// +kubebuilder:validation:Optional
 	Name string `json:"name,omitempty"`
@@ -518,7 +518,7 @@ type UserDefinedFunctionValidationSignatureRetType struct {
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef UserDefinedFunctionValidationSignatureRetTypeParentRef `json:"parentRef,omitempty"`
+	ParentRef UserDefinedFunctionValidationSignatureRetTypeParentRef `json:"parentRef,omitempty,omitzero"`
 	// Free form text without any restriction on permitted characters. Name can have letters, numbers, and special characters. The value is editable and is restricted to 1000 characters.
 	// +kubebuilder:validation:Optional
 	Name string `json:"name,omitempty"`
@@ -532,9 +532,9 @@ type UserDefinedFunctionValidationSignatureRetType struct {
 	// +kubebuilder:validation:Optional
 	WrappedType shared.JSONValue `json:"wrappedType,omitempty"`
 	// +kubebuilder:validation:Optional
-	ConfigValues UserDefinedFunctionValidationSignatureRetTypeConfigValues `json:"configValues,omitempty"`
+	ConfigValues UserDefinedFunctionValidationSignatureRetTypeConfigValues `json:"configValues,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	ConfigDefinition UserDefinedFunctionValidationSignatureRetTypeConfigDefinition `json:"configDefinition,omitempty"`
+	ConfigDefinition UserDefinedFunctionValidationSignatureRetTypeConfigDefinition `json:"configDefinition,omitempty,omitzero"`
 }
 
 // UserDefinedFunctionValidationSignatureArgumentParentRef defines nested fields for UserDefinedFunctionValidation.Signature.Argument.ParentRef.
@@ -585,7 +585,7 @@ type UserDefinedFunctionValidationSignatureArgumentConfigValues struct {
 	// +kubebuilder:validation:Optional
 	ConfigParamValues map[string]UserDefinedFunctionValidationSignatureArgumentConfigValuesConfigParamValues `json:"configParamValues,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef UserDefinedFunctionValidationSignatureArgumentConfigValuesParentRef `json:"parentRef,omitempty"`
+	ParentRef UserDefinedFunctionValidationSignatureArgumentConfigValuesParentRef `json:"parentRef,omitempty,omitzero"`
 }
 
 // UserDefinedFunctionValidationSignatureArgumentTypeParentRef defines nested fields for UserDefinedFunctionValidation.Signature.Argument.Type.ParentRef.
@@ -636,7 +636,7 @@ type UserDefinedFunctionValidationSignatureArgumentTypeConfigValues struct {
 	// +kubebuilder:validation:Optional
 	ConfigParamValues map[string]UserDefinedFunctionValidationSignatureArgumentTypeConfigValuesConfigParamValues `json:"configParamValues,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef UserDefinedFunctionValidationSignatureArgumentTypeConfigValuesParentRef `json:"parentRef,omitempty"`
+	ParentRef UserDefinedFunctionValidationSignatureArgumentTypeConfigValuesParentRef `json:"parentRef,omitempty,omitzero"`
 }
 
 // UserDefinedFunctionValidationSignatureArgumentTypeConfigDefinitionParentRef defines nested fields for UserDefinedFunctionValidation.Signature.Argument.Type.ConfigDefinition.ParentRef.
@@ -652,7 +652,7 @@ type UserDefinedFunctionValidationSignatureArgumentTypeConfigDefinitionParentRef
 // UserDefinedFunctionValidationSignatureArgumentTypeConfigDefinitionConfigParameterDefinitions defines nested fields for UserDefinedFunctionValidation.Signature.Argument.Type.ConfigDefinition.ConfigParameterDefinitions.
 type UserDefinedFunctionValidationSignatureArgumentTypeConfigDefinitionConfigParameterDefinitions struct {
 	// +kubebuilder:validation:Optional
-	ParameterType shared.JSONValue `json:"parameterType,omitempty"`
+	ParameterType shared.JSONValue `json:"parameterType,omitempty,omitzero"`
 	// This object represents the configurable properties for an object type.
 	// +kubebuilder:validation:Optional
 	ParameterName string `json:"parameterName,omitempty"`
@@ -685,7 +685,7 @@ type UserDefinedFunctionValidationSignatureArgumentTypeConfigDefinition struct {
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef UserDefinedFunctionValidationSignatureArgumentTypeConfigDefinitionParentRef `json:"parentRef,omitempty"`
+	ParentRef UserDefinedFunctionValidationSignatureArgumentTypeConfigDefinitionParentRef `json:"parentRef,omitempty,omitzero"`
 	// Free form text without any restriction on permitted characters. Name can have letters, numbers, and special characters. The value is editable and is restricted to 1000 characters.
 	// +kubebuilder:validation:Optional
 	Name string `json:"name,omitempty"`
@@ -748,7 +748,7 @@ type UserDefinedFunctionValidationSignatureArgumentTypeTypeHandlerConfigValues s
 	// +kubebuilder:validation:Optional
 	ConfigParamValues map[string]UserDefinedFunctionValidationSignatureArgumentTypeTypeHandlerConfigValuesConfigParamValues `json:"configParamValues,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef UserDefinedFunctionValidationSignatureArgumentTypeTypeHandlerConfigValuesParentRef `json:"parentRef,omitempty"`
+	ParentRef UserDefinedFunctionValidationSignatureArgumentTypeTypeHandlerConfigValuesParentRef `json:"parentRef,omitempty,omitzero"`
 }
 
 // UserDefinedFunctionValidationSignatureArgumentTypeTypeHandlerScopeReference defines nested fields for UserDefinedFunctionValidation.Signature.Argument.Type.TypeHandler.ScopeReference.
@@ -812,7 +812,7 @@ type UserDefinedFunctionValidationSignatureArgumentTypeTypeHandlerProjectionRule
 	// +kubebuilder:validation:Optional
 	ConfigParamValues map[string]UserDefinedFunctionValidationSignatureArgumentTypeTypeHandlerProjectionRuleConfigValuesConfigParamValues `json:"configParamValues,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef UserDefinedFunctionValidationSignatureArgumentTypeTypeHandlerProjectionRuleConfigValuesParentRef `json:"parentRef,omitempty"`
+	ParentRef UserDefinedFunctionValidationSignatureArgumentTypeTypeHandlerProjectionRuleConfigValuesParentRef `json:"parentRef,omitempty,omitzero"`
 }
 
 // UserDefinedFunctionValidationSignatureArgumentTypeTypeHandlerProjectionRule defines nested fields for UserDefinedFunctionValidation.Signature.Argument.Type.TypeHandler.ProjectionRule.
@@ -826,12 +826,12 @@ type UserDefinedFunctionValidationSignatureArgumentTypeTypeHandlerProjectionRule
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef UserDefinedFunctionValidationSignatureArgumentTypeTypeHandlerProjectionRuleParentRef `json:"parentRef,omitempty"`
+	ParentRef UserDefinedFunctionValidationSignatureArgumentTypeTypeHandlerProjectionRuleParentRef `json:"parentRef,omitempty,omitzero"`
 	// Specifies whether the rule uses a java regex syntax.
 	// +kubebuilder:validation:Optional
 	IsJavaRegexSyntax bool `json:"isJavaRegexSyntax,omitempty"`
 	// +kubebuilder:validation:Optional
-	ConfigValues UserDefinedFunctionValidationSignatureArgumentTypeTypeHandlerProjectionRuleConfigValues `json:"configValues,omitempty"`
+	ConfigValues UserDefinedFunctionValidationSignatureArgumentTypeTypeHandlerProjectionRuleConfigValues `json:"configValues,omitempty,omitzero"`
 	// The status of an object that can be set to value 1 for shallow references across objects, other values reserved.
 	// +kubebuilder:validation:Optional
 	ObjectStatus int `json:"objectStatus,omitempty"`
@@ -891,7 +891,7 @@ type UserDefinedFunctionValidationSignatureArgumentTypeTypeHandler struct {
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef UserDefinedFunctionValidationSignatureArgumentTypeTypeHandlerParentRef `json:"parentRef,omitempty"`
+	ParentRef UserDefinedFunctionValidationSignatureArgumentTypeTypeHandlerParentRef `json:"parentRef,omitempty,omitzero"`
 	// Reference key for the typed object.
 	// +kubebuilder:validation:Optional
 	Scope string `json:"scope,omitempty"`
@@ -899,12 +899,12 @@ type UserDefinedFunctionValidationSignatureArgumentTypeTypeHandler struct {
 	// +kubebuilder:validation:Optional
 	FlattenDetails string `json:"flattenDetails,omitempty"`
 	// +kubebuilder:validation:Optional
-	ConfigValues UserDefinedFunctionValidationSignatureArgumentTypeTypeHandlerConfigValues `json:"configValues,omitempty"`
+	ConfigValues UserDefinedFunctionValidationSignatureArgumentTypeTypeHandlerConfigValues `json:"configValues,omitempty,omitzero"`
 	// The status of an object that can be set to value 1 for shallow references across objects, other values reserved.
 	// +kubebuilder:validation:Optional
 	ObjectStatus int `json:"objectStatus,omitempty"`
 	// +kubebuilder:validation:Optional
-	ScopeReference UserDefinedFunctionValidationSignatureArgumentTypeTypeHandlerScopeReference `json:"scopeReference,omitempty"`
+	ScopeReference UserDefinedFunctionValidationSignatureArgumentTypeTypeHandlerScopeReference `json:"scopeReference,omitempty,omitzero"`
 	// Specifies whether it is ordered by rule.
 	// +kubebuilder:validation:Optional
 	IsOrderByRule bool `json:"isOrderByRule,omitempty"`
@@ -924,7 +924,7 @@ type UserDefinedFunctionValidationSignatureArgumentType struct {
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef UserDefinedFunctionValidationSignatureArgumentTypeParentRef `json:"parentRef,omitempty"`
+	ParentRef UserDefinedFunctionValidationSignatureArgumentTypeParentRef `json:"parentRef,omitempty,omitzero"`
 	// Free form text without any restriction on permitted characters. Name can have letters, numbers, and special characters. The value is editable and is restricted to 1000 characters.
 	// +kubebuilder:validation:Optional
 	Name string `json:"name,omitempty"`
@@ -943,14 +943,14 @@ type UserDefinedFunctionValidationSignatureArgumentType struct {
 	// +kubebuilder:validation:Optional
 	WrappedType shared.JSONValue `json:"wrappedType,omitempty"`
 	// +kubebuilder:validation:Optional
-	ConfigValues UserDefinedFunctionValidationSignatureArgumentTypeConfigValues `json:"configValues,omitempty"`
+	ConfigValues UserDefinedFunctionValidationSignatureArgumentTypeConfigValues `json:"configValues,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	ConfigDefinition UserDefinedFunctionValidationSignatureArgumentTypeConfigDefinition `json:"configDefinition,omitempty"`
+	ConfigDefinition UserDefinedFunctionValidationSignatureArgumentTypeConfigDefinition `json:"configDefinition,omitempty,omitzero"`
 	// The java type name.
 	// +kubebuilder:validation:Optional
 	JavaTypeName string `json:"javaTypeName,omitempty"`
 	// +kubebuilder:validation:Optional
-	TypeHandler UserDefinedFunctionValidationSignatureArgumentTypeTypeHandler `json:"typeHandler,omitempty"`
+	TypeHandler UserDefinedFunctionValidationSignatureArgumentTypeTypeHandler `json:"typeHandler,omitempty,omitzero"`
 	// The data type system name.
 	// +kubebuilder:validation:Optional
 	TypeSystemName string `json:"typeSystemName,omitempty"`
@@ -1022,7 +1022,7 @@ type UserDefinedFunctionValidationSignatureArgumentSplitConditionConfigValues st
 	// +kubebuilder:validation:Optional
 	ConfigParamValues map[string]UserDefinedFunctionValidationSignatureArgumentSplitConditionConfigValuesConfigParamValues `json:"configParamValues,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef UserDefinedFunctionValidationSignatureArgumentSplitConditionConfigValuesParentRef `json:"parentRef,omitempty"`
+	ParentRef UserDefinedFunctionValidationSignatureArgumentSplitConditionConfigValuesParentRef `json:"parentRef,omitempty,omitzero"`
 }
 
 // UserDefinedFunctionValidationSignatureArgumentSplitCondition defines nested fields for UserDefinedFunctionValidation.Signature.Argument.SplitCondition.
@@ -1037,12 +1037,12 @@ type UserDefinedFunctionValidationSignatureArgumentSplitCondition struct {
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef UserDefinedFunctionValidationSignatureArgumentSplitConditionParentRef `json:"parentRef,omitempty"`
+	ParentRef UserDefinedFunctionValidationSignatureArgumentSplitConditionParentRef `json:"parentRef,omitempty,omitzero"`
 	// The expression string for the object.
 	// +kubebuilder:validation:Optional
 	ExprString string `json:"exprString,omitempty"`
 	// +kubebuilder:validation:Optional
-	ConfigValues UserDefinedFunctionValidationSignatureArgumentSplitConditionConfigValues `json:"configValues,omitempty"`
+	ConfigValues UserDefinedFunctionValidationSignatureArgumentSplitConditionConfigValues `json:"configValues,omitempty,omitzero"`
 	// The status of an object that can be set to value 1 for shallow references across objects, other values reserved.
 	// +kubebuilder:validation:Optional
 	ObjectStatus int `json:"objectStatus,omitempty"`
@@ -1099,7 +1099,7 @@ type UserDefinedFunctionValidationSignatureArgumentNativeShapeFieldConfigValues 
 	// +kubebuilder:validation:Optional
 	ConfigParamValues map[string]UserDefinedFunctionValidationSignatureArgumentNativeShapeFieldConfigValuesConfigParamValues `json:"configParamValues,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef UserDefinedFunctionValidationSignatureArgumentNativeShapeFieldConfigValuesParentRef `json:"parentRef,omitempty"`
+	ParentRef UserDefinedFunctionValidationSignatureArgumentNativeShapeFieldConfigValuesParentRef `json:"parentRef,omitempty,omitzero"`
 }
 
 // UserDefinedFunctionValidationSignatureArgumentNativeShapeField defines nested fields for UserDefinedFunctionValidation.Signature.Argument.NativeShapeField.
@@ -1114,7 +1114,7 @@ type UserDefinedFunctionValidationSignatureArgumentNativeShapeField struct {
 	// +kubebuilder:validation:Optional
 	Type shared.JSONValue `json:"type,omitempty"`
 	// +kubebuilder:validation:Optional
-	ConfigValues UserDefinedFunctionValidationSignatureArgumentNativeShapeFieldConfigValues `json:"configValues,omitempty"`
+	ConfigValues UserDefinedFunctionValidationSignatureArgumentNativeShapeFieldConfigValues `json:"configValues,omitempty,omitzero"`
 	// The position of the attribute.
 	// +kubebuilder:validation:Optional
 	Position int `json:"position,omitempty"`
@@ -1174,7 +1174,7 @@ type UserDefinedFunctionValidationSignatureArgumentExprConfigValues struct {
 	// +kubebuilder:validation:Optional
 	ConfigParamValues map[string]UserDefinedFunctionValidationSignatureArgumentExprConfigValuesConfigParamValues `json:"configParamValues,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef UserDefinedFunctionValidationSignatureArgumentExprConfigValuesParentRef `json:"parentRef,omitempty"`
+	ParentRef UserDefinedFunctionValidationSignatureArgumentExprConfigValuesParentRef `json:"parentRef,omitempty,omitzero"`
 }
 
 // UserDefinedFunctionValidationSignatureArgumentExpr defines nested fields for UserDefinedFunctionValidation.Signature.Argument.Expr.
@@ -1189,12 +1189,12 @@ type UserDefinedFunctionValidationSignatureArgumentExpr struct {
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef UserDefinedFunctionValidationSignatureArgumentExprParentRef `json:"parentRef,omitempty"`
+	ParentRef UserDefinedFunctionValidationSignatureArgumentExprParentRef `json:"parentRef,omitempty,omitzero"`
 	// The expression string for the object.
 	// +kubebuilder:validation:Optional
 	ExprString string `json:"exprString,omitempty"`
 	// +kubebuilder:validation:Optional
-	ConfigValues UserDefinedFunctionValidationSignatureArgumentExprConfigValues `json:"configValues,omitempty"`
+	ConfigValues UserDefinedFunctionValidationSignatureArgumentExprConfigValues `json:"configValues,omitempty,omitzero"`
 	// The status of an object that can be set to value 1 for shallow references across objects, other values reserved.
 	// +kubebuilder:validation:Optional
 	ObjectStatus int `json:"objectStatus,omitempty"`
@@ -1248,7 +1248,7 @@ type UserDefinedFunctionValidationSignatureArgumentUseTypeConfigValues struct {
 	// +kubebuilder:validation:Optional
 	ConfigParamValues map[string]UserDefinedFunctionValidationSignatureArgumentUseTypeConfigValuesConfigParamValues `json:"configParamValues,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef UserDefinedFunctionValidationSignatureArgumentUseTypeConfigValuesParentRef `json:"parentRef,omitempty"`
+	ParentRef UserDefinedFunctionValidationSignatureArgumentUseTypeConfigValuesParentRef `json:"parentRef,omitempty,omitzero"`
 }
 
 // UserDefinedFunctionValidationSignatureArgumentUseTypeConfigDefinitionParentRef defines nested fields for UserDefinedFunctionValidation.Signature.Argument.UseType.ConfigDefinition.ParentRef.
@@ -1309,7 +1309,7 @@ type UserDefinedFunctionValidationSignatureArgumentUseTypeConfigDefinitionConfig
 	// +kubebuilder:validation:Optional
 	ConfigParamValues map[string]UserDefinedFunctionValidationSignatureArgumentUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeConfigValuesConfigParamValues `json:"configParamValues,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef UserDefinedFunctionValidationSignatureArgumentUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeConfigValuesParentRef `json:"parentRef,omitempty"`
+	ParentRef UserDefinedFunctionValidationSignatureArgumentUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeConfigValuesParentRef `json:"parentRef,omitempty,omitzero"`
 }
 
 // UserDefinedFunctionValidationSignatureArgumentUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerParentRef defines nested fields for UserDefinedFunctionValidation.Signature.Argument.UseType.ConfigDefinition.ConfigParameterDefinitions.ParameterType.TypeHandler.ParentRef.
@@ -1360,7 +1360,7 @@ type UserDefinedFunctionValidationSignatureArgumentUseTypeConfigDefinitionConfig
 	// +kubebuilder:validation:Optional
 	ConfigParamValues map[string]UserDefinedFunctionValidationSignatureArgumentUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerConfigValuesConfigParamValues `json:"configParamValues,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef UserDefinedFunctionValidationSignatureArgumentUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerConfigValuesParentRef `json:"parentRef,omitempty"`
+	ParentRef UserDefinedFunctionValidationSignatureArgumentUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerConfigValuesParentRef `json:"parentRef,omitempty,omitzero"`
 }
 
 // UserDefinedFunctionValidationSignatureArgumentUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerScopeReference defines nested fields for UserDefinedFunctionValidation.Signature.Argument.UseType.ConfigDefinition.ConfigParameterDefinitions.ParameterType.TypeHandler.ScopeReference.
@@ -1424,7 +1424,7 @@ type UserDefinedFunctionValidationSignatureArgumentUseTypeConfigDefinitionConfig
 	// +kubebuilder:validation:Optional
 	ConfigParamValues map[string]UserDefinedFunctionValidationSignatureArgumentUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerProjectionRuleConfigValuesConfigParamValues `json:"configParamValues,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef UserDefinedFunctionValidationSignatureArgumentUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerProjectionRuleConfigValuesParentRef `json:"parentRef,omitempty"`
+	ParentRef UserDefinedFunctionValidationSignatureArgumentUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerProjectionRuleConfigValuesParentRef `json:"parentRef,omitempty,omitzero"`
 }
 
 // UserDefinedFunctionValidationSignatureArgumentUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerProjectionRule defines nested fields for UserDefinedFunctionValidation.Signature.Argument.UseType.ConfigDefinition.ConfigParameterDefinitions.ParameterType.TypeHandler.ProjectionRule.
@@ -1438,12 +1438,12 @@ type UserDefinedFunctionValidationSignatureArgumentUseTypeConfigDefinitionConfig
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef UserDefinedFunctionValidationSignatureArgumentUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerProjectionRuleParentRef `json:"parentRef,omitempty"`
+	ParentRef UserDefinedFunctionValidationSignatureArgumentUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerProjectionRuleParentRef `json:"parentRef,omitempty,omitzero"`
 	// Specifies whether the rule uses a java regex syntax.
 	// +kubebuilder:validation:Optional
 	IsJavaRegexSyntax bool `json:"isJavaRegexSyntax,omitempty"`
 	// +kubebuilder:validation:Optional
-	ConfigValues UserDefinedFunctionValidationSignatureArgumentUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerProjectionRuleConfigValues `json:"configValues,omitempty"`
+	ConfigValues UserDefinedFunctionValidationSignatureArgumentUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerProjectionRuleConfigValues `json:"configValues,omitempty,omitzero"`
 	// The status of an object that can be set to value 1 for shallow references across objects, other values reserved.
 	// +kubebuilder:validation:Optional
 	ObjectStatus int `json:"objectStatus,omitempty"`
@@ -1503,7 +1503,7 @@ type UserDefinedFunctionValidationSignatureArgumentUseTypeConfigDefinitionConfig
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef UserDefinedFunctionValidationSignatureArgumentUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerParentRef `json:"parentRef,omitempty"`
+	ParentRef UserDefinedFunctionValidationSignatureArgumentUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerParentRef `json:"parentRef,omitempty,omitzero"`
 	// Reference key for the typed object.
 	// +kubebuilder:validation:Optional
 	Scope string `json:"scope,omitempty"`
@@ -1511,12 +1511,12 @@ type UserDefinedFunctionValidationSignatureArgumentUseTypeConfigDefinitionConfig
 	// +kubebuilder:validation:Optional
 	FlattenDetails string `json:"flattenDetails,omitempty"`
 	// +kubebuilder:validation:Optional
-	ConfigValues UserDefinedFunctionValidationSignatureArgumentUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerConfigValues `json:"configValues,omitempty"`
+	ConfigValues UserDefinedFunctionValidationSignatureArgumentUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerConfigValues `json:"configValues,omitempty,omitzero"`
 	// The status of an object that can be set to value 1 for shallow references across objects, other values reserved.
 	// +kubebuilder:validation:Optional
 	ObjectStatus int `json:"objectStatus,omitempty"`
 	// +kubebuilder:validation:Optional
-	ScopeReference UserDefinedFunctionValidationSignatureArgumentUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerScopeReference `json:"scopeReference,omitempty"`
+	ScopeReference UserDefinedFunctionValidationSignatureArgumentUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandlerScopeReference `json:"scopeReference,omitempty,omitzero"`
 	// Specifies whether it is ordered by rule.
 	// +kubebuilder:validation:Optional
 	IsOrderByRule bool `json:"isOrderByRule,omitempty"`
@@ -1536,7 +1536,7 @@ type UserDefinedFunctionValidationSignatureArgumentUseTypeConfigDefinitionConfig
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef UserDefinedFunctionValidationSignatureArgumentUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeParentRef `json:"parentRef,omitempty"`
+	ParentRef UserDefinedFunctionValidationSignatureArgumentUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeParentRef `json:"parentRef,omitempty,omitzero"`
 	// Free form text without any restriction on permitted characters. Name can have letters, numbers, and special characters. The value is editable and is restricted to 1000 characters.
 	// +kubebuilder:validation:Optional
 	Name string `json:"name,omitempty"`
@@ -1555,14 +1555,14 @@ type UserDefinedFunctionValidationSignatureArgumentUseTypeConfigDefinitionConfig
 	// +kubebuilder:validation:Optional
 	WrappedType shared.JSONValue `json:"wrappedType,omitempty"`
 	// +kubebuilder:validation:Optional
-	ConfigValues UserDefinedFunctionValidationSignatureArgumentUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeConfigValues `json:"configValues,omitempty"`
+	ConfigValues UserDefinedFunctionValidationSignatureArgumentUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeConfigValues `json:"configValues,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	ConfigDefinition shared.JSONValue `json:"configDefinition,omitempty"`
+	ConfigDefinition shared.JSONValue `json:"configDefinition,omitempty,omitzero"`
 	// The java type name.
 	// +kubebuilder:validation:Optional
 	JavaTypeName string `json:"javaTypeName,omitempty"`
 	// +kubebuilder:validation:Optional
-	TypeHandler UserDefinedFunctionValidationSignatureArgumentUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandler `json:"typeHandler,omitempty"`
+	TypeHandler UserDefinedFunctionValidationSignatureArgumentUseTypeConfigDefinitionConfigParameterDefinitionsParameterTypeTypeHandler `json:"typeHandler,omitempty,omitzero"`
 	// The data type system name.
 	// +kubebuilder:validation:Optional
 	TypeSystemName string `json:"typeSystemName,omitempty"`
@@ -1589,7 +1589,7 @@ type UserDefinedFunctionValidationSignatureArgumentUseTypeConfigDefinitionConfig
 // UserDefinedFunctionValidationSignatureArgumentUseTypeConfigDefinitionConfigParameterDefinitions defines nested fields for UserDefinedFunctionValidation.Signature.Argument.UseType.ConfigDefinition.ConfigParameterDefinitions.
 type UserDefinedFunctionValidationSignatureArgumentUseTypeConfigDefinitionConfigParameterDefinitions struct {
 	// +kubebuilder:validation:Optional
-	ParameterType UserDefinedFunctionValidationSignatureArgumentUseTypeConfigDefinitionConfigParameterDefinitionsParameterType `json:"parameterType,omitempty"`
+	ParameterType UserDefinedFunctionValidationSignatureArgumentUseTypeConfigDefinitionConfigParameterDefinitionsParameterType `json:"parameterType,omitempty,omitzero"`
 	// This object represents the configurable properties for an object type.
 	// +kubebuilder:validation:Optional
 	ParameterName string `json:"parameterName,omitempty"`
@@ -1622,7 +1622,7 @@ type UserDefinedFunctionValidationSignatureArgumentUseTypeConfigDefinition struc
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef UserDefinedFunctionValidationSignatureArgumentUseTypeConfigDefinitionParentRef `json:"parentRef,omitempty"`
+	ParentRef UserDefinedFunctionValidationSignatureArgumentUseTypeConfigDefinitionParentRef `json:"parentRef,omitempty,omitzero"`
 	// Free form text without any restriction on permitted characters. Name can have letters, numbers, and special characters. The value is editable and is restricted to 1000 characters.
 	// +kubebuilder:validation:Optional
 	Name string `json:"name,omitempty"`
@@ -1646,7 +1646,7 @@ type UserDefinedFunctionValidationSignatureArgumentUseType struct {
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef UserDefinedFunctionValidationSignatureArgumentUseTypeParentRef `json:"parentRef,omitempty"`
+	ParentRef UserDefinedFunctionValidationSignatureArgumentUseTypeParentRef `json:"parentRef,omitempty,omitzero"`
 	// Free form text without any restriction on permitted characters. Name can have letters, numbers, and special characters. The value is editable and is restricted to 1000 characters.
 	// +kubebuilder:validation:Optional
 	Name string `json:"name,omitempty"`
@@ -1660,9 +1660,9 @@ type UserDefinedFunctionValidationSignatureArgumentUseType struct {
 	// +kubebuilder:validation:Optional
 	WrappedType shared.JSONValue `json:"wrappedType,omitempty"`
 	// +kubebuilder:validation:Optional
-	ConfigValues UserDefinedFunctionValidationSignatureArgumentUseTypeConfigValues `json:"configValues,omitempty"`
+	ConfigValues UserDefinedFunctionValidationSignatureArgumentUseTypeConfigValues `json:"configValues,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	ConfigDefinition UserDefinedFunctionValidationSignatureArgumentUseTypeConfigDefinition `json:"configDefinition,omitempty"`
+	ConfigDefinition UserDefinedFunctionValidationSignatureArgumentUseTypeConfigDefinition `json:"configDefinition,omitempty,omitzero"`
 }
 
 // UserDefinedFunctionValidationSignatureArgument defines nested fields for UserDefinedFunctionValidation.Signature.Argument.
@@ -1676,9 +1676,9 @@ type UserDefinedFunctionValidationSignatureArgument struct {
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef UserDefinedFunctionValidationSignatureArgumentParentRef `json:"parentRef,omitempty"`
+	ParentRef UserDefinedFunctionValidationSignatureArgumentParentRef `json:"parentRef,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	ConfigValues UserDefinedFunctionValidationSignatureArgumentConfigValues `json:"configValues,omitempty"`
+	ConfigValues UserDefinedFunctionValidationSignatureArgumentConfigValues `json:"configValues,omitempty,omitzero"`
 	// The status of an object that can be set to value 1 for shallow references across objects, other values reserved.
 	// +kubebuilder:validation:Optional
 	ObjectStatus int `json:"objectStatus,omitempty"`
@@ -1697,12 +1697,12 @@ type UserDefinedFunctionValidationSignatureArgument struct {
 	// +kubebuilder:validation:Optional
 	PortType string `json:"portType,omitempty"`
 	// +kubebuilder:validation:Optional
-	Type UserDefinedFunctionValidationSignatureArgumentType `json:"type,omitempty"`
+	Type UserDefinedFunctionValidationSignatureArgumentType `json:"type,omitempty,omitzero"`
 	// Labels are keywords or labels that you can add to data assets, dataflows and so on. You can define your own labels and use them to categorize content.
 	// +kubebuilder:validation:Optional
 	Labels []string `json:"labels,omitempty"`
 	// +kubebuilder:validation:Optional
-	SplitCondition UserDefinedFunctionValidationSignatureArgumentSplitCondition `json:"splitCondition,omitempty"`
+	SplitCondition UserDefinedFunctionValidationSignatureArgumentSplitCondition `json:"splitCondition,omitempty,omitzero"`
 	// The port based on what decision expression evaluates to.
 	// +kubebuilder:validation:Optional
 	DecisionOutputPortType string `json:"decisionOutputPortType,omitempty"`
@@ -1710,9 +1710,9 @@ type UserDefinedFunctionValidationSignatureArgument struct {
 	// +kubebuilder:validation:Optional
 	Scope string `json:"scope,omitempty"`
 	// +kubebuilder:validation:Optional
-	ScopeReference UserDefinedFunctionValidationSignatureArgumentScopeReference `json:"scopeReference,omitempty"`
+	ScopeReference UserDefinedFunctionValidationSignatureArgumentScopeReference `json:"scopeReference,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	NativeShapeField UserDefinedFunctionValidationSignatureArgumentNativeShapeField `json:"nativeShapeField,omitempty"`
+	NativeShapeField UserDefinedFunctionValidationSignatureArgumentNativeShapeField `json:"nativeShapeField,omitempty,omitzero"`
 	// The default value of the parameter.
 	// +kubebuilder:validation:Optional
 	DefaultValue shared.JSONValue `json:"defaultValue,omitempty"`
@@ -1735,9 +1735,9 @@ type UserDefinedFunctionValidationSignatureArgument struct {
 	// +kubebuilder:validation:Optional
 	OutputAggregationType string `json:"outputAggregationType,omitempty"`
 	// +kubebuilder:validation:Optional
-	Expr UserDefinedFunctionValidationSignatureArgumentExpr `json:"expr,omitempty"`
+	Expr UserDefinedFunctionValidationSignatureArgumentExpr `json:"expr,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	UseType UserDefinedFunctionValidationSignatureArgumentUseType `json:"useType,omitempty"`
+	UseType UserDefinedFunctionValidationSignatureArgumentUseType `json:"useType,omitempty,omitzero"`
 	// column name pattern can be used to generate the name structure of the generated columns. By default column names are of %PIVOT_KEY_VALUE% or %MACRO_INPUT%_%PIVOT_KEY_VALUE%, but we can change it something by passing something like MY_PREFIX%PIVOT_KEY_VALUE%MY_SUFFIX or MY_PREFIX%MACRO_INPUT%_%PIVOT_KEY_VALUE%MY_SUFFIX which will add custom prefix and suffix to the column name.
 	// +kubebuilder:validation:Optional
 	ColumnNamePattern string `json:"columnNamePattern,omitempty"`
@@ -1764,12 +1764,12 @@ type UserDefinedFunctionValidationSignature struct {
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef UserDefinedFunctionValidationSignatureParentRef `json:"parentRef,omitempty"`
+	ParentRef UserDefinedFunctionValidationSignatureParentRef `json:"parentRef,omitempty,omitzero"`
 	// Free form text without any restriction on permitted characters. Name can have letters, numbers, and special characters. The value is editable and is restricted to 1000 characters.
 	// +kubebuilder:validation:Optional
 	Name string `json:"name,omitempty"`
 	// +kubebuilder:validation:Optional
-	RetType UserDefinedFunctionValidationSignatureRetType `json:"retType,omitempty"`
+	RetType UserDefinedFunctionValidationSignatureRetType `json:"retType,omitempty,omitzero"`
 	// An array of function arguments.
 	// +kubebuilder:validation:Optional
 	Arguments []UserDefinedFunctionValidationSignatureArgument `json:"arguments,omitempty"`
@@ -1829,7 +1829,7 @@ type UserDefinedFunctionValidationExprConfigValues struct {
 	// +kubebuilder:validation:Optional
 	ConfigParamValues map[string]UserDefinedFunctionValidationExprConfigValuesConfigParamValues `json:"configParamValues,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef UserDefinedFunctionValidationExprConfigValuesParentRef `json:"parentRef,omitempty"`
+	ParentRef UserDefinedFunctionValidationExprConfigValuesParentRef `json:"parentRef,omitempty,omitzero"`
 }
 
 // UserDefinedFunctionValidationExpr defines nested fields for UserDefinedFunctionValidation.Expr.
@@ -1844,12 +1844,12 @@ type UserDefinedFunctionValidationExpr struct {
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef UserDefinedFunctionValidationExprParentRef `json:"parentRef,omitempty"`
+	ParentRef UserDefinedFunctionValidationExprParentRef `json:"parentRef,omitempty,omitzero"`
 	// The expression string for the object.
 	// +kubebuilder:validation:Optional
 	ExprString string `json:"exprString,omitempty"`
 	// +kubebuilder:validation:Optional
-	ConfigValues UserDefinedFunctionValidationExprConfigValues `json:"configValues,omitempty"`
+	ConfigValues UserDefinedFunctionValidationExprConfigValues `json:"configValues,omitempty,omitzero"`
 	// The status of an object that can be set to value 1 for shallow references across objects, other values reserved.
 	// +kubebuilder:validation:Optional
 	ObjectStatus int `json:"objectStatus,omitempty"`
@@ -1915,7 +1915,7 @@ type UserDefinedFunctionValidationMetadata struct {
 	// +kubebuilder:validation:Optional
 	AggregatorKey string `json:"aggregatorKey,omitempty"`
 	// +kubebuilder:validation:Optional
-	Aggregator UserDefinedFunctionValidationMetadataAggregator `json:"aggregator,omitempty"`
+	Aggregator UserDefinedFunctionValidationMetadataAggregator `json:"aggregator,omitempty,omitzero"`
 	// The full path to identify this object.
 	// +kubebuilder:validation:Optional
 	IdentifierPath string `json:"identifierPath,omitempty"`
@@ -1932,7 +1932,7 @@ type UserDefinedFunctionValidationMetadata struct {
 	// +kubebuilder:validation:Optional
 	IsFavorite bool `json:"isFavorite,omitempty"`
 	// +kubebuilder:validation:Optional
-	CountStatistics UserDefinedFunctionValidationMetadataCountStatistics `json:"countStatistics,omitempty"`
+	CountStatistics UserDefinedFunctionValidationMetadataCountStatistics `json:"countStatistics,omitempty,omitzero"`
 }
 
 // UserDefinedFunctionValidationValidationMessages defines nested fields for UserDefinedFunctionValidation.ValidationMessages.

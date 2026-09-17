@@ -1,0 +1,282 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "waas",
+  "slug": "waaspolicy",
+  "kind": "WaasPolicy",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_waas_waas_policy",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateWaasPolicy",
+        "requestType": "waas.CreateWaasPolicyRequest",
+        "responseType": "waas.CreateWaasPolicyResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetWaasPolicy",
+        "requestType": "waas.GetWaasPolicyRequest",
+        "responseType": "waas.GetWaasPolicyResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListWaasPolicies",
+        "requestType": "waas.ListWaasPoliciesRequest",
+        "responseType": "waas.ListWaasPoliciesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeWaasPolicyCompartment",
+        "requestType": "waas.ChangeWaasPolicyCompartmentRequest",
+        "responseType": "waas.ChangeWaasPolicyCompartmentResponse"
+      },
+      {
+        "operation": "UpdateWaasPolicy",
+        "requestType": "waas.UpdateWaasPolicyRequest",
+        "responseType": "waas.UpdateWaasPolicyResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteWaasPolicy",
+        "requestType": "waas.DeleteWaasPolicyRequest",
+        "responseType": "waas.DeleteWaasPolicyResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "FAILED"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "additional_domains",
+      "compartment_id",
+      "defined_tags",
+      "display_name",
+      "freeform_tags",
+      "origin_groups.label",
+      "origin_groups.origin_group.origin",
+      "origin_groups.origin_group.weight",
+      "origins.custom_headers.name",
+      "origins.custom_headers.value",
+      "origins.http_port",
+      "origins.https_port",
+      "origins.label",
+      "origins.uri",
+      "policy_config.certificate_id",
+      "policy_config.cipher_group",
+      "policy_config.client_address_header",
+      "policy_config.health_checks.expected_response_code_group",
+      "policy_config.health_checks.expected_response_text",
+      "policy_config.health_checks.headers",
+      "policy_config.health_checks.healthy_threshold",
+      "policy_config.health_checks.interval_in_seconds",
+      "policy_config.health_checks.is_enabled",
+      "policy_config.health_checks.is_response_text_check_enabled",
+      "policy_config.health_checks.method",
+      "policy_config.health_checks.path",
+      "policy_config.health_checks.timeout_in_seconds",
+      "policy_config.health_checks.unhealthy_threshold",
+      "policy_config.is_behind_cdn",
+      "policy_config.is_cache_control_respected",
+      "policy_config.is_https_enabled",
+      "policy_config.is_https_forced",
+      "policy_config.is_origin_compression_enabled",
+      "policy_config.is_response_buffering_enabled",
+      "policy_config.is_sni_enabled",
+      "policy_config.load_balancing_method.domain",
+      "policy_config.load_balancing_method.expiration_time_in_seconds",
+      "policy_config.load_balancing_method.method",
+      "policy_config.load_balancing_method.name",
+      "policy_config.tls_protocols",
+      "policy_config.websocket_path_prefixes",
+      "waf_config.access_rules.action",
+      "waf_config.access_rules.block_action",
+      "waf_config.access_rules.block_error_page_code",
+      "waf_config.access_rules.block_error_page_description",
+      "waf_config.access_rules.block_error_page_message",
+      "waf_config.access_rules.block_response_code",
+      "waf_config.access_rules.bypass_challenges",
+      "waf_config.access_rules.captcha_footer",
+      "waf_config.access_rules.captcha_header",
+      "waf_config.access_rules.captcha_submit_label",
+      "waf_config.access_rules.captcha_title",
+      "waf_config.access_rules.criteria.condition",
+      "waf_config.access_rules.criteria.is_case_sensitive",
+      "waf_config.access_rules.criteria.value",
+      "waf_config.access_rules.name",
+      "waf_config.access_rules.redirect_response_code",
+      "waf_config.access_rules.redirect_url",
+      "waf_config.access_rules.response_header_manipulation.action",
+      "waf_config.access_rules.response_header_manipulation.header",
+      "waf_config.access_rules.response_header_manipulation.value",
+      "waf_config.address_rate_limiting.allowed_rate_per_address",
+      "waf_config.address_rate_limiting.block_response_code",
+      "waf_config.address_rate_limiting.is_enabled",
+      "waf_config.address_rate_limiting.max_delayed_count_per_address",
+      "waf_config.caching_rules.action",
+      "waf_config.caching_rules.caching_duration",
+      "waf_config.caching_rules.client_caching_duration",
+      "waf_config.caching_rules.criteria.condition",
+      "waf_config.caching_rules.criteria.value",
+      "waf_config.caching_rules.is_client_caching_enabled",
+      "waf_config.caching_rules.key",
+      "waf_config.caching_rules.name",
+      "waf_config.captchas.failure_message",
+      "waf_config.captchas.footer_text",
+      "waf_config.captchas.header_text",
+      "waf_config.captchas.session_expiration_in_seconds",
+      "waf_config.captchas.submit_label",
+      "waf_config.captchas.title",
+      "waf_config.captchas.url",
+      "waf_config.custom_protection_rules.action",
+      "waf_config.custom_protection_rules.exclusions.exclusions",
+      "waf_config.custom_protection_rules.exclusions.target",
+      "waf_config.custom_protection_rules.id",
+      "waf_config.device_fingerprint_challenge.action",
+      "waf_config.device_fingerprint_challenge.action_expiration_in_seconds",
+      "waf_config.device_fingerprint_challenge.challenge_settings.block_action",
+      "waf_config.device_fingerprint_challenge.challenge_settings.block_error_page_code",
+      "waf_config.device_fingerprint_challenge.challenge_settings.block_error_page_description",
+      "waf_config.device_fingerprint_challenge.challenge_settings.block_error_page_message",
+      "waf_config.device_fingerprint_challenge.challenge_settings.block_response_code",
+      "waf_config.device_fingerprint_challenge.challenge_settings.captcha_footer",
+      "waf_config.device_fingerprint_challenge.challenge_settings.captcha_header",
+      "waf_config.device_fingerprint_challenge.challenge_settings.captcha_submit_label",
+      "waf_config.device_fingerprint_challenge.challenge_settings.captcha_title",
+      "waf_config.device_fingerprint_challenge.failure_threshold",
+      "waf_config.device_fingerprint_challenge.failure_threshold_expiration_in_seconds",
+      "waf_config.device_fingerprint_challenge.is_enabled",
+      "waf_config.device_fingerprint_challenge.max_address_count",
+      "waf_config.device_fingerprint_challenge.max_address_count_expiration_in_seconds",
+      "waf_config.human_interaction_challenge.action",
+      "waf_config.human_interaction_challenge.action_expiration_in_seconds",
+      "waf_config.human_interaction_challenge.challenge_settings.block_action",
+      "waf_config.human_interaction_challenge.challenge_settings.block_error_page_code",
+      "waf_config.human_interaction_challenge.challenge_settings.block_error_page_description",
+      "waf_config.human_interaction_challenge.challenge_settings.block_error_page_message",
+      "waf_config.human_interaction_challenge.challenge_settings.block_response_code",
+      "waf_config.human_interaction_challenge.challenge_settings.captcha_footer",
+      "waf_config.human_interaction_challenge.challenge_settings.captcha_header",
+      "waf_config.human_interaction_challenge.challenge_settings.captcha_submit_label",
+      "waf_config.human_interaction_challenge.challenge_settings.captcha_title",
+      "waf_config.human_interaction_challenge.failure_threshold",
+      "waf_config.human_interaction_challenge.failure_threshold_expiration_in_seconds",
+      "waf_config.human_interaction_challenge.interaction_threshold",
+      "waf_config.human_interaction_challenge.is_enabled",
+      "waf_config.human_interaction_challenge.is_nat_enabled",
+      "waf_config.human_interaction_challenge.recording_period_in_seconds",
+      "waf_config.human_interaction_challenge.set_http_header.name",
+      "waf_config.human_interaction_challenge.set_http_header.value",
+      "waf_config.js_challenge.action",
+      "waf_config.js_challenge.action_expiration_in_seconds",
+      "waf_config.js_challenge.are_redirects_challenged",
+      "waf_config.js_challenge.challenge_settings.block_action",
+      "waf_config.js_challenge.challenge_settings.block_error_page_code",
+      "waf_config.js_challenge.challenge_settings.block_error_page_description",
+      "waf_config.js_challenge.challenge_settings.block_error_page_message",
+      "waf_config.js_challenge.challenge_settings.block_response_code",
+      "waf_config.js_challenge.challenge_settings.captcha_footer",
+      "waf_config.js_challenge.challenge_settings.captcha_header",
+      "waf_config.js_challenge.challenge_settings.captcha_submit_label",
+      "waf_config.js_challenge.challenge_settings.captcha_title",
+      "waf_config.js_challenge.criteria.condition",
+      "waf_config.js_challenge.criteria.is_case_sensitive",
+      "waf_config.js_challenge.criteria.value",
+      "waf_config.js_challenge.failure_threshold",
+      "waf_config.js_challenge.is_enabled",
+      "waf_config.js_challenge.is_nat_enabled",
+      "waf_config.js_challenge.set_http_header.name",
+      "waf_config.js_challenge.set_http_header.value",
+      "waf_config.origin",
+      "waf_config.origin_groups",
+      "waf_config.protection_settings.allowed_http_methods",
+      "waf_config.protection_settings.block_action",
+      "waf_config.protection_settings.block_error_page_code",
+      "waf_config.protection_settings.block_error_page_description",
+      "waf_config.protection_settings.block_error_page_message",
+      "waf_config.protection_settings.block_response_code",
+      "waf_config.protection_settings.is_response_inspected",
+      "waf_config.protection_settings.max_argument_count",
+      "waf_config.protection_settings.max_name_length_per_argument",
+      "waf_config.protection_settings.max_response_size_in_ki_b",
+      "waf_config.protection_settings.max_total_name_length_of_arguments",
+      "waf_config.protection_settings.media_types",
+      "waf_config.protection_settings.recommendations_period_in_days",
+      "waf_config.whitelists.address_lists",
+      "waf_config.whitelists.addresses",
+      "waf_config.whitelists.name"
+    ],
+    "forceNew": [
+      "domain"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_waas_waas_policies",
+    "collectionField": "waas_policies",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_names",
+      "ids",
+      "states",
+      "time_created_greater_than_or_equal_to",
+      "time_created_less_than"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/waas/waaspolicy/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/waas/waaspolicy/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from terraform-provider-oci for waas/waaspolicy."
+  ]
+}

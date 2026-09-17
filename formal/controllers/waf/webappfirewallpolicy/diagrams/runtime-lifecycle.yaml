@@ -1,0 +1,67 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: waf
+slug: webappfirewallpolicy
+kind: WebAppFirewallPolicy
+archetype: generated-service-manager
+states:
+    - provisioning
+    - active
+    - updating
+    - terminating
+repoAuthored:
+    operations:
+        update:
+            - UpdateWebAppFirewallPolicy
+    providerLifecycle:
+        createPending:
+            - CREATING
+        updatePending:
+            - UPDATING
+        deletePending:
+            - DELETING
+    listLookup:
+        filters:
+            - id
+            - compartmentId
+            - displayName
+        matchRule: exact id, compartmentId, displayName match within the resource scope; duplicate matches fail
+    mutation:
+        mutable:
+            - compartmentId
+            - displayName
+            - actions
+            - requestAccessControl
+            - requestRateLimiting
+            - requestProtection
+            - responseAccessControl
+            - responseProtection
+            - freeformTags
+            - definedTags
+            - systemTags
+    hooks:
+        create:
+            - helper: tfresource.CreateResource
+            - helper: tfresource.WaitForWorkRequestWithErrorHandling
+              entityType: webAppFirewallPolicy
+              action: CREATED
+        update:
+            - helper: tfresource.UpdateResource
+            - helper: ChangeWebAppFirewallPolicyCompartment
+            - helper: tfresource.WaitForWorkRequestWithErrorHandling
+              entityType: webAppFirewallPolicy
+              action: UPDATED
+        delete:
+            - helper: tfresource.DeleteResource
+            - helper: tfresource.WaitForWorkRequestWithErrorHandling
+              entityType: webAppFirewallPolicy
+              action: DELETED
+    followUp:
+        create: read-after-write
+        update: read-after-write
+        delete: confirm-delete
+notes:
+    - The production runtime uses generatedruntime/workrequest async handling for create, update, delete work-request phases.
+    - Lifecycle success states are ACTIVE; pending create, update, and delete states requeue until the corresponding follow-up converges.
+    - Status projection is required, Secret side effects are none, and the finalizer policy is retain-until-confirmed-delete.
+    - Delete policy required retains ownership until DELETED or confirmed absence.

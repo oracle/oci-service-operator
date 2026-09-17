@@ -79,6 +79,7 @@ func TestHostnameCreateRequiresLoadBalancerAnnotationBeforeOCICalls(t *testing.T
 
 func TestHostnameCreateBindsStatusAfterReadback(t *testing.T) {
 	resource := newHostnameResource()
+	resource.UID = "hostname-uid"
 	fake := &fakeHostnameOCIClient{
 		t: t,
 		getResults: []hostnameGetResult{
@@ -105,7 +106,7 @@ func TestHostnameCreateBindsStatusAfterReadback(t *testing.T) {
 	if len(fake.getRequests) != 2 || len(fake.listRequests) != 1 || len(fake.createRequests) != 1 {
 		t.Fatalf("call counts get/list/create = %d/%d/%d, want 2/1/1", len(fake.getRequests), len(fake.listRequests), len(fake.createRequests))
 	}
-	assertCreateRequest(t, fake.createRequests[0], testLoadBalancerID, testHostnameName, testHostnameValue)
+	assertCreateRequest(t, fake.createRequests[0], testLoadBalancerID, testHostnameName, testHostnameValue, "hostname-uid")
 	requireHostnameStatus(t, resource, testLoadBalancerID, testHostnameName, testHostnameValue)
 	requireCondition(t, resource, shared.Active, v1.ConditionTrue)
 	if resource.Status.OsokStatus.Async.Current != nil {
@@ -745,7 +746,7 @@ func requireAsyncCurrentClass(
 	}
 }
 
-func assertCreateRequest(t *testing.T, request loadbalancersdk.CreateHostnameRequest, wantLoadBalancerID string, wantName string, wantHostname string) {
+func assertCreateRequest(t *testing.T, request loadbalancersdk.CreateHostnameRequest, wantLoadBalancerID string, wantName string, wantHostname string, wantRetryToken string) {
 	t.Helper()
 	if got := stringValue(request.LoadBalancerId); got != wantLoadBalancerID {
 		t.Fatalf("CreateHostname.LoadBalancerId = %q, want %q", got, wantLoadBalancerID)
@@ -755,6 +756,9 @@ func assertCreateRequest(t *testing.T, request loadbalancersdk.CreateHostnameReq
 	}
 	if got := stringValue(request.CreateHostnameDetails.Hostname); got != wantHostname {
 		t.Fatalf("CreateHostname.Hostname = %q, want %q", got, wantHostname)
+	}
+	if got := stringValue(request.OpcRetryToken); got != wantRetryToken {
+		t.Fatalf("CreateHostname.OpcRetryToken = %q, want %q", got, wantRetryToken)
 	}
 }
 

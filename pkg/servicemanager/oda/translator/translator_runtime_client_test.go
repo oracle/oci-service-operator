@@ -142,6 +142,7 @@ func TestTranslatorRequiresOdaInstanceAnnotation(t *testing.T) {
 
 func TestTranslatorCreateProjectsStatus(t *testing.T) {
 	resource := makeTranslatorResource()
+	resource.UID = "translator-uid"
 	resource.Spec.Properties = map[string]string{"model": "nmt"}
 	resource.Spec.FreeformTags = map[string]string{"managed-by": "osok"}
 	resource.Spec.DefinedTags = map[string]shared.MapValue{"Operations": {"CostCenter": "42"}}
@@ -150,6 +151,9 @@ func TestTranslatorCreateProjectsStatus(t *testing.T) {
 		return odasdk.ListTranslatorsResponse{}, nil
 	}
 	fake.createFunc = func(_ context.Context, request odasdk.CreateTranslatorRequest) (odasdk.CreateTranslatorResponse, error) {
+		if got := stringValue(request.OpcRetryToken); got != string(resource.UID) {
+			t.Fatalf("create opcRetryToken = %q, want %q", got, resource.UID)
+		}
 		if got := stringValue(request.OdaInstanceId); got != testTranslatorOdaInstanceID {
 			t.Fatalf("create odaInstanceId = %q, want %q", got, testTranslatorOdaInstanceID)
 		}

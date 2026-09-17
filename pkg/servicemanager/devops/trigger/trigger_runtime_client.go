@@ -104,7 +104,7 @@ func applyTriggerRuntimeHooks(
 		return
 	}
 
-	hooks.Semantics = newTriggerRuntimeSemantics()
+	hooks.Semantics = reviewedTriggerRuntimeSemantics()
 	hooks.BuildCreateBody = func(_ context.Context, resource *devopsv1beta1.Trigger, _ string) (any, error) {
 		return buildTriggerCreateBody(resource)
 	}
@@ -148,6 +148,8 @@ func applyTriggerRuntimeHooks(
 	}
 	hooks.Async.ResolveAction = resolveTriggerWorkRequestAction
 	hooks.Async.RecoverResourceID = recoverTriggerIDFromWorkRequest
+	hooks.DeleteHooks.ConfirmRead = triggerDeleteConfirmRead(hooks.Get.Call, listAllCall)
+	hooks.DeleteHooks.UseConfirmReadAfterWorkRequest = true
 	hooks.DeleteHooks.HandleError = handleTriggerDeleteError
 	hooks.WrapGeneratedClient = append(hooks.WrapGeneratedClient, func(delegate TriggerServiceClient) TriggerServiceClient {
 		runtimeClient := &triggerRuntimeClient{
@@ -159,6 +161,38 @@ func applyTriggerRuntimeHooks(
 		}
 		return runtimeClient
 	})
+}
+
+func triggerDeleteConfirmRead(
+	getCall func(context.Context, devopssdk.GetTriggerRequest) (devopssdk.GetTriggerResponse, error),
+	listCall func(context.Context, devopssdk.ListTriggersRequest) (devopssdk.ListTriggersResponse, error),
+) func(context.Context, *devopsv1beta1.Trigger, string) (any, error) {
+	return func(ctx context.Context, resource *devopsv1beta1.Trigger, currentID string) (any, error) {
+		if getCall == nil {
+			return nil, fmt.Errorf("%s delete confirmation requires a get operation", triggerKind)
+		}
+		response, err := getCall(ctx, devopssdk.GetTriggerRequest{TriggerId: optionalString(currentID)})
+		if err == nil || !errorutil.ClassifyDeleteError(err).IsAuthShapedNotFound() {
+			return response, err
+		}
+		identity, identityErr := resolveTriggerIdentity(resource)
+		if identityErr != nil {
+			return nil, identityErr
+		}
+		existing, listErr := lookupExistingTrigger(ctx, resource, identity, listCall)
+		if listErr != nil {
+			return nil, listErr
+		}
+		if existing != nil {
+			return nil, err
+		}
+		return nil, errorutil.NotFoundOciError(errorutil.OciErrors{
+			HTTPStatusCode: 404,
+			ErrorCode:      errorutil.NotFound,
+			OpcRequestID:   servicemanager.ErrorOpcRequestID(err),
+			Description:    "trigger not found after scoped delete confirmation",
+		})
+	}
 }
 
 func newTriggerServiceClientWithOCIClient(log loggerutil.OSOKLogger, client triggerOCIClient) TriggerServiceClient {
@@ -722,7 +756,7 @@ func (c *triggerRuntimeClient) fail(resource *devopsv1beta1.Trigger, err error) 
 	return servicemanager.OSOKResponse{IsSuccessful: false}, err
 }
 
-func newTriggerRuntimeSemantics() *generatedruntime.Semantics {
+func reviewedTriggerRuntimeSemantics() *generatedruntime.Semantics {
 	return &generatedruntime.Semantics{
 		FormalService: "devops",
 		FormalSlug:    "trigger",

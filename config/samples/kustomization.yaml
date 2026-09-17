@@ -478,4 +478,6 @@ resources:
 - ocicontrolcenter_v1beta1_namespace.yaml
 - osubbillingschedule_v1beta1_billingschedule.yaml
 - osuborganizationsubscription_v1beta1_organizationsubscription.yaml
+- apigateway_v1beta1_apigateway.yaml
+- apigateway_v1beta1_apigatewaydeployment.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

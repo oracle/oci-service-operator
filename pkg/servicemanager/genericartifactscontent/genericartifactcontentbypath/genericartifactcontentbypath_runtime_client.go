@@ -651,7 +651,7 @@ func isGenericArtifactContentByPathUnambiguousNotFound(err error) bool {
 		return false
 	}
 	code := strings.TrimSpace(serviceErr.GetCode())
-	return code == "" || code == "NotFound"
+	return code == "" || code == "NotFound" || code == "GENERIC_ARTIFACT_METADATA_NOT_FOUND" || code == "ARTIFACT_NOT_AVAILABLE"
 }
 
 func isGenericArtifactContentByPathAuthNotFound(err error) bool {

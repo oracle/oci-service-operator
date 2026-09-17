@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "devops",
+  "slug": "deploypipeline",
+  "kind": "DeployPipeline",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_devops_deploy_pipeline",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDeployPipeline",
+        "requestType": "devops.CreateDeployPipelineRequest",
+        "responseType": "devops.CreateDeployPipelineResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDeployPipeline",
+        "requestType": "devops.GetDeployPipelineRequest",
+        "responseType": "devops.GetDeployPipelineResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDeployPipelines",
+        "requestType": "devops.ListDeployPipelinesRequest",
+        "responseType": "devops.ListDeployPipelinesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDeployPipeline",
+        "requestType": "devops.UpdateDeployPipelineRequest",
+        "responseType": "devops.UpdateDeployPipelineResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDeployPipeline",
+        "requestType": "devops.DeleteDeployPipelineRequest",
+        "responseType": "devops.DeleteDeployPipelineResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "defined_tags",
+      "deploy_pipeline_parameters.items.default_value",
+      "deploy_pipeline_parameters.items.description",
+      "deploy_pipeline_parameters.items.name",
+      "description",
+      "display_name",
+      "freeform_tags"
+    ],
+    "forceNew": [
+      "project_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_devops_deploy_pipelines",
+    "collectionField": "deploy_pipeline_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "id",
+      "project_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/devops/deploypipeline/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/devops/deploypipeline/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from terraform-provider-oci for devops/deploypipeline."
+  ]
+}

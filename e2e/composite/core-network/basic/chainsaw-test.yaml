@@ -1,0 +1,252 @@
+# Copyright (c) 2026, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+# yaml-language-server: $schema=https://raw.githubusercontent.com/kyverno/chainsaw/v0.2.15/.schemas/json/test-chainsaw-v1alpha1.json
+
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: Test
+metadata:
+  name: core-network-composite
+spec:
+  concurrent: false
+  timeouts:
+    apply: 2m
+    assert: 20m
+    cleanup: 30m
+    delete: 30m
+    exec: 2m
+  bindings:
+    - name: suffix
+      value: (env('OSOK_E2E_SUFFIX'))
+    - name: compartmentId
+      value: (env('OCI_COMPARTMENT_ID'))
+    - name: vcnName
+      value: (join('-', ['osok-chain-vcn', $suffix]))
+    - name: subnetName
+      value: (join('-', ['osok-chain-subnet', $suffix]))
+    - name: internetGatewayName
+      value: (join('-', ['osok-chain-ig', $suffix]))
+    - name: networkSecurityGroupName
+      value: (join('-', ['osok-chain-nsg', $suffix]))
+  steps:
+    - name: exercise-dependent-network-resources
+      description: Create a VCN, pass its observed OCID to three dependents, update every resource, and clean up in reverse order.
+      try:
+        - script:
+            env:
+              - name: OCI_COMPARTMENT_ID
+                value: ($compartmentId)
+              - name: OSOK_E2E_SUFFIX
+                value: ($suffix)
+            content: |
+              set -eu
+              test -n "$OCI_COMPARTMENT_ID" || { echo "OCI_COMPARTMENT_ID is required" >&2; exit 2; }
+              test -n "$OSOK_E2E_SUFFIX" || { echo "OSOK_E2E_SUFFIX is required" >&2; exit 2; }
+        - apply:
+            resource:
+              apiVersion: core.oracle.com/v1beta1
+              kind: Vcn
+              metadata:
+                name: ($vcnName)
+                namespace: ($namespace)
+              spec:
+                compartmentId: ($compartmentId)
+                displayName: ($vcnName)
+                cidrBlocks:
+                  - 10.91.0.0/16
+                freeformTags:
+                  osok-e2e-phase: create
+        - assert:
+            resource:
+              apiVersion: core.oracle.com/v1beta1
+              kind: Vcn
+              metadata:
+                name: ($vcnName)
+              status:
+                lifecycleState: AVAILABLE
+                freeformTags:
+                  osok-e2e-phase: create
+                status:
+                  (conditions[?type == 'Active' && status == 'True'] | length(@) > `0`): true
+                  (ocid != null && length(ocid) > `0`): true
+        - script:
+            env:
+              - name: RESOURCE_NAME
+                value: ($vcnName)
+            content: kubectl get vcn.core.oracle.com "$RESOURCE_NAME" -n "$NAMESPACE" -o json
+            outputs:
+              - name: vcn
+                value: (json_parse($stdout))
+        - apply:
+            resource:
+              apiVersion: core.oracle.com/v1beta1
+              kind: Subnet
+              metadata:
+                name: ($subnetName)
+                namespace: ($namespace)
+              spec:
+                compartmentId: ($compartmentId)
+                vcnId: ($vcn.status.status.ocid)
+                cidrBlock: 10.91.50.0/24
+                displayName: ($subnetName)
+                prohibitPublicIpOnVnic: true
+                freeformTags:
+                  osok-e2e-phase: create
+        - assert:
+            resource:
+              apiVersion: core.oracle.com/v1beta1
+              kind: Subnet
+              metadata:
+                name: ($subnetName)
+              status:
+                lifecycleState: AVAILABLE
+                (vcnId == $vcn.status.status.ocid): true
+                status:
+                  (conditions[?type == 'Active' && status == 'True'] | length(@) > `0`): true
+                  (ocid != null && length(ocid) > `0`): true
+        - apply:
+            resource:
+              apiVersion: core.oracle.com/v1beta1
+              kind: InternetGateway
+              metadata:
+                name: ($internetGatewayName)
+                namespace: ($namespace)
+              spec:
+                compartmentId: ($compartmentId)
+                isEnabled: true
+                vcnId: ($vcn.status.status.ocid)
+                displayName: ($internetGatewayName)
+                freeformTags:
+                  osok-e2e-phase: create
+        - assert:
+            resource:
+              apiVersion: core.oracle.com/v1beta1
+              kind: InternetGateway
+              metadata:
+                name: ($internetGatewayName)
+              status:
+                lifecycleState: AVAILABLE
+                (vcnId == $vcn.status.status.ocid): true
+                status:
+                  (conditions[?type == 'Active' && status == 'True'] | length(@) > `0`): true
+                  (ocid != null && length(ocid) > `0`): true
+        - apply:
+            resource:
+              apiVersion: core.oracle.com/v1beta1
+              kind: NetworkSecurityGroup
+              metadata:
+                name: ($networkSecurityGroupName)
+                namespace: ($namespace)
+              spec:
+                compartmentId: ($compartmentId)
+                vcnId: ($vcn.status.status.ocid)
+                displayName: ($networkSecurityGroupName)
+                freeformTags:
+                  osok-e2e-phase: create
+        - assert:
+            resource:
+              apiVersion: core.oracle.com/v1beta1
+              kind: NetworkSecurityGroup
+              metadata:
+                name: ($networkSecurityGroupName)
+              status:
+                lifecycleState: AVAILABLE
+                (vcnId == $vcn.status.status.ocid): true
+                status:
+                  (conditions[?type == 'Active' && status == 'True'] | length(@) > `0`): true
+                  (ocid != null && length(ocid) > `0`): true
+        - apply:
+            resource:
+              apiVersion: core.oracle.com/v1beta1
+              kind: Vcn
+              metadata:
+                name: ($vcnName)
+                namespace: ($namespace)
+              spec:
+                compartmentId: ($compartmentId)
+                displayName: ($vcnName)
+                cidrBlocks:
+                  - 10.91.0.0/16
+                freeformTags:
+                  osok-e2e-phase: update
+        - apply:
+            resource:
+              apiVersion: core.oracle.com/v1beta1
+              kind: Subnet
+              metadata:
+                name: ($subnetName)
+                namespace: ($namespace)
+              spec:
+                compartmentId: ($compartmentId)
+                vcnId: ($vcn.status.status.ocid)
+                cidrBlock: 10.91.50.0/24
+                displayName: ($subnetName)
+                prohibitPublicIpOnVnic: true
+                freeformTags:
+                  osok-e2e-phase: update
+        - apply:
+            resource:
+              apiVersion: core.oracle.com/v1beta1
+              kind: InternetGateway
+              metadata:
+                name: ($internetGatewayName)
+                namespace: ($namespace)
+              spec:
+                compartmentId: ($compartmentId)
+                isEnabled: true
+                vcnId: ($vcn.status.status.ocid)
+                displayName: ($internetGatewayName)
+                freeformTags:
+                  osok-e2e-phase: update
+        - apply:
+            resource:
+              apiVersion: core.oracle.com/v1beta1
+              kind: NetworkSecurityGroup
+              metadata:
+                name: ($networkSecurityGroupName)
+                namespace: ($namespace)
+              spec:
+                compartmentId: ($compartmentId)
+                vcnId: ($vcn.status.status.ocid)
+                displayName: ($networkSecurityGroupName)
+                freeformTags:
+                  osok-e2e-phase: update
+        - assert:
+            resource:
+              apiVersion: core.oracle.com/v1beta1
+              kind: Vcn
+              metadata:
+                name: ($vcnName)
+              status:
+                lifecycleState: AVAILABLE
+                freeformTags:
+                  osok-e2e-phase: update
+        - assert:
+            resource:
+              apiVersion: core.oracle.com/v1beta1
+              kind: Subnet
+              metadata:
+                name: ($subnetName)
+              status:
+                lifecycleState: AVAILABLE
+                freeformTags:
+                  osok-e2e-phase: update
+        - assert:
+            resource:
+              apiVersion: core.oracle.com/v1beta1
+              kind: InternetGateway
+              metadata:
+                name: ($internetGatewayName)
+              status:
+                lifecycleState: AVAILABLE
+                freeformTags:
+                  osok-e2e-phase: update
+        - assert:
+            resource:
+              apiVersion: core.oracle.com/v1beta1
+              kind: NetworkSecurityGroup
+              metadata:
+                name: ($networkSecurityGroupName)
+              status:
+                lifecycleState: AVAILABLE
+                freeformTags:
+                  osok-e2e-phase: update

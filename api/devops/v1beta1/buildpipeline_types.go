@@ -24,7 +24,7 @@ type BuildPipelineSpec struct {
 	// +kubebuilder:validation:Optional
 	DisplayName string `json:"displayName,omitempty"`
 	// +kubebuilder:validation:Optional
-	BuildPipelineParameters BuildPipelineParameters `json:"buildPipelineParameters,omitempty"`
+	BuildPipelineParameters BuildPipelineParameters `json:"buildPipelineParameters,omitempty,omitzero"`
 	// Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.  See Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"bar-key": "value"}`
 	// +kubebuilder:validation:Optional
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`

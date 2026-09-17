@@ -29,7 +29,7 @@ type PipelineSpec struct {
 	// +kubebuilder:validation:Optional
 	ModelVersion string `json:"modelVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ParentRef PipelineParentRef `json:"parentRef,omitempty"`
+	ParentRef PipelineParentRef `json:"parentRef,omitempty,omitzero"`
 	// Detailed description for the object.
 	// +kubebuilder:validation:Optional
 	Description string `json:"description,omitempty"`
@@ -53,6 +53,12 @@ type PipelineSpec struct {
 	// The list of variables required in pipeline.
 	// +kubebuilder:validation:Optional
 	Variables []shared.JSONValue `json:"variables,omitempty"`
+	// The OCID of the Data Integration workspace containing this resource.
+	// +kubebuilder:validation:Required
+	WorkspaceId string `json:"workspaceId"`
+	// The aggregator key required by the collection lookup.
+	// +kubebuilder:validation:Required
+	AggregatorKey string `json:"aggregatorKey"`
 }
 
 // PipelineRegistryMetadata defines nested fields for Pipeline.RegistryMetadata.

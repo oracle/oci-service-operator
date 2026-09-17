@@ -1,0 +1,50 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: devops
+slug: deploypipeline
+kind: DeployPipeline
+archetype: generated-service-manager
+states:
+    - provisioning
+    - active
+    - updating
+    - terminating
+repoAuthored:
+    providerLifecycle:
+        createPending:
+            - CREATING
+        updatePending:
+            - UPDATING
+        deletePending:
+            - DELETING
+    listLookup:
+        filters:
+            - projectId
+            - displayName
+            - id
+        matchRule: exact projectId, displayName, id match within the resource scope; duplicate matches fail
+    mutation:
+        mutable:
+            - description
+            - displayName
+            - deployPipelineParameters
+            - freeformTags
+            - definedTags
+        forceNew:
+            - projectId
+    hooks:
+        create:
+            - helper: tfresource.CreateResource
+        update:
+            - helper: tfresource.UpdateResource
+        delete:
+            - helper: tfresource.DeleteResource
+    followUp:
+        create: GetWorkRequest -> GetDeployPipeline
+        update: GetWorkRequest -> GetDeployPipeline
+        delete: confirm-delete
+notes:
+    - The production runtime uses generatedruntime/workrequest async handling for create, update, delete work-request phases.
+    - Lifecycle success states are ACTIVE, INACTIVE; pending create, update, and delete states requeue until the corresponding follow-up converges.
+    - Status projection is required, Secret side effects are none, and the finalizer policy is retain-until-confirmed-delete.
+    - Delete policy required retains ownership until DELETED or confirmed absence.

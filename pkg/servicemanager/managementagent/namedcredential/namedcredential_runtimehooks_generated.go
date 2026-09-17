@@ -50,15 +50,84 @@ func registerNamedCredentialRuntimeHooksMutator(mutator NamedCredentialRuntimeHo
 	}
 	namedcredentialRuntimeHooksMutators = append(namedcredentialRuntimeHooksMutators, mutator)
 }
+func newNamedCredentialRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "managementagent",
+		FormalSlug:    "namedcredential",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"id", "managementAgentId", "name", "state", "type"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"definedTags", "description", "freeformTags", "properties"},
+			ForceNew:      []string{"managementAgentId", "name", "type"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "NamedCredential", Action: "CreateNamedCredential"}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "NamedCredential", Action: "UpdateNamedCredential"}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "NamedCredential", Action: "DeleteNamedCredential"}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "NamedCredential", Action: "CreateNamedCredential"}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "NamedCredential", Action: "UpdateNamedCredential"}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "NamedCredential", Action: "DeleteNamedCredential"}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newNamedCredentialDefaultRuntimeHooks(sdkClient managementagentsdk.ManagementAgentClient) NamedCredentialRuntimeHooks {
 	return NamedCredentialRuntimeHooks{
+		Semantics:       newNamedCredentialRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*managementagentv1beta1.NamedCredential]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*managementagentv1beta1.NamedCredential]{},
 		StatusHooks:     generatedruntime.StatusHooks[*managementagentv1beta1.NamedCredential]{},
 		ParityHooks:     generatedruntime.ParityHooks[*managementagentv1beta1.NamedCredential]{},
-		Async:           generatedruntime.AsyncHooks[*managementagentv1beta1.NamedCredential]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*managementagentv1beta1.NamedCredential]{},
+		Async: generatedruntime.AsyncHooks[*managementagentv1beta1.NamedCredential]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := managementagentsdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*managementagentv1beta1.NamedCredential]{},
 		Create: runtimeOperationHooks[managementagentsdk.CreateNamedCredentialRequest, managementagentsdk.CreateNamedCredentialResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateNamedCredentialDetails", RequestName: "CreateNamedCredentialDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request managementagentsdk.CreateNamedCredentialRequest) (managementagentsdk.CreateNamedCredentialResponse, error) {
@@ -106,10 +175,19 @@ func buildNamedCredentialGeneratedRuntimeConfig(
 	hooks NamedCredentialRuntimeHooks,
 ) generatedruntime.Config[*managementagentv1beta1.NamedCredential] {
 	return generatedruntime.Config[*managementagentv1beta1.NamedCredential]{
-		Kind:            "NamedCredential",
-		SDKName:         "NamedCredential",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "NamedCredential",
+		SDKName:   "NamedCredential",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

@@ -1,0 +1,43 @@
+version: 1
+name: postgresql-db-system-basic-crud
+service: psql
+namespace: default
+timeout: 120m
+pollInterval: 30s
+dependencies:
+  - admin-secret.yaml
+create: create.yaml
+update: update.yaml
+ready:
+  conditionTypes: [Active]
+  lifecycleStates: [ACTIVE]
+  requireOCID: true
+  fieldsEqual:
+    - desired: spec.displayName
+      observed: status.displayName
+    - desired: spec.description
+      observed: status.description
+    - desired: spec.dbVersion
+      observed: status.dbVersion
+    - desired: spec.shape
+      observed: status.shape
+    - desired: spec.instanceOcpuCount
+      observed: status.instanceOcpuCount
+    - desired: spec.instanceMemorySizeInGBs
+      observed: status.instanceMemorySizeInGBs
+    - desired: spec.storageDetails.isRegionallyDurable
+      observed: status.storageDetails.isRegionallyDurable
+    - desired: spec.networkDetails.subnetId
+      observed: status.networkDetails.subnetId
+    - desired: spec.adminUsername
+      observed: status.adminUsernameSource
+    - desired: spec.adminPassword
+      observed: status.adminPasswordSource
+    - desired: spec.freeformTags
+      observed: status.freeformTags
+failureConditionTypes: [Failed]
+delete:
+  enabled: true
+  timeout: 120m
+  cleanupDependencies: true
+cleanupOnFailure: true

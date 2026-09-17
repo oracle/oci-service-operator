@@ -40,7 +40,7 @@ observe --> retryable : OCI state in CREATING,\nUPDATING, DELETING
 observe --> failed : unresolved OCI error or non-success state
 evaluate_ready --> reject_unsupported_drift : force-new or conflicting\ndrift detected
 reject_unsupported_drift --> ready : wait for spec or live state change
-evaluate_ready --> apply_update : supported mutable drift for\ndefined_tags, display_name,\nesxi_software_version (+3\nmore)
+evaluate_ready --> apply_update : supported mutable drift for\ndefinedTags, displayName,\nesxiSoftwareVersion (+3\nmore)
 apply_update --> ready : update path completes
 evaluate_ready --> ready : no supported drift remains
 ready --> ready : no supported drift remains
@@ -73,16 +73,17 @@ provider states: create CREATING, UPDATING;
 update UPDATING; delete DELETING
 follow-up: create=read-after-write;
 update=read-after-write; delete=confirm-delete
-supported drift: defined_tags, display_name,
-esxi_software_version, freeform_tags (+2 more)
+supported drift: definedTags, displayName,
+esxiSoftwareVersion, freeformTags (+2 more)
 reject before mutate: force-new fields
-capacity_reservation_id,
-compute_availability_domain, datastores,
-esxi_hosts_count (+7 more)
+capacityReservationId,
+computeAvailabilityDomain, datastores,
+esxiHostsCount (+7 more)
 create-only fields: none
 list lookup: oci_ocvp_clusters filters
-compartment_id, display_name, lifecycle_state,
-sddc_id
+compartmentId, displayName, lifecycleState,
+sddcId; exact SDDC and display-name identity
+match; duplicate matches fail
 conflicts: none
 open gaps: none
 Create or bind only attempts list reuse when

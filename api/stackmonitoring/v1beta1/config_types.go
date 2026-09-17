@@ -51,7 +51,7 @@ type ConfigSpec struct {
 	// +kubebuilder:validation:Optional
 	UserGroups []ConfigUserGroup `json:"userGroups,omitempty"`
 	// +kubebuilder:validation:Optional
-	AdditionalConfigurations ConfigAdditionalConfigurations `json:"additionalConfigurations,omitempty"`
+	AdditionalConfigurations ConfigAdditionalConfigurations `json:"additionalConfigurations,omitempty,omitzero"`
 	// True if automatic promotion is enabled, false if it is not enabled.
 	// +kubebuilder:validation:Optional
 	IsEnabled bool `json:"isEnabled,omitempty"`

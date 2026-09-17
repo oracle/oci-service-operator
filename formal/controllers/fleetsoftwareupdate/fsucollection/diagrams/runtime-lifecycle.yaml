@@ -1,0 +1,99 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: fleetsoftwareupdate
+slug: fsucollection
+kind: FsuCollection
+archetype: generated-service-manager
+states:
+- provisioning
+- active
+- updating
+- terminating
+repoAuthored:
+  operations:
+    create:
+    - CreateFsuCollection
+    update:
+    - UpdateFsuCollection
+    delete:
+    - DeleteFsuCollection
+  providerLifecycle:
+    createPending:
+    - S_CREATING
+    updatePending: []
+    deletePending:
+    - DELETING
+  listLookup:
+    filters:
+    - compartmentId
+    - displayName
+    - state
+    - type
+    matchRule: exact declared filters match within the resource scope; duplicate matches
+      fail
+  mutation:
+    mutable:
+    - compartmentId
+    - definedTags
+    - displayName
+    - freeformTags
+    - id
+    forceNew:
+    - components
+    - components.componentType
+    - components.fleetDiscovery
+    - components.fleetDiscovery.filters
+    - components.fleetDiscovery.filters.entityType
+    - components.fleetDiscovery.filters.exadataReleases
+    - components.fleetDiscovery.filters.identifiers
+    - components.fleetDiscovery.filters.mode
+    - components.fleetDiscovery.filters.operator
+    - components.fleetDiscovery.filters.tags
+    - components.fleetDiscovery.filters.tags.key
+    - components.fleetDiscovery.filters.tags.namespace
+    - components.fleetDiscovery.filters.tags.value
+    - components.fleetDiscovery.filters.type
+    - components.fleetDiscovery.filters.versions
+    - components.fleetDiscovery.fsuDiscoveryId
+    - components.fleetDiscovery.query
+    - components.fleetDiscovery.strategy
+    - components.fleetDiscovery.targets
+    - components.sourceMajorVersion
+    - fleetDiscovery
+    - fleetDiscovery.filters
+    - fleetDiscovery.filters.entityType
+    - fleetDiscovery.filters.exadataReleases
+    - fleetDiscovery.filters.identifiers
+    - fleetDiscovery.filters.mode
+    - fleetDiscovery.filters.names
+    - fleetDiscovery.filters.operator
+    - fleetDiscovery.filters.tags
+    - fleetDiscovery.filters.tags.key
+    - fleetDiscovery.filters.tags.namespace
+    - fleetDiscovery.filters.tags.value
+    - fleetDiscovery.filters.type
+    - fleetDiscovery.filters.versions
+    - fleetDiscovery.fsuDiscoveryId
+    - fleetDiscovery.query
+    - fleetDiscovery.strategy
+    - fleetDiscovery.targets
+    - serviceType
+    - sourceMajorVersion
+    - type
+  hooks:
+    create:
+    - helper: tfresource.CreateResource
+    update:
+    - helper: tfresource.UpdateResource
+    delete:
+    - helper: tfresource.DeleteResource
+  followUp:
+    create: GetWorkRequest -> read-after-write
+    update: GetWorkRequest -> read-after-write
+    delete: GetWorkRequest -> confirm-delete
+notes:
+- The generated service manager uses the reviewed CRUD request, response, lifecycle,
+  and status projection contract.
+- Work-request phases are declared per operation from the vendored SDK response surface.
+- Secret side effects are none and finalizer ownership is retained until confirmed
+  deletion.

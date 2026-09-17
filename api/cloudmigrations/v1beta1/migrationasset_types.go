@@ -36,7 +36,7 @@ type MigrationAssetSpec struct {
 	// +kubebuilder:validation:Optional
 	ReplicationScheduleId string `json:"replicationScheduleId,omitempty"`
 	// +kubebuilder:validation:Optional
-	ReplicationLocationDetail MigrationAssetReplicationLocationDetail `json:"replicationLocationDetail,omitempty"`
+	ReplicationLocationDetail MigrationAssetReplicationLocationDetail `json:"replicationLocationDetail,omitempty,omitzero"`
 	// List of migration assets that depends on this asset.
 	// +kubebuilder:validation:Optional
 	DependsOn []string `json:"dependsOn,omitempty"`

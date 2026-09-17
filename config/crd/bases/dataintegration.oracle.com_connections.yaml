@@ -123,6 +123,10 @@ spec:
                 description: The credential file content from an Oracle Object Storage
                   wallet.
                 type: string
+              dataAssetKey:
+                description: The data asset key required by the connection collection
+                  lookup.
+                type: string
               dataNodePrincipal:
                 description: The HDFS Data Node principal.
                 type: string
@@ -319,10 +323,16 @@ spec:
               username:
                 description: The user name for the connection.
                 type: string
+              workspaceId:
+                description: The OCID of the Data Integration workspace containing
+                  this resource.
+                type: string
             required:
+            - dataAssetKey
             - identifier
             - name
             - objectVersion
+            - workspaceId
             type: object
           status:
             description: ConnectionStatus defines the observed state of Connection.

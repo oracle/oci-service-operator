@@ -50,50 +50,119 @@ func registerOracleDbAzureBlobContainerRuntimeHooksMutator(mutator OracleDbAzure
 	}
 	oracledbazureblobcontainerRuntimeHooksMutators = append(oracledbazureblobcontainerRuntimeHooksMutators, mutator)
 }
-func newOracleDbAzureBlobContainerDefaultRuntimeHooks(sdkClient dbmulticloudsdk.OracleDBAzureBlobContainerClient) OracleDbAzureBlobContainerRuntimeHooks {
+func newOracleDbAzureBlobContainerRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "dbmulticloud",
+		FormalSlug:    "oracledbazureblobcontainer",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"azureStorageAccountName", "azureStorageContainerName", "compartmentId", "displayName", "oracleDbAzureBlobContainerId", "state"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"azureStorageAccountName", "azureStorageContainerName", "compartmentId", "definedTags", "displayName", "freeformTags", "privateEndpointDnsAlias", "privateEndpointIpAddress"},
+			ForceNew:      []string{},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
+func newOracleDbAzureBlobContainerDefaultRuntimeHooks(sdkClient OracleDbAzureBlobContainerSDKClients) OracleDbAzureBlobContainerRuntimeHooks {
 	return OracleDbAzureBlobContainerRuntimeHooks{
+		Semantics:       newOracleDbAzureBlobContainerRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*dbmulticloudv1beta1.OracleDbAzureBlobContainer]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*dbmulticloudv1beta1.OracleDbAzureBlobContainer]{},
 		StatusHooks:     generatedruntime.StatusHooks[*dbmulticloudv1beta1.OracleDbAzureBlobContainer]{},
 		ParityHooks:     generatedruntime.ParityHooks[*dbmulticloudv1beta1.OracleDbAzureBlobContainer]{},
-		Async:           generatedruntime.AsyncHooks[*dbmulticloudv1beta1.OracleDbAzureBlobContainer]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*dbmulticloudv1beta1.OracleDbAzureBlobContainer]{},
+		Async: generatedruntime.AsyncHooks[*dbmulticloudv1beta1.OracleDbAzureBlobContainer]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := dbmulticloudsdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.workRequestClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*dbmulticloudv1beta1.OracleDbAzureBlobContainer]{},
 		Create: runtimeOperationHooks[dbmulticloudsdk.CreateOracleDbAzureBlobContainerRequest, dbmulticloudsdk.CreateOracleDbAzureBlobContainerResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateOracleDbAzureBlobContainerDetails", RequestName: "CreateOracleDbAzureBlobContainerDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dbmulticloudsdk.CreateOracleDbAzureBlobContainerRequest) (dbmulticloudsdk.CreateOracleDbAzureBlobContainerResponse, error) {
-				return sdkClient.CreateOracleDbAzureBlobContainer(ctx, request)
+				return sdkClient.oracleDbAzureBlobContainerClient.CreateOracleDbAzureBlobContainer(ctx, request)
 			},
 		},
 		Get: runtimeOperationHooks[dbmulticloudsdk.GetOracleDbAzureBlobContainerRequest, dbmulticloudsdk.GetOracleDbAzureBlobContainerResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OracleDbAzureBlobContainerId", RequestName: "oracleDbAzureBlobContainerId", Contribution: "path", PreferResourceID: true}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dbmulticloudsdk.GetOracleDbAzureBlobContainerRequest) (dbmulticloudsdk.GetOracleDbAzureBlobContainerResponse, error) {
-				return sdkClient.GetOracleDbAzureBlobContainer(ctx, request)
+				return sdkClient.oracleDbAzureBlobContainerClient.GetOracleDbAzureBlobContainer(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[dbmulticloudsdk.ListOracleDbAzureBlobContainersRequest, dbmulticloudsdk.ListOracleDbAzureBlobContainersResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "OracleDbAzureBlobContainerId", RequestName: "oracleDbAzureBlobContainerId", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "AzureStorageAccountName", RequestName: "azureStorageAccountName", Contribution: "query", PreferResourceID: false}, {FieldName: "AzureStorageContainerName", RequestName: "azureStorageContainerName", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dbmulticloudsdk.ListOracleDbAzureBlobContainersRequest) (dbmulticloudsdk.ListOracleDbAzureBlobContainersResponse, error) {
-				return sdkClient.ListOracleDbAzureBlobContainers(ctx, request)
+				return sdkClient.oracleDbAzureBlobContainerClient.ListOracleDbAzureBlobContainers(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[dbmulticloudsdk.UpdateOracleDbAzureBlobContainerRequest, dbmulticloudsdk.UpdateOracleDbAzureBlobContainerResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OracleDbAzureBlobContainerId", RequestName: "oracleDbAzureBlobContainerId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateOracleDbAzureBlobContainerDetails", RequestName: "UpdateOracleDbAzureBlobContainerDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dbmulticloudsdk.UpdateOracleDbAzureBlobContainerRequest) (dbmulticloudsdk.UpdateOracleDbAzureBlobContainerResponse, error) {
-				return sdkClient.UpdateOracleDbAzureBlobContainer(ctx, request)
+				return sdkClient.oracleDbAzureBlobContainerClient.UpdateOracleDbAzureBlobContainer(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[dbmulticloudsdk.DeleteOracleDbAzureBlobContainerRequest, dbmulticloudsdk.DeleteOracleDbAzureBlobContainerResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OracleDbAzureBlobContainerId", RequestName: "oracleDbAzureBlobContainerId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request dbmulticloudsdk.DeleteOracleDbAzureBlobContainerRequest) (dbmulticloudsdk.DeleteOracleDbAzureBlobContainerResponse, error) {
-				return sdkClient.DeleteOracleDbAzureBlobContainer(ctx, request)
+				return sdkClient.oracleDbAzureBlobContainerClient.DeleteOracleDbAzureBlobContainer(ctx, request)
 			},
 		},
 		WrapGeneratedClient: []func(OracleDbAzureBlobContainerServiceClient) OracleDbAzureBlobContainerServiceClient{},
 	}
 }
 
-func newOracleDbAzureBlobContainerRuntimeHooks(manager *OracleDbAzureBlobContainerServiceManager, sdkClient dbmulticloudsdk.OracleDBAzureBlobContainerClient) OracleDbAzureBlobContainerRuntimeHooks {
+func newOracleDbAzureBlobContainerRuntimeHooks(manager *OracleDbAzureBlobContainerServiceManager, sdkClient OracleDbAzureBlobContainerSDKClients) OracleDbAzureBlobContainerRuntimeHooks {
 	hooks := newOracleDbAzureBlobContainerDefaultRuntimeHooks(sdkClient)
 	for _, mutator := range oracledbazureblobcontainerRuntimeHooksMutators {
 		mutator(manager, &hooks)
@@ -106,10 +175,19 @@ func buildOracleDbAzureBlobContainerGeneratedRuntimeConfig(
 	hooks OracleDbAzureBlobContainerRuntimeHooks,
 ) generatedruntime.Config[*dbmulticloudv1beta1.OracleDbAzureBlobContainer] {
 	return generatedruntime.Config[*dbmulticloudv1beta1.OracleDbAzureBlobContainer]{
-		Kind:            "OracleDbAzureBlobContainer",
-		SDKName:         "OracleDbAzureBlobContainer",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "OracleDbAzureBlobContainer",
+		SDKName:   "OracleDbAzureBlobContainer",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

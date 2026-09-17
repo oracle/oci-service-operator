@@ -1,0 +1,153 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "goldengate",
+  "slug": "databaseregistration",
+  "kind": "DatabaseRegistration",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_golden_gate_database_registration",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDatabaseRegistration",
+        "requestType": "goldengate.CreateDatabaseRegistrationRequest",
+        "responseType": "goldengate.CreateDatabaseRegistrationResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDatabaseRegistration",
+        "requestType": "goldengate.GetDatabaseRegistrationRequest",
+        "responseType": "goldengate.GetDatabaseRegistrationResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatabaseRegistrations",
+        "requestType": "goldengate.ListDatabaseRegistrationsRequest",
+        "responseType": "goldengate.ListDatabaseRegistrationsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDatabaseRegistration",
+        "requestType": "goldengate.UpdateDatabaseRegistrationRequest",
+        "responseType": "goldengate.UpdateDatabaseRegistrationResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDatabaseRegistration",
+        "requestType": "goldengate.DeleteDatabaseRegistrationRequest",
+        "responseType": "goldengate.DeleteDatabaseRegistrationResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "displayName",
+      "fqdn",
+      "username",
+      "password",
+      "aliasName",
+      "description",
+      "freeformTags",
+      "definedTags",
+      "connectionString",
+      "sessionMode",
+      "wallet"
+    ],
+    "forceNew": [
+      "compartmentId",
+      "ipAddress",
+      "subnetId",
+      "databaseId",
+      "vaultId",
+      "keyId",
+      "secretCompartmentId"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "DatabaseRegistration",
+        "action": "CreateDatabaseRegistration"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "DatabaseRegistration",
+        "action": "UpdateDatabaseRegistration"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "DatabaseRegistration",
+        "action": "DeleteDatabaseRegistration"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "unavailable",
+    "collectionField": "Items",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartmentId",
+      "lifecycleState",
+      "displayName",
+      "opc-request-id"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/goldengate/databaseregistration/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/goldengate/databaseregistration/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Terraform provider formal-import could not resolve oci_golden_gate_database_registration; the vendored SDK, generated runtime, and package-owned typed OCI fixtures define this reviewed contract."
+  ]
+}

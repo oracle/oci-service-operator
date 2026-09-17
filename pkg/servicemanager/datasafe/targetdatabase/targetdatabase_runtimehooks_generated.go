@@ -50,15 +50,84 @@ func registerTargetDatabaseRuntimeHooksMutator(mutator TargetDatabaseRuntimeHook
 	}
 	targetdatabaseRuntimeHooksMutators = append(targetdatabaseRuntimeHooksMutators, mutator)
 }
+func newTargetDatabaseRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "datasafe",
+		FormalSlug:    "targetdatabase",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE", "FAILED", "NEEDS_ATTENTION"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"accessLevel", "associatedResourceId", "compartmentId", "compartmentIdInSubtree", "databaseType", "displayName", "infrastructureType", "state", "targetDatabaseId"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"compartmentId", "connectionOption.connectionType", "connectionOption.datasafePrivateEndpointId", "connectionOption.onPremConnectorId", "credentials.password", "credentials.userName", "databaseDetails.autonomousDatabaseId", "databaseDetails.databaseType", "databaseDetails.dbSystemId", "databaseDetails.infrastructureType", "databaseDetails.instanceId", "databaseDetails.ipAddresses", "databaseDetails.listenerPort", "databaseDetails.pluggableDatabaseId", "databaseDetails.serviceName", "databaseDetails.vmClusterId", "definedTags", "description", "displayName", "freeformTags", "tlsConfig.certificateStoreType", "tlsConfig.keyStoreContent", "tlsConfig.status", "tlsConfig.storePassword", "tlsConfig.trustStoreContent"},
+			ForceNew:      []string{"peerTargetDatabaseDetails", "peerTargetDatabaseDetails.databaseDetails", "peerTargetDatabaseDetails.databaseDetails.autonomousDatabaseId", "peerTargetDatabaseDetails.databaseDetails.databaseType", "peerTargetDatabaseDetails.databaseDetails.dbSystemId", "peerTargetDatabaseDetails.databaseDetails.infrastructureType", "peerTargetDatabaseDetails.databaseDetails.instanceId", "peerTargetDatabaseDetails.databaseDetails.ipAddresses", "peerTargetDatabaseDetails.databaseDetails.listenerPort", "peerTargetDatabaseDetails.databaseDetails.pluggableDatabaseId", "peerTargetDatabaseDetails.databaseDetails.serviceName", "peerTargetDatabaseDetails.databaseDetails.vmClusterId", "peerTargetDatabaseDetails.dataguardAssociationId", "peerTargetDatabaseDetails.description", "peerTargetDatabaseDetails.displayName", "peerTargetDatabaseDetails.tlsConfig", "peerTargetDatabaseDetails.tlsConfig.certificateStoreType", "peerTargetDatabaseDetails.tlsConfig.keyStoreContent", "peerTargetDatabaseDetails.tlsConfig.status", "peerTargetDatabaseDetails.tlsConfig.storePassword", "peerTargetDatabaseDetails.tlsConfig.trustStoreContent"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForUpdatedState", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForUpdatedState", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newTargetDatabaseDefaultRuntimeHooks(sdkClient datasafesdk.DataSafeClient) TargetDatabaseRuntimeHooks {
 	return TargetDatabaseRuntimeHooks{
+		Semantics:       newTargetDatabaseRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*datasafev1beta1.TargetDatabase]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*datasafev1beta1.TargetDatabase]{},
 		StatusHooks:     generatedruntime.StatusHooks[*datasafev1beta1.TargetDatabase]{},
 		ParityHooks:     generatedruntime.ParityHooks[*datasafev1beta1.TargetDatabase]{},
-		Async:           generatedruntime.AsyncHooks[*datasafev1beta1.TargetDatabase]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*datasafev1beta1.TargetDatabase]{},
+		Async: generatedruntime.AsyncHooks[*datasafev1beta1.TargetDatabase]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := datasafesdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*datasafev1beta1.TargetDatabase]{},
 		Create: runtimeOperationHooks[datasafesdk.CreateTargetDatabaseRequest, datasafesdk.CreateTargetDatabaseResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateTargetDatabaseDetails", RequestName: "CreateTargetDatabaseDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request datasafesdk.CreateTargetDatabaseRequest) (datasafesdk.CreateTargetDatabaseResponse, error) {
@@ -106,10 +175,19 @@ func buildTargetDatabaseGeneratedRuntimeConfig(
 	hooks TargetDatabaseRuntimeHooks,
 ) generatedruntime.Config[*datasafev1beta1.TargetDatabase] {
 	return generatedruntime.Config[*datasafev1beta1.TargetDatabase]{
-		Kind:            "TargetDatabase",
-		SDKName:         "TargetDatabase",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "TargetDatabase",
+		SDKName:   "TargetDatabase",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

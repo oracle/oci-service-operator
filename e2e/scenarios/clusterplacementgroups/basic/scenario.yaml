@@ -1,0 +1,25 @@
+version: 1
+name: clusterplacementgroup-basic-crud
+service: clusterplacementgroups
+namespace: default
+timeout: 30m
+pollInterval: 10s
+create: create.yaml
+update: update.yaml
+ready:
+  conditionTypes: [Active]
+  lifecycleStates: [ACTIVE]
+  requireOCID: true
+  fieldsEqual:
+    - desired: spec.name
+      observed: status.name
+    - desired: spec.description
+      observed: status.description
+    - desired: spec.freeformTags
+      observed: status.freeformTags
+failureConditionTypes: [Failed]
+delete:
+  enabled: true
+  timeout: 30m
+  cleanupDependencies: true
+cleanupOnFailure: true

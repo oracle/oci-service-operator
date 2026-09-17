@@ -14,8 +14,13 @@ SKIP_GENERATOR_REFRESH="${SKIP_GENERATOR_REFRESH:-false}"
 GENERATOR_OVERWRITE="${GENERATOR_OVERWRITE:-true}"
 SKIP_PACKAGE_RENDER="${SKIP_PACKAGE_RENDER:-false}"
 REFRESH_OCI_SECRET="${REFRESH_OCI_SECRET:-false}"
+SKIP_CERT_MANAGER="${SKIP_CERT_MANAGER:-false}"
 SAMPLE_DIR="${SAMPLE_DIR:-${REPO_ROOT}/config/samples}"
 SAMPLE_GLOB="${SAMPLE_GLOB:-}"
+SCENARIO_PATH="${SCENARIO_PATH:-}"
+SCENARIO_ARTIFACT_DIR="${SCENARIO_ARTIFACT_DIR:-}"
+COMPOSITE_DIR="${COMPOSITE_DIR:-}"
+COMPOSITE_ARTIFACT_DIR="${COMPOSITE_ARTIFACT_DIR:-}"
 TEST_NAMESPACE="${TEST_NAMESPACE:-default}"
 CONTROLLER_ROLLOUT_TIMEOUT="${CONTROLLER_ROLLOUT_TIMEOUT:-5m}"
 RESOURCE_TIMEOUT="${RESOURCE_TIMEOUT:-10m}"
@@ -35,6 +40,8 @@ OLM_VERSION="${OLM_VERSION:-v0.28.0}"
 KIND_WAIT="${KIND_WAIT:-5m}"
 COREDNS_ROLLOUT_TIMEOUT="${COREDNS_ROLLOUT_TIMEOUT:-5m}"
 OLM_TIMEOUT="${OLM_TIMEOUT:-10m}"
+CERT_MANAGER_VERSION="${CERT_MANAGER_VERSION:-v1.19.3}"
+CERT_MANAGER_TIMEOUT="${CERT_MANAGER_TIMEOUT:-5m}"
 RECREATE_CLUSTER="${RECREATE_CLUSTER:-false}"
 SKIP_OLM="${SKIP_OLM:-false}"
 KIND_NODE_NAMESERVERS="${KIND_NODE_NAMESERVERS:-1.1.1.1 8.8.8.8}"
@@ -45,6 +52,8 @@ KIND_CONFIG_PATH="${ARTIFACT_DIR}/kind-config.yaml"
 KUBECTL_BIN="${KUBECTL_BIN:-kubectl}"
 KIND_BIN="${BIN_DIR}/kind"
 OPERATOR_SDK_BIN="${BIN_DIR}/operator-sdk"
+CHAINSAW_RUNNER="${CHAINSAW_RUNNER:-${REPO_ROOT}/e2e/chainsaw}"
+CHAINSAW_VERSION="${CHAINSAW_VERSION:-v0.2.15}"
 MAKE_GOCACHE="${MAKE_GOCACHE:-${ARTIFACT_DIR}/.gocache}"
 MAKE_GOMODCACHE="${MAKE_GOMODCACHE:-${ARTIFACT_DIR}/.gomodcache}"
 MAKE_GOTMPDIR="${MAKE_GOTMPDIR:-${ARTIFACT_DIR}/.gotmp}"
@@ -92,7 +101,8 @@ Default action:
 
 Other actions:
   test    Require --service. Bootstrap the cluster if needed, then deploy and
-          validate the selected package group against local sample manifests.
+          validate the selected package group against samples, one lifecycle
+          scenario, or one composite suite.
   down    Delete the Kind cluster and local artifacts for CLUSTER_NAME.
   status  Show cluster, OLM, and optional service deployment status.
   render  Render the Kind config only.
@@ -103,6 +113,10 @@ Service test options:
   --controller-img IMG     Local controller image tag. Default: osok-<group>:dev
   --sample-dir DIR         Sample manifest directory. Default: ${SAMPLE_DIR}
   --sample-glob GLOB       Manifest glob inside --sample-dir. Default: <group>_*.yaml
+  --scenario PATH          Run an AWS ACK-style create/update/delete scenario
+                           instead of applying the package sample directory.
+  --composite DIR          Run a Chainsaw dependency suite instead of package
+                           samples or one standalone lifecycle scenario.
   --test-namespace NS      Namespace for sample applies when manifests omit it.
                            Default: ${TEST_NAMESPACE}
   --oci-profile PROFILE    OCI profile for auto-created ocicredentials. Default: ${OCI_PROFILE}
@@ -114,6 +128,7 @@ Service test options:
   --skip-load              Skip kind load docker-image.
   --skip-generator-refresh Skip make generator-refresh.
   --skip-package-render    Skip make package-install and reuse dist/packages/<group>/install.yaml.
+  --skip-cert-manager      Do not install cert-manager when the package manifest requires it.
 
 Common environment overrides:
   CLUSTER_NAME=${CLUSTER_NAME}
@@ -125,6 +140,8 @@ Common environment overrides:
   OLM_REGISTRY_PROBE_URL=${OLM_REGISTRY_PROBE_URL}
   OPERATOR_SDK_VERSION=${OPERATOR_SDK_VERSION}
   OLM_VERSION=${OLM_VERSION}
+  CERT_MANAGER_VERSION=${CERT_MANAGER_VERSION}
+  CHAINSAW_VERSION=${CHAINSAW_VERSION}
   RECREATE_CLUSTER=${RECREATE_CLUSTER}
   SKIP_OLM=${SKIP_OLM}
 EOF
@@ -142,6 +159,9 @@ need_cmd() {
 }
 
 parse_args() {
+  local composite_relative
+  local composite_service
+
   if [ $# -gt 0 ]; then
     case "$1" in
       up|test|down|status|render|help|-h|--help)
@@ -171,6 +191,16 @@ parse_args() {
       --sample-glob)
         [ $# -ge 2 ] || die "--sample-glob requires a value"
         SAMPLE_GLOB="$2"
+        shift 2
+        ;;
+      --scenario)
+        [ $# -ge 2 ] || die "--scenario requires a value"
+        SCENARIO_PATH="$2"
+        shift 2
+        ;;
+      --composite)
+        [ $# -ge 2 ] || die "--composite requires a value"
+        COMPOSITE_DIR="$2"
         shift 2
         ;;
       --test-namespace)
@@ -218,6 +248,10 @@ parse_args() {
         SKIP_PACKAGE_RENDER=true
         shift
         ;;
+      --skip-cert-manager)
+        SKIP_CERT_MANAGER=true
+        shift
+        ;;
       help|-h|--help)
         ACTION="help"
         shift
@@ -245,6 +279,34 @@ parse_args() {
       SAMPLE_DIR="${REPO_ROOT}/${SAMPLE_DIR}"
       ;;
   esac
+
+  if [ -n "${SCENARIO_PATH}" ]; then
+    case "${SCENARIO_PATH}" in
+      /*) ;;
+      *) SCENARIO_PATH="${REPO_ROOT}/${SCENARIO_PATH}" ;;
+    esac
+    [ -f "${SCENARIO_PATH}" ] || die "lifecycle scenario not found: ${SCENARIO_PATH}"
+  fi
+
+  if [ -n "${COMPOSITE_DIR}" ]; then
+    case "${COMPOSITE_DIR}" in
+      /*) ;;
+      *) COMPOSITE_DIR="${REPO_ROOT}/${COMPOSITE_DIR}" ;;
+    esac
+    [ -d "${COMPOSITE_DIR}" ] || die "composite suite directory not found: ${COMPOSITE_DIR}"
+    COMPOSITE_DIR="$(cd -- "${COMPOSITE_DIR}" && pwd -P)"
+    [ -f "${COMPOSITE_DIR}/chainsaw-test.yaml" ] || die "composite suite is missing chainsaw-test.yaml: ${COMPOSITE_DIR}"
+    case "${COMPOSITE_DIR}" in
+      "${REPO_ROOT}/e2e/composite/"*)
+        composite_relative="${COMPOSITE_DIR#"${REPO_ROOT}/e2e/composite/"}"
+        composite_service="${composite_relative%%/*}"
+        [ "${SERVICE}" = "${composite_service}" ] || die "composite suite targets service ${composite_service}, not ${SERVICE}"
+        ;;
+    esac
+  fi
+  if [ -n "${SCENARIO_PATH}" ] && [ -n "${COMPOSITE_DIR}" ]; then
+    die "--scenario and --composite cannot be used together"
+  fi
 
   if [ -n "${SERVICE}" ] && [ -z "${CONTROLLER_IMG}" ]; then
     CONTROLLER_IMG="osok-${SERVICE}:dev"
@@ -584,13 +646,17 @@ load_local_controller_image() {
 
 refresh_service_artifacts() {
   local args
+  local generator_service
 
-  args=( generator-refresh "GENERATOR_SERVICE=${SERVICE}" )
+  generator_service="${CRD_PATHS#./api/}"
+  generator_service="${generator_service%%/*}"
+  [ -n "${generator_service}" ] || die "unable to derive generator service from CRD_PATHS=${CRD_PATHS}"
+  args=( generator-refresh "GENERATOR_SERVICE=${generator_service}" )
   if [ -n "${GENERATOR_OVERWRITE:-}" ]; then
     args+=( "GENERATOR_OVERWRITE=${GENERATOR_OVERWRITE}" )
   fi
 
-  log "Refreshing generated artifacts for service ${SERVICE}"
+  log "Refreshing generated artifacts for package ${SERVICE} from generator service ${generator_service}"
   run_make "${args[@]}"
 }
 
@@ -601,6 +667,29 @@ render_service_install_manifest() {
 
 ensure_service_install_manifest() {
   [ -f "${INSTALL_MANIFEST_PATH}" ] || die "install manifest not found: ${INSTALL_MANIFEST_PATH}"
+}
+
+install_cert_manager_if_required() {
+  local manifest_url
+
+  if ! grep -q 'cert-manager.io/' "${INSTALL_MANIFEST_PATH}"; then
+    return
+  fi
+  if is_true "${SKIP_CERT_MANAGER}"; then
+    die "package ${SERVICE} requires cert-manager but SKIP_CERT_MANAGER=${SKIP_CERT_MANAGER}"
+  fi
+  if "${KUBECTL_BIN}" get crd certificates.cert-manager.io issuers.cert-manager.io >/dev/null 2>&1 \
+    && "${KUBECTL_BIN}" -n cert-manager get deployment \
+      cert-manager cert-manager-cainjector cert-manager-webhook >/dev/null 2>&1; then
+    log "Reusing installed cert-manager"
+  else
+    manifest_url="https://github.com/cert-manager/cert-manager/releases/download/${CERT_MANAGER_VERSION}/cert-manager.yaml"
+    log "Installing cert-manager ${CERT_MANAGER_VERSION}"
+    "${KUBECTL_BIN}" apply -f "${manifest_url}"
+  fi
+  "${KUBECTL_BIN}" -n cert-manager rollout status deployment/cert-manager --timeout "${CERT_MANAGER_TIMEOUT}"
+  "${KUBECTL_BIN}" -n cert-manager rollout status deployment/cert-manager-cainjector --timeout "${CERT_MANAGER_TIMEOUT}"
+  "${KUBECTL_BIN}" -n cert-manager rollout status deployment/cert-manager-webhook --timeout "${CERT_MANAGER_TIMEOUT}"
 }
 
 ensure_namespace_exists() {
@@ -765,32 +854,32 @@ apply_service_install_manifest() {
 }
 
 patch_kind_local_mismatches() {
+  local desired_replicas
   local pki_mount_index
   local pki_volume_index
-  local patch_ops
   local auth_patch
 
-  log "Patching deployment ${DEPLOYMENT_NAME} image=${CONTROLLER_IMG} for Kind"
-  "${KUBECTL_BIN}" -n "${PACKAGE_NAMESPACE}" patch deployment "${DEPLOYMENT_NAME}" \
-    --type=json \
-    -p="[{\"op\":\"replace\",\"path\":\"/spec/template/spec/containers/0/image\",\"value\":\"${CONTROLLER_IMG}\"}]" >/dev/null
-
-  log "Patching deployment ${DEPLOYMENT_NAME} imagePullPolicy=IfNotPresent for Kind"
-  "${KUBECTL_BIN}" -n "${PACKAGE_NAMESPACE}" patch deployment "${DEPLOYMENT_NAME}" \
-    --type=json \
-    -p='[{"op":"replace","path":"/spec/template/spec/containers/0/imagePullPolicy","value":"IfNotPresent"}]' >/dev/null
+  desired_replicas="$("${KUBECTL_BIN}" -n "${PACKAGE_NAMESPACE}" get deployment "${DEPLOYMENT_NAME}" \
+    -o jsonpath='{.spec.replicas}')"
+  desired_replicas="${desired_replicas:-1}"
+  log "Scaling deployment ${DEPLOYMENT_NAME} to zero before applying local-only settings"
+  "${KUBECTL_BIN}" -n "${PACKAGE_NAMESPACE}" scale deployment "${DEPLOYMENT_NAME}" --replicas=0 >/dev/null
+  "${KUBECTL_BIN}" -n "${PACKAGE_NAMESPACE}" rollout status "deployment/${DEPLOYMENT_NAME}" \
+    --timeout="${CONTROLLER_ROLLOUT_TIMEOUT}" >/dev/null
 
   log "Patching secret ${OSOKCONFIG_SECRET_NAME} useinstanceprincipal=false for local credentials"
   "${KUBECTL_BIN}" -n "${PACKAGE_NAMESPACE}" patch secret "${OSOKCONFIG_SECRET_NAME}" \
     --type=merge \
     -p='{"stringData":{"useinstanceprincipal":"false"}}' >/dev/null
 
-  auth_patch="$(cat <<'EOF'
+  auth_patch="$(cat <<EOF
 spec:
   template:
     spec:
       containers:
       - name: manager
+        image: ${CONTROLLER_IMG}
+        imagePullPolicy: IfNotPresent
         env:
         - name: AUTH_TYPE
           valueFrom:
@@ -820,7 +909,7 @@ spec:
           secretName: ocicredentials
 EOF
 )"
-  log "Patching deployment ${DEPLOYMENT_NAME} with ocicredentials env and /etc/oci mount"
+  log "Patching deployment ${DEPLOYMENT_NAME} atomically for the local image and OCI credentials"
   "${KUBECTL_BIN}" -n "${PACKAGE_NAMESPACE}" patch deployment "${DEPLOYMENT_NAME}" \
     --type=strategic \
     -p "${auth_patch}" >/dev/null
@@ -835,8 +924,9 @@ EOF
     die "deployment ${DEPLOYMENT_NAME} unexpectedly mounts host /etc/pki"
   fi
 
-  log "Restarting deployment ${DEPLOYMENT_NAME} so updated secrets are re-read"
-  "${KUBECTL_BIN}" -n "${PACKAGE_NAMESPACE}" rollout restart "deployment/${DEPLOYMENT_NAME}" >/dev/null
+  log "Restoring deployment ${DEPLOYMENT_NAME} replicas=${desired_replicas}"
+  "${KUBECTL_BIN}" -n "${PACKAGE_NAMESPACE}" scale deployment "${DEPLOYMENT_NAME}" \
+    --replicas="${desired_replicas}" >/dev/null
 }
 
 wait_for_controller_rollout() {
@@ -1278,6 +1368,77 @@ run_service_samples() {
   log "Resource creation summary for ${SERVICE}: pass=${RESULT_PASS_COUNT} fail=${RESULT_FAIL_COUNT} total=${sample_count}"
 }
 
+run_lifecycle_scenario() {
+  local scenario_name
+  local scenario_artifacts
+  local profile_tenancy
+  local profile_region
+  local profile_security_token_file
+  local profile_availability_domain
+  local -a oci_auth_args
+
+  scenario_name="${SERVICE}-$(basename -- "$(dirname -- "${SCENARIO_PATH}")")"
+  scenario_artifacts="${SCENARIO_ARTIFACT_DIR:-${ARTIFACT_DIR}/scenarios/${scenario_name}}"
+  profile_tenancy="$(oci_config_value tenancy)"
+  profile_region="$(oci_config_value region)"
+  profile_security_token_file="$(oci_config_value security_token_file)"
+  export OCI_TENANCY_ID="${OCI_TENANCY_ID:-${profile_tenancy}}"
+  export OCI_REGION="${OCI_REGION:-${profile_region}}"
+  [ -n "${OCI_TENANCY_ID}" ] || die "profile ${OCI_PROFILE} does not provide OCI_TENANCY_ID for lifecycle scenarios"
+  [ -n "${OCI_REGION}" ] || die "profile ${OCI_PROFILE} does not provide OCI_REGION for lifecycle scenarios"
+  if [ -z "${OCI_AVAILABILITY_DOMAIN:-}" ] && command -v oci >/dev/null 2>&1; then
+    oci_auth_args=( --profile "${OCI_PROFILE}" )
+    if [ -n "${profile_security_token_file}" ]; then
+      oci_auth_args+=( --auth security_token )
+    fi
+    profile_availability_domain="$(
+      oci iam availability-domain list \
+        --compartment-id "${OCI_COMPARTMENT_ID:-${OCI_TENANCY_ID}}" \
+        "${oci_auth_args[@]}" \
+        --query 'data[0].name' \
+        --raw-output 2>/dev/null || true
+    )"
+    if [ -n "${profile_availability_domain}" ] && [ "${profile_availability_domain}" != "null" ]; then
+      export OCI_AVAILABILITY_DOMAIN="${profile_availability_domain}"
+    fi
+  fi
+  ensure_make_cache_dirs
+  log "Running lifecycle scenario ${SCENARIO_PATH}"
+  (
+    cd "${REPO_ROOT}"
+    GOCACHE="${MAKE_GOCACHE}" \
+    GOMODCACHE="${MAKE_GOMODCACHE}" \
+    GOTMPDIR="${MAKE_GOTMPDIR}" \
+    GOPATH="${MAKE_GOPATH}" \
+    go run -buildvcs=false ./cmd/osok-e2e lifecycle \
+      --scenario "${SCENARIO_PATH}" \
+      --artifacts-dir "${scenario_artifacts}" \
+      --kubeconfig "${KUBECONFIG_PATH}" \
+      --kubectl "${KUBECTL_BIN}" \
+      --expected-service "${SERVICE}"
+  )
+  log "Lifecycle evidence written to ${scenario_artifacts}/result.json"
+}
+
+run_composite_suite() {
+  local composite_name
+  local composite_artifacts
+
+  composite_name="${SERVICE}-$(basename -- "${COMPOSITE_DIR}")"
+  composite_artifacts="${COMPOSITE_ARTIFACT_DIR:-${ARTIFACT_DIR}/composite/${composite_name}}"
+  mkdir -p "${composite_artifacts}"
+  export OSOK_E2E_SUFFIX="${OSOK_E2E_SUFFIX:-$(date -u +%Y%m%d-%H%M%S)}"
+
+  log "Running composite suite ${COMPOSITE_DIR}"
+  "${CHAINSAW_RUNNER}" test "${COMPOSITE_DIR}" \
+    --fail-fast \
+    --parallel 1 \
+    --report-format JSON \
+    --report-name result \
+    --report-path "${composite_artifacts}"
+  log "Composite evidence written to ${composite_artifacts}/result.json"
+}
+
 run_service_suite() {
   load_service_metadata
   ensure_service_prereqs
@@ -1313,14 +1474,21 @@ run_service_suite() {
   fi
 
   ensure_service_install_manifest
+  install_cert_manager_if_required
   ensure_ocicredentials_secret
   apply_service_install_manifest
   patch_kind_local_mismatches
   wait_for_controller_rollout
-  run_service_samples
+  if [ -n "${COMPOSITE_DIR}" ]; then
+    run_composite_suite
+  elif [ -n "${SCENARIO_PATH}" ]; then
+    run_lifecycle_scenario
+  else
+    run_service_samples
+  fi
   capture_controller_logs
 
-  if [ "${RESULT_FAIL_COUNT}" -ne 0 ]; then
+  if [ -z "${SCENARIO_PATH}" ] && [ -z "${COMPOSITE_DIR}" ] && [ "${RESULT_FAIL_COUNT}" -ne 0 ]; then
     die "service suite failed for ${SERVICE}; see ${RESULTS_FILE} and ${CONTROLLER_LOG_FILE}"
   fi
 }

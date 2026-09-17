@@ -56,6 +56,15 @@ spec:
           spec:
             description: FolderTagSpec defines the desired state of FolderTag.
             properties:
+              catalogId:
+                description: The OCID of the catalog containing the tagged folder.
+                type: string
+              dataAssetKey:
+                description: The key of the data asset containing the tagged folder.
+                type: string
+              folderKey:
+                description: The key of the folder receiving the tag.
+                type: string
               name:
                 description: |-
                   The name of the tag in the case of a free form tag.
@@ -65,6 +74,10 @@ spec:
                 description: Unique key of the related term or null in the case of
                   a free form tag.
                 type: string
+            required:
+            - catalogId
+            - dataAssetKey
+            - folderKey
             type: object
           status:
             description: FolderTagStatus defines the observed state of FolderTag.

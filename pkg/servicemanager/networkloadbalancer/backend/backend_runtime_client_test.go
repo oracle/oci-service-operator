@@ -118,6 +118,31 @@ func TestCreateOrUpdateBindsExistingBackend(t *testing.T) {
 	}
 }
 
+func TestDeleteConfirmsAuthShapedNotFoundByScopedList(t *testing.T) {
+	t.Parallel()
+
+	resource := makeTrackedBackendResource()
+	client := newTestBackendRuntimeClient(&fakeBackendOCIClient{
+		getFn: func(context.Context, networkloadbalancersdk.GetBackendRequest) (networkloadbalancersdk.GetBackendResponse, error) {
+			return networkloadbalancersdk.GetBackendResponse{Backend: sdkBackend(1, false, false, false)}, nil
+		},
+		deleteFn: func(context.Context, networkloadbalancersdk.DeleteBackendRequest) (networkloadbalancersdk.DeleteBackendResponse, error) {
+			return networkloadbalancersdk.DeleteBackendResponse{}, errortest.NewServiceError(404, errorutil.NotAuthorizedOrNotFound, "ambiguous delete")
+		},
+		listFn: func(context.Context, networkloadbalancersdk.ListBackendsRequest) (networkloadbalancersdk.ListBackendsResponse, error) {
+			return networkloadbalancersdk.ListBackendsResponse{}, nil
+		},
+	})
+
+	deleted, err := client.Delete(context.Background(), resource)
+	if err != nil {
+		t.Fatalf("Delete() error = %v", err)
+	}
+	if !deleted || resource.Status.OsokStatus.DeletedAt == nil {
+		t.Fatalf("Delete() deleted=%v deletedAt=%v, want scoped absence confirmation", deleted, resource.Status.OsokStatus.DeletedAt)
+	}
+}
+
 func TestCreateOrUpdateCreatesBackendAndPollsWorkRequest(t *testing.T) {
 	t.Parallel()
 
@@ -559,6 +584,9 @@ func TestDeleteTreatsAuthShapedNotFoundAsAmbiguous(t *testing.T) {
 
 	resource := makeTrackedBackendResource()
 	client := newTestBackendRuntimeClient(&fakeBackendOCIClient{
+		listFn: func(context.Context, networkloadbalancersdk.ListBackendsRequest) (networkloadbalancersdk.ListBackendsResponse, error) {
+			return networkloadbalancersdk.ListBackendsResponse{BackendCollection: networkloadbalancersdk.BackendCollection{Items: []networkloadbalancersdk.BackendSummary{{Name: common.String(backendName)}}}}, nil
+		},
 		getFn: func(_ context.Context, req networkloadbalancersdk.GetBackendRequest) (networkloadbalancersdk.GetBackendResponse, error) {
 			assertBackendPathIdentity(t, req.NetworkLoadBalancerId, req.BackendSetName, req.BackendName)
 			return networkloadbalancersdk.GetBackendResponse{Backend: sdkBackend(1, false, false, false)}, nil

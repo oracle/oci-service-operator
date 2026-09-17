@@ -1,0 +1,172 @@
+# Copyright (c) 2026, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+# yaml-language-server: $schema=https://raw.githubusercontent.com/kyverno/chainsaw/v0.2.15/.schemas/json/test-chainsaw-v1alpha1.json
+
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: Test
+metadata:
+  name: containerengine-cluster-node-pool
+spec:
+  concurrent: false
+  timeouts:
+    apply: 2m
+    assert: 60m
+    cleanup: 75m
+    delete: 75m
+    exec: 2m
+  bindings:
+    - name: suffix
+      value: (env('OSOK_E2E_SUFFIX'))
+    - name: compartmentId
+      value: (env('OCI_COMPARTMENT_ID'))
+    - name: vcnId
+      value: (env('OCI_VCN_ID'))
+    - name: clusterSubnetId
+      value: (env('OCI_CLUSTER_SUBNET_ID'))
+    - name: serviceLbSubnetId
+      value: (env('OCI_SERVICE_LB_SUBNET_ID'))
+    - name: nodeSubnetId
+      value: (env('OCI_NODE_SUBNET_ID'))
+    - name: podSubnetId
+      value: (env('OCI_POD_SUBNET_ID'))
+    - name: kubernetesVersion
+      value: (env('OCI_KUBERNETES_VERSION'))
+    - name: computeShape
+      value: (env('OCI_COMPUTE_SHAPE'))
+    - name: imageId
+      value: (env('OCI_IMAGE_ID'))
+    - name: availabilityDomain
+      value: (env('OCI_AVAILABILITY_DOMAIN'))
+    - name: clusterName
+      value: (join('-', ['osok-chain-oke', $suffix]))
+    - name: nodePoolName
+      value: (join('-', ['osok-chain-np', $suffix]))
+  steps:
+    - name: exercise-cluster-node-pool-chain
+      description: Create an OKE cluster, inject its observed OCID into an IMDSv2 node pool, and clean up in dependency order.
+      try:
+        - script:
+            env:
+              - name: OCI_COMPARTMENT_ID
+                value: ($compartmentId)
+              - name: OCI_VCN_ID
+                value: ($vcnId)
+              - name: OCI_CLUSTER_SUBNET_ID
+                value: ($clusterSubnetId)
+              - name: OCI_SERVICE_LB_SUBNET_ID
+                value: ($serviceLbSubnetId)
+              - name: OCI_NODE_SUBNET_ID
+                value: ($nodeSubnetId)
+              - name: OCI_POD_SUBNET_ID
+                value: ($podSubnetId)
+              - name: OCI_KUBERNETES_VERSION
+                value: ($kubernetesVersion)
+              - name: OCI_COMPUTE_SHAPE
+                value: ($computeShape)
+              - name: OCI_IMAGE_ID
+                value: ($imageId)
+              - name: OCI_AVAILABILITY_DOMAIN
+                value: ($availabilityDomain)
+            content: |
+              set -eu
+              test -n "$OCI_COMPARTMENT_ID" || { echo "OCI_COMPARTMENT_ID is required" >&2; exit 2; }
+              test -n "$OCI_VCN_ID" || { echo "OCI_VCN_ID is required" >&2; exit 2; }
+              test -n "$OCI_CLUSTER_SUBNET_ID" || { echo "OCI_CLUSTER_SUBNET_ID is required" >&2; exit 2; }
+              test -n "$OCI_SERVICE_LB_SUBNET_ID" || { echo "OCI_SERVICE_LB_SUBNET_ID is required" >&2; exit 2; }
+              test -n "$OCI_NODE_SUBNET_ID" || { echo "OCI_NODE_SUBNET_ID is required" >&2; exit 2; }
+              test -n "$OCI_POD_SUBNET_ID" || { echo "OCI_POD_SUBNET_ID is required" >&2; exit 2; }
+              test -n "$OCI_KUBERNETES_VERSION" || { echo "OCI_KUBERNETES_VERSION is required" >&2; exit 2; }
+              test -n "$OCI_COMPUTE_SHAPE" || { echo "OCI_COMPUTE_SHAPE is required" >&2; exit 2; }
+              test -n "$OCI_IMAGE_ID" || { echo "OCI_IMAGE_ID is required" >&2; exit 2; }
+              test -n "$OCI_AVAILABILITY_DOMAIN" || { echo "OCI_AVAILABILITY_DOMAIN is required" >&2; exit 2; }
+        - apply:
+            resource:
+              apiVersion: containerengine.oracle.com/v1beta1
+              kind: Cluster
+              metadata:
+                name: ($clusterName)
+                namespace: ($namespace)
+              spec:
+                name: ($clusterName)
+                compartmentId: ($compartmentId)
+                vcnId: ($vcnId)
+                kubernetesVersion: ($kubernetesVersion)
+                endpointConfig:
+                  subnetId: ($clusterSubnetId)
+                  isPublicIpEnabled: false
+                options:
+                  serviceLbSubnetIds:
+                    - ($serviceLbSubnetId)
+                clusterPodNetworkOptions:
+                  - cniType: OCI_VCN_IP_NATIVE
+                type: BASIC_CLUSTER
+                freeformTags:
+                  osok-e2e-phase: create
+        - assert:
+            resource:
+              apiVersion: containerengine.oracle.com/v1beta1
+              kind: Cluster
+              metadata:
+                name: ($clusterName)
+              status:
+                lifecycleState: ACTIVE
+                (vcnId == $vcnId): true
+                status:
+                  (conditions[?type == 'Active' && status == 'True'] | length(@) > `0`): true
+                  (ocid != null && length(ocid) > `0`): true
+        - script:
+            env:
+              - name: RESOURCE_NAME
+                value: ($clusterName)
+            content: kubectl get cluster.containerengine.oracle.com "$RESOURCE_NAME" -n "$NAMESPACE" -o json
+            outputs:
+              - name: cluster
+                value: (json_parse($stdout))
+        - apply:
+            resource:
+              apiVersion: containerengine.oracle.com/v1beta1
+              kind: NodePool
+              metadata:
+                name: ($nodePoolName)
+                namespace: ($namespace)
+              spec:
+                compartmentId: ($compartmentId)
+                clusterId: ($cluster.status.status.ocid)
+                name: ($nodePoolName)
+                nodeShape: ($computeShape)
+                kubernetesVersion: ($kubernetesVersion)
+                nodeMetadata:
+                  areLegacyImdsEndpointsDisabled: "true"
+                nodeSourceDetails:
+                  sourceType: IMAGE
+                  imageId: ($imageId)
+                  bootVolumeSizeInGBs: 50
+                nodeShapeConfig:
+                  ocpus: 1
+                  memoryInGBs: 16
+                nodeConfigDetails:
+                  size: 1
+                  placementConfigs:
+                    - availabilityDomain: ($availabilityDomain)
+                      subnetId: ($nodeSubnetId)
+                  nodePoolPodNetworkOptionDetails:
+                    cniType: OCI_VCN_IP_NATIVE
+                    maxPodsPerNode: 31
+                    podSubnetIds:
+                      - ($podSubnetId)
+                freeformTags:
+                  osok-e2e-phase: create
+        - assert:
+            resource:
+              apiVersion: containerengine.oracle.com/v1beta1
+              kind: NodePool
+              metadata:
+                name: ($nodePoolName)
+              status:
+                lifecycleState: ACTIVE
+                (clusterId == $cluster.status.status.ocid): true
+                nodeMetadata:
+                  areLegacyImdsEndpointsDisabled: "true"
+                status:
+                  (conditions[?type == 'Active' && status == 'True'] | length(@) > `0`): true
+                  (ocid != null && length(ocid) > `0`): true

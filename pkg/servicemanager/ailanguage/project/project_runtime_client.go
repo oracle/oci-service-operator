@@ -290,7 +290,13 @@ func (c *projectRuntimeClient) CreateOrUpdate(
 	}
 
 	response, err := c.delegate.CreateOrUpdate(ctx, resource, req)
-	if err == nil || resource == nil || !isRetryableProjectUpdateConflict(err) {
+	if err == nil || resource == nil {
+		return response, err
+	}
+	if isProjectUpdateMissingWorkRequest(err) {
+		return c.finishSynchronousUpdate(ctx, resource, currentProjectID(resource))
+	}
+	if !isRetryableProjectUpdateConflict(err) {
 		return response, err
 	}
 
@@ -846,7 +852,7 @@ func buildProjectUpdateBody(
 	}
 
 	desiredDefinedTags := desiredProjectDefinedTagsForUpdate(resource.Spec.DefinedTags, current.DefinedTags)
-	if !reflect.DeepEqual(current.DefinedTags, desiredDefinedTags) {
+	if !reflect.DeepEqual(projectUserDefinedTags(current.DefinedTags), desiredDefinedTags) {
 		updateDetails.DefinedTags = desiredDefinedTags
 		updateNeeded = true
 	}
@@ -855,6 +861,27 @@ func buildProjectUpdateBody(
 		return ailanguagesdk.UpdateProjectDetails{}, false, nil
 	}
 	return updateDetails, true, nil
+}
+
+func projectUserDefinedTags(current map[string]map[string]interface{}) map[string]map[string]interface{} {
+	if current == nil {
+		return nil
+	}
+	result := make(map[string]map[string]interface{}, len(current))
+	for namespace, values := range current {
+		if namespace == "Oracle-Tags" {
+			continue
+		}
+		cloned := make(map[string]interface{}, len(values))
+		for key, value := range values {
+			cloned[key] = value
+		}
+		result[namespace] = cloned
+	}
+	if len(result) == 0 {
+		return map[string]map[string]interface{}{}
+	}
+	return result
 }
 
 func validateProjectCreateOnlyDriftForResponse(resource *ailanguagev1beta1.Project, currentResponse any) error {
@@ -919,7 +946,7 @@ func (c *projectRuntimeClient) startUpdate(
 
 	workRequestID := strings.TrimSpace(stringValue(response.OpcWorkRequestId))
 	if workRequestID == "" {
-		return c.fail(resource, fmt.Errorf("Project update did not return an opc-work-request-id"))
+		return c.finishSynchronousUpdate(ctx, resource, stringValue(updateRequest.ProjectId))
 	}
 
 	c.trackAsyncWorkRequest(
@@ -929,6 +956,55 @@ func (c *projectRuntimeClient) startUpdate(
 		fmt.Sprintf("Project update requested; polling work request %s", workRequestID),
 	)
 	return c.resumeUpdate(ctx, resource, workRequestID)
+}
+
+func (c *projectRuntimeClient) finishSynchronousUpdate(
+	ctx context.Context,
+	resource *ailanguagev1beta1.Project,
+	projectID string,
+) (servicemanager.OSOKResponse, error) {
+	projectID = strings.TrimSpace(projectID)
+	if projectID == "" {
+		return c.fail(resource, fmt.Errorf("Project synchronous update response did not preserve projectId"))
+	}
+
+	current, err := c.getProject(ctx, projectID)
+	if err != nil {
+		if !isProjectReadNotFoundOCI(err) {
+			return c.fail(resource, normalizeProjectOCIError(err))
+		}
+		return c.markAsyncOperation(resource, &shared.OSOKAsyncOperation{
+			Source:          shared.OSOKAsyncSourceLifecycle,
+			Phase:           shared.OSOKAsyncPhaseUpdate,
+			RawStatus:       string(ailanguagesdk.ProjectLifecycleStateUpdating),
+			NormalizedClass: shared.OSOKAsyncClassPending,
+			Message:         "Project update was accepted without a work-request ID; waiting for the Project to become readable",
+		}), nil
+	}
+
+	c.projectStatus(resource, current)
+	_, updateNeeded, err := c.buildUpdateRequest(resource, current)
+	if err != nil {
+		return c.fail(resource, err)
+	}
+	if updateNeeded {
+		rawStatus := strings.TrimSpace(string(current.LifecycleState))
+		if rawStatus == "" {
+			rawStatus = string(ailanguagesdk.ProjectLifecycleStateUpdating)
+		}
+		return c.markAsyncOperation(resource, &shared.OSOKAsyncOperation{
+			Source:          shared.OSOKAsyncSourceLifecycle,
+			Phase:           shared.OSOKAsyncPhaseUpdate,
+			RawStatus:       rawStatus,
+			NormalizedClass: shared.OSOKAsyncClassPending,
+			Message:         "Project update was accepted without a work-request ID; waiting for mutable fields to converge",
+		}), nil
+	}
+	return c.finishWithLifecycle(resource, current, shared.OSOKAsyncPhaseUpdate), nil
+}
+
+func isProjectUpdateMissingWorkRequest(err error) bool {
+	return err != nil && strings.Contains(err.Error(), "Project update did not return an opc-work-request-id")
 }
 
 func buildCreateProjectDetails(spec ailanguagev1beta1.ProjectSpec) ailanguagesdk.CreateProjectDetails {
@@ -1234,6 +1310,13 @@ func resolveProjectIDFromWorkRequest(
 }
 
 func resolveProjectWorkRequestAction(workRequest ailanguagesdk.WorkRequest) (string, error) {
+	if _, ok := projectWorkRequestPhaseFromOperationType(workRequest.OperationType); ok {
+		// The live AI Language service reports CREATED for create, update, and
+		// delete Project work-request resources. OperationType is the reliable
+		// phase discriminator; keep the incorrect resource action out of the
+		// shared phase resolver.
+		return "", nil
+	}
 	var action string
 
 	for _, resource := range workRequest.Resources {

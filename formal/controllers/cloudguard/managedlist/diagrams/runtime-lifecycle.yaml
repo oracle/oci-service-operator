@@ -1,0 +1,48 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: cloudguard
+slug: managedlist
+kind: ManagedList
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  listLookup:
+    filters:
+      - compartment_id
+      - display_name
+      - id
+    matchRule: Adopt only a unique managed-list match in the requested compartment.
+  mutation:
+    mutable:
+      - defined_tags
+      - description
+      - display_name
+      - freeform_tags
+      - list_items
+    forceNew:
+      - compartment_id
+      - group
+      - list_type
+      - source_managed_list_id
+  hooks:
+    create:
+      - helper: CreateManagedList
+    update:
+      - helper: UpdateManagedList
+    delete:
+      - helper: DeleteManagedList
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - Live CIDR-list create, item/description update, and confirmed delete
+    established the lifecycle and mutation contract without enabling any
+    Cloud Guard detector or target.
+  - >-
+    `CREATING` and `UPDATING` requeue, `ACTIVE` succeeds, and `DELETING`
+    retains the finalizer until `DELETED` or confirmed absence.

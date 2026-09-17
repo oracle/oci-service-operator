@@ -50,15 +50,84 @@ func registerPipelineRuntimeHooksMutator(mutator PipelineRuntimeHooksMutator) {
 	}
 	pipelineRuntimeHooksMutators = append(pipelineRuntimeHooksMutators, mutator)
 }
+func newPipelineRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "goldengate",
+		FormalSlug:    "pipeline",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{"UPDATING"},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "displayName", "lifecycleState", "lifecycleSubState", "opc-request-id"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"definedTags", "description", "displayName", "freeformTags", "licenseModel", "mappingRules", "processOptions", "subnetId"},
+			ForceNew:      []string{"compartmentId", "jsonData", "locks", "recipeType", "sourceConnectionDetails", "targetConnectionDetails"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "Pipeline", Action: "CreatePipeline"}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "Pipeline", Action: "UpdatePipeline"}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "Pipeline", Action: "DeletePipeline"}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "Pipeline", Action: "CreatePipeline"}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "Pipeline", Action: "UpdatePipeline"}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "Pipeline", Action: "DeletePipeline"}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newPipelineDefaultRuntimeHooks(sdkClient goldengatesdk.GoldenGateClient) PipelineRuntimeHooks {
 	return PipelineRuntimeHooks{
+		Semantics:       newPipelineRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*goldengatev1beta1.Pipeline]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*goldengatev1beta1.Pipeline]{},
 		StatusHooks:     generatedruntime.StatusHooks[*goldengatev1beta1.Pipeline]{},
 		ParityHooks:     generatedruntime.ParityHooks[*goldengatev1beta1.Pipeline]{},
-		Async:           generatedruntime.AsyncHooks[*goldengatev1beta1.Pipeline]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*goldengatev1beta1.Pipeline]{},
+		Async: generatedruntime.AsyncHooks[*goldengatev1beta1.Pipeline]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := goldengatesdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*goldengatev1beta1.Pipeline]{},
 		Create: runtimeOperationHooks[goldengatesdk.CreatePipelineRequest, goldengatesdk.CreatePipelineResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreatePipelineDetails", RequestName: "CreatePipelineDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request goldengatesdk.CreatePipelineRequest) (goldengatesdk.CreatePipelineResponse, error) {
@@ -106,10 +175,19 @@ func buildPipelineGeneratedRuntimeConfig(
 	hooks PipelineRuntimeHooks,
 ) generatedruntime.Config[*goldengatev1beta1.Pipeline] {
 	return generatedruntime.Config[*goldengatev1beta1.Pipeline]{
-		Kind:            "Pipeline",
-		SDKName:         "Pipeline",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "Pipeline",
+		SDKName:   "Pipeline",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

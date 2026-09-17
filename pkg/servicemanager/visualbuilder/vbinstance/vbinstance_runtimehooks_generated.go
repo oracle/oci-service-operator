@@ -114,8 +114,20 @@ func newVbInstanceDefaultRuntimeHooks(sdkClient visualbuildersdk.VbInstanceClien
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*visualbuilderv1beta1.VbInstance]{},
 		StatusHooks:     generatedruntime.StatusHooks[*visualbuilderv1beta1.VbInstance]{},
 		ParityHooks:     generatedruntime.ParityHooks[*visualbuilderv1beta1.VbInstance]{},
-		Async:           generatedruntime.AsyncHooks[*visualbuilderv1beta1.VbInstance]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*visualbuilderv1beta1.VbInstance]{},
+		Async: generatedruntime.AsyncHooks[*visualbuilderv1beta1.VbInstance]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := visualbuildersdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*visualbuilderv1beta1.VbInstance]{},
 		Create: runtimeOperationHooks[visualbuildersdk.CreateVbInstanceRequest, visualbuildersdk.CreateVbInstanceResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateVbInstanceDetails", RequestName: "CreateVbInstanceDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request visualbuildersdk.CreateVbInstanceRequest) (visualbuildersdk.CreateVbInstanceResponse, error) {
@@ -163,10 +175,19 @@ func buildVbInstanceGeneratedRuntimeConfig(
 	hooks VbInstanceRuntimeHooks,
 ) generatedruntime.Config[*visualbuilderv1beta1.VbInstance] {
 	return generatedruntime.Config[*visualbuilderv1beta1.VbInstance]{
-		Kind:            "VbInstance",
-		SDKName:         "VbInstance",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "VbInstance",
+		SDKName:   "VbInstance",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

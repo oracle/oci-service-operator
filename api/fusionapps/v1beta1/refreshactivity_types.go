@@ -23,6 +23,9 @@ type RefreshActivitySpec struct {
 	// Current time the refresh activity is scheduled to start. An RFC3339 formatted datetime string.
 	// +kubebuilder:validation:Optional
 	TimeScheduledStart string `json:"timeScheduledStart,omitempty"`
+	// The OCID of the Fusion environment receiving this refresh activity.
+	// +kubebuilder:validation:Required
+	FusionEnvironmentId string `json:"fusionEnvironmentId"`
 }
 
 // RefreshActivityRefreshIssueDetailsList defines nested fields for RefreshActivity.RefreshIssueDetailsList.

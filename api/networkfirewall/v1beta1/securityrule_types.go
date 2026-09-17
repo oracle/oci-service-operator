@@ -32,10 +32,13 @@ type SecurityRuleSpec struct {
 	// +kubebuilder:validation:Optional
 	Inspection string `json:"inspection,omitempty"`
 	// +kubebuilder:validation:Optional
-	Position SecurityRulePosition `json:"position,omitempty"`
+	Position SecurityRulePosition `json:"position,omitempty,omitzero"`
 	// The description of the security rule. This field can be used to add additional info.
 	// +kubebuilder:validation:Optional
 	Description string `json:"description,omitempty"`
+	// The OCID of the Network Firewall policy that owns this resource.
+	// +kubebuilder:validation:Required
+	NetworkFirewallPolicyId string `json:"networkFirewallPolicyId"`
 }
 
 // SecurityRuleCondition defines nested fields for SecurityRule.Condition.

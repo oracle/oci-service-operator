@@ -574,6 +574,29 @@ func newTestLogAnalyticsEmBridgeClient(fake *fakeLogAnalyticsEmBridgeOCIClient) 
 	return newLogAnalyticsEmBridgeServiceClientWithOCIClient(loggerutil.OSOKLogger{Logger: logr.Discard()}, provider, fake)
 }
 
+func TestLogAnalyticsEmBridgeRequestFieldsLeaveContextualNamespaceToWrapper(t *testing.T) {
+	t.Parallel()
+	fieldSets := [][]generatedruntime.RequestField{
+		logAnalyticsEmBridgeCreateFields(),
+		logAnalyticsEmBridgeGetFields(),
+		logAnalyticsEmBridgeListFields(),
+		logAnalyticsEmBridgeUpdateFields(),
+		logAnalyticsEmBridgeDeleteFields(),
+	}
+	for _, fields := range fieldSets {
+		for _, field := range fields {
+			if field.FieldName == "NamespaceName" {
+				t.Fatal("contextual namespace must be injected by the request wrapper")
+			}
+		}
+	}
+	for _, field := range logAnalyticsEmBridgeListFields() {
+		if field.FieldName == "LifecycleState" || field.FieldName == "LifecycleDetailsContains" || field.FieldName == "ImportStatus" {
+			t.Fatalf("list field %q maps observed state into a query-only filter", field.FieldName)
+		}
+	}
+}
+
 func newLogAnalyticsEmBridgeResource() *loganalyticsv1beta1.LogAnalyticsEmBridge {
 	return &loganalyticsv1beta1.LogAnalyticsEmBridge{
 		ObjectMeta: metav1.ObjectMeta{

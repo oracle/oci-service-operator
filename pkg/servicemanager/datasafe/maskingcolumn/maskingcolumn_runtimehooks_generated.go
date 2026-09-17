@@ -50,15 +50,84 @@ func registerMaskingColumnRuntimeHooksMutator(mutator MaskingColumnRuntimeHooksM
 	}
 	maskingcolumnRuntimeHooksMutators = append(maskingcolumnRuntimeHooksMutators, mutator)
 }
+func newMaskingColumnRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "datasafe",
+		FormalSlug:    "maskingcolumn",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{"UPDATING"},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"columnName", "maskingPolicyId", "objectName", "schemaName"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"isMaskingEnabled", "maskingColumnGroup", "maskingFormats", "objectType", "sensitiveTypeId"},
+			ForceNew:      []string{"columnName", "maskingPolicyId", "objectName", "schemaName"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "MaskingColumn", Action: "CreateMaskingColumn"}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "MaskingColumn", Action: "UpdateMaskingColumn"}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "MaskingColumn", Action: "DeleteMaskingColumn"}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "MaskingColumn", Action: "CreateMaskingColumn"}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "MaskingColumn", Action: "UpdateMaskingColumn"}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "MaskingColumn", Action: "DeleteMaskingColumn"}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newMaskingColumnDefaultRuntimeHooks(sdkClient datasafesdk.DataSafeClient) MaskingColumnRuntimeHooks {
 	return MaskingColumnRuntimeHooks{
+		Semantics:       newMaskingColumnRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*datasafev1beta1.MaskingColumn]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*datasafev1beta1.MaskingColumn]{},
 		StatusHooks:     generatedruntime.StatusHooks[*datasafev1beta1.MaskingColumn]{},
 		ParityHooks:     generatedruntime.ParityHooks[*datasafev1beta1.MaskingColumn]{},
-		Async:           generatedruntime.AsyncHooks[*datasafev1beta1.MaskingColumn]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*datasafev1beta1.MaskingColumn]{},
+		Async: generatedruntime.AsyncHooks[*datasafev1beta1.MaskingColumn]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := datasafesdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*datasafev1beta1.MaskingColumn]{},
 		Create: runtimeOperationHooks[datasafesdk.CreateMaskingColumnRequest, datasafesdk.CreateMaskingColumnResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "MaskingPolicyId", RequestName: "maskingPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "CreateMaskingColumnDetails", RequestName: "CreateMaskingColumnDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request datasafesdk.CreateMaskingColumnRequest) (datasafesdk.CreateMaskingColumnResponse, error) {
@@ -66,25 +135,25 @@ func newMaskingColumnDefaultRuntimeHooks(sdkClient datasafesdk.DataSafeClient) M
 			},
 		},
 		Get: runtimeOperationHooks[datasafesdk.GetMaskingColumnRequest, datasafesdk.GetMaskingColumnResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "MaskingPolicyId", RequestName: "maskingPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "MaskingColumnKey", RequestName: "maskingColumnKey", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "MaskingPolicyId", RequestName: "maskingPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "MaskingColumnKey", RequestName: "maskingColumnKey", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request datasafesdk.GetMaskingColumnRequest) (datasafesdk.GetMaskingColumnResponse, error) {
 				return sdkClient.GetMaskingColumn(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[datasafesdk.ListMaskingColumnsRequest, datasafesdk.ListMaskingColumnsResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "MaskingPolicyId", RequestName: "maskingPolicyId", Contribution: "path", PreferResourceID: true}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "MaskingColumnLifecycleState", RequestName: "maskingColumnLifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "DataType", RequestName: "dataType", Contribution: "query", PreferResourceID: false}, {FieldName: "SchemaName", RequestName: "schemaName", Contribution: "query", PreferResourceID: false}, {FieldName: "ObjectName", RequestName: "objectName", Contribution: "query", PreferResourceID: false}, {FieldName: "ColumnName", RequestName: "columnName", Contribution: "query", PreferResourceID: false}, {FieldName: "ObjectType", RequestName: "objectType", Contribution: "query", PreferResourceID: false}, {FieldName: "MaskingColumnGroup", RequestName: "maskingColumnGroup", Contribution: "query", PreferResourceID: false}, {FieldName: "SensitiveTypeId", RequestName: "sensitiveTypeId", Contribution: "query", PreferResourceID: false}, {FieldName: "IsMaskingEnabled", RequestName: "isMaskingEnabled", Contribution: "query", PreferResourceID: false}, {FieldName: "IsSeedRequired", RequestName: "isSeedRequired", Contribution: "query", PreferResourceID: false}, {FieldName: "TimeCreatedGreaterThanOrEqualTo", RequestName: "timeCreatedGreaterThanOrEqualTo", Contribution: "query", PreferResourceID: false}, {FieldName: "TimeCreatedLessThan", RequestName: "timeCreatedLessThan", Contribution: "query", PreferResourceID: false}, {FieldName: "TimeUpdatedGreaterThanOrEqualTo", RequestName: "timeUpdatedGreaterThanOrEqualTo", Contribution: "query", PreferResourceID: false}, {FieldName: "TimeUpdatedLessThan", RequestName: "timeUpdatedLessThan", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "MaskingPolicyId", RequestName: "maskingPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "MaskingColumnLifecycleState", RequestName: "maskingColumnLifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "DataType", RequestName: "dataType", Contribution: "query", PreferResourceID: false}, {FieldName: "SchemaName", RequestName: "schemaName", Contribution: "query", PreferResourceID: false}, {FieldName: "ObjectName", RequestName: "objectName", Contribution: "query", PreferResourceID: false}, {FieldName: "ColumnName", RequestName: "columnName", Contribution: "query", PreferResourceID: false}, {FieldName: "ObjectType", RequestName: "objectType", Contribution: "query", PreferResourceID: false}, {FieldName: "MaskingColumnGroup", RequestName: "maskingColumnGroup", Contribution: "query", PreferResourceID: false}, {FieldName: "SensitiveTypeId", RequestName: "sensitiveTypeId", Contribution: "query", PreferResourceID: false}, {FieldName: "IsMaskingEnabled", RequestName: "isMaskingEnabled", Contribution: "query", PreferResourceID: false}, {FieldName: "IsSeedRequired", RequestName: "isSeedRequired", Contribution: "query", PreferResourceID: false}, {FieldName: "TimeCreatedGreaterThanOrEqualTo", RequestName: "timeCreatedGreaterThanOrEqualTo", Contribution: "query", PreferResourceID: false}, {FieldName: "TimeCreatedLessThan", RequestName: "timeCreatedLessThan", Contribution: "query", PreferResourceID: false}, {FieldName: "TimeUpdatedGreaterThanOrEqualTo", RequestName: "timeUpdatedGreaterThanOrEqualTo", Contribution: "query", PreferResourceID: false}, {FieldName: "TimeUpdatedLessThan", RequestName: "timeUpdatedLessThan", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request datasafesdk.ListMaskingColumnsRequest) (datasafesdk.ListMaskingColumnsResponse, error) {
 				return sdkClient.ListMaskingColumns(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[datasafesdk.UpdateMaskingColumnRequest, datasafesdk.UpdateMaskingColumnResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "MaskingColumnKey", RequestName: "maskingColumnKey", Contribution: "path", PreferResourceID: false}, {FieldName: "MaskingPolicyId", RequestName: "maskingPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdateMaskingColumnDetails", RequestName: "UpdateMaskingColumnDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "MaskingColumnKey", RequestName: "maskingColumnKey", Contribution: "path", PreferResourceID: true}, {FieldName: "MaskingPolicyId", RequestName: "maskingPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdateMaskingColumnDetails", RequestName: "UpdateMaskingColumnDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request datasafesdk.UpdateMaskingColumnRequest) (datasafesdk.UpdateMaskingColumnResponse, error) {
 				return sdkClient.UpdateMaskingColumn(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[datasafesdk.DeleteMaskingColumnRequest, datasafesdk.DeleteMaskingColumnResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "MaskingColumnKey", RequestName: "maskingColumnKey", Contribution: "path", PreferResourceID: false}, {FieldName: "MaskingPolicyId", RequestName: "maskingPolicyId", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "MaskingColumnKey", RequestName: "maskingColumnKey", Contribution: "path", PreferResourceID: true}, {FieldName: "MaskingPolicyId", RequestName: "maskingPolicyId", Contribution: "path", PreferResourceID: false}},
 			Call: func(ctx context.Context, request datasafesdk.DeleteMaskingColumnRequest) (datasafesdk.DeleteMaskingColumnResponse, error) {
 				return sdkClient.DeleteMaskingColumn(ctx, request)
 			},
@@ -106,10 +175,19 @@ func buildMaskingColumnGeneratedRuntimeConfig(
 	hooks MaskingColumnRuntimeHooks,
 ) generatedruntime.Config[*datasafev1beta1.MaskingColumn] {
 	return generatedruntime.Config[*datasafev1beta1.MaskingColumn]{
-		Kind:            "MaskingColumn",
-		SDKName:         "MaskingColumn",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "MaskingColumn",
+		SDKName:   "MaskingColumn",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

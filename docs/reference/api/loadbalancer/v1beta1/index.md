@@ -1630,6 +1630,7 @@ PathRouteSetSpec defines the desired state of PathRouteSet.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| `loadBalancerId` | The OCID of the load balancer that owns this path route set. | `string` | No | - | - |
 | `name` | The name for this set of path route rules. It must be unique and it cannot be changed. Avoid entering confidential information. Example: `example_path_route_set` | `string` | Yes | - | - |
 | [`pathRoutes`](#kind-pathrouteset-spec-pathroutes) | The set of path route rules. | `list[object]` | Yes | - | - |
 
@@ -1664,6 +1665,7 @@ PathRouteSetStatus defines the observed state of PathRouteSet.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| `loadBalancerId` | The bound load balancer OCID used to address this path route set. | `string` | No | - | - |
 | `name` | The unique name for this set of path route rules. Avoid entering confidential information. Example: `example_path_route_set` | `string` | No | - | - |
 | [`pathRoutes`](#kind-pathrouteset-status-pathroutes) | The set of path route rules. | `list[object]` | No | - | - |
 | [`status`](#kind-pathrouteset-status-status) | - | `object` | Yes | - | - |
@@ -1770,6 +1772,7 @@ RoutingPolicySpec defines the desired state of RoutingPolicy.
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `conditionLanguageVersion` | The version of the language in which `condition` of `rules` are composed. | `string` | Yes | - | - |
+| `loadBalancerId` | The OCID of the load balancer that owns this routing policy. | `string` | No | - | - |
 | `name` | The name for this list of routing rules. It must be unique and it cannot be changed. Avoid entering confidential information. Example: `example_routing_rules` | `string` | Yes | - | - |
 | [`rules`](#kind-routingpolicy-spec-rules) | The list of routing rules. | `list[object]` | Yes | - | - |
 
@@ -1807,6 +1810,7 @@ RoutingPolicyStatus defines the observed state of RoutingPolicy.
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `conditionLanguageVersion` | The version of the language in which `condition` of `rules` are composed. | `string` | No | - | - |
+| `loadBalancerId` | The bound load balancer OCID used to address this routing policy. | `string` | No | - | - |
 | `name` | The unique name for this list of routing rules. Avoid entering confidential information. Example: `example_routing_policy` | `string` | No | - | - |
 | [`rules`](#kind-routingpolicy-status-rules) | The ordered list of routing rules. | `list[object]` | No | - | - |
 | [`status`](#kind-routingpolicy-status-status) | - | `object` | Yes | - | - |
@@ -1915,6 +1919,7 @@ RuleSetSpec defines the desired state of RuleSet.
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | [`items`](#kind-ruleset-spec-items) | An array of rules that compose the rule set. | `list[object]` | Yes | - | - |
+| `loadBalancerId` | The OCID of the load balancer that owns this rule set. | `string` | No | - | - |
 | `name` | The name for this set of rules. It must be unique and it cannot be changed. Avoid entering confidential information. Example: `example_rule_set` | `string` | Yes | - | - |
 
 <a id="kind-ruleset-spec-items"></a>
@@ -1992,6 +1997,7 @@ RuleSetStatus defines the observed state of RuleSet.
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | [`items`](#kind-ruleset-status-items) | An array of rules that compose the rule set. | `list[object]` | No | - | - |
+| `loadBalancerId` | The bound load balancer OCID used to address this rule set. | `string` | No | - | - |
 | `name` | The name for this set of rules. It must be unique and it cannot be changed. Avoid entering confidential information. Example: `example_rule_set` | `string` | No | - | - |
 | [`status`](#kind-ruleset-status-status) | - | `object` | Yes | - | - |
 

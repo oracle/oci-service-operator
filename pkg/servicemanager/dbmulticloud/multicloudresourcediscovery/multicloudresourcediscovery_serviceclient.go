@@ -32,8 +32,28 @@ type defaultMultiCloudResourceDiscoveryServiceClient struct {
 
 var _ MultiCloudResourceDiscoveryServiceClient = defaultMultiCloudResourceDiscoveryServiceClient{}
 
+type MultiCloudResourceDiscoverySDKClients struct {
+	multiCloudResourceDiscoveryClient dbmulticloudsdk.MultiCloudResourceDiscoveryClient
+	workRequestClient                 dbmulticloudsdk.WorkRequestClient
+}
+
+func newMultiCloudResourceDiscoverySDKClients(manager *MultiCloudResourceDiscoveryServiceManager) (MultiCloudResourceDiscoverySDKClients, error) {
+	var clients MultiCloudResourceDiscoverySDKClients
+	multiCloudResourceDiscoveryClientClient, err := dbmulticloudsdk.NewMultiCloudResourceDiscoveryClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize MultiCloudResourceDiscovery OCI client MultiCloudResourceDiscoveryClient: %w", err)
+	}
+	clients.multiCloudResourceDiscoveryClient = multiCloudResourceDiscoveryClientClient
+	workRequestClientClient, err := dbmulticloudsdk.NewWorkRequestClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize MultiCloudResourceDiscovery OCI client WorkRequestClient: %w", err)
+	}
+	clients.workRequestClient = workRequestClientClient
+	return clients, nil
+}
+
 var newMultiCloudResourceDiscoveryServiceClient = func(manager *MultiCloudResourceDiscoveryServiceManager) MultiCloudResourceDiscoveryServiceClient {
-	sdkClient, err := dbmulticloudsdk.NewMultiCloudResourceDiscoveryClientWithConfigurationProvider(manager.Provider)
+	sdkClient, err := newMultiCloudResourceDiscoverySDKClients(manager)
 	hooks := newMultiCloudResourceDiscoveryRuntimeHooks(manager, sdkClient)
 	config := buildMultiCloudResourceDiscoveryGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {

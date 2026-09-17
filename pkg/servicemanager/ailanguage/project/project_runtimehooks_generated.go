@@ -95,7 +95,7 @@ func newProjectRuntimeSemantics() *generatedruntime.Semantics {
 			Hooks:    []generatedruntime.Hook{{Helper: "CreateProject", EntityType: "", Action: ""}},
 		},
 		UpdateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "GetWorkRequest -> GetProject",
+			Strategy: "GetProject after synchronous 200; GetWorkRequest when supplied",
 			Hooks:    []generatedruntime.Hook{{Helper: "UpdateProject", EntityType: "", Action: ""}},
 		},
 		DeleteFollowUp: generatedruntime.FollowUpSemantics{
@@ -114,8 +114,20 @@ func newProjectDefaultRuntimeHooks(sdkClient ailanguagesdk.AIServiceLanguageClie
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*ailanguagev1beta1.Project]{},
 		StatusHooks:     generatedruntime.StatusHooks[*ailanguagev1beta1.Project]{},
 		ParityHooks:     generatedruntime.ParityHooks[*ailanguagev1beta1.Project]{},
-		Async:           generatedruntime.AsyncHooks[*ailanguagev1beta1.Project]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*ailanguagev1beta1.Project]{},
+		Async: generatedruntime.AsyncHooks[*ailanguagev1beta1.Project]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := ailanguagesdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*ailanguagev1beta1.Project]{},
 		Create: runtimeOperationHooks[ailanguagesdk.CreateProjectRequest, ailanguagesdk.CreateProjectResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateProjectDetails", RequestName: "CreateProjectDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request ailanguagesdk.CreateProjectRequest) (ailanguagesdk.CreateProjectResponse, error) {
@@ -163,10 +175,19 @@ func buildProjectGeneratedRuntimeConfig(
 	hooks ProjectRuntimeHooks,
 ) generatedruntime.Config[*ailanguagev1beta1.Project] {
 	return generatedruntime.Config[*ailanguagev1beta1.Project]{
-		Kind:            "Project",
-		SDKName:         "Project",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "Project",
+		SDKName:   "Project",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

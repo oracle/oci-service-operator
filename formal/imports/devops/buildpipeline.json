@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "devops",
+  "slug": "buildpipeline",
+  "kind": "BuildPipeline",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_devops_build_pipeline",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateBuildPipeline",
+        "requestType": "devops.CreateBuildPipelineRequest",
+        "responseType": "devops.CreateBuildPipelineResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetBuildPipeline",
+        "requestType": "devops.GetBuildPipelineRequest",
+        "responseType": "devops.GetBuildPipelineResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListBuildPipelines",
+        "requestType": "devops.ListBuildPipelinesRequest",
+        "responseType": "devops.ListBuildPipelinesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateBuildPipeline",
+        "requestType": "devops.UpdateBuildPipelineRequest",
+        "responseType": "devops.UpdateBuildPipelineResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteBuildPipeline",
+        "requestType": "devops.DeleteBuildPipelineRequest",
+        "responseType": "devops.DeleteBuildPipelineResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "build_pipeline_parameters.items.default_value",
+      "build_pipeline_parameters.items.description",
+      "build_pipeline_parameters.items.name",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags"
+    ],
+    "forceNew": [
+      "project_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_devops_build_pipelines",
+    "collectionField": "build_pipeline_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "id",
+      "project_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/devops/buildpipeline/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/devops/buildpipeline/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from terraform-provider-oci for devops/buildpipeline."
+  ]
+}

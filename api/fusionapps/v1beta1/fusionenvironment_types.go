@@ -29,7 +29,7 @@ type FusionEnvironmentSpec struct {
 	// +kubebuilder:validation:Required
 	CreateFusionEnvironmentAdminUserDetails FusionEnvironmentCreateFusionEnvironmentAdminUserDetails `json:"createFusionEnvironmentAdminUserDetails"`
 	// +kubebuilder:validation:Optional
-	MaintenancePolicy FusionEnvironmentMaintenancePolicy `json:"maintenancePolicy,omitempty"`
+	MaintenancePolicy FusionEnvironmentMaintenancePolicy `json:"maintenancePolicy,omitempty,omitzero"`
 	// byok kms keyId
 	// +kubebuilder:validation:Optional
 	KmsKeyId string `json:"kmsKeyId,omitempty"`

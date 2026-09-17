@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "stackmonitoring",
+  "slug": "baselineablemetric",
+  "kind": "BaselineableMetric",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_stack_monitoring_baselineable_metric",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateBaselineableMetric",
+        "requestType": "stackmonitoring.CreateBaselineableMetricRequest",
+        "responseType": "stackmonitoring.CreateBaselineableMetricResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetBaselineableMetric",
+        "requestType": "stackmonitoring.GetBaselineableMetricRequest",
+        "responseType": "stackmonitoring.GetBaselineableMetricResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListBaselineableMetrics",
+        "requestType": "stackmonitoring.ListBaselineableMetricsRequest",
+        "responseType": "stackmonitoring.ListBaselineableMetricsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateBaselineableMetric",
+        "requestType": "stackmonitoring.UpdateBaselineableMetricRequest",
+        "responseType": "stackmonitoring.UpdateBaselineableMetricResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteBaselineableMetric",
+        "requestType": "stackmonitoring.DeleteBaselineableMetricRequest",
+        "responseType": "stackmonitoring.DeleteBaselineableMetricResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "target": [
+        "S_ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "column",
+      "compartment_id",
+      "name",
+      "namespace",
+      "resource_group",
+      "resource_type"
+    ],
+    "forceNew": null,
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_stack_monitoring_baselineable_metrics",
+    "collectionField": "baselineable_metric_summary_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "baselineable_metric_id",
+      "compartment_id",
+      "is_out_of_box",
+      "metric_namespace",
+      "name",
+      "resource_group",
+      "resource_type"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/stackmonitoring/baselineablemetric/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/stackmonitoring/baselineablemetric/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts are imported from the pinned terraform-provider-oci revision; repo-authored runtime semantics remain authoritative."
+  ]
+}

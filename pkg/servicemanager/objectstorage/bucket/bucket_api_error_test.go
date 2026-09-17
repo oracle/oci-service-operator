@@ -112,6 +112,44 @@ func TestBucketPlainGeneratedRuntimeDeleteErrorMatrix(t *testing.T) {
 	})
 }
 
+func TestBucketDeleteConfirmsBucketNotFound(t *testing.T) {
+	t.Parallel()
+
+	getCalls := 0
+	client := newBucketGeneratedRuntimeMatrixClient(t, &fakeBucketRuntimeOCIClient{
+		getFn: func(context.Context, objectstoragesdk.GetBucketRequest) (objectstoragesdk.GetBucketResponse, error) {
+			getCalls++
+			if getCalls == 1 {
+				return objectstoragesdk.GetBucketResponse{Bucket: objectstoragesdk.Bucket{
+					Id:            stringPtr("ocid1.bucket.oc1..deleted"),
+					Name:          stringPtr("matrix-bucket"),
+					Namespace:     stringPtr("tenantnamespace"),
+					CompartmentId: stringPtr("ocid1.compartment.oc1..matrix"),
+				}}, nil
+			}
+			return objectstoragesdk.GetBucketResponse{}, errortest.NewServiceError(404, "BucketNotFound", "bucket is gone")
+		},
+		deleteFn: func(context.Context, objectstoragesdk.DeleteBucketRequest) (objectstoragesdk.DeleteBucketResponse, error) {
+			return objectstoragesdk.DeleteBucketResponse{}, nil
+		},
+	})
+	resource := newMatrixBucketResource()
+	resource.Status.Namespace = "tenantnamespace"
+	resource.Status.Name = resource.Spec.Name
+	resource.Status.OsokStatus.Ocid = "ocid1.bucket.oc1..deleted"
+
+	deleted, err := client.Delete(context.Background(), resource)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !deleted {
+		t.Fatal("Delete() = false, want confirmed deletion")
+	}
+	if getCalls != 2 {
+		t.Fatalf("GetBucket() calls = %d, want pre-delete read plus confirmation", getCalls)
+	}
+}
+
 func newBucketGeneratedRuntimeMatrixClient(
 	t *testing.T,
 	sdkClient *fakeBucketRuntimeOCIClient,
@@ -123,6 +161,9 @@ func newBucketGeneratedRuntimeMatrixClient(
 			Kind:      "Bucket",
 			SDKName:   "Bucket",
 			Semantics: newBucketRuntimeSemantics(),
+			DeleteHooks: generatedruntime.DeleteHooks[*objectstoragev1beta1.Bucket]{
+				HandleError: handleBucketDeleteError,
+			},
 			Create: &generatedruntime.Operation{
 				NewRequest: func() any { return &objectstoragesdk.CreateBucketRequest{} },
 				Call: func(ctx context.Context, request any) (any, error) {

@@ -47,7 +47,7 @@ type SddcSpec struct {
 	// +kubebuilder:validation:Optional
 	IsSingleHostSddc bool `json:"isSingleHostSddc,omitempty"`
 	// +kubebuilder:validation:Optional
-	SddcByolAllocationDetails SddcByolAllocationDetails `json:"sddcByolAllocationDetails,omitempty"`
+	SddcByolAllocationDetails SddcByolAllocationDetails `json:"sddcByolAllocationDetails,omitempty,omitzero"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no
 	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
@@ -263,7 +263,7 @@ type SddcInitialConfigurationInitialClusterConfiguration struct {
 	// +kubebuilder:validation:Optional
 	DatastoreClusterIds []string `json:"datastoreClusterIds,omitempty"`
 	// +kubebuilder:validation:Optional
-	ClusterByolAllocationDetails SddcInitialConfigurationInitialClusterConfigurationClusterByolAllocationDetails `json:"clusterByolAllocationDetails,omitempty"`
+	ClusterByolAllocationDetails SddcInitialConfigurationInitialClusterConfigurationClusterByolAllocationDetails `json:"clusterByolAllocationDetails,omitempty,omitzero"`
 	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the initial VMware BYOL Allocation used to deploy VMware Cloud Foundation.
 	// +kubebuilder:validation:Optional
 	InitialVcfByolAllocationId string `json:"initialVcfByolAllocationId,omitempty"`

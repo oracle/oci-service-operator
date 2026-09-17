@@ -66,7 +66,7 @@ func newScheduleDefaultRuntimeHooks(sdkClient dataintegrationsdk.DataIntegration
 			},
 		},
 		Get: runtimeOperationHooks[dataintegrationsdk.GetScheduleRequest, dataintegrationsdk.GetScheduleResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "ApplicationKey", RequestName: "applicationKey", Contribution: "path", PreferResourceID: false}, {FieldName: "ScheduleKey", RequestName: "scheduleKey", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "ApplicationKey", RequestName: "applicationKey", Contribution: "path", PreferResourceID: false}, {FieldName: "ScheduleKey", RequestName: "scheduleKey", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request dataintegrationsdk.GetScheduleRequest) (dataintegrationsdk.GetScheduleResponse, error) {
 				return sdkClient.GetSchedule(ctx, request)
 			},
@@ -78,13 +78,13 @@ func newScheduleDefaultRuntimeHooks(sdkClient dataintegrationsdk.DataIntegration
 			},
 		},
 		Update: runtimeOperationHooks[dataintegrationsdk.UpdateScheduleRequest, dataintegrationsdk.UpdateScheduleResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "ApplicationKey", RequestName: "applicationKey", Contribution: "path", PreferResourceID: false}, {FieldName: "ScheduleKey", RequestName: "scheduleKey", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdateScheduleDetails", RequestName: "UpdateScheduleDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "ApplicationKey", RequestName: "applicationKey", Contribution: "path", PreferResourceID: false}, {FieldName: "ScheduleKey", RequestName: "scheduleKey", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateScheduleDetails", RequestName: "UpdateScheduleDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dataintegrationsdk.UpdateScheduleRequest) (dataintegrationsdk.UpdateScheduleResponse, error) {
 				return sdkClient.UpdateSchedule(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[dataintegrationsdk.DeleteScheduleRequest, dataintegrationsdk.DeleteScheduleResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "ApplicationKey", RequestName: "applicationKey", Contribution: "path", PreferResourceID: false}, {FieldName: "ScheduleKey", RequestName: "scheduleKey", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "ApplicationKey", RequestName: "applicationKey", Contribution: "path", PreferResourceID: false}, {FieldName: "ScheduleKey", RequestName: "scheduleKey", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request dataintegrationsdk.DeleteScheduleRequest) (dataintegrationsdk.DeleteScheduleResponse, error) {
 				return sdkClient.DeleteSchedule(ctx, request)
 			},

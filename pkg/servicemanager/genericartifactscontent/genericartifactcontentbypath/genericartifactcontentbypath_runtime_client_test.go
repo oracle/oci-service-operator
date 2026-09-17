@@ -77,6 +77,15 @@ func TestGenericArtifactContentByPathCreateUploadsSecretAndRecordsStatus(t *test
 	requireGenericArtifactContentByPathCondition(t, resource, shared.Active)
 }
 
+func TestGenericArtifactContentByPathRecognizesServiceMetadataNotFound(t *testing.T) {
+	for _, code := range []string{"GENERIC_ARTIFACT_METADATA_NOT_FOUND", "ARTIFACT_NOT_AVAILABLE"} {
+		err := errortest.NewServiceError(404, code, "artifact not found")
+		if !isGenericArtifactContentByPathUnambiguousNotFound(err) {
+			t.Fatalf("%s was not classified as an unambiguous absence", code)
+		}
+	}
+}
+
 func TestGenericArtifactContentByPathNoOpBindsExistingMatchingContent(t *testing.T) {
 	resource := newGenericArtifactContentByPathResource()
 	fake := &fakeGenericArtifactContentByPathOCIClient{

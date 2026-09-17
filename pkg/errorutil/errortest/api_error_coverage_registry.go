@@ -261,6 +261,26 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 				retryableConflictWorkRequest,
 				"PrivilegedApiControl runtime persists create, update, and delete work-request IDs in shared async status, bounds pre-create reuse to exact compartmentId plus displayName plus resourceType matches, preserves clear-to-empty update semantics, and narrows delete request projection so spec.description is not sent as the delete reason query field.",
 			),
+			resourceKey("apigateway", "ApiGateway"): reviewedRegistration(
+				"apigateway",
+				"apigateway",
+				apiErrorCoverageDefaultVersion,
+				"ApiGateway",
+				APIErrorCoverageFamilyGeneratedRuntimeWorkRequest,
+				deleteNotFoundReadback,
+				retryableConflictWorkRequest,
+				"ApiGateway preserves the public API kind as an alias of the SDK Gateway family, tracks create/update/delete work requests, uses a typed mutable update body, and manages the ready-only hostname Secret through a package-local wrapper.",
+			),
+			resourceKey("apigateway", "ApiGatewayDeployment"): reviewedRegistration(
+				"apigateway",
+				"apigateway",
+				apiErrorCoverageDefaultVersion,
+				"ApiGatewayDeployment",
+				APIErrorCoverageFamilyGeneratedRuntimeWorkRequest,
+				deleteNotFoundReadback,
+				retryableConflictWorkRequest,
+				"ApiGatewayDeployment preserves the public API kind as an alias of the SDK Deployment family, tracks create/update/delete work requests, and normalizes the compatibility routes shorthand into the typed SDK specification.",
+			),
 			resourceKey("apiplatform", "ApiPlatformInstance"): reviewedRegistration(
 				"apiplatform",
 				"apiplatform",
@@ -3163,7 +3183,8 @@ func BuildAPIErrorCoverageInventory(cfg *generator.Config) ([]APIErrorCoverageIn
 
 		version := service.VersionOrDefault(cfg.DefaultVersion)
 		addSelection := func(kind string, source string) {
-			item := ensureInventoryItem(itemsByKey, service, version, kind)
+			apiKind := service.APIKindFor(kind)
+			item := ensureInventoryItem(itemsByKey, service, version, apiKind)
 			item.SelectionSources = appendUniqueString(item.SelectionSources, source)
 			item.ControllerStrategy = service.ControllerGenerationStrategyFor(kind)
 			item.ServiceManagerStrategy = service.ServiceManagerGenerationStrategyFor(kind)

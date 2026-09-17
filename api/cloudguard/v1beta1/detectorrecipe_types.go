@@ -128,9 +128,9 @@ type DetectorRecipeDetectorRuleDetailsCondition struct {
 	// +kubebuilder:validation:Optional
 	ValueType string `json:"valueType,omitempty"`
 	// +kubebuilder:validation:Optional
-	LeftOperand shared.JSONValue `json:"leftOperand,omitempty"`
+	LeftOperand shared.JSONValue `json:"leftOperand,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	RightOperand shared.JSONValue `json:"rightOperand,omitempty"`
+	RightOperand shared.JSONValue `json:"rightOperand,omitempty,omitzero"`
 	// Composite condition operator
 	// +kubebuilder:validation:Optional
 	CompositeOperator string `json:"compositeOperator,omitempty"`
@@ -161,7 +161,7 @@ type DetectorRecipeDetectorRuleDetails struct {
 	// +kubebuilder:validation:Optional
 	Configurations []DetectorRecipeDetectorRuleDetailsConfiguration `json:"configurations,omitempty"`
 	// +kubebuilder:validation:Optional
-	Condition DetectorRecipeDetectorRuleDetailsCondition `json:"condition,omitempty"`
+	Condition DetectorRecipeDetectorRuleDetailsCondition `json:"condition,omitempty,omitzero"`
 	// User-defined labels for a detector rule
 	// +kubebuilder:validation:Optional
 	Labels []string `json:"labels,omitempty"`

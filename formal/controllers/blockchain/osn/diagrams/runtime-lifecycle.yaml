@@ -1,0 +1,31 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: blockchain
+slug: osn
+kind: Osn
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+  - failed
+repoAuthored:
+  listLookup:
+    filters:
+      - "ad"
+    matchRule: exact unique match on fields exposed by the scoped OCI list response
+  mutation:
+    mutable:
+      - "ocpuAllocationParam"
+    forceNew:
+      - "blockchainPlatformId"
+      - "ad"
+  followUp:
+    create: "work-request-then-read"
+    update: "work-request-then-read"
+    delete: "work-request-then-confirm-delete"
+notes:
+  - "The vendored SDK exposes create, update, delete through service work requests; the runtime polls those requests and preserves the tracked resource identity before rereading OCI."
+  - "Parent identifiers scope composite OCI request paths and remain replacement-only unless the SDK update details explicitly expose them."
+  - "Create, get, list where available, update, and delete request shapes are exercised by the package-local typed OCI mock integration test."

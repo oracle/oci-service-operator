@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "ons",
+  "slug": "subscription",
+  "kind": "Subscription",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_ons_subscription",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateSubscription",
+        "requestType": "ons.CreateSubscriptionRequest",
+        "responseType": "ons.CreateSubscriptionResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetSubscription",
+        "requestType": "ons.GetSubscriptionRequest",
+        "responseType": "ons.GetSubscriptionResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeSubscriptionCompartment",
+        "requestType": "ons.ChangeSubscriptionCompartmentRequest",
+        "responseType": "ons.ChangeSubscriptionCompartmentResponse"
+      },
+      {
+        "operation": "UpdateSubscription",
+        "requestType": "ons.UpdateSubscriptionRequest",
+        "responseType": "ons.UpdateSubscriptionResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteSubscription",
+        "requestType": "ons.DeleteSubscriptionRequest",
+        "responseType": "ons.DeleteSubscriptionResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "target": [
+        "ACTIVE",
+        "PENDING"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "delivery_policy",
+      "freeform_tags"
+    ],
+    "forceNew": [
+      "endpoint",
+      "protocol",
+      "topic_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/ons/subscription/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/ons/subscription/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Refreshed from the pinned terraform-provider-oci Notifications Subscription resource; scoped delete confirmation remains repo-authored."
+  ]
+}

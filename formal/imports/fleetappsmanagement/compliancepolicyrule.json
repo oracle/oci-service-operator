@@ -1,0 +1,128 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "fleetappsmanagement",
+  "slug": "compliancepolicyrule",
+  "kind": "CompliancePolicyRule",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_fleet_apps_management_compliance_policy_rule",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateCompliancePolicyRule",
+        "requestType": "fleetappsmanagement.CreateCompliancePolicyRuleRequest",
+        "responseType": "fleetappsmanagement.CreateCompliancePolicyRuleResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetCompliancePolicyRule",
+        "requestType": "fleetappsmanagement.GetCompliancePolicyRuleRequest",
+        "responseType": "fleetappsmanagement.GetCompliancePolicyRuleResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListCompliancePolicyRules",
+        "requestType": "fleetappsmanagement.ListCompliancePolicyRulesRequest",
+        "responseType": "fleetappsmanagement.ListCompliancePolicyRulesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateCompliancePolicyRule",
+        "requestType": "fleetappsmanagement.UpdateCompliancePolicyRuleRequest",
+        "responseType": "fleetappsmanagement.UpdateCompliancePolicyRuleResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteCompliancePolicyRule",
+        "requestType": "fleetappsmanagement.DeleteCompliancePolicyRuleRequest",
+        "responseType": "fleetappsmanagement.DeleteCompliancePolicyRuleResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "defined_tags",
+      "freeform_tags",
+      "grace_period",
+      "patch_selection.days_since_release",
+      "patch_selection.patch_level",
+      "patch_selection.patch_name",
+      "patch_selection.selection_type",
+      "patch_type_id",
+      "product_version.is_applicable_for_all_higher_versions",
+      "product_version.version",
+      "severity"
+    ],
+    "forceNew": [
+      "compliance_policy_id",
+      "display_name"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_fleet_apps_management_compliance_policy_rules",
+    "collectionField": "compliance_policy_rule_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "compliance_policy_id",
+      "display_name",
+      "id",
+      "patch_name",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/fleetappsmanagement/compliancepolicyrule/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/fleetappsmanagement/compliancepolicyrule/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from the pinned terraform-provider-oci source revision."
+  ]
+}

@@ -134,7 +134,11 @@ func resourceModels(index *ocisdk.Package, service ServiceConfig) ([]ResourceMod
 
 	kindNames := make(map[string]struct{}, len(candidates))
 	for _, candidate := range candidates {
-		kindNames[candidate.rawName] = struct{}{}
+		kind := service.APIKindFor(candidate.rawName)
+		if _, exists := kindNames[kind]; exists {
+			return nil, fmt.Errorf("service %q kindAliases produces duplicate API kind %q", service.Service, kind)
+		}
+		kindNames[kind] = struct{}{}
 	}
 
 	resources := make([]ResourceModel, 0, len(candidates))
@@ -249,8 +253,15 @@ func buildResourceModelForKinds(index *ocisdk.Package, service ServiceConfig, en
 		return ResourceModel{}, fmt.Errorf("discover runtime metadata for %q: %w", entry.rawName, err)
 	}
 
-	kind := entry.rawName
-	fieldSet := synthesizeResourceFieldSet(index, service, kind, entry.rawName, desiredStateStructCandidates(entry.rawName, entry.requestBodyPayloads))
+	kind := service.APIKindFor(entry.rawName)
+	fieldSet := synthesizeResourceFieldSet(
+		index,
+		service,
+		kind,
+		entry.rawName,
+		desiredStateStructCandidates(entry.rawName, entry.requestBodyPayloads),
+		responseObservedStateStructCandidates(index, runtimeModel),
+	)
 	displayField := primaryDisplayField(fieldSet.SpecFields)
 	kindPlural := strings.ToLower(pluralize(kind))
 	statusTypeName := defaultStatusTypeName(kind)
@@ -275,6 +286,58 @@ func buildResourceModelForKinds(index *ocisdk.Package, service ServiceConfig, en
 		ListComments:        []string{fmt.Sprintf("%s contains a list of %s.", listTypeName, kind)},
 		PrimaryDisplayField: displayField,
 	}, nil
+}
+
+func responseObservedStateStructCandidates(index *ocisdk.Package, runtimeModel *RuntimeModel) []string {
+	if index == nil || runtimeModel == nil {
+		return nil
+	}
+
+	candidates := make([]string, 0, 3)
+	operations := []*RuntimeOperationModel{
+		runtimeModel.Get,
+		runtimeModel.Create,
+		runtimeModel.Update,
+	}
+	for _, operation := range operations {
+		if operation == nil {
+			continue
+		}
+		for _, payload := range index.ResponseBodyPayloads(operation.ResponseTypeName) {
+			candidates = appendUniqueStrings(candidates, payload)
+		}
+	}
+	if len(candidates) > 0 || runtimeModel.List == nil {
+		return candidates
+	}
+
+	responseType := runtimeModel.List.ResponseTypeName
+	if structExposesItems(index, responseType) {
+		return []string{responseType}
+	}
+	payloads := index.ResponseBodyPayloads(responseType)
+	for _, payload := range payloads {
+		if structExposesItems(index, payload) {
+			return []string{payload}
+		}
+	}
+	return payloads
+}
+
+func structExposesItems(index *ocisdk.Package, candidate string) bool {
+	if index == nil || strings.TrimSpace(candidate) == "" {
+		return false
+	}
+	model, ok := index.Struct(candidate)
+	if !ok {
+		return false
+	}
+	for _, field := range model.Fields {
+		if field.Name == "Items" || field.JSONName == "items" {
+			return true
+		}
+	}
+	return false
 }
 
 func apiObjectListTypeName(kind string, kindNames map[string]struct{}) string {
@@ -337,6 +400,13 @@ func buildRuntimeModel(pkg *ocisdk.Package, rawName string, operations []string,
 			return nil, err
 		}
 		assignRuntimeOperation(model, operation, binding)
+	}
+	if method, ok := pkg.OperationForRequest("GetWorkRequestRequest"); ok {
+		binding, err := buildRuntimeOperationModel(pkg, "WorkRequest", "Get", method)
+		if err != nil {
+			return nil, fmt.Errorf("discover GetWorkRequest runtime metadata: %w", err)
+		}
+		model.WorkRequest = binding
 	}
 	clients, err := collectRuntimeClients(model)
 	if err != nil {
@@ -470,12 +540,13 @@ func runtimeRequestStructFields(pkg *ocisdk.Package, rawName string, operation s
 	}
 
 	pathFieldCount := countFieldsByContribution(requestStruct.Fields, ocisdk.FieldContributionPath)
+	identityRequestName := terminalPathParameter(method.Path)
 	fields := make([]RuntimeRequestFieldModel, 0, len(requestStruct.Fields))
 	for _, field := range requestStruct.Fields {
 		if !includeRuntimeRequestField(field) {
 			continue
 		}
-		fields = append(fields, buildRuntimeRequestFieldModel(field, shouldPreferResourceID(operation, rawName, field, pathFieldCount)))
+		fields = append(fields, buildRuntimeRequestFieldModel(field, shouldPreferResourceID(operation, rawName, field, pathFieldCount, identityRequestName)))
 	}
 
 	return fields
@@ -525,8 +596,8 @@ func buildRuntimeRequestFieldModel(field ocisdk.Field, preferResourceID bool) Ru
 	}
 }
 
-func shouldPreferResourceID(operation string, rawName string, field ocisdk.Field, pathFieldCount int) bool {
-	if operation == "Create" || field.Contribution != ocisdk.FieldContributionPath {
+func shouldPreferResourceID(operation string, rawName string, field ocisdk.Field, pathFieldCount int, identityRequestName string) bool {
+	if operation == "Create" || operation == "List" || field.Contribution != ocisdk.FieldContributionPath {
 		return false
 	}
 	requestName := strings.ToLower(strings.TrimSpace(field.RequestName))
@@ -534,11 +605,26 @@ func shouldPreferResourceID(operation string, rawName string, field ocisdk.Field
 		requestName = strings.ToLower(strings.TrimSpace(field.Name))
 	}
 	rawName = strings.ToLower(strings.TrimSpace(rawName))
+	identityRequestName = strings.ToLower(strings.TrimSpace(identityRequestName))
+	if identityRequestName != "" {
+		return requestName == identityRequestName
+	}
 	matchesResourceID := requestName != "" && rawName != "" && strings.Contains(requestName, rawName) && strings.HasSuffix(requestName, "id")
 	if pathFieldCount == 1 {
 		return true
 	}
 	return matchesResourceID
+}
+
+func terminalPathParameter(path string) string {
+	segments := strings.Split(strings.TrimSpace(path), "/")
+	for index := len(segments) - 1; index >= 0; index-- {
+		segment := strings.TrimSpace(segments[index])
+		if len(segment) > 2 && strings.HasPrefix(segment, "{") && strings.HasSuffix(segment, "}") {
+			return segment[1 : len(segment)-1]
+		}
+	}
+	return ""
 }
 
 func hasField(fields []FieldModel, name string) bool {
@@ -605,6 +691,9 @@ func attachResourceFormalModels(service ServiceConfig, pkg *PackageModel, catalo
 		}
 
 		pkg.Resources[index].Formal = model
+		if err := validateRuntimeUpdateOperationSubset(model, pkg.Resources[index].Runtime); err != nil {
+			return nil, fmt.Errorf("service %q kind %q: %w", service.Service, pkg.Resources[index].Kind, err)
+		}
 		if pkg.Resources[index].Runtime != nil {
 			pkg.Resources[index].Runtime.Semantics = buildRuntimeSemanticsModelWithAsync(
 				model,
@@ -721,6 +810,7 @@ const (
 type fieldRenderingOptions struct {
 	scope                     fieldScope
 	escapeStatusJSONCollision bool
+	preserveOptionalBool      bool
 	excludedFieldPaths        map[string]struct{}
 	requiredPointerFieldPaths map[string]struct{}
 }

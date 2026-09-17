@@ -1,0 +1,130 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "computecloudatcustomer",
+  "slug": "cccinfrastructure",
+  "kind": "CccInfrastructure",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_compute_cloud_at_customer_ccc_infrastructure",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateCccInfrastructure",
+        "requestType": "computecloudatcustomer.CreateCccInfrastructureRequest",
+        "responseType": "computecloudatcustomer.CreateCccInfrastructureResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetCccInfrastructure",
+        "requestType": "computecloudatcustomer.GetCccInfrastructureRequest",
+        "responseType": "computecloudatcustomer.GetCccInfrastructureResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListCccInfrastructures",
+        "requestType": "computecloudatcustomer.ListCccInfrastructuresRequest",
+        "responseType": "computecloudatcustomer.ListCccInfrastructuresResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeCccInfrastructureCompartment",
+        "requestType": "computecloudatcustomer.ChangeCccInfrastructureCompartmentRequest",
+        "responseType": "computecloudatcustomer.ChangeCccInfrastructureCompartmentResponse"
+      },
+      {
+        "operation": "UpdateCccInfrastructure",
+        "requestType": "computecloudatcustomer.UpdateCccInfrastructureRequest",
+        "responseType": "computecloudatcustomer.UpdateCccInfrastructureResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteCccInfrastructure",
+        "requestType": "computecloudatcustomer.DeleteCccInfrastructureRequest",
+        "responseType": "computecloudatcustomer.DeleteCccInfrastructureResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "target": [
+        "ACTIVE",
+        "NEEDS_ATTENTION"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "ccc_upgrade_schedule_id",
+      "compartment_id",
+      "connection_details",
+      "connection_state",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags",
+      "subnet_id"
+    ],
+    "forceNew": null,
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_compute_cloud_at_customer_ccc_infrastructures",
+    "collectionField": "ccc_infrastructure_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "access_level",
+      "ccc_infrastructure_id",
+      "compartment_id",
+      "compartment_id_in_subtree",
+      "display_name",
+      "display_name_contains",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/computecloudatcustomer/cccinfrastructure/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/computecloudatcustomer/cccinfrastructure/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from the pinned terraform-provider-oci source revision."
+  ]
+}

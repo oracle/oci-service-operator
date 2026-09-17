@@ -50,15 +50,84 @@ func registerBackendRuntimeHooksMutator(mutator BackendRuntimeHooksMutator) {
 	}
 	backendRuntimeHooksMutators = append(backendRuntimeHooksMutators, mutator)
 }
+func newBackendRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "networkloadbalancer",
+		FormalSlug:    "backend",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"backendSetName", "networkLoadBalancerId"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"isBackup", "isDrain", "isOffline", "weight"},
+			ForceNew:      []string{"backendSetName", "ipAddress", "name", "networkLoadBalancerId", "port", "targetId"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "Backend", Action: "CreateBackend"}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "Backend", Action: "UpdateBackend"}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "Backend", Action: "DeleteBackend"}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "Backend", Action: "CreateBackend"}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "Backend", Action: "UpdateBackend"}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "Backend", Action: "DeleteBackend"}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newBackendDefaultRuntimeHooks(sdkClient networkloadbalancersdk.NetworkLoadBalancerClient) BackendRuntimeHooks {
 	return BackendRuntimeHooks{
+		Semantics:       newBackendRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*networkloadbalancerv1beta1.Backend]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*networkloadbalancerv1beta1.Backend]{},
 		StatusHooks:     generatedruntime.StatusHooks[*networkloadbalancerv1beta1.Backend]{},
 		ParityHooks:     generatedruntime.ParityHooks[*networkloadbalancerv1beta1.Backend]{},
-		Async:           generatedruntime.AsyncHooks[*networkloadbalancerv1beta1.Backend]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*networkloadbalancerv1beta1.Backend]{},
+		Async: generatedruntime.AsyncHooks[*networkloadbalancerv1beta1.Backend]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := networkloadbalancersdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*networkloadbalancerv1beta1.Backend]{},
 		Create: runtimeOperationHooks[networkloadbalancersdk.CreateBackendRequest, networkloadbalancersdk.CreateBackendResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "NetworkLoadBalancerId", RequestName: "networkLoadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "BackendSetName", RequestName: "backendSetName", Contribution: "path", PreferResourceID: false}, {FieldName: "CreateBackendDetails", RequestName: "CreateBackendDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request networkloadbalancersdk.CreateBackendRequest) (networkloadbalancersdk.CreateBackendResponse, error) {
@@ -66,7 +135,7 @@ func newBackendDefaultRuntimeHooks(sdkClient networkloadbalancersdk.NetworkLoadB
 			},
 		},
 		Get: runtimeOperationHooks[networkloadbalancersdk.GetBackendRequest, networkloadbalancersdk.GetBackendResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NetworkLoadBalancerId", RequestName: "networkLoadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "BackendSetName", RequestName: "backendSetName", Contribution: "path", PreferResourceID: false}, {FieldName: "BackendName", RequestName: "backendName", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NetworkLoadBalancerId", RequestName: "networkLoadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "BackendSetName", RequestName: "backendSetName", Contribution: "path", PreferResourceID: false}, {FieldName: "BackendName", RequestName: "backendName", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request networkloadbalancersdk.GetBackendRequest) (networkloadbalancersdk.GetBackendResponse, error) {
 				return sdkClient.GetBackend(ctx, request)
 			},
@@ -78,13 +147,13 @@ func newBackendDefaultRuntimeHooks(sdkClient networkloadbalancersdk.NetworkLoadB
 			},
 		},
 		Update: runtimeOperationHooks[networkloadbalancersdk.UpdateBackendRequest, networkloadbalancersdk.UpdateBackendResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NetworkLoadBalancerId", RequestName: "networkLoadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "BackendSetName", RequestName: "backendSetName", Contribution: "path", PreferResourceID: false}, {FieldName: "BackendName", RequestName: "backendName", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdateBackendDetails", RequestName: "UpdateBackendDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NetworkLoadBalancerId", RequestName: "networkLoadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "BackendSetName", RequestName: "backendSetName", Contribution: "path", PreferResourceID: false}, {FieldName: "BackendName", RequestName: "backendName", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateBackendDetails", RequestName: "UpdateBackendDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request networkloadbalancersdk.UpdateBackendRequest) (networkloadbalancersdk.UpdateBackendResponse, error) {
 				return sdkClient.UpdateBackend(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[networkloadbalancersdk.DeleteBackendRequest, networkloadbalancersdk.DeleteBackendResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NetworkLoadBalancerId", RequestName: "networkLoadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "BackendSetName", RequestName: "backendSetName", Contribution: "path", PreferResourceID: false}, {FieldName: "BackendName", RequestName: "backendName", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NetworkLoadBalancerId", RequestName: "networkLoadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "BackendSetName", RequestName: "backendSetName", Contribution: "path", PreferResourceID: false}, {FieldName: "BackendName", RequestName: "backendName", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request networkloadbalancersdk.DeleteBackendRequest) (networkloadbalancersdk.DeleteBackendResponse, error) {
 				return sdkClient.DeleteBackend(ctx, request)
 			},
@@ -106,10 +175,19 @@ func buildBackendGeneratedRuntimeConfig(
 	hooks BackendRuntimeHooks,
 ) generatedruntime.Config[*networkloadbalancerv1beta1.Backend] {
 	return generatedruntime.Config[*networkloadbalancerv1beta1.Backend]{
-		Kind:            "Backend",
-		SDKName:         "Backend",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "Backend",
+		SDKName:   "Backend",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

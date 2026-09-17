@@ -1,0 +1,130 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "stackmonitoring",
+  "slug": "monitoringtemplate",
+  "kind": "MonitoringTemplate",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_stack_monitoring_monitoring_template",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateMonitoringTemplate",
+        "requestType": "stackmonitoring.CreateMonitoringTemplateRequest",
+        "responseType": "stackmonitoring.CreateMonitoringTemplateResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetMonitoringTemplate",
+        "requestType": "stackmonitoring.GetMonitoringTemplateRequest",
+        "responseType": "stackmonitoring.GetMonitoringTemplateResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListMonitoringTemplates",
+        "requestType": "stackmonitoring.ListMonitoringTemplatesRequest",
+        "responseType": "stackmonitoring.ListMonitoringTemplatesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateMonitoringTemplate",
+        "requestType": "stackmonitoring.UpdateMonitoringTemplateRequest",
+        "responseType": "stackmonitoring.UpdateMonitoringTemplateResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteMonitoringTemplate",
+        "requestType": "stackmonitoring.DeleteMonitoringTemplateRequest",
+        "responseType": "stackmonitoring.DeleteMonitoringTemplateResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "S_CREATING"
+      ],
+      "target": [
+        "S_ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "defined_tags",
+      "description",
+      "destinations",
+      "display_name",
+      "freeform_tags",
+      "is_alarms_enabled",
+      "is_split_notification_enabled",
+      "members.composite_type",
+      "members.id",
+      "members.type",
+      "message_format",
+      "repeat_notification_duration"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_stack_monitoring_monitoring_templates",
+    "collectionField": "monitoring_template_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "metric_name",
+      "monitoring_template_id",
+      "namespace",
+      "resource_types",
+      "state",
+      "status"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/stackmonitoring/monitoringtemplate/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/stackmonitoring/monitoringtemplate/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts are imported from the pinned terraform-provider-oci revision; repo-authored runtime semantics remain authoritative."
+  ]
+}

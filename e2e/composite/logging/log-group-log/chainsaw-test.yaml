@@ -1,0 +1,146 @@
+# Copyright (c) 2026, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+# yaml-language-server: $schema=https://raw.githubusercontent.com/kyverno/chainsaw/v0.2.15/.schemas/json/test-chainsaw-v1alpha1.json
+
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: Test
+metadata:
+  name: logging-log-group-log
+spec:
+  concurrent: false
+  timeouts:
+    apply: 2m
+    assert: 20m
+    cleanup: 30m
+    delete: 30m
+    exec: 2m
+  bindings:
+    - name: suffix
+      value: (env('OSOK_E2E_SUFFIX'))
+    - name: compartmentId
+      value: (env('OCI_COMPARTMENT_ID'))
+    - name: logGroupName
+      value: (join('-', ['osok-chain-log-group', $suffix]))
+    - name: logName
+      value: (join('-', ['osok-chain-log', $suffix]))
+  steps:
+    - name: exercise-log-group-log-chain
+      description: Create a log group, inject its observed OCID into a custom log, update both resources, and clean up.
+      try:
+        - script:
+            env:
+              - name: OCI_COMPARTMENT_ID
+                value: ($compartmentId)
+            content: |
+              set -eu
+              test -n "$OCI_COMPARTMENT_ID" || { echo "OCI_COMPARTMENT_ID is required" >&2; exit 2; }
+        - apply:
+            resource:
+              apiVersion: logging.oracle.com/v1beta1
+              kind: LogGroup
+              metadata:
+                name: ($logGroupName)
+                namespace: ($namespace)
+              spec:
+                compartmentId: ($compartmentId)
+                displayName: ($logGroupName)
+                description: OSOK composite lifecycle create
+                freeformTags:
+                  osok-e2e-phase: create
+        - assert:
+            resource:
+              apiVersion: logging.oracle.com/v1beta1
+              kind: LogGroup
+              metadata:
+                name: ($logGroupName)
+              status:
+                lifecycleState: ACTIVE
+                status:
+                  (conditions[?type == 'Active' && status == 'True'] | length(@) > `0`): true
+                  (ocid != null && length(ocid) > `0`): true
+        - script:
+            env:
+              - name: RESOURCE_NAME
+                value: ($logGroupName)
+            content: kubectl get loggroup.logging.oracle.com "$RESOURCE_NAME" -n "$NAMESPACE" -o json
+            outputs:
+              - name: logGroup
+                value: (json_parse($stdout))
+        - apply:
+            resource:
+              apiVersion: logging.oracle.com/v1beta1
+              kind: Log
+              metadata:
+                name: ($logName)
+                namespace: ($namespace)
+              spec:
+                logGroupId: ($logGroup.status.status.ocid)
+                displayName: ($logName)
+                logType: CUSTOM
+                isEnabled: true
+                retentionDuration: 30
+                freeformTags:
+                  osok-e2e-phase: create
+        - assert:
+            resource:
+              apiVersion: logging.oracle.com/v1beta1
+              kind: Log
+              metadata:
+                name: ($logName)
+              status:
+                lifecycleState: ACTIVE
+                (logGroupId == $logGroup.status.status.ocid): true
+                retentionDuration: 30
+                status:
+                  (conditions[?type == 'Active' && status == 'True'] | length(@) > `0`): true
+                  (ocid != null && length(ocid) > `0`): true
+        - apply:
+            resource:
+              apiVersion: logging.oracle.com/v1beta1
+              kind: LogGroup
+              metadata:
+                name: ($logGroupName)
+                namespace: ($namespace)
+              spec:
+                compartmentId: ($compartmentId)
+                displayName: ($logGroupName)
+                description: OSOK composite lifecycle update
+                freeformTags:
+                  osok-e2e-phase: update
+        - apply:
+            resource:
+              apiVersion: logging.oracle.com/v1beta1
+              kind: Log
+              metadata:
+                name: ($logName)
+                namespace: ($namespace)
+              spec:
+                logGroupId: ($logGroup.status.status.ocid)
+                displayName: ($logName)
+                logType: CUSTOM
+                isEnabled: true
+                retentionDuration: 60
+                freeformTags:
+                  osok-e2e-phase: update
+        - assert:
+            resource:
+              apiVersion: logging.oracle.com/v1beta1
+              kind: LogGroup
+              metadata:
+                name: ($logGroupName)
+              status:
+                lifecycleState: ACTIVE
+                description: OSOK composite lifecycle update
+                freeformTags:
+                  osok-e2e-phase: update
+        - assert:
+            resource:
+              apiVersion: logging.oracle.com/v1beta1
+              kind: Log
+              metadata:
+                name: ($logName)
+              status:
+                lifecycleState: ACTIVE
+                retentionDuration: 60
+                freeformTags:
+                  osok-e2e-phase: update

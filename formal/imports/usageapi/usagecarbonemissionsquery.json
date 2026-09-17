@@ -5,7 +5,7 @@
   "slug": "usagecarbonemissionsquery",
   "kind": "UsageCarbonEmissionsQuery",
   "sourceRef": "terraform-provider-oci",
-  "providerResource": "scaffold_usageapi_usagecarbonemissionsquery",
+  "providerResource": "oci_metering_computation_usage_carbon_emissions_query",
   "operations": {
     "create": [
       {
@@ -23,9 +23,9 @@
     ],
     "list": [
       {
-        "operation": "ListUsageCarbonEmissionsQuery",
-        "requestType": "usageapi.ListUsageCarbonEmissionsQueryRequest",
-        "responseType": "usageapi.ListUsageCarbonEmissionsQueryResponse"
+        "operation": "ListUsageCarbonEmissionsQueries",
+        "requestType": "usageapi.ListUsageCarbonEmissionsQueriesRequest",
+        "responseType": "usageapi.ListUsageCarbonEmissionsQueriesResponse"
       }
     ],
     "update": [
@@ -45,17 +45,13 @@
   },
   "lifecycle": {
     "create": {
-      "pending": [
-        "PROVISIONING"
-      ],
+      "pending": [],
       "target": [
         "ACTIVE"
       ]
     },
     "update": {
-      "pending": [
-        "UPDATING"
-      ],
+      "pending": [],
       "target": [
         "ACTIVE"
       ]
@@ -63,7 +59,24 @@
   },
   "mutation": {
     "mutable": [
-      "display_name"
+      "query_definition.cost_analysis_ui.graph",
+      "query_definition.cost_analysis_ui.is_cumulative_graph",
+      "query_definition.display_name",
+      "query_definition.report_query.compartment_depth",
+      "query_definition.report_query.date_range_name",
+      "query_definition.report_query.emission_calculation_method",
+      "query_definition.report_query.emission_type",
+      "query_definition.report_query.granularity",
+      "query_definition.report_query.group_by",
+      "query_definition.report_query.group_by_tag.key",
+      "query_definition.report_query.group_by_tag.namespace",
+      "query_definition.report_query.group_by_tag.value",
+      "query_definition.report_query.is_aggregate_by_time",
+      "query_definition.report_query.tenant_id",
+      "query_definition.report_query.time_usage_ended",
+      "query_definition.report_query.time_usage_started",
+      "query_definition.report_query.usage_carbon_emissions_query_filter",
+      "query_definition.version"
     ],
     "forceNew": [
       "compartment_id"
@@ -74,11 +87,6 @@
     "create": [
       {
         "helper": "tfresource.CreateResource"
-      },
-      {
-        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
-        "entityType": "template",
-        "action": "CREATED"
       }
     ],
     "update": [
@@ -93,20 +101,17 @@
     ]
   },
   "deleteConfirmation": {
-    "pending": [
-      "DELETING"
-    ],
+    "pending": [],
     "target": [
       "DELETED"
     ]
   },
   "listLookup": {
-    "datasource": "scaffold_usageapi_usagecarbonemissionsquery",
-    "collectionField": "usagecarbonemissionsquery",
+    "datasource": "oci_metering_computation_usage_carbon_emissions_queries",
+    "collectionField": "usage_carbon_emissions_query_collection",
     "responseItemsField": "Items",
     "filterFields": [
-      "compartment_id",
-      "state"
+      "compartment_id"
     ]
   },
   "boundary": {
@@ -120,6 +125,6 @@
     ]
   },
   "notes": [
-    "Scaffold placeholder for usageapi/usagecarbonemissionsquery; replace imported facts before promoting this row beyond scaffold."
+    "Refreshed from the pinned terraform-provider-oci Metering Computation Usage Carbon Emissions Query resource; state-free settling remains repo-authored."
   ]
 }

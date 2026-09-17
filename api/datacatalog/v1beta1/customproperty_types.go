@@ -61,6 +61,12 @@ type CustomPropertySpec struct {
 	// Example: `{"properties": { "default": { "host": "host1", "port": "1521", "database": "orcl"}}}`
 	// +kubebuilder:validation:Optional
 	Properties map[string]map[string]string `json:"properties,omitempty"`
+	// The OCID of the catalog containing the custom property.
+	// +kubebuilder:validation:Required
+	CatalogId string `json:"catalogId"`
+	// The key of the namespace containing the custom property.
+	// +kubebuilder:validation:Required
+	NamespaceId string `json:"namespaceId"`
 }
 
 // CustomPropertyScope defines nested fields for CustomProperty.Scope.

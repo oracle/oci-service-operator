@@ -1,0 +1,63 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: managementagent
+slug: datasource
+kind: DataSource
+archetype: generated-service-manager
+states:
+- provisioning
+- active
+- updating
+- terminating
+repoAuthored:
+  operations:
+    update:
+    - UpdateDataSource
+  providerLifecycle:
+    createPending:
+    - CREATING
+    updatePending:
+    - UPDATING
+    deletePending:
+    - DELETING
+  listLookup:
+    filters:
+    - managementAgentId
+    - name
+    matchRule: exact managementAgentId, name match within the resource scope; duplicate
+      matches fail
+  mutation:
+    mutable:
+    - url
+    - allowMetrics
+    - proxyUrl
+    - connectionTimeout
+    - readTimeout
+    - readDataLimitInKilobytes
+    - scheduleMins
+    - resourceGroup
+    - metricDimensions
+    forceNew:
+    - managementAgentId
+    - name
+    - compartmentId
+    - type
+    - namespace
+  hooks:
+    create:
+    - helper: resource-local DataSource runtime
+    update:
+    - helper: resource-local DataSource runtime
+    delete:
+    - helper: resource-local DataSource runtime
+  followUp:
+    create: GetWorkRequest -> paginated ListDataSources/GetDataSource readback
+    update: GetWorkRequest -> GetDataSource readback
+    delete: GetWorkRequest -> conservative confirm-delete
+notes:
+- The production runtime uses the declared work-request phases and service-local async
+  adapter.
+- Lifecycle success and pending states mirror the production service-manager semantics.
+- Status projection is required, Secret side effects are none, and the finalizer policy
+  is retain-until-confirmed-delete.
+- Delete ownership is retained until a terminal lifecycle state or confirmed absence.

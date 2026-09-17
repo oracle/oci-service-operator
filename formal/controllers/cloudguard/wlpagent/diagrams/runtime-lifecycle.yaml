@@ -1,0 +1,43 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: cloudguard
+slug: wlpagent
+kind: WlpAgent
+archetype: generated-service-manager
+states:
+  - active
+  - terminating
+repoAuthored:
+  listLookup:
+    filters:
+      - compartmentId
+      - agentVersion
+    matchRule: exact unique compartmentId plus agentVersion match
+  mutation:
+    mutable:
+      - certificateSignedRequest
+      - definedTags
+      - freeformTags
+    forceNew:
+      - agentVersion
+      - compartmentId
+      - osInfo
+  hooks:
+    create:
+      - helper: tfresource.CreateResource
+    update:
+      - helper: tfresource.UpdateResource
+    delete:
+      - helper: tfresource.DeleteResource
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - WlpAgent responses expose no lifecycle field. The retained resource-local
+    state-free wrapper marks a readable post-write resource Active.
+  - Certificate signing request and tag maps reconcile in place. Compartment,
+    agent version, and OS information remain replacement-only.
+  - Pre-create reuse uses exact compartmentId plus agentVersion matching, and
+    delete keeps the finalizer until a NotFound reread. There are no Secret
+    side effects.

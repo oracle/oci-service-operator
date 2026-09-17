@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "aidataplatform",
+  "slug": "aidataplatform",
+  "kind": "AiDataPlatform",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_ai_data_platform_ai_data_platform",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateAiDataPlatform",
+        "requestType": "aidataplatform.CreateAiDataPlatformRequest",
+        "responseType": "aidataplatform.CreateAiDataPlatformResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetAiDataPlatform",
+        "requestType": "aidataplatform.GetAiDataPlatformRequest",
+        "responseType": "aidataplatform.GetAiDataPlatformResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListAiDataPlatforms",
+        "requestType": "aidataplatform.ListAiDataPlatformsRequest",
+        "responseType": "aidataplatform.ListAiDataPlatformsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateAiDataPlatform",
+        "requestType": "aidataplatform.UpdateAiDataPlatformRequest",
+        "responseType": "aidataplatform.UpdateAiDataPlatformResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteAiDataPlatform",
+        "requestType": "aidataplatform.DeleteAiDataPlatformRequest",
+        "responseType": "aidataplatform.DeleteAiDataPlatformResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "displayName",
+      "aiDataPlatformType",
+      "freeformTags",
+      "definedTags",
+      "systemTags"
+    ],
+    "forceNew": [
+      "compartmentId",
+      "defaultWorkspaceName"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "unavailable",
+    "collectionField": "Items",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartmentId",
+      "displayName",
+      "id"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/aidataplatform/aidataplatform/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/aidataplatform/aidataplatform/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Terraform provider formal-import cannot resolve oci_ai_data_platform_ai_data_platform; the vendored SDK, production runtime, and package-owned typed OCI fixtures define this contract."
+  ]
+}

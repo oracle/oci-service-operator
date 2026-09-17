@@ -493,36 +493,62 @@ func (c tsigKeyDeleteGuardClient) CreateOrUpdate(
 }
 
 func (c tsigKeyDeleteGuardClient) Delete(ctx context.Context, resource *dnsv1beta1.TsigKey) (bool, error) {
-	if err := c.guardDeleteRead(ctx, resource); err != nil {
-		return false, err
+	deleted, err := c.guardDeleteRead(ctx, resource)
+	if err != nil || deleted {
+		return deleted, err
 	}
 	return c.delegate.Delete(ctx, resource)
 }
 
-func (c tsigKeyDeleteGuardClient) guardDeleteRead(ctx context.Context, resource *dnsv1beta1.TsigKey) error {
+func (c tsigKeyDeleteGuardClient) guardDeleteRead(ctx context.Context, resource *dnsv1beta1.TsigKey) (bool, error) {
 	if resource == nil {
-		return nil
+		return false, nil
 	}
 	id := strings.TrimSpace(string(resource.Status.OsokStatus.Ocid))
 	if id == "" {
 		id = strings.TrimSpace(resource.Status.Id)
 	}
 	if id == "" {
-		return nil
+		return false, nil
 	}
 	if c.initErr != nil {
-		return fmt.Errorf("initialize TsigKey OCI client: %w", c.initErr)
+		return false, fmt.Errorf("initialize TsigKey OCI client: %w", c.initErr)
 	}
 	if c.client == nil {
-		return fmt.Errorf("TsigKey OCI client is not configured")
+		return false, fmt.Errorf("TsigKey OCI client is not configured")
 	}
 	_, err := c.client.GetTsigKey(ctx, dnssdk.GetTsigKeyRequest{TsigKeyId: common.String(id)})
-	if err == nil || errorutil.ClassifyDeleteError(err).IsUnambiguousNotFound() {
-		return nil
+	classification := errorutil.ClassifyDeleteError(err)
+	if err == nil {
+		return false, nil
+	}
+	if classification.IsUnambiguousNotFound() {
+		return true, nil
+	}
+	if classification.IsAuthShapedNotFound() {
+		servicemanager.RecordErrorOpcRequestID(&resource.Status.OsokStatus, err)
+		response, listErr := listTsigKeysAllPages(ctx, c.client, c.initErr, dnssdk.ListTsigKeysRequest{
+			CompartmentId: common.String(resource.Spec.CompartmentId),
+			Id:            common.String(id),
+			Name:          common.String(resource.Spec.Name),
+		})
+		if listErr != nil {
+			return false, fmt.Errorf("confirm TsigKey deletion by list: %w", listErr)
+		}
+		for _, item := range response.Items {
+			if item.Id != nil && strings.TrimSpace(*item.Id) == id {
+				err = conservativeTsigKeyNotFoundError(err, "pre-delete read")
+				servicemanager.RecordErrorOpcRequestID(&resource.Status.OsokStatus, err)
+				return false, err
+			}
+		}
+		resource.Status.Id = ""
+		resource.Status.OsokStatus.Ocid = ""
+		return true, nil
 	}
 	err = conservativeTsigKeyNotFoundError(err, "pre-delete read")
 	servicemanager.RecordErrorOpcRequestID(&resource.Status.OsokStatus, err)
-	return err
+	return false, err
 }
 
 func conservativeTsigKeyNotFoundError(err error, operation string) error {

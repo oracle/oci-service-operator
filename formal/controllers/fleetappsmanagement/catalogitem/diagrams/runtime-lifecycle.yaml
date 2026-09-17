@@ -1,0 +1,85 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: fleetappsmanagement
+slug: catalogitem
+kind: CatalogItem
+archetype: generated-service-manager
+states:
+- provisioning
+- active
+- updating
+- terminating
+repoAuthored:
+  operations:
+    create:
+    - CreateCatalogItem
+    update:
+    - UpdateCatalogItem
+    delete:
+    - DeleteCatalogItem
+  providerLifecycle:
+    createPending:
+    - CREATING
+    updatePending: []
+    deletePending:
+    - DELETING
+  listLookup:
+    filters:
+    - catalogListingId
+    - catalogListingVersionCriteria
+    - compartmentId
+    - configSourceType
+    - displayName
+    - packageType
+    - shouldListPublicItems
+    - state
+    matchRule: exact declared filters match within the resource scope; duplicate matches
+      fail
+  mutation:
+    mutable:
+    - cloneCatalogItemTrigger
+    - compartmentId
+    - definedTags
+    - description
+    - displayName
+    - freeformTags
+    - shortDescription
+    - versionDescription
+    forceNew:
+    - catalogSourcePayload
+    - catalogSourcePayload.accessUri
+    - catalogSourcePayload.branchName
+    - catalogSourcePayload.bucket
+    - catalogSourcePayload.configSourceType
+    - catalogSourcePayload.configurationSourceProviderId
+    - catalogSourcePayload.description
+    - catalogSourcePayload.listingId
+    - catalogSourcePayload.longDescription
+    - catalogSourcePayload.namespace
+    - catalogSourcePayload.object
+    - catalogSourcePayload.repositoryUrl
+    - catalogSourcePayload.templateDisplayName
+    - catalogSourcePayload.timeExpires
+    - catalogSourcePayload.version
+    - catalogSourcePayload.workingDirectory
+    - catalogSourcePayload.zipFileBase64encoded
+    - configSourceType
+    - listingId
+    - listingVersion
+    - packageType
+    - timeReleased
+  hooks:
+    update:
+    - helper: tfresource.WaitForUpdatedState
+    delete:
+    - helper: tfresource.DeleteResource
+  followUp:
+    create: GetWorkRequest -> read-after-write
+    update: GetWorkRequest -> read-after-write
+    delete: GetWorkRequest -> confirm-delete
+notes:
+- The generated service manager uses the reviewed CRUD request, response, lifecycle,
+  and status projection contract.
+- Work-request phases are declared per operation from the vendored SDK response surface.
+- Secret side effects are none and finalizer ownership is retained until confirmed
+  deletion.

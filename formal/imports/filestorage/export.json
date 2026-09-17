@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "filestorage",
+  "slug": "export",
+  "kind": "Export",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_file_storage_export",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateExport",
+        "requestType": "filestorage.CreateExportRequest",
+        "responseType": "filestorage.CreateExportResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetExport",
+        "requestType": "filestorage.GetExportRequest",
+        "responseType": "filestorage.GetExportResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListExports",
+        "requestType": "filestorage.ListExportsRequest",
+        "responseType": "filestorage.ListExportsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateExport",
+        "requestType": "filestorage.UpdateExportRequest",
+        "responseType": "filestorage.UpdateExportResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteExport",
+        "requestType": "filestorage.DeleteExportRequest",
+        "responseType": "filestorage.DeleteExportResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "export_options.access",
+      "export_options.allowed_auth",
+      "export_options.anonymous_gid",
+      "export_options.anonymous_uid",
+      "export_options.identity_squash",
+      "export_options.is_anonymous_access_allowed",
+      "export_options.require_privileged_source_port",
+      "export_options.source",
+      "is_idmap_groups_for_sys_auth",
+      "is_lock_override"
+    ],
+    "forceNew": [
+      "export_set_id",
+      "file_system_id",
+      "locks",
+      "locks.message",
+      "locks.related_resource_id",
+      "locks.time_created",
+      "locks.type",
+      "path"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForCreatedState"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_file_storage_exports",
+    "collectionField": "exports",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "export_set_id",
+      "file_system_id",
+      "id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/filestorage/export/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/filestorage/export/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Refreshed from the pinned terraform-provider-oci File Storage Export resource; normalization and deletion behavior remain repo-authored."
+  ]
+}

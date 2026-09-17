@@ -52,6 +52,9 @@ type DecryptionProfileSpec struct {
 	// Whether to automatically append SAN to impersonating certificate if server certificate is missing SAN.
 	// +kubebuilder:validation:Optional
 	IsAutoIncludeAltName bool `json:"isAutoIncludeAltName,omitempty"`
+	// The OCID of the Network Firewall policy that owns this resource.
+	// +kubebuilder:validation:Required
+	NetworkFirewallPolicyId string `json:"networkFirewallPolicyId"`
 }
 
 // DecryptionProfileStatus defines the observed state of DecryptionProfile.

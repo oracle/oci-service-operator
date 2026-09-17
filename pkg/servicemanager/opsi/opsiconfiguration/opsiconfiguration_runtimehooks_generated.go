@@ -50,15 +50,84 @@ func registerOpsiConfigurationRuntimeHooksMutator(mutator OpsiConfigurationRunti
 	}
 	opsiconfigurationRuntimeHooksMutators = append(opsiconfigurationRuntimeHooksMutators, mutator)
 }
+func newOpsiConfigurationRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "opsi",
+		FormalSlug:    "opsiconfiguration",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "displayName", "opsiConfigType", "state"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"definedTags", "description", "displayName", "freeformTags", "jsonData", "systemTags"},
+			ForceNew:      []string{"compartmentId", "opsiConfigType"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "opsiconfiguration", Action: "CREATE_OPSI_CONFIGURATION"}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "opsiconfiguration", Action: "UPDATE_OPSI_CONFIGURATION"}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "opsiconfiguration", Action: "DELETE_OPSI_CONFIGURATION"}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> GetOpsiConfiguration",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "opsiconfiguration", Action: "CREATE_OPSI_CONFIGURATION"}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> GetOpsiConfiguration",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "opsiconfiguration", Action: "UPDATE_OPSI_CONFIGURATION"}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "opsiconfiguration", Action: "DELETE_OPSI_CONFIGURATION"}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newOpsiConfigurationDefaultRuntimeHooks(sdkClient opsisdk.OperationsInsightsClient) OpsiConfigurationRuntimeHooks {
 	return OpsiConfigurationRuntimeHooks{
+		Semantics:       newOpsiConfigurationRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*opsiv1beta1.OpsiConfiguration]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*opsiv1beta1.OpsiConfiguration]{},
 		StatusHooks:     generatedruntime.StatusHooks[*opsiv1beta1.OpsiConfiguration]{},
 		ParityHooks:     generatedruntime.ParityHooks[*opsiv1beta1.OpsiConfiguration]{},
-		Async:           generatedruntime.AsyncHooks[*opsiv1beta1.OpsiConfiguration]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*opsiv1beta1.OpsiConfiguration]{},
+		Async: generatedruntime.AsyncHooks[*opsiv1beta1.OpsiConfiguration]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := opsisdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*opsiv1beta1.OpsiConfiguration]{},
 		Create: runtimeOperationHooks[opsisdk.CreateOpsiConfigurationRequest, opsisdk.CreateOpsiConfigurationResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OpsiConfigField", RequestName: "opsiConfigField", Contribution: "query", PreferResourceID: false}, {FieldName: "ConfigItemCustomStatus", RequestName: "configItemCustomStatus", Contribution: "query", PreferResourceID: false}, {FieldName: "ConfigItemsApplicableContext", RequestName: "configItemsApplicableContext", Contribution: "query", PreferResourceID: false}, {FieldName: "ConfigItemField", RequestName: "configItemField", Contribution: "query", PreferResourceID: false}, {FieldName: "CreateOpsiConfigurationDetails", RequestName: "CreateOpsiConfigurationDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request opsisdk.CreateOpsiConfigurationRequest) (opsisdk.CreateOpsiConfigurationResponse, error) {
@@ -106,10 +175,19 @@ func buildOpsiConfigurationGeneratedRuntimeConfig(
 	hooks OpsiConfigurationRuntimeHooks,
 ) generatedruntime.Config[*opsiv1beta1.OpsiConfiguration] {
 	return generatedruntime.Config[*opsiv1beta1.OpsiConfiguration]{
-		Kind:            "OpsiConfiguration",
-		SDKName:         "OpsiConfiguration",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "OpsiConfiguration",
+		SDKName:   "OpsiConfiguration",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

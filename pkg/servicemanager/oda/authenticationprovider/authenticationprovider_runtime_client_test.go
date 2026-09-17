@@ -142,12 +142,16 @@ func TestAuthenticationProviderRequiresOdaInstanceAnnotation(t *testing.T) {
 
 func TestAuthenticationProviderCreateProjectsStatus(t *testing.T) {
 	resource := makeAuthenticationProviderResource()
+	resource.UID = "authentication-provider-uid"
 	resource.Spec.IsVisible = true
 	fake := &fakeAuthenticationProviderOCIClient{}
 	fake.listFunc = func(context.Context, odasdk.ListAuthenticationProvidersRequest) (odasdk.ListAuthenticationProvidersResponse, error) {
 		return odasdk.ListAuthenticationProvidersResponse{}, nil
 	}
 	fake.createFunc = func(_ context.Context, request odasdk.CreateAuthenticationProviderRequest) (odasdk.CreateAuthenticationProviderResponse, error) {
+		if got := stringValue(request.OpcRetryToken); got != string(resource.UID) {
+			t.Fatalf("create opcRetryToken = %q, want %q", got, resource.UID)
+		}
 		if got := stringValue(request.OdaInstanceId); got != testOdaInstanceID {
 			t.Fatalf("create odaInstanceId = %q, want %q", got, testOdaInstanceID)
 		}

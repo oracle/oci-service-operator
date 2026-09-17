@@ -1,0 +1,128 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "devops",
+  "slug": "trigger",
+  "kind": "Trigger",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_devops_trigger",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateTrigger",
+        "requestType": "devops.CreateTriggerRequest",
+        "responseType": "devops.CreateTriggerResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetTrigger",
+        "requestType": "devops.GetTriggerRequest",
+        "responseType": "devops.GetTriggerResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListTriggers",
+        "requestType": "devops.ListTriggersRequest",
+        "responseType": "devops.ListTriggersResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateTrigger",
+        "requestType": "devops.UpdateTriggerRequest",
+        "responseType": "devops.UpdateTriggerResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteTrigger",
+        "requestType": "devops.DeleteTriggerRequest",
+        "responseType": "devops.DeleteTriggerResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "actions.build_pipeline_id",
+      "actions.filter.events",
+      "actions.filter.exclude.file_filter.file_paths",
+      "actions.filter.include.base_ref",
+      "actions.filter.include.file_filter.file_paths",
+      "actions.filter.include.head_ref",
+      "actions.filter.include.repository_name",
+      "actions.filter.trigger_source",
+      "actions.type",
+      "connection_id",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags",
+      "repository_id",
+      "trigger_source"
+    ],
+    "forceNew": [
+      "project_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_devops_triggers",
+    "collectionField": "trigger_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "id",
+      "project_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/devops/trigger/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/devops/trigger/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from terraform-provider-oci for devops/trigger."
+  ]
+}

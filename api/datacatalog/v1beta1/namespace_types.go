@@ -24,6 +24,9 @@ type NamespaceSpec struct {
 	// If this field is defined by service or by a user
 	// +kubebuilder:validation:Optional
 	IsServiceDefined bool `json:"isServiceDefined,omitempty"`
+	// The OCID of the catalog containing the namespace.
+	// +kubebuilder:validation:Required
+	CatalogId string `json:"catalogId"`
 }
 
 // NamespaceStatus defines the observed state of Namespace.

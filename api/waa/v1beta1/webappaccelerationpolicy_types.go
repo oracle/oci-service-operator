@@ -21,9 +21,9 @@ type WebAppAccelerationPolicySpec struct {
 	// +kubebuilder:validation:Optional
 	DisplayName string `json:"displayName,omitempty"`
 	// +kubebuilder:validation:Optional
-	ResponseCachingPolicy WebAppAccelerationPolicyResponseCachingPolicy `json:"responseCachingPolicy,omitempty"`
+	ResponseCachingPolicy WebAppAccelerationPolicyResponseCachingPolicy `json:"responseCachingPolicy,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	ResponseCompressionPolicy WebAppAccelerationPolicyResponseCompressionPolicy `json:"responseCompressionPolicy,omitempty"`
+	ResponseCompressionPolicy WebAppAccelerationPolicyResponseCompressionPolicy `json:"responseCompressionPolicy,omitempty,omitzero"`
 	// Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
 	// Example: `{"bar-key": "value"}`
 	// +kubebuilder:validation:Optional
@@ -69,7 +69,7 @@ type WebAppAccelerationPolicyResponseCompressionPolicyGzipCompression struct {
 // WebAppAccelerationPolicyResponseCompressionPolicy defines nested fields for WebAppAccelerationPolicy.ResponseCompressionPolicy.
 type WebAppAccelerationPolicyResponseCompressionPolicy struct {
 	// +kubebuilder:validation:Optional
-	GzipCompression WebAppAccelerationPolicyResponseCompressionPolicyGzipCompression `json:"gzipCompression,omitempty"`
+	GzipCompression WebAppAccelerationPolicyResponseCompressionPolicyGzipCompression `json:"gzipCompression,omitempty,omitzero"`
 }
 
 // WebAppAccelerationPolicyStatus defines the observed state of WebAppAccelerationPolicy.

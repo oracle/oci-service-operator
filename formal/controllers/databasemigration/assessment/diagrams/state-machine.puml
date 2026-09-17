@@ -40,7 +40,7 @@ observe --> retryable : OCI state in CREATING,\nIN_PROGRESS, UPDATING,\nDELETING
 observe --> failed : unresolved OCI error or non-success state
 evaluate_ready --> reject_unsupported_drift : force-new or conflicting\ndrift detected
 reject_unsupported_drift --> ready : wait for spec or live state change
-evaluate_ready --> apply_update : supported mutable drift for\nacceptable_downtime,\ncreation_type,\ndatabase_data_size (+8 more)
+evaluate_ready --> apply_update : supported mutable drift for\nacceptableDowntime,\ncreationType,\ndatabaseDataSize (+8 more)
 apply_update --> ready : update path completes
 evaluate_ready --> ready : no supported drift remains
 ready --> ready : no supported drift remains
@@ -70,22 +70,45 @@ status/finalizer: required /
 retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
 provider states: create CREATING, IN_PROGRESS;
-update UPDATING, IN_PROGRESS; delete DELETING
-supported drift: acceptable_downtime,
-creation_type, database_data_size,
-ddl_expectation (+7 more)
+update UPDATING; delete DELETING
+follow-up: create=GetWorkRequest ->
+GetAssessment; update=GetWorkRequest ->
+GetAssessment; delete=GetWorkRequest ->
+GetAssessment/ListAssessments confirm-delete
+supported drift: acceptableDowntime,
+creationType, databaseDataSize, ddlExpectation
+(+7 more)
 reject before mutate: force-new fields
-bulk_include_exclude_data, compartment_id,
-database_combination, exclude_objects (+1 more)
+bulkIncludeExcludeData, compartmentId,
+databaseCombination, excludeObjects (+1 more)
 create-only fields: none
 list lookup: oci_database_migration_assessments
-filters compartment_id, display_name,
-lifecycle_details, lifecycle_state
+filters compartmentId, displayName; exact
+compartmentId, displayName, databaseCombination,
+connection identity, network, downtime,
+data-size, DDL, and creation-type match;
+duplicate matches fail
 conflicts: none
 open gaps: none
-Scaffold metadata only; replace with
-controller-specific runtime states before
-promotion.
+The reviewed runtime selects the concrete MYSQL
+or ORACLE request type from databaseCombination
+before calling OCI; unsupported object-helper
+fields are rejected rather than partially
+published.
+CREATING and IN_PROGRESS requeue as
+provisioning, UPDATING requeues as updating,
+ACTIVE and SUCCEEDED settle success, and
+DELETING retains the finalizer until DELETED or
+confirmed absence.
+Create, update, and delete persist and poll the
+Database Migration work request, recover the
+Assessment identifier, and reread the concrete
+Assessment subtype before projecting status.
+Pre-create reuse is bounded to the complete
+reviewed identity. Only the published
+update-detail fields reconcile in place;
+compartment, discriminator, and object-helper
+drift require replacement.
 end note
 note right of delete_pending
 delete policy: required

@@ -50,15 +50,84 @@ func registerFsuDiscoveryRuntimeHooksMutator(mutator FsuDiscoveryRuntimeHooksMut
 	}
 	fsudiscoveryRuntimeHooksMutators = append(fsudiscoveryRuntimeHooksMutators, mutator)
 }
+func newFsuDiscoveryRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "fleetsoftwareupdate",
+		FormalSlug:    "fsudiscovery",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{"UPDATING"},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "displayName", "lifecycleState", "opc-request-id"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"definedTags", "displayName", "freeformTags"},
+			ForceNew:      []string{"compartmentId", "details"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "FsuDiscovery", Action: "CreateFsuDiscovery"}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "FsuDiscovery", Action: "DeleteFsuDiscovery"}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "FsuDiscovery", Action: "CreateFsuDiscovery"}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "FsuDiscovery", Action: "DeleteFsuDiscovery"}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newFsuDiscoveryDefaultRuntimeHooks(sdkClient fleetsoftwareupdatesdk.FleetSoftwareUpdateClient) FsuDiscoveryRuntimeHooks {
 	return FsuDiscoveryRuntimeHooks{
+		Semantics:       newFsuDiscoveryRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*fleetsoftwareupdatev1beta1.FsuDiscovery]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*fleetsoftwareupdatev1beta1.FsuDiscovery]{},
 		StatusHooks:     generatedruntime.StatusHooks[*fleetsoftwareupdatev1beta1.FsuDiscovery]{},
 		ParityHooks:     generatedruntime.ParityHooks[*fleetsoftwareupdatev1beta1.FsuDiscovery]{},
-		Async:           generatedruntime.AsyncHooks[*fleetsoftwareupdatev1beta1.FsuDiscovery]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*fleetsoftwareupdatev1beta1.FsuDiscovery]{},
+		Async: generatedruntime.AsyncHooks[*fleetsoftwareupdatev1beta1.FsuDiscovery]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := fleetsoftwareupdatesdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*fleetsoftwareupdatev1beta1.FsuDiscovery]{},
 		Create: runtimeOperationHooks[fleetsoftwareupdatesdk.CreateFsuDiscoveryRequest, fleetsoftwareupdatesdk.CreateFsuDiscoveryResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateFsuDiscoveryDetails", RequestName: "CreateFsuDiscoveryDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request fleetsoftwareupdatesdk.CreateFsuDiscoveryRequest) (fleetsoftwareupdatesdk.CreateFsuDiscoveryResponse, error) {
@@ -106,10 +175,19 @@ func buildFsuDiscoveryGeneratedRuntimeConfig(
 	hooks FsuDiscoveryRuntimeHooks,
 ) generatedruntime.Config[*fleetsoftwareupdatev1beta1.FsuDiscovery] {
 	return generatedruntime.Config[*fleetsoftwareupdatev1beta1.FsuDiscovery]{
-		Kind:            "FsuDiscovery",
-		SDKName:         "FsuDiscovery",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "FsuDiscovery",
+		SDKName:   "FsuDiscovery",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

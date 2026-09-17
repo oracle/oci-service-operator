@@ -44,7 +44,13 @@ type FolderSpec struct {
 	// +kubebuilder:validation:Required
 	ObjectVersion int `json:"objectVersion"`
 	// +kubebuilder:validation:Optional
-	ParentRef FolderParentRef `json:"parentRef,omitempty"`
+	ParentRef FolderParentRef `json:"parentRef,omitempty,omitzero"`
+	// The OCID of the Data Integration workspace containing this resource.
+	// +kubebuilder:validation:Required
+	WorkspaceId string `json:"workspaceId"`
+	// The aggregator key required by the collection lookup.
+	// +kubebuilder:validation:Required
+	AggregatorKey string `json:"aggregatorKey"`
 }
 
 // FolderRegistryMetadata defines nested fields for Folder.RegistryMetadata.

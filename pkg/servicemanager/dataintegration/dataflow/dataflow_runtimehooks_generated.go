@@ -66,25 +66,25 @@ func newDataFlowDefaultRuntimeHooks(sdkClient dataintegrationsdk.DataIntegration
 			},
 		},
 		Get: runtimeOperationHooks[dataintegrationsdk.GetDataFlowRequest, dataintegrationsdk.GetDataFlowResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "DataFlowKey", RequestName: "dataFlowKey", Contribution: "path", PreferResourceID: false}, {FieldName: "ExpandReferences", RequestName: "expandReferences", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "DataFlowKey", RequestName: "dataFlowKey", Contribution: "path", PreferResourceID: true}, {FieldName: "ExpandReferences", RequestName: "expandReferences", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dataintegrationsdk.GetDataFlowRequest) (dataintegrationsdk.GetDataFlowResponse, error) {
 				return sdkClient.GetDataFlow(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[dataintegrationsdk.ListDataFlowsRequest, dataintegrationsdk.ListDataFlowsResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: true}, {FieldName: "FolderId", RequestName: "folderId", Contribution: "query", PreferResourceID: false}, {FieldName: "Fields", RequestName: "fields", Contribution: "query", PreferResourceID: false}, {FieldName: "Name", RequestName: "name", Contribution: "query", PreferResourceID: false}, {FieldName: "Identifier", RequestName: "identifier", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "FolderId", RequestName: "folderId", Contribution: "query", PreferResourceID: false}, {FieldName: "Fields", RequestName: "fields", Contribution: "query", PreferResourceID: false}, {FieldName: "Name", RequestName: "name", Contribution: "query", PreferResourceID: false}, {FieldName: "Identifier", RequestName: "identifier", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dataintegrationsdk.ListDataFlowsRequest) (dataintegrationsdk.ListDataFlowsResponse, error) {
 				return sdkClient.ListDataFlows(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[dataintegrationsdk.UpdateDataFlowRequest, dataintegrationsdk.UpdateDataFlowResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "DataFlowKey", RequestName: "dataFlowKey", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdateDataFlowDetails", RequestName: "UpdateDataFlowDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "DataFlowKey", RequestName: "dataFlowKey", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateDataFlowDetails", RequestName: "UpdateDataFlowDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dataintegrationsdk.UpdateDataFlowRequest) (dataintegrationsdk.UpdateDataFlowResponse, error) {
 				return sdkClient.UpdateDataFlow(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[dataintegrationsdk.DeleteDataFlowRequest, dataintegrationsdk.DeleteDataFlowResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "DataFlowKey", RequestName: "dataFlowKey", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "DataFlowKey", RequestName: "dataFlowKey", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request dataintegrationsdk.DeleteDataFlowRequest) (dataintegrationsdk.DeleteDataFlowResponse, error) {
 				return sdkClient.DeleteDataFlow(ctx, request)
 			},

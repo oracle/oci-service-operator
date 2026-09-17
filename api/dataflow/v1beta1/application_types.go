@@ -50,7 +50,7 @@ type ApplicationSpec struct {
 	// +kubebuilder:validation:Optional
 	Arguments []string `json:"arguments,omitempty"`
 	// +kubebuilder:validation:Optional
-	ApplicationLogConfig ApplicationLogConfig `json:"applicationLogConfig,omitempty"`
+	ApplicationLogConfig ApplicationLogConfig `json:"applicationLogConfig,omitempty,omitzero"`
 	// The class for the application.
 	// +kubebuilder:validation:Optional
 	ClassName string `json:"className,omitempty"`
@@ -69,7 +69,7 @@ type ApplicationSpec struct {
 	// +kubebuilder:validation:Optional
 	Description string `json:"description,omitempty"`
 	// +kubebuilder:validation:Optional
-	DriverShapeConfig ApplicationDriverShapeConfig `json:"driverShapeConfig,omitempty"`
+	DriverShapeConfig ApplicationDriverShapeConfig `json:"driverShapeConfig,omitempty,omitzero"`
 	// The input used for spark-submit command. For more details see https://spark.apache.org/docs/latest/submitting-applications.html#launching-applications-with-spark-submit.
 	// Supported options include ``--class``, ``--file``, ``--jars``, ``--conf``, ``--py-files``, and main application file with arguments.
 	// Example: ``--jars oci://path/to/a.jar,oci://path/to/b.jar --files oci://path/to/a.json,oci://path/to/b.csv --py-files oci://path/to/a.py,oci://path/to/b.py --conf spark.sql.crossJoin.enabled=true --class org.apache.spark.examples.SparkPi oci://path/to/main.jar 10``
@@ -78,7 +78,7 @@ type ApplicationSpec struct {
 	// +kubebuilder:validation:Optional
 	Execute string `json:"execute,omitempty"`
 	// +kubebuilder:validation:Optional
-	ExecutorShapeConfig ApplicationExecutorShapeConfig `json:"executorShapeConfig,omitempty"`
+	ExecutorShapeConfig ApplicationExecutorShapeConfig `json:"executorShapeConfig,omitempty,omitzero"`
 	// An Oracle Cloud Infrastructure URI of the file containing the application to execute.
 	// See https://docs.oracle.com/iaas/Content/API/SDKDocs/hdfsconnector.htm#uriformat.
 	// +kubebuilder:validation:Optional

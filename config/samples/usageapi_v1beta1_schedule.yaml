@@ -23,10 +23,14 @@ spec:
     region: us-ashburn-1
     namespace: example-namespace
     bucketName: usage-reports
-  scheduleRecurrences: "FREQ=DAILY;INTERVAL=1"
+  scheduleRecurrences: "DAILY"
   timeScheduled: "2026-01-15T15:00:00Z"
   description: "Daily usage export"
   outputFileFormat: CSV
-  savedReportId: ocid1.savedreport.oc1..exampleuniqueID
+  queryProperties:
+    granularity: DAILY
+    dateRange:
+      dateRangeType: DYNAMIC
+      dynamicDateRangeType: LAST_7_DAYS
   freeformTags:
     workload: finops

@@ -40,11 +40,11 @@ type BackendSetSpec struct {
 	// +kubebuilder:validation:Optional
 	BackendMaxConnections int `json:"backendMaxConnections,omitempty"`
 	// +kubebuilder:validation:Optional
-	SslConfiguration BackendSetSslConfiguration `json:"sslConfiguration,omitempty"`
+	SslConfiguration BackendSetSslConfiguration `json:"sslConfiguration,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	SessionPersistenceConfiguration BackendSetSessionPersistenceConfiguration `json:"sessionPersistenceConfiguration,omitempty"`
+	SessionPersistenceConfiguration BackendSetSessionPersistenceConfiguration `json:"sessionPersistenceConfiguration,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	LbCookieSessionPersistenceConfiguration BackendSetLbCookieSessionPersistenceConfiguration `json:"lbCookieSessionPersistenceConfiguration,omitempty"`
+	LbCookieSessionPersistenceConfiguration BackendSetLbCookieSessionPersistenceConfiguration `json:"lbCookieSessionPersistenceConfiguration,omitempty,omitzero"`
 	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the load balancer that owns this backend set.
 	// +kubebuilder:validation:Required
 	LoadBalancerId string `json:"loadBalancerId"`

@@ -1,0 +1,22 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: loganalytics
+slug: loganalyticsembridge
+kind: LogAnalyticsEmBridge
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  providerLifecycle: {createPending: ["CREATING"], updatePending: [], deletePending: []}
+  listLookup:
+    filters: ["namespaceName","compartmentId","displayName","id"]
+    matchRule: exact Log Analytics namespace, compartment, and display name match; tracked ID is preferred
+  mutation:
+    mutable: ["displayName","description","bucketName","freeformTags","definedTags"]
+    forceNew: ["compartmentId","emEntitiesCompartmentId"]
+  followUp: {create: read-after-write, update: read-after-write, delete: confirm-delete}
+notes:
+  - "The service namespace is resolved outside the CR status and injected into every nested request path."

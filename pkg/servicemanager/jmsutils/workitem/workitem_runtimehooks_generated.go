@@ -56,7 +56,7 @@ func newWorkItemDefaultRuntimeHooks(sdkClient jmsutilssdk.JmsUtilsClient) WorkIt
 		Async:           generatedruntime.AsyncHooks[*jmsutilsv1beta1.WorkItem]{},
 		DeleteHooks:     generatedruntime.DeleteHooks[*jmsutilsv1beta1.WorkItem]{},
 		List: runtimeOperationHooks[jmsutilssdk.ListWorkItemsRequest, jmsutilssdk.ListWorkItemsResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkRequestId", RequestName: "workRequestId", Contribution: "path", PreferResourceID: true}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkRequestId", RequestName: "workRequestId", Contribution: "path", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request jmsutilssdk.ListWorkItemsRequest) (jmsutilssdk.ListWorkItemsResponse, error) {
 				return sdkClient.ListWorkItems(ctx, request)
 			},

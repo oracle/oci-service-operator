@@ -515,6 +515,11 @@ func TestHttpMonitorServiceClientDeleteConfirmsUnambiguousNotFound(t *testing.T)
 		deleteFn: func(context.Context, healthcheckssdk.DeleteHttpMonitorRequest) (healthcheckssdk.DeleteHttpMonitorResponse, error) {
 			return healthcheckssdk.DeleteHttpMonitorResponse{OpcRequestId: common.String("opc-delete-1")}, nil
 		},
+		listFn: func(context.Context, healthcheckssdk.ListHttpMonitorsRequest) (healthcheckssdk.ListHttpMonitorsResponse, error) {
+			return healthcheckssdk.ListHttpMonitorsResponse{Items: []healthcheckssdk.HttpMonitorSummary{{
+				Id: common.String("ocid1.httpmonitor.oc1..existing"),
+			}}}, nil
+		},
 	})
 
 	resource := makeHttpMonitorResource()
@@ -571,7 +576,7 @@ func TestHttpMonitorServiceClientDeleteTreatsAuthShapedNotFoundAsAmbiguous(t *te
 	}
 }
 
-func TestHttpMonitorServiceClientDeleteFailsFastOnPreDeleteAuthShapedNotFound(t *testing.T) {
+func TestHttpMonitorServiceClientDeleteConfirmsPreDeleteAuthShapedNotFoundByListAbsence(t *testing.T) {
 	t.Parallel()
 
 	getCalls := 0
@@ -585,6 +590,15 @@ func TestHttpMonitorServiceClientDeleteFailsFastOnPreDeleteAuthShapedNotFound(t 
 			deleteCalls++
 			return healthcheckssdk.DeleteHttpMonitorResponse{}, nil
 		},
+		listFn: func(_ context.Context, req healthcheckssdk.ListHttpMonitorsRequest) (healthcheckssdk.ListHttpMonitorsResponse, error) {
+			if req.CompartmentId == nil || *req.CompartmentId != "ocid1.compartment.oc1..example" {
+				t.Fatalf("list compartmentId = %v", req.CompartmentId)
+			}
+			if req.DisplayName == nil || *req.DisplayName != "http-monitor-alpha" {
+				t.Fatalf("list displayName = %v", req.DisplayName)
+			}
+			return healthcheckssdk.ListHttpMonitorsResponse{}, nil
+		},
 	})
 
 	resource := makeHttpMonitorResource()
@@ -592,11 +606,11 @@ func TestHttpMonitorServiceClientDeleteFailsFastOnPreDeleteAuthShapedNotFound(t 
 	resource.Status.OsokStatus.Ocid = "ocid1.httpmonitor.oc1..existing"
 
 	deleted, err := client.Delete(context.Background(), resource)
-	if err == nil || !strings.Contains(err.Error(), "ambiguous 404 NotAuthorizedOrNotFound") {
-		t.Fatalf("Delete() error = %v, want pre-delete auth-shaped 404 failure", err)
+	if err != nil {
+		t.Fatalf("Delete() error = %v", err)
 	}
-	if deleted {
-		t.Fatal("Delete() should not report deleted for pre-delete auth-shaped 404")
+	if !deleted {
+		t.Fatal("Delete() should report deleted after scoped list proves absence")
 	}
 	if getCalls != 1 {
 		t.Fatalf("GetHttpMonitor() calls = %d, want 1", getCalls)
@@ -606,6 +620,9 @@ func TestHttpMonitorServiceClientDeleteFailsFastOnPreDeleteAuthShapedNotFound(t 
 	}
 	if resource.Status.OsokStatus.OpcRequestID != "opc-request-id" {
 		t.Fatalf("status.opcRequestId = %q, want surfaced auth error request ID", resource.Status.OsokStatus.OpcRequestID)
+	}
+	if resource.Status.OsokStatus.DeletedAt == nil {
+		t.Fatal("status.deletedAt = nil, want confirmed deletion timestamp")
 	}
 }
 

@@ -50,15 +50,84 @@ func registerMigrationAssetRuntimeHooksMutator(mutator MigrationAssetRuntimeHook
 	}
 	migrationassetRuntimeHooksMutators = append(migrationassetRuntimeHooksMutators, mutator)
 }
+func newMigrationAssetRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "cloudmigrations",
+		FormalSlug:    "migrationasset",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE", "NEEDS_ATTENTION"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"displayName", "migrationAssetId", "migrationId", "state"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"displayName", "migrationAssetDependsOn", "replicationScheduleId"},
+			ForceNew:      []string{"availabilityDomain", "inventoryAssetId", "migrationId", "replicationCompartmentId", "snapShotBucketName"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newMigrationAssetDefaultRuntimeHooks(sdkClient cloudmigrationssdk.MigrationClient) MigrationAssetRuntimeHooks {
 	return MigrationAssetRuntimeHooks{
+		Semantics:       newMigrationAssetRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*cloudmigrationsv1beta1.MigrationAsset]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*cloudmigrationsv1beta1.MigrationAsset]{},
 		StatusHooks:     generatedruntime.StatusHooks[*cloudmigrationsv1beta1.MigrationAsset]{},
 		ParityHooks:     generatedruntime.ParityHooks[*cloudmigrationsv1beta1.MigrationAsset]{},
-		Async:           generatedruntime.AsyncHooks[*cloudmigrationsv1beta1.MigrationAsset]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*cloudmigrationsv1beta1.MigrationAsset]{},
+		Async: generatedruntime.AsyncHooks[*cloudmigrationsv1beta1.MigrationAsset]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := cloudmigrationssdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*cloudmigrationsv1beta1.MigrationAsset]{},
 		Create: runtimeOperationHooks[cloudmigrationssdk.CreateMigrationAssetRequest, cloudmigrationssdk.CreateMigrationAssetResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateMigrationAssetDetails", RequestName: "CreateMigrationAssetDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request cloudmigrationssdk.CreateMigrationAssetRequest) (cloudmigrationssdk.CreateMigrationAssetResponse, error) {
@@ -106,10 +175,19 @@ func buildMigrationAssetGeneratedRuntimeConfig(
 	hooks MigrationAssetRuntimeHooks,
 ) generatedruntime.Config[*cloudmigrationsv1beta1.MigrationAsset] {
 	return generatedruntime.Config[*cloudmigrationsv1beta1.MigrationAsset]{
-		Kind:            "MigrationAsset",
-		SDKName:         "MigrationAsset",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "MigrationAsset",
+		SDKName:   "MigrationAsset",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

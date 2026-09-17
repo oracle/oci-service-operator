@@ -19,6 +19,7 @@ import (
 	multicloudv1beta1 "github.com/oracle/oci-service-operator/api/multicloud/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
+	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	"github.com/oracle/oci-service-operator/pkg/util"
 	corev1 "k8s.io/api/core/v1"
@@ -122,6 +123,9 @@ func (c externalLocationMappingMetadataRuntimeClient) CreateOrUpdate(
 
 	identity := query.identityFor(item)
 	if err := validateExternalLocationMappingMetadataTrackedIdentity(resource, identity); err != nil {
+		return c.fail(resource, err)
+	}
+	if err := generatedruntime.ProjectResponseBodyWithAliases(resource, item, nil); err != nil {
 		return c.fail(resource, err)
 	}
 

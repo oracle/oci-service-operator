@@ -66,25 +66,25 @@ func newDecryptionRuleDefaultRuntimeHooks(sdkClient networkfirewallsdk.NetworkFi
 			},
 		},
 		Get: runtimeOperationHooks[networkfirewallsdk.GetDecryptionRuleRequest, networkfirewallsdk.GetDecryptionRuleResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "DecryptionRuleName", RequestName: "decryptionRuleName", Contribution: "path", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "DecryptionRuleName", RequestName: "decryptionRuleName", Contribution: "path", PreferResourceID: true}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request networkfirewallsdk.GetDecryptionRuleRequest) (networkfirewallsdk.GetDecryptionRuleResponse, error) {
 				return sdkClient.GetDecryptionRule(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[networkfirewallsdk.ListDecryptionRulesRequest, networkfirewallsdk.ListDecryptionRulesResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: true}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "DecryptionRulePriorityOrder", RequestName: "decryptionRulePriorityOrder", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "DecryptionRulePriorityOrder", RequestName: "decryptionRulePriorityOrder", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request networkfirewallsdk.ListDecryptionRulesRequest) (networkfirewallsdk.ListDecryptionRulesResponse, error) {
 				return sdkClient.ListDecryptionRules(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[networkfirewallsdk.UpdateDecryptionRuleRequest, networkfirewallsdk.UpdateDecryptionRuleResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "DecryptionRuleName", RequestName: "decryptionRuleName", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdateDecryptionRuleDetails", RequestName: "UpdateDecryptionRuleDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "DecryptionRuleName", RequestName: "decryptionRuleName", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateDecryptionRuleDetails", RequestName: "UpdateDecryptionRuleDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request networkfirewallsdk.UpdateDecryptionRuleRequest) (networkfirewallsdk.UpdateDecryptionRuleResponse, error) {
 				return sdkClient.UpdateDecryptionRule(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[networkfirewallsdk.DeleteDecryptionRuleRequest, networkfirewallsdk.DeleteDecryptionRuleResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "DecryptionRuleName", RequestName: "decryptionRuleName", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "DecryptionRuleName", RequestName: "decryptionRuleName", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request networkfirewallsdk.DeleteDecryptionRuleRequest) (networkfirewallsdk.DeleteDecryptionRuleResponse, error) {
 				return sdkClient.DeleteDecryptionRule(ctx, request)
 			},

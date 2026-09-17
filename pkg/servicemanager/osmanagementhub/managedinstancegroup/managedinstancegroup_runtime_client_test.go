@@ -434,6 +434,7 @@ func TestManagedInstanceGroupServiceClientReconcilesMembershipWithCustomActions(
 	current := managedInstanceGroupSDK(testManagedInstanceGroupID, osmanagementhubsdk.ManagedInstanceGroupLifecycleStateActive)
 	current.SoftwareSourceIds = []osmanagementhubsdk.SoftwareSourceDetails{
 		{Id: common.String(testSoftwareSourceID)},
+		{Id: common.String("ocid1.softwaresource.oc1..mandatory"), IsMandatoryForAutonomousLinux: common.Bool(true)},
 		{Id: common.String("ocid1.softwaresource.oc1..detach")},
 	}
 	current.ManagedInstanceIds = []string{"ocid1.instance.oc1..detach"}
@@ -604,6 +605,9 @@ func TestManagedInstanceGroupServiceClientDeleteRejectsAuthShapedNotFound(t *tes
 	fake := &fakeManagedInstanceGroupOCIClient{t: t}
 	fake.get = func(_ context.Context, _ osmanagementhubsdk.GetManagedInstanceGroupRequest) (osmanagementhubsdk.GetManagedInstanceGroupResponse, error) {
 		return osmanagementhubsdk.GetManagedInstanceGroupResponse{}, errortest.NewServiceError(404, errorutil.NotAuthorizedOrNotFound, "ambiguous")
+	}
+	fake.list = func(_ context.Context, _ osmanagementhubsdk.ListManagedInstanceGroupsRequest) (osmanagementhubsdk.ListManagedInstanceGroupsResponse, error) {
+		return osmanagementhubsdk.ListManagedInstanceGroupsResponse{ManagedInstanceGroupCollection: osmanagementhubsdk.ManagedInstanceGroupCollection{Items: []osmanagementhubsdk.ManagedInstanceGroupSummary{{Id: common.String(testManagedInstanceGroupID)}}}}, nil
 	}
 
 	deleted, err := newManagedInstanceGroupTestClient(fake).Delete(context.Background(), resource)

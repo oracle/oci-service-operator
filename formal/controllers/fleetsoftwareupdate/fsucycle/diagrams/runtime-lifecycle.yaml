@@ -1,0 +1,94 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: fleetsoftwareupdate
+slug: fsucycle
+kind: FsuCycle
+archetype: generated-service-manager
+states:
+- provisioning
+- active
+- updating
+- terminating
+repoAuthored:
+  operations:
+    create:
+    - CreateFsuCycle
+    update:
+    - UpdateFsuCycle
+    delete:
+    - DeleteFsuCycle
+  providerLifecycle:
+    createPending:
+    - S_CREATING
+    - S_IN_PROGRESS
+    updatePending: []
+    deletePending:
+    - DELETING
+  listLookup:
+    filters:
+    - collectionType
+    - compartmentId
+    - displayName
+    - fsuCollectionId
+    - state
+    - targetVersion
+    matchRule: exact declared filters match within the resource scope; duplicate matches
+      fail
+  mutation:
+    mutable:
+    - batchingStrategy.isForceRolling
+    - batchingStrategy.isWaitForBatchResume
+    - batchingStrategy.percentage
+    - batchingStrategy.type
+    - compartmentId
+    - definedTags
+    - diagnosticsCollection.logCollectionMode
+    - displayName
+    - freeformTags
+    - goalVersionDetails.components.componentType
+    - goalVersionDetails.components.goalVersionDetails.goalSoftwareImageId
+    - goalVersionDetails.components.goalVersionDetails.goalType
+    - goalVersionDetails.components.goalVersionDetails.goalVersion
+    - goalVersionDetails.components.homePolicy
+    - goalVersionDetails.components.newHomePrefix
+    - goalVersionDetails.homePolicy
+    - goalVersionDetails.newHomePrefix
+    - goalVersionDetails.softwareImageId
+    - goalVersionDetails.type
+    - goalVersionDetails.version
+    - isIgnoreMissingPatches
+    - isIgnorePatches
+    - isKeepPlacement
+    - maxDrainTimeoutInSeconds
+    - type
+    - upgradeDetails.collectionType
+    - upgradeDetails.isIgnorePostUpgradeErrors
+    - upgradeDetails.isIgnorePrerequisites
+    - upgradeDetails.isRecompileInvalidObjects
+    - upgradeDetails.isTimeZoneUpgrade
+    - upgradeDetails.maxDrainTimeoutInSeconds
+    forceNew:
+    - applyActionSchedule
+    - applyActionSchedule.timeToStart
+    - applyActionSchedule.type
+    - fsuCollectionId
+    - stageActionSchedule
+    - stageActionSchedule.timeToStart
+    - stageActionSchedule.type
+  hooks:
+    create:
+    - helper: tfresource.CreateResource
+    update:
+    - helper: tfresource.UpdateResource
+    delete:
+    - helper: tfresource.DeleteResource
+  followUp:
+    create: GetWorkRequest -> read-after-write
+    update: GetWorkRequest -> read-after-write
+    delete: GetWorkRequest -> confirm-delete
+notes:
+- The generated service manager uses the reviewed CRUD request, response, lifecycle,
+  and status projection contract.
+- Work-request phases are declared per operation from the vendored SDK response surface.
+- Secret side effects are none and finalizer ownership is retained until confirmed
+  deletion.

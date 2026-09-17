@@ -1298,7 +1298,7 @@ func confirmScheduledJobDelete(
 	listScheduledJobs func(context.Context, osmanagementhubsdk.ListScheduledJobsRequest) (osmanagementhubsdk.ListScheduledJobsResponse, error),
 ) (any, error) {
 	if strings.TrimSpace(currentID) != "" {
-		return confirmScheduledJobDeleteByID(ctx, resource, currentID, getScheduledJob)
+		return confirmScheduledJobDeleteByID(ctx, resource, currentID, getScheduledJob, listScheduledJobs)
 	}
 	if resource == nil {
 		return nil, fmt.Errorf("scheduledjob resource is nil")
@@ -1311,12 +1311,29 @@ func confirmScheduledJobDeleteByID(
 	resource *osmanagementhubv1beta1.ScheduledJob,
 	currentID string,
 	getScheduledJob func(context.Context, osmanagementhubsdk.GetScheduledJobRequest) (osmanagementhubsdk.GetScheduledJobResponse, error),
+	listScheduledJobs func(context.Context, osmanagementhubsdk.ListScheduledJobsRequest) (osmanagementhubsdk.ListScheduledJobsResponse, error),
 ) (any, error) {
 	if getScheduledJob == nil {
 		return nil, fmt.Errorf("scheduledjob delete confirmation cannot read OCI resource by id")
 	}
 	response, err := getScheduledJob(ctx, osmanagementhubsdk.GetScheduledJobRequest{ScheduledJobId: common.String(strings.TrimSpace(currentID))})
 	if err != nil {
+		if errorutil.ClassifyDeleteError(err).IsAuthShapedNotFound() && resource != nil && listScheduledJobs != nil {
+			request, requestErr := scheduledJobListRequestFromSpec(resource.Spec)
+			if requestErr != nil {
+				return nil, requestErr
+			}
+			listResponse, listErr := listScheduledJobs(ctx, request)
+			if listErr != nil {
+				return nil, conservativeScheduledJobNotFoundError(resource, listErr, "delete confirmation list")
+			}
+			for _, item := range listResponse.Items {
+				if strings.TrimSpace(stringPointerValue(item.Id)) == strings.TrimSpace(currentID) {
+					return nil, conservativeScheduledJobNotFoundError(resource, err, "delete confirmation read")
+				}
+			}
+			return nil, newScheduledJobNotFoundError("scheduledjob delete confirmation list proved the tracked OCI resource is absent")
+		}
 		return nil, conservativeScheduledJobNotFoundError(resource, err, "delete confirmation read")
 	}
 	return response, nil

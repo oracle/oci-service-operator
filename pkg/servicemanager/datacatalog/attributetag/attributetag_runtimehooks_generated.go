@@ -65,7 +65,7 @@ func newAttributeTagDefaultRuntimeHooks(sdkClient datacatalogsdk.DataCatalogClie
 			},
 		},
 		Get: runtimeOperationHooks[datacatalogsdk.GetAttributeTagRequest, datacatalogsdk.GetAttributeTagResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "DataAssetKey", RequestName: "dataAssetKey", Contribution: "path", PreferResourceID: false}, {FieldName: "EntityKey", RequestName: "entityKey", Contribution: "path", PreferResourceID: false}, {FieldName: "AttributeKey", RequestName: "attributeKey", Contribution: "path", PreferResourceID: false}, {FieldName: "TagKey", RequestName: "tagKey", Contribution: "path", PreferResourceID: false}, {FieldName: "Fields", RequestName: "fields", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "DataAssetKey", RequestName: "dataAssetKey", Contribution: "path", PreferResourceID: false}, {FieldName: "EntityKey", RequestName: "entityKey", Contribution: "path", PreferResourceID: false}, {FieldName: "AttributeKey", RequestName: "attributeKey", Contribution: "path", PreferResourceID: false}, {FieldName: "TagKey", RequestName: "tagKey", Contribution: "path", PreferResourceID: true}, {FieldName: "Fields", RequestName: "fields", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request datacatalogsdk.GetAttributeTagRequest) (datacatalogsdk.GetAttributeTagResponse, error) {
 				return sdkClient.GetAttributeTag(ctx, request)
 			},
@@ -77,7 +77,7 @@ func newAttributeTagDefaultRuntimeHooks(sdkClient datacatalogsdk.DataCatalogClie
 			},
 		},
 		Delete: runtimeOperationHooks[datacatalogsdk.DeleteAttributeTagRequest, datacatalogsdk.DeleteAttributeTagResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "DataAssetKey", RequestName: "dataAssetKey", Contribution: "path", PreferResourceID: false}, {FieldName: "EntityKey", RequestName: "entityKey", Contribution: "path", PreferResourceID: false}, {FieldName: "AttributeKey", RequestName: "attributeKey", Contribution: "path", PreferResourceID: false}, {FieldName: "TagKey", RequestName: "tagKey", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "DataAssetKey", RequestName: "dataAssetKey", Contribution: "path", PreferResourceID: false}, {FieldName: "EntityKey", RequestName: "entityKey", Contribution: "path", PreferResourceID: false}, {FieldName: "AttributeKey", RequestName: "attributeKey", Contribution: "path", PreferResourceID: false}, {FieldName: "TagKey", RequestName: "tagKey", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request datacatalogsdk.DeleteAttributeTagRequest) (datacatalogsdk.DeleteAttributeTagResponse, error) {
 				return sdkClient.DeleteAttributeTag(ctx, request)
 			},

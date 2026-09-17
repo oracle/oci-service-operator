@@ -1177,6 +1177,28 @@ func profileDeleteConfirmRead(
 				return nil, fmt.Errorf("profile delete confirmation requires get OCI operation")
 			}
 			response, err := getProfile(ctx, osmanagementhubsdk.GetProfileRequest{ProfileId: common.String(currentID)})
+			if err != nil && errorutil.ClassifyDeleteError(err).IsAuthShapedNotFound() && listProfiles != nil {
+				request, ok, requestErr := profileDeleteListRequest(resource)
+				if requestErr != nil {
+					return nil, requestErr
+				}
+				if ok {
+					listResponse, listErr := listProfiles(ctx, request)
+					if listErr != nil {
+						return profileDeleteConfirmReadResponse(listResponse, listErr)
+					}
+					for _, item := range listResponse.Items {
+						if strings.TrimSpace(profileString(item.Id)) == currentID {
+							return profileDeleteConfirmReadResponse(response, err)
+						}
+					}
+					return nil, errorutil.NotFoundOciError{
+						HTTPStatusCode: 404,
+						ErrorCode:      errorutil.NotFound,
+						Description:    "Profile delete confirmation list proved the tracked OCID is absent",
+					}
+				}
+			}
 			return profileDeleteConfirmReadResponse(response, err)
 		}
 		if listProfiles == nil {

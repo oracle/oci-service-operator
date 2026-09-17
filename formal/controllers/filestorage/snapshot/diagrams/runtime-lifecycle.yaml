@@ -1,0 +1,50 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: filestorage
+slug: snapshot
+kind: Snapshot
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+  - deleted
+repoAuthored:
+  providerLifecycle:
+    createPending:
+      - CREATING
+    deletePending:
+      - DELETING
+  listLookup:
+    filters:
+      - fileSystemId
+      - name
+    matchRule: exact fileSystemId and immutable name match
+  mutation:
+    mutable:
+      - definedTags
+      - expirationTime
+      - freeformTags
+    forceNew:
+      - fileSystemId
+      - locks
+      - name
+  operations:
+    update:
+      - UpdateSnapshot
+  hooks:
+    create:
+      - helper: tfresource.CreateResource
+    update:
+      - helper: tfresource.UpdateResource
+    delete:
+      - helper: tfresource.DeleteResource
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - Recorded OCI responses are synchronous, while generatedruntime confirms create, update, and delete through explicit GetSnapshot lifecycle reads rather than the provider-local WaitForCreatedState helper.
+  - fileSystemId and name form the stable pre-create identity; both are replacement-only after creation.
+  - Delete retains the finalizer through DELETING until DELETED or NotFound. There are no Secret side effects.

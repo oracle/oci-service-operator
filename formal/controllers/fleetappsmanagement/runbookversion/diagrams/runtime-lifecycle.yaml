@@ -1,0 +1,136 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: fleetappsmanagement
+slug: runbookversion
+kind: RunbookVersion
+archetype: generated-service-manager
+states:
+- provisioning
+- active
+- updating
+- terminating
+repoAuthored:
+  operations:
+    create:
+    - CreateRunbookVersion
+    update:
+    - UpdateRunbookVersion
+    delete:
+    - DeleteRunbookVersion
+  providerLifecycle:
+    createPending:
+    - CREATING
+    updatePending: []
+    deletePending:
+    - DELETING
+  listLookup:
+    filters:
+    - compartmentId
+    - id
+    - name
+    - runbookId
+    - state
+    matchRule: exact declared filters match within the resource scope; duplicate matches
+      fail
+  mutation:
+    mutable:
+    - executionWorkflowDetails.workflow.groupName
+    - executionWorkflowDetails.workflow.steps.groupName
+    - executionWorkflowDetails.workflow.steps.stepName
+    - executionWorkflowDetails.workflow.steps.steps
+    - executionWorkflowDetails.workflow.steps.type
+    - executionWorkflowDetails.workflow.type
+    - groups.name
+    - groups.properties.actionOnFailure
+    - groups.properties.notificationPreferences.shouldNotifyOnPause
+    - groups.properties.notificationPreferences.shouldNotifyOnTaskFailure
+    - groups.properties.notificationPreferences.shouldNotifyOnTaskSuccess
+    - groups.properties.pauseDetails.durationInMinutes
+    - groups.properties.pauseDetails.kind
+    - groups.properties.preCondition
+    - groups.properties.runOn.condition
+    - groups.properties.runOn.host
+    - groups.properties.runOn.kind
+    - groups.properties.runOn.previousTaskInstanceDetails.outputVariableDetails.outputVariableName
+    - groups.properties.runOn.previousTaskInstanceDetails.outputVariableDetails.stepName
+    - groups.properties.runOn.previousTaskInstanceDetails.resourceId
+    - groups.properties.runOn.previousTaskInstanceDetails.resourceType
+    - groups.type
+    - rollbackWorkflowDetails.scope
+    - rollbackWorkflowDetails.workflow.groupName
+    - rollbackWorkflowDetails.workflow.steps.groupName
+    - rollbackWorkflowDetails.workflow.steps.stepName
+    - rollbackWorkflowDetails.workflow.steps.steps
+    - rollbackWorkflowDetails.workflow.steps.type
+    - rollbackWorkflowDetails.workflow.type
+    - tasks.outputVariableMappings.name
+    - tasks.outputVariableMappings.outputVariableDetails.outputVariableName
+    - tasks.outputVariableMappings.outputVariableDetails.stepName
+    - tasks.stepName
+    - tasks.stepProperties.actionOnFailure
+    - tasks.stepProperties.notificationPreferences.shouldNotifyOnPause
+    - tasks.stepProperties.notificationPreferences.shouldNotifyOnTaskFailure
+    - tasks.stepProperties.notificationPreferences.shouldNotifyOnTaskSuccess
+    - tasks.stepProperties.pauseDetails.durationInMinutes
+    - tasks.stepProperties.pauseDetails.kind
+    - tasks.stepProperties.preCondition
+    - tasks.stepProperties.runOn.condition
+    - tasks.stepProperties.runOn.host
+    - tasks.stepProperties.runOn.kind
+    - tasks.stepProperties.runOn.previousTaskInstanceDetails.outputVariableDetails.outputVariableName
+    - tasks.stepProperties.runOn.previousTaskInstanceDetails.outputVariableDetails.stepName
+    - tasks.stepProperties.runOn.previousTaskInstanceDetails.resourceId
+    - tasks.stepProperties.runOn.previousTaskInstanceDetails.resourceType
+    - tasks.taskRecordDetails.description
+    - tasks.taskRecordDetails.executionDetails.catalogId
+    - tasks.taskRecordDetails.executionDetails.command
+    - tasks.taskRecordDetails.executionDetails.configFile
+    - tasks.taskRecordDetails.executionDetails.content.bucket
+    - tasks.taskRecordDetails.executionDetails.content.catalogId
+    - tasks.taskRecordDetails.executionDetails.content.checksum
+    - tasks.taskRecordDetails.executionDetails.content.namespace
+    - tasks.taskRecordDetails.executionDetails.content.object
+    - tasks.taskRecordDetails.executionDetails.content.sourceType
+    - tasks.taskRecordDetails.executionDetails.credentials.displayName
+    - tasks.taskRecordDetails.executionDetails.credentials.id
+    - tasks.taskRecordDetails.executionDetails.endpoint
+    - tasks.taskRecordDetails.executionDetails.executionType
+    - tasks.taskRecordDetails.executionDetails.isExecutableContent
+    - tasks.taskRecordDetails.executionDetails.isLocked
+    - tasks.taskRecordDetails.executionDetails.isReadOutputVariableEnabled
+    - tasks.taskRecordDetails.executionDetails.targetCompartmentId
+    - tasks.taskRecordDetails.executionDetails.variables.inputVariables.description
+    - tasks.taskRecordDetails.executionDetails.variables.inputVariables.name
+    - tasks.taskRecordDetails.executionDetails.variables.inputVariables.type
+    - tasks.taskRecordDetails.executionDetails.variables.outputVariables
+    - tasks.taskRecordDetails.isApplySubjectTask
+    - tasks.taskRecordDetails.isCopyToLibraryEnabled
+    - tasks.taskRecordDetails.isDiscoveryOutputTask
+    - tasks.taskRecordDetails.name
+    - tasks.taskRecordDetails.osType
+    - tasks.taskRecordDetails.platform
+    - tasks.taskRecordDetails.properties.numRetries
+    - tasks.taskRecordDetails.properties.timeoutInSeconds
+    - tasks.taskRecordDetails.scope
+    - tasks.taskRecordDetails.taskRecordId
+    forceNew:
+    - definedTags
+    - freeformTags
+    - runbookId
+  hooks:
+    create:
+    - helper: tfresource.CreateResource
+    update:
+    - helper: tfresource.UpdateResource
+    delete:
+    - helper: tfresource.DeleteResource
+  followUp:
+    create: GetWorkRequest -> read-after-write
+    update: GetWorkRequest -> read-after-write
+    delete: GetWorkRequest -> confirm-delete
+notes:
+- The generated service manager uses the reviewed CRUD request, response, lifecycle,
+  and status projection contract.
+- Work-request phases are declared per operation from the vendored SDK response surface.
+- Secret side effects are none and finalizer ownership is retained until confirmed
+  deletion.

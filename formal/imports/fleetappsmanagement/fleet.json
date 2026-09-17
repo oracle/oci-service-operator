@@ -1,0 +1,196 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "fleetappsmanagement",
+  "slug": "fleet",
+  "kind": "Fleet",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_fleet_apps_management_fleet",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateFleet",
+        "requestType": "fleetappsmanagement.CreateFleetRequest",
+        "responseType": "fleetappsmanagement.CreateFleetResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetFleet",
+        "requestType": "fleetappsmanagement.GetFleetRequest",
+        "responseType": "fleetappsmanagement.GetFleetResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListFleets",
+        "requestType": "fleetappsmanagement.ListFleetsRequest",
+        "responseType": "fleetappsmanagement.ListFleetsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeFleetCompartment",
+        "requestType": "fleetappsmanagement.ChangeFleetCompartmentRequest",
+        "responseType": "fleetappsmanagement.ChangeFleetCompartmentResponse"
+      },
+      {
+        "operation": "UpdateFleet",
+        "requestType": "fleetappsmanagement.UpdateFleetRequest",
+        "responseType": "fleetappsmanagement.UpdateFleetResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteFleet",
+        "requestType": "fleetappsmanagement.DeleteFleetRequest",
+        "responseType": "fleetappsmanagement.DeleteFleetResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "NEEDS_ATTENTION"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "defined_tags",
+      "description",
+      "display_name",
+      "environment_type",
+      "freeform_tags",
+      "is_target_auto_confirm",
+      "notification_preferences.compartment_id",
+      "notification_preferences.preferences.on_job_canceled",
+      "notification_preferences.preferences.on_job_failure",
+      "notification_preferences.preferences.on_job_schedule_change",
+      "notification_preferences.preferences.on_job_start",
+      "notification_preferences.preferences.on_job_success",
+      "notification_preferences.preferences.on_resource_non_compliance",
+      "notification_preferences.preferences.on_runbook_newer_version",
+      "notification_preferences.preferences.on_task_failure",
+      "notification_preferences.preferences.on_task_pause",
+      "notification_preferences.preferences.on_task_success",
+      "notification_preferences.preferences.on_topology_modification",
+      "notification_preferences.preferences.upcoming_schedule.notify_before",
+      "notification_preferences.preferences.upcoming_schedule.on_upcoming_schedule",
+      "notification_preferences.topic_id",
+      "products",
+      "resource_selection.resource_selection_type",
+      "resource_selection.rule_selection_criteria.match_condition",
+      "resource_selection.rule_selection_criteria.rules.basis",
+      "resource_selection.rule_selection_criteria.rules.compartment_id",
+      "resource_selection.rule_selection_criteria.rules.compartment_id_in_subtree",
+      "resource_selection.rule_selection_criteria.rules.conditions.attr_group",
+      "resource_selection.rule_selection_criteria.rules.conditions.attr_key",
+      "resource_selection.rule_selection_criteria.rules.conditions.attr_value",
+      "resource_selection.rule_selection_criteria.rules.match_condition",
+      "resource_selection.rule_selection_criteria.rules.resource_compartment_id",
+      "resources.compartment_id"
+    ],
+    "forceNew": [
+      "compartment_id",
+      "credentials",
+      "credentials.compartment_id",
+      "credentials.display_name",
+      "credentials.entity_specifics",
+      "credentials.entity_specifics.credential_level",
+      "credentials.entity_specifics.resource_id",
+      "credentials.entity_specifics.target",
+      "credentials.entity_specifics.variables",
+      "credentials.entity_specifics.variables.name",
+      "credentials.entity_specifics.variables.value",
+      "credentials.password",
+      "credentials.password.credential_type",
+      "credentials.password.key_id",
+      "credentials.password.key_version",
+      "credentials.password.secret_id",
+      "credentials.password.secret_version",
+      "credentials.password.value",
+      "credentials.password.vault_id",
+      "credentials.user",
+      "credentials.user.credential_type",
+      "credentials.user.key_id",
+      "credentials.user.key_version",
+      "credentials.user.secret_id",
+      "credentials.user.secret_version",
+      "credentials.user.value",
+      "credentials.user.vault_id",
+      "details",
+      "details.fleet_type",
+      "parent_fleet_id",
+      "properties",
+      "properties.compartment_id",
+      "properties.display_name",
+      "properties.fleet_property_type",
+      "properties.is_required",
+      "properties.value",
+      "resources",
+      "resources.fleet_resource_type",
+      "resources.resource_id",
+      "resources.tenancy_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_fleet_apps_management_fleets",
+    "collectionField": "fleet_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "application_type",
+      "compartment_id",
+      "display_name",
+      "environment_type",
+      "fleet_type",
+      "id",
+      "product",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/fleetappsmanagement/fleet/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/fleetappsmanagement/fleet/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from the pinned terraform-provider-oci source revision."
+  ]
+}

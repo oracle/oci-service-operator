@@ -434,6 +434,11 @@ func TestProcessSetDeleteRejectsAuthShapedPreDeleteRead(t *testing.T) {
 			requireStringPtr(t, "GetProcessSetRequest.ProcessSetId", request.ProcessSetId, testProcessSetID)
 			return stackmonitoringsdk.GetProcessSetResponse{}, errortest.NewServiceError(404, errorutil.NotAuthorizedOrNotFound, "authorization or existence is ambiguous")
 		},
+		listFn: func(_ context.Context, request stackmonitoringsdk.ListProcessSetsRequest) (stackmonitoringsdk.ListProcessSetsResponse, error) {
+			requireStringPtr(t, "ListProcessSetsRequest.CompartmentId", request.CompartmentId, resource.Spec.CompartmentId)
+			requireStringPtr(t, "ListProcessSetsRequest.DisplayName", request.DisplayName, resource.Spec.DisplayName)
+			return stackmonitoringsdk.ListProcessSetsResponse{ProcessSetCollection: stackmonitoringsdk.ProcessSetCollection{Items: []stackmonitoringsdk.ProcessSetSummary{{Id: common.String(testProcessSetID)}}}}, nil
+		},
 		deleteFn: func(context.Context, stackmonitoringsdk.DeleteProcessSetRequest) (stackmonitoringsdk.DeleteProcessSetResponse, error) {
 			t.Fatal("DeleteProcessSet() called after auth-shaped pre-delete read")
 			return stackmonitoringsdk.DeleteProcessSetResponse{}, nil
@@ -455,6 +460,40 @@ func TestProcessSetDeleteRejectsAuthShapedPreDeleteRead(t *testing.T) {
 	}
 }
 
+func TestProcessSetDeleteAcceptsAuthShapedReadAfterScopedListProvesAbsence(t *testing.T) {
+	resource := makeProcessSetResource()
+	resource.Status.OsokStatus.Ocid = shared.OCID(testProcessSetID)
+	client := newTestProcessSetClient(&fakeProcessSetOCIClient{
+		getFn: func(_ context.Context, request stackmonitoringsdk.GetProcessSetRequest) (stackmonitoringsdk.GetProcessSetResponse, error) {
+			requireStringPtr(t, "GetProcessSetRequest.ProcessSetId", request.ProcessSetId, testProcessSetID)
+			return stackmonitoringsdk.GetProcessSetResponse{}, errortest.NewServiceError(404, errorutil.NotAuthorizedOrNotFound, "authorization or existence is ambiguous")
+		},
+		listFn: func(_ context.Context, request stackmonitoringsdk.ListProcessSetsRequest) (stackmonitoringsdk.ListProcessSetsResponse, error) {
+			requireStringPtr(t, "ListProcessSetsRequest.CompartmentId", request.CompartmentId, resource.Spec.CompartmentId)
+			requireStringPtr(t, "ListProcessSetsRequest.DisplayName", request.DisplayName, resource.Spec.DisplayName)
+			return stackmonitoringsdk.ListProcessSetsResponse{}, nil
+		},
+		deleteFn: func(context.Context, stackmonitoringsdk.DeleteProcessSetRequest) (stackmonitoringsdk.DeleteProcessSetResponse, error) {
+			t.Fatal("DeleteProcessSet() called after scoped list proved absence")
+			return stackmonitoringsdk.DeleteProcessSetResponse{}, nil
+		},
+	})
+
+	deleted, err := client.Delete(context.Background(), resource)
+	if err != nil {
+		t.Fatalf("Delete() error = %v", err)
+	}
+	if !deleted {
+		t.Fatal("Delete() deleted = false, want true after scoped list absence")
+	}
+	if resource.Status.OsokStatus.DeletedAt == nil {
+		t.Fatal("status.status.deletedAt = nil, want deletion timestamp")
+	}
+	if got := resource.Status.OsokStatus.OpcRequestID; got != "opc-request-id" {
+		t.Fatalf("status.status.opcRequestId = %q, want ambiguous read request id", got)
+	}
+}
+
 func TestProcessSetDeleteTreatsAuthShapedDeleteNotFoundConservatively(t *testing.T) {
 	resource := makeProcessSetResource()
 	resource.Status.OsokStatus.Ocid = shared.OCID(testProcessSetID)
@@ -470,6 +509,11 @@ func TestProcessSetDeleteTreatsAuthShapedDeleteNotFoundConservatively(t *testing
 		deleteFn: func(_ context.Context, request stackmonitoringsdk.DeleteProcessSetRequest) (stackmonitoringsdk.DeleteProcessSetResponse, error) {
 			requireStringPtr(t, "DeleteProcessSetRequest.ProcessSetId", request.ProcessSetId, testProcessSetID)
 			return stackmonitoringsdk.DeleteProcessSetResponse{}, errortest.NewServiceError(404, errorutil.NotAuthorizedOrNotFound, "authorization or existence is ambiguous")
+		},
+		listFn: func(_ context.Context, request stackmonitoringsdk.ListProcessSetsRequest) (stackmonitoringsdk.ListProcessSetsResponse, error) {
+			requireStringPtr(t, "ListProcessSetsRequest.CompartmentId", request.CompartmentId, resource.Spec.CompartmentId)
+			requireStringPtr(t, "ListProcessSetsRequest.DisplayName", request.DisplayName, resource.Spec.DisplayName)
+			return stackmonitoringsdk.ListProcessSetsResponse{ProcessSetCollection: stackmonitoringsdk.ProcessSetCollection{Items: []stackmonitoringsdk.ProcessSetSummary{{Id: common.String(testProcessSetID)}}}}, nil
 		},
 	})
 
@@ -488,6 +532,37 @@ func TestProcessSetDeleteTreatsAuthShapedDeleteNotFoundConservatively(t *testing
 	}
 	if got := resource.Status.OsokStatus.OpcRequestID; got != "opc-request-id" {
 		t.Fatalf("status.status.opcRequestId = %q, want opc-request-id", got)
+	}
+}
+
+func TestProcessSetDeleteAcceptsAuthShapedDeleteAfterScopedListProvesAbsence(t *testing.T) {
+	resource := makeProcessSetResource()
+	resource.Status.OsokStatus.Ocid = shared.OCID(testProcessSetID)
+	client := newTestProcessSetClient(&fakeProcessSetOCIClient{
+		getFn: func(_ context.Context, request stackmonitoringsdk.GetProcessSetRequest) (stackmonitoringsdk.GetProcessSetResponse, error) {
+			requireStringPtr(t, "GetProcessSetRequest.ProcessSetId", request.ProcessSetId, testProcessSetID)
+			return stackmonitoringsdk.GetProcessSetResponse{ProcessSet: makeSDKProcessSet(testProcessSetID, resource.Spec, stackmonitoringsdk.LifecycleStateActive)}, nil
+		},
+		deleteFn: func(_ context.Context, request stackmonitoringsdk.DeleteProcessSetRequest) (stackmonitoringsdk.DeleteProcessSetResponse, error) {
+			requireStringPtr(t, "DeleteProcessSetRequest.ProcessSetId", request.ProcessSetId, testProcessSetID)
+			return stackmonitoringsdk.DeleteProcessSetResponse{}, errortest.NewServiceError(404, errorutil.NotAuthorizedOrNotFound, "authorization or existence is ambiguous")
+		},
+		listFn: func(_ context.Context, request stackmonitoringsdk.ListProcessSetsRequest) (stackmonitoringsdk.ListProcessSetsResponse, error) {
+			requireStringPtr(t, "ListProcessSetsRequest.CompartmentId", request.CompartmentId, resource.Spec.CompartmentId)
+			requireStringPtr(t, "ListProcessSetsRequest.DisplayName", request.DisplayName, resource.Spec.DisplayName)
+			return stackmonitoringsdk.ListProcessSetsResponse{}, nil
+		},
+	})
+
+	deleted, err := client.Delete(context.Background(), resource)
+	if err != nil {
+		t.Fatalf("Delete() error = %v", err)
+	}
+	if !deleted {
+		t.Fatal("Delete() deleted = false, want true after scoped list absence")
+	}
+	if resource.Status.OsokStatus.DeletedAt == nil {
+		t.Fatal("status.status.deletedAt = nil, want deletion timestamp")
 	}
 }
 

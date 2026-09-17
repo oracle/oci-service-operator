@@ -104,7 +104,7 @@ func newMacDeviceRuntimeSemantics() *generatedruntime.Semantics {
 		Unsupported:         []generatedruntime.UnsupportedSemantic{},
 	}
 }
-func newMacDeviceDefaultRuntimeHooks(sdkClient mngdmacsdk.MacDeviceClient) MacDeviceRuntimeHooks {
+func newMacDeviceDefaultRuntimeHooks(sdkClient MacDeviceSDKClients) MacDeviceRuntimeHooks {
 	return MacDeviceRuntimeHooks{
 		Semantics:       newMacDeviceRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*mngdmacv1beta1.MacDevice]{},
@@ -112,31 +112,43 @@ func newMacDeviceDefaultRuntimeHooks(sdkClient mngdmacsdk.MacDeviceClient) MacDe
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*mngdmacv1beta1.MacDevice]{},
 		StatusHooks:     generatedruntime.StatusHooks[*mngdmacv1beta1.MacDevice]{},
 		ParityHooks:     generatedruntime.ParityHooks[*mngdmacv1beta1.MacDevice]{},
-		Async:           generatedruntime.AsyncHooks[*mngdmacv1beta1.MacDevice]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*mngdmacv1beta1.MacDevice]{},
+		Async: generatedruntime.AsyncHooks[*mngdmacv1beta1.MacDevice]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := mngdmacsdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.macOrderClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*mngdmacv1beta1.MacDevice]{},
 		Get: runtimeOperationHooks[mngdmacsdk.GetMacDeviceRequest, mngdmacsdk.GetMacDeviceResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "MacDeviceId", RequestName: "macDeviceId", Contribution: "path", PreferResourceID: true}, {FieldName: "MacOrderId", RequestName: "macOrderId", Contribution: "path", PreferResourceID: false}},
 			Call: func(ctx context.Context, request mngdmacsdk.GetMacDeviceRequest) (mngdmacsdk.GetMacDeviceResponse, error) {
-				return sdkClient.GetMacDevice(ctx, request)
+				return sdkClient.macDeviceClient.GetMacDevice(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[mngdmacsdk.ListMacDevicesRequest, mngdmacsdk.ListMacDevicesResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "MacOrderId", RequestName: "macOrderId", Contribution: "path", PreferResourceID: true}, {FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "Id", RequestName: "id", Contribution: "query", PreferResourceID: false}, {FieldName: "SerialNumber", RequestName: "serialNumber", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "MacOrderId", RequestName: "macOrderId", Contribution: "path", PreferResourceID: false}, {FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "Id", RequestName: "id", Contribution: "query", PreferResourceID: false}, {FieldName: "SerialNumber", RequestName: "serialNumber", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request mngdmacsdk.ListMacDevicesRequest) (mngdmacsdk.ListMacDevicesResponse, error) {
-				return sdkClient.ListMacDevices(ctx, request)
+				return sdkClient.macDeviceClient.ListMacDevices(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[mngdmacsdk.TerminateMacDeviceRequest, mngdmacsdk.TerminateMacDeviceResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "MacDeviceId", RequestName: "macDeviceId", Contribution: "path", PreferResourceID: true}, {FieldName: "MacOrderId", RequestName: "macOrderId", Contribution: "path", PreferResourceID: false}},
 			Call: func(ctx context.Context, request mngdmacsdk.TerminateMacDeviceRequest) (mngdmacsdk.TerminateMacDeviceResponse, error) {
-				return sdkClient.TerminateMacDevice(ctx, request)
+				return sdkClient.macDeviceClient.TerminateMacDevice(ctx, request)
 			},
 		},
 		WrapGeneratedClient: []func(MacDeviceServiceClient) MacDeviceServiceClient{},
 	}
 }
 
-func newMacDeviceRuntimeHooks(manager *MacDeviceServiceManager, sdkClient mngdmacsdk.MacDeviceClient) MacDeviceRuntimeHooks {
+func newMacDeviceRuntimeHooks(manager *MacDeviceServiceManager, sdkClient MacDeviceSDKClients) MacDeviceRuntimeHooks {
 	hooks := newMacDeviceDefaultRuntimeHooks(sdkClient)
 	for _, mutator := range macdeviceRuntimeHooksMutators {
 		mutator(manager, &hooks)
@@ -149,10 +161,19 @@ func buildMacDeviceGeneratedRuntimeConfig(
 	hooks MacDeviceRuntimeHooks,
 ) generatedruntime.Config[*mngdmacv1beta1.MacDevice] {
 	return generatedruntime.Config[*mngdmacv1beta1.MacDevice]{
-		Kind:            "MacDevice",
-		SDKName:         "MacDevice",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "MacDevice",
+		SDKName:   "MacDevice",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

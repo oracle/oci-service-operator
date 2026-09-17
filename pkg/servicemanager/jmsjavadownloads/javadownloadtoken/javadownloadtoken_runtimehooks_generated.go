@@ -114,8 +114,20 @@ func newJavaDownloadTokenDefaultRuntimeHooks(sdkClient jmsjavadownloadssdk.JavaD
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*jmsjavadownloadsv1beta1.JavaDownloadToken]{},
 		StatusHooks:     generatedruntime.StatusHooks[*jmsjavadownloadsv1beta1.JavaDownloadToken]{},
 		ParityHooks:     generatedruntime.ParityHooks[*jmsjavadownloadsv1beta1.JavaDownloadToken]{},
-		Async:           generatedruntime.AsyncHooks[*jmsjavadownloadsv1beta1.JavaDownloadToken]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*jmsjavadownloadsv1beta1.JavaDownloadToken]{},
+		Async: generatedruntime.AsyncHooks[*jmsjavadownloadsv1beta1.JavaDownloadToken]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := jmsjavadownloadssdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*jmsjavadownloadsv1beta1.JavaDownloadToken]{},
 		Create: runtimeOperationHooks[jmsjavadownloadssdk.CreateJavaDownloadTokenRequest, jmsjavadownloadssdk.CreateJavaDownloadTokenResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateJavaDownloadTokenDetails", RequestName: "CreateJavaDownloadTokenDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request jmsjavadownloadssdk.CreateJavaDownloadTokenRequest) (jmsjavadownloadssdk.CreateJavaDownloadTokenResponse, error) {
@@ -163,10 +175,19 @@ func buildJavaDownloadTokenGeneratedRuntimeConfig(
 	hooks JavaDownloadTokenRuntimeHooks,
 ) generatedruntime.Config[*jmsjavadownloadsv1beta1.JavaDownloadToken] {
 	return generatedruntime.Config[*jmsjavadownloadsv1beta1.JavaDownloadToken]{
-		Kind:            "JavaDownloadToken",
-		SDKName:         "JavaDownloadToken",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "JavaDownloadToken",
+		SDKName:   "JavaDownloadToken",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

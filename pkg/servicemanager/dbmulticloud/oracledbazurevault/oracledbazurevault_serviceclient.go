@@ -32,8 +32,28 @@ type defaultOracleDbAzureVaultServiceClient struct {
 
 var _ OracleDbAzureVaultServiceClient = defaultOracleDbAzureVaultServiceClient{}
 
+type OracleDbAzureVaultSDKClients struct {
+	oracleDbAzureVaultClient dbmulticloudsdk.OracleDbAzureVaultClient
+	workRequestClient        dbmulticloudsdk.WorkRequestClient
+}
+
+func newOracleDbAzureVaultSDKClients(manager *OracleDbAzureVaultServiceManager) (OracleDbAzureVaultSDKClients, error) {
+	var clients OracleDbAzureVaultSDKClients
+	oracleDbAzureVaultClientClient, err := dbmulticloudsdk.NewOracleDbAzureVaultClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize OracleDbAzureVault OCI client OracleDbAzureVaultClient: %w", err)
+	}
+	clients.oracleDbAzureVaultClient = oracleDbAzureVaultClientClient
+	workRequestClientClient, err := dbmulticloudsdk.NewWorkRequestClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize OracleDbAzureVault OCI client WorkRequestClient: %w", err)
+	}
+	clients.workRequestClient = workRequestClientClient
+	return clients, nil
+}
+
 var newOracleDbAzureVaultServiceClient = func(manager *OracleDbAzureVaultServiceManager) OracleDbAzureVaultServiceClient {
-	sdkClient, err := dbmulticloudsdk.NewOracleDbAzureVaultClientWithConfigurationProvider(manager.Provider)
+	sdkClient, err := newOracleDbAzureVaultSDKClients(manager)
 	hooks := newOracleDbAzureVaultRuntimeHooks(manager, sdkClient)
 	config := buildOracleDbAzureVaultGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {

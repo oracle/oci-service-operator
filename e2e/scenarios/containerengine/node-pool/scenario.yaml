@@ -1,0 +1,35 @@
+version: 1
+name: containerengine-node-pool-basic-crud
+service: containerengine
+namespace: default
+timeout: 60m
+pollInterval: 20s
+create: create.yaml
+update: update.yaml
+ready:
+  conditionTypes: [Active]
+  lifecycleStates: [ACTIVE]
+  requireOCID: true
+  fieldsEqual:
+    - desired: spec.name
+      observed: status.name
+    - desired: spec.clusterId
+      observed: status.clusterId
+    - desired: spec.kubernetesVersion
+      observed: status.kubernetesVersion
+    - desired: spec.nodeShape
+      observed: status.nodeShape
+    - desired: spec.nodeSourceDetails.imageId
+      observed: status.nodeSourceDetails.imageId
+    - desired: spec.nodeConfigDetails.size
+      observed: status.nodeConfigDetails.size
+    - desired: spec.nodeMetadata.areLegacyImdsEndpointsDisabled
+      observed: status.nodeMetadata.areLegacyImdsEndpointsDisabled
+    - desired: spec.freeformTags
+      observed: status.freeformTags
+failureConditionTypes: [Failed]
+delete:
+  enabled: true
+  timeout: 60m
+  cleanupDependencies: true
+cleanupOnFailure: true

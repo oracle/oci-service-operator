@@ -32,8 +32,28 @@ type defaultOnboardingServiceClient struct {
 
 var _ OnboardingServiceClient = defaultOnboardingServiceClient{}
 
+type OnboardingSDKClients struct {
+	fleetAppsManagementAdminClient       fleetappsmanagementsdk.FleetAppsManagementAdminClient
+	fleetAppsManagementWorkRequestClient fleetappsmanagementsdk.FleetAppsManagementWorkRequestClient
+}
+
+func newOnboardingSDKClients(manager *OnboardingServiceManager) (OnboardingSDKClients, error) {
+	var clients OnboardingSDKClients
+	fleetAppsManagementAdminClientClient, err := fleetappsmanagementsdk.NewFleetAppsManagementAdminClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize Onboarding OCI client FleetAppsManagementAdminClient: %w", err)
+	}
+	clients.fleetAppsManagementAdminClient = fleetAppsManagementAdminClientClient
+	fleetAppsManagementWorkRequestClientClient, err := fleetappsmanagementsdk.NewFleetAppsManagementWorkRequestClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize Onboarding OCI client FleetAppsManagementWorkRequestClient: %w", err)
+	}
+	clients.fleetAppsManagementWorkRequestClient = fleetAppsManagementWorkRequestClientClient
+	return clients, nil
+}
+
 var newOnboardingServiceClient = func(manager *OnboardingServiceManager) OnboardingServiceClient {
-	sdkClient, err := fleetappsmanagementsdk.NewFleetAppsManagementAdminClientWithConfigurationProvider(manager.Provider)
+	sdkClient, err := newOnboardingSDKClients(manager)
 	hooks := newOnboardingRuntimeHooks(manager, sdkClient)
 	config := buildOnboardingGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {

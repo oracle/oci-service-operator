@@ -263,6 +263,9 @@ func securityPolicyConfigRuntimeSemantics() *generatedruntime.Semantics {
 			},
 			ConflictsWith: map[string][]string{},
 		},
+		Hooks: generatedruntime.HookSet{
+			Update: []generatedruntime.Hook{{Helper: "ChangeSecurityPolicyConfigCompartment"}},
+		},
 		CreateFollowUp: generatedruntime.FollowUpSemantics{Strategy: "read-after-write"},
 		UpdateFollowUp: generatedruntime.FollowUpSemantics{Strategy: "read-after-write"},
 		DeleteFollowUp: generatedruntime.FollowUpSemantics{Strategy: "confirm-delete"},

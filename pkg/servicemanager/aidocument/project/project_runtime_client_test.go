@@ -18,6 +18,7 @@ import (
 	aidocumentv1beta1 "github.com/oracle/oci-service-operator/api/aidocument/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/errorutil/errortest"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
+	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
@@ -183,6 +184,64 @@ func TestProjectRuntimeHooksUseReviewedRequestFields(t *testing.T) {
 	if len(hooks.Semantics.AuxiliaryOperations) != 0 {
 		t.Fatalf("semantics.auxiliaryOperations = %#v, want reviewed omission of ChangeProjectCompartment", hooks.Semantics.AuxiliaryOperations)
 	}
+}
+
+func TestProjectConvergenceClientRequeuesWhenUpdateResponseHasStaleMutableFields(t *testing.T) {
+	t.Parallel()
+
+	resource := makeProjectResource()
+	resource.Status.DisplayName = resource.Spec.DisplayName
+	resource.Status.Description = "stale description"
+	client := projectConvergenceClient{delegate: projectResponseClient{
+		response: servicemanager.OSOKResponse{IsSuccessful: true},
+	}}
+
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.ShouldRequeue || response.RequeueDuration != 5*time.Second {
+		t.Fatalf("CreateOrUpdate() response = %#v, want bounded convergence requeue", response)
+	}
+}
+
+func TestProjectConvergenceClientRequeuesRetryableUpdateConflict(t *testing.T) {
+	t.Parallel()
+
+	client := projectConvergenceClient{delegate: projectErrorClient{err: errortest.NewServiceError(
+		409, "Conflict", "Resource is currently being modified",
+	)}}
+	response, err := client.CreateOrUpdate(context.Background(), makeProjectResource(), ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful || !response.ShouldRequeue || response.RequeueDuration != 5*time.Second {
+		t.Fatalf("CreateOrUpdate() response = %#v, want retryable update conflict", response)
+	}
+}
+
+type projectResponseClient struct {
+	response servicemanager.OSOKResponse
+}
+
+type projectErrorClient struct {
+	err error
+}
+
+func (c projectErrorClient) CreateOrUpdate(context.Context, *aidocumentv1beta1.Project, ctrl.Request) (servicemanager.OSOKResponse, error) {
+	return servicemanager.OSOKResponse{IsSuccessful: false}, c.err
+}
+
+func (projectErrorClient) Delete(context.Context, *aidocumentv1beta1.Project) (bool, error) {
+	return false, nil
+}
+
+func (c projectResponseClient) CreateOrUpdate(context.Context, *aidocumentv1beta1.Project, ctrl.Request) (servicemanager.OSOKResponse, error) {
+	return c.response, nil
+}
+
+func (projectResponseClient) Delete(context.Context, *aidocumentv1beta1.Project) (bool, error) {
+	return true, nil
 }
 
 func TestProjectServiceClientCreateOrUpdateCreatesAndRequeuesWhileCreating(t *testing.T) {

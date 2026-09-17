@@ -33,7 +33,7 @@ type DatasetSpec struct {
 	// +kubebuilder:validation:Optional
 	Description string `json:"description,omitempty"`
 	// +kubebuilder:validation:Optional
-	InitialRecordGenerationConfiguration DatasetInitialRecordGenerationConfiguration `json:"initialRecordGenerationConfiguration,omitempty"`
+	InitialRecordGenerationConfiguration DatasetInitialRecordGenerationConfiguration `json:"initialRecordGenerationConfiguration,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
 	InitialImportDatasetConfiguration DatasetCreateInitialImportDatasetConfiguration `json:"initialImportDatasetConfiguration,omitempty"`
 	// The labeling instructions for human labelers in rich text format
@@ -96,7 +96,7 @@ type DatasetFormatDetails struct {
 	// +kubebuilder:validation:Optional
 	FormatType string `json:"formatType,omitempty"`
 	// +kubebuilder:validation:Optional
-	TextFileTypeMetadata DatasetFormatDetailsTextFileTypeMetadata `json:"textFileTypeMetadata,omitempty"`
+	TextFileTypeMetadata DatasetFormatDetailsTextFileTypeMetadata `json:"textFileTypeMetadata,omitempty,omitzero"`
 }
 
 // DatasetLabelSetItem defines nested fields for Dataset.LabelSet.Item.

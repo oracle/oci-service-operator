@@ -50,50 +50,119 @@ func registerOracleDbAzureBlobMountRuntimeHooksMutator(mutator OracleDbAzureBlob
 	}
 	oracledbazureblobmountRuntimeHooksMutators = append(oracledbazureblobmountRuntimeHooksMutators, mutator)
 }
-func newOracleDbAzureBlobMountDefaultRuntimeHooks(sdkClient dbmulticloudsdk.OracleDBAzureBlobMountClient) OracleDbAzureBlobMountRuntimeHooks {
+func newOracleDbAzureBlobMountRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "dbmulticloud",
+		FormalSlug:    "oracledbazureblobmount",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "displayName", "oracleDbAzureBlobContainerId", "oracleDbAzureBlobMountId", "oracleDbAzureConnectorId", "state"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"compartmentId", "definedTags", "displayName", "freeformTags", "oracleDbAzureBlobContainerId", "oracleDbAzureConnectorId"},
+			ForceNew:      []string{},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
+func newOracleDbAzureBlobMountDefaultRuntimeHooks(sdkClient OracleDbAzureBlobMountSDKClients) OracleDbAzureBlobMountRuntimeHooks {
 	return OracleDbAzureBlobMountRuntimeHooks{
+		Semantics:       newOracleDbAzureBlobMountRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*dbmulticloudv1beta1.OracleDbAzureBlobMount]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*dbmulticloudv1beta1.OracleDbAzureBlobMount]{},
 		StatusHooks:     generatedruntime.StatusHooks[*dbmulticloudv1beta1.OracleDbAzureBlobMount]{},
 		ParityHooks:     generatedruntime.ParityHooks[*dbmulticloudv1beta1.OracleDbAzureBlobMount]{},
-		Async:           generatedruntime.AsyncHooks[*dbmulticloudv1beta1.OracleDbAzureBlobMount]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*dbmulticloudv1beta1.OracleDbAzureBlobMount]{},
+		Async: generatedruntime.AsyncHooks[*dbmulticloudv1beta1.OracleDbAzureBlobMount]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := dbmulticloudsdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.workRequestClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*dbmulticloudv1beta1.OracleDbAzureBlobMount]{},
 		Create: runtimeOperationHooks[dbmulticloudsdk.CreateOracleDbAzureBlobMountRequest, dbmulticloudsdk.CreateOracleDbAzureBlobMountResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateOracleDbAzureBlobMountDetails", RequestName: "CreateOracleDbAzureBlobMountDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dbmulticloudsdk.CreateOracleDbAzureBlobMountRequest) (dbmulticloudsdk.CreateOracleDbAzureBlobMountResponse, error) {
-				return sdkClient.CreateOracleDbAzureBlobMount(ctx, request)
+				return sdkClient.oracleDbAzureBlobMountClient.CreateOracleDbAzureBlobMount(ctx, request)
 			},
 		},
 		Get: runtimeOperationHooks[dbmulticloudsdk.GetOracleDbAzureBlobMountRequest, dbmulticloudsdk.GetOracleDbAzureBlobMountResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OracleDbAzureBlobMountId", RequestName: "oracleDbAzureBlobMountId", Contribution: "path", PreferResourceID: true}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dbmulticloudsdk.GetOracleDbAzureBlobMountRequest) (dbmulticloudsdk.GetOracleDbAzureBlobMountResponse, error) {
-				return sdkClient.GetOracleDbAzureBlobMount(ctx, request)
+				return sdkClient.oracleDbAzureBlobMountClient.GetOracleDbAzureBlobMount(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[dbmulticloudsdk.ListOracleDbAzureBlobMountsRequest, dbmulticloudsdk.ListOracleDbAzureBlobMountsResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "OracleDbAzureBlobMountId", RequestName: "oracleDbAzureBlobMountId", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "OracleDbAzureBlobContainerId", RequestName: "oracleDbAzureBlobContainerId", Contribution: "query", PreferResourceID: false}, {FieldName: "OracleDbAzureConnectorId", RequestName: "oracleDbAzureConnectorId", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dbmulticloudsdk.ListOracleDbAzureBlobMountsRequest) (dbmulticloudsdk.ListOracleDbAzureBlobMountsResponse, error) {
-				return sdkClient.ListOracleDbAzureBlobMounts(ctx, request)
+				return sdkClient.oracleDbAzureBlobMountClient.ListOracleDbAzureBlobMounts(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[dbmulticloudsdk.UpdateOracleDbAzureBlobMountRequest, dbmulticloudsdk.UpdateOracleDbAzureBlobMountResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OracleDbAzureBlobMountId", RequestName: "oracleDbAzureBlobMountId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateOracleDbAzureBlobMountDetails", RequestName: "UpdateOracleDbAzureBlobMountDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dbmulticloudsdk.UpdateOracleDbAzureBlobMountRequest) (dbmulticloudsdk.UpdateOracleDbAzureBlobMountResponse, error) {
-				return sdkClient.UpdateOracleDbAzureBlobMount(ctx, request)
+				return sdkClient.oracleDbAzureBlobMountClient.UpdateOracleDbAzureBlobMount(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[dbmulticloudsdk.DeleteOracleDbAzureBlobMountRequest, dbmulticloudsdk.DeleteOracleDbAzureBlobMountResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OracleDbAzureBlobMountId", RequestName: "oracleDbAzureBlobMountId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request dbmulticloudsdk.DeleteOracleDbAzureBlobMountRequest) (dbmulticloudsdk.DeleteOracleDbAzureBlobMountResponse, error) {
-				return sdkClient.DeleteOracleDbAzureBlobMount(ctx, request)
+				return sdkClient.oracleDbAzureBlobMountClient.DeleteOracleDbAzureBlobMount(ctx, request)
 			},
 		},
 		WrapGeneratedClient: []func(OracleDbAzureBlobMountServiceClient) OracleDbAzureBlobMountServiceClient{},
 	}
 }
 
-func newOracleDbAzureBlobMountRuntimeHooks(manager *OracleDbAzureBlobMountServiceManager, sdkClient dbmulticloudsdk.OracleDBAzureBlobMountClient) OracleDbAzureBlobMountRuntimeHooks {
+func newOracleDbAzureBlobMountRuntimeHooks(manager *OracleDbAzureBlobMountServiceManager, sdkClient OracleDbAzureBlobMountSDKClients) OracleDbAzureBlobMountRuntimeHooks {
 	hooks := newOracleDbAzureBlobMountDefaultRuntimeHooks(sdkClient)
 	for _, mutator := range oracledbazureblobmountRuntimeHooksMutators {
 		mutator(manager, &hooks)
@@ -106,10 +175,19 @@ func buildOracleDbAzureBlobMountGeneratedRuntimeConfig(
 	hooks OracleDbAzureBlobMountRuntimeHooks,
 ) generatedruntime.Config[*dbmulticloudv1beta1.OracleDbAzureBlobMount] {
 	return generatedruntime.Config[*dbmulticloudv1beta1.OracleDbAzureBlobMount]{
-		Kind:            "OracleDbAzureBlobMount",
-		SDKName:         "OracleDbAzureBlobMount",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "OracleDbAzureBlobMount",
+		SDKName:   "OracleDbAzureBlobMount",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

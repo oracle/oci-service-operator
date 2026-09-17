@@ -208,11 +208,10 @@ func TestRoutingPolicyRequestFieldsKeepOperationsScopedToRecordedPath(t *testing
 			got:  routingPolicyCreateFields(),
 			want: []generatedruntime.RequestField{
 				{
-					FieldName:        "LoadBalancerId",
-					RequestName:      "loadBalancerId",
-					Contribution:     "path",
-					PreferResourceID: true,
-					LookupPaths:      []string{"status.status.ocid"},
+					FieldName:    "LoadBalancerId",
+					RequestName:  "loadBalancerId",
+					Contribution: "path",
+					LookupPaths:  []string{"status.loadBalancerId", "spec.loadBalancerId"},
 				},
 				{
 					FieldName:    "CreateRoutingPolicyDetails",
@@ -226,17 +225,17 @@ func TestRoutingPolicyRequestFieldsKeepOperationsScopedToRecordedPath(t *testing
 			got:  routingPolicyGetFields(),
 			want: []generatedruntime.RequestField{
 				{
-					FieldName:        "LoadBalancerId",
-					RequestName:      "loadBalancerId",
-					Contribution:     "path",
-					PreferResourceID: true,
-					LookupPaths:      []string{"status.status.ocid"},
+					FieldName:    "LoadBalancerId",
+					RequestName:  "loadBalancerId",
+					Contribution: "path",
+					LookupPaths:  []string{"status.loadBalancerId", "spec.loadBalancerId"},
 				},
 				{
-					FieldName:    "RoutingPolicyName",
-					RequestName:  "routingPolicyName",
-					Contribution: "path",
-					LookupPaths:  []string{"status.name", "spec.name", "name"},
+					FieldName:        "RoutingPolicyName",
+					RequestName:      "routingPolicyName",
+					Contribution:     "path",
+					PreferResourceID: true,
+					LookupPaths:      []string{"status.name", "spec.name", "name"},
 				},
 			},
 		},
@@ -245,11 +244,10 @@ func TestRoutingPolicyRequestFieldsKeepOperationsScopedToRecordedPath(t *testing
 			got:  routingPolicyListFields(),
 			want: []generatedruntime.RequestField{
 				{
-					FieldName:        "LoadBalancerId",
-					RequestName:      "loadBalancerId",
-					Contribution:     "path",
-					PreferResourceID: true,
-					LookupPaths:      []string{"status.status.ocid"},
+					FieldName:    "LoadBalancerId",
+					RequestName:  "loadBalancerId",
+					Contribution: "path",
+					LookupPaths:  []string{"status.loadBalancerId", "spec.loadBalancerId"},
 				},
 			},
 		},
@@ -258,17 +256,17 @@ func TestRoutingPolicyRequestFieldsKeepOperationsScopedToRecordedPath(t *testing
 			got:  routingPolicyUpdateFields(),
 			want: []generatedruntime.RequestField{
 				{
-					FieldName:        "LoadBalancerId",
-					RequestName:      "loadBalancerId",
-					Contribution:     "path",
-					PreferResourceID: true,
-					LookupPaths:      []string{"status.status.ocid"},
+					FieldName:    "LoadBalancerId",
+					RequestName:  "loadBalancerId",
+					Contribution: "path",
+					LookupPaths:  []string{"status.loadBalancerId", "spec.loadBalancerId"},
 				},
 				{
-					FieldName:    "RoutingPolicyName",
-					RequestName:  "routingPolicyName",
-					Contribution: "path",
-					LookupPaths:  []string{"status.name", "spec.name", "name"},
+					FieldName:        "RoutingPolicyName",
+					RequestName:      "routingPolicyName",
+					Contribution:     "path",
+					PreferResourceID: true,
+					LookupPaths:      []string{"status.name", "spec.name", "name"},
 				},
 				{
 					FieldName:    "UpdateRoutingPolicyDetails",
@@ -282,17 +280,17 @@ func TestRoutingPolicyRequestFieldsKeepOperationsScopedToRecordedPath(t *testing
 			got:  routingPolicyDeleteFields(),
 			want: []generatedruntime.RequestField{
 				{
-					FieldName:        "LoadBalancerId",
-					RequestName:      "loadBalancerId",
-					Contribution:     "path",
-					PreferResourceID: true,
-					LookupPaths:      []string{"status.status.ocid"},
+					FieldName:    "LoadBalancerId",
+					RequestName:  "loadBalancerId",
+					Contribution: "path",
+					LookupPaths:  []string{"status.loadBalancerId", "spec.loadBalancerId"},
 				},
 				{
-					FieldName:    "RoutingPolicyName",
-					RequestName:  "routingPolicyName",
-					Contribution: "path",
-					LookupPaths:  []string{"status.name", "spec.name", "name"},
+					FieldName:        "RoutingPolicyName",
+					RequestName:      "routingPolicyName",
+					Contribution:     "path",
+					PreferResourceID: true,
+					LookupPaths:      []string{"status.name", "spec.name", "name"},
 				},
 			},
 		},
@@ -337,11 +335,34 @@ func TestRoutingPolicyWorkRequestAdapterMapsLoadBalancerStates(t *testing.T) {
 	}
 }
 
+func TestRoutingPolicyWorkRequestAdapterMapsLiveActionNames(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		action string
+		want   shared.OSOKAsyncPhase
+	}{
+		{action: "AddRoutingPolicy", want: shared.OSOKAsyncPhaseCreate},
+		{action: "UpdateRoutingPolicy", want: shared.OSOKAsyncPhaseUpdate},
+		{action: "RemoveRoutingPolicy", want: shared.OSOKAsyncPhaseDelete},
+	}
+	for _, tc := range tests {
+		got, err := routingPolicyWorkRequestAsyncAdapter.ResolvePhase(&shared.OSOKStatus{}, tc.action, "")
+		if err != nil {
+			t.Fatalf("ResolvePhase(%q) error = %v", tc.action, err)
+		}
+		if got != tc.want {
+			t.Fatalf("ResolvePhase(%q) = %q, want %q", tc.action, got, tc.want)
+		}
+	}
+}
+
 func TestCreateOrUpdateRejectsMissingRoutingPolicyLoadBalancerAnnotation(t *testing.T) {
 	t.Parallel()
 
 	resource := makeUntrackedRoutingPolicyResource()
 	resource.Annotations = nil
+	resource.Spec.LoadBalancerId = ""
 	client := &fakeGeneratedRoutingPolicyOCIClient{}
 
 	response, err := newTestRoutingPolicyRuntimeClient(client).CreateOrUpdate(context.Background(), resource, ctrl.Request{})
@@ -678,6 +699,17 @@ func TestRoutingPolicyCreateBodySupportsJsonDataAction(t *testing.T) {
 	assertRoutingPolicySDKRules(t, "json action rules", body.Rules, sdkRoutingPolicyRules("json_backend_set"))
 }
 
+func TestRoutingPolicyCreateBodyRejectsInvalidRuleName(t *testing.T) {
+	t.Parallel()
+
+	resource := makeUntrackedRoutingPolicyResource()
+	resource.Spec.Rules[0].Name = "route-images"
+	_, err := buildRoutingPolicyCreateBody(resource)
+	if err == nil || !strings.Contains(err.Error(), "must match") {
+		t.Fatalf("buildRoutingPolicyCreateBody() error = %v, want rule-name validation", err)
+	}
+}
+
 func makeUntrackedRoutingPolicyResource() *loadbalancerv1beta1.RoutingPolicy {
 	return &loadbalancerv1beta1.RoutingPolicy{
 		ObjectMeta: metav1.ObjectMeta{
@@ -688,6 +720,7 @@ func makeUntrackedRoutingPolicyResource() *loadbalancerv1beta1.RoutingPolicy {
 		},
 		Spec: loadbalancerv1beta1.RoutingPolicySpec{
 			Name:                     routingPolicyNameValue,
+			LoadBalancerId:           routingPolicyLoadBalancerID,
 			ConditionLanguageVersion: "V1",
 			Rules:                    apiRoutingPolicyRules(routingPolicyBackendSetName),
 		},
@@ -696,7 +729,8 @@ func makeUntrackedRoutingPolicyResource() *loadbalancerv1beta1.RoutingPolicy {
 
 func makeTrackedRoutingPolicyResource() *loadbalancerv1beta1.RoutingPolicy {
 	resource := makeUntrackedRoutingPolicyResource()
-	resource.Status.OsokStatus.Ocid = shared.OCID(routingPolicyLoadBalancerID)
+	resource.Status.OsokStatus.Ocid = shared.OCID(routingPolicyNameValue)
+	resource.Status.LoadBalancerId = routingPolicyLoadBalancerID
 	resource.Status.Name = routingPolicyNameValue
 	return resource
 }
@@ -704,7 +738,7 @@ func makeTrackedRoutingPolicyResource() *loadbalancerv1beta1.RoutingPolicy {
 func apiRoutingPolicyRules(backendSetName string) []loadbalancerv1beta1.RoutingPolicyRule {
 	return []loadbalancerv1beta1.RoutingPolicyRule{
 		{
-			Name:      "route-images",
+			Name:      "route_images",
 			Condition: "all(http.request.url.path sw '/images')",
 			Actions: []loadbalancerv1beta1.RoutingPolicyRuleAction{
 				{
@@ -727,7 +761,7 @@ func sdkRoutingPolicy(conditionLanguageVersion string, backendSetName string) lo
 func sdkRoutingPolicyRules(backendSetName string) []loadbalancersdk.RoutingRule {
 	return []loadbalancersdk.RoutingRule{
 		{
-			Name:      common.String("route-images"),
+			Name:      common.String("route_images"),
 			Condition: common.String("all(http.request.url.path sw '/images')"),
 			Actions: []loadbalancersdk.Action{
 				loadbalancersdk.ForwardToBackendSet{
@@ -791,8 +825,11 @@ func assertRoutingPolicyTrackedStatus(
 	wantRules []loadbalancerv1beta1.RoutingPolicyRule,
 ) {
 	t.Helper()
-	if got := string(resource.Status.OsokStatus.Ocid); got != wantLoadBalancerID {
-		t.Fatalf("status.status.ocid = %q, want %q", got, wantLoadBalancerID)
+	if got := resource.Status.LoadBalancerId; got != wantLoadBalancerID {
+		t.Fatalf("status.loadBalancerId = %q, want %q", got, wantLoadBalancerID)
+	}
+	if got := string(resource.Status.OsokStatus.Ocid); got != wantName {
+		t.Fatalf("status.status.ocid = %q, want tracked routing policy name %q", got, wantName)
 	}
 	if got := resource.Status.Name; got != wantName {
 		t.Fatalf("status.name = %q, want %q", got, wantName)

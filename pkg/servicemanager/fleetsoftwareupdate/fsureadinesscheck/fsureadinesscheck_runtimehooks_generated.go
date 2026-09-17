@@ -57,8 +57,20 @@ func newFsuReadinessCheckDefaultRuntimeHooks(sdkClient fleetsoftwareupdatesdk.Fl
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*fleetsoftwareupdatev1beta1.FsuReadinessCheck]{},
 		StatusHooks:     generatedruntime.StatusHooks[*fleetsoftwareupdatev1beta1.FsuReadinessCheck]{},
 		ParityHooks:     generatedruntime.ParityHooks[*fleetsoftwareupdatev1beta1.FsuReadinessCheck]{},
-		Async:           generatedruntime.AsyncHooks[*fleetsoftwareupdatev1beta1.FsuReadinessCheck]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*fleetsoftwareupdatev1beta1.FsuReadinessCheck]{},
+		Async: generatedruntime.AsyncHooks[*fleetsoftwareupdatev1beta1.FsuReadinessCheck]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := fleetsoftwareupdatesdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*fleetsoftwareupdatev1beta1.FsuReadinessCheck]{},
 		Create: runtimeOperationHooks[fleetsoftwareupdatesdk.CreateFsuReadinessCheckRequest, fleetsoftwareupdatesdk.CreateFsuReadinessCheckResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateFsuReadinessCheckDetails", RequestName: "CreateFsuReadinessCheckDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request fleetsoftwareupdatesdk.CreateFsuReadinessCheckRequest) (fleetsoftwareupdatesdk.CreateFsuReadinessCheckResponse, error) {
@@ -106,10 +118,19 @@ func buildFsuReadinessCheckGeneratedRuntimeConfig(
 	hooks FsuReadinessCheckRuntimeHooks,
 ) generatedruntime.Config[*fleetsoftwareupdatev1beta1.FsuReadinessCheck] {
 	return generatedruntime.Config[*fleetsoftwareupdatev1beta1.FsuReadinessCheck]{
-		Kind:            "FsuReadinessCheck",
-		SDKName:         "FsuReadinessCheck",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "FsuReadinessCheck",
+		SDKName:   "FsuReadinessCheck",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

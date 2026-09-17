@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "maskingpolicy",
+  "kind": "MaskingPolicy",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_masking_policy",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateMaskingPolicy",
+        "requestType": "datasafe.CreateMaskingPolicyRequest",
+        "responseType": "datasafe.CreateMaskingPolicyResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetMaskingPolicy",
+        "requestType": "datasafe.GetMaskingPolicyRequest",
+        "responseType": "datasafe.GetMaskingPolicyResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListMaskingPolicies",
+        "requestType": "datasafe.ListMaskingPoliciesRequest",
+        "responseType": "datasafe.ListMaskingPoliciesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeMaskingPolicyCompartment",
+        "requestType": "datasafe.ChangeMaskingPolicyCompartmentRequest",
+        "responseType": "datasafe.ChangeMaskingPolicyCompartmentResponse"
+      },
+      {
+        "operation": "UpdateMaskingPolicy",
+        "requestType": "datasafe.UpdateMaskingPolicyRequest",
+        "responseType": "datasafe.UpdateMaskingPolicyResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteMaskingPolicy",
+        "requestType": "datasafe.DeleteMaskingPolicyRequest",
+        "responseType": "datasafe.DeleteMaskingPolicyResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "NEEDS_ATTENTION"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "add_masking_columns_from_sdm_trigger",
+      "column_source.column_source",
+      "column_source.sensitive_data_model_id",
+      "column_source.target_id",
+      "compartment_id",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags",
+      "generate_health_report_trigger",
+      "is_drop_temp_tables_enabled",
+      "is_redo_logging_enabled",
+      "is_refresh_stats_enabled",
+      "parallel_degree",
+      "post_masking_script",
+      "pre_masking_script",
+      "recompile"
+    ],
+    "forceNew": null,
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "update": [
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_data_safe_masking_policies",
+    "collectionField": "masking_policy_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "access_level",
+      "compartment_id",
+      "compartment_id_in_subtree",
+      "display_name",
+      "masking_policy_id",
+      "sensitive_data_model_id",
+      "state",
+      "target_id",
+      "time_created_greater_than_or_equal_to",
+      "time_created_less_than"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/maskingpolicy/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/maskingpolicy/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts are imported from the pinned terraform-provider-oci revision; repo-authored runtime semantics remain authoritative."
+  ]
+}

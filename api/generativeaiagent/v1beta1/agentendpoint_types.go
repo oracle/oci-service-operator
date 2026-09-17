@@ -27,16 +27,16 @@ type AgentEndpointSpec struct {
 	// +kubebuilder:validation:Optional
 	Description string `json:"description,omitempty"`
 	// +kubebuilder:validation:Optional
-	ContentModerationConfig AgentEndpointContentModerationConfig `json:"contentModerationConfig,omitempty"`
+	ContentModerationConfig AgentEndpointContentModerationConfig `json:"contentModerationConfig,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	GuardrailConfig AgentEndpointGuardrailConfig `json:"guardrailConfig,omitempty"`
+	GuardrailConfig AgentEndpointGuardrailConfig `json:"guardrailConfig,omitempty,omitzero"`
 	// Key-value pairs to allow additional configurations.
 	// +kubebuilder:validation:Optional
 	Metadata map[string]string `json:"metadata,omitempty"`
 	// +kubebuilder:validation:Optional
-	HumanInputConfig AgentEndpointHumanInputConfig `json:"humanInputConfig,omitempty"`
+	HumanInputConfig AgentEndpointHumanInputConfig `json:"humanInputConfig,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	OutputConfig AgentEndpointOutputConfig `json:"outputConfig,omitempty"`
+	OutputConfig AgentEndpointOutputConfig `json:"outputConfig,omitempty,omitzero"`
 	// Whether to show traces in the chat result.
 	// +kubebuilder:validation:Optional
 	ShouldEnableTrace bool `json:"shouldEnableTrace,omitempty"`
@@ -50,9 +50,9 @@ type AgentEndpointSpec struct {
 	// +kubebuilder:validation:Optional
 	ShouldEnableMultiLanguage bool `json:"shouldEnableMultiLanguage,omitempty"`
 	// +kubebuilder:validation:Optional
-	SessionConfig AgentEndpointSessionConfig `json:"sessionConfig,omitempty"`
+	SessionConfig AgentEndpointSessionConfig `json:"sessionConfig,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	ProvisionedCapacityConfig AgentEndpointProvisionedCapacityConfig `json:"provisionedCapacityConfig,omitempty"`
+	ProvisionedCapacityConfig AgentEndpointProvisionedCapacityConfig `json:"provisionedCapacityConfig,omitempty,omitzero"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
 	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
@@ -105,11 +105,11 @@ type AgentEndpointGuardrailConfigPersonallyIdentifiableInformationConfig struct 
 // AgentEndpointGuardrailConfig defines nested fields for AgentEndpoint.GuardrailConfig.
 type AgentEndpointGuardrailConfig struct {
 	// +kubebuilder:validation:Optional
-	ContentModerationConfig AgentEndpointGuardrailConfigContentModerationConfig `json:"contentModerationConfig,omitempty"`
+	ContentModerationConfig AgentEndpointGuardrailConfigContentModerationConfig `json:"contentModerationConfig,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	PromptInjectionConfig AgentEndpointGuardrailConfigPromptInjectionConfig `json:"promptInjectionConfig,omitempty"`
+	PromptInjectionConfig AgentEndpointGuardrailConfigPromptInjectionConfig `json:"promptInjectionConfig,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	PersonallyIdentifiableInformationConfig AgentEndpointGuardrailConfigPersonallyIdentifiableInformationConfig `json:"personallyIdentifiableInformationConfig,omitempty"`
+	PersonallyIdentifiableInformationConfig AgentEndpointGuardrailConfigPersonallyIdentifiableInformationConfig `json:"personallyIdentifiableInformationConfig,omitempty,omitzero"`
 }
 
 // AgentEndpointHumanInputConfig defines nested fields for AgentEndpoint.HumanInputConfig.
@@ -178,7 +178,7 @@ type AgentEndpointProvisionedCapacityConfig struct {
 	// +kubebuilder:validation:Required
 	ProvisionedCapacityId string `json:"provisionedCapacityId"`
 	// +kubebuilder:validation:Optional
-	PlatformRuntimeConfig AgentEndpointProvisionedCapacityConfigPlatformRuntimeConfig `json:"platformRuntimeConfig,omitempty"`
+	PlatformRuntimeConfig AgentEndpointProvisionedCapacityConfigPlatformRuntimeConfig `json:"platformRuntimeConfig,omitempty,omitzero"`
 	// RAG and SQL will be tools.
 	// +kubebuilder:validation:Optional
 	ToolRuntimeConfigs []AgentEndpointProvisionedCapacityConfigToolRuntimeConfig `json:"toolRuntimeConfigs,omitempty"`

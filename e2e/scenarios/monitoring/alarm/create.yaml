@@ -1,0 +1,21 @@
+#
+# Copyright (c) 2026, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+#
+
+apiVersion: monitoring.oracle.com/v1beta1
+kind: Alarm
+metadata:
+  name: osok-alarm-${OSOK_E2E_SUFFIX}
+spec:
+  displayName: osok-alarm-${OSOK_E2E_SUFFIX}
+  compartmentId: ${OCI_COMPARTMENT_ID}
+  metricCompartmentId: ${OCI_COMPARTMENT_ID}
+  namespace: oci_computeagent
+  query: CpuUtilization[1m].mean() > 100
+  severity: CRITICAL
+  destinations:
+    - ${OCI_NOTIFICATION_TOPIC_ID}
+  isEnabled: false
+  freeformTags:
+    osok-e2e-phase: create

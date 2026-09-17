@@ -66,25 +66,25 @@ func newSecurityAttributeDefaultRuntimeHooks(sdkClient securityattributesdk.Secu
 			},
 		},
 		Get: runtimeOperationHooks[securityattributesdk.GetSecurityAttributeRequest, securityattributesdk.GetSecurityAttributeResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "SecurityAttributeNamespaceId", RequestName: "securityAttributeNamespaceId", Contribution: "path", PreferResourceID: true}, {FieldName: "SecurityAttributeName", RequestName: "securityAttributeName", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "SecurityAttributeNamespaceId", RequestName: "securityAttributeNamespaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "SecurityAttributeName", RequestName: "securityAttributeName", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request securityattributesdk.GetSecurityAttributeRequest) (securityattributesdk.GetSecurityAttributeResponse, error) {
 				return sdkClient.GetSecurityAttribute(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[securityattributesdk.ListSecurityAttributesRequest, securityattributesdk.ListSecurityAttributesResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "SecurityAttributeNamespaceId", RequestName: "securityAttributeNamespaceId", Contribution: "path", PreferResourceID: true}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "SecurityAttributeNamespaceId", RequestName: "securityAttributeNamespaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request securityattributesdk.ListSecurityAttributesRequest) (securityattributesdk.ListSecurityAttributesResponse, error) {
 				return sdkClient.ListSecurityAttributes(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[securityattributesdk.UpdateSecurityAttributeRequest, securityattributesdk.UpdateSecurityAttributeResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "SecurityAttributeNamespaceId", RequestName: "securityAttributeNamespaceId", Contribution: "path", PreferResourceID: true}, {FieldName: "SecurityAttributeName", RequestName: "securityAttributeName", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdateSecurityAttributeDetails", RequestName: "UpdateSecurityAttributeDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "SecurityAttributeNamespaceId", RequestName: "securityAttributeNamespaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "SecurityAttributeName", RequestName: "securityAttributeName", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateSecurityAttributeDetails", RequestName: "UpdateSecurityAttributeDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request securityattributesdk.UpdateSecurityAttributeRequest) (securityattributesdk.UpdateSecurityAttributeResponse, error) {
 				return sdkClient.UpdateSecurityAttribute(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[securityattributesdk.DeleteSecurityAttributeRequest, securityattributesdk.DeleteSecurityAttributeResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "SecurityAttributeNamespaceId", RequestName: "securityAttributeNamespaceId", Contribution: "path", PreferResourceID: true}, {FieldName: "SecurityAttributeName", RequestName: "securityAttributeName", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "SecurityAttributeNamespaceId", RequestName: "securityAttributeNamespaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "SecurityAttributeName", RequestName: "securityAttributeName", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request securityattributesdk.DeleteSecurityAttributeRequest) (securityattributesdk.DeleteSecurityAttributeResponse, error) {
 				return sdkClient.DeleteSecurityAttribute(ctx, request)
 			},

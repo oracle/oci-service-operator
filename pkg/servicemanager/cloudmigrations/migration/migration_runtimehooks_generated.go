@@ -50,15 +50,84 @@ func registerMigrationRuntimeHooksMutator(mutator MigrationRuntimeHooksMutator) 
 	}
 	migrationRuntimeHooksMutators = append(migrationRuntimeHooksMutators, mutator)
 }
+func newMigrationRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "cloudmigrations",
+		FormalSlug:    "migration",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE", "NEEDS_ATTENTION"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "displayName", "migrationId", "state"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"compartmentId", "definedTags", "displayName", "freeformTags", "isCompleted", "replicationScheduleId"},
+			ForceNew:      []string{},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newMigrationDefaultRuntimeHooks(sdkClient cloudmigrationssdk.MigrationClient) MigrationRuntimeHooks {
 	return MigrationRuntimeHooks{
+		Semantics:       newMigrationRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*cloudmigrationsv1beta1.Migration]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*cloudmigrationsv1beta1.Migration]{},
 		StatusHooks:     generatedruntime.StatusHooks[*cloudmigrationsv1beta1.Migration]{},
 		ParityHooks:     generatedruntime.ParityHooks[*cloudmigrationsv1beta1.Migration]{},
-		Async:           generatedruntime.AsyncHooks[*cloudmigrationsv1beta1.Migration]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*cloudmigrationsv1beta1.Migration]{},
+		Async: generatedruntime.AsyncHooks[*cloudmigrationsv1beta1.Migration]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := cloudmigrationssdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*cloudmigrationsv1beta1.Migration]{},
 		Create: runtimeOperationHooks[cloudmigrationssdk.CreateMigrationRequest, cloudmigrationssdk.CreateMigrationResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateMigrationDetails", RequestName: "CreateMigrationDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request cloudmigrationssdk.CreateMigrationRequest) (cloudmigrationssdk.CreateMigrationResponse, error) {
@@ -106,10 +175,19 @@ func buildMigrationGeneratedRuntimeConfig(
 	hooks MigrationRuntimeHooks,
 ) generatedruntime.Config[*cloudmigrationsv1beta1.Migration] {
 	return generatedruntime.Config[*cloudmigrationsv1beta1.Migration]{
-		Kind:            "Migration",
-		SDKName:         "Migration",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "Migration",
+		SDKName:   "Migration",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

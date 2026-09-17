@@ -1,0 +1,147 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "dbmulticloud",
+  "slug": "oracledbawsidentityconnector",
+  "kind": "OracleDbAwsIdentityConnector",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_dbmulticloud_oracle_db_aws_identity_connector",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOracleDbAwsIdentityConnector",
+        "requestType": "dbmulticloud.CreateOracleDbAwsIdentityConnectorRequest",
+        "responseType": "dbmulticloud.CreateOracleDbAwsIdentityConnectorResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOracleDbAwsIdentityConnector",
+        "requestType": "dbmulticloud.GetOracleDbAwsIdentityConnectorRequest",
+        "responseType": "dbmulticloud.GetOracleDbAwsIdentityConnectorResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOracleDbAwsIdentityConnectors",
+        "requestType": "dbmulticloud.ListOracleDbAwsIdentityConnectorsRequest",
+        "responseType": "dbmulticloud.ListOracleDbAwsIdentityConnectorsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOracleDbAwsIdentityConnector",
+        "requestType": "dbmulticloud.UpdateOracleDbAwsIdentityConnectorRequest",
+        "responseType": "dbmulticloud.UpdateOracleDbAwsIdentityConnectorResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOracleDbAwsIdentityConnector",
+        "requestType": "dbmulticloud.DeleteOracleDbAwsIdentityConnectorRequest",
+        "responseType": "dbmulticloud.DeleteOracleDbAwsIdentityConnectorResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "displayName",
+      "resourceId",
+      "oidcScope",
+      "issuerUrl",
+      "serviceRoleDetails",
+      "awsLocation",
+      "awsStsPrivateEndpoint",
+      "awsAccountId",
+      "freeformTags",
+      "definedTags"
+    ],
+    "forceNew": [
+      "compartmentId"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "OracleDbAwsIdentityConnector",
+        "action": "CreateOracleDbAwsIdentityConnector"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "OracleDbAwsIdentityConnector",
+        "action": "UpdateOracleDbAwsIdentityConnector"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "OracleDbAwsIdentityConnector",
+        "action": "DeleteOracleDbAwsIdentityConnector"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "unavailable",
+    "collectionField": "Items",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartmentId",
+      "displayName",
+      "lifecycleState",
+      "resourceId",
+      "opc-request-id"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/dbmulticloud/oracledbawsidentityconnector/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/dbmulticloud/oracledbawsidentityconnector/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Terraform provider formal-import could not resolve oci_dbmulticloud_oracle_db_aws_identity_connector; the vendored SDK, generated runtime, and package-owned typed OCI fixtures define this reviewed contract."
+  ]
+}

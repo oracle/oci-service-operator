@@ -106,7 +106,7 @@ type QueryDefinitionReportQuery struct {
 	// +kubebuilder:validation:Optional
 	IsAggregateByTime bool `json:"isAggregateByTime,omitempty"`
 	// +kubebuilder:validation:Optional
-	Forecast QueryDefinitionReportQueryForecast `json:"forecast,omitempty"`
+	Forecast QueryDefinitionReportQueryForecast `json:"forecast,omitempty,omitzero"`
 	// The query usage type. COST by default if it is missing.
 	// * Usage: Query the usage data.
 	// * Cost: Query the cost/billing data.
@@ -131,7 +131,7 @@ type QueryDefinitionReportQuery struct {
 	// +kubebuilder:validation:Optional
 	CompartmentDepth float32 `json:"compartmentDepth,omitempty"`
 	// +kubebuilder:validation:Optional
-	Filter QueryDefinitionReportQueryFilter `json:"filter,omitempty"`
+	Filter QueryDefinitionReportQueryFilter `json:"filter,omitempty,omitzero"`
 	// The UI date range, for example, LAST_THREE_MONTHS. Conflicts with timeUsageStarted and timeUsageEnded.
 	// +kubebuilder:validation:Optional
 	DateRangeName string `json:"dateRangeName,omitempty"`

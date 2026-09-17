@@ -144,7 +144,7 @@ type PlatformConfigurationConfigCategoryDetails struct {
 	// +kubebuilder:validation:Optional
 	Products []PlatformConfigurationConfigCategoryDetailsProduct `json:"products,omitempty"`
 	// +kubebuilder:validation:Optional
-	SubCategoryDetails PlatformConfigurationConfigCategoryDetailsSubCategoryDetails `json:"subCategoryDetails,omitempty"`
+	SubCategoryDetails PlatformConfigurationConfigCategoryDetailsSubCategoryDetails `json:"subCategoryDetails,omitempty,omitzero"`
 	// Versions associated with the PRODUCT. Mandatory if product is not softlink product.
 	// +kubebuilder:validation:Optional
 	Versions []string `json:"versions,omitempty"`

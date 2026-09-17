@@ -21,6 +21,12 @@ type DataAssetTagSpec struct {
 	// Unique key of the related term or null in the case of a free form tag.
 	// +kubebuilder:validation:Optional
 	TermKey string `json:"termKey,omitempty"`
+	// The OCID of the catalog containing the tagged data asset.
+	// +kubebuilder:validation:Required
+	CatalogId string `json:"catalogId"`
+	// The key of the data asset receiving the tag.
+	// +kubebuilder:validation:Required
+	DataAssetKey string `json:"dataAssetKey"`
 }
 
 // DataAssetTagStatus defines the observed state of DataAssetTag.

@@ -1,0 +1,61 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: datasafe
+slug: attributeset
+kind: AttributeSet
+archetype: generated-service-manager
+states:
+    - provisioning
+    - active
+    - updating
+    - terminating
+repoAuthored:
+    operations:
+        update:
+            - UpdateAttributeSet
+    providerLifecycle:
+        createPending:
+            - CREATING
+        updatePending:
+            - UPDATING
+        deletePending:
+            - DELETING
+    listLookup:
+        filters:
+            - compartmentId
+            - displayName
+            - attributeSetType
+        matchRule: exact compartmentId, displayName, attributeSetType match within the resource scope; duplicate matches fail
+    mutation:
+        mutable:
+            - attributeSetValues
+            - compartmentId
+            - definedTags
+            - description
+            - displayName
+            - freeformTags
+        forceNew:
+            - attributeSetType
+    hooks:
+        create:
+            - helper: tfresource.CreateResource
+              entityType: AttributeSet
+              action: CreateAttributeSet
+        update:
+            - helper: tfresource.UpdateResource
+              entityType: AttributeSet
+              action: UpdateAttributeSet
+            - helper: ChangeAttributeSetCompartment
+        delete:
+            - helper: tfresource.DeleteResource
+              entityType: AttributeSet
+              action: DeleteAttributeSet
+    followUp:
+        create: read-after-write
+        update: read-after-write
+        delete: confirm-delete
+notes:
+    - The production runtime uses generatedruntime/workrequest async handling for create, update, delete work-request phases.
+    - Lifecycle success states are ACTIVE; pending create, update, and delete states requeue until the corresponding follow-up converges.
+    - Status projection is required, Secret side effects are none, and the finalizer policy is retain-until-confirmed-delete.
+    - Delete policy required retains ownership until DELETED or confirmed absence.

@@ -1,0 +1,203 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "cloudbridge",
+  "slug": "asset",
+  "kind": "Asset",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_cloud_bridge_asset",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateAsset",
+        "requestType": "cloudbridge.CreateAssetRequest",
+        "responseType": "cloudbridge.CreateAssetResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetAsset",
+        "requestType": "cloudbridge.GetAssetRequest",
+        "responseType": "cloudbridge.GetAssetResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListAssets",
+        "requestType": "cloudbridge.ListAssetsRequest",
+        "responseType": "cloudbridge.ListAssetsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeAssetCompartment",
+        "requestType": "cloudbridge.ChangeAssetCompartmentRequest",
+        "responseType": "cloudbridge.ChangeAssetCompartmentResponse"
+      },
+      {
+        "operation": "ChangeAssetTags",
+        "requestType": "cloudbridge.ChangeAssetTagsRequest",
+        "responseType": "cloudbridge.ChangeAssetTagsResponse"
+      },
+      {
+        "operation": "UpdateAsset",
+        "requestType": "cloudbridge.UpdateAssetRequest",
+        "responseType": "cloudbridge.UpdateAssetResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteAsset",
+        "requestType": "cloudbridge.DeleteAssetRequest",
+        "responseType": "cloudbridge.DeleteAssetResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "asset_source_ids",
+      "asset_type",
+      "compartment_id",
+      "compute.connected_networks",
+      "compute.cores_count",
+      "compute.cpu_model",
+      "compute.description",
+      "compute.disks.boot_order",
+      "compute.disks.location",
+      "compute.disks.name",
+      "compute.disks.persistent_mode",
+      "compute.disks.size_in_mbs",
+      "compute.disks.uuid",
+      "compute.disks.uuid_lun",
+      "compute.disks_count",
+      "compute.dns_name",
+      "compute.firmware",
+      "compute.gpu_devices.cores_count",
+      "compute.gpu_devices.description",
+      "compute.gpu_devices.manufacturer",
+      "compute.gpu_devices.memory_in_mbs",
+      "compute.gpu_devices.name",
+      "compute.gpu_devices_count",
+      "compute.guest_state",
+      "compute.hardware_version",
+      "compute.host_name",
+      "compute.is_pmem_enabled",
+      "compute.is_tpm_enabled",
+      "compute.latency_sensitivity",
+      "compute.memory_in_mbs",
+      "compute.nics.ip_addresses",
+      "compute.nics.label",
+      "compute.nics.mac_address",
+      "compute.nics.mac_address_type",
+      "compute.nics.network_name",
+      "compute.nics.switch_name",
+      "compute.nics_count",
+      "compute.nvdimm_controller.bus_number",
+      "compute.nvdimm_controller.label",
+      "compute.nvdimms.controller_key",
+      "compute.nvdimms.label",
+      "compute.nvdimms.unit_number",
+      "compute.operating_system",
+      "compute.operating_system_version",
+      "compute.pmem_in_mbs",
+      "compute.power_state",
+      "compute.primary_ip",
+      "compute.scsi_controller.label",
+      "compute.scsi_controller.shared_bus",
+      "compute.scsi_controller.unit_number",
+      "compute.storage_provisioned_in_mbs",
+      "compute.threads_per_core_count",
+      "defined_tags",
+      "display_name",
+      "freeform_tags",
+      "vm.hypervisor_host",
+      "vm.hypervisor_vendor",
+      "vm.hypervisor_version",
+      "vmware_vcenter.data_center",
+      "vmware_vcenter.vcenter_key",
+      "vmware_vcenter.vcenter_version",
+      "vmware_vm.cluster",
+      "vmware_vm.customer_fields",
+      "vmware_vm.customer_tags.description",
+      "vmware_vm.customer_tags.name",
+      "vmware_vm.fault_tolerance_bandwidth",
+      "vmware_vm.fault_tolerance_secondary_latency",
+      "vmware_vm.fault_tolerance_state",
+      "vmware_vm.instance_uuid",
+      "vmware_vm.is_disks_cbt_enabled",
+      "vmware_vm.is_disks_uuid_enabled",
+      "vmware_vm.path",
+      "vmware_vm.vmware_tools_status"
+    ],
+    "forceNew": [
+      "external_asset_key",
+      "inventory_id",
+      "source_key"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_cloud_bridge_assets",
+    "collectionField": "asset_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "asset_id",
+      "asset_type",
+      "compartment_id",
+      "display_name",
+      "external_asset_key",
+      "inventory_id",
+      "source_key",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/cloudbridge/asset/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/cloudbridge/asset/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from the pinned terraform-provider-oci source revision."
+  ]
+}

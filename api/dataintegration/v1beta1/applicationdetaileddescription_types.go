@@ -20,11 +20,103 @@ type ApplicationDetailedDescriptionSpec struct {
 	// Base64 encoded rich text description of the object.
 	// +kubebuilder:validation:Optional
 	DetailedDescription string `json:"detailedDescription,omitempty"`
+	// The OCID of the Data Integration workspace containing this resource.
+	// +kubebuilder:validation:Required
+	WorkspaceId string `json:"workspaceId"`
+	// The key of the application containing this resource.
+	// +kubebuilder:validation:Required
+	ApplicationKey string `json:"applicationKey"`
+}
+
+// ApplicationDetailedDescriptionParentRef defines nested fields for ApplicationDetailedDescription.ParentRef.
+type ApplicationDetailedDescriptionParentRef struct {
+	// Key of the parent object.
+	Parent string `json:"parent,omitempty"`
+	// Key of the root document object.
+	RootDocId string `json:"rootDocId,omitempty"`
+}
+
+// ApplicationDetailedDescriptionMetadataAggregator defines nested fields for ApplicationDetailedDescription.Metadata.Aggregator.
+type ApplicationDetailedDescriptionMetadataAggregator struct {
+	// The type of the aggregator.
+	Type string `json:"type,omitempty"`
+	// The key of the aggregator object.
+	Key string `json:"key,omitempty"`
+	// The name of the aggregator.
+	Name string `json:"name,omitempty"`
+	// The identifier of the aggregator.
+	Identifier string `json:"identifier,omitempty"`
+	// The description of the aggregator.
+	Description string `json:"description,omitempty"`
+}
+
+// ApplicationDetailedDescriptionMetadataCountStatisticsObjectTypeCountList defines nested fields for ApplicationDetailedDescription.Metadata.CountStatistics.ObjectTypeCountList.
+type ApplicationDetailedDescriptionMetadataCountStatisticsObjectTypeCountList struct {
+	// The type of object for the count statistic object.
+	ObjectType string `json:"objectType,omitempty"`
+	// The value for the count statistic object.
+	ObjectCount int64 `json:"objectCount,omitempty"`
+}
+
+// ApplicationDetailedDescriptionMetadataCountStatistics defines nested fields for ApplicationDetailedDescription.Metadata.CountStatistics.
+type ApplicationDetailedDescriptionMetadataCountStatistics struct {
+	// The array of statistics.
+	ObjectTypeCountList []ApplicationDetailedDescriptionMetadataCountStatisticsObjectTypeCountList `json:"objectTypeCountList,omitempty"`
+}
+
+// ApplicationDetailedDescriptionMetadata defines nested fields for ApplicationDetailedDescription.Metadata.
+type ApplicationDetailedDescriptionMetadata struct {
+	// The user that created the object.
+	CreatedBy string `json:"createdBy,omitempty"`
+	// The user that created the object.
+	CreatedByName string `json:"createdByName,omitempty"`
+	// The user that updated the object.
+	UpdatedBy string `json:"updatedBy,omitempty"`
+	// The user that updated the object.
+	UpdatedByName string `json:"updatedByName,omitempty"`
+	// The date and time that the object was created.
+	TimeCreated string `json:"timeCreated,omitempty"`
+	// The date and time that the object was updated.
+	TimeUpdated string `json:"timeUpdated,omitempty"`
+	// The owning object key for this object.
+	AggregatorKey string                                           `json:"aggregatorKey,omitempty"`
+	Aggregator    ApplicationDetailedDescriptionMetadataAggregator `json:"aggregator,omitempty"`
+	// The full path to identify this object.
+	IdentifierPath string `json:"identifierPath,omitempty"`
+	// Information property fields.
+	InfoFields map[string]string `json:"infoFields,omitempty"`
+	// The registry version of the object.
+	RegistryVersion int `json:"registryVersion,omitempty"`
+	// Labels are keywords or tags that you can add to data assets, dataflows and so on. You can define your own labels and use them to categorize content.
+	Labels []string `json:"labels,omitempty"`
+	// Specifies whether this object is a favorite or not.
+	IsFavorite      bool                                                  `json:"isFavorite,omitempty"`
+	CountStatistics ApplicationDetailedDescriptionMetadataCountStatistics `json:"countStatistics,omitempty"`
 }
 
 // ApplicationDetailedDescriptionStatus defines the observed state of ApplicationDetailedDescription.
 type ApplicationDetailedDescriptionStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
+	// The type of the published object.
+	ModelType string `json:"modelType,omitempty"`
+	// Generated key that can be used in API calls to identify task. On scenarios where reference to the task is needed, a value can be passed in create.
+	Key string `json:"key,omitempty"`
+	// The object's model version.
+	ModelVersion string                                  `json:"modelVersion,omitempty"`
+	ParentRef    ApplicationDetailedDescriptionParentRef `json:"parentRef,omitempty"`
+	// Free form text without any restriction on permitted characters. Name can have letters, numbers, and special characters. The value is editable and is restricted to 1000 characters.
+	Name string `json:"name,omitempty"`
+	// The version of the object that is used to track changes in the object instance.
+	ObjectVersion int `json:"objectVersion,omitempty"`
+	// The status of an object that can be set to value 1 for shallow references across objects, other values reserved.
+	ObjectStatus int `json:"objectStatus,omitempty"`
+	// Value can only contain upper case letters, underscore, and numbers. It should begin with upper case letter or underscore. The value can be modified.
+	Identifier string                                 `json:"identifier,omitempty"`
+	Metadata   ApplicationDetailedDescriptionMetadata `json:"metadata,omitempty"`
+	// Base64 encoded image to represent logo of the object.
+	Logo string `json:"logo,omitempty"`
+	// Base64 encoded rich text description of the object.
+	DetailedDescription string `json:"detailedDescription,omitempty"`
 }
 
 // +kubebuilder:object:root=true

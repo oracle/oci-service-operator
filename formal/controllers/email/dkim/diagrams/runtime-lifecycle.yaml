@@ -9,5 +9,41 @@ states:
   - active
   - updating
   - terminating
+repoAuthored:
+  listLookup:
+    filters:
+      - email_domain_id
+      - id
+      - name
+    matchRule: Adopt only a unique selector match beneath the requested email domain.
+  mutation:
+    mutable:
+      - defined_tags
+      - description
+      - freeform_tags
+    forceNew:
+      - email_domain_id
+      - name
+  hooks:
+    create:
+      - helper: CreateDkim
+    update:
+      - helper: UpdateDkim
+    delete:
+      - helper: DeleteDkim
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
 notes:
-  - Scaffold metadata only; replace with controller-specific runtime states before promotion.
+  - >-
+    `NEEDS_ATTENTION` is a steady successful state for an unverified DKIM: OCI
+    has created the key and is waiting for the operator to publish its DNS
+    records. The runtime must not fail reconciliation while that external DNS
+    action is pending.
+  - >-
+    `CREATING` and `UPDATING` requeue; `ACTIVE` and `NEEDS_ATTENTION` are
+    successful steady states; delete retains the finalizer through `DELETING`
+    until OCI reports `DELETED` or an unambiguous absence.
+  - The runtime projects the generated selector and DNS CNAME/TXT values into
+    status without creating Kubernetes Secrets.

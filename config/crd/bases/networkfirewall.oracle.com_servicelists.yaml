@@ -63,6 +63,10 @@ spec:
               name:
                 description: Name of the service Group.
                 type: string
+              networkFirewallPolicyId:
+                description: The OCID of the Network Firewall policy that owns this
+                  resource.
+                type: string
               services:
                 description: Collection of service names.
                 items:
@@ -70,6 +74,7 @@ spec:
                 type: array
             required:
             - name
+            - networkFirewallPolicyId
             - services
             type: object
           status:

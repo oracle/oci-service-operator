@@ -9,5 +9,21 @@ states:
   - active
   - updating
   - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending: ["CREATING"]
+    updatePending: ["UPDATING"]
+    deletePending: ["DELETING"]
+  listLookup:
+    filters: ["clusterId","displayName"]
+    matchRule: exact clusterId plus displayName match; duplicate matches fail
+  mutation:
+    mutable: ["billingDonorHostId","definedTags","displayName","freeformTags","nextCommitment"]
+    forceNew: ["capacityReservationId","clusterId","computeAvailabilityDomain","currentCommitment","esxiSoftwareVersion","hostOcpuCount","hostShapeName"]
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
 notes:
-  - Scaffold metadata only; replace with controller-specific runtime states before promotion.
+  - "The runtime updates billingDonorHostId only with a compatible nextCommitment and rejects create-only drift before mutation."
+  - "Create and update settle only after GetEsxiHost reaches ACTIVE; delete retains the finalizer until absence is confirmed."

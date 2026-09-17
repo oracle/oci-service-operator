@@ -48,7 +48,7 @@ type DatabaseToolsConnectionSpec struct {
 	// +kubebuilder:validation:Optional
 	UserName string `json:"userName,omitempty"`
 	// +kubebuilder:validation:Optional
-	UserPassword DatabaseToolsConnectionUserPassword `json:"userPassword,omitempty"`
+	UserPassword DatabaseToolsConnectionUserPassword `json:"userPassword,omitempty,omitzero"`
 	// The advanced connection properties key-value pair.
 	// +kubebuilder:validation:Optional
 	AdvancedProperties map[string]string `json:"advancedProperties,omitempty"`
@@ -60,12 +60,12 @@ type DatabaseToolsConnectionSpec struct {
 	// +kubebuilder:validation:Optional
 	ConnectionString string `json:"connectionString,omitempty"`
 	// +kubebuilder:validation:Optional
-	RelatedResource DatabaseToolsConnectionRelatedResource `json:"relatedResource,omitempty"`
+	RelatedResource DatabaseToolsConnectionRelatedResource `json:"relatedResource,omitempty,omitzero"`
 	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Database Tools private endpoint used to access the database in the customer VCN.
 	// +kubebuilder:validation:Optional
 	PrivateEndpointId string `json:"privateEndpointId,omitempty"`
 	// +kubebuilder:validation:Optional
-	ProxyClient DatabaseToolsConnectionProxyClient `json:"proxyClient,omitempty"`
+	ProxyClient DatabaseToolsConnectionProxyClient `json:"proxyClient,omitempty,omitzero"`
 }
 
 // DatabaseToolsConnectionLock defines nested fields for DatabaseToolsConnection.Lock.
@@ -124,9 +124,9 @@ type DatabaseToolsConnectionKeyStore struct {
 	// +kubebuilder:validation:Optional
 	KeyStoreType string `json:"keyStoreType,omitempty"`
 	// +kubebuilder:validation:Optional
-	KeyStoreContent DatabaseToolsConnectionKeyStoreKeyStoreContent `json:"keyStoreContent,omitempty"`
+	KeyStoreContent DatabaseToolsConnectionKeyStoreKeyStoreContent `json:"keyStoreContent,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	KeyStorePassword DatabaseToolsConnectionKeyStoreKeyStorePassword `json:"keyStorePassword,omitempty"`
+	KeyStorePassword DatabaseToolsConnectionKeyStoreKeyStorePassword `json:"keyStorePassword,omitempty,omitzero"`
 }
 
 // DatabaseToolsConnectionRelatedResource defines nested fields for DatabaseToolsConnection.RelatedResource.
@@ -160,7 +160,7 @@ type DatabaseToolsConnectionProxyClient struct {
 	// +kubebuilder:validation:Optional
 	UserName string `json:"userName,omitempty"`
 	// +kubebuilder:validation:Optional
-	UserPassword DatabaseToolsConnectionProxyClientUserPassword `json:"userPassword,omitempty"`
+	UserPassword DatabaseToolsConnectionProxyClientUserPassword `json:"userPassword,omitempty,omitzero"`
 	// A list of database roles for the client. These roles are enabled if the proxy is authorized to use the roles on behalf of the client.
 	// +kubebuilder:validation:Optional
 	Roles []string `json:"roles,omitempty"`

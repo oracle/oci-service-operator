@@ -55,7 +55,7 @@ type SubscriptionSpec struct {
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 	// The delivery policy of the subscription. Stored as a JSON string.
 	// +kubebuilder:validation:Optional
-	DeliveryPolicy SubscriptionDeliveryPolicy `json:"deliveryPolicy,omitempty"`
+	DeliveryPolicy SubscriptionDeliveryPolicy `json:"deliveryPolicy,omitempty,omitzero"`
 }
 
 // SubscriptionDeliveryPolicyBackoffRetryPolicy defines nested fields for Subscription.DeliveryPolicy.BackoffRetryPolicy.
@@ -71,7 +71,7 @@ type SubscriptionDeliveryPolicyBackoffRetryPolicy struct {
 // SubscriptionDeliveryPolicy defines nested fields for Subscription.DeliveryPolicy.
 type SubscriptionDeliveryPolicy struct {
 	// +kubebuilder:validation:Optional
-	BackoffRetryPolicy SubscriptionDeliveryPolicyBackoffRetryPolicy `json:"backoffRetryPolicy,omitempty"`
+	BackoffRetryPolicy SubscriptionDeliveryPolicyBackoffRetryPolicy `json:"backoffRetryPolicy,omitempty,omitzero"`
 }
 
 // SubscriptionStatus defines the observed state of Subscription.

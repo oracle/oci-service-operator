@@ -1,0 +1,143 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "operatoraccesscontrol",
+  "slug": "operatorcontrolassignment",
+  "kind": "OperatorControlAssignment",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_operator_access_control_operator_control_assignment",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOperatorControlAssignment",
+        "requestType": "operatoraccesscontrol.CreateOperatorControlAssignmentRequest",
+        "responseType": "operatoraccesscontrol.CreateOperatorControlAssignmentResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOperatorControlAssignment",
+        "requestType": "operatoraccesscontrol.GetOperatorControlAssignmentRequest",
+        "responseType": "operatoraccesscontrol.GetOperatorControlAssignmentResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOperatorControlAssignments",
+        "requestType": "operatoraccesscontrol.ListOperatorControlAssignmentsRequest",
+        "responseType": "operatoraccesscontrol.ListOperatorControlAssignmentsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeOperatorControlAssignmentCompartment",
+        "requestType": "operatoraccesscontrol.ChangeOperatorControlAssignmentCompartmentRequest",
+        "responseType": "operatoraccesscontrol.ChangeOperatorControlAssignmentCompartmentResponse"
+      },
+      {
+        "operation": "UpdateOperatorControlAssignment",
+        "requestType": "operatoraccesscontrol.UpdateOperatorControlAssignmentRequest",
+        "responseType": "operatoraccesscontrol.UpdateOperatorControlAssignmentResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOperatorControlAssignment",
+        "requestType": "operatoraccesscontrol.DeleteOperatorControlAssignmentRequest",
+        "responseType": "operatoraccesscontrol.DeleteOperatorControlAssignmentResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "S_CREATED"
+      ],
+      "target": [
+        "S_APPLIED",
+        "S_APPLYFAILED"
+      ]
+    },
+    "update": {
+      "pending": [
+        "S_UPDATING"
+      ],
+      "target": [
+        "S_APPLIED",
+        "S_APPLYFAILED",
+        "S_UPDATEFAILED"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "comment",
+      "compartment_id",
+      "defined_tags",
+      "freeform_tags",
+      "is_auto_approve_during_maintenance",
+      "is_enforced_always",
+      "is_hypervisor_log_forwarded",
+      "is_log_forwarded",
+      "remote_syslog_server_address",
+      "remote_syslog_server_ca_cert",
+      "remote_syslog_server_port",
+      "time_assignment_from",
+      "time_assignment_to",
+      "validate_assignment_trigger"
+    ],
+    "forceNew": [
+      "operator_control_id",
+      "resource_compartment_id",
+      "resource_id",
+      "resource_name",
+      "resource_type"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "update": [
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_operator_access_control_operator_control_assignments",
+    "collectionField": "operator_control_assignment_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "operator_control_name",
+      "resource_name",
+      "resource_type",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/operatoraccesscontrol/operatorcontrolassignment/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/operatoraccesscontrol/operatorcontrolassignment/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts are imported from the pinned terraform-provider-oci revision; repo-authored runtime semantics remain authoritative."
+  ]
+}

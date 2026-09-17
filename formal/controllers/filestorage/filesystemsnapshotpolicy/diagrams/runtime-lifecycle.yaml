@@ -1,0 +1,53 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: filestorage
+slug: filesystemsnapshotpolicy
+kind: FilesystemSnapshotPolicy
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+  - deleted
+repoAuthored:
+  providerLifecycle:
+    createPending:
+      - CREATING
+    deletePending:
+      - DELETING
+  listLookup:
+    filters:
+      - availabilityDomain
+      - compartmentId
+      - displayName
+      - policyPrefix
+    matchRule: exact availabilityDomain, compartmentId, displayName, and policyPrefix match
+  mutation:
+    mutable:
+      - definedTags
+      - displayName
+      - freeformTags
+      - policyPrefix
+      - schedules
+    forceNew:
+      - availabilityDomain
+      - compartmentId
+      - locks
+  operations:
+    update:
+      - UpdateFilesystemSnapshotPolicy
+  hooks:
+    create: []
+    update:
+      - helper: tfresource.WaitForUpdatedState
+    delete:
+      - helper: tfresource.DeleteResource
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - ACTIVE is the published steady state; the CR does not expose the provider-only start and stop state control.
+  - ChangeFilesystemSnapshotPolicyCompartment remains outside the published generic runtime, so compartmentId is replacement-only.
+  - Delete retains the finalizer through DELETING until DELETED or NotFound. There are no Secret side effects.

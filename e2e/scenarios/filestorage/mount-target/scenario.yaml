@@ -1,0 +1,27 @@
+version: 1
+name: filestorage-mount-target-basic-crud
+service: filestorage
+namespace: default
+timeout: 30m
+pollInterval: 10s
+create: create.yaml
+update: update.yaml
+ready:
+  conditionTypes: [Active]
+  lifecycleStates: [ACTIVE]
+  requireOCID: true
+  fieldsEqual:
+    - desired: spec.displayName
+      observed: status.displayName
+    - desired: spec.availabilityDomain
+      observed: status.availabilityDomain
+    - desired: spec.subnetId
+      observed: status.subnetId
+    - desired: spec.freeformTags
+      observed: status.freeformTags
+failureConditionTypes: [Failed]
+delete:
+  enabled: true
+  timeout: 30m
+  cleanupDependencies: true
+cleanupOnFailure: true

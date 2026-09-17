@@ -1,0 +1,22 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: osmanagementhub
+slug: softwaresource
+kind: SoftwareSource
+archetype: generated-service-manager
+states: [provisioning, active, updating, terminating]
+repoAuthored:
+  providerLifecycle:
+    createPending: [CREATING]
+    updatePending: [UPDATING]
+    deletePending: [DELETING]
+  listLookup:
+    filters: [compartmentId, displayName, softwareSourceType, id]
+    matchRule: exact compartment, name, and software-source discriminator match; duplicate matches fail
+  mutation:
+    mutable: [displayName, description, freeformTags, definedTags, vendorSoftwareSources, customSoftwareSourceFilter, isAutomaticallyUpdated, isAutoResolveDependencies, isLatestContentOnly, url, gpgKeyUrl, isGpgCheckEnabled, isSslVerifyEnabled, advancedRepoOptions, isMirrorSyncAllowed]
+    forceNew: [compartmentId, softwareSourceType, originSoftwareSourceId, osFamily, archType, softwareSourceVersion, softwareSourceSubType]
+  followUp: {create: read-after-write, update: read-after-write, delete: confirm-delete}
+notes:
+  - ACTIVE and INACTIVE are stable states; DELETED confirms deletion.
+  - Software-source discriminators select the concrete OCI SDK create, update, and response models.

@@ -5,9 +5,11 @@ slug: usagecarbonemissionsquery
 kind: UsageCarbonEmissionsQuery
 archetype: generated-service-manager
 states:
-  - provisioning
   - active
-  - updating
   - terminating
+  - deleted
 notes:
-  - Scaffold metadata only; replace with controller-specific runtime states before promotion.
+  - The SDK does not expose lifecycle state on UsageCarbonEmissionsQuery bodies, so create and update settle through read-after-write confirmation and the service-local wrapper projects Active status.
+  - In-place updates are limited to queryDefinition; compartmentId requires replacement.
+  - Existing queries are matched by the populated queryDefinition fields, and delete retains the finalizer until Get confirms absence.
+  - The runtime has no Kubernetes Secret side effects.

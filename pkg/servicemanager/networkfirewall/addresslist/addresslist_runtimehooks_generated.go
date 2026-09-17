@@ -66,25 +66,25 @@ func newAddressListDefaultRuntimeHooks(sdkClient networkfirewallsdk.NetworkFirew
 			},
 		},
 		Get: runtimeOperationHooks[networkfirewallsdk.GetAddressListRequest, networkfirewallsdk.GetAddressListResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "AddressListName", RequestName: "addressListName", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "AddressListName", RequestName: "addressListName", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request networkfirewallsdk.GetAddressListRequest) (networkfirewallsdk.GetAddressListResponse, error) {
 				return sdkClient.GetAddressList(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[networkfirewallsdk.ListAddressListsRequest, networkfirewallsdk.ListAddressListsResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: true}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request networkfirewallsdk.ListAddressListsRequest) (networkfirewallsdk.ListAddressListsResponse, error) {
 				return sdkClient.ListAddressLists(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[networkfirewallsdk.UpdateAddressListRequest, networkfirewallsdk.UpdateAddressListResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "AddressListName", RequestName: "addressListName", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdateAddressListDetails", RequestName: "UpdateAddressListDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "AddressListName", RequestName: "addressListName", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateAddressListDetails", RequestName: "UpdateAddressListDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request networkfirewallsdk.UpdateAddressListRequest) (networkfirewallsdk.UpdateAddressListResponse, error) {
 				return sdkClient.UpdateAddressList(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[networkfirewallsdk.DeleteAddressListRequest, networkfirewallsdk.DeleteAddressListResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "AddressListName", RequestName: "addressListName", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "NetworkFirewallPolicyId", RequestName: "networkFirewallPolicyId", Contribution: "path", PreferResourceID: false}, {FieldName: "AddressListName", RequestName: "addressListName", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request networkfirewallsdk.DeleteAddressListRequest) (networkfirewallsdk.DeleteAddressListResponse, error) {
 				return sdkClient.DeleteAddressList(ctx, request)
 			},

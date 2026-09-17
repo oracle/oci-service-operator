@@ -50,50 +50,119 @@ func registerFleetRuntimeHooksMutator(mutator FleetRuntimeHooksMutator) {
 	}
 	fleetRuntimeHooksMutators = append(fleetRuntimeHooksMutators, mutator)
 }
-func newFleetDefaultRuntimeHooks(sdkClient fleetappsmanagementsdk.FleetAppsManagementClient) FleetRuntimeHooks {
+func newFleetRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "fleetappsmanagement",
+		FormalSlug:    "fleet",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE", "NEEDS_ATTENTION"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"applicationType", "compartmentId", "displayName", "environmentType", "fleetType", "id", "product", "state"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"definedTags", "description", "displayName", "environmentType", "freeformTags", "isTargetAutoConfirm", "notificationPreferences.compartmentId", "notificationPreferences.preferences.onJobCanceled", "notificationPreferences.preferences.onJobFailure", "notificationPreferences.preferences.onJobScheduleChange", "notificationPreferences.preferences.onJobStart", "notificationPreferences.preferences.onJobSuccess", "notificationPreferences.preferences.onResourceNonCompliance", "notificationPreferences.preferences.onRunbookNewerVersion", "notificationPreferences.preferences.onTaskFailure", "notificationPreferences.preferences.onTaskPause", "notificationPreferences.preferences.onTaskSuccess", "notificationPreferences.preferences.onTopologyModification", "notificationPreferences.preferences.upcomingSchedule.notifyBefore", "notificationPreferences.preferences.upcomingSchedule.onUpcomingSchedule", "notificationPreferences.topicId", "products", "resourceSelection.resourceSelectionType", "resourceSelection.ruleSelectionCriteria.matchCondition", "resourceSelection.ruleSelectionCriteria.rules.basis", "resourceSelection.ruleSelectionCriteria.rules.compartmentId", "resourceSelection.ruleSelectionCriteria.rules.compartmentIdInSubtree", "resourceSelection.ruleSelectionCriteria.rules.conditions.attrGroup", "resourceSelection.ruleSelectionCriteria.rules.conditions.attrKey", "resourceSelection.ruleSelectionCriteria.rules.conditions.attrValue", "resourceSelection.ruleSelectionCriteria.rules.matchCondition", "resourceSelection.ruleSelectionCriteria.rules.resourceCompartmentId", "resources.compartmentId"},
+			ForceNew:      []string{"compartmentId", "credentials", "credentials.compartmentId", "credentials.displayName", "credentials.entitySpecifics", "credentials.entitySpecifics.credentialLevel", "credentials.entitySpecifics.resourceId", "credentials.entitySpecifics.target", "credentials.entitySpecifics.variables", "credentials.entitySpecifics.variables.name", "credentials.entitySpecifics.variables.value", "credentials.password", "credentials.password.credentialType", "credentials.password.keyId", "credentials.password.keyVersion", "credentials.password.secretId", "credentials.password.secretVersion", "credentials.password.value", "credentials.password.vaultId", "credentials.user", "credentials.user.credentialType", "credentials.user.keyId", "credentials.user.keyVersion", "credentials.user.secretId", "credentials.user.secretVersion", "credentials.user.value", "credentials.user.vaultId", "details", "details.fleetType", "parentFleetId", "properties", "properties.compartmentId", "properties.displayName", "properties.fleetPropertyType", "properties.isRequired", "properties.value", "resources", "resources.fleetResourceType", "resources.resourceId", "resources.tenancyId"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
+func newFleetDefaultRuntimeHooks(sdkClient FleetSDKClients) FleetRuntimeHooks {
 	return FleetRuntimeHooks{
+		Semantics:       newFleetRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*fleetappsmanagementv1beta1.Fleet]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*fleetappsmanagementv1beta1.Fleet]{},
 		StatusHooks:     generatedruntime.StatusHooks[*fleetappsmanagementv1beta1.Fleet]{},
 		ParityHooks:     generatedruntime.ParityHooks[*fleetappsmanagementv1beta1.Fleet]{},
-		Async:           generatedruntime.AsyncHooks[*fleetappsmanagementv1beta1.Fleet]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*fleetappsmanagementv1beta1.Fleet]{},
+		Async: generatedruntime.AsyncHooks[*fleetappsmanagementv1beta1.Fleet]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := fleetappsmanagementsdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.fleetAppsManagementWorkRequestClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*fleetappsmanagementv1beta1.Fleet]{},
 		Create: runtimeOperationHooks[fleetappsmanagementsdk.CreateFleetRequest, fleetappsmanagementsdk.CreateFleetResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateFleetDetails", RequestName: "CreateFleetDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.CreateFleetRequest) (fleetappsmanagementsdk.CreateFleetResponse, error) {
-				return sdkClient.CreateFleet(ctx, request)
+				return sdkClient.fleetAppsManagementClient.CreateFleet(ctx, request)
 			},
 		},
 		Get: runtimeOperationHooks[fleetappsmanagementsdk.GetFleetRequest, fleetappsmanagementsdk.GetFleetResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "FleetId", RequestName: "fleetId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.GetFleetRequest) (fleetappsmanagementsdk.GetFleetResponse, error) {
-				return sdkClient.GetFleet(ctx, request)
+				return sdkClient.fleetAppsManagementClient.GetFleet(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[fleetappsmanagementsdk.ListFleetsRequest, fleetappsmanagementsdk.ListFleetsResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "FleetType", RequestName: "fleetType", Contribution: "query", PreferResourceID: false}, {FieldName: "ApplicationType", RequestName: "applicationType", Contribution: "query", PreferResourceID: false}, {FieldName: "Product", RequestName: "product", Contribution: "query", PreferResourceID: false}, {FieldName: "EnvironmentType", RequestName: "environmentType", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "Id", RequestName: "id", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.ListFleetsRequest) (fleetappsmanagementsdk.ListFleetsResponse, error) {
-				return sdkClient.ListFleets(ctx, request)
+				return sdkClient.fleetAppsManagementClient.ListFleets(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[fleetappsmanagementsdk.UpdateFleetRequest, fleetappsmanagementsdk.UpdateFleetResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "FleetId", RequestName: "fleetId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateFleetDetails", RequestName: "UpdateFleetDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.UpdateFleetRequest) (fleetappsmanagementsdk.UpdateFleetResponse, error) {
-				return sdkClient.UpdateFleet(ctx, request)
+				return sdkClient.fleetAppsManagementClient.UpdateFleet(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[fleetappsmanagementsdk.DeleteFleetRequest, fleetappsmanagementsdk.DeleteFleetResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "FleetId", RequestName: "fleetId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.DeleteFleetRequest) (fleetappsmanagementsdk.DeleteFleetResponse, error) {
-				return sdkClient.DeleteFleet(ctx, request)
+				return sdkClient.fleetAppsManagementClient.DeleteFleet(ctx, request)
 			},
 		},
 		WrapGeneratedClient: []func(FleetServiceClient) FleetServiceClient{},
 	}
 }
 
-func newFleetRuntimeHooks(manager *FleetServiceManager, sdkClient fleetappsmanagementsdk.FleetAppsManagementClient) FleetRuntimeHooks {
+func newFleetRuntimeHooks(manager *FleetServiceManager, sdkClient FleetSDKClients) FleetRuntimeHooks {
 	hooks := newFleetDefaultRuntimeHooks(sdkClient)
 	for _, mutator := range fleetRuntimeHooksMutators {
 		mutator(manager, &hooks)
@@ -106,10 +175,19 @@ func buildFleetGeneratedRuntimeConfig(
 	hooks FleetRuntimeHooks,
 ) generatedruntime.Config[*fleetappsmanagementv1beta1.Fleet] {
 	return generatedruntime.Config[*fleetappsmanagementv1beta1.Fleet]{
-		Kind:            "Fleet",
-		SDKName:         "Fleet",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "Fleet",
+		SDKName:   "Fleet",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

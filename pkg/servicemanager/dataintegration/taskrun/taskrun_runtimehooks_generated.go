@@ -66,7 +66,7 @@ func newTaskRunDefaultRuntimeHooks(sdkClient dataintegrationsdk.DataIntegrationC
 			},
 		},
 		Get: runtimeOperationHooks[dataintegrationsdk.GetTaskRunRequest, dataintegrationsdk.GetTaskRunResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "ApplicationKey", RequestName: "applicationKey", Contribution: "path", PreferResourceID: false}, {FieldName: "TaskRunKey", RequestName: "taskRunKey", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "ApplicationKey", RequestName: "applicationKey", Contribution: "path", PreferResourceID: false}, {FieldName: "TaskRunKey", RequestName: "taskRunKey", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request dataintegrationsdk.GetTaskRunRequest) (dataintegrationsdk.GetTaskRunResponse, error) {
 				return sdkClient.GetTaskRun(ctx, request)
 			},
@@ -78,13 +78,13 @@ func newTaskRunDefaultRuntimeHooks(sdkClient dataintegrationsdk.DataIntegrationC
 			},
 		},
 		Update: runtimeOperationHooks[dataintegrationsdk.UpdateTaskRunRequest, dataintegrationsdk.UpdateTaskRunResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "ApplicationKey", RequestName: "applicationKey", Contribution: "path", PreferResourceID: false}, {FieldName: "TaskRunKey", RequestName: "taskRunKey", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdateTaskRunDetails", RequestName: "UpdateTaskRunDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "ApplicationKey", RequestName: "applicationKey", Contribution: "path", PreferResourceID: false}, {FieldName: "TaskRunKey", RequestName: "taskRunKey", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateTaskRunDetails", RequestName: "UpdateTaskRunDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dataintegrationsdk.UpdateTaskRunRequest) (dataintegrationsdk.UpdateTaskRunResponse, error) {
 				return sdkClient.UpdateTaskRun(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[dataintegrationsdk.DeleteTaskRunRequest, dataintegrationsdk.DeleteTaskRunResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "ApplicationKey", RequestName: "applicationKey", Contribution: "path", PreferResourceID: false}, {FieldName: "TaskRunKey", RequestName: "taskRunKey", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "ApplicationKey", RequestName: "applicationKey", Contribution: "path", PreferResourceID: false}, {FieldName: "TaskRunKey", RequestName: "taskRunKey", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request dataintegrationsdk.DeleteTaskRunRequest) (dataintegrationsdk.DeleteTaskRunResponse, error) {
 				return sdkClient.DeleteTaskRun(ctx, request)
 			},

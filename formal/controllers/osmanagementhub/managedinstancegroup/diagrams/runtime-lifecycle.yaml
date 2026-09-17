@@ -1,0 +1,26 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: osmanagementhub
+slug: managedinstancegroup
+kind: ManagedInstanceGroup
+archetype: generated-service-manager
+states: [provisioning, active, updating, terminating]
+repoAuthored:
+  providerLifecycle:
+    createPending: [CREATING]
+    updatePending: [UPDATING]
+    deletePending: [DELETING]
+  listLookup:
+    filters: [compartmentId, displayName, osFamily, archType, vendorName, location]
+    matchRule: exact immutable identity match; duplicate matches fail
+  mutation:
+    mutable: [displayName, description, notificationTopicId, autonomousSettings.isDataCollectionAuthorized, freeformTags, definedTags, softwareSourceIds, managedInstanceIds]
+    forceNew: [compartmentId, osFamily, archType, vendorName, location]
+  hooks:
+    create: [{helper: tfresource.CreateResource}]
+    update: [{helper: tfresource.UpdateResource}]
+    delete: [{helper: tfresource.DeleteResource}]
+  followUp: {create: read-after-write, update: read-after-write, delete: confirm-delete}
+notes:
+  - ACTIVE is success and DELETED confirms deletion after lifecycle polling.
+  - Software-source and managed-instance membership use explicit attach/detach operations around the primary CRUD lifecycle.

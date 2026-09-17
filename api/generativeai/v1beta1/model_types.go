@@ -110,7 +110,7 @@ type ModelFineTuneDetails struct {
 	// +kubebuilder:validation:Required
 	DedicatedAiClusterId string `json:"dedicatedAiClusterId"`
 	// +kubebuilder:validation:Optional
-	TrainingConfig ModelFineTuneDetailsTrainingConfig `json:"trainingConfig,omitempty"`
+	TrainingConfig ModelFineTuneDetailsTrainingConfig `json:"trainingConfig,omitempty,omitzero"`
 }
 
 // ModelMetrics defines nested fields for Model.ModelMetrics.

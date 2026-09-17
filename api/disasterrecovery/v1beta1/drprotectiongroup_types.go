@@ -25,7 +25,7 @@ type DrProtectionGroupSpec struct {
 	// +kubebuilder:validation:Required
 	LogLocation DrProtectionGroupLogLocation `json:"logLocation"`
 	// +kubebuilder:validation:Optional
-	Association DrProtectionGroupAssociation `json:"association,omitempty"`
+	Association DrProtectionGroupAssociation `json:"association,omitempty,omitzero"`
 	// A list of DR protection group members.
 	// +kubebuilder:validation:Optional
 	Members []DrProtectionGroupMember `json:"members,omitempty"`
@@ -235,9 +235,9 @@ type DrProtectionGroupMemberBlockVolumeOperation struct {
 	// +kubebuilder:validation:Required
 	BlockVolumeId string `json:"blockVolumeId"`
 	// +kubebuilder:validation:Optional
-	AttachmentDetails DrProtectionGroupMemberBlockVolumeOperationAttachmentDetails `json:"attachmentDetails,omitempty"`
+	AttachmentDetails DrProtectionGroupMemberBlockVolumeOperationAttachmentDetails `json:"attachmentDetails,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	MountDetails DrProtectionGroupMemberBlockVolumeOperationMountDetails `json:"mountDetails,omitempty"`
+	MountDetails DrProtectionGroupMemberBlockVolumeOperationMountDetails `json:"mountDetails,omitempty,omitzero"`
 }
 
 // DrProtectionGroupMemberBlockVolumeAttachAndMountOperationsAttachment defines nested fields for DrProtectionGroup.Member.BlockVolumeAttachAndMountOperations.Attachment.
@@ -470,7 +470,7 @@ type DrProtectionGroupMember struct {
 	// +kubebuilder:validation:Optional
 	PasswordVaultSecretId string `json:"passwordVaultSecretId,omitempty"`
 	// +kubebuilder:validation:Optional
-	DestinationEncryptionKey DrProtectionGroupMemberDestinationEncryptionKey `json:"destinationEncryptionKey,omitempty"`
+	DestinationEncryptionKey DrProtectionGroupMemberDestinationEncryptionKey `json:"destinationEncryptionKey,omitempty,omitzero"`
 	// This specifies the mechanism used to create a temporary Autonomous Database instance for DR Drills.
 	// See https://docs.oracle.com/en/cloud/paas/autonomous-database/serverless/adbsb/autonomous-clone-about.html for information about these clone types.
 	// See https://docs.oracle.com/en/cloud/paas/autonomous-database/serverless/adbsb/autonomous-data-guard-snapshot-standby.html for information about snapshot standby.
@@ -496,9 +496,9 @@ type DrProtectionGroupMember struct {
 	// +kubebuilder:validation:Optional
 	IsContinueOnGtidReconciliationTimeout bool `json:"isContinueOnGtidReconciliationTimeout,omitempty"`
 	// +kubebuilder:validation:Optional
-	DbSystemAdminUserDetails DrProtectionGroupMemberDbSystemAdminUserDetails `json:"dbSystemAdminUserDetails,omitempty"`
+	DbSystemAdminUserDetails DrProtectionGroupMemberDbSystemAdminUserDetails `json:"dbSystemAdminUserDetails,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	DbSystemReplicationUserDetails DrProtectionGroupMemberDbSystemReplicationUserDetails `json:"dbSystemReplicationUserDetails,omitempty"`
+	DbSystemReplicationUserDetails DrProtectionGroupMemberDbSystemReplicationUserDetails `json:"dbSystemReplicationUserDetails,omitempty,omitzero"`
 	// The availability domain of the destination mount target.
 	// Example: `BBTh:region-AD`
 	// +kubebuilder:validation:Optional
@@ -561,7 +561,7 @@ type DrProtectionGroupMember struct {
 	// +kubebuilder:validation:Optional
 	BlockVolumeOperations []DrProtectionGroupMemberBlockVolumeOperation `json:"blockVolumeOperations,omitempty"`
 	// +kubebuilder:validation:Optional
-	BlockVolumeAttachAndMountOperations DrProtectionGroupMemberBlockVolumeAttachAndMountOperations `json:"blockVolumeAttachAndMountOperations,omitempty"`
+	BlockVolumeAttachAndMountOperations DrProtectionGroupMemberBlockVolumeAttachAndMountOperations `json:"blockVolumeAttachAndMountOperations,omitempty,omitzero"`
 	// A flag indicating if the compute instance should be moved during DR operations.
 	// Example: `false`
 	// +kubebuilder:validation:Optional
@@ -585,7 +585,7 @@ type DrProtectionGroupMember struct {
 	// +kubebuilder:validation:Optional
 	SourceVolumeToDestinationEncryptionKeyMappings []DrProtectionGroupMemberSourceVolumeToDestinationEncryptionKeyMapping `json:"sourceVolumeToDestinationEncryptionKeyMappings,omitempty"`
 	// +kubebuilder:validation:Optional
-	CommonDestinationKey DrProtectionGroupMemberCommonDestinationKey `json:"commonDestinationKey,omitempty"`
+	CommonDestinationKey DrProtectionGroupMemberCommonDestinationKey `json:"commonDestinationKey,omitempty,omitzero"`
 	// The OCID of the peer OKE cluster.
 	// This property applies to the OKE cluster member in both the primary and standby region.
 	// Example: `ocid1.cluster.oc1..uniqueID`
@@ -597,9 +597,9 @@ type DrProtectionGroupMember struct {
 	// +kubebuilder:validation:Optional
 	JumpHostId string `json:"jumpHostId,omitempty"`
 	// +kubebuilder:validation:Optional
-	BackupLocation DrProtectionGroupMemberBackupLocation `json:"backupLocation,omitempty"`
+	BackupLocation DrProtectionGroupMemberBackupLocation `json:"backupLocation,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	BackupConfig DrProtectionGroupMemberBackupConfig `json:"backupConfig,omitempty"`
+	BackupConfig DrProtectionGroupMemberBackupConfig `json:"backupConfig,omitempty,omitzero"`
 	// The list of source-to-destination load balancer mappings required for DR operations.
 	// This property applies to the OKE cluster member in primary region.
 	// +kubebuilder:validation:Optional

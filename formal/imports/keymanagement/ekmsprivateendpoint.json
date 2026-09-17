@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "keymanagement",
+  "slug": "ekmsprivateendpoint",
+  "kind": "EkmsPrivateEndpoint",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_kms_ekms_private_endpoint",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateEkmsPrivateEndpoint",
+        "requestType": "keymanagement.CreateEkmsPrivateEndpointRequest",
+        "responseType": "keymanagement.CreateEkmsPrivateEndpointResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetEkmsPrivateEndpoint",
+        "requestType": "keymanagement.GetEkmsPrivateEndpointRequest",
+        "responseType": "keymanagement.GetEkmsPrivateEndpointResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListEkmsPrivateEndpoints",
+        "requestType": "keymanagement.ListEkmsPrivateEndpointsRequest",
+        "responseType": "keymanagement.ListEkmsPrivateEndpointsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateEkmsPrivateEndpoint",
+        "requestType": "keymanagement.UpdateEkmsPrivateEndpointRequest",
+        "responseType": "keymanagement.UpdateEkmsPrivateEndpointResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteEkmsPrivateEndpoint",
+        "requestType": "keymanagement.DeleteEkmsPrivateEndpointRequest",
+        "responseType": "keymanagement.DeleteEkmsPrivateEndpointResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "defined_tags",
+      "display_name",
+      "freeform_tags"
+    ],
+    "forceNew": [
+      "ca_bundle",
+      "compartment_id",
+      "external_key_manager_ip",
+      "port",
+      "subnet_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_kms_ekms_private_endpoints",
+    "collectionField": "ekms_private_endpoints",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/keymanagement/ekmsprivateendpoint/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/keymanagement/ekmsprivateendpoint/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts are imported from the pinned terraform-provider-oci revision; repo-authored runtime semantics remain authoritative."
+  ]
+}

@@ -50,15 +50,84 @@ func registerIotDomainRuntimeHooksMutator(mutator IotDomainRuntimeHooksMutator) 
 	}
 	iotdomainRuntimeHooksMutators = append(iotdomainRuntimeHooksMutators, mutator)
 }
+func newIotDomainRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "iot",
+		FormalSlug:    "iotdomain",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{"UPDATING"},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "displayName", "id", "iotDomainGroupId"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"definedTags", "description", "displayName", "freeformTags"},
+			ForceNew:      []string{"compartmentId", "iotDomainGroupId"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "IotDomain", Action: "CreateIotDomain"}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "IotDomain", Action: "UpdateIotDomain"}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "IotDomain", Action: "DeleteIotDomain"}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "IotDomain", Action: "CreateIotDomain"}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "IotDomain", Action: "UpdateIotDomain"}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "IotDomain", Action: "DeleteIotDomain"}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newIotDomainDefaultRuntimeHooks(sdkClient iotsdk.IotClient) IotDomainRuntimeHooks {
 	return IotDomainRuntimeHooks{
+		Semantics:       newIotDomainRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*iotv1beta1.IotDomain]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*iotv1beta1.IotDomain]{},
 		StatusHooks:     generatedruntime.StatusHooks[*iotv1beta1.IotDomain]{},
 		ParityHooks:     generatedruntime.ParityHooks[*iotv1beta1.IotDomain]{},
-		Async:           generatedruntime.AsyncHooks[*iotv1beta1.IotDomain]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*iotv1beta1.IotDomain]{},
+		Async: generatedruntime.AsyncHooks[*iotv1beta1.IotDomain]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := iotsdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*iotv1beta1.IotDomain]{},
 		Create: runtimeOperationHooks[iotsdk.CreateIotDomainRequest, iotsdk.CreateIotDomainResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateIotDomainDetails", RequestName: "CreateIotDomainDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request iotsdk.CreateIotDomainRequest) (iotsdk.CreateIotDomainResponse, error) {
@@ -106,10 +175,19 @@ func buildIotDomainGeneratedRuntimeConfig(
 	hooks IotDomainRuntimeHooks,
 ) generatedruntime.Config[*iotv1beta1.IotDomain] {
 	return generatedruntime.Config[*iotv1beta1.IotDomain]{
-		Kind:            "IotDomain",
-		SDKName:         "IotDomain",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "IotDomain",
+		SDKName:   "IotDomain",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

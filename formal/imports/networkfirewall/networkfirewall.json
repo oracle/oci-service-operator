@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "networkfirewall",
+  "slug": "networkfirewall",
+  "kind": "NetworkFirewall",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_network_firewall_network_firewall",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateNetworkFirewall",
+        "requestType": "networkfirewall.CreateNetworkFirewallRequest",
+        "responseType": "networkfirewall.CreateNetworkFirewallResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetNetworkFirewall",
+        "requestType": "networkfirewall.GetNetworkFirewallRequest",
+        "responseType": "networkfirewall.GetNetworkFirewallResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListNetworkFirewalls",
+        "requestType": "networkfirewall.ListNetworkFirewallsRequest",
+        "responseType": "networkfirewall.ListNetworkFirewallsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeNetworkFirewallCompartment",
+        "requestType": "networkfirewall.ChangeNetworkFirewallCompartmentRequest",
+        "responseType": "networkfirewall.ChangeNetworkFirewallCompartmentResponse"
+      },
+      {
+        "operation": "UpdateNetworkFirewall",
+        "requestType": "networkfirewall.UpdateNetworkFirewallRequest",
+        "responseType": "networkfirewall.UpdateNetworkFirewallResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteNetworkFirewall",
+        "requestType": "networkfirewall.DeleteNetworkFirewallRequest",
+        "responseType": "networkfirewall.DeleteNetworkFirewallResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "NEEDS_ATTENTION"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "display_name",
+      "freeform_tags",
+      "nat_configuration.must_enable_private_nat",
+      "network_firewall_policy_id",
+      "network_security_group_ids",
+      "shape"
+    ],
+    "forceNew": [
+      "availability_domain",
+      "ipv4address",
+      "ipv6address",
+      "subnet_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_network_firewall_network_firewalls",
+    "collectionField": "network_firewall_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "availability_domain",
+      "compartment_id",
+      "display_name",
+      "id",
+      "network_firewall_policy_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/networkfirewall/networkfirewall/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/networkfirewall/networkfirewall/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts are imported from the pinned terraform-provider-oci revision; repo-authored runtime semantics remain authoritative."
+  ]
+}

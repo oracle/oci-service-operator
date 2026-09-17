@@ -1,0 +1,141 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "filestorage",
+  "slug": "filesystemsnapshotpolicy",
+  "kind": "FilesystemSnapshotPolicy",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_file_storage_filesystem_snapshot_policy",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateFilesystemSnapshotPolicy",
+        "requestType": "filestorage.CreateFilesystemSnapshotPolicyRequest",
+        "responseType": "filestorage.CreateFilesystemSnapshotPolicyResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetFilesystemSnapshotPolicy",
+        "requestType": "filestorage.GetFilesystemSnapshotPolicyRequest",
+        "responseType": "filestorage.GetFilesystemSnapshotPolicyResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListFilesystemSnapshotPolicies",
+        "requestType": "filestorage.ListFilesystemSnapshotPoliciesRequest",
+        "responseType": "filestorage.ListFilesystemSnapshotPoliciesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeFilesystemSnapshotPolicyCompartment",
+        "requestType": "filestorage.ChangeFilesystemSnapshotPolicyCompartmentRequest",
+        "responseType": "filestorage.ChangeFilesystemSnapshotPolicyCompartmentResponse"
+      },
+      {
+        "operation": "UpdateFilesystemSnapshotPolicy",
+        "requestType": "filestorage.UpdateFilesystemSnapshotPolicyRequest",
+        "responseType": "filestorage.UpdateFilesystemSnapshotPolicyResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteFilesystemSnapshotPolicy",
+        "requestType": "filestorage.DeleteFilesystemSnapshotPolicyRequest",
+        "responseType": "filestorage.DeleteFilesystemSnapshotPolicyResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "display_name",
+      "freeform_tags",
+      "is_lock_override",
+      "policy_prefix",
+      "schedules.day_of_month",
+      "schedules.day_of_week",
+      "schedules.hour_of_day",
+      "schedules.month",
+      "schedules.period",
+      "schedules.retention_duration_in_seconds",
+      "schedules.schedule_prefix",
+      "schedules.time_schedule_start",
+      "schedules.time_zone",
+      "state"
+    ],
+    "forceNew": [
+      "availability_domain",
+      "locks",
+      "locks.message",
+      "locks.related_resource_id",
+      "locks.time_created",
+      "locks.type"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "update": [
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_file_storage_filesystem_snapshot_policies",
+    "collectionField": "filesystem_snapshot_policies",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "availability_domain",
+      "compartment_id",
+      "display_name",
+      "policy_prefix"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/filestorage/filesystemsnapshotpolicy/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/filestorage/filesystemsnapshotpolicy/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "lifecycle-classification",
+      "list-lookup",
+      "mutation-policy",
+      "status-projection",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Recorded OCI create and update responses are synchronous; the published OSOK runtime confirms convergence through GetFilesystemSnapshotPolicy reads.",
+    "ACTIVE is the published steady state and delete retains the finalizer through DELETING until DELETED or NotFound.",
+    "ChangeFilesystemSnapshotPolicyCompartment and provider-only start or stop controls remain outside the published generic runtime."
+  ]
+}

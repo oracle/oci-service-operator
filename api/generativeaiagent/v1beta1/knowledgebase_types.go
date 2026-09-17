@@ -110,7 +110,7 @@ type KnowledgeBaseIndexConfig struct {
 	// +kubebuilder:validation:Optional
 	ShouldEnableHybridSearch bool `json:"shouldEnableHybridSearch,omitempty"`
 	// +kubebuilder:validation:Optional
-	DatabaseConnection KnowledgeBaseIndexConfigDatabaseConnection `json:"databaseConnection,omitempty"`
+	DatabaseConnection KnowledgeBaseIndexConfigDatabaseConnection `json:"databaseConnection,omitempty,omitzero"`
 	// Array of Database functions to be used.
 	// +kubebuilder:validation:Optional
 	DatabaseFunctions []KnowledgeBaseIndexConfigDatabaseFunction `json:"databaseFunctions,omitempty"`
@@ -118,7 +118,7 @@ type KnowledgeBaseIndexConfig struct {
 	// +kubebuilder:validation:Optional
 	ClusterId string `json:"clusterId,omitempty"`
 	// +kubebuilder:validation:Optional
-	SecretDetail KnowledgeBaseIndexConfigSecretDetail `json:"secretDetail,omitempty"`
+	SecretDetail KnowledgeBaseIndexConfigSecretDetail `json:"secretDetail,omitempty,omitzero"`
 	// Index configuration for open search.
 	// +kubebuilder:validation:Optional
 	Indexes []KnowledgeBaseIndexConfigIndex `json:"indexes,omitempty"`

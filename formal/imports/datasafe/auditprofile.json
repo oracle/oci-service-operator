@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "auditprofile",
+  "kind": "AuditProfile",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_audit_profile",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateAuditProfile",
+        "requestType": "datasafe.CreateAuditProfileRequest",
+        "responseType": "datasafe.CreateAuditProfileResponse"
+      },
+      {
+        "operation": "ListAuditProfiles",
+        "requestType": "datasafe.ListAuditProfilesRequest",
+        "responseType": "datasafe.ListAuditProfilesResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetAuditProfile",
+        "requestType": "datasafe.GetAuditProfileRequest",
+        "responseType": "datasafe.GetAuditProfileResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListAuditProfiles",
+        "requestType": "datasafe.ListAuditProfilesRequest",
+        "responseType": "datasafe.ListAuditProfilesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeAuditProfileCompartment",
+        "requestType": "datasafe.ChangeAuditProfileCompartmentRequest",
+        "responseType": "datasafe.ChangeAuditProfileCompartmentResponse"
+      },
+      {
+        "operation": "UpdateAuditProfile",
+        "requestType": "datasafe.UpdateAuditProfileRequest",
+        "responseType": "datasafe.UpdateAuditProfileResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteAuditProfile",
+        "requestType": "datasafe.DeleteAuditProfileRequest",
+        "responseType": "datasafe.DeleteAuditProfileResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "target": [
+        "ACTIVE",
+        "NEEDS_ATTENTION"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "change_retention_trigger",
+      "compartment_id",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags",
+      "is_override_global_paid_usage",
+      "is_override_global_retention_setting",
+      "is_paid_usage_enabled",
+      "offline_months",
+      "online_months"
+    ],
+    "forceNew": [
+      "target_id",
+      "target_type"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_data_safe_audit_profiles",
+    "collectionField": "audit_profile_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "access_level",
+      "audit_collected_volume_greater_than_or_equal_to",
+      "audit_profile_id",
+      "compartment_id",
+      "compartment_id_in_subtree",
+      "display_name",
+      "is_override_global_retention_setting",
+      "is_paid_usage_enabled",
+      "state",
+      "target_database_group_id",
+      "target_id",
+      "target_type"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/auditprofile/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/auditprofile/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts are imported from the pinned terraform-provider-oci revision; repo-authored runtime semantics remain authoritative."
+  ]
+}

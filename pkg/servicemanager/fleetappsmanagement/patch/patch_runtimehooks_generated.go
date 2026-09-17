@@ -50,50 +50,119 @@ func registerPatchRuntimeHooksMutator(mutator PatchRuntimeHooksMutator) {
 	}
 	patchRuntimeHooksMutators = append(patchRuntimeHooksMutators, mutator)
 }
-func newPatchDefaultRuntimeHooks(sdkClient fleetappsmanagementsdk.FleetAppsManagementOperationsClient) PatchRuntimeHooks {
+func newPatchRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "fleetappsmanagement",
+		FormalSlug:    "patch",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "id", "name", "patchTypeId", "productId", "shouldCompliancePolicyRulesBeApplied", "state", "timeReleasedGreaterThanOrEqualTo", "timeReleasedLessThan", "type", "version"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"artifactDetails.artifact.content.bucket", "artifactDetails.artifact.content.checksum", "artifactDetails.artifact.content.namespace", "artifactDetails.artifact.content.object", "artifactDetails.artifact.content.sourceType", "artifactDetails.artifacts.architecture", "artifactDetails.artifacts.content.bucket", "artifactDetails.artifacts.content.checksum", "artifactDetails.artifacts.content.namespace", "artifactDetails.artifacts.content.object", "artifactDetails.artifacts.content.sourceType", "artifactDetails.artifacts.osType", "artifactDetails.category", "compartmentId", "definedTags", "dependentPatches.id", "description", "freeformTags", "patchType.platformConfigurationId", "product.platformConfigurationId", "product.version", "severity", "timeReleased"},
+			ForceNew:      []string{"name"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
+func newPatchDefaultRuntimeHooks(sdkClient PatchSDKClients) PatchRuntimeHooks {
 	return PatchRuntimeHooks{
+		Semantics:       newPatchRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*fleetappsmanagementv1beta1.Patch]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*fleetappsmanagementv1beta1.Patch]{},
 		StatusHooks:     generatedruntime.StatusHooks[*fleetappsmanagementv1beta1.Patch]{},
 		ParityHooks:     generatedruntime.ParityHooks[*fleetappsmanagementv1beta1.Patch]{},
-		Async:           generatedruntime.AsyncHooks[*fleetappsmanagementv1beta1.Patch]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*fleetappsmanagementv1beta1.Patch]{},
+		Async: generatedruntime.AsyncHooks[*fleetappsmanagementv1beta1.Patch]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := fleetappsmanagementsdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.fleetAppsManagementWorkRequestClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*fleetappsmanagementv1beta1.Patch]{},
 		Create: runtimeOperationHooks[fleetappsmanagementsdk.CreatePatchRequest, fleetappsmanagementsdk.CreatePatchResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreatePatchDetails", RequestName: "CreatePatchDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.CreatePatchRequest) (fleetappsmanagementsdk.CreatePatchResponse, error) {
-				return sdkClient.CreatePatch(ctx, request)
+				return sdkClient.fleetAppsManagementOperationsClient.CreatePatch(ctx, request)
 			},
 		},
 		Get: runtimeOperationHooks[fleetappsmanagementsdk.GetPatchRequest, fleetappsmanagementsdk.GetPatchResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "PatchId", RequestName: "patchId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.GetPatchRequest) (fleetappsmanagementsdk.GetPatchResponse, error) {
-				return sdkClient.GetPatch(ctx, request)
+				return sdkClient.fleetAppsManagementOperationsClient.GetPatch(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[fleetappsmanagementsdk.ListPatchesRequest, fleetappsmanagementsdk.ListPatchesResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "ProductId", RequestName: "productId", Contribution: "query", PreferResourceID: false}, {FieldName: "Version", RequestName: "version", Contribution: "query", PreferResourceID: false}, {FieldName: "Type", RequestName: "type", Contribution: "query", PreferResourceID: false}, {FieldName: "PatchTypeId", RequestName: "patchTypeId", Contribution: "query", PreferResourceID: false}, {FieldName: "Name", RequestName: "name", Contribution: "query", PreferResourceID: false}, {FieldName: "Id", RequestName: "id", Contribution: "query", PreferResourceID: false}, {FieldName: "TimeReleasedGreaterThanOrEqualTo", RequestName: "timeReleasedGreaterThanOrEqualTo", Contribution: "query", PreferResourceID: false}, {FieldName: "TimeReleasedLessThan", RequestName: "timeReleasedLessThan", Contribution: "query", PreferResourceID: false}, {FieldName: "ShouldCompliancePolicyRulesBeApplied", RequestName: "shouldCompliancePolicyRulesBeApplied", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.ListPatchesRequest) (fleetappsmanagementsdk.ListPatchesResponse, error) {
-				return sdkClient.ListPatches(ctx, request)
+				return sdkClient.fleetAppsManagementOperationsClient.ListPatches(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[fleetappsmanagementsdk.UpdatePatchRequest, fleetappsmanagementsdk.UpdatePatchResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "PatchId", RequestName: "patchId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdatePatchDetails", RequestName: "UpdatePatchDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.UpdatePatchRequest) (fleetappsmanagementsdk.UpdatePatchResponse, error) {
-				return sdkClient.UpdatePatch(ctx, request)
+				return sdkClient.fleetAppsManagementOperationsClient.UpdatePatch(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[fleetappsmanagementsdk.DeletePatchRequest, fleetappsmanagementsdk.DeletePatchResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "PatchId", RequestName: "patchId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.DeletePatchRequest) (fleetappsmanagementsdk.DeletePatchResponse, error) {
-				return sdkClient.DeletePatch(ctx, request)
+				return sdkClient.fleetAppsManagementOperationsClient.DeletePatch(ctx, request)
 			},
 		},
 		WrapGeneratedClient: []func(PatchServiceClient) PatchServiceClient{},
 	}
 }
 
-func newPatchRuntimeHooks(manager *PatchServiceManager, sdkClient fleetappsmanagementsdk.FleetAppsManagementOperationsClient) PatchRuntimeHooks {
+func newPatchRuntimeHooks(manager *PatchServiceManager, sdkClient PatchSDKClients) PatchRuntimeHooks {
 	hooks := newPatchDefaultRuntimeHooks(sdkClient)
 	for _, mutator := range patchRuntimeHooksMutators {
 		mutator(manager, &hooks)
@@ -106,10 +175,19 @@ func buildPatchGeneratedRuntimeConfig(
 	hooks PatchRuntimeHooks,
 ) generatedruntime.Config[*fleetappsmanagementv1beta1.Patch] {
 	return generatedruntime.Config[*fleetappsmanagementv1beta1.Patch]{
-		Kind:            "Patch",
-		SDKName:         "Patch",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "Patch",
+		SDKName:   "Patch",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

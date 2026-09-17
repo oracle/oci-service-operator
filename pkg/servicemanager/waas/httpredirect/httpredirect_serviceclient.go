@@ -32,8 +32,28 @@ type defaultHttpRedirectServiceClient struct {
 
 var _ HttpRedirectServiceClient = defaultHttpRedirectServiceClient{}
 
+type HttpRedirectSDKClients struct {
+	redirectClient waassdk.RedirectClient
+	waasClient     waassdk.WaasClient
+}
+
+func newHttpRedirectSDKClients(manager *HttpRedirectServiceManager) (HttpRedirectSDKClients, error) {
+	var clients HttpRedirectSDKClients
+	redirectClientClient, err := waassdk.NewRedirectClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize HttpRedirect OCI client RedirectClient: %w", err)
+	}
+	clients.redirectClient = redirectClientClient
+	waasClientClient, err := waassdk.NewWaasClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize HttpRedirect OCI client WaasClient: %w", err)
+	}
+	clients.waasClient = waasClientClient
+	return clients, nil
+}
+
 var newHttpRedirectServiceClient = func(manager *HttpRedirectServiceManager) HttpRedirectServiceClient {
-	sdkClient, err := waassdk.NewRedirectClientWithConfigurationProvider(manager.Provider)
+	sdkClient, err := newHttpRedirectSDKClients(manager)
 	hooks := newHttpRedirectRuntimeHooks(manager, sdkClient)
 	config := buildHttpRedirectGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {

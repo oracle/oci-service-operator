@@ -7,6 +7,7 @@ package processset
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"reflect"
 	"strings"
@@ -20,6 +21,8 @@ import (
 	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
 	"github.com/oracle/oci-service-operator/pkg/shared"
 	"github.com/oracle/oci-service-operator/pkg/util"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
@@ -56,6 +59,8 @@ type processSetAmbiguousNotFoundError struct {
 type processSetDeletePreflightClient struct {
 	delegate ProcessSetServiceClient
 	get      func(context.Context, stackmonitoringsdk.GetProcessSetRequest) (stackmonitoringsdk.GetProcessSetResponse, error)
+	list     func(context.Context, stackmonitoringsdk.ListProcessSetsRequest) (stackmonitoringsdk.ListProcessSetsResponse, error)
+	log      loggerutil.OSOKLogger
 }
 
 func (e processSetAmbiguousNotFoundError) Error() string {
@@ -67,14 +72,22 @@ func (e processSetAmbiguousNotFoundError) GetOpcRequestID() string {
 }
 
 func init() {
-	registerProcessSetRuntimeHooksMutator(func(_ *ProcessSetServiceManager, hooks *ProcessSetRuntimeHooks) {
-		applyProcessSetRuntimeHooks(hooks)
+	registerProcessSetRuntimeHooksMutator(func(manager *ProcessSetServiceManager, hooks *ProcessSetRuntimeHooks) {
+		if manager == nil {
+			applyProcessSetRuntimeHooks(hooks)
+			return
+		}
+		applyProcessSetRuntimeHooks(hooks, manager.Log)
 	})
 }
 
-func applyProcessSetRuntimeHooks(hooks *ProcessSetRuntimeHooks) {
+func applyProcessSetRuntimeHooks(hooks *ProcessSetRuntimeHooks, logs ...loggerutil.OSOKLogger) {
 	if hooks == nil {
 		return
+	}
+	var log loggerutil.OSOKLogger
+	if len(logs) > 0 {
+		log = logs[0]
 	}
 
 	hooks.Semantics = reviewedProcessSetRuntimeSemantics()
@@ -91,7 +104,7 @@ func applyProcessSetRuntimeHooks(hooks *ProcessSetRuntimeHooks) {
 	}
 	hooks.DeleteHooks.HandleError = handleProcessSetDeleteError
 	hooks.WrapGeneratedClient = append(hooks.WrapGeneratedClient, func(delegate ProcessSetServiceClient) ProcessSetServiceClient {
-		return processSetDeletePreflightClient{delegate: delegate, get: hooks.Get.Call}
+		return processSetDeletePreflightClient{delegate: delegate, get: hooks.Get.Call, list: hooks.List.Call, log: log}
 	})
 }
 
@@ -100,7 +113,7 @@ func newProcessSetServiceClientWithOCIClient(
 	client processSetOCIClient,
 ) ProcessSetServiceClient {
 	hooks := newProcessSetRuntimeHooksWithOCIClient(client)
-	applyProcessSetRuntimeHooks(&hooks)
+	applyProcessSetRuntimeHooks(&hooks, log)
 	manager := &ProcessSetServiceManager{Log: log}
 	delegate := defaultProcessSetServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*stackmonitoringv1beta1.ProcessSet](
@@ -525,32 +538,106 @@ func (c processSetDeletePreflightClient) Delete(ctx context.Context, resource *s
 	if c.delegate == nil {
 		return false, fmt.Errorf("processSet runtime client is not configured")
 	}
-	if err := c.rejectAuthShapedConfirmRead(ctx, resource); err != nil {
+	confirmedDeleted, err := c.confirmAuthShapedDeleteByList(ctx, resource)
+	if err != nil {
 		return false, err
 	}
-	return c.delegate.Delete(ctx, resource)
+	if confirmedDeleted {
+		c.markDeleted(resource, "OCI ProcessSet no longer exists")
+		return true, nil
+	}
+	deleted, err := c.delegate.Delete(ctx, resource)
+	if err == nil {
+		return deleted, nil
+	}
+	var ambiguous processSetAmbiguousNotFoundError
+	if !errors.As(err, &ambiguous) {
+		return false, err
+	}
+	found, listErr := c.existsByScopedList(ctx, resource)
+	if listErr != nil {
+		return false, listErr
+	}
+	if found {
+		return false, err
+	}
+	c.markDeleted(resource, "OCI ProcessSet no longer exists")
+	return true, nil
 }
 
-func (c processSetDeletePreflightClient) rejectAuthShapedConfirmRead(
+func (c processSetDeletePreflightClient) confirmAuthShapedDeleteByList(
 	ctx context.Context,
 	resource *stackmonitoringv1beta1.ProcessSet,
-) error {
+) (bool, error) {
 	if c.get == nil || resource == nil || strings.TrimSpace(string(resource.Status.OsokStatus.Ocid)) == "" {
-		return nil
+		return false, nil
 	}
 
+	currentID := strings.TrimSpace(string(resource.Status.OsokStatus.Ocid))
+	if currentID == "" {
+		currentID = strings.TrimSpace(resource.Status.Id)
+	}
+	if currentID == "" {
+		return false, fmt.Errorf("processSet scoped list confirmation requires a tracked OCI identity")
+	}
 	_, err := c.get(ctx, stackmonitoringsdk.GetProcessSetRequest{
-		ProcessSetId: common.String(strings.TrimSpace(string(resource.Status.OsokStatus.Ocid))),
+		ProcessSetId: common.String(currentID),
 	})
 	if err == nil || errorutil.ClassifyDeleteError(err).IsUnambiguousNotFound() {
-		return nil
+		return errorutil.ClassifyDeleteError(err).IsUnambiguousNotFound(), nil
 	}
 	if !errorutil.ClassifyDeleteError(err).IsAuthShapedNotFound() {
-		return err
+		return false, err
 	}
-	ambiguous := processSetAmbiguousNotFound("delete confirmation read", err)
-	servicemanager.SetOpcRequestID(&resource.Status.OsokStatus, ambiguous.GetOpcRequestID())
-	return ambiguous
+	servicemanager.SetOpcRequestID(&resource.Status.OsokStatus, errorutil.OpcRequestID(err))
+	if c.list == nil {
+		return false, processSetAmbiguousNotFound("delete confirmation read", err)
+	}
+	found, listErr := c.existsByScopedList(ctx, resource)
+	if listErr != nil {
+		return false, listErr
+	}
+	if found {
+		return false, processSetAmbiguousNotFound("delete confirmation read", err)
+	}
+	return true, nil
+}
+
+func (c processSetDeletePreflightClient) existsByScopedList(
+	ctx context.Context,
+	resource *stackmonitoringv1beta1.ProcessSet,
+) (bool, error) {
+	if c.list == nil || resource == nil {
+		return false, fmt.Errorf("processSet scoped list confirmation is not configured")
+	}
+	currentID := strings.TrimSpace(string(resource.Status.OsokStatus.Ocid))
+	response, err := c.list(ctx, stackmonitoringsdk.ListProcessSetsRequest{
+		CompartmentId: common.String(strings.TrimSpace(resource.Spec.CompartmentId)),
+		DisplayName:   common.String(strings.TrimSpace(resource.Spec.DisplayName)),
+	})
+	if err != nil {
+		return false, fmt.Errorf("confirm processSet deletion by scoped list: %w", err)
+	}
+	for _, candidate := range response.Items {
+		if candidate.Id != nil && strings.TrimSpace(*candidate.Id) == currentID {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
+func (c processSetDeletePreflightClient) markDeleted(resource *stackmonitoringv1beta1.ProcessSet, message string) {
+	if resource == nil {
+		return
+	}
+	status := &resource.Status.OsokStatus
+	now := metav1.Now()
+	status.DeletedAt = &now
+	status.UpdatedAt = &now
+	status.Message = message
+	status.Reason = string(shared.Terminating)
+	servicemanager.ClearAsyncOperation(status)
+	*status = util.UpdateOSOKStatusCondition(*status, shared.Terminating, corev1.ConditionTrue, "", message, c.log)
 }
 
 func processSetAmbiguousNotFound(operation string, err error) processSetAmbiguousNotFoundError {

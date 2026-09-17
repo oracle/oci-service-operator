@@ -1,0 +1,123 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Activity - cloudguard/DataSource
+skinparam activity {
+  backgroundColor #f8fafc
+  borderColor #0f172a
+  fontColor #0f172a
+  diamondBackgroundColor #e2e8f0
+  diamondBorderColor #1d4ed8
+  diamondFontColor #0f172a
+  startColor #1d4ed8
+  endColor #0f172a
+  barColor #1d4ed8
+}
+start
+partition "Observe and Bind" {
+:Start from shared flow\nshared/diagrams/shared-reconcile-activity.svg;
+:Read desired DataSource spec, tracked status,\nand delete intent;
+if ("Tracked or explicit OCI identity present?") then (yes)
+:Get the current OCI resource via GetDataSource;
+else (no)
+:Resolve an existing OCI resource through\nListDataSources using filters compartmentId,\ndisplayName, dataSourceFeedProvider;
+:Create the OCI resource via CreateDataSource\nwhen no reusable match is found;
+:Persist the resolved or created OCI identity\ninto status;
+endif
+}
+if ("Delete requested?") then (yes)
+partition "Delete" {
+:Delete path uses DeleteDataSource with\nrequired via GetDataSource or ListDataSources\nto DELETED confirmation;
+:Confirm deletion via GetDataSource or\nListDataSources until OCI reaches DELETED;
+if ("Delete cleanup and finalizer release succeed?") then (yes)
+:Remove the finalizer after delete completion;
+else (no)
+:Stay blocked until cleanup or finalizer\nrelease succeeds;
+endif
+}
+stop
+else (no)
+partition "Lifecycle Classification" {
+if ("OCI state in retryable set?") then (yes)
+:Request requeue while OCI remains in CREATING,\nUPDATING, DELETING;
+stop
+endif
+if ("OCI state is outside success targets?") then (yes)
+:Return an unsuccessful reconcile result until\nOCI reaches ACTIVE, INACTIVE;
+stop
+endif
+}
+partition "Ready and Drift Handling" {
+:Compare live OCI state against the\nrepo-authored mutation surface;
+if ("Force-new or conflicting drift detected?") then (yes)
+:Reject drift before OCI mutation for force-new\nfields compartmentId, dataSourceFeedProvider;
+stop
+endif
+if ("Supported mutable drift detected?") then (yes)
+:Apply UpdateDataSource only for mutable fields\ndataSourceDetails, definedTags, displayName,\nfreeformTags (+1 more);
+else (no)
+:Skip the no-op mutation path;
+endif
+:Run provider helper hooks\ncreate=generatedruntime.Create\nentity=DataSource action=CREATE;\nupdate=generatedruntime.Update\nentity=DataSource action=UPDATE;\ndelete=generatedruntime.Delete\nentity=DataSource action=DELETE when the\nmatching field-driven path executes;
+:Apply explicit follow-up semantics\ncreate=GetWorkRequest -> read-after-write;\nupdate=GetWorkRequest -> read-after-write;\ndelete=confirm-delete;
+:Return success for the ACTIVE, INACTIVE\nsuccess state;
+:Project required status and finalizer policy\nretain-until-confirmed-delete;
+:Requeue on provisioning, updating, terminating;
+}
+endif
+stop
+note right
+shared diagram:
+shared/diagrams/shared-reconcile-activity.svg
+Start from the shared reconcile activity and
+specialize provider-backed CRUD, wait, and
+status-projection details here.
+Controller-local activity diagrams add
+list-lookup hints, secret policies, delete
+handling, and open formal gaps.
+archetype batch: Generated service-manager
+controllers specialize the shared reconcile path
+with formal runtime ownership.
+service: cloudguard
+slug: datasource
+kind: DataSource
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: provisioning, updating, terminating
+provider states: create CREATING; update
+UPDATING; delete DELETING
+follow-up: create=GetWorkRequest ->
+read-after-write; update=GetWorkRequest ->
+read-after-write; delete=confirm-delete
+supported drift: dataSourceDetails, definedTags,
+displayName, freeformTags (+1 more)
+reject before mutate: force-new fields
+compartmentId, dataSourceFeedProvider
+create-only fields: none
+list lookup: unavailable filters compartmentId,
+displayName, dataSourceFeedProvider; exact
+compartmentId, displayName,
+dataSourceFeedProvider match within the resource
+scope; duplicate matches fail
+conflicts: none
+open gaps: none
+The production runtime uses the declared
+work-request phases and service-local async
+adapter.
+Lifecycle success and pending states mirror the
+production service-manager semantics.
+Status projection is required, Secret side
+effects are none, and the finalizer policy is
+retain-until-confirmed-delete.
+Delete ownership is retained until a terminal
+lifecycle state or confirmed absence.
+end note
+@enduml

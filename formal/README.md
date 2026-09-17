@@ -16,11 +16,10 @@ This tree is the repo-local source of truth for formal runtime inputs.
 - `controller_manifest.tsv` binds one controller row to exactly one import, spec, logic-gap file, and diagrams directory. That manifest is authoritative for generator-owned formal catalog artifacts; orphan controller directories or import JSON files are drift and fail `make formal-verify`.
 
 The checked-in `template` row remains scaffold-only as a schema example. The
-current seeded default-active corpus lives in `core/Drg`, `mysql/DbSystem`,
-`nosql/Table`, `psql/DbSystem`, and `streaming/Stream`.
-`database/AutonomousDatabase` remains the default-active promotable reference
-row, and `identity/User` remains a preserved explicit-backlog promotable
-reference row.
+authoritative corpus is the complete set of rows in
+`controller_manifest.tsv`; its `stage` column distinguishes `seeded`,
+`promotable`, and `scaffold` entries. Use that manifest rather than a
+hand-maintained resource list or count when inspecting current coverage.
 
 Use `make formal-scaffold` to refresh the tracked scaffold rows and any
 explicit `formalSpec` rows from the published default-active API surface in
@@ -117,6 +116,21 @@ generator specializes those controller-local diagrams from the shared
 `controller_diagrams/*.yaml` strategy, the controller manifest row, controller
 `spec.cfg`, repo-authored runtime metadata, and imported provider facts derived
 from the public `terraform-provider-oci` behavior.
+
+When the provider exposes create, update, or delete operations that are not
+delegated to the generated runtime core, `runtime-lifecycle.yaml` may declare
+the matching `repoAuthored.operations.create`, `update`, or `delete` effective
+operation subset. This includes unused provider operations and operations that
+a package-local wrapper handles separately. Every entry must name an imported
+provider operation for that phase. Omitting a phase subset preserves all
+imported operations. An explicit subset must retain the generator's primary
+operation when that primary is present in the provider import; an explicit
+empty subset may exclude a provider-only phase whose primary runtime operation
+comes from the vendored SDK instead. Package-local handled operations belong in
+`repoAuthored.hooks`, notes, and package tests rather than the generated
+runtime's unsupported auxiliary-operation list. The validated subsets drive
+generated runtime semantics, and the update subset also drives formal mutation
+diagrams.
 
 `formal/` is controller-scoped, not service-scoped. The steady-state target is
 one manifest row plus sibling `controllers/<service>/<slug>/...` and

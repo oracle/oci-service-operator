@@ -1,0 +1,54 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: autoscaling
+slug: autoscalingconfiguration
+kind: AutoScalingConfiguration
+archetype: generated-service-manager
+states:
+  - active
+  - terminating
+repoAuthored:
+  listLookup:
+    filters:
+      - compartmentId
+      - displayName
+    matchRule: exact unique compartmentId plus displayName match
+  mutation:
+    mutable:
+      - coolDownInSeconds
+      - definedTags
+      - displayName
+      - freeformTags
+      - isEnabled
+    forceNew:
+      - compartmentId
+      - policies
+      - resource
+  operations:
+    update:
+      - UpdateAutoScalingConfiguration
+  hooks:
+    create:
+      - helper: tfresource.CreateResource
+    update:
+      - helper: tfresource.UpdateResource
+    delete:
+      - helper: tfresource.DeleteResource
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - The OCI SDK response has no lifecycle-state field or work-request handle,
+    so create and update are synchronous and settle through read-after-write.
+  - Pre-create reuse is limited to an exact unique compartmentId plus
+    displayName match.
+  - Cooldown, display name, enabled state, and tag maps reconcile in place.
+    Every non-noop update also carries the desired isEnabled value because the
+    live Autoscaling API rejects an otherwise valid partial update when that
+    field is omitted.
+    Compartment movement uses a separate provider action that the published
+    OSOK runtime does not invoke, and resource/policy definitions remain
+    replacement-only.
+  - Delete keeps the finalizer until GetAutoScalingConfiguration returns
+    NotFound. The runtime has no Secret side effects.

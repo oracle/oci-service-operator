@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "demandsignal",
+  "slug": "occdemandsignal",
+  "kind": "OccDemandSignal",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_demand_signal_occ_demand_signal",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOccDemandSignal",
+        "requestType": "demandsignal.CreateOccDemandSignalRequest",
+        "responseType": "demandsignal.CreateOccDemandSignalResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOccDemandSignal",
+        "requestType": "demandsignal.GetOccDemandSignalRequest",
+        "responseType": "demandsignal.GetOccDemandSignalResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOccDemandSignals",
+        "requestType": "demandsignal.ListOccDemandSignalsRequest",
+        "responseType": "demandsignal.ListOccDemandSignalsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOccDemandSignal",
+        "requestType": "demandsignal.UpdateOccDemandSignalRequest",
+        "responseType": "demandsignal.UpdateOccDemandSignalResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOccDemandSignal",
+        "requestType": "demandsignal.DeleteOccDemandSignalRequest",
+        "responseType": "demandsignal.DeleteOccDemandSignalResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "display_name",
+      "freeform_tags",
+      "is_active",
+      "patch_operations.from",
+      "patch_operations.operation",
+      "patch_operations.position",
+      "patch_operations.selected_item",
+      "patch_operations.selection",
+      "patch_operations.value"
+    ],
+    "forceNew": [
+      "occ_demand_signal_id",
+      "occ_demand_signals",
+      "occ_demand_signals.resource_type",
+      "occ_demand_signals.units",
+      "occ_demand_signals.values",
+      "occ_demand_signals.values.comments",
+      "occ_demand_signals.values.time_expected",
+      "occ_demand_signals.values.value"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_demand_signal_occ_demand_signals",
+    "collectionField": "occ_demand_signal_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/demandsignal/occdemandsignal/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/demandsignal/occdemandsignal/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from the pinned terraform-provider-oci source revision."
+  ]
+}

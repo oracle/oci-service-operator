@@ -1,0 +1,29 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: optimizer
+slug: profile
+kind: Profile
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending: ["CREATING"]
+    updatePending: ["ATTACHING","DETACHING","UPDATING"]
+    deletePending: ["ATTACHING","CREATING","DELETING","DETACHING","UPDATING"]
+  listLookup:
+    filters: ["compartmentId","id","name"]
+    matchRule: exact resource identity match; duplicate matches fail
+  mutation:
+    mutable: ["aggregationIntervalInDays","definedTags","description","freeformTags","levelsConfiguration","name","systemTags","targetCompartments","targetTags"]
+    forceNew: ["compartmentId"]
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - "The runtime uses its declared lifecycle-state contract for Profile reconciliation."
+  - "The credential-free mock exercises SDK request serialization, response projection, mutation when supported, and confirmed deletion."

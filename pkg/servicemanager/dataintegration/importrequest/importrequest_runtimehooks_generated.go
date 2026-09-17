@@ -66,25 +66,25 @@ func newImportRequestDefaultRuntimeHooks(sdkClient dataintegrationsdk.DataIntegr
 			},
 		},
 		Get: runtimeOperationHooks[dataintegrationsdk.GetImportRequestRequest, dataintegrationsdk.GetImportRequestResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "ImportRequestKey", RequestName: "importRequestKey", Contribution: "path", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "ImportRequestKey", RequestName: "importRequestKey", Contribution: "path", PreferResourceID: true}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dataintegrationsdk.GetImportRequestRequest) (dataintegrationsdk.GetImportRequestResponse, error) {
 				return sdkClient.GetImportRequest(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[dataintegrationsdk.ListImportRequestsRequest, dataintegrationsdk.ListImportRequestsResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: true}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Name", RequestName: "name", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "ImportStatus", RequestName: "importStatus", Contribution: "query", PreferResourceID: false}, {FieldName: "Projection", RequestName: "projection", Contribution: "query", PreferResourceID: false}, {FieldName: "TimeStartedInMillis", RequestName: "timeStartedInMillis", Contribution: "query", PreferResourceID: false}, {FieldName: "TimeEndedInMillis", RequestName: "timeEndedInMillis", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Name", RequestName: "name", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "ImportStatus", RequestName: "importStatus", Contribution: "query", PreferResourceID: false}, {FieldName: "Projection", RequestName: "projection", Contribution: "query", PreferResourceID: false}, {FieldName: "TimeStartedInMillis", RequestName: "timeStartedInMillis", Contribution: "query", PreferResourceID: false}, {FieldName: "TimeEndedInMillis", RequestName: "timeEndedInMillis", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dataintegrationsdk.ListImportRequestsRequest) (dataintegrationsdk.ListImportRequestsResponse, error) {
 				return sdkClient.ListImportRequests(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[dataintegrationsdk.UpdateImportRequestRequest, dataintegrationsdk.UpdateImportRequestResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "ImportRequestKey", RequestName: "importRequestKey", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdateImportRequestDetails", RequestName: "UpdateImportRequestDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}, {FieldName: "ImportRequestKey", RequestName: "importRequestKey", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateImportRequestDetails", RequestName: "UpdateImportRequestDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dataintegrationsdk.UpdateImportRequestRequest) (dataintegrationsdk.UpdateImportRequestResponse, error) {
 				return sdkClient.UpdateImportRequest(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[dataintegrationsdk.DeleteImportRequestRequest, dataintegrationsdk.DeleteImportRequestResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "ImportRequestKey", RequestName: "importRequestKey", Contribution: "path", PreferResourceID: false}, {FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "ImportRequestKey", RequestName: "importRequestKey", Contribution: "path", PreferResourceID: true}, {FieldName: "WorkspaceId", RequestName: "workspaceId", Contribution: "path", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dataintegrationsdk.DeleteImportRequestRequest) (dataintegrationsdk.DeleteImportRequestResponse, error) {
 				return sdkClient.DeleteImportRequest(ctx, request)
 			},

@@ -50,50 +50,119 @@ func registerAgentDependencyRuntimeHooksMutator(mutator AgentDependencyRuntimeHo
 	}
 	agentdependencyRuntimeHooksMutators = append(agentdependencyRuntimeHooksMutators, mutator)
 }
-func newAgentDependencyDefaultRuntimeHooks(sdkClient cloudbridgesdk.OcbAgentSvcClient) AgentDependencyRuntimeHooks {
+func newAgentDependencyRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "cloudbridge",
+		FormalSlug:    "agentdependency",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"agentId", "compartmentId", "displayName", "environmentId", "state"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"bucket", "compartmentId", "definedTags", "dependencyName", "dependencyVersion", "description", "displayName", "freeformTags", "namespace", "object", "systemTags"},
+			ForceNew:      []string{},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForUpdatedState", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForUpdatedState", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
+func newAgentDependencyDefaultRuntimeHooks(sdkClient AgentDependencySDKClients) AgentDependencyRuntimeHooks {
 	return AgentDependencyRuntimeHooks{
+		Semantics:       newAgentDependencyRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*cloudbridgev1beta1.AgentDependency]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*cloudbridgev1beta1.AgentDependency]{},
 		StatusHooks:     generatedruntime.StatusHooks[*cloudbridgev1beta1.AgentDependency]{},
 		ParityHooks:     generatedruntime.ParityHooks[*cloudbridgev1beta1.AgentDependency]{},
-		Async:           generatedruntime.AsyncHooks[*cloudbridgev1beta1.AgentDependency]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*cloudbridgev1beta1.AgentDependency]{},
+		Async: generatedruntime.AsyncHooks[*cloudbridgev1beta1.AgentDependency]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := cloudbridgesdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.commonClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*cloudbridgev1beta1.AgentDependency]{},
 		Create: runtimeOperationHooks[cloudbridgesdk.CreateAgentDependencyRequest, cloudbridgesdk.CreateAgentDependencyResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateAgentDependencyDetails", RequestName: "CreateAgentDependencyDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request cloudbridgesdk.CreateAgentDependencyRequest) (cloudbridgesdk.CreateAgentDependencyResponse, error) {
-				return sdkClient.CreateAgentDependency(ctx, request)
+				return sdkClient.ocbAgentSvcClient.CreateAgentDependency(ctx, request)
 			},
 		},
 		Get: runtimeOperationHooks[cloudbridgesdk.GetAgentDependencyRequest, cloudbridgesdk.GetAgentDependencyResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "AgentDependencyId", RequestName: "agentDependencyId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request cloudbridgesdk.GetAgentDependencyRequest) (cloudbridgesdk.GetAgentDependencyResponse, error) {
-				return sdkClient.GetAgentDependency(ctx, request)
+				return sdkClient.ocbAgentSvcClient.GetAgentDependency(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[cloudbridgesdk.ListAgentDependenciesRequest, cloudbridgesdk.ListAgentDependenciesResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "AgentId", RequestName: "agentId", Contribution: "query", PreferResourceID: false}, {FieldName: "EnvironmentId", RequestName: "environmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request cloudbridgesdk.ListAgentDependenciesRequest) (cloudbridgesdk.ListAgentDependenciesResponse, error) {
-				return sdkClient.ListAgentDependencies(ctx, request)
+				return sdkClient.ocbAgentSvcClient.ListAgentDependencies(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[cloudbridgesdk.UpdateAgentDependencyRequest, cloudbridgesdk.UpdateAgentDependencyResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "AgentDependencyId", RequestName: "agentDependencyId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateAgentDependencyDetails", RequestName: "UpdateAgentDependencyDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request cloudbridgesdk.UpdateAgentDependencyRequest) (cloudbridgesdk.UpdateAgentDependencyResponse, error) {
-				return sdkClient.UpdateAgentDependency(ctx, request)
+				return sdkClient.ocbAgentSvcClient.UpdateAgentDependency(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[cloudbridgesdk.DeleteAgentDependencyRequest, cloudbridgesdk.DeleteAgentDependencyResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "AgentDependencyId", RequestName: "agentDependencyId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request cloudbridgesdk.DeleteAgentDependencyRequest) (cloudbridgesdk.DeleteAgentDependencyResponse, error) {
-				return sdkClient.DeleteAgentDependency(ctx, request)
+				return sdkClient.ocbAgentSvcClient.DeleteAgentDependency(ctx, request)
 			},
 		},
 		WrapGeneratedClient: []func(AgentDependencyServiceClient) AgentDependencyServiceClient{},
 	}
 }
 
-func newAgentDependencyRuntimeHooks(manager *AgentDependencyServiceManager, sdkClient cloudbridgesdk.OcbAgentSvcClient) AgentDependencyRuntimeHooks {
+func newAgentDependencyRuntimeHooks(manager *AgentDependencyServiceManager, sdkClient AgentDependencySDKClients) AgentDependencyRuntimeHooks {
 	hooks := newAgentDependencyDefaultRuntimeHooks(sdkClient)
 	for _, mutator := range agentdependencyRuntimeHooksMutators {
 		mutator(manager, &hooks)
@@ -106,10 +175,19 @@ func buildAgentDependencyGeneratedRuntimeConfig(
 	hooks AgentDependencyRuntimeHooks,
 ) generatedruntime.Config[*cloudbridgev1beta1.AgentDependency] {
 	return generatedruntime.Config[*cloudbridgev1beta1.AgentDependency]{
-		Kind:            "AgentDependency",
-		SDKName:         "AgentDependency",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "AgentDependency",
+		SDKName:   "AgentDependency",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

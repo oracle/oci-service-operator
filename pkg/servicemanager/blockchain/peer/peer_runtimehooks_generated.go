@@ -57,8 +57,20 @@ func newPeerDefaultRuntimeHooks(sdkClient blockchainsdk.BlockchainPlatformClient
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*blockchainv1beta1.Peer]{},
 		StatusHooks:     generatedruntime.StatusHooks[*blockchainv1beta1.Peer]{},
 		ParityHooks:     generatedruntime.ParityHooks[*blockchainv1beta1.Peer]{},
-		Async:           generatedruntime.AsyncHooks[*blockchainv1beta1.Peer]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*blockchainv1beta1.Peer]{},
+		Async: generatedruntime.AsyncHooks[*blockchainv1beta1.Peer]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := blockchainsdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*blockchainv1beta1.Peer]{},
 		Create: runtimeOperationHooks[blockchainsdk.CreatePeerRequest, blockchainsdk.CreatePeerResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "BlockchainPlatformId", RequestName: "blockchainPlatformId", Contribution: "path", PreferResourceID: false}, {FieldName: "CreatePeerDetails", RequestName: "CreatePeerDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request blockchainsdk.CreatePeerRequest) (blockchainsdk.CreatePeerResponse, error) {
@@ -72,7 +84,7 @@ func newPeerDefaultRuntimeHooks(sdkClient blockchainsdk.BlockchainPlatformClient
 			},
 		},
 		List: runtimeOperationHooks[blockchainsdk.ListPeersRequest, blockchainsdk.ListPeersResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "BlockchainPlatformId", RequestName: "blockchainPlatformId", Contribution: "path", PreferResourceID: true}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "BlockchainPlatformId", RequestName: "blockchainPlatformId", Contribution: "path", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request blockchainsdk.ListPeersRequest) (blockchainsdk.ListPeersResponse, error) {
 				return sdkClient.ListPeers(ctx, request)
 			},
@@ -106,10 +118,19 @@ func buildPeerGeneratedRuntimeConfig(
 	hooks PeerRuntimeHooks,
 ) generatedruntime.Config[*blockchainv1beta1.Peer] {
 	return generatedruntime.Config[*blockchainv1beta1.Peer]{
-		Kind:            "Peer",
-		SDKName:         "Peer",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "Peer",
+		SDKName:   "Peer",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

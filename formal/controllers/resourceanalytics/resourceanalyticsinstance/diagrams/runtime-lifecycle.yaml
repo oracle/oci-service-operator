@@ -1,0 +1,65 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: resourceanalytics
+slug: resourceanalyticsinstance
+kind: ResourceAnalyticsInstance
+archetype: generated-service-manager
+states:
+- provisioning
+- active
+- updating
+- terminating
+repoAuthored:
+  operations:
+    update:
+    - UpdateResourceAnalyticsInstance
+  providerLifecycle:
+    createPending:
+    - CREATING
+    updatePending:
+    - UPDATING
+    deletePending:
+    - DELETING
+  listLookup:
+    filters:
+    - compartmentId
+    - displayName
+    matchRule: exact compartmentId, displayName match within the resource scope; duplicate
+      matches fail
+  mutation:
+    mutable:
+    - displayName
+    - description
+    - freeformTags
+    - definedTags
+    forceNew:
+    - compartmentId
+    - adwAdminPassword
+    - subnetId
+    - isMutualTlsRequired
+    - nsgIds
+    - licenseModel
+  hooks:
+    create:
+    - helper: tfresource.CreateResource
+      entityType: ResourceAnalyticsInstance
+      action: CreateResourceAnalyticsInstance
+    update:
+    - helper: tfresource.UpdateResource
+      entityType: ResourceAnalyticsInstance
+      action: UpdateResourceAnalyticsInstance
+    delete:
+    - helper: tfresource.DeleteResource
+      entityType: ResourceAnalyticsInstance
+      action: DeleteResourceAnalyticsInstance
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+- The production runtime uses the declared work-request phases and service-local async
+  adapter.
+- Lifecycle success and pending states mirror the production service-manager semantics.
+- Status projection is required, Secret side effects are none, and the finalizer policy
+  is retain-until-confirmed-delete.
+- Delete ownership is retained until a terminal lifecycle state or confirmed absence.

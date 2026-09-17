@@ -1,0 +1,70 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: opsi
+slug: newsreport
+kind: NewsReport
+archetype: generated-service-manager
+states:
+- provisioning
+- active
+- updating
+- terminating
+repoAuthored:
+  operations:
+    update:
+    - UpdateNewsReport
+  providerLifecycle:
+    createPending:
+    - CREATING
+    updatePending:
+    - UPDATING
+    deletePending:
+    - DELETING
+  listLookup:
+    filters:
+    - compartmentId
+    - name
+    - onsTopicId
+    matchRule: exact compartmentId, name, onsTopicId match within the resource scope;
+      duplicate matches fail
+  mutation:
+    mutable:
+    - status
+    - newsFrequency
+    - locale
+    - contentTypes
+    - onsTopicId
+    - freeformTags
+    - definedTags
+    - name
+    - description
+    - dayOfWeek
+    - areChildCompartmentsIncluded
+    - tagFilters
+    - matchRule
+    forceNew:
+    - compartmentId
+  hooks:
+    create:
+    - helper: generatedruntime.Create
+      entityType: NewsReport
+      action: CREATE_NEWS_REPORT
+    update:
+    - helper: generatedruntime.Update
+      entityType: NewsReport
+      action: UPDATE_NEWS_REPORT
+    delete:
+    - helper: generatedruntime.Delete
+      entityType: NewsReport
+      action: DELETE_NEWS_REPORT
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+- The production runtime uses the declared work-request phases and service-local async
+  adapter.
+- Lifecycle success and pending states mirror the production service-manager semantics.
+- Status projection is required, Secret side effects are none, and the finalizer policy
+  is retain-until-confirmed-delete.
+- Delete ownership is retained until a terminal lifecycle state or confirmed absence.

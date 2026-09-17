@@ -37,7 +37,7 @@ type MonitoredResourceTypeSpec struct {
 	// +kubebuilder:validation:Optional
 	ResourceCategory string `json:"resourceCategory,omitempty"`
 	// +kubebuilder:validation:Optional
-	Metadata MonitoredResourceTypeMetadata `json:"metadata,omitempty"`
+	Metadata MonitoredResourceTypeMetadata `json:"metadata,omitempty,omitzero"`
 	// Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
 	// Example: `{"bar-key": "value"}`
 	// +kubebuilder:validation:Optional

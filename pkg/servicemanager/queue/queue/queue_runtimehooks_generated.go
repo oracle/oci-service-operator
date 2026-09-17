@@ -119,8 +119,20 @@ func newQueueDefaultRuntimeHooks(sdkClient queuesdk.QueueAdminClient) QueueRunti
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*queuev1beta1.Queue]{},
 		StatusHooks:     generatedruntime.StatusHooks[*queuev1beta1.Queue]{},
 		ParityHooks:     generatedruntime.ParityHooks[*queuev1beta1.Queue]{},
-		Async:           generatedruntime.AsyncHooks[*queuev1beta1.Queue]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*queuev1beta1.Queue]{},
+		Async: generatedruntime.AsyncHooks[*queuev1beta1.Queue]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := queuesdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*queuev1beta1.Queue]{},
 		Create: runtimeOperationHooks[queuesdk.CreateQueueRequest, queuesdk.CreateQueueResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateQueueDetails", RequestName: "CreateQueueDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request queuesdk.CreateQueueRequest) (queuesdk.CreateQueueResponse, error) {
@@ -168,10 +180,24 @@ func buildQueueGeneratedRuntimeConfig(
 	hooks QueueRuntimeHooks,
 ) generatedruntime.Config[*queuev1beta1.Queue] {
 	return generatedruntime.Config[*queuev1beta1.Queue]{
-		Kind:            "Queue",
-		SDKName:         "Queue",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "Queue",
+		SDKName:   "Queue",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+				LegacyFieldBridge: &generatedruntime.WorkRequestLegacyFieldBridge{
+					Create: "CreateWorkRequestId",
+					Update: "UpdateWorkRequestId",
+					Delete: "DeleteWorkRequestId",
+				},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

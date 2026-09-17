@@ -114,8 +114,20 @@ func newRedisClusterDefaultRuntimeHooks(sdkClient redissdk.RedisClusterClient) R
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*redisv1beta1.RedisCluster]{},
 		StatusHooks:     generatedruntime.StatusHooks[*redisv1beta1.RedisCluster]{},
 		ParityHooks:     generatedruntime.ParityHooks[*redisv1beta1.RedisCluster]{},
-		Async:           generatedruntime.AsyncHooks[*redisv1beta1.RedisCluster]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*redisv1beta1.RedisCluster]{},
+		Async: generatedruntime.AsyncHooks[*redisv1beta1.RedisCluster]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := redissdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*redisv1beta1.RedisCluster]{},
 		Create: runtimeOperationHooks[redissdk.CreateRedisClusterRequest, redissdk.CreateRedisClusterResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateRedisClusterDetails", RequestName: "CreateRedisClusterDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request redissdk.CreateRedisClusterRequest) (redissdk.CreateRedisClusterResponse, error) {
@@ -163,10 +175,19 @@ func buildRedisClusterGeneratedRuntimeConfig(
 	hooks RedisClusterRuntimeHooks,
 ) generatedruntime.Config[*redisv1beta1.RedisCluster] {
 	return generatedruntime.Config[*redisv1beta1.RedisCluster]{
-		Kind:            "RedisCluster",
-		SDKName:         "RedisCluster",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "RedisCluster",
+		SDKName:   "RedisCluster",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

@@ -19,7 +19,6 @@
   "update": {
     "allowInPlacePaths": [
       "addOnFeatures",
-      "compartmentId",
       "definedTags",
       "description",
       "drRegion",
@@ -36,7 +35,7 @@
         "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
       },
       {
-        "fieldPath": "idcsAccessToken",
+        "fieldPath": "compartmentId",
         "decision": "replacementRequired",
         "mergeCase": "replacementRequired",
         "docsEvidenceState": "notDocumented",
@@ -62,13 +61,6 @@
         "mergeCase": "replacementRequired",
         "docsEvidenceState": "notDocumented",
         "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
-      },
-      {
-        "fieldPath": "lifecycleDetails",
-        "decision": "unknown",
-        "mergeCase": "astOnlyCandidate",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
       },
       {
         "fieldPath": "name",

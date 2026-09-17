@@ -50,15 +50,84 @@ func registerReplicationScheduleRuntimeHooksMutator(mutator ReplicationScheduleR
 	}
 	replicationscheduleRuntimeHooksMutators = append(replicationscheduleRuntimeHooksMutators, mutator)
 }
+func newReplicationScheduleRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "cloudmigrations",
+		FormalSlug:    "replicationschedule",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE", "NEEDS_ATTENTION"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "displayName", "replicationScheduleId", "state"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"compartmentId", "definedTags", "displayName", "executionRecurrences", "freeformTags"},
+			ForceNew:      []string{},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newReplicationScheduleDefaultRuntimeHooks(sdkClient cloudmigrationssdk.MigrationClient) ReplicationScheduleRuntimeHooks {
 	return ReplicationScheduleRuntimeHooks{
+		Semantics:       newReplicationScheduleRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*cloudmigrationsv1beta1.ReplicationSchedule]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*cloudmigrationsv1beta1.ReplicationSchedule]{},
 		StatusHooks:     generatedruntime.StatusHooks[*cloudmigrationsv1beta1.ReplicationSchedule]{},
 		ParityHooks:     generatedruntime.ParityHooks[*cloudmigrationsv1beta1.ReplicationSchedule]{},
-		Async:           generatedruntime.AsyncHooks[*cloudmigrationsv1beta1.ReplicationSchedule]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*cloudmigrationsv1beta1.ReplicationSchedule]{},
+		Async: generatedruntime.AsyncHooks[*cloudmigrationsv1beta1.ReplicationSchedule]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := cloudmigrationssdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*cloudmigrationsv1beta1.ReplicationSchedule]{},
 		Create: runtimeOperationHooks[cloudmigrationssdk.CreateReplicationScheduleRequest, cloudmigrationssdk.CreateReplicationScheduleResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateReplicationScheduleDetails", RequestName: "CreateReplicationScheduleDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request cloudmigrationssdk.CreateReplicationScheduleRequest) (cloudmigrationssdk.CreateReplicationScheduleResponse, error) {
@@ -106,10 +175,19 @@ func buildReplicationScheduleGeneratedRuntimeConfig(
 	hooks ReplicationScheduleRuntimeHooks,
 ) generatedruntime.Config[*cloudmigrationsv1beta1.ReplicationSchedule] {
 	return generatedruntime.Config[*cloudmigrationsv1beta1.ReplicationSchedule]{
-		Kind:            "ReplicationSchedule",
-		SDKName:         "ReplicationSchedule",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "ReplicationSchedule",
+		SDKName:   "ReplicationSchedule",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

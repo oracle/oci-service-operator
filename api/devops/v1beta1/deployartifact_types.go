@@ -75,7 +75,7 @@ type DeployArtifactSource struct {
 	// +kubebuilder:validation:Optional
 	ChartUrl string `json:"chartUrl,omitempty"`
 	// +kubebuilder:validation:Optional
-	HelmVerificationKeySource DeployArtifactSourceHelmVerificationKeySource `json:"helmVerificationKeySource,omitempty"`
+	HelmVerificationKeySource DeployArtifactSourceHelmVerificationKeySource `json:"helmVerificationKeySource,omitempty,omitzero"`
 	// Specifies OCIR image path - optionally include tag.
 	// +kubebuilder:validation:Optional
 	ImageUri string `json:"imageUri,omitempty"`

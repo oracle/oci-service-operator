@@ -44,12 +44,17 @@ func applyBackendRuntimeHooks(hooks *BackendRuntimeHooks) {
 
 	getCall := hooks.Get.Call
 	hooks.Semantics = newBackendRuntimeSemantics()
+	hooks.BuildUpdateBody = buildBackendUpdateBody
 	hooks.Identity = generatedruntime.IdentityHooks[*loadbalancerv1beta1.Backend]{
+		RecordBeforeCreateFollowUp: true,
 		Resolve: func(resource *loadbalancerv1beta1.Backend) (any, error) {
 			return resolveBackendIdentity(resource)
 		},
 		RecordPath: func(resource *loadbalancerv1beta1.Backend, identity any) {
 			recordBackendPathIdentity(resource, identity.(backendIdentity))
+		},
+		RecordTracked: func(resource *loadbalancerv1beta1.Backend, identity any, _ string) {
+			recordBackendTrackedIdentity(resource, identity.(backendIdentity))
 		},
 		LookupExisting: func(ctx context.Context, _ *loadbalancerv1beta1.Backend, identity any) (any, error) {
 			return lookupExistingBackend(ctx, getCall, identity.(backendIdentity))
@@ -83,6 +88,75 @@ func applyBackendRuntimeHooks(hooks *BackendRuntimeHooks) {
 		backendSetNameField(),
 		backendNameField(),
 	}
+}
+
+func buildBackendUpdateBody(
+	_ context.Context,
+	resource *loadbalancerv1beta1.Backend,
+	_ string,
+	currentResponse any,
+) (any, bool, error) {
+	if resource == nil {
+		return nil, false, fmt.Errorf("backend resource is nil")
+	}
+	if currentResponse == nil {
+		return loadbalancersdk.UpdateBackendDetails{}, false, nil
+	}
+	current, err := backendFromCurrentResponse(currentResponse)
+	if err != nil {
+		return nil, false, err
+	}
+	desiredWeight := resource.Spec.Weight
+	if desiredWeight == 0 {
+		desiredWeight = intPointerValue(current.Weight)
+		if desiredWeight == 0 {
+			desiredWeight = 1
+		}
+	}
+	details := loadbalancersdk.UpdateBackendDetails{
+		Weight:  common.Int(desiredWeight),
+		Backup:  common.Bool(resource.Spec.Backup),
+		Drain:   common.Bool(resource.Spec.Drain),
+		Offline: common.Bool(resource.Spec.Offline),
+	}
+	if resource.Spec.MaxConnections != 0 {
+		details.MaxConnections = common.Int(resource.Spec.MaxConnections)
+	}
+	changed := intPointerValue(current.Weight) != desiredWeight ||
+		boolPointerValue(current.Backup) != resource.Spec.Backup ||
+		boolPointerValue(current.Drain) != resource.Spec.Drain ||
+		boolPointerValue(current.Offline) != resource.Spec.Offline ||
+		intPointerValue(current.MaxConnections) != resource.Spec.MaxConnections
+	return details, changed, nil
+}
+
+func backendFromCurrentResponse(response any) (loadbalancersdk.Backend, error) {
+	switch current := response.(type) {
+	case loadbalancersdk.GetBackendResponse:
+		return current.Backend, nil
+	case *loadbalancersdk.GetBackendResponse:
+		if current != nil {
+			return current.Backend, nil
+		}
+	case loadbalancersdk.Backend:
+		return current, nil
+	case *loadbalancersdk.Backend:
+		if current != nil {
+			return *current, nil
+		}
+	}
+	return loadbalancersdk.Backend{}, fmt.Errorf("expected Backend readback, got %T", response)
+}
+
+func intPointerValue(value *int) int {
+	if value == nil {
+		return 0
+	}
+	return *value
+}
+
+func boolPointerValue(value *bool) bool {
+	return value != nil && *value
 }
 
 func newBackendRuntimeHooksWithOCIClient(client backendRuntimeOCIClient) BackendRuntimeHooks {
@@ -227,6 +301,12 @@ func recordBackendPathIdentity(resource *loadbalancerv1beta1.Backend, identity b
 	}
 	resource.Status.LoadBalancerId = identity.loadBalancerID
 	resource.Status.BackendSetName = identity.backendSetName
+	resource.Status.Name = identity.backendName
+}
+
+func recordBackendTrackedIdentity(resource *loadbalancerv1beta1.Backend, identity backendIdentity) {
+	recordBackendPathIdentity(resource, identity)
+	resource.Status.OsokStatus.Ocid = shared.OCID(identity.backendName)
 }
 
 func seedSyntheticBackendOCID(resource *loadbalancerv1beta1.Backend, backendName string) func() {

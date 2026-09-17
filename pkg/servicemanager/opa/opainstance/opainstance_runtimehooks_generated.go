@@ -114,8 +114,20 @@ func newOpaInstanceDefaultRuntimeHooks(sdkClient opasdk.OpaInstanceClient) OpaIn
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*opav1beta1.OpaInstance]{},
 		StatusHooks:     generatedruntime.StatusHooks[*opav1beta1.OpaInstance]{},
 		ParityHooks:     generatedruntime.ParityHooks[*opav1beta1.OpaInstance]{},
-		Async:           generatedruntime.AsyncHooks[*opav1beta1.OpaInstance]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*opav1beta1.OpaInstance]{},
+		Async: generatedruntime.AsyncHooks[*opav1beta1.OpaInstance]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := opasdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*opav1beta1.OpaInstance]{},
 		Create: runtimeOperationHooks[opasdk.CreateOpaInstanceRequest, opasdk.CreateOpaInstanceResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateOpaInstanceDetails", RequestName: "CreateOpaInstanceDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request opasdk.CreateOpaInstanceRequest) (opasdk.CreateOpaInstanceResponse, error) {
@@ -163,10 +175,19 @@ func buildOpaInstanceGeneratedRuntimeConfig(
 	hooks OpaInstanceRuntimeHooks,
 ) generatedruntime.Config[*opav1beta1.OpaInstance] {
 	return generatedruntime.Config[*opav1beta1.OpaInstance]{
-		Kind:            "OpaInstance",
-		SDKName:         "OpaInstance",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "OpaInstance",
+		SDKName:   "OpaInstance",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

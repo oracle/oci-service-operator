@@ -32,8 +32,28 @@ type defaultCatalogItemServiceClient struct {
 
 var _ CatalogItemServiceClient = defaultCatalogItemServiceClient{}
 
+type CatalogItemSDKClients struct {
+	fleetAppsManagementCatalogClient     fleetappsmanagementsdk.FleetAppsManagementCatalogClient
+	fleetAppsManagementWorkRequestClient fleetappsmanagementsdk.FleetAppsManagementWorkRequestClient
+}
+
+func newCatalogItemSDKClients(manager *CatalogItemServiceManager) (CatalogItemSDKClients, error) {
+	var clients CatalogItemSDKClients
+	fleetAppsManagementCatalogClientClient, err := fleetappsmanagementsdk.NewFleetAppsManagementCatalogClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize CatalogItem OCI client FleetAppsManagementCatalogClient: %w", err)
+	}
+	clients.fleetAppsManagementCatalogClient = fleetAppsManagementCatalogClientClient
+	fleetAppsManagementWorkRequestClientClient, err := fleetappsmanagementsdk.NewFleetAppsManagementWorkRequestClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return clients, fmt.Errorf("initialize CatalogItem OCI client FleetAppsManagementWorkRequestClient: %w", err)
+	}
+	clients.fleetAppsManagementWorkRequestClient = fleetAppsManagementWorkRequestClientClient
+	return clients, nil
+}
+
 var newCatalogItemServiceClient = func(manager *CatalogItemServiceManager) CatalogItemServiceClient {
-	sdkClient, err := fleetappsmanagementsdk.NewFleetAppsManagementCatalogClientWithConfigurationProvider(manager.Provider)
+	sdkClient, err := newCatalogItemSDKClients(manager)
 	hooks := newCatalogItemRuntimeHooks(manager, sdkClient)
 	config := buildCatalogItemGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {

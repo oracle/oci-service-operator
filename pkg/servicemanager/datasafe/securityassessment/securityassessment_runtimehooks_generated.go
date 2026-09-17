@@ -50,15 +50,84 @@ func registerSecurityAssessmentRuntimeHooksMutator(mutator SecurityAssessmentRun
 	}
 	securityassessmentRuntimeHooksMutators = append(securityassessmentRuntimeHooksMutators, mutator)
 }
+func newSecurityAssessmentRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "datasafe",
+		FormalSlug:    "securityassessment",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"SUCCEEDED"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"accessLevel", "compartmentId", "compartmentIdInSubtree", "displayName", "isBaseline", "isScheduleAssessment", "scheduleAssessmentId", "state", "targetDatabaseGroupId", "targetId", "targetType", "templateAssessmentId", "timeCreatedGreaterThanOrEqualTo", "timeCreatedLessThan", "triggeredBy", "type"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"applyTemplateTrigger", "compareToTemplateBaselineTrigger", "compartmentId", "definedTags", "description", "displayName", "freeformTags", "isAssessmentScheduled", "removeTemplateTrigger", "schedule"},
+			ForceNew:      []string{"baseSecurityAssessmentId", "targetId", "targetType", "templateAssessmentId", "type"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{},
+			Update: []generatedruntime.Hook{},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
 func newSecurityAssessmentDefaultRuntimeHooks(sdkClient datasafesdk.DataSafeClient) SecurityAssessmentRuntimeHooks {
 	return SecurityAssessmentRuntimeHooks{
+		Semantics:       newSecurityAssessmentRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*datasafev1beta1.SecurityAssessment]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*datasafev1beta1.SecurityAssessment]{},
 		StatusHooks:     generatedruntime.StatusHooks[*datasafev1beta1.SecurityAssessment]{},
 		ParityHooks:     generatedruntime.ParityHooks[*datasafev1beta1.SecurityAssessment]{},
-		Async:           generatedruntime.AsyncHooks[*datasafev1beta1.SecurityAssessment]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*datasafev1beta1.SecurityAssessment]{},
+		Async: generatedruntime.AsyncHooks[*datasafev1beta1.SecurityAssessment]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := datasafesdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*datasafev1beta1.SecurityAssessment]{},
 		Create: runtimeOperationHooks[datasafesdk.CreateSecurityAssessmentRequest, datasafesdk.CreateSecurityAssessmentResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateSecurityAssessmentDetails", RequestName: "CreateSecurityAssessmentDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request datasafesdk.CreateSecurityAssessmentRequest) (datasafesdk.CreateSecurityAssessmentResponse, error) {
@@ -106,10 +175,19 @@ func buildSecurityAssessmentGeneratedRuntimeConfig(
 	hooks SecurityAssessmentRuntimeHooks,
 ) generatedruntime.Config[*datasafev1beta1.SecurityAssessment] {
 	return generatedruntime.Config[*datasafev1beta1.SecurityAssessment]{
-		Kind:            "SecurityAssessment",
-		SDKName:         "SecurityAssessment",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "SecurityAssessment",
+		SDKName:   "SecurityAssessment",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

@@ -1,0 +1,174 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "targetdatabase",
+  "kind": "TargetDatabase",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_target_database",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateTargetDatabase",
+        "requestType": "datasafe.CreateTargetDatabaseRequest",
+        "responseType": "datasafe.CreateTargetDatabaseResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetTargetDatabase",
+        "requestType": "datasafe.GetTargetDatabaseRequest",
+        "responseType": "datasafe.GetTargetDatabaseResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListTargetDatabases",
+        "requestType": "datasafe.ListTargetDatabasesRequest",
+        "responseType": "datasafe.ListTargetDatabasesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeTargetDatabaseCompartment",
+        "requestType": "datasafe.ChangeTargetDatabaseCompartmentRequest",
+        "responseType": "datasafe.ChangeTargetDatabaseCompartmentResponse"
+      },
+      {
+        "operation": "UpdateTargetDatabase",
+        "requestType": "datasafe.UpdateTargetDatabaseRequest",
+        "responseType": "datasafe.UpdateTargetDatabaseResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteTargetDatabase",
+        "requestType": "datasafe.DeleteTargetDatabaseRequest",
+        "responseType": "datasafe.DeleteTargetDatabaseResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "FAILED",
+        "NEEDS_ATTENTION"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "connection_option.connection_type",
+      "connection_option.datasafe_private_endpoint_id",
+      "connection_option.on_prem_connector_id",
+      "credentials.password",
+      "credentials.user_name",
+      "database_details.autonomous_database_id",
+      "database_details.database_type",
+      "database_details.db_system_id",
+      "database_details.infrastructure_type",
+      "database_details.instance_id",
+      "database_details.ip_addresses",
+      "database_details.listener_port",
+      "database_details.pluggable_database_id",
+      "database_details.service_name",
+      "database_details.vm_cluster_id",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags",
+      "tls_config.certificate_store_type",
+      "tls_config.key_store_content",
+      "tls_config.status",
+      "tls_config.store_password",
+      "tls_config.trust_store_content"
+    ],
+    "forceNew": [
+      "peer_target_database_details",
+      "peer_target_database_details.database_details",
+      "peer_target_database_details.database_details.autonomous_database_id",
+      "peer_target_database_details.database_details.database_type",
+      "peer_target_database_details.database_details.db_system_id",
+      "peer_target_database_details.database_details.infrastructure_type",
+      "peer_target_database_details.database_details.instance_id",
+      "peer_target_database_details.database_details.ip_addresses",
+      "peer_target_database_details.database_details.listener_port",
+      "peer_target_database_details.database_details.pluggable_database_id",
+      "peer_target_database_details.database_details.service_name",
+      "peer_target_database_details.database_details.vm_cluster_id",
+      "peer_target_database_details.dataguard_association_id",
+      "peer_target_database_details.description",
+      "peer_target_database_details.display_name",
+      "peer_target_database_details.tls_config",
+      "peer_target_database_details.tls_config.certificate_store_type",
+      "peer_target_database_details.tls_config.key_store_content",
+      "peer_target_database_details.tls_config.status",
+      "peer_target_database_details.tls_config.store_password",
+      "peer_target_database_details.tls_config.trust_store_content"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_data_safe_target_databases",
+    "collectionField": "target_databases",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "access_level",
+      "associated_resource_id",
+      "compartment_id",
+      "compartment_id_in_subtree",
+      "database_type",
+      "display_name",
+      "infrastructure_type",
+      "state",
+      "target_database_id"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/targetdatabase/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/targetdatabase/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts imported from the pinned terraform-provider-oci source revision."
+  ]
+}

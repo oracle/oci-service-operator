@@ -1313,7 +1313,7 @@ func TestDeleteRejectsAuthShapedPreDeleteNetworkLoadBalancerConfirmRead(t *testi
 	}
 }
 
-func TestDeleteSucceededWorkRequestTreatsAuthShapedNetworkLoadBalancerConfirmationNotFoundAsFatal(t *testing.T) {
+func TestDeleteSucceededWorkRequestTreatsAuthShapedNetworkLoadBalancerConfirmationAsDeleted(t *testing.T) {
 	t.Parallel()
 
 	client := &fakeNetworkLoadBalancerOCIClient{
@@ -1337,31 +1337,30 @@ func TestDeleteSucceededWorkRequestTreatsAuthShapedNetworkLoadBalancerConfirmati
 	}
 
 	deleted, err := serviceClient.Delete(context.Background(), resource)
-	if err == nil {
-		t.Fatal("Delete() error = nil, want succeeded delete work request auth-shaped confirmation 404 to stay fatal")
+	if err != nil {
+		t.Fatalf("Delete() error = %v, want tracked succeeded delete to accept confirmation 404", err)
 	}
-	if !strings.Contains(err.Error(), "delete confirmation returned ambiguous 404 NotAuthorizedOrNotFound") {
-		t.Fatalf("Delete() error = %v, want ambiguous confirmation 404", err)
-	}
-	if deleted {
-		t.Fatal("Delete() deleted = true, want finalizer retained after auth-shaped confirm read")
+	if !deleted {
+		t.Fatal("Delete() deleted = false, want tracked succeeded delete confirmation")
 	}
 	if len(client.deleteRequests) != 0 {
 		t.Fatalf("delete requests = %d, want 0 after succeeded work request confirmation fails", len(client.deleteRequests))
 	}
-	if len(client.workRequests) != 1 {
-		t.Fatalf("work request reads = %d, want 1", len(client.workRequests))
+	if len(client.workRequests) != 2 {
+		t.Fatalf("work request reads = %d, want 2", len(client.workRequests))
 	}
 	if len(client.getRequests) != 1 {
 		t.Fatalf("get requests = %d, want 1", len(client.getRequests))
 	}
-	if resource.Status.OsokStatus.DeletedAt != nil {
-		t.Fatalf("status.status.deletedAt = %v, want nil", resource.Status.OsokStatus.DeletedAt)
+	if resource.Status.OsokStatus.DeletedAt == nil {
+		t.Fatal("status.status.deletedAt = nil, want deletion timestamp")
 	}
 	if got := resource.Status.OsokStatus.OpcRequestID; got != "opc-request-id" {
 		t.Fatalf("status.status.opcRequestId = %q, want opc-request-id", got)
 	}
-	assertNetworkLoadBalancerCurrentWorkRequest(t, resource, shared.OSOKAsyncPhaseDelete, shared.OSOKAsyncClassPending, "wr-delete-1")
+	if resource.Status.OsokStatus.Async.Current != nil {
+		t.Fatalf("status.async.current = %#v, want cleared after succeeded delete", resource.Status.OsokStatus.Async.Current)
+	}
 }
 
 func TestDeleteTreatsNotAuthorizedOrNotFoundAsAmbiguous(t *testing.T) {

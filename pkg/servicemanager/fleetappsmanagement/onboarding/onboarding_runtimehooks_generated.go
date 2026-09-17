@@ -50,50 +50,119 @@ func registerOnboardingRuntimeHooksMutator(mutator OnboardingRuntimeHooksMutator
 	}
 	onboardingRuntimeHooksMutators = append(onboardingRuntimeHooksMutators, mutator)
 }
-func newOnboardingDefaultRuntimeHooks(sdkClient fleetappsmanagementsdk.FleetAppsManagementAdminClient) OnboardingRuntimeHooks {
+func newOnboardingRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "fleetappsmanagement",
+		FormalSlug:    "onboarding",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE", "NEEDS_ATTENTION"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "id", "state"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"definedTags", "freeformTags", "isCostTrackingTagEnabled", "isFamsTagEnabled"},
+			ForceNew:      []string{"compartmentId"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> read-after-write",
+			Hooks:    []generatedruntime.Hook{},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "GetWorkRequest -> confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
+func newOnboardingDefaultRuntimeHooks(sdkClient OnboardingSDKClients) OnboardingRuntimeHooks {
 	return OnboardingRuntimeHooks{
+		Semantics:       newOnboardingRuntimeSemantics(),
 		Identity:        generatedruntime.IdentityHooks[*fleetappsmanagementv1beta1.Onboarding]{},
 		Read:            generatedruntime.ReadHooks{},
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*fleetappsmanagementv1beta1.Onboarding]{},
 		StatusHooks:     generatedruntime.StatusHooks[*fleetappsmanagementv1beta1.Onboarding]{},
 		ParityHooks:     generatedruntime.ParityHooks[*fleetappsmanagementv1beta1.Onboarding]{},
-		Async:           generatedruntime.AsyncHooks[*fleetappsmanagementv1beta1.Onboarding]{},
-		DeleteHooks:     generatedruntime.DeleteHooks[*fleetappsmanagementv1beta1.Onboarding]{},
+		Async: generatedruntime.AsyncHooks[*fleetappsmanagementv1beta1.Onboarding]{
+			Adapter: generatedruntime.DefaultWorkRequestAsyncAdapter(),
+			GetWorkRequest: func(ctx context.Context, workRequestID string) (any, error) {
+				request := fleetappsmanagementsdk.GetWorkRequestRequest{
+					WorkRequestId: &workRequestID,
+				}
+				response, err := sdkClient.fleetAppsManagementWorkRequestClient.GetWorkRequest(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+				return response, nil
+			},
+		},
+		DeleteHooks: generatedruntime.DeleteHooks[*fleetappsmanagementv1beta1.Onboarding]{},
 		Create: runtimeOperationHooks[fleetappsmanagementsdk.CreateOnboardingRequest, fleetappsmanagementsdk.CreateOnboardingResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateOnboardingDetails", RequestName: "CreateOnboardingDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.CreateOnboardingRequest) (fleetappsmanagementsdk.CreateOnboardingResponse, error) {
-				return sdkClient.CreateOnboarding(ctx, request)
+				return sdkClient.fleetAppsManagementAdminClient.CreateOnboarding(ctx, request)
 			},
 		},
 		Get: runtimeOperationHooks[fleetappsmanagementsdk.GetOnboardingRequest, fleetappsmanagementsdk.GetOnboardingResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OnboardingId", RequestName: "onboardingId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.GetOnboardingRequest) (fleetappsmanagementsdk.GetOnboardingResponse, error) {
-				return sdkClient.GetOnboarding(ctx, request)
+				return sdkClient.fleetAppsManagementAdminClient.GetOnboarding(ctx, request)
 			},
 		},
 		List: runtimeOperationHooks[fleetappsmanagementsdk.ListOnboardingsRequest, fleetappsmanagementsdk.ListOnboardingsResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "Id", RequestName: "id", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.ListOnboardingsRequest) (fleetappsmanagementsdk.ListOnboardingsResponse, error) {
-				return sdkClient.ListOnboardings(ctx, request)
+				return sdkClient.fleetAppsManagementAdminClient.ListOnboardings(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[fleetappsmanagementsdk.UpdateOnboardingRequest, fleetappsmanagementsdk.UpdateOnboardingResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OnboardingId", RequestName: "onboardingId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateOnboardingDetails", RequestName: "UpdateOnboardingDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.UpdateOnboardingRequest) (fleetappsmanagementsdk.UpdateOnboardingResponse, error) {
-				return sdkClient.UpdateOnboarding(ctx, request)
+				return sdkClient.fleetAppsManagementAdminClient.UpdateOnboarding(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[fleetappsmanagementsdk.DeleteOnboardingRequest, fleetappsmanagementsdk.DeleteOnboardingResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OnboardingId", RequestName: "onboardingId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request fleetappsmanagementsdk.DeleteOnboardingRequest) (fleetappsmanagementsdk.DeleteOnboardingResponse, error) {
-				return sdkClient.DeleteOnboarding(ctx, request)
+				return sdkClient.fleetAppsManagementAdminClient.DeleteOnboarding(ctx, request)
 			},
 		},
 		WrapGeneratedClient: []func(OnboardingServiceClient) OnboardingServiceClient{},
 	}
 }
 
-func newOnboardingRuntimeHooks(manager *OnboardingServiceManager, sdkClient fleetappsmanagementsdk.FleetAppsManagementAdminClient) OnboardingRuntimeHooks {
+func newOnboardingRuntimeHooks(manager *OnboardingServiceManager, sdkClient OnboardingSDKClients) OnboardingRuntimeHooks {
 	hooks := newOnboardingDefaultRuntimeHooks(sdkClient)
 	for _, mutator := range onboardingRuntimeHooksMutators {
 		mutator(manager, &hooks)
@@ -106,10 +175,19 @@ func buildOnboardingGeneratedRuntimeConfig(
 	hooks OnboardingRuntimeHooks,
 ) generatedruntime.Config[*fleetappsmanagementv1beta1.Onboarding] {
 	return generatedruntime.Config[*fleetappsmanagementv1beta1.Onboarding]{
-		Kind:            "Onboarding",
-		SDKName:         "Onboarding",
-		Log:             manager.Log,
-		Semantics:       hooks.Semantics,
+		Kind:      "Onboarding",
+		SDKName:   "Onboarding",
+		Log:       manager.Log,
+		Semantics: hooks.Semantics,
+		AsyncSemantics: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
 		TrackedRecreate: hooks.TrackedRecreate,

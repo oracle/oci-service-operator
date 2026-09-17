@@ -57,9 +57,9 @@ type ConfigSpec struct {
 	// +kubebuilder:validation:Optional
 	MatchAgentsWithAttributeValue string `json:"matchAgentsWithAttributeValue,omitempty"`
 	// +kubebuilder:validation:Optional
-	Config ConfigFields `json:"config,omitempty"`
+	Config ConfigFields `json:"config,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	Overrides ConfigOverrides `json:"overrides,omitempty"`
+	Overrides ConfigOverrides `json:"overrides,omitempty,omitzero"`
 	// The options are stored here as JSON.
 	// +kubebuilder:validation:Optional
 	Options shared.JSONValue `json:"options,omitempty"`

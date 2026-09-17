@@ -24,7 +24,7 @@ type RoverClusterSpec struct {
 	// +kubebuilder:validation:Required
 	ClusterSize int `json:"clusterSize"`
 	// +kubebuilder:validation:Optional
-	CustomerShippingAddress RoverClusterCustomerShippingAddress `json:"customerShippingAddress,omitempty"`
+	CustomerShippingAddress RoverClusterCustomerShippingAddress `json:"customerShippingAddress,omitempty,omitzero"`
 	// List of existing workloads that should be provisioned on the nodes.
 	// +kubebuilder:validation:Optional
 	ClusterWorkloads []RoverClusterClusterWorkload `json:"clusterWorkloads,omitempty"`

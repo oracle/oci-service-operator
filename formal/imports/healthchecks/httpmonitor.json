@@ -1,0 +1,137 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "healthchecks",
+  "slug": "httpmonitor",
+  "kind": "HttpMonitor",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_health_checks_http_monitor",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateHttpMonitor",
+        "requestType": "healthchecks.CreateHttpMonitorRequest",
+        "responseType": "healthchecks.CreateHttpMonitorResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetHttpMonitor",
+        "requestType": "healthchecks.GetHttpMonitorRequest",
+        "responseType": "healthchecks.GetHttpMonitorResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListHttpMonitors",
+        "requestType": "healthchecks.ListHttpMonitorsRequest",
+        "responseType": "healthchecks.ListHttpMonitorsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeHttpMonitorCompartment",
+        "requestType": "healthchecks.ChangeHttpMonitorCompartmentRequest",
+        "responseType": "healthchecks.ChangeHttpMonitorCompartmentResponse"
+      },
+      {
+        "operation": "UpdateHttpMonitor",
+        "requestType": "healthchecks.UpdateHttpMonitorRequest",
+        "responseType": "healthchecks.UpdateHttpMonitorResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteHttpMonitor",
+        "requestType": "healthchecks.DeleteHttpMonitorRequest",
+        "responseType": "healthchecks.DeleteHttpMonitorResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "display_name",
+      "freeform_tags",
+      "headers",
+      "interval_in_seconds",
+      "is_enabled",
+      "method",
+      "path",
+      "port",
+      "protocol",
+      "targets",
+      "timeout_in_seconds",
+      "vantage_point_names"
+    ],
+    "forceNew": null,
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "target": [
+      "NOT_FOUND"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_health_checks_http_monitors",
+    "collectionField": "http_monitors",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "protocol",
+      "id"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/healthchecks/httpmonitor/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/healthchecks/httpmonitor/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "lifecycle-classification",
+      "list-lookup",
+      "status-projection",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "The OCI SDK HttpMonitor model has no lifecycle-state field; ACTIVE is the repo-authored immediate steady-state abstraction for synchronous create and update.",
+    "The provider exposes ChangeHttpMonitorCompartment separately, but the published OSOK runtime does not invoke that auxiliary action and keeps compartmentId replacement-only.",
+    "Delete confirmation is best-effort but auth-shaped 404 responses are ambiguous; the resource-local delete guard requires scoped list absence before releasing the finalizer."
+  ]
+}

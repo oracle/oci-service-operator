@@ -1,0 +1,142 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datasafe",
+  "slug": "sensitivedatamodel",
+  "kind": "SensitiveDataModel",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_safe_sensitive_data_model",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateSensitiveDataModel",
+        "requestType": "datasafe.CreateSensitiveDataModelRequest",
+        "responseType": "datasafe.CreateSensitiveDataModelResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetSensitiveDataModel",
+        "requestType": "datasafe.GetSensitiveDataModelRequest",
+        "responseType": "datasafe.GetSensitiveDataModelResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListSensitiveDataModels",
+        "requestType": "datasafe.ListSensitiveDataModelsRequest",
+        "responseType": "datasafe.ListSensitiveDataModelsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeSensitiveDataModelCompartment",
+        "requestType": "datasafe.ChangeSensitiveDataModelCompartmentRequest",
+        "responseType": "datasafe.ChangeSensitiveDataModelCompartmentResponse"
+      },
+      {
+        "operation": "UpdateSensitiveDataModel",
+        "requestType": "datasafe.UpdateSensitiveDataModelRequest",
+        "responseType": "datasafe.UpdateSensitiveDataModelResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteSensitiveDataModel",
+        "requestType": "datasafe.DeleteSensitiveDataModelRequest",
+        "responseType": "datasafe.DeleteSensitiveDataModelResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "app_suite_name",
+      "compartment_id",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags",
+      "is_app_defined_relation_discovery_enabled",
+      "is_sample_data_collection_enabled",
+      "schemas_for_discovery",
+      "sensitive_type_group_ids_for_discovery",
+      "sensitive_type_ids_for_discovery",
+      "tables_for_discovery.schema_name",
+      "tables_for_discovery.table_names",
+      "target_id"
+    ],
+    "forceNew": [
+      "is_include_all_schemas",
+      "is_include_all_sensitive_types"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_data_safe_sensitive_data_models",
+    "collectionField": "sensitive_data_model_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "access_level",
+      "compartment_id",
+      "compartment_id_in_subtree",
+      "display_name",
+      "sensitive_data_model_id",
+      "state",
+      "target_id",
+      "time_created_greater_than_or_equal_to",
+      "time_created_less_than"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datasafe/sensitivedatamodel/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datasafe/sensitivedatamodel/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts are imported from the pinned terraform-provider-oci revision; repo-authored runtime semantics remain authoritative."
+  ]
+}

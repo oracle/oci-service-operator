@@ -1,0 +1,119 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "limits",
+  "slug": "quota",
+  "kind": "Quota",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_limits_quota",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateQuota",
+        "requestType": "limits.CreateQuotaRequest",
+        "responseType": "limits.CreateQuotaResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetQuota",
+        "requestType": "limits.GetQuotaRequest",
+        "responseType": "limits.GetQuotaResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListQuotas",
+        "requestType": "limits.ListQuotasRequest",
+        "responseType": "limits.ListQuotasResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateQuota",
+        "requestType": "limits.UpdateQuotaRequest",
+        "responseType": "limits.UpdateQuotaResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteQuota",
+        "requestType": "limits.DeleteQuotaRequest",
+        "responseType": "limits.DeleteQuotaResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "defined_tags",
+      "description",
+      "freeform_tags",
+      "statements"
+    ],
+    "forceNew": [
+      "compartment_id",
+      "locks",
+      "locks.message",
+      "locks.related_resource_id",
+      "locks.type",
+      "name"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_limits_quotas",
+    "collectionField": "quotas",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "name",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/limits/quota/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/limits/quota/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Provider facts are imported from the pinned terraform-provider-oci revision; repo-authored runtime semantics remain authoritative."
+  ]
+}

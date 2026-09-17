@@ -30,7 +30,7 @@ type DigitalTwinAdapterSpec struct {
 	// +kubebuilder:validation:Optional
 	Description string `json:"description,omitempty"`
 	// +kubebuilder:validation:Optional
-	InboundEnvelope DigitalTwinAdapterInboundEnvelope `json:"inboundEnvelope,omitempty"`
+	InboundEnvelope DigitalTwinAdapterInboundEnvelope `json:"inboundEnvelope,omitempty,omitzero"`
 	// list of inbound routes
 	// +kubebuilder:validation:Optional
 	InboundRoutes []DigitalTwinAdapterInboundRoute `json:"inboundRoutes,omitempty"`
@@ -73,9 +73,9 @@ type DigitalTwinAdapterInboundEnvelope struct {
 	// +kubebuilder:validation:Required
 	ReferenceEndpoint string `json:"referenceEndpoint"`
 	// +kubebuilder:validation:Optional
-	ReferencePayload DigitalTwinAdapterInboundEnvelopeReferencePayload `json:"referencePayload,omitempty"`
+	ReferencePayload DigitalTwinAdapterInboundEnvelopeReferencePayload `json:"referencePayload,omitempty,omitzero"`
 	// +kubebuilder:validation:Optional
-	EnvelopeMapping DigitalTwinAdapterInboundEnvelopeEnvelopeMapping `json:"envelopeMapping,omitempty"`
+	EnvelopeMapping DigitalTwinAdapterInboundEnvelopeEnvelopeMapping `json:"envelopeMapping,omitempty,omitzero"`
 }
 
 // DigitalTwinAdapterInboundRouteReferencePayload defines nested fields for DigitalTwinAdapter.InboundRoute.ReferencePayload.
@@ -97,7 +97,7 @@ type DigitalTwinAdapterInboundRoute struct {
 	// +kubebuilder:validation:Required
 	Condition string `json:"condition"`
 	// +kubebuilder:validation:Optional
-	ReferencePayload DigitalTwinAdapterInboundRouteReferencePayload `json:"referencePayload,omitempty"`
+	ReferencePayload DigitalTwinAdapterInboundRouteReferencePayload `json:"referencePayload,omitempty,omitzero"`
 	// A set of key-value JQ expressions used to transform the incoming payload into a shape
 	// compatible with the digital twin model's context or schema.
 	// The keys are target fields (in the digital twin model), and values are JQ expressions

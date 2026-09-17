@@ -66,7 +66,7 @@ func newFolderDefaultRuntimeHooks(sdkClient datacatalogsdk.DataCatalogClient) Fo
 			},
 		},
 		Get: runtimeOperationHooks[datacatalogsdk.GetFolderRequest, datacatalogsdk.GetFolderResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "DataAssetKey", RequestName: "dataAssetKey", Contribution: "path", PreferResourceID: false}, {FieldName: "FolderKey", RequestName: "folderKey", Contribution: "path", PreferResourceID: false}, {FieldName: "IsIncludeObjectRelationships", RequestName: "isIncludeObjectRelationships", Contribution: "query", PreferResourceID: false}, {FieldName: "Fields", RequestName: "fields", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "DataAssetKey", RequestName: "dataAssetKey", Contribution: "path", PreferResourceID: false}, {FieldName: "FolderKey", RequestName: "folderKey", Contribution: "path", PreferResourceID: true}, {FieldName: "IsIncludeObjectRelationships", RequestName: "isIncludeObjectRelationships", Contribution: "query", PreferResourceID: false}, {FieldName: "Fields", RequestName: "fields", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request datacatalogsdk.GetFolderRequest) (datacatalogsdk.GetFolderResponse, error) {
 				return sdkClient.GetFolder(ctx, request)
 			},
@@ -78,13 +78,13 @@ func newFolderDefaultRuntimeHooks(sdkClient datacatalogsdk.DataCatalogClient) Fo
 			},
 		},
 		Update: runtimeOperationHooks[datacatalogsdk.UpdateFolderRequest, datacatalogsdk.UpdateFolderResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "DataAssetKey", RequestName: "dataAssetKey", Contribution: "path", PreferResourceID: false}, {FieldName: "FolderKey", RequestName: "folderKey", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdateFolderDetails", RequestName: "UpdateFolderDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "DataAssetKey", RequestName: "dataAssetKey", Contribution: "path", PreferResourceID: false}, {FieldName: "FolderKey", RequestName: "folderKey", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateFolderDetails", RequestName: "UpdateFolderDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request datacatalogsdk.UpdateFolderRequest) (datacatalogsdk.UpdateFolderResponse, error) {
 				return sdkClient.UpdateFolder(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[datacatalogsdk.DeleteFolderRequest, datacatalogsdk.DeleteFolderResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "DataAssetKey", RequestName: "dataAssetKey", Contribution: "path", PreferResourceID: false}, {FieldName: "FolderKey", RequestName: "folderKey", Contribution: "path", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "CatalogId", RequestName: "catalogId", Contribution: "path", PreferResourceID: false}, {FieldName: "DataAssetKey", RequestName: "dataAssetKey", Contribution: "path", PreferResourceID: false}, {FieldName: "FolderKey", RequestName: "folderKey", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request datacatalogsdk.DeleteFolderRequest) (datacatalogsdk.DeleteFolderResponse, error) {
 				return sdkClient.DeleteFolder(ctx, request)
 			},

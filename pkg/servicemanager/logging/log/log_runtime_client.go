@@ -19,6 +19,9 @@ func applyLogRuntimeHooks(hooks *LogRuntimeHooks) {
 	if hooks == nil {
 		return
 	}
+	if hooks.Semantics != nil {
+		hooks.Semantics.Mutation.ZeroValueNullEquivalent = []string{"configuration"}
+	}
 
 	hooks.Create.Fields = logCreateFields()
 	hooks.Get.Fields = logGetFields()
