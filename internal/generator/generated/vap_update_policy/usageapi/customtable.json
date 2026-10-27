@@ -13,7 +13,7 @@
     "apiVersion": "usageapi.oracle.com/v1beta1",
     "kind": "CustomTable",
     "formalSlug": "customtable",
-    "providerResource": "oci_usage_custom_table",
+    "providerResource": "oci_metering_computation_custom_table",
     "specPathPrefix": "spec"
   },
   "update": {
