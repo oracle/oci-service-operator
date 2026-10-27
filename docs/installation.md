@@ -429,6 +429,42 @@ per-package bundle, use:
 $ operator-sdk cleanup oci-service-operator
 ```
 
+### TLS and post-quantum key exchange
+
+Controller images use Go 1.26.10 and Oracle Linux 9 for both amd64 and arm64.
+The OCI Go SDK uses Go's native TLS implementation. Its default configuration
+enables TLS 1.3 and hybrid post-quantum key exchange, including `X25519MLKEM768`.
+OSOK preserves these defaults, including when `OCI_DEFAULT_CERTS_PATH` supplies
+a custom trust bundle. See the [Go 1.26 TLS release notes](https://go.dev/doc/go1.26#crypto/tls).
+
+Keep the runtime's default TLS groups enabled. In particular, setting
+`GODEBUG=tlsmlkem=0` disables the default hybrid key exchanges. TLS 1.2 and
+classical TLS 1.3 peers remain supported for compatibility; those connections
+do not provide post-quantum key exchange.
+
+Run the local OCI SDK handshake checks with:
+
+```bash
+go test ./pkg/authhelper -run '^TestOCISDKTLSNegotiation$' -count=1 -v
+```
+
+These checks verify the negotiated protocol and group against loopback peers,
+including hybrid TLS 1.3 and classical fallback, with default and custom CA
+configurations. Deployment validation must additionally cover the actual
+endpoints and network paths: OCI service and authentication endpoints, the
+Kubernetes API server, and admission webhooks where enabled. Include every TLS
+termination hop in any proxy, gateway, load balancer, or service mesh.
+
+For each applicable deployed path, record the controller image and Go version,
+endpoint and termination path, timestamp, TLS version, and negotiated group from
+a fresh full handshake. Confirm TLS 1.3 with the approved hybrid group on
+PQC-capable peers; TLS 1.3 alone does not establish that PQC was negotiated.
+Rebuild and redeploy controller images to pick up the runtime upgrade.
+
+FIPS 140-3 applicability and compliance are a separate deployment assessment.
+This PQC runtime upgrade does not attest FIPS compliance; deployments with FIPS
+requirements need their approved cryptographic module and validation path.
+
 ### Customize CA trust bundle
 
 The default controller image is built on Oracle Linux 9 and uses the CA trust bundle included in the
