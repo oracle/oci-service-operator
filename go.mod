@@ -1,5 +1,6 @@
 module github.com/oracle/oci-service-operator
 
+// Go 1.26.10 includes the crypto/x509 fix for CVE-2026-111943.
 go 1.26.10
 
 require (

@@ -470,10 +470,20 @@ requirements need their approved cryptographic module and validation path.
 The default controller image is built on Oracle Linux 9 and uses the CA trust bundle included in the
 image. Controller Deployments do not mount the Kubernetes worker node's `/etc/pki` directory.
 
+The image build uses Go 1.26.10, which includes the `crypto/x509` mitigation for
+[CVE-2026-111943](https://pkg.go.dev/vuln/GO-2026-6809), and installs
+`ca-certificates >= 2026.2.92_v9.0.319-90.3.el9_8` for
+[ELSA-2026-88459](https://linux.oracle.com/errata/ELSA-2026-88459.html).
+These changes address the eMudhra intermediate CA compromise. Rebuild and redeploy each supported
+controller image to pick up the fixes; updating a worker node does not update the controller image's
+trust bundle. The image publishing paths pull fresh base images before building.
+
 For an environment that requires additional private or corporate certificate authorities, mount a
 complete PEM trust bundle from a ConfigMap or Secret and set `OCI_DEFAULT_CERTS_PATH` to the mounted
 file. The bundle must contain both the public roots needed for OCI endpoints and any additional
-private roots because the OCI SDK uses the configured file as its complete trust pool. For example:
+private roots because the OCI SDK uses the configured file as its complete trust pool. Keep this
+externally supplied bundle updated with the same CA distrust changes as the system bundle; rebuilding
+the controller image does not replace a mounted bundle. For example:
 
 ```yaml
 spec:

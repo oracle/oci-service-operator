@@ -25,6 +25,12 @@ COPY . ./
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=arm64 GO111MODULE=on go build -mod vendor -a -o manager .
 
 FROM arm64v8/oraclelinux:9-slim
+
+# ELSA-2026-88459: remove trust in the compromised eMudhra certificate chains.
+RUN microdnf --refresh install -y 'ca-certificates >= 2026.2.92_v9.0.319-90.3.el9_8' \
+    && update-ca-trust extract \
+    && microdnf clean all
+
 WORKDIR /
 
 # Copy the manager binary

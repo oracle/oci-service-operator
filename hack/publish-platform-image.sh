@@ -74,7 +74,7 @@ for platform in "${normalized_platforms[@]}"; do
 	platform_image="${image}-${arch}"
 	echo ">>> Building ${platform_image} for ${platform}"
 	if [[ "${use_docker_platform}" == "true" ]]; then
-		"${docker_bin}" buildx build \
+		"${docker_bin}" buildx build --pull \
 			--platform "${platform}" \
 			--build-arg CONTROLLER_MAIN="${controller_main}" \
 			--build-arg TARGETOS="${os}" \
@@ -85,7 +85,7 @@ for platform in "${normalized_platforms[@]}"; do
 			--push \
 			"${ROOT_DIR}"
 	else
-		"${docker_bin}" build \
+		"${docker_bin}" build --pull \
 			--build-arg CONTROLLER_MAIN="${controller_main}" \
 			--build-arg TARGETOS="${os}" \
 			--build-arg TARGETARCH="${arch}" \

@@ -459,7 +459,7 @@ test-sample: fmt vet ## Run tests.
 		$(ENVTEST_ENV) KUBEBUILDER_ASSETS="$$envtest_assets" go test -v ./... -coverprofile cover.out -args -ginkgo.v'
 
 docker-build-sample: ## Build docker image with the manager.
-	docker build -t ${IMG} .
+	docker build --pull -t ${IMG} .
 
 ##@ Build
 
@@ -470,10 +470,10 @@ run: manifests generate fmt vet ## Run a controller from your host.
 	go run -buildvcs=false .
 
 docker-build: test bundle ## Build docker image with the manager and CRDs
-	docker build -t ${IMG} .
+	docker build --pull -t ${IMG} .
 
 docker-build-raw: ## Build docker image without running tests/bundle dependencies.
-	docker build --build-arg CONTROLLER_MAIN=$(CONTROLLER_MAIN) --build-arg TARGETOS=$(TARGETOS) --build-arg TARGETARCH=$(TARGETARCH) --build-arg CGO_ENABLED=0 --build-arg GOEXPERIMENT= -t ${IMG} .
+	docker build --pull --build-arg CONTROLLER_MAIN=$(CONTROLLER_MAIN) --build-arg TARGETOS=$(TARGETOS) --build-arg TARGETARCH=$(TARGETARCH) --build-arg CGO_ENABLED=0 --build-arg GOEXPERIMENT= -t ${IMG} .
 
 build-service: generate fmt vet ## Build a service-scoped manager binary.
 	@[ -n "$(SERVICE)" ] || { echo "SERVICE must be set"; exit 1; }
@@ -483,12 +483,12 @@ build-service: generate fmt vet ## Build a service-scoped manager binary.
 docker-build-service: ## Build docker image for SERVICE using service manager entrypoint.
 	@[ -n "$(SERVICE)" ] || { echo "SERVICE must be set"; exit 1; }
 	@[ -f "cmd/manager/$(SERVICE)/main.go" ] || { echo "SERVICE '$(SERVICE)' does not have a dedicated controller entrypoint under cmd/manager."; exit 1; }
-	docker build --build-arg CONTROLLER_MAIN=./cmd/manager/$(SERVICE) --build-arg TARGETOS=$(TARGETOS) --build-arg TARGETARCH=$(TARGETARCH) --build-arg CGO_ENABLED=0 --build-arg GOEXPERIMENT= -t $(SERVICE_IMG) .
+	docker build --pull --build-arg CONTROLLER_MAIN=./cmd/manager/$(SERVICE) --build-arg TARGETOS=$(TARGETOS) --build-arg TARGETARCH=$(TARGETARCH) --build-arg CGO_ENABLED=0 --build-arg GOEXPERIMENT= -t $(SERVICE_IMG) .
 
 docker-build-service-raw: ## Build service image without running tests/bundle dependencies.
 	@[ -n "$(SERVICE)" ] || { echo "SERVICE must be set"; exit 1; }
 	@[ -f "cmd/manager/$(SERVICE)/main.go" ] || { echo "SERVICE '$(SERVICE)' does not have a dedicated controller entrypoint under cmd/manager."; exit 1; }
-	docker build --build-arg CONTROLLER_MAIN=./cmd/manager/$(SERVICE) --build-arg TARGETOS=$(TARGETOS) --build-arg TARGETARCH=$(TARGETARCH) --build-arg CGO_ENABLED=0 --build-arg GOEXPERIMENT= -t $(SERVICE_IMG) .
+	docker build --pull --build-arg CONTROLLER_MAIN=./cmd/manager/$(SERVICE) --build-arg TARGETOS=$(TARGETOS) --build-arg TARGETARCH=$(TARGETARCH) --build-arg CGO_ENABLED=0 --build-arg GOEXPERIMENT= -t $(SERVICE_IMG) .
 
 docker-push: ## Push docker image with the manager.
 	docker push ${IMG}
@@ -605,7 +605,7 @@ publish-service-olm: controller-gen kustomize operator-sdk ## Build/push a per-s
 			os="$${platform%%/*}"; \
 			arch="$${platform##*/}"; \
 			echo ">>> Building $$image for $$platform"; \
-			docker build --build-arg CONTROLLER_MAIN=./cmd/manager/$(GROUP) --build-arg TARGETOS="$$os" --build-arg TARGETARCH="$$arch" --build-arg CGO_ENABLED=$(PUBLISH_CGO_ENABLED) --build-arg GOEXPERIMENT=$(PUBLISH_GOEXPERIMENT) -t "$$image" .; \
+			docker build --pull --build-arg CONTROLLER_MAIN=./cmd/manager/$(GROUP) --build-arg TARGETOS="$$os" --build-arg TARGETARCH="$$arch" --build-arg CGO_ENABLED=$(PUBLISH_CGO_ENABLED) --build-arg GOEXPERIMENT=$(PUBLISH_GOEXPERIMENT) -t "$$image" .; \
 			echo ">>> Pushing $$image"; \
 			docker push "$$image"; \
 		fi; \
