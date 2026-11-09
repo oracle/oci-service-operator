@@ -242,6 +242,6 @@ jobs:
             docker buildx imagetools create --tag "${image}" "${refs[@]}"
 
             make package-bundle-olm GROUP="${service}" CONTROLLER_IMG="${image}" VERSION="${{ inputs.version }}"
-            make bundle-build BUNDLE_IMG="${bundle_image}"
-            make bundle-push BUNDLE_IMG="${bundle_image}"
+            docker buildx build --platform "${raw_platforms//_//}" \
+              --file bundle.Dockerfile --tag "${bundle_image}" --push .
           done
