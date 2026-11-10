@@ -429,61 +429,15 @@ per-package bundle, use:
 $ operator-sdk cleanup oci-service-operator
 ```
 
-### TLS and post-quantum key exchange
-
-Controller images use Go 1.26.10 and Oracle Linux 9 for both amd64 and arm64.
-The OCI Go SDK uses Go's native TLS implementation. Its default configuration
-enables TLS 1.3 and hybrid post-quantum key exchange, including `X25519MLKEM768`.
-OSOK preserves these defaults, including when `OCI_DEFAULT_CERTS_PATH` supplies
-a custom trust bundle. See the [Go 1.26 TLS release notes](https://go.dev/doc/go1.26#crypto/tls).
-
-Keep the runtime's default TLS groups enabled. In particular, setting
-`GODEBUG=tlsmlkem=0` disables the default hybrid key exchanges. TLS 1.2 and
-classical TLS 1.3 peers remain supported for compatibility; those connections
-do not provide post-quantum key exchange.
-
-Run the local OCI SDK handshake checks with:
-
-```bash
-go test ./pkg/authhelper -run '^TestOCISDKTLSNegotiation$' -count=1 -v
-```
-
-These checks verify the negotiated protocol and group against loopback peers,
-including hybrid TLS 1.3 and classical fallback, with default and custom CA
-configurations. Deployment validation must additionally cover the actual
-endpoints and network paths: OCI service and authentication endpoints, the
-Kubernetes API server, and admission webhooks where enabled. Include every TLS
-termination hop in any proxy, gateway, load balancer, or service mesh.
-
-For each applicable deployed path, record the controller image and Go version,
-endpoint and termination path, timestamp, TLS version, and negotiated group from
-a fresh full handshake. Confirm TLS 1.3 with the approved hybrid group on
-PQC-capable peers; TLS 1.3 alone does not establish that PQC was negotiated.
-Rebuild and redeploy controller images to pick up the runtime upgrade.
-
-FIPS 140-3 applicability and compliance are a separate deployment assessment.
-This PQC runtime upgrade does not attest FIPS compliance; deployments with FIPS
-requirements need their approved cryptographic module and validation path.
-
 ### Customize CA trust bundle
 
 The default controller image is built on Oracle Linux 9 and uses the CA trust bundle included in the
 image. Controller Deployments do not mount the Kubernetes worker node's `/etc/pki` directory.
 
-The image build uses Go 1.26.10, which includes the `crypto/x509` mitigation for
-[CVE-2026-111943](https://pkg.go.dev/vuln/GO-2026-6809), and installs
-`ca-certificates >= 2026.2.92_v9.0.319-90.3.el9_8` for
-[ELSA-2026-88459](https://linux.oracle.com/errata/ELSA-2026-88459.html).
-These changes address the eMudhra intermediate CA compromise. Rebuild and redeploy each supported
-controller image to pick up the fixes; updating a worker node does not update the controller image's
-trust bundle. The image publishing paths pull fresh base images before building.
-
 For an environment that requires additional private or corporate certificate authorities, mount a
 complete PEM trust bundle from a ConfigMap or Secret and set `OCI_DEFAULT_CERTS_PATH` to the mounted
 file. The bundle must contain both the public roots needed for OCI endpoints and any additional
-private roots because the OCI SDK uses the configured file as its complete trust pool. Keep this
-externally supplied bundle updated with the same CA distrust changes as the system bundle; rebuilding
-the controller image does not replace a mounted bundle. For example:
+private roots because the OCI SDK uses the configured file as its complete trust pool. For example:
 
 ```yaml
 spec:
