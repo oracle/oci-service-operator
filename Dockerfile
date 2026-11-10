@@ -4,7 +4,7 @@
 #
 
 # Build the manager binary
-FROM golang:1.25 AS builder
+FROM golang:1.26.10 AS builder
 
 WORKDIR /workspace
 COPY go.mod go.sum ./
