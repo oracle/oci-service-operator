@@ -24,7 +24,7 @@
     "service": "usageapi",
     "kind": "Schedule",
     "formalSlug": "schedule",
-    "providerResource": "oci_usage_schedule",
+    "providerResource": "oci_metering_computation_schedule",
     "repoAuthoredSpecPath": "controllers/usageapi/schedule/spec.cfg",
     "formalImportPath": "imports/usageapi/schedule.json"
   },
@@ -52,7 +52,7 @@
         "formalImportPath": "imports/usageapi/schedule.json",
         "formalSourceRef": "terraform-provider-oci",
         "astSourceBucket": "mutation.forceNew",
-        "terraformDocsPage": "usage_schedule#argument-reference",
+        "terraformDocsPage": "metering_computation_schedule#argument-reference",
         "terraformDocsSection": "Argument Reference"
       }
     },
@@ -80,7 +80,7 @@
         "formalImportPath": "imports/usageapi/schedule.json",
         "formalSourceRef": "terraform-provider-oci",
         "astSourceBucket": "mutation.mutable",
-        "terraformDocsPage": "usage_schedule#argument-reference",
+        "terraformDocsPage": "metering_computation_schedule#argument-reference",
         "terraformDocsSection": "Argument Reference"
       }
     },
@@ -108,7 +108,7 @@
         "formalImportPath": "imports/usageapi/schedule.json",
         "formalSourceRef": "terraform-provider-oci",
         "astSourceBucket": "mutation.mutable",
-        "terraformDocsPage": "usage_schedule#argument-reference",
+        "terraformDocsPage": "metering_computation_schedule#argument-reference",
         "terraformDocsSection": "Argument Reference"
       }
     },
@@ -136,7 +136,7 @@
         "formalImportPath": "imports/usageapi/schedule.json",
         "formalSourceRef": "terraform-provider-oci",
         "astSourceBucket": "mutation.mutable",
-        "terraformDocsPage": "usage_schedule#argument-reference",
+        "terraformDocsPage": "metering_computation_schedule#argument-reference",
         "terraformDocsSection": "Argument Reference"
       }
     },
@@ -163,7 +163,7 @@
         "formalImportPath": "imports/usageapi/schedule.json",
         "formalSourceRef": "terraform-provider-oci",
         "astSourceBucket": "mutation.forceNew",
-        "terraformDocsPage": "usage_schedule#argument-reference",
+        "terraformDocsPage": "metering_computation_schedule#argument-reference",
         "terraformDocsSection": "Argument Reference"
       }
     },
@@ -191,7 +191,7 @@
         "formalImportPath": "imports/usageapi/schedule.json",
         "formalSourceRef": "terraform-provider-oci",
         "astSourceBucket": "mutation.mutable",
-        "terraformDocsPage": "usage_schedule#argument-reference",
+        "terraformDocsPage": "metering_computation_schedule#argument-reference",
         "terraformDocsSection": "Argument Reference"
       }
     },
@@ -218,7 +218,7 @@
         "formalImportPath": "imports/usageapi/schedule.json",
         "formalSourceRef": "terraform-provider-oci",
         "astSourceBucket": "mutation.forceNew",
-        "terraformDocsPage": "usage_schedule#argument-reference",
+        "terraformDocsPage": "metering_computation_schedule#argument-reference",
         "terraformDocsSection": "Argument Reference"
       }
     },
@@ -246,7 +246,7 @@
         "formalImportPath": "imports/usageapi/schedule.json",
         "formalSourceRef": "terraform-provider-oci",
         "astSourceBucket": "mutation.mutable",
-        "terraformDocsPage": "usage_schedule#argument-reference",
+        "terraformDocsPage": "metering_computation_schedule#argument-reference",
         "terraformDocsSection": "Argument Reference"
       }
     },
@@ -273,7 +273,7 @@
         "formalImportPath": "imports/usageapi/schedule.json",
         "formalSourceRef": "terraform-provider-oci",
         "astSourceBucket": "mutation.forceNew",
-        "terraformDocsPage": "usage_schedule#argument-reference",
+        "terraformDocsPage": "metering_computation_schedule#argument-reference",
         "terraformDocsSection": "Argument Reference"
       }
     },
@@ -300,7 +300,7 @@
         "formalImportPath": "imports/usageapi/schedule.json",
         "formalSourceRef": "terraform-provider-oci",
         "astSourceBucket": "mutation.forceNew",
-        "terraformDocsPage": "usage_schedule#argument-reference",
+        "terraformDocsPage": "metering_computation_schedule#argument-reference",
         "terraformDocsSection": "Argument Reference"
       }
     },
@@ -327,7 +327,7 @@
         "formalImportPath": "imports/usageapi/schedule.json",
         "formalSourceRef": "terraform-provider-oci",
         "astSourceBucket": "mutation.forceNew",
-        "terraformDocsPage": "usage_schedule#argument-reference",
+        "terraformDocsPage": "metering_computation_schedule#argument-reference",
         "terraformDocsSection": "Argument Reference"
       }
     }

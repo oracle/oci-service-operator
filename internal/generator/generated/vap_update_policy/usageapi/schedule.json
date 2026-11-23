@@ -13,7 +13,7 @@
     "apiVersion": "usageapi.oracle.com/v1beta1",
     "kind": "Schedule",
     "formalSlug": "schedule",
-    "providerResource": "oci_usage_schedule",
+    "providerResource": "oci_metering_computation_schedule",
     "specPathPrefix": "spec"
   },
   "update": {
