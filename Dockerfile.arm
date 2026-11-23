@@ -4,7 +4,7 @@
 #
 
 # Build the manager binary
-FROM golang:1.25 as builder
+FROM golang:1.26.10 as builder
 
 WORKDIR /workspace
 # Copy the Go Modules manifests
@@ -22,16 +22,16 @@ COPY go.sum go.sum
 COPY . ./
 
 # Build
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=arm64 GO111MODULE=on go build -mod vendor -a -o manager main.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=arm64 GO111MODULE=on go build -mod vendor -a -o manager .
 
-FROM arm64v8/oraclelinux:7-slim
+FROM arm64v8/oraclelinux:9-slim
 WORKDIR /
 
 # Copy the manager binary
 COPY --from=builder /workspace/manager .
 
 # Copy CRDs
-COPY --from=builder /workspace/bundle/manifests/oci.oracle.com_*.yaml /
+COPY --from=builder /workspace/config/crd/bases/*.yaml /
 
 USER 65532:65532
 
